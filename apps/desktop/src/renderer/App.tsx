@@ -2,7 +2,8 @@ import { useEffect, useMemo, useReducer, useRef, useState, type CSSProperties, t
 import { Button, EmptyState, Modal, PageHeader, SectionHeader, StatRow, StatusMessage, Surface, VisuallyHidden } from './ui';
 import { navigationReducer, persistNavigationState, readNavigationState } from './navigation';
 import brandMarkUrl from './assets/brand-mark.png';
-import { FIRST_RUN_NARRATION_STEPS, FIRST_RUN_NARRATION_TEXT, accessibilityAnnouncement, applyAccessibilityProfile, cancelFirstRunNarration, isFirstRunIntroductionComplete, nextRovingIndex, parseAccessibilityPreferences, persistBrandAudioMuted, persistFirstRunIntroductionComplete, readBootstrapPreference, readBrandAudioMuted, resolveAccessibilityTheme, serializeAccessibilityPreferences, startFirstRunNarration, writeBootstrapPreference, type AccessibilityAudienceProfile, type AccessibilityPreferences, type BootstrapPreferenceStorage, type FirstRunNarrationStatus } from './accessibility';
+import { accessibilityAnnouncement, applyAccessibilityProfile, cancelFirstRunNarration, firstRunNarrationContent, isFirstRunIntroductionComplete, nextRovingIndex, parseAccessibilityPreferences, persistBrandAudioMuted, persistFirstRunIntroductionComplete, readBootstrapPreference, readBrandAudioMuted, resolveAccessibilityTheme, serializeAccessibilityPreferences, startFirstRunNarration, writeBootstrapPreference, type AccessibilityAudienceProfile, type AccessibilityPreferences, type BootstrapPreferenceStorage, type FirstRunNarrationStatus } from './accessibility';
+import { getActiveUiLocale, localizeNavigationGroup, localizeNavigationLabel, useLocalization } from './localization';
 import { AsyncWriteGuard, MutationRevisionWatermark } from './async-state-guard';
 import { AsyncStatePanel, ValidationSummary, canUndoGovernedDraft, useGovernedDraft, type ValidationIssue } from './form-ux';
 import { resolveRouteAsyncState } from './route-async-state';
@@ -26,6 +27,7 @@ import { LocalTranslationLanguagePanel } from './LocalTranslationLanguagePanel';
 import { NarratedHelpCenter } from './NarratedHelpCenter';
 import { FamilyMeetingPanel } from './FamilyMeetingPanel';
 import { UniversalUxConsolidationPanel } from './UniversalUxConsolidationPanel';
+import { FamilyLocationMap } from './FamilyLocationMap';
 import { CommunicationFileSharingPanel } from './CommunicationFileSharingPanel';
 import { CommunicationAuditArchivePanel } from './CommunicationAuditArchivePanel';
 import { DistributedOperationsPanel } from './DistributedOperationsPanel';
@@ -130,8 +132,9 @@ type ScreenId = ProductScreenId;
 const navItems: ReadonlyArray<{ readonly id: ScreenId; readonly label: string; readonly icon: string }> =
   PRODUCT_NAVIGATION_ROUTES.map(({ id, label, icon }) => ({ id, label, icon }));
 
-const navGroups: ReadonlyArray<{ readonly label: string; readonly items: readonly ScreenId[] }> =
+const navGroups: ReadonlyArray<{ readonly id: (typeof PRODUCT_NAVIGATION_GROUPS)[number]['id']; readonly label: string; readonly items: readonly ScreenId[] }> =
   PRODUCT_NAVIGATION_GROUPS.map((group) => ({
+    id: group.id,
     label: group.label,
     items: PRODUCT_NAVIGATION_ROUTES
       .filter((route) => route.groupId === group.id)
@@ -214,7 +217,7 @@ const mergeSnapshotPatch = (current: FamilyAppSnapshot, patch: FamilySnapshotPat
 });
 
 const formatDate = (iso: string, options?: Intl.DateTimeFormatOptions): string =>
-  new Intl.DateTimeFormat('tr-TR', options ?? { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(iso));
+  new Intl.DateTimeFormat(getActiveUiLocale(), options ?? { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(iso));
 
 const yearsOld = (birthDate?: string): string => {
   if (!birthDate) return 'Yaş bilgisi yok';
@@ -557,7 +560,7 @@ function ImportantDaysScreen({ snapshot, archivedEvents, onAdd, onEdit, onArchiv
           <div className="event-detail-header"><span className="calendar-tile large"><small>{new Date(selected.startAt).toLocaleDateString('tr-TR', { month: 'short' }).toLocaleUpperCase('tr-TR')}</small><strong>{new Date(selected.startAt).getDate()}</strong></span><div><span className="tag blue">Önemli gün</span><h2>{selected.title}</h2><p>{selected.description||'Açıklama eklenmemiş.'}</p></div><div className="event-header-actions"><Button onClick={()=>onEdit(selected)}>Tüm alanları düzenle</Button><Button tone="danger" disabled={busyId===selected.id} onClick={()=>void archive()}>{busyId===selected.id?'Arşivleniyor…':'Arşivle'}</Button></div></div>
           <div className="event-facts"><div><small>Tarih ve saat</small><strong>{formatDate(selected.startAt, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</strong></div><div><small>Konum</small><strong>⌖ {selected.locationLabel ?? 'Eklenmemiş'}</strong></div><div><small>Gizlilik</small><strong>{selected.visibility==='family'?'Aileyle paylaşılıyor':selected.visibility==='selected_members'?'Seçili üyeler':'Kişisel'}</strong></div><div><small>Tekrar</small><strong>{selected.recurrence === 'yearly' ? 'Her yıl' : 'Tek sefer'}</strong></div><div><small>Hatırlatma</small><strong>{selected.reminderDays.length ? selected.reminderDays.map((day) => day === 0 ? 'aynı gün' : `${day} gün`).join(', ') : 'Kapalı'}</strong></div></div>
           <div className="event-content-grid">
-            <section><span className="eyebrow">Davetiye</span><div className="invitation-preview"><span>Anadolu Parsı</span><h3>{selected.title}</h3><p>{selected.invitationText ?? 'Bu etkinlik için davetiye eklenmemiş.'}</p><small>{formatDate(selected.startAt)}</small></div></section>
+            <section><span className="eyebrow">Davetiye</span><div className="invitation-preview"><span>ParsYuva</span><h3>{selected.title}</h3><p>{selected.invitationText ?? 'Bu etkinlik için davetiye eklenmemiş.'}</p><small>{formatDate(selected.startAt)}</small></div></section>
             <section><span className="eyebrow">Katılımcılar ({participantNames.length})</span><div className="participant-chips">{participantNames.map((name) => <span key={name}>{name}</span>)}</div></section>
             <section><span className="eyebrow">İçerikler</span><div className="attachment-overview"><strong>{selected.attachmentCount}</strong><span>fotoğraf, video veya belge</span><Button onClick={()=>onOpenArchive(selected.id)}>Arşivde görüntüle</Button></div></section>
             <section><span className="eyebrow">Notlar ve anılar</span><div className="notes-card">{selected.notes ?? 'Henüz not eklenmemiş.'}</div></section>
@@ -652,6 +655,8 @@ function playParsBrandSound(): void {
 }
 
 function FirstRunIntroduction({audioMuted,onAudioMutedChange,onComplete}:{audioMuted:boolean;onAudioMutedChange:(muted:boolean)=>void;onComplete:()=>void}){
+  const {language,t}=useLocalization();
+  const narration=firstRunNarrationContent(language);
   const [narrationStatus,setNarrationStatus]=useState<FirstRunNarrationStatus>(audioMuted?'muted':'idle');
   const [narrationRate,setNarrationRate]=useState<'normal'|'slow'>('normal');
   const narrationEnvironment=():{synthesis?:SpeechSynthesis;createUtterance?:(text:string)=>SpeechSynthesisUtterance}=>{
@@ -666,25 +671,26 @@ function FirstRunIntroduction({audioMuted,onAudioMutedChange,onComplete}:{audioM
   const cancelNarration=()=>cancelFirstRunNarration(narrationEnvironment().synthesis);
   const speak=(muted=audioMuted)=>{
     const environment=narrationEnvironment();
-    return startFirstRunNarration({muted,rate:narrationRate,synthesis:environment.synthesis,createUtterance:environment.createUtterance,onStatus:setNarrationStatus});
+    return startFirstRunNarration({muted,language,rate:narrationRate,synthesis:environment.synthesis,createUtterance:environment.createUtterance,onStatus:setNarrationStatus});
   };
   useEffect(()=>{if(audioMuted){cancelNarration();setNarrationStatus('muted');return;}speak(false);return()=>{cancelNarration();};},[audioMuted]);
   const toggleMuted=()=>{const next=!audioMuted;onAudioMutedChange(next);if(next){cancelNarration();setNarrationStatus('muted');}};
   const complete=()=>{cancelNarration();persistFirstRunIntroductionComplete(browserPreferenceStorage());playParsBrandSound();onComplete();};
   const speaking=narrationStatus==='speaking';
-  const narrationStatusText=audioMuted?'Ses kapalı; anlatım metni görünür.':narrationStatus==='unavailable'?'Bu cihazda yerel sesli anlatım kullanılamıyor; metin görünür.':narrationStatus==='error'?'Sesli anlatım başlatılamadı; metin görünür.':speaking?'Türkçe anlatım oynatılıyor.':'Türkçe anlatım hazır.';
-  return <main className="first-run-shell"><section className="first-run-card"><div className="first-run-brand"><img src={brandMarkUrl} alt=""/><span className="eyebrow">İlk kurulum · 3 kısa adım</span><h1>Anadolu Parsı<br/><small>Aile Yaşam Merkezi</small></h1></div><p className="first-run-lead">Aile hafızası, belgeler, sağlık, finans ve yaşam kayıtları için güvenli yerel merkez.</p><ol className="first-run-steps">{FIRST_RUN_NARRATION_STEPS.map((step,index)=><li key={step}><span>{index+1}</span><p>{step.replace(/^(Birinci|İkinci|Üçüncü) adım:\s*/u,'')}</p></li>)}</ol><div className="first-run-caption" aria-live="polite"><strong>Sesli anlatım metni</strong><p>{FIRST_RUN_NARRATION_TEXT}</p><small role="status">{narrationStatusText} · {narrationRate==='slow'?'Yavaş hız':'Normal hız'}</small></div><div className="first-run-actions"><Button onClick={toggleMuted}>{audioMuted?'Sesi aç':'Sesi kapat'}</Button><Button onClick={()=>{if(speaking){cancelNarration();setNarrationStatus('idle');}else speak(false);}} disabled={audioMuted||narrationStatus==='unavailable'}>{speaking?'Anlatımı durdur':'Baştan anlat'}</Button><Button onClick={()=>{cancelNarration();setNarrationStatus('idle');setNarrationRate(value=>value==='normal'?'slow':'normal');}}>{narrationRate==='slow'?'Normal hız':'Daha yavaş'}</Button><Button tone="primary" onClick={complete}>Güvenli kuruluma başla</Button></div><button className="first-run-skip" type="button" onClick={complete}>Tanıtımı şimdilik geç</button></section></main>;
+  const narrationStatusText=audioMuted?t('intro.audioMuted'):narrationStatus==='unavailable'?t('intro.audioUnavailable'):narrationStatus==='error'?t('intro.audioError'):speaking?t('intro.audioPlaying'):t('intro.audioReady');
+  return <main className="first-run-shell"><section className="first-run-card"><div className="first-run-brand"><img src={brandMarkUrl} alt=""/><span className="eyebrow">{t('intro.eyebrow')}</span><h1>ParsYuva AYM<br/><small>{t('brand.subtitle')}</small></h1></div><p className="first-run-lead">{t('intro.lead')}</p><ol className="first-run-steps">{narration.steps.map((step,index)=><li key={step}><span>{index+1}</span><p>{step.replace(/^(?:(?:Birinci|İkinci|Üçüncü) adım|Step (?:one|two|three)):\s*/u,'')}</p></li>)}</ol><div className="first-run-caption" aria-live="polite"><strong>{t('intro.caption')}</strong><p>{narration.text}</p><small role="status">{narrationStatusText} · {narrationRate==='slow'?t('intro.slowSpeed'):t('intro.normalSpeed')}</small></div><div className="first-run-actions"><Button onClick={toggleMuted}>{audioMuted?t('intro.unmute'):t('intro.mute')}</Button><Button onClick={()=>{if(speaking){cancelNarration();setNarrationStatus('idle');}else speak(false);}} disabled={audioMuted||narrationStatus==='unavailable'}>{speaking?t('intro.stop'):t('intro.restart')}</Button><Button onClick={()=>{cancelNarration();setNarrationStatus('idle');setNarrationRate(value=>value==='normal'?'slow':'normal');}}>{narrationRate==='slow'?t('intro.normal'):t('intro.slower')}</Button><Button tone="primary" onClick={complete}>{t('intro.start')}</Button></div><button className="first-run-skip" type="button" onClick={complete}>{t('intro.skip')}</button></section></main>;
 }
 
 
 function FirstRunSecuritySetup({onComplete}:{onComplete:(state:AuthStateView)=>void}){
+  const {language,t}=useLocalization();
   const [setup,setSetup]=useState<TwoFactorSetupView|null>(null);
   const [code,setCode]=useState('');
   const [saved,setSaved]=useState(false);
   const [message,setMessage]=useState('');
-  const begin=async()=>{try{if(!window.pardus)return;setSetup(await window.pardus.beginTwoFactorSetup());setMessage('Authenticator uygulamanıza anahtarı ekleyin ve kurtarma kodlarını güvenli yerde saklayın.');}catch(error){setMessage(error instanceof Error?error.message:'Güvenlik kurulumu başlatılamadı.');}};
-  const finish=async()=>{try{if(!window.pardus||!setup||!saved||code.trim().length<6)return;const state=await window.pardus.enableTwoFactor({code:code.trim()});onComplete(state);playParsBrandSound();}catch(error){setMessage(error instanceof Error?error.message:'Doğrulama kodu kabul edilmedi.');}};
-  return <main className="first-run-security-shell"><section className="first-run-card panel"><img src={brandMarkUrl} alt="Anadolu Parsı"/><span className="eyebrow">İlk kurulum · Güvenlik</span><h1>Hesabınızı ve kurtarma yolunu güvenceye alın</h1><p>Ana uygulama açılmadan önce iki aşamalı doğrulama ve kurtarma kodları oluşturulur. Bu adım tamamlanmadan kullanıcı verisi oturumu normal kullanıma geçmez.</p>{!setup?<Button tone="primary" onClick={()=>void begin()}>Güvenlik kurulumunu başlat</Button>:<><div className="notes-card"><strong>Authenticator kurulumu</strong><small>Anahtar: {setup.secret}</small><small>Kurulum URI: {setup.otpauthUri}</small><strong>Kurtarma kodları</strong><small>{setup.recoveryCodes.join(' · ')}</small><Button onClick={()=>void navigator.clipboard.writeText(setup.recoveryCodes.join('\n'))}>Kurtarma kodlarını kopyala</Button></div><label>Authenticator doğrulama kodu<input inputMode="numeric" autoComplete="one-time-code" value={code} onChange={event=>setCode(event.target.value.replace(/\s+/g,''))}/></label><label className="check-label"><input type="checkbox" checked={saved} onChange={event=>setSaved(event.target.checked)}/>Kurtarma kodlarını güvenli bir yerde sakladım</label><Button tone="primary" disabled={!saved||code.trim().length<6} onClick={()=>void finish()}>Güvenliği tamamla ve uygulamayı aç</Button></>}{message&&<StatusMessage tone="info">{message}</StatusMessage>}</section></main>;
+  const begin=async()=>{try{if(!window.pardus)return;setSetup(await window.pardus.beginTwoFactorSetup());setMessage(language==='tr'?'Authenticator uygulamanıza anahtarı ekleyin ve kurtarma kodlarını güvenli yerde saklayın.':'Add the key to your authenticator application and keep the recovery codes in a safe place.');}catch(error){setMessage(error instanceof Error?error.message:language==='tr'?'Güvenlik kurulumu başlatılamadı.':'Security setup could not be started.');}};
+  const finish=async()=>{try{if(!window.pardus||!setup||!saved||code.trim().length<6)return;const state=await window.pardus.enableTwoFactor({code:code.trim()});onComplete(state);playParsBrandSound();}catch(error){setMessage(error instanceof Error?error.message:language==='tr'?'Doğrulama kodu kabul edilmedi.':'The verification code was not accepted.');}};
+  return <main className="first-run-security-shell"><section className="first-run-card panel"><img src={brandMarkUrl} alt="ParsYuva AYM"/><span className="eyebrow">{t('security.eyebrow')}</span><h1>{t('security.title')}</h1><p>{t('security.body')}</p>{!setup?<Button tone="primary" onClick={()=>void begin()}>{t('security.start')}</Button>:<><div className="notes-card"><strong>{t('security.authenticator')}</strong><small>{t('security.key')}: {setup.secret}</small><small>{t('security.uri')}: {setup.otpauthUri}</small><strong>{t('security.recoveryCodes')}</strong><small>{setup.recoveryCodes.join(' · ')}</small><Button onClick={()=>void navigator.clipboard.writeText(setup.recoveryCodes.join('\n'))}>{t('security.copy')}</Button></div><label>{t('security.code')}<input inputMode="numeric" autoComplete="one-time-code" value={code} onChange={event=>setCode(event.target.value.replace(/\s+/g,''))}/></label><label className="check-label"><input type="checkbox" checked={saved} onChange={event=>setSaved(event.target.checked)}/>{t('security.saved')}</label><Button tone="primary" disabled={!saved||code.trim().length<6} onClick={()=>void finish()}>{t('security.finish')}</Button></>}{message&&<StatusMessage tone="info">{message}</StatusMessage>}</section></main>;
 }
 
 function InvitationAcceptancePanel({onAccepted}:{onAccepted:(state:AuthStateView)=>Promise<void>}){
@@ -748,6 +754,7 @@ const windowsHelloOutcomeMessage = (
 })[outcome];
 
 function AuthScreen({ auth, onSetup, onLogin, onWindowsHelloLogin, onInvitationAccepted }: { auth: AuthStateView; onSetup:(input:SetupAdminInput)=>Promise<void>; onLogin:(input:LoginInput)=>Promise<void>; onWindowsHelloLogin:(input:LoginWithWindowsHelloInput)=>Promise<void>; onInvitationAccepted:(state:AuthStateView)=>Promise<void> }) {
+  const {language,t}=useLocalization();
   const [familyName,setFamilyName]=useState('');
   const [displayName,setDisplayName]=useState('');
   const [selectedAccountId,setSelectedAccountId]=useState(auth.profiles?.[0]?.id ?? '');
@@ -786,36 +793,36 @@ function AuthScreen({ auth, onSetup, onLogin, onWindowsHelloLogin, onInvitationA
     if(busy||helloBusy)return;
     setSubmitAttempted(true);
     setError('');
-    if(auth.initialized&&profiles.length>0&&!selectedAccountId){setError('Devam etmek için bir profil seçin.');return;}
-    if(!auth.initialized&&familyName.trim().length<2){setError('Aile adı en az 2 karakter olmalıdır. Eksik alan işaretlendi.');familyNameRef.current?.focus();return;}
-    if(!auth.initialized&&displayName.trim().length<2){setError('Adınız ve soyadınız en az 2 karakter olmalıdır. Eksik alan işaretlendi.');displayNameRef.current?.focus();return;}
-    if(!auth.initialized&&!passwordAssessment.valid){setError('Parola en az 12 karakter; büyük harf, küçük harf, rakam ve simge içermelidir.');passwordRef.current?.focus();return;}
-    if(auth.initialized&&password.length===0){setError('Devam etmek için yerel parolanızı yazın.');passwordRef.current?.focus();return;}
+    if(auth.initialized&&profiles.length>0&&!selectedAccountId){setError(language==='tr'?'Devam etmek için bir profil seçin.':'Select a profile to continue.');return;}
+    if(!auth.initialized&&familyName.trim().length<2){setError(language==='tr'?'Aile adı en az 2 karakter olmalıdır. Eksik alan işaretlendi.':'The family name must contain at least 2 characters. The missing field is highlighted.');familyNameRef.current?.focus();return;}
+    if(!auth.initialized&&displayName.trim().length<2){setError(language==='tr'?'Adınız ve soyadınız en az 2 karakter olmalıdır. Eksik alan işaretlendi.':'Your full name must contain at least 2 characters. The missing field is highlighted.');displayNameRef.current?.focus();return;}
+    if(!auth.initialized&&!passwordAssessment.valid){setError(language==='tr'?'Parola en az 12 karakter; büyük harf, küçük harf, rakam ve simge içermelidir.':'The password must contain at least 12 characters, including uppercase, lowercase, a number and a symbol.');passwordRef.current?.focus();return;}
+    if(auth.initialized&&password.length===0){setError(language==='tr'?'Devam etmek için yerel parolanızı yazın.':'Enter your local password to continue.');passwordRef.current?.focus();return;}
     setBusy(true);
     try{
       if(auth.initialized)await onLogin({...(selectedAccountId?{accountId:selectedAccountId}:{}),password,...(secondFactorCode.trim()?{secondFactorCode:secondFactorCode.trim()}:{})});
       else await onSetup({familyName:familyName.trim(),displayName:displayName.trim(),password});
-    }catch(x){setError(x instanceof Error?x.message:'İşlem başarısız.');}
+    }catch(x){setError(x instanceof Error?x.message:language==='tr'?'İşlem başarısız.':'The operation failed.');}
     finally{setBusy(false)}
   };
   return <main className="auth-shell">
-    <section className="auth-story" aria-label="Anadolu Parsı Aile Yaşam Merkezi">
-      <div className="auth-brand"><img src={brandMarkUrl} alt=""/><div><strong>Anadolu Parsı</strong><small>Aile Yaşam Merkezi</small></div></div>
-      <div className="auth-story-copy"><span className="eyebrow">Yalnız size ait</span><h1>Ailenizin hikâyesi,<br/>tek ve güvenli bir yerde.</h1><p>Soy ağacınızı, anılarınızı, önemli günlerinizi ve aile kayıtlarınızı internet hesabı açmadan yönetin.</p></div>
-      <div className="auth-trust"><span>✓</span><div><strong>Veriler bu bilgisayarda kalır</strong><small>E-posta hesabı veya çevrim içi üyelik gerekmez.</small></div></div>
+    <section className="auth-story" aria-label="ParsYuva AYM">
+      <div className="auth-brand"><img src={brandMarkUrl} alt=""/><div><strong>ParsYuva AYM</strong><small>{t('brand.subtitle')}</small></div></div>
+      <div className="auth-story-copy"><span className="eyebrow">{t('auth.private')}</span><h1>{t('auth.story').split('\n').map((line,index)=><span key={line}>{line}{index===0&&<br/>}</span>)}</h1><p>{t('auth.storyBody')}</p></div>
+      <div className="auth-trust"><span>✓</span><div><strong>{t('auth.localData')}</strong><small>{t('auth.noOnlineAccount')}</small></div></div>
     </section>
     <section className="auth-entry">
       <form className="auth-form" aria-labelledby="auth-title" noValidate onSubmit={event=>{event.preventDefault();void submit();}}>
-        <div className="auth-heading"><span className="eyebrow">{auth.initialized?'Tekrar hoş geldiniz':'İlk başlangıç'}</span><h2 id="auth-title">{auth.initialized?'Profilinizi seçin':'Ailenizi oluşturalım'}</h2><p>{auth.initialized?'Aile yaşam alanınıza yerel parolanızla devam edin.':'Birkaç bilgiyle kişisel aile alanınızı hazırlayın.'}</p></div>
-        {!auth.initialized&&<div className="auth-fields"><label>Aile adı<input ref={familyNameRef} autoFocus autoComplete="organization" value={familyName} onChange={event=>{setFamilyName(event.target.value);setError('');}} required minLength={2} aria-invalid={familyNameInvalid} placeholder="Örn. Yılmaz Ailesi"/></label><label>Adınız ve soyadınız<input ref={displayNameRef} autoComplete="name" value={displayName} onChange={event=>{setDisplayName(event.target.value);setError('');}} required minLength={2} aria-invalid={displayNameInvalid} placeholder="Aile yöneticisinin adı"/></label></div>}
-        {auth.initialized&&profiles.length>0&&<div className="profile-grid" role="radiogroup" aria-label="Yerel profiller">{profiles.map(profile=><button type="button" role="radio" aria-checked={selectedAccountId===profile.id} className={`profile-card ${selectedAccountId===profile.id?'selected':''}`} key={profile.id} onClick={()=>setSelectedAccountId(profile.id)}><span>{profile.initials}</span><div><strong>{profile.displayName}</strong><small>{profile.role==='family_admin'?'Aile yöneticisi':'Aile üyesi'}</small></div><i>{selectedAccountId===profile.id?'✓':''}</i></button>)}</div>}
-        <div className="auth-fields"><label>Yerel parola<div className="password-input-shell"><input id="local-password" ref={passwordRef} type={passwordVisible?'text':'password'} autoComplete={auth.initialized?'current-password':'new-password'} value={password} onChange={event=>{setPassword(event.target.value);setError('');}} required minLength={12} aria-invalid={passwordInvalid} placeholder="Parolanızı yazın"/><button type="button" className="password-visibility-toggle" aria-controls="local-password" aria-pressed={passwordVisible} aria-label={passwordVisible?'Parolayı gizle':'Parolayı göster'} onClick={()=>setPasswordVisible(value=>!value)}>{passwordVisible?'Gizle':'Göster'}</button></div>{!auth.initialized&&<div className="password-checklist" aria-live="polite"><strong>{passwordAssessment.remainingCharacters?`${passwordAssessment.remainingCharacters} karakter daha gerekli`:'Uzunluk koşulu tamam'}</strong><span className={passwordAssessment.checks.uppercase?'ok':''}>Büyük harf</span><span className={passwordAssessment.checks.lowercase?'ok':''}>Küçük harf</span><span className={passwordAssessment.checks.digit?'ok':''}>Rakam</span><span className={passwordAssessment.checks.symbol?'ok':''}>Sembol</span></div>}</label>{auth.initialized&&<label>İki aşamalı doğrulama kodu <small>(etkinse)</small><input value={secondFactorCode} onChange={e=>setSecondFactorCode(e.target.value)} inputMode="numeric" autoComplete="one-time-code" placeholder="6 haneli kod veya kurtarma kodu"/></label>}</div>
+        <div className="auth-heading"><span className="eyebrow">{auth.initialized?t('auth.welcomeBack'):t('auth.firstStart')}</span><h2 id="auth-title">{auth.initialized?t('auth.selectProfile'):t('auth.createFamily')}</h2><p>{auth.initialized?t('auth.loginBody'):t('auth.setupBody')}</p></div>
+        {!auth.initialized&&<div className="auth-fields"><label>{t('auth.familyName')}<input ref={familyNameRef} autoFocus autoComplete="organization" value={familyName} onChange={event=>{setFamilyName(event.target.value);setError('');}} required minLength={2} aria-invalid={familyNameInvalid} placeholder={t('auth.familyPlaceholder')}/></label><label>{t('auth.fullName')}<input ref={displayNameRef} autoComplete="name" value={displayName} onChange={event=>{setDisplayName(event.target.value);setError('');}} required minLength={2} aria-invalid={displayNameInvalid} placeholder={t('auth.namePlaceholder')}/></label></div>}
+        {auth.initialized&&profiles.length>0&&<div className="profile-grid" role="radiogroup" aria-label={t('auth.localProfiles')}>{profiles.map(profile=><button type="button" role="radio" aria-checked={selectedAccountId===profile.id} className={`profile-card ${selectedAccountId===profile.id?'selected':''}`} key={profile.id} onClick={()=>setSelectedAccountId(profile.id)}><span>{profile.initials}</span><div><strong>{profile.displayName}</strong><small>{profile.role==='family_admin'?t('auth.admin'):t('auth.member')}</small></div><i>{selectedAccountId===profile.id?'✓':''}</i></button>)}</div>}
+        <div className="auth-fields"><label>{t('auth.localPassword')}<div className="password-input-shell"><input id="local-password" ref={passwordRef} type={passwordVisible?'text':'password'} autoComplete={auth.initialized?'current-password':'new-password'} value={password} onChange={event=>{setPassword(event.target.value);setError('');}} required minLength={12} aria-invalid={passwordInvalid} placeholder={t('auth.passwordPlaceholder')}/><button type="button" className="password-visibility-toggle" aria-controls="local-password" aria-pressed={passwordVisible} aria-label={passwordVisible?t('auth.hidePassword'):t('auth.showPassword')} onClick={()=>setPasswordVisible(value=>!value)}>{passwordVisible?(language==='tr'?'Gizle':'Hide'):(language==='tr'?'Göster':'Show')}</button></div>{!auth.initialized&&<div className="password-checklist" aria-live="polite"><strong>{passwordAssessment.remainingCharacters?t('auth.moreCharacters',{count:passwordAssessment.remainingCharacters}):t('auth.lengthComplete')}</strong><span className={passwordAssessment.checks.uppercase?'ok':''}>{t('auth.uppercase')}</span><span className={passwordAssessment.checks.lowercase?'ok':''}>{t('auth.lowercase')}</span><span className={passwordAssessment.checks.digit?'ok':''}>{t('auth.digit')}</span><span className={passwordAssessment.checks.symbol?'ok':''}>{t('auth.symbol')}</span></div>}</label>{auth.initialized&&<label>{language==='tr'?'İki aşamalı doğrulama kodu':'Two-factor authentication code'} <small>({language==='tr'?'etkinse':'if enabled'})</small><input value={secondFactorCode} onChange={e=>setSecondFactorCode(e.target.value)} inputMode="numeric" autoComplete="one-time-code" placeholder={language==='tr'?'6 haneli kod veya kurtarma kodu':'6-digit code or recovery code'}/></label>}</div>
         {externalProviders.some(p=>p.productionReady)&&<div className="external-identity-ready" aria-label="Haricî kimlik sağlayıcıları">{externalProviders.filter(p=>p.productionReady).map(p=><span key={p.id}>{p.label}</span>)}</div>}
         {error&&<div className="form-error" role="alert">{error}</div>}
         {auth.initialized&&helloState?.enrolled&&<Button type="button" tone="primary" disabled={busy||helloBusy||helloState.availability!=='available'} onClick={()=>void loginWithHello()}>{helloBusy?'Windows Hello bekleniyor…':'Windows Hello ile devam et'}</Button>}
         {auth.initialized&&helloState?.enrolled&&helloState.availability!=='available'&&<StatusMessage tone="info">{windowsHelloOutcomeMessage(helloState.availability)}</StatusMessage>}
-        <Button tone="primary" type="button" disabled={busy||helloBusy} aria-describedby="auth-submit-guidance" onClick={()=>void submit()}>{busy?'Hazırlanıyor…':auth.initialized?'Aile alanına gir':'Aile alanımı oluştur'}</Button>
-        <p id="auth-submit-guidance" className="auth-submit-guidance" aria-live="polite">{busy?'Güvenli yerel alan hazırlanıyor; lütfen bekleyin.':auth.initialized?'Profil ve parola doğrulandıktan sonra aile alanınız açılır.':'Düğmeye bastığınızda eksik alan gösterilir; bilgiler uygunsa güvenli kurulum başlar.'}</p>
+        <Button tone="primary" type="button" disabled={busy||helloBusy} aria-describedby="auth-submit-guidance" onClick={()=>void submit()}>{busy?t('auth.working'):auth.initialized?t('auth.login'):t('auth.create')}</Button>
+        <p id="auth-submit-guidance" className="auth-submit-guidance" aria-live="polite">{busy?(language==='tr'?'Güvenli yerel alan hazırlanıyor; lütfen bekleyin.':'The secure local space is being prepared; please wait.'):auth.initialized?(language==='tr'?'Profil ve parola doğrulandıktan sonra aile alanınız açılır.':'Your family space opens after the profile and password are verified.'):(language==='tr'?'Düğmeye bastığınızda eksik alan gösterilir; bilgiler uygunsa güvenli kurulum başlar.':'Missing fields are highlighted when you press the button; secure setup starts when the information is valid.')}</p>
         <small className="auth-footnote">{USER_VISIBLE_APP_INFO.releaseLabel} · {USER_VISIBLE_APP_INFO.stage}</small>
       </form>
       {auth.initialized&&<InvitationAcceptancePanel onAccepted={onInvitationAccepted}/>}
@@ -1150,7 +1157,7 @@ function SystemManagementScreen(){
   <Surface className="workspace-summary"><SectionHeader eyebrow="PPK-021 · AST güvenlik kapısı" title="Ayrıcalıklı kod yüzeylerinde exact default-deny ratchet"/><div className="notes-card"><strong>{platformPolicyAstGateBoundary?.status==='build-verified'&&platformPolicyAstGateBoundary.enforcement==='fail-closed'?'TypeScript AST kapısı build aşamasında doğrulandı':'AST gate durumu doğrulanamadı'}</strong><small>{platformPolicyAstGateBoundary?.protectedRuleCount??0} kural · {platformPolicyAstGateBoundary?.productionSourceZones??0} üretim bölgesi · {platformPolicyAstGateBoundary?.exactAllowlistEntries??0} exact yüzey</small><small>Yeni veya eski izin: fail-closed · wildcard: {platformPolicyAstGateBoundary?.wildcardsAllowed===false?'yasak':'doğrulanamadı'} · doğrudan rol yetkilendirmesi: {platformPolicyAstGateBoundary?.directRoleAuthorizationBypasses??'doğrulanamadı'}</small><small>Alias, dynamic import, require ve hesaplanmış property AST üzerinde incelenir; AST gate runtime politikasının yerine geçmez · istemciye kaynak yolu veya allowlist hash'i verilmez</small></div></Surface>
   <Surface className="workspace-summary"><SectionHeader eyebrow="PPK-022 · capability manifest kapısı" title="Kamera, mikrofon, dosya, OCR, AI, konum ve ağ için çift katmanlı ret"/><div className="notes-card"><strong>{platformCapabilityManifestGateBoundary?.status==='build-runtime-verified'&&platformCapabilityManifestGateBoundary.enforcement==='build-and-runtime-fail-closed'?'Build ve runtime capability kapısı doğrulandı':'Capability manifest durumu doğrulanamadı'}</strong><small>{platformCapabilityManifestGateBoundary?.protectedCapabilityCount??0} kaynak ailesi · {platformCapabilityManifestGateBoundary?.canonicalApplicationCount??0} uygulama · {platformCapabilityManifestGateBoundary?.exactAstSurfaceCount??0} exact AST yüzeyi</small><small>Eksik veya beklenmeyen capability: fail-closed · imzalı manifest hash bağı ve authenticated Core Service runtime doğrulaması zorunlu</small><small>Build manifesti tek başına runtime yetkisi vermez · istemciye kaynak yolu veya manifest hash'i verilmez · mevcut Desktop vault sahipliği korunur</small></div></Surface>
   <Surface className="workspace-summary"><SectionHeader eyebrow="PPK-023 · uygulama güvenlik profili" title="ASVS, MASVS, SSDF eşlemesi ve uygulama başına tehdit modeli"/><div className="notes-card"><strong>{applicationSecurityProfileGateBoundary?.status==='build-mapping-verified'&&applicationSecurityProfileGateBoundary.enforcement==='fail-closed'?'Uygulama güvenlik profil kapısı doğrulandı':'Uygulama güvenlik profili doğrulanamadı'}</strong><small>{applicationSecurityProfileGateBoundary?.mappedApplicationCount??0}/{applicationSecurityProfileGateBoundary?.canonicalApplicationCount??0} uygulama · {applicationSecurityProfileGateBoundary?.threatModelCount??0} tehdit modeli · {applicationSecurityProfileGateBoundary?.mobileMasvsApplicationCount??0} mobil MASVS profili</small><small>ASVS {applicationSecurityProfileGateBoundary?.asvsVersion??'—'} · MASVS {applicationSecurityProfileGateBoundary?.masvsVersion??'—'} · SSDF {applicationSecurityProfileGateBoundary?.ssdfVersion??'—'} · yeni veya eksik profil build aşamasında reddedilir</small><small>Eşleme uygunluk sertifikası veya runtime yetkisi değildir · profile-only hedefler native doğrulanmış sayılmaz · istemciye kaynak yolu ya da tehdit modeli hash'i verilmez</small></div></Surface>
-  <div className="content-grid two"><article className="panel"><h2>Yedekleme politikası</h2><form className="form-grid" onSubmit={e=>void saveTarget(e)}><label>Hedef adı<input name="name" required/></label><label>Tür<select name="kind"><option value="local">Yerel</option><option value="external">Harici disk</option><option value="cloud">Bulut klasörü</option></select></label><label className="span-2">Klasör yolu<input name="path" required placeholder="C:\\Anadolu-Parsi-Yedek"/></label><label>Zamanlama<select name="schedule"><option value="manual">Manuel</option><option value="hourly">Saatlik</option><option value="daily">Günlük</option><option value="weekly">Haftalık</option><option value="monthly">Aylık</option></select></label><label>Saklanacak yedek<input name="retention" type="number" min="1" max="365" defaultValue="10"/></label><label>Yeniden deneme<input name="retry" type="number" min="0" max="5" defaultValue="2"/></label><Button tone="primary" type="submit">Politikayı kaydet</Button></form></article><article className="panel"><div className="section-heading"><div><h2>Yedek hedefleri</h2><p>Her hedef bağımsız çalışır ve SHA-256 ile doğrulanır.</p></div><Button onClick={()=>void runAllBackups()}>Tümünü çalıştır</Button></div>{backupMessage&&<p className="success-text">{backupMessage}</p>}{targets.length?targets.map(t=><div className="list-row" key={t.id}><div><strong>{t.name}</strong><small>{t.kind} · {t.schedule} · son {t.retentionCount} yedek</small><small>{t.nextRunAt?`Sonraki ${formatDate(t.nextRunAt,{dateStyle:'short',timeStyle:'short'})}`:t.lastError??t.path}</small></div><Button onClick={()=>void runTarget(t.id)} disabled={!t.enabled}>Çalıştır</Button></div>):<EmptyState title="Yedek hedefi tanımlanmadı" body="Yerel, harici veya bulut hedefi ekleyin."/>}</article></div>
+  <div className="content-grid two"><article className="panel"><h2>Yedekleme politikası</h2><form className="form-grid" onSubmit={e=>void saveTarget(e)}><label>Hedef adı<input name="name" required/></label><label>Tür<select name="kind"><option value="local">Yerel</option><option value="external">Harici disk</option><option value="cloud">Bulut klasörü</option></select></label><label className="span-2">Klasör yolu<input name="path" required placeholder="C:\\ParsYuva-AYM-Yedek"/></label><label>Zamanlama<select name="schedule"><option value="manual">Manuel</option><option value="hourly">Saatlik</option><option value="daily">Günlük</option><option value="weekly">Haftalık</option><option value="monthly">Aylık</option></select></label><label>Saklanacak yedek<input name="retention" type="number" min="1" max="365" defaultValue="10"/></label><label>Yeniden deneme<input name="retry" type="number" min="0" max="5" defaultValue="2"/></label><Button tone="primary" type="submit">Politikayı kaydet</Button></form></article><article className="panel"><div className="section-heading"><div><h2>Yedek hedefleri</h2><p>Her hedef bağımsız çalışır ve SHA-256 ile doğrulanır.</p></div><Button onClick={()=>void runAllBackups()}>Tümünü çalıştır</Button></div>{backupMessage&&<p className="success-text">{backupMessage}</p>}{targets.length?targets.map(t=><div className="list-row" key={t.id}><div><strong>{t.name}</strong><small>{t.kind} · {t.schedule} · son {t.retentionCount} yedek</small><small>{t.nextRunAt?`Sonraki ${formatDate(t.nextRunAt,{dateStyle:'short',timeStyle:'short'})}`:t.lastError??t.path}</small></div><Button onClick={()=>void runTarget(t.id)} disabled={!t.enabled}>Çalıştır</Button></div>):<EmptyState title="Yedek hedefi tanımlanmadı" body="Yerel, harici veya bulut hedefi ekleyin."/>}</article></div>
   <div className="content-grid two"><article className="panel"><h2>Performans eğilimi</h2><div className="stats-grid"><div className="context-stat"><strong>%{trend?.peakCpuPercent??0}</strong><span>tepe CPU</span></div><div className="context-stat"><strong>%{trend?.peakMemoryPercent??0}</strong><span>tepe RAM</span></div></div><div className="section-heading"><p>Beş dakikalık otomatik örnekleme geçmişi.</p><Button onClick={()=>void sample()}>Şimdi örnek al</Button></div>{performance.slice(0,8).map(x=><div className="list-row" key={x.id}><div><strong>CPU %{x.cpuLoadPercent} · RAM %{x.memoryUsagePercent}</strong><small>DB {bytes(x.databaseBytes)} · Arşiv {bytes(x.archiveBytes)}</small></div><span>{formatDate(x.sampledAt,{hour:'2-digit',minute:'2-digit'})}</span></div>)}</article><article className="panel"><h2>Arka plan görevleri</h2>{tasks.length?tasks.slice(0,10).map(t=><div className="list-row" key={t.id}><div><strong>{t.label}</strong><small>{t.taskType} · {t.status}{t.details?` · ${t.details}`:''}</small></div><span>{t.durationMs!=null?`${Math.round(t.durationMs/1000)} sn`:'çalışıyor'}</span></div>):<EmptyState title="Görev kaydı yok" body="Yedekleme ve bakım görevleri burada izlenecek."/>}</article></div>
   <div className="content-grid two"><article className="panel"><h2>Bakım işlemleri</h2><div className="button-row"><Button onClick={()=>void maintain('integrity_check')}>Bütünlük kontrolü</Button><Button onClick={()=>void maintain('wal_checkpoint')}>WAL temizle</Button><Button onClick={()=>void maintain('analyze')}>ANALYZE</Button><Button tone="danger" onClick={()=>void maintain('vacuum')}>VACUUM</Button></div>{result&&<p className={result.success?'success-text':'error-text'}>{result.message}</p>}{health?.warnings.map(w=><p className="warning-text" key={w}>{w}</p>)}</article><article className="panel"><h2>Son yedek çalışmaları</h2>{runs.slice(0,8).map(r=><div className="list-row" key={r.id}><div><strong>{r.status==='success'?'Doğrulandı':'Başarısız'}</strong><small>{r.filePath??r.error}</small></div><span>{r.sizeBytes?bytes(r.sizeBytes):'—'}</span></div>)}</article></div>
   {systemMessage&&<p className="success-text">{systemMessage}</p>}
@@ -1492,7 +1499,7 @@ const createPasskeyRegistrationResponse=async(challenge:PasskeyChallengeView,cen
   if(!globalThis.navigator?.credentials)throw new Error('Bu cihazda WebAuthn kullanılamıyor; hiçbir passkey kaydı oluşturulmadı.');
   const credential=await globalThis.navigator.credentials.create({publicKey:{
     challenge:base64urlToBytes(challenge.challenge),
-    rp:{id:challenge.relyingPartyId,name:'Anadolu Parsı Aile Yaşam Merkezi'},
+    rp:{id:challenge.relyingPartyId,name:'ParsYuva AYM'},
     user:{id:new TextEncoder().encode(String(center.key.accountId)),name:String(center.key.accountId),displayName:'Yerel aile hesabı'},
     pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
     timeout:passkeyTimeout(challenge.expiresAt),attestation:'none',
@@ -2071,7 +2078,7 @@ function AddLocationModal({ onClose, onSave }: { onClose: () => void; onSave: (i
 
 function LocationScreen({ snapshot, onAdd, onAcknowledge }: { snapshot: FamilyAppSnapshot; onAdd: () => void; onAcknowledge: (notificationId:string) => Promise<void> }) {
   const activeNotifications = snapshot.notifications.filter((item) => !item.acknowledgedAt);
-  return <><PageHeader eyebrow="Aile coğrafi hafızası" title="Konum ve harita" description="Etkinlik yerlerini, ikametleri ve aile anı noktalarını kayıt altında tutun." actions={<Button tone="primary" onClick={onAdd}>＋ Konum ekle</Button>} /><section className="workspace-grid"><article className="panel workspace-form"><span className="eyebrow">{snapshot.locations.length} konum</span><h2>Kayıtlı yerler</h2>{snapshot.locations.map((location) => <div className="summary-row" key={location.id}><span>⌖</span><strong>{location.label}</strong><i>{location.address ?? location.kind}</i></div>)}</article><article className="panel workspace-summary"><span className="eyebrow">{activeNotifications.length} bekleyen hatırlatma</span><h2>Bildirim merkezi</h2>{activeNotifications.length ? activeNotifications.map((item) => <div className="context-stat" key={item.id}><strong>{item.body}</strong><span>{item.title}</span><Button onClick={()=>void onAcknowledge(item.id)}>Okundu işaretle</Button></div>) : <EmptyState title="Hatırlatma yok" body="Yaklaşan veya okunmamış önemli gün bildirimi bulunmuyor." />}</article></section></>;
+  return <><PageHeader eyebrow="Aile coğrafi hafızası" title="Konum ve harita" description="Etkinlik yerlerini, ikametleri ve aile anı noktalarını yalnız bu cihazda görüntüleyin." actions={<Button tone="primary" onClick={onAdd}>＋ Konum ekle</Button>} /><FamilyLocationMap locations={snapshot.locations} /><section className="workspace-grid family-location-support-grid"><article className="panel workspace-form"><span className="eyebrow">{snapshot.locations.length} konum</span><h2>Kayıtlı yerler</h2>{snapshot.locations.length ? snapshot.locations.map((location) => <div className="summary-row" key={location.id}><span>⌖</span><strong>{location.label}</strong><i>{location.address ?? (location.latitude !== undefined && location.longitude !== undefined ? `${location.latitude.toFixed(5)}, ${location.longitude.toFixed(5)}` : location.kind)}</i></div>) : <EmptyState title="Kayıtlı konum yok" body="Haritada göstermek için ilk aile konumunu ekleyin." />}</article><article className="panel workspace-summary"><span className="eyebrow">{activeNotifications.length} bekleyen hatırlatma</span><h2>Bildirim merkezi</h2>{activeNotifications.length ? activeNotifications.map((item) => <div className="context-stat" key={item.id}><strong>{item.body}</strong><span>{item.title}</span><Button onClick={()=>void onAcknowledge(item.id)}>Okundu işaretle</Button></div>) : <EmptyState title="Hatırlatma yok" body="Yaklaşan veya okunmamış önemli gün bildirimi bulunmuyor." />}</article></section></>;
 }
 
 const localProfileIdentity=(displayName:string):string=>{
@@ -2620,6 +2627,7 @@ function SessionLockOverlay({state,twoFactorEnabled,onContinue,onLockNow,onUnloc
 }
 
 export function App() {
+  const {language,locale,t}=useLocalization();
   const [navigation, dispatchNavigation] = useReducer(navigationReducer, undefined, () => readNavigationState('dashboard', navItems.map((item) => item.id)));
   const active = navigation.active as ScreenId;
   const setActive = (id: ScreenId) => dispatchNavigation({ type: 'navigate', screen: id });
@@ -2982,14 +2990,16 @@ export function App() {
 
   useEffect(()=>{if(notificationOpen&&auth.authenticated&&!loadedSnapshotSectionsRef.current.has('timeline'))void ensureSnapshotSection('timeline').catch(error=>setScreenDataError(error instanceof Error?error.message:'Bildirimler yüklenemedi.'));},[notificationOpen,auth.authenticated]);
 
-  const activeItem = navItems.find((item) => item.id === active) ?? navItems[0]!;
-  const now = useMemo(() => new Intl.DateTimeFormat('tr-TR', { dateStyle: 'full', timeStyle: 'short' }).format(currentTime), [currentTime]);
+  const localizedNavItems = useMemo(() => navItems.map((item)=>({...item,label:localizeNavigationLabel(item.id,item.label)})), [language]);
+  const localizedNavGroups = useMemo(() => navGroups.map((group)=>({...group,label:localizeNavigationGroup(group.id,group.label)})), [language]);
+  const activeItem = localizedNavItems.find((item) => item.id === active) ?? localizedNavItems[0]!;
+  const now = useMemo(() => new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeStyle: 'short' }).format(currentTime), [currentTime,locale]);
   const searchResults = useMemo(() => {
-    const normalized = searchQuery.trim().toLocaleLowerCase('tr-TR');
+    const normalized = searchQuery.trim().toLocaleLowerCase(locale);
     return normalized
-      ? navItems.filter((item) => item.label.toLocaleLowerCase('tr-TR').includes(normalized))
-      : navItems.slice(0, 7);
-  }, [searchQuery]);
+      ? localizedNavItems.filter((item) => item.label.toLocaleLowerCase(locale).includes(normalized))
+      : localizedNavItems.slice(0, 7);
+  }, [searchQuery,localizedNavItems,locale]);
   const activeNotifications = snapshot.notifications.filter((item) => !item.acknowledgedAt);
   const refreshDashboard = async () => {
     if(!window.pardus)return;
@@ -3100,7 +3110,7 @@ export function App() {
   if(!firstRunIntroCompleted) return auth.authenticated&&sessionOverlay
     ? sessionOverlay
     : <FirstRunIntroduction audioMuted={accessibility.audioMuted} onAudioMutedChange={(audioMuted)=>updateAccessibility({...accessibility,audioMuted})} onComplete={()=>setFirstRunIntroCompleted(true)}/>;
-  if(loading)return <main className="first-run-shell"><section className="first-run-card"><div className="loading-screen"><div className="loader"/><strong>Güvenli başlangıç hazırlanıyor…</strong><small>Kimlik durumu doğrulanmadan aile verileri ve normal uygulama ekranı açılmaz.</small></div></section></main>;
+  if(loading)return <main className="first-run-shell"><section className="first-run-card"><div className="loading-screen"><div className="loader"/><strong>{t('shell.loading')}</strong><small>{t('shell.loadingBody')}</small></div></section></main>;
   if(!auth.authenticated) return <AuthScreen auth={auth} onSetup={setupAdmin} onLogin={login} onWindowsHelloLogin={loginWithWindowsHello} onInvitationAccepted={completeInvitationAcceptance}/>;
   if(auth.authenticated && !auth.twoFactorEnabled) {
     const setup=<FirstRunSecuritySetup onComplete={(state)=>{setAuth(state);void bootstrapAuthenticatedSession();}}/>;
@@ -3146,67 +3156,67 @@ export function App() {
   else screen = <PlaceholderScreen screen={active} snapshot={snapshot} auth={auth} />;
 
   return (<>
-    <div aria-hidden={sessionOverlayVisible?true:undefined} className={`app-shell ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`} data-theme={theme} data-release-channel={releaseChannel} data-text-scale={accessibility.textScale} data-high-contrast={accessibility.highContrast ? 'true' : 'false'} data-reduce-motion={accessibility.reduceMotion ? 'true' : 'false'} data-density={accessibility.density} data-reading-mode={accessibility.readingMode} data-audience-profile={accessibility.audienceProfile} data-captions-enabled={accessibility.captionsEnabled?'true':'false'} data-audio-muted={accessibility.audioMuted?'true':'false'} style={{'--accessibility-text-scale':accessibility.textScalePercent/100} as CSSProperties}>
+    <div aria-hidden={sessionOverlayVisible?true:undefined} className={`app-shell ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`} data-theme={theme} data-release-channel={releaseChannel} data-ui-language={language} data-text-scale={accessibility.textScale} data-high-contrast={accessibility.highContrast ? 'true' : 'false'} data-reduce-motion={accessibility.reduceMotion ? 'true' : 'false'} data-density={accessibility.density} data-reading-mode={accessibility.readingMode} data-audience-profile={accessibility.audienceProfile} data-captions-enabled={accessibility.captionsEnabled?'true':'false'} data-audio-muted={accessibility.audioMuted?'true':'false'} style={{'--accessibility-text-scale':accessibility.textScalePercent/100} as CSSProperties}>
       <VisuallyHidden as="div"><div aria-live="polite" aria-atomic="true">{accessibilityAnnouncement(activeItem.label)}</div></VisuallyHidden>
-      <a className="skip-link" href="#main-content">Ana içeriğe geç</a>
+      <a className="skip-link" href="#main-content">{t('shell.skip')}</a>
       <aside className="sidebar">
         <div className="window-brand">
           <div className="brand-icon"><img src={brandMarkUrl} alt=""/></div>
-          <div className="brand-copy"><strong>Anadolu Parsı</strong><small>Aile Yaşam Merkezi</small></div>
-          <button type="button" className="sidebar-toggle" aria-label={sidebarCollapsed ? 'Menüyü genişlet' : 'Menüyü daralt'} onClick={()=>setSidebarCollapsed((value)=>!value)}>{sidebarCollapsed ? '›' : '‹'}</button>
+          <div className="brand-copy"><strong>ParsYuva AYM</strong><small>{t('brand.subtitle')}</small></div>
+          <button type="button" className="sidebar-toggle" aria-label={sidebarCollapsed ? t('shell.expand') : t('shell.collapse')} onClick={()=>setSidebarCollapsed((value)=>!value)}>{sidebarCollapsed ? '›' : '‹'}</button>
         </div>
         <div className="family-control">
           <button type="button" className="family-switcher" aria-expanded={familyOpen} aria-controls="family-menu" aria-haspopup="dialog" onClick={()=>{setFamilyOpen((value)=>!value);setProfileOpen(false);setNotificationOpen(false);}}>
-            <span className="family-icon">♙</span><span className="family-copy"><small>Aktif aile</small><strong>{snapshot.family.name}</strong></span><span className="disclosure">⌄</span>
+            <span className="family-icon">♙</span><span className="family-copy"><small>{t('shell.activeFamily')}</small><strong>{snapshot.family.name}</strong></span><span className="disclosure">⌄</span>
           </button>
           {familyOpen && <div id="family-menu" className="sidebar-popover" role="dialog" aria-label="Aktif aile alanı">
-            <span className="eyebrow">Yerel aile alanı</span>
+            <span className="eyebrow">{t('shell.familyArea')}</span>
             <strong>{snapshot.family.name}</strong>
-            <p>Bu sürüm tek, cihazda saklanan aile alanıyla çalışır.</p>
-            <Button onClick={()=>navigateFromShell('settings')}>Aile ayarlarını aç</Button>
+            <p>{t('shell.familyBody')}</p>
+            <Button onClick={()=>navigateFromShell('settings')}>{t('shell.familySettings')}</Button>
           </div>}
         </div>
-        <nav aria-label="Ana gezinme">
-          {navGroups.map((group)=><section className="nav-group" key={group.label}>
+        <nav aria-label={t('shell.navigation')}>
+          {localizedNavGroups.map((group)=><section className="nav-group" key={group.label}>
             <h2 className="nav-group-label">{group.label}</h2>
             {group.items.map((id)=>{
-              const item=navItems.find((candidate)=>candidate.id===id)!;
+              const item=localizedNavItems.find((candidate)=>candidate.id===id)!;
               return <button type="button" title={sidebarCollapsed ? item.label : undefined} aria-current={active === item.id ? 'page' : undefined} className={active === item.id ? 'active' : ''} key={item.id} onClick={() => navigateFromShell(item.id)}><span aria-hidden="true">{item.icon}</span><span className="nav-label">{item.label}</span>{item.id === 'health' && <i />}{item.id === SECURITY_CENTER_ROUTE && securityCenterNeedsAttention(auth) && <i title="Cihaz yeniden yetkilendirmesi gerekiyor" />}</button>;
             })}
           </section>)}
         </nav>
-        <div className="sidebar-footer"><div className="sync-state"><span>◌</span><div><strong>Yerel veri hazır</strong><small>{formatDate(snapshot.lastUpdatedAt, { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' })}</small></div><i>✓</i></div><div className="edition-line"><span>{appInfo.releaseLabel}</span><small>{appInfo.stage}</small></div></div>
+        <div className="sidebar-footer"><div className="sync-state"><span>◌</span><div><strong>{t('shell.localReady')}</strong><small>{formatDate(snapshot.lastUpdatedAt, { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' })}</small></div><i>✓</i></div><div className="edition-line"><span>{appInfo.releaseLabel}</span><small>{appInfo.stage}</small></div></div>
       </aside>
       <main ref={mainContentRef} id="main-content" className="main-area" tabIndex={-1} aria-labelledby="current-section-title">
         <header className="topbar">
           <div className="breadcrumb"><span aria-hidden="true">{activeItem.icon}</span><strong id="current-section-title">{activeItem.label}</strong></div>
           <div className="topbar-center">{now}</div>
           <div className="topbar-actions">
-            <button type="button" className="help-trigger" aria-haspopup="dialog" aria-expanded={helpOpen} aria-controls="narrated-help-dialog" onClick={()=>{setHelpOpen(true);setSearchOpen(false);setNotificationOpen(false);setProfileOpen(false);setFamilyOpen(false);}}><span aria-hidden="true">?</span><span>Yardım</span><kbd>F1</kbd></button>
+            <button type="button" className="help-trigger" aria-haspopup="dialog" aria-expanded={helpOpen} aria-controls="narrated-help-dialog" onClick={()=>{setHelpOpen(true);setSearchOpen(false);setNotificationOpen(false);setProfileOpen(false);setFamilyOpen(false);}}><span aria-hidden="true">?</span><span>{t('shell.help')}</span><kbd>F1</kbd></button>
             <div className="topbar-control">
               <button type="button" className="notification" aria-expanded={notificationOpen} aria-controls="notification-menu" aria-haspopup="dialog" aria-label={`${activeNotifications.length} okunmamış bildirim`} onClick={()=>{setNotificationOpen((value)=>!value);setProfileOpen(false);setFamilyOpen(false);}}>♢{activeNotifications.length>0&&<i>{activeNotifications.length}</i>}</button>
-              {notificationOpen&&<div id="notification-menu" className="menu-popover notification-popover" role="dialog" aria-label="Bildirim merkezi">
-                <div className="popover-heading"><div><span className="eyebrow">Bildirim merkezi</span><strong>{activeNotifications.length ? `${activeNotifications.length} yeni bildirim` : 'Her şey güncel'}</strong></div><button type="button" aria-label="Bildirimleri kapat" onClick={()=>setNotificationOpen(false)}>×</button></div>
-                {activeNotifications.length ? activeNotifications.slice(0,5).map((item)=><article key={item.id} className="notification-row"><button type="button" onClick={()=>navigateFromShell('important-days')}><strong>{item.title}</strong><small>{item.body}</small><time>{formatDate(item.dueAt,{dateStyle:'medium'})}</time></button><button type="button" className="acknowledge-button" aria-label={`${item.title} bildirimini okundu işaretle`} onClick={()=>void acknowledgeTimelineNotification(item.id)}>✓</button></article>) : <p className="popover-empty">Bekleyen aile bildirimi bulunmuyor.</p>}
+              {notificationOpen&&<div id="notification-menu" className="menu-popover notification-popover" role="dialog" aria-label={t('shell.notifications')}>
+                <div className="popover-heading"><div><span className="eyebrow">{t('shell.notifications')}</span><strong>{activeNotifications.length ? `${activeNotifications.length} ${language==='tr'?'yeni bildirim':'new notifications'}` : t('shell.everythingCurrent')}</strong></div><button type="button" aria-label={t('shell.closeNotifications')} onClick={()=>setNotificationOpen(false)}>×</button></div>
+                {activeNotifications.length ? activeNotifications.slice(0,5).map((item)=><article key={item.id} className="notification-row"><button type="button" onClick={()=>navigateFromShell('important-days')}><strong>{item.title}</strong><small>{item.body}</small><time>{formatDate(item.dueAt,{dateStyle:'medium'})}</time></button><button type="button" className="acknowledge-button" aria-label={`${item.title} ${language==='tr'?'bildirimini okundu işaretle':'mark notification as read'}`} onClick={()=>void acknowledgeTimelineNotification(item.id)}>✓</button></article>) : <p className="popover-empty">{t('shell.noNotifications')}</p>}
               </div>}
             </div>
-            <button ref={searchTriggerRef} type="button" className="search-box" aria-label="Uygulamada ara" onClick={()=>setSearchOpen(true)}><span className="search-icon">⌕</span><span>Ara…</span><kbd>Ctrl+K</kbd></button>
+            <button ref={searchTriggerRef} type="button" className="search-box" aria-label={t('shell.searchAria')} onClick={()=>setSearchOpen(true)}><span className="search-icon">⌕</span><span>{t('shell.search')}</span><kbd>Ctrl+K</kbd></button>
             <div className="topbar-control">
               <button type="button" className="user-menu" aria-expanded={profileOpen} aria-controls="profile-menu" aria-haspopup="menu" onClick={()=>{setProfileOpen((value)=>!value);setNotificationOpen(false);setFamilyOpen(false);}}>
-                <span className="person-avatar">{(auth.displayName??'Aile').split(/\s+/u).slice(0,2).map(part=>part[0]?.toLocaleUpperCase('tr-TR')).join('')}</span>
-                <span className="user-copy"><strong>{auth.displayName??'Aile kullanıcısı'}</strong><small>● {auth.role==='family_admin'?'Aile yöneticisi':'Aile üyesi'}</small></span><span className="disclosure">⌄</span>
+                <span className="person-avatar">{(auth.displayName??t('shell.user')).split(/\s+/u).slice(0,2).map(part=>part[0]?.toLocaleUpperCase(locale)).join('')}</span>
+                <span className="user-copy"><strong>{auth.displayName??t('shell.user')}</strong><small>● {auth.role==='family_admin'?t('auth.admin'):t('auth.member')}</small></span><span className="disclosure">⌄</span>
               </button>
               {profileOpen&&<div id="profile-menu" className="menu-popover profile-popover" role="menu">
-                <div className="profile-summary"><span className="person-avatar large">{(auth.displayName??'Aile').split(/\s+/u).slice(0,2).map(part=>part[0]?.toLocaleUpperCase('tr-TR')).join('')}</span><div><strong>{auth.displayName??'Aile kullanıcısı'}</strong><small>{auth.role==='family_admin'?'Aile yöneticisi':'Aile üyesi'} · Yerel profil</small></div></div>
-                <button type="button" role="menuitem" onClick={()=>updateAccessibility({...accessibility,theme:theme==='dark'?'light':'dark'})}><span>{theme==='dark'?'☀':'☾'}</span>{theme==='dark'?'Açık görünüme geç':'Koyu görünüme geç'}</button>
+                <div className="profile-summary"><span className="person-avatar large">{(auth.displayName??t('shell.user')).split(/\s+/u).slice(0,2).map(part=>part[0]?.toLocaleUpperCase(locale)).join('')}</span><div><strong>{auth.displayName??t('shell.user')}</strong><small>{auth.role==='family_admin'?t('auth.admin'):t('auth.member')} · {t('shell.localProfile')}</small></div></div>
+                <button type="button" role="menuitem" onClick={()=>updateAccessibility({...accessibility,theme:theme==='dark'?'light':'dark'})}><span>{theme==='dark'?'☀':'☾'}</span>{theme==='dark'?t('shell.light'):t('shell.dark')}</button>
                 <button type="button" role="menuitem" onClick={()=>navigateFromShell('windows-hello')}><span>◎</span>Windows Hello</button>
-                <button type="button" role="menuitem" onClick={()=>navigateFromShell(SECURITY_CENTER_ROUTE)}><span>⛨</span>Güvenlik Merkezi</button>
+                <button type="button" role="menuitem" onClick={()=>navigateFromShell(SECURITY_CENTER_ROUTE)}><span>⛨</span>{t('shell.security')}</button>
                 <button type="button" role="menuitem" onClick={()=>navigateFromShell('settings')}><span>⇄</span>Ağ çıkış güvenliği</button>
                 <button type="button" role="menuitem" onClick={()=>navigateFromShell('settings')}><span>⛓</span>Türetilmiş veri güvenliği</button>
                 <button type="button" role="menuitem" onClick={()=>navigateFromShell('settings')}><span>◈</span>Hassas log güvenliği</button>
-                <button type="button" role="menuitem" onClick={()=>navigateFromShell('settings')}><span>⚙</span>Sistem ve bakım</button>
-                <button type="button" role="menuitem" onClick={()=>void lockSessionNow()}><span>▣</span>Şimdi kilitle</button>
-                <button type="button" role="menuitem" className="danger-action" onClick={()=>void logout()}><span>↪</span>Profilden çıkış yap</button>
+                <button type="button" role="menuitem" onClick={()=>navigateFromShell('settings')}><span>⚙</span>{t('shell.system')}</button>
+                <button type="button" role="menuitem" onClick={()=>void lockSessionNow()}><span>▣</span>{t('shell.lock')}</button>
+                <button type="button" role="menuitem" className="danger-action" onClick={()=>void logout()}><span>↪</span>{t('shell.logout')}</button>
               </div>}
             </div>
           </div>
@@ -3233,12 +3243,12 @@ export function App() {
           setSearchActiveIndex(next);
           searchResultRefs.current[next]?.focus();
         }}>
-          <div className="command-input"><span aria-hidden="true">⌕</span><input autoFocus value={searchQuery} onChange={(event)=>{setSearchQuery(event.target.value);setSearchActiveIndex(0);}} onKeyDown={(event)=>{if(event.key==='Enter'&&searchResults[searchActiveIndex]){event.preventDefault();navigateFromShell(searchResults[searchActiveIndex]!.id);}}} placeholder="Bir bölüm veya özellik arayın…" aria-label="Arama metni" aria-controls="command-results" aria-activedescendant={searchResults[searchActiveIndex]?`command-result-${searchResults[searchActiveIndex]!.id}`:undefined}/><kbd aria-hidden="true">ESC</kbd></div>
-          <div id="command-results" className="command-results" role="listbox" aria-label={searchQuery.trim() ? 'Arama sonuçları' : 'Hızlı erişim'}>
-            <span id="command-title" className="eyebrow">{searchQuery.trim() ? 'Arama sonuçları' : 'Hızlı erişim'}</span>
-            {searchResults.length?searchResults.map((item,index)=><button ref={element=>{searchResultRefs.current[index]=element;}} id={`command-result-${item.id}`} type="button" role="option" aria-selected={searchActiveIndex===index} tabIndex={searchActiveIndex===index?0:-1} key={item.id} onFocus={()=>setSearchActiveIndex(index)} onClick={()=>navigateFromShell(item.id)}><span className="command-icon" aria-hidden="true">{item.icon}</span><span><strong>{item.label}</strong><small>{navGroups.find((group)=>group.items.includes(item.id))?.label}</small></span><kbd aria-hidden="true">↵</kbd></button>):<div className="command-empty" role="status"><strong>Sonuç bulunamadı</strong><small>Başka bir bölüm adı deneyin.</small></div>}
+          <div className="command-input"><span aria-hidden="true">⌕</span><input autoFocus value={searchQuery} onChange={(event)=>{setSearchQuery(event.target.value);setSearchActiveIndex(0);}} onKeyDown={(event)=>{if(event.key==='Enter'&&searchResults[searchActiveIndex]){event.preventDefault();navigateFromShell(searchResults[searchActiveIndex]!.id);}}} placeholder={language==='tr'?'Bir bölüm veya özellik arayın…':'Search for a section or feature…'} aria-label={language==='tr'?'Arama metni':'Search text'} aria-controls="command-results" aria-activedescendant={searchResults[searchActiveIndex]?`command-result-${searchResults[searchActiveIndex]!.id}`:undefined}/><kbd aria-hidden="true">ESC</kbd></div>
+          <div id="command-results" className="command-results" role="listbox" aria-label={searchQuery.trim() ? (language==='tr'?'Arama sonuçları':'Search results') : (language==='tr'?'Hızlı erişim':'Quick access')}>
+            <span id="command-title" className="eyebrow">{searchQuery.trim() ? (language==='tr'?'Arama sonuçları':'Search results') : (language==='tr'?'Hızlı erişim':'Quick access')}</span>
+            {searchResults.length?searchResults.map((item,index)=><button ref={element=>{searchResultRefs.current[index]=element;}} id={`command-result-${item.id}`} type="button" role="option" aria-selected={searchActiveIndex===index} tabIndex={searchActiveIndex===index?0:-1} key={item.id} onFocus={()=>setSearchActiveIndex(index)} onClick={()=>navigateFromShell(item.id)}><span className="command-icon" aria-hidden="true">{item.icon}</span><span><strong>{item.label}</strong><small>{localizedNavGroups.find((group)=>group.items.includes(item.id))?.label}</small></span><kbd aria-hidden="true">↵</kbd></button>):<div className="command-empty" role="status"><strong>{language==='tr'?'Sonuç bulunamadı':'No results found'}</strong><small>{language==='tr'?'Başka bir bölüm adı deneyin.':'Try another section name.'}</small></div>}
           </div>
-          <footer id="command-help"><span>↑↓ Gezin</span><span>Enter Aç</span><span>Esc Kapat</span></footer>
+          <footer id="command-help"><span>↑↓ {language==='tr'?'Gezin':'Navigate'}</span><span>Enter {language==='tr'?'Aç':'Open'}</span><span>Esc {language==='tr'?'Kapat':'Close'}</span></footer>
         </section>
       </div>}
       {helpOpen&&<NarratedHelpCenter activeScreenLabel={activeItem.label} audioMuted={accessibility.audioMuted} onAudioMutedChange={(audioMuted)=>updateAccessibility({...accessibility,audioMuted})} onClose={()=>setHelpOpen(false)}/>}

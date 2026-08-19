@@ -43,9 +43,9 @@
   "targetedValidation": {"testFiles": 3, "tests": 10, "status": "PASS"},
   "validation": {
     "migration113Sha256": "3f7b7e02e462744f704ced2255b75d712b90930c807889f13f8dd1d4d2f6e596",
-    "ppk015": {"status": "PASS", "scannedFiles": 563, "sourceInventorySha256": "f6fb78533a4776d3286a98e8caa3342549ad9f7c7672a1a1061cd483f2820c1b"},
-    "ppk021": {"status": "PASS", "scannedFiles": 563, "exactSurfaces": 886, "sha256": "58a90febf9382776c2b1472e6ffd6a645c9a24a4cd69e499a8afc1fff2e72b30"},
-    "ppk022": {"status": "PASS", "scannedFiles": 563, "exactSurfaces": 422, "sha256": "dc0234d84a50ff1872f9cde4fb7ab286446b236a69019034055fa938dbb3be1e"}
+    "ppk015": {"status": "PASS", "scannedFiles": 568, "sourceInventorySha256": "8ef8bf331b1c484c595c2639b9da313d8ae6e0cd5e8751fa921bef2fdcccee64"},
+    "ppk021": {"status": "PASS", "scannedFiles": 568, "exactSurfaces": 889, "sha256": "3a297f74d43d4675090a709d4359af9245c2971a7fc338afef2fb87b1c8608dd"},
+    "ppk022": {"status": "PASS", "scannedFiles": 568, "exactSurfaces": 428, "sha256": "1bf21d23c862afbccb9611083c093f9ced703adadf7a170c29f53479d21397b1"}
   },
   "manualEvidence": {
     "realThreeNodeQuorum": "NOT_RUN",

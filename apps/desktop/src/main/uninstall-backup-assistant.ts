@@ -97,7 +97,7 @@ export const createVerifiedUninstallBackups = async (input: {
     await mkdir(rootPath, { recursive: true });
     const realRoot = await realpath(rootPath);
     if (realRoot !== rootPath || (await lstat(rootPath)).isSymbolicLink()) throw new Error('Kaldırma yedek hedefi güvenilir gerçek dizin değil.');
-    const backupDirectory = join(rootPath, `Anadolu_Parsi_Kaldirma_Yedegi_${timestamp}`);
+    const backupDirectory = join(rootPath, `ParsYuva_AYM_Kaldirma_Yedegi_${timestamp}`);
     await mkdir(backupDirectory, { recursive: false });
     const manifestFiles: Array<{ relativePath: string; size: number; sha256: string }> = [];
     for (const source of files) {
@@ -113,7 +113,7 @@ export const createVerifiedUninstallBackups = async (input: {
       manifestFiles.push({ relativePath: source.relativePath.replaceAll('\\', '/'), size: source.size, sha256: source.sha256 });
     }
     const manifest = {
-      schemaVersion: 1, product: 'Anadolu Parsı Aile Yaşam Merkezi', applicationVersion: input.applicationVersion,
+      schemaVersion: 1, product: 'ParsYuva AYM', applicationVersion: input.applicationVersion,
       createdAt: input.createdAt, sourceDirectoryName: basename(userDataPath), targetKind: target.kind,
       encryptedPersistentCopy: true, cloudUploadObserved: false, providerSyncResponsibility: target.kind !== 'local_documents',
       files: manifestFiles

@@ -1,0 +1,33 @@
+import { readFile } from 'node:fs/promises';
+
+const failures=[];
+let checks=0;
+const check=(condition,message)=>{checks+=1;if(!condition)failures.push(message);};
+const read=(path)=>readFile(path,'utf8');
+const policy=JSON.parse(await read('config/kullanici-arayuzu-dil-politikasi.json'));
+const desktopPackage=JSON.parse(await read('apps/desktop/package.json'));
+const [domain,main,preload,globalTypes,rendererMain,localization,accessibility,help,installer]=await Promise.all([
+  read('packages/domain/src/ui-localization.ts'),read('apps/desktop/src/main/main.ts'),read('apps/desktop/src/main/preload.ts'),
+  read('apps/desktop/src/renderer/global.d.ts'),read('apps/desktop/src/renderer/main.tsx'),read('apps/desktop/src/renderer/localization.tsx'),
+  read('apps/desktop/src/renderer/accessibility.ts'),read('apps/desktop/src/renderer/NarratedHelpCenter.tsx'),read('apps/desktop/build/installer.nsh')
+]);
+
+check(policy.ruleId==='PR-215'&&policy.decisionId==='DEC-255','policy rule/decision binding mismatch');
+check(JSON.stringify(policy.supportedLanguages)===JSON.stringify(['tr','en']),'supported language order mismatch');
+check(policy.fallbackLanguage==='en'&&policy.fallbackLocale==='en-US','English fallback missing');
+check(policy.rendererMayChooseLanguage===false&&policy.resolutionProcess==='electron-main','renderer must not choose language');
+check(policy.coverage.foundationStatus==='COMPLETE'&&policy.coverage.coreUserJourneyStatus==='COMPLETE','localization foundation incomplete');
+check(policy.coverage.fullFeaturePanelTranslationStatus==='PARTIAL'&&policy.coverage.countsAsFullApplicationEnglishPass===false,'partial full-feature truth missing');
+check(domain.includes("primaryLanguage === 'tr' ? 'tr' : 'en'")&&domain.includes("resolveUiLocalization('en-US')"),'domain fallback resolver missing');
+check(main.includes('resolveUiLocalization(app.getLocale())')&&main.includes("registerIpcHandler('app:getLocalizationBootstrap'"),'main system-locale authority missing');
+check(preload.includes("invoke('app:getLocalizationBootstrap')")&&globalTypes.includes('getLocalizationBootstrap()'),'preload/global localization bridge missing');
+check(rendererMain.includes('DEFAULT_UI_LOCALIZATION')&&rendererMain.includes('document.documentElement.lang = localization.locale'),'English-first renderer bootstrap missing');
+check(localization.includes("fallbackUsed")===false,'renderer dictionary must not mutate fallback truth');
+check(localization.includes("'auth.createFamily':'Let’s create your family'")&&localization.includes("'shell.help':'Help'"),'English core dictionary missing');
+check(accessibility.includes('FIRST_RUN_NARRATION_TEXT_EN')&&accessibility.includes("locale:'en-US'"),'English first-run narration missing');
+check(help.includes('SILVER_HELP_TOPICS_EN')&&help.includes("utterance.lang = input.language === 'en' ? 'en-US' : 'tr-TR'"),'English narrated help missing');
+check(desktopPackage.build?.nsis?.multiLanguageInstaller===true&&JSON.stringify(desktopPackage.build?.nsis?.installerLanguages)===JSON.stringify(['en_US','tr_TR']),'installer language configuration mismatch');
+check(installer.includes('LangString AymFinishTitle ${AYM_LANG_ENGLISH}')&&installer.includes('LangString AymFinishTitle ${AYM_LANG_TURKISH}'),'installer localized copy missing');
+
+if(failures.length){console.error(`Kullanıcı arayüzü dil politikası: FAIL (${checks-failures.length}/${checks})`);for(const failure of failures)console.error(`- ${failure}`);process.exit(1);}
+console.log(`Kullanıcı arayüzü dil politikası: PASS (${checks}/${checks})`);

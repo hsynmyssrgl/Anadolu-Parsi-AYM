@@ -13,13 +13,15 @@ const targetedTestFiles=Object.freeze([
   'packages/repositories/family-ai-assistant-repository-policy.test.ts',
   'apps/desktop/tests/family-ai-assistant-data-store.test.ts',
   'apps/desktop/tests/family-ai-assistant-ipc-integration.test.ts',
-  'apps/desktop/tests/family-ai-assistant-ui.test.ts'
+  'apps/desktop/tests/family-ai-assistant-ui.test.ts',
+  'apps/desktop/tests/local-family-ai-model-adapter.test.ts'
 ]);
-const [scope,inventory,manifest,migrations,contract,repository,adapter,runtime,main,preload,globalTypes,decision,threat,...tests]=await Promise.all([
+const [scope,inventory,manifest,migrations,contract,repository,adapter,modelAdapter,runtime,main,preload,globalTypes,decision,threat,...tests]=await Promise.all([
   json('config/33-w-consent-bound-family-ai-assistant-scope.json'),json('config/33-w-consent-bound-family-ai-assistant-inventory.json'),
   json('artifacts/manifests/DATABASE_MIGRATION_VERIFICATION_MVP56.json'),text('packages/database/src/family-database-migrations.ts'),
   text('packages/repository-contracts/src/family-ai-assistant-repository.ts'),text('packages/repositories/src/family-ai-assistant-repository.ts'),
-  text('apps/desktop/src/main/family-ai-assistant-application-adapter.ts'),text('apps/desktop/src/main/life-production-policy-runtime.ts'),
+  text('apps/desktop/src/main/family-ai-assistant-application-adapter.ts'),text('apps/desktop/src/main/local-family-ai-model-adapter.ts'),
+  text('apps/desktop/src/main/life-production-policy-runtime.ts'),
   text('apps/desktop/src/main/main.ts'),text('apps/desktop/src/main/preload.ts'),text('apps/desktop/src/renderer/global.d.ts'),
   text('docs/decisions/DEC-234-consent-bound-family-ai-assistant.md'),text('docs/security/THREAT_MODEL_33_W_CONSENT_BOUND_FAMILY_AI_ASSISTANT.md'),
   ...targetedTestFiles.map(text)
@@ -29,17 +31,18 @@ const sha=match?createHash('sha256').update(`${match[1].replace(/\r\n/g,'\n').tr
 const migration=manifest.migrationVersions?.find((item)=>item.version===101);
 const p21=scope.validation.ppk021;const p22=scope.validation.ppk022;
 const definitions=[
-  ['scope inventory and five-test matrix are exact',JSON.stringify(scope.requirements)===JSON.stringify(inventory.requirements)&&JSON.stringify(scope.validation.targetedTestFiles)===JSON.stringify(inventory.implementedTargetedTests)&&tests.length===5&&scope.validation.targetedTestRatchet===26],
+  ['scope inventory and six-test matrix are exact',JSON.stringify(scope.requirements)===JSON.stringify(inventory.requirements)&&JSON.stringify(scope.validation.targetedTestFiles)===JSON.stringify(inventory.implementedTargetedTests)&&tests.length===6&&scope.validation.targetedTestRatchet===34],
   ['migration 101 source manifest and scope checksums are canonical',migration?.name==='consent_bound_family_ai_assistant'&&migration?.checksum===sha&&sha===scope.validation.migrationSha256&&sha==='ef3790fad5f64de7bbd089d09a835dcb302092d64ccef6abb85e2105fbab2b5b'],
   ['migration owns immutable current and mutation ledgers',has(migrations,['family_ai_suggestion_mutations','family_ai_suggestions','trg_33w_family_ai_suggestion_delete','trg_33w_family_ai_mutation_delete'])],
   ['repository contract exposes center suggestion mutation and policy ports',has(contract,['loadCenter','findSuggestion','findMutationByClientOperationId','insertMutation','insertSuggestion','saveSuggestion','findSuggestionForPolicyResolution'])],
   ['repository enforces exact receipt payload-free resolution and bounded capacity',has(repository,['writeBinding(context,row)','findSuggestionForPolicyResolution','FAMILY_AI_ASSISTANT_MAX_SUGGESTIONS','suggestion capacity is exhausted'])],
   ['desktop adapter composes central policy consent and transactional audit outbox',has(adapter,['RepositoryBackedLifePolicyTransactionRunner','RepositoryBackedFamilyAiAssistantUnitOfWork','aiConsentRepository','auditRepository.append','outboxRepository.enqueue'])],
+  ['local model adapter is exact loopback auto-discovery bounded and fail closed',has(modelAdapter,["ENDPOINT='http://127.0.0.1:11434'","hostname:'127.0.0.1'",'port:11434','resolveLocalFamilyAiEnabled','PPT_LOCAL_AI_ENABLED=0','maximumResponseBytes:131_072',"stream:false"])],
   ['production runtime resolves exact private suggestion owner',has(runtime,["resourceType === 'family_ai_suggestion'",'ownerPersonId: found.value.ownerPersonId'])],
-  ['main preload and renderer expose exact three safe methods',has(main,['FAMILY_AI_ASSISTANT_IPC_CHANNELS.getCenter','FAMILY_AI_ASSISTANT_IPC_CHANNELS.generate','FAMILY_AI_ASSISTANT_IPC_CHANNELS.review'])&&has(preload,['getFamilyAiAssistantCenter','generateFamilyAiSuggestion','reviewFamilyAiSuggestion'])&&has(globalTypes,['getFamilyAiAssistantCenter','generateFamilyAiSuggestion','reviewFamilyAiSuggestion'])],
-  ['tests cover canonical replay module pairing deny precedence capacity rollback IPC and route',has(tests.join('\n'),['replayed:true','source.calls','operation-cross-module',"status:'revoked'",'capacity-overflow','controlled 33-W outbox failure','durableActionPerformed','familyAiAssistant:future','family-ai-assistant-title'])],
-  ['decision and threat model deny provider inference downstream action and acceptance claims',has(decision,['countsAsRequirementPass=false','model çıkarımı','durableActionPerformed=not_performed','NOT_RUN'])&&has(threat,['Otonom eylem yanılsaması','Ham içerik sızıntısı','NOT_RUN'])],
-  ['PPK ratchets are exact PASS while requirement remains open',p21.status==='PASS'&&p21.scannedProductionFiles===563&&p21.exactPrivilegedSurfaceCount===886&&p21.exactAllowlistSha256==='58a90febf9382776c2b1472e6ffd6a645c9a24a4cd69e499a8afc1fff2e72b30'&&p22.status==='PASS'&&p22.scannedProductionFiles===563&&p22.exactCapabilitySurfaceCount===422&&p22.exactCapabilityManifestSha256==='dc0234d84a50ff1872f9cde4fb7ab286446b236a69019034055fa938dbb3be1e'&&scope.validation.countsAsRequirementPass===false]
+  ['main preload and renderer expose exact five safe methods',has(main,['FAMILY_AI_ASSISTANT_IPC_CHANNELS.getCenter','FAMILY_AI_ASSISTANT_IPC_CHANNELS.getLocalModelStatus','FAMILY_AI_ASSISTANT_IPC_CHANNELS.runLocalModel','FAMILY_AI_ASSISTANT_IPC_CHANNELS.generate','FAMILY_AI_ASSISTANT_IPC_CHANNELS.review'])&&has(preload,['getFamilyAiAssistantCenter','getFamilyAiLocalModelStatus','runFamilyAiLocalModel','generateFamilyAiSuggestion','reviewFamilyAiSuggestion'])&&has(globalTypes,['getFamilyAiAssistantCenter','getFamilyAiLocalModelStatus','runFamilyAiLocalModel','generateFamilyAiSuggestion','reviewFamilyAiSuggestion'])],
+  ['tests cover replay module pairing consent race loopback bounds capacity rollback IPC and route',has(tests.join('\n'),['replayed:true','source.calls','operation-cross-module',"status:'revoked'",'source state changes during inference','127.0.0.1:11434','capacity-overflow','controlled 33-W outbox failure','durableActionPerformed','familyAiAssistant:future','family-ai-assistant-title'])],
+  ['decision and threat model bind transient loopback inference downstream no-action and acceptance limits',has(decision,['countsAsRequirementPass=false','127.0.0.1:11434','Model yanıtı veritabanına','durableActionPerformed=not_performed','NOT_RUN'])&&has(threat,['Otonom eylem yanılsaması','Ham içerik sızıntısı','Çıkarım sırasında izin yarışı','NOT_RUN'])],
+  ['PPK ratchets are exact PASS while requirement remains open',p21.status==='PASS'&&p21.scannedProductionFiles===568&&p21.exactPrivilegedSurfaceCount===889&&p21.exactAllowlistSha256==='3a297f74d43d4675090a709d4359af9245c2971a7fc338afef2fb87b1c8608dd'&&p22.status==='PASS'&&p22.scannedProductionFiles===568&&p22.exactCapabilitySurfaceCount===428&&p22.exactCapabilityManifestSha256==='1bf21d23c862afbccb9611083c093f9ced703adadf7a170c29f53479d21397b1'&&scope.validation.countsAsRequirementPass===false]
 ];
 const checks=definitions.map(([name,passed])=>({name,status:passed?'PASS':'FAIL'}));
 const failures=checks.filter((item)=>item.status==='FAIL');

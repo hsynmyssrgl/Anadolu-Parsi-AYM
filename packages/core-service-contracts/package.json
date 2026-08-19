@@ -1,12 +1,12 @@
 {
   "name": "@ppt/core-service-contracts",
-  "version": "18.8.2026-30",
+  "version": "19.8.2026-33",
   "private": true,
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "dependencies": {
-    "@ppt/platform-policy": "18.8.2026-30"
+    "@ppt/platform-policy": "19.8.2026-33"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

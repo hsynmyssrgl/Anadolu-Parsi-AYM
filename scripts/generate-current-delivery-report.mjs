@@ -386,7 +386,7 @@ const report = {
   id: `DELIVERY-STATUS-${release.current.version}`,
   generatedAt: new Date().toISOString(),
   visibleRelease: release.current.visibleRelease,
-  userVisibleDeliveryFileName: `Anadolu_Parsi_Aile_Yasam_Merkezi_${release.current.visibleRelease.replaceAll(' ', '_')}.json`,
+  userVisibleDeliveryFileName: `ParsYuva_AYM_${release.current.visibleRelease.replaceAll(' ', '_')}.json`,
   releaseStatus: 'IN_PROGRESS',
   workCompleted: [
     'DEC-152 single authoritative source, local receipt and incremental governance binding',
@@ -605,7 +605,7 @@ const report = {
   sourceSha256: receipt.treeSha256,
   deliveryBackupRoots: {
     local: `C:\\PPT\\AYM\\09_ARSIV\\TESLIM_RAPORLARI\\${release.current.visibleRelease}`,
-    external: `D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\${release.current.visibleRelease}\\deliveries`,
+    external: `D:\\AYM_LIBRARY\\ParsYuva\\ParsYuva AYM\\${release.current.visibleRelease}\\deliveries`,
     latestReceipt: 'LATEST_33-J.json'
   },
   sourceReceiptBoundary: 'The focused official 30-Z through 31-E checkpoints, the official 33-D controlled-import closure, the official 33-E managed-life closure, the official 33-F home-inventory closure, the historical official 33-G family-emergency planning, 33-H preparedness and 33-I private assistance-card closures, the current official 33-J offline emergency-card portability closure, and the current editable C: source tree are independently externally bound on D:. The delivery report files are derived outputs excluded from the source hash to prevent self-reference.',

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://parsyuva.local/schemas/ticari-kanit-v1.json",
+  "title": "ParsYuva AYM Kanit Kaydi",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "tur",
+    "kapsam",
+    "durum",
+    "kaynak",
+    "uretimZamani",
+    "disKaynak"
+  ],
+  "properties": {
+    "id": { "type": "string", "pattern": "^KANIT-[0-9]{4}$" },
+    "tur": { "enum": ["TEST", "TYPECHECK", "BUILD", "GATE", "UAT", "DIS_ONAY", "BELGE"] },
+    "kapsam": { "type": "string", "minLength": 3 },
+    "durum": { "enum": ["PASS", "FAIL", "BLOCKED", "NOT_RUN", "STALE"] },
+    "kaynak": { "type": "string", "minLength": 1 },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "uretimZamani": { "type": "string", "format": "date-time" },
+    "disKaynak": { "type": "boolean" },
+    "not": { "type": "string" }
+  }
+}

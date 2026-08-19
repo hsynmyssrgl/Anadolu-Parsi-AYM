@@ -97,7 +97,7 @@ if (
 await run({ executable: node, args: [resolve(import.meta.dirname, 'run-electron-builder.mjs')], cwd: resolve(root, 'apps/desktop') });
 const releaseRoot = resolve(root, 'apps/desktop/release');
 const activeRelease = JSON.parse(await readFile(resolve(root, 'config/release-ledger.json'), 'utf8')).current;
-const installerName = `Anadolu-Parsi-Aile-Yasam-Merkezi-${activeRelease.channel}-${activeRelease.version}-x64-Kurulum.exe`;
+const installerName = `ParsYuva-AYM-${activeRelease.channel}-${activeRelease.version}-x64-Kurulum.exe`;
 const installerPath = resolve(releaseRoot, installerName);
 if (!existsSync(installerPath)) throw new Error('Signed installer output is missing after electron-builder.');
 const signatureVerifierPath = resolve(root, 'scripts/verify-ppk025-windows-package-signature.ps1');

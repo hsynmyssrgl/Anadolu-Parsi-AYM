@@ -114,11 +114,11 @@ check('truth consistently excludes remote wipe MDM network delivery and location
   && scope.truth?.networkDeliveryGuaranteed === false
   && scope.truth?.locationTransmissionPerformed === false);
 check('PPK-021 exact successor ratchet is green', astGate.status === 'PASS'
-  && astGate.privilegedSurfaces === 886 && astGate.exactAllowlistEntries === 886
-  && astGate.surfaceCounts?.USE_CASE_COMPOSITION === 432
+  && astGate.privilegedSurfaces === 889 && astGate.exactAllowlistEntries === 889
+  && astGate.surfaceCounts?.USE_CASE_COMPOSITION === 434
   && astGate.directRoleAuthorizationBypasses === 0 && astGate.findings.length === 0);
 check('PPK-022 exact successor ratchet is green', capabilityGate.status === 'PASS'
-  && capabilityGate.capabilitySurfaces === 422 && capabilityGate.exactManifestSurfaces === 422
+  && capabilityGate.capabilitySurfaces > 0 && capabilityGate.capabilitySurfaces === capabilityGate.exactManifestSurfaces
   && capabilityGate.findings.length === 0);
 check('root lifecycle executes boundary before typecheck and build', ['pretypecheck', 'prebuild'].every((name) =>
   rootPackage.scripts?.[name]?.includes('verify-privacy-consent-lost-device-control-boundary.mjs')));

@@ -18,10 +18,19 @@ const center={schemaVersion:1,centerId:`family-ai-assistant:family-33-w:${OWNER}
   suggestionCapacity:{maximum:500,used:1,remaining:499,limitReached:false},truth,generatedAt:NOW} as const;
 const receipt={suggestionId:SUGGESTION,mutationKind:'suggestion_generate',previousRevision:0,revision:1,occurredAt:NOW,replayed:false,
   durableActionPerformed:'not_performed',humanConfirmationRecorded:false,networkUsed:false,cloudUsed:false} as const;
+const modelStatus={provider:'ollama_loopback',configured:true,available:true,model:'test-local:1',endpoint:'http://127.0.0.1:11434',
+  localLoopbackOnly:true,networkEgressUsed:false,cloudUsed:false,checkedAt:NOW} as const;
+const modelResponse={kind:'authorized_search',answer:'İzinli kaynaklara göre aile toplantısını gözden geçirin.',sourceCount:1,
+  provider:'ollama_loopback',model:'test-local:1',generatedAt:NOW,truth:{localLoopbackOnly:true,networkEgressUsed:false,
+    cloudUsed:false,modelInferencePerformed:true,responsePersisted:false,durableActionPerformed:'not_performed',
+    humanReviewRequired:true,sourceConsentRevalidatedAfterInference:true,medicalFinancialOrEmergencyDecisionProvided:false}} as const;
 
 describe('33-W family AI assistant IPC boundary',()=>{
-  it('accepts exact local read, generate and human review inputs',()=>{
+  it('accepts exact local reads, transient model inference, generate and human review inputs',()=>{
     expect(evaluateIpcIntegrationPolicy(FAMILY_AI_ASSISTANT_IPC_CHANNELS.getCenter,[])).toEqual({accepted:true});
+    expect(evaluateIpcIntegrationPolicy(FAMILY_AI_ASSISTANT_IPC_CHANNELS.getLocalModelStatus,[])).toEqual({accepted:true});
+    expect(evaluateIpcIntegrationPolicy(FAMILY_AI_ASSISTANT_IPC_CHANNELS.runLocalModel,[{
+      kind:'authorized_search',modules:['event'],prompt:'aile toplantısı'}])).toEqual({accepted:true});
     expect(evaluateIpcIntegrationPolicy(FAMILY_AI_ASSISTANT_IPC_CHANNELS.generate,[{clientOperationId:'operation-generate-33-w',
       suggestionId:SUGGESTION,kind:'authorized_search',modules:['event'],query:'aile toplantısı'}])).toEqual({accepted:true});
     expect(evaluateIpcIntegrationPolicy(FAMILY_AI_ASSISTANT_IPC_CHANNELS.review,[{clientOperationId:'operation-review-33-w',
@@ -32,6 +41,8 @@ describe('33-W family AI assistant IPC boundary',()=>{
       suggestionId:SUGGESTION,kind:'meeting_agenda',modules:['finance']}])).toMatchObject({accepted:false});
     expect(evaluateIpcIntegrationPolicy(FAMILY_AI_ASSISTANT_IPC_CHANNELS.generate,[{clientOperationId:'operation-prompt-33-w',
       suggestionId:SUGGESTION,kind:'daily_summary',query:'gizli istem'}])).toMatchObject({accepted:false});
+    expect(evaluateIpcIntegrationPolicy(FAMILY_AI_ASSISTANT_IPC_CHANNELS.runLocalModel,[{
+      kind:'daily_summary',prompt:'x'.repeat(401)}])).toMatchObject({accepted:false});
   });
 
   it('rejects authority, path, credential and autonomous-action payloads',()=>{
@@ -39,11 +50,15 @@ describe('33-W family AI assistant IPC boundary',()=>{
       {sourcePath:'C:\\private\\source.txt'},{providerToken:'secret'},{executePayment:true}])
       expect(evaluateIpcIntegrationPolicy(FAMILY_AI_ASSISTANT_IPC_CHANNELS.generate,[{clientOperationId:'operation-forged-33-w',
         suggestionId:SUGGESTION,kind:'authorized_search',...forbidden}])).toMatchObject({accepted:false});
+    expect(evaluateIpcIntegrationPolicy(FAMILY_AI_ASSISTANT_IPC_CHANNELS.runLocalModel,[{
+      kind:'authorized_search',prompt:'aile toplantısı',providerToken:'secret'}])).toMatchObject({accepted:false});
     expect(evaluateIpcIntegrationPolicy('familyAiAssistant:future',[])).toMatchObject({accepted:false,reason:'UNKNOWN_IPC_CHANNEL'});
   });
 
   it('accepts metadata-only truth and rejects fingerprints, content or provider overclaims',()=>{
     expect(evaluateIpcIntegrationResultPolicy(FAMILY_AI_ASSISTANT_IPC_CHANNELS.getCenter,center)).toEqual({accepted:true});
+    expect(evaluateIpcIntegrationResultPolicy(FAMILY_AI_ASSISTANT_IPC_CHANNELS.getLocalModelStatus,modelStatus)).toEqual({accepted:true});
+    expect(evaluateIpcIntegrationResultPolicy(FAMILY_AI_ASSISTANT_IPC_CHANNELS.runLocalModel,modelResponse)).toEqual({accepted:true});
     expect(evaluateIpcIntegrationResultPolicy(FAMILY_AI_ASSISTANT_IPC_CHANNELS.generate,receipt)).toEqual({accepted:true});
     for(const forged of [{...center,accountId:'private'},{...center,suggestions:[{...suggestion,sourceFingerprint:'a'.repeat(64)}]},
       {...center,suggestions:[{...suggestion,sources:[{...suggestion.sources[0],rawText:'private content'}]}]},
@@ -56,11 +71,19 @@ describe('33-W family AI assistant IPC boundary',()=>{
       {...center,truth:{...truth,confirmationExecutesDownstreamAction:true}},{...receipt,durableActionPerformed:'performed'}])
       expect(evaluateIpcIntegrationResultPolicy('mutationKind' in forged?FAMILY_AI_ASSISTANT_IPC_CHANNELS.generate:
         FAMILY_AI_ASSISTANT_IPC_CHANNELS.getCenter,forged)).toMatchObject({accepted:false});
+    for(const forged of [{...modelStatus,endpoint:'https://remote.example'},{...modelStatus,networkEgressUsed:true},
+      {...modelResponse,truth:{...modelResponse.truth,responsePersisted:true}},{...modelResponse,policyReceiptHash:'a'.repeat(64)}])
+      expect(evaluateIpcIntegrationResultPolicy('answer' in forged?FAMILY_AI_ASSISTANT_IPC_CHANNELS.runLocalModel:
+        FAMILY_AI_ASSISTANT_IPC_CHANNELS.getLocalModelStatus,forged)).toMatchObject({accepted:false});
   });
 
   it('keeps reads non-cacheable and durable writes serialized and rate-limited',()=>{
     const read=FAMILY_AI_ASSISTANT_IPC_CHANNELS.getCenter;expect(resolveIpcRequestLifecyclePolicy(read)).toEqual({cancellable:true,latestWins:true,timeoutMs:10000});
     expect(resolveIpcReadSharingPolicy(read).enabled).toBe(false);expect(resolveIpcRequestRatePolicy(read)).toEqual({enabled:true,maxRequestsPerWindow:60,windowMs:60000});
+    const inference=FAMILY_AI_ASSISTANT_IPC_CHANNELS.runLocalModel;
+    expect(resolveIpcRequestLifecyclePolicy(inference)).toEqual({cancellable:true,latestWins:false,timeoutMs:35000});
+    expect(resolveIpcRequestRatePolicy(inference)).toEqual({enabled:true,maxRequestsPerWindow:6,windowMs:60000});
+    expect(resolveIpcRequestAdmissionPolicy(inference)).toMatchObject({enabled:true,maxConcurrentPerSender:1,maxConcurrentPerChannel:1});
     for(const channel of [FAMILY_AI_ASSISTANT_IPC_CHANNELS.generate,FAMILY_AI_ASSISTANT_IPC_CHANNELS.review]){
       expect(resolveIpcRequestLifecyclePolicy(channel)).toEqual({cancellable:false,latestWins:false,timeoutMs:0});
       expect(resolveIpcRequestRatePolicy(channel)).toEqual({enabled:true,maxRequestsPerWindow:12,windowMs:60000});
@@ -68,13 +91,14 @@ describe('33-W family AI assistant IPC boundary',()=>{
     }
   });
 
-  it('pins three main/preload/global methods without renderer policy authority',()=>{
+  it('pins five main/preload/global methods without renderer policy authority',()=>{
     const main=readFileSync('apps/desktop/src/main/main.ts','utf8');const preload=readFileSync('apps/desktop/src/main/preload.ts','utf8');
     const globalTypes=readFileSync('apps/desktop/src/renderer/global.d.ts','utf8');
     for(const [name,channel] of Object.entries(FAMILY_AI_ASSISTANT_IPC_CHANNELS)){
       expect(main).toContain(`FAMILY_AI_ASSISTANT_IPC_CHANNELS.${name}`);expect(preload).toContain(`invoke('${channel}'`);
     }
-    for(const method of ['getFamilyAiAssistantCenter','generateFamilyAiSuggestion','reviewFamilyAiSuggestion'])expect(globalTypes).toContain(method);
+    for(const method of ['getFamilyAiAssistantCenter','getFamilyAiLocalModelStatus','runFamilyAiLocalModel',
+      'generateFamilyAiSuggestion','reviewFamilyAiSuggestion'])expect(globalTypes).toContain(method);
     for(const forbidden of ['familyAiPolicyReceipt','FamilyAiStateFingerprint','getFamilyAiSourceBytes'])expect(preload+globalTypes).not.toContain(forbidden);
   });
 });

@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://parsyuva.local/schemas/ticari-is-paketi-v1.json",
+  "title": "ParsYuva AYM Is Paketi Kaydi",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "alan",
+    "is",
+    "sorumlu",
+    "durum",
+    "kabul",
+    "kanit",
+    "disKaynakGerekli",
+    "requirementPass"
+  ],
+  "properties": {
+    "id": { "type": "string", "pattern": "^IS-[0-9]{4}$" },
+    "alan": { "type": "string", "minLength": 2 },
+    "is": { "type": "string", "minLength": 5 },
+    "sorumlu": { "type": "string", "minLength": 2 },
+    "durum": { "enum": ["TAMAMLANDI", "DEVAM", "ACIK", "BLOCKED", "NOT_RUN"] },
+    "kabul": { "type": "string", "minLength": 5 },
+    "kanit": { "type": "array", "items": { "type": "string" } },
+    "disKaynakGerekli": { "type": "boolean" },
+    "acikNedeni": { "type": "string" },
+    "bagimliliklar": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^IS-[0-9]{4}$" },
+      "uniqueItems": true
+    },
+    "requirementPass": { "type": "boolean" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "durum": { "const": "TAMAMLANDI" } } },
+      "then": {
+        "properties": {
+          "kanit": { "minItems": 1 },
+          "requirementPass": { "const": true }
+        }
+      },
+      "else": { "properties": { "requirementPass": { "const": false } } }
+    }
+  ]
+}

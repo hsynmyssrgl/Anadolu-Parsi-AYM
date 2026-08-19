@@ -191,9 +191,11 @@ const childEducationChannels = new Set<string>([
 const placesTravelReadChannels=new Set<string>(['placesTravel:getCenter']);
 const placesTravelWriteChannels=new Set<string>(['placesTravel:createItem','placesTravel:updateItem','placesTravel:deleteItem']);
 const placesTravelChannels=new Set<string>([...placesTravelReadChannels,...placesTravelWriteChannels]);
-const familyAiAssistantReadChannels=new Set<string>(['familyAiAssistant:getCenter']);
+const familyAiAssistantReadChannels=new Set<string>(['familyAiAssistant:getCenter','familyAiAssistant:getLocalModelStatus']);
+const familyAiAssistantInferenceChannels=new Set<string>(['familyAiAssistant:runLocalModel']);
 const familyAiAssistantWriteChannels=new Set<string>(['familyAiAssistant:generate','familyAiAssistant:review']);
-const familyAiAssistantChannels=new Set<string>([...familyAiAssistantReadChannels,...familyAiAssistantWriteChannels]);
+const familyAiAssistantChannels=new Set<string>([...familyAiAssistantReadChannels,...familyAiAssistantInferenceChannels,
+  ...familyAiAssistantWriteChannels]);
 const memoryStudioReadChannels=new Set<string>(['memoryStudio:getCenter']);
 const memoryStudioWriteChannels=new Set<string>(['memoryStudio:createRecord','memoryStudio:deleteRecord','memoryStudio:createCapsule',
   'memoryStudio:reviewCapsule','memoryStudio:transitionCapsule']);
@@ -282,6 +284,7 @@ export const resolveIpcRequestLifecyclePolicy = (channel: string): IpcRequestLif
   if(memoryStudioReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
   if(memoryStudioWriteChannels.has(channel))return Object.freeze({cancellable:false,latestWins:false,timeoutMs:0});
   if(familyAiAssistantReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
+  if(familyAiAssistantInferenceChannels.has(channel))return Object.freeze({cancellable:true,latestWins:false,timeoutMs:35_000});
   if(familyAiAssistantWriteChannels.has(channel))return Object.freeze({cancellable:false,latestWins:false,timeoutMs:0});
   if(placesTravelReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
   if(placesTravelWriteChannels.has(channel))return Object.freeze({cancellable:false,latestWins:false,timeoutMs:0});
@@ -408,7 +411,8 @@ export const resolveIpcRequestAdmissionPolicy = (channel: string): IpcRequestAdm
   if(memoryStudioChannels.has(channel))return Object.freeze({enabled:true,priority:'interactive',priorityWeight:100,
     maxConcurrentPerSender:2,maxConcurrentPerChannel:1,maxQueuedPerSender:4,queueTimeoutMs:2_500});
   if(familyAiAssistantChannels.has(channel))return Object.freeze({enabled:true,priority:'interactive',priorityWeight:100,
-    maxConcurrentPerSender:2,maxConcurrentPerChannel:1,maxQueuedPerSender:4,queueTimeoutMs:2_500});
+    maxConcurrentPerSender:familyAiAssistantInferenceChannels.has(channel)?1:2,maxConcurrentPerChannel:1,
+    maxQueuedPerSender:familyAiAssistantInferenceChannels.has(channel)?1:4,queueTimeoutMs:2_500});
   if(placesTravelChannels.has(channel))return Object.freeze({enabled:true,priority:'interactive',priorityWeight:100,
     maxConcurrentPerSender:2,maxConcurrentPerChannel:1,maxQueuedPerSender:4,queueTimeoutMs:2_500});
   if (childEducationChannels.has(channel)) {
@@ -544,6 +548,7 @@ export const resolveIpcRequestRatePolicy = (channel: string): IpcRequestRatePoli
   if(memoryStudioReadChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:60,windowMs:60_000});
   if(memoryStudioWriteChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:12,windowMs:60_000});
   if(familyAiAssistantReadChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:60,windowMs:60_000});
+  if(familyAiAssistantInferenceChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:6,windowMs:60_000});
   if(familyAiAssistantWriteChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:12,windowMs:60_000});
   if(placesTravelReadChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:60,windowMs:60_000});
   if(placesTravelWriteChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:16,windowMs:60_000});

@@ -1,24 +1,25 @@
 {
   "schemaVersion": 1,
-  "id": "PPT-CANONICAL-RULE-REGISTRY-V9",
-  "product": "Anadolu Parsı Aile Yaşam Merkezi",
-  "upperBrand": "Panthera pardus tulliana",
-  "effectiveRelease": "Bronze 04.08.2026.29",
+  "id": "PPT-CANONICAL-RULE-REGISTRY-V13",
+  "product": "ParsYuva AYM",
+  "upperBrand": "ParsYuva",
+  "effectiveRelease": "Bronze 19.08.2026.33",
   "exceptionless": true,
   "previousRuleSet": {
     "version": "PROJECT-RULES-2026-08-02-V6",
     "sha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
   },
-  "ruleCount": 208,
-  "activeRuleCount": 194,
-  "supersededRuleCount": 14,
+  "ruleCount": 217,
+  "activeRuleCount": 197,
+  "supersededRuleCount": 20,
   "rules": [
     {
       "id": "PR-001",
       "text": "Tüm proje ailesinin üst markası Latince “Panthera pardus tulliana”dır. Uygulama adı üst markadan ayrıdır ve bu uygulamanın resmî adı “Anadolu Parsı Aile Yaşam Merkezi”dir; yeni uygulamalar “Anadolu Parsı” adına içeriklerini tanımlayan ek ad alır. Üst marka adı normal uygulama kullanıcı arayüzünde gösterilmez.",
-      "state": "ACTIVE",
+      "state": "SUPERSEDED",
       "source": "PROJECT-RULES-2026-08-02-V6",
-      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15",
+      "replacedBy": "PR-209"
     },
     {
       "id": "PR-002",
@@ -831,9 +832,10 @@
     {
       "id": "PR-116",
       "text": "Marka mimarisi zorunludur: üst marka “Panthera pardus tulliana”, kullanıcıya görünen uygulama adı “Anadolu Parsı Aile Yaşam Merkezi”dir; Latin üst marka adı normal uygulama ekranlarında kullanılmaz ve yeni uygulama adları “Anadolu Parsı + işlevsel ad” kuralını izler.",
-      "state": "ACTIVE",
+      "state": "SUPERSEDED",
       "source": "PROJECT-RULES-2026-08-02-V6",
-      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15",
+      "replacedBy": "PR-209"
     },
     {
       "id": "PR-117",
@@ -910,9 +912,10 @@
     {
       "id": "PR-127",
       "text": "Geliştirici/üretici/owner/author/copyright metadata dahil aktif proje metadata’sında doğal kişi kimliği kullanılmaz; gerekli sahiplik ve üretici ifadeleri yalnız marka kimliği “Panthera pardus tulliana” ve ürün kimliği üzerinden tutulur.",
-      "state": "ACTIVE",
+      "state": "SUPERSEDED",
       "source": "PROJECT-RULES-2026-08-02-V6",
-      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15",
+      "replacedBy": "PR-211"
     },
     {
       "id": "PR-128",
@@ -1198,16 +1201,18 @@
     {
       "id": "PR-168",
       "text": "Kalıcı proje kütüphanesi hiyerarşisi /Panthera pardus tulliana/Anadolu Parsı Aile Yaşam Merkezi şeklindedir; bu uygulamaya ait yeni build, kaynak, belge, görsel, hash ve teslim kanıtları yalnız bu dal altında tutulur.",
-      "state": "ACTIVE",
+      "state": "SUPERSEDED",
       "source": "PROJECT-RULES-2026-08-02-V6",
-      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15",
+      "replacedBy": "PR-212"
     },
     {
       "id": "PR-169",
       "text": "Üst marka altındaki başka/eski proje dosyaları yalnız ad benzerliği nedeniyle Anadolu Parsı Aile Yaşam Merkezi klasörüne taşınamaz veya bağlam kaynağı sayılamaz; proje provenance sınırı fail-closed uygulanır.",
-      "state": "ACTIVE",
+      "state": "SUPERSEDED",
       "source": "PROJECT-RULES-2026-08-02-V6",
-      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15",
+      "replacedBy": "PR-212"
     },
     {
       "id": "PR-170",
@@ -1283,9 +1288,10 @@
     {
       "id": "PR-180",
       "text": "Yeni kaynak, belge, görsel, hash, manifest, doğrulama ve teslim kanıtları kalıcı olarak yalnız /Panthera pardus tulliana/Anadolu Parsı Aile Yaşam Merkezi/<Görünür Sürüm>/ dalında tutulur. Library yükleme kanıtı olmadan teslim COMPLETED sayılamaz.",
-      "state": "ACTIVE",
+      "state": "SUPERSEDED",
       "source": "USER_DECISIONS_2026-08-04",
-      "effectiveRelease": "Bronze 04.08.2026.28"
+      "effectiveRelease": "Bronze 04.08.2026.28",
+      "replacedBy": "PR-212"
     },
     {
       "id": "PR-181",
@@ -1482,7 +1488,70 @@
       "state": "ACTIVE",
       "source": "USER_DECISION_DEC-129",
       "effectiveRelease": "Bronze 04.08.2026.29"
+    },
+    {
+      "id": "PR-209",
+      "text": "Marka mimarisi zorunludur: ana marka ParsYuva, kullanıcıya görünen masaüstü ürün ve kısayol adı ParsYuva AYM, açıklayıcı uzun ad ParsYuva Aile Yaşam Merkezi'dir. Eski Windows appId ve Anadolu Parsı Aile Yaşam Merkezi kullanıcı veri dizini yalnız geriye dönük güncelleme/veri uyumluluğu için değişmez teknik kimlik olarak korunur; yeni kullanıcı yüzeylerinde eski marka gösterilemez.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-254",
+      "effectiveRelease": "Bronze 18.08.2026.31"
+    },
+    {
+      "id": "PR-210",
+      "text": "ParsYuva şirket unvanı, marka, alan adı, sosyal hesap, mağaza hesabı ve hukuk-vergi-gizlilik hazırlığı ancak yetkili güncel dış kanıtla tamamlanmış sayılır. Aday unvan, ön araştırma veya yerel kodlama resmî kuruluş, tescil, rezervasyon, uygunluk, yatırım ya da halka arz kanıtı değildir; eksik kanıt fail-closed NOT_RUN veya BLOCKED_EXTERNAL kalır.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-254",
+      "effectiveRelease": "Bronze 18.08.2026.31"
+    },
+    {
+      "id": "PR-211",
+      "text": "Aktif geliştirici, üretici, owner, author ve copyright metadata'sı doğal kişi kimliği taşıyamaz; marka ve ürün metadata'sı ParsYuva ve ParsYuva AYM kimlikleriyle tutulur. Tarihsel kanıtların özgün eski metadata'sı değiştirilmez.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-254",
+      "effectiveRelease": "Bronze 18.08.2026.31"
+    },
+    {
+      "id": "PR-212",
+      "text": "ParsYuva sonrası yeni kalıcı belge, kaynak, görsel, hash ve teslim kanıtlarının kurumsal kütüphane yolu /ParsYuva/ParsYuva AYM/<Görünür Sürüm> şeklindedir. Önceki /Panthera pardus tulliana/Anadolu Parsı Aile Yaşam Merkezi kayıtları tarihsel ve değişmez kalır; yeni ürün dalına otomatik taşınmaz, güncel kaynak veya tamamlanma kanıtı sayılmaz.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-254",
+      "effectiveRelease": "Bronze 18.08.2026.31"
+    },
+    {
+      "id": "PR-213",
+      "text": "Platform ve cihaz çalışma alanları Microsoft/Windows, Apple/macOS/iOS, ortak cihaz sözleşmeleri ve gelecek Android kapsamı olarak ayrı tutulur. Bir platformun kodu veya kanıtı diğer platformun gerçek cihaz, mağaza, imza ya da UAT kanıtı sayılamaz.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-254",
+      "effectiveRelease": "Bronze 18.08.2026.31"
+    },
+    {
+      "id": "PR-214",
+      "text": "Güncel ana belgeler yapı, karar, kural, kurumsallaşma, platform ve cihaz, test ve kanıt, kullanıcı belgeleri konularına göre kurumsal klasörlerde sınıflandırılır. Dosya adları Türkçe anlamlı ve ASCII karakterli olur; tarihsel kayıtların adı, içeriği ve konumu yeniden yazılmaz.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-254",
+      "effectiveRelease": "Bronze 18.08.2026.31"
+    },
+    {
+      "id": "PR-215",
+      "text": "Uygulama ve kurulum sihirbazı açılış dilini kurulduğu makinenin işletim sistemi dilinden belirler. Türkçe ve İngilizce desteklenir; sistem dili desteklenmiyorsa veya güvenilir biçimde çözülemiyorsa kullanıcı verisi açılmadan önce İngilizce güvenli varsayılan olarak seçilir. Dil seçimi ana süreçte yapılır, renderer yalnız doğrulanmış dil/locale görünümünü alır; İngilizce sözlük eksik anahtarları Türkçeye sessizce düşüremez.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-255",
+      "effectiveRelease": "Bronze 18.08.2026.32"
+    },
+    {
+      "id": "PR-216",
+      "text": "Kurulum öncesi karşılama ve hazır sayfaları işlem yapmıyorsa hareketli ilerleme göstergesi kullanamaz. Kurulum boyunca yalnız gerçek dosya kurulumunu izleyen tek ilerleme çubuğu gösterilir; yüzde değeri NSIS'in yerel kurulum ilerlemesinden okunur ve dekoratif veya simüle ilerleme yasaktır.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-256",
+      "effectiveRelease": "Bronze 19.08.2026.33"
+    },
+    {
+      "id": "PR-217",
+      "text": "Ürün ve belge başlıklarında yalnız ParsYuva AYM kullanılır. AYM kısaltması Aile Yaşam Merkezi anlamını zaten taşıdığı için aynı başlıkta ParsYuva AYM ile Aile Yaşam Merkezi birlikte tekrar edilemez. Açık uzun ad yalnız kısaltmanın açıklanması gereken ayrı tanıtım veya hukuk metninde kullanılabilir.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-257",
+      "effectiveRelease": "Bronze 19.08.2026.33"
     }
   ],
-  "rulesSha256": "5e7e45b7c2ae9f3c7465866a58d9d389ef6a793dab855a68a1434e003eade081"
+  "rulesSha256": "b79db92a03d559f33ccd49348bad159a70b6034fbcf10a07abe5a407549bf0be"
 }

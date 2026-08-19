@@ -197,7 +197,7 @@ export const acceptNpmCacheTransferBundle = async ({
     const receipt = {
       schemaVersion: CACHE_BUNDLE_ACCEPTANCE_SCHEMA,
       kind: CACHE_BUNDLE_ACCEPTANCE_KIND,
-      product: 'Anadolu Parsı Aile Yaşam Merkezi',
+      product: 'ParsYuva AYM',
       stage: 'Bronze RC2 Active Development',
       status: 'PASS',
       disposition: 'ACCEPTED',
@@ -231,7 +231,7 @@ export const acceptNpmCacheTransferBundle = async ({
     const receipt = {
       schemaVersion: CACHE_BUNDLE_ACCEPTANCE_SCHEMA,
       kind: CACHE_BUNDLE_ACCEPTANCE_KIND,
-      product: 'Anadolu Parsı Aile Yaşam Merkezi',
+      product: 'ParsYuva AYM',
       stage: 'Bronze RC2 Active Development',
       status: 'FAIL',
       disposition: 'REJECTED',

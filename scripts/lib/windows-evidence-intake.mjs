@@ -39,7 +39,7 @@ export const verifyWindowsEvidenceIntake = async ({
   const manifest = await readJson(resolve(manifestPath));
   addCheck(checks, 'manifest-schema', manifest.schemaVersion === 1, manifest.schemaVersion);
   addCheck(checks, 'manifest-status', manifest.status === 'PASS', manifest.status);
-  addCheck(checks, 'manifest-product', manifest.product === 'Anadolu Parsı Aile Yaşam Merkezi', manifest.product);
+  addCheck(checks, 'manifest-product', manifest.product === 'ParsYuva AYM', manifest.product);
   addCheck(checks, 'manifest-build', manifest.build === expectedBuild, manifest.build);
   addCheck(checks, 'manifest-application-version', manifest.applicationVersion === expectedApplicationVersion, manifest.applicationVersion);
   addCheck(checks, 'manifest-package-version', manifest.packageVersion === expectedPackageVersion, manifest.packageVersion);
@@ -124,7 +124,7 @@ export const verifyWindowsEvidenceIntake = async ({
   const failedChecks = checks.filter((check) => check.status !== 'PASS');
   return {
     schemaVersion: 1,
-    product: 'Anadolu Parsı Aile Yaşam Merkezi',
+    product: 'ParsYuva AYM',
     build: expectedBuild,
     applicationVersion: expectedApplicationVersion,
     packageVersion: expectedPackageVersion,

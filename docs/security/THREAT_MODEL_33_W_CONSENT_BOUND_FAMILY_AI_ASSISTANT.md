@@ -16,11 +16,13 @@
 4. **Otonom eylem yanılsaması:** İnsan onayı yalnız inceleme durumunu kaydeder. Ödeme, rezervasyon, sağlık, acil durum veya başka downstream kalıcı işlem yoktur.
 5. **Replay ve yarış:** `clientOperationId`, request fingerprint, optimistic revision, immutable mutation ledger ve aynı receipt/fence altında current-row eşliği fail-closed uygulanır.
 6. **Renderer yetki yükseltmesi:** Renderer hesap, aile, sahip, receipt, state fingerprint veya kalıcı eylem parametresi seçemez; exact IPC anahtarları, sınırlar ve safe-result doğrulaması zorunludur.
-7. **Sağlayıcı/ağ iddiası:** Provider yapılandırılmış değildir; ağ, bulut ve model inference çalıştırılmaz. Konuşma ve çeviri seçenekleri yalnız uygulanmamış yerel truth olarak gösterilir.
+7. **Sağlayıcı/ağ kaçışı:** Yerel model adaptörü yalnız opt-in ve exact `127.0.0.1:11434` için Node HTTP taşıması kurar. Uzak host, HTTPS yönlendirmesi, proxy, renderer URL'si ve bulut tokenı yoktur. Sağlayıcı kapalıyken sıfır I/O; endpoint, durum ve inference yanıtlarında exact JSON, boyut ve timeout sınırı uygulanır. Bu bilgisayarda runtime/model kurulu olmadığından canlı çıkarım `NOT_RUN` kalır.
 8. **OCR/finans/sağlık yanlış kararı:** OCR önerileri otomatik kabul edilmez; medikal, finansal veya acil durum kararı üretilmez ve gerçek güvenlik incelemeleri yapılmadan kabul iddiası kurulmaz.
 9. **Türler arası kaynak karıştırma:** Her öneri türü kanonik modül kümesinin yalnız alt kümesini, her modül de tek kaynak türünü kullanır. Arama sorgusu yalnız `authorized_search` için zorunludur; diğer türler serbest metin istemi kabul etmez.
 10. **Merkez taşması ve kalıcı disk büyümesi:** Sahip başına 500 current öneri hem repository hem migration tarafından fail-closed sınırlanır. Terminal kayıt saklama/kapasite geri kazanım politikası kararlaştırılmadığı için yaşam boyu kapasite tükenmesi artık riski açıktır; sessiz kırpma yapılmaz.
 11. **Yanıltıcı güven puanı:** Puan yalnız kaynak kapsamını gösterir; doğruluk, güvenlik veya uzman tavsiyesi değildir ve UI bunu açıkça etiketler.
+12. **Çıkarım sırasında izin yarışı:** Model çağrısından önceki izinli kaynak kümesinin içerik fingerprint'i alınır; çağrı sonrasında aynı PEP/onay yolu yeniden çalıştırılır. Kaynak, içerik veya onay değişirse geçici yanıt atılır. Model yanıtı hiçbir kalıcı kayıt, audit veya outbox payload'ı oluşturmaz.
+13. **Model enjeksiyonu ve otonomi yanılsaması:** Sistem istemi kaynak dışı bilgi uydurmayı, teknik kimlik/secret/yol döndürmeyi, tıbbi-mali-acil karar ve kalıcı işlem iddiasını yasaklar. Çıktı yine güvenilir talimat sayılmaz; UI insan doğrulaması ve kaydedilmedi sınırını gösterir.
 
 ## Açık kanıtlar
 

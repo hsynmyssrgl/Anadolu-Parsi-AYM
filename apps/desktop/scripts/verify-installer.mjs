@@ -14,8 +14,9 @@ const required = [
   ['build/installer-bronze-sidebar.bmp', 10000],
   ['build/installer-silver-sidebar.bmp', 10000],
   ['build/installer-gold-sidebar.bmp', 10000],
-  ['build/LICENSE_TR.txt', 100],
+  ['docs/LISANS_TR_KAYNAK.txt', 100],
   ['build/LICENSE_TR.rtf', 200],
+  ['build/LICENSE_en.rtf', 200],
   ['dist/main/main.mjs', 1000],
   ['dist/main/preload.cjs', 1000],
   ['dist/renderer/index.html', 100]
@@ -33,12 +34,16 @@ if (build.nsis?.oneClick !== false) failures.push('NSIS yardımcı kurulum modu 
 if (build.nsis?.allowToChangeInstallationDirectory !== false) failures.push('Kurulum dizini kullanıcı tarafından değiştirilemez olmalı.');
 if (build.nsis?.perMachine !== true) failures.push('Kurulum tüm kullanıcılar için yönetici yetkisiyle yapılmalı.');
 if (build.nsis?.include !== 'build/installer.nsh') failures.push('Sabit AYM kurulum dizini NSIS include dosyası bağlı değil.');
-if (build.nsis?.license !== 'build/LICENSE_TR.rtf') failures.push('NSIS Unicode lisans dosyası tanımlı değil.');
-if (build.nsis?.shortcutName !== 'Anadolu Parsı AYM') failures.push('Masaüstü ve Başlat menüsü kısayolu Anadolu Parsı AYM olmalı.');
+if (build.nsis?.license !== undefined) failures.push('NSIS tek-dilli sabit lisans yolu tanımlanmamalı.');
+if (build.nsis?.multiLanguageInstaller !== true
+  || JSON.stringify(build.nsis?.installerLanguages) !== JSON.stringify(['en_US','tr_TR'])) {
+  failures.push('NSIS sistem dili seçimi İngilizce varsayılan ve Türkçe destekli değil.');
+}
+if (build.nsis?.shortcutName !== 'ParsYuva AYM') failures.push('Masaüstü ve Başlat menüsü kısayolu ParsYuva AYM olmalı.');
 if (/[çğıöşüÇĞİÖŞÜ]/u.test(artifactTemplate) || !/^[A-Za-z0-9_.$\{\}-]+$/u.test(artifactTemplate)) {
   failures.push('Kurulum dosyası adı Türkçe anlamlı ASCII karakterlerle sınırlandırılmalı.');
 }
-if (!artifactTemplate.startsWith('Anadolu-Parsi-Aile-Yasam-Merkezi-') || !artifactTemplate.endsWith('-Kurulum.${ext}')) {
+if (!artifactTemplate.startsWith('ParsYuva-AYM-') || !artifactTemplate.endsWith('-Kurulum.${ext}')) {
   failures.push('Kurulum dosyası adı ürün, sürüm kanalı ve Kurulum amacını açıkça taşımalı.');
 }
 try {
@@ -60,10 +65,6 @@ try {
   const requiredInstallerExperience = [
     '!macro customWelcomePage',
     '!macro customPageAfterChangeDir',
-    'Function AymWelcomeAnimate',
-    'Function AymReadyAnimate',
-    '${NSD_CreateTimer} AymWelcomeAnimate 520',
-    '${NSD_CreateTimer} AymReadyAnimate 760',
     '!define PPT_INSTALLER_RELEASE_CHANNEL "Bronze"',
     '!define MUI_FONT "Segoe UI"',
     '!define MUI_FONTSIZE 10',
@@ -75,26 +76,51 @@ try {
     '!define PPT_INSTALLER_CHANNEL_BITMAP "installer-gold-sidebar.bmp"',
     '!define MUI_WELCOMEFINISHPAGE_BITMAP "${__FILEDIR__}\\${PPT_INSTALLER_CHANNEL_BITMAP}"',
     'SetCtlColors $AymWelcomePulseLabel "${PPT_INSTALLER_CHANNEL_COLOR}" "F0F0F0"',
-    'SetCtlColors $AymReadyPulseLabel "${PPT_INSTALLER_CHANNEL_COLOR}" "F0F0F0"',
-    'Anadolu Parsı Aile Yaşam Merkezi',
+    'ParsYuva AYM',
     'Kuruluma hazır',
     'Sesli Yardım Merkezi',
     'C:\\Program Files\\PPT\\AYM',
     'CreateFont $1 "Segoe UI" 11 400',
     'CreateFont $2 "Segoe UI" 10 600',
-    '!define MUI_FINISHPAGE_TITLE "Anadolu Parsı Aile Yaşam Merkezi kullanıma hazır"'
+    '!define AYM_LANG_ENGLISH 1033',
+    '!define AYM_LANG_TURKISH 1055',
+    'LangString AymFinishTitle ${AYM_LANG_ENGLISH} "ParsYuva AYM is ready"',
+    'LangString AymFinishTitle ${AYM_LANG_TURKISH} "ParsYuva AYM kullanıma hazır"',
+    '!define MUI_FINISHPAGE_TITLE "$(AymFinishTitle)"',
+    'Function AymInstallProgressTick',
+    '${PBM_GETPOS}',
+    'GetDlgItem $AymInstallProgress $0 1004',
+    'GetDlgItem $AymInstallPercentText $0 1006',
+    '!define MUI_PAGE_CUSTOMFUNCTION_SHOW AymInstallFilesShow',
+    '!define MUI_PAGE_CUSTOMFUNCTION_LEAVE AymInstallFilesLeave',
+    'LangString AymInstallingPercent ${AYM_LANG_TURKISH} "Yükleniyor:"',
+    'LangString AymInstallCompletePercent ${AYM_LANG_TURKISH} "Yükleme tamamlandı: 100%"'
   ];
   for (const marker of requiredInstallerExperience) {
-    if (!installerInclude.includes(marker)) failures.push(`NSIS animasyon/metin sözleşmesi eksik: ${marker}`);
+    if (!installerInclude.includes(marker)) failures.push(`NSIS deneyim/metin sözleşmesi eksik: ${marker}`);
   }
-  if (/SetCtlColors \$Aym(?:Welcome|Ready)PulseLabel "\$\{PPT_INSTALLER_CHANNEL_COLOR\}" transparent/u.test(installerInclude)) {
+  if (installerInclude.includes('Function AymWelcomeAnimate')
+    || installerInclude.includes('${NSD_CreateTimer} AymWelcomeAnimate')
+    || installerInclude.includes('Function AymReadyAnimate')
+    || installerInclude.includes('${NSD_CreateTimer} AymReadyAnimate')
+    || installerInclude.includes('${NSD_CreateProgressBar}')) {
+    failures.push('Kurulum öncesi sayfalar sahte hareketli ilerleme göstergesi kullanmamalı; tek ilerleme yerel NSIS dosya kurulum sayfası olmalı.');
+  }
+  if ((installerInclude.match(/\$\{PBM_GETPOS\}/gu) ?? []).length !== 1) {
+    failures.push('Yerel NSIS kurulum ilerlemesi yüzde metnine tam bir kez bağlanmalı.');
+  }
+  if (installerInclude.includes('ParsYuva AYM Aile Yaşam Merkezi')
+    || installerInclude.includes('ParsYuva AYM Family Life Center')) {
+    failures.push('Ürün başlığı AYM kısaltmasıyla uzun adı aynı anda tekrar edemez.');
+  }
+  if (/SetCtlColors \$AymWelcomePulseLabel "\$\{PPT_INSTALLER_CHANNEL_COLOR\}" transparent/u.test(installerInclude)) {
     failures.push('Animasyonlu kurulum yazısı şeffaf arka planla üst üste çizilemez.');
   }
   const [installerOnly, uninstallerOnly = ''] = installerInclude.split('!macro customUnInstall');
   if (/https?:|Exec(?:Shell)?|nsExec|inetc|download/iu.test(installerOnly)) {
     failures.push('NSIS karşılama/animasyon kodu ağ veya haricî süreç yetkisi içeremez.');
   }
-  const expectedUninstallHelper = 'ExecWait \'"$INSTDIR\\Anadolu Parsı Aile Yaşam Merkezi.exe" --uninstall-backup-assistant\' $0';
+  const expectedUninstallHelper = 'ExecWait \'"$INSTDIR\\ParsYuva AYM.exe" --uninstall-backup-assistant\' $0';
   if (!uninstallerOnly.includes(expectedUninstallHelper)) {
     failures.push('Kaldırıcı yalnız doğrulanmış yerel yedek yardımcısını tam sabit komutla çağırmalı.');
   }
@@ -116,7 +142,7 @@ try {
   failures.push(`Electron builder çalıştırıcısı okunamadı: ${error.message}`);
 }
 try {
-  const sourceLicense = await readFile(resolve(desktopRoot, 'build/LICENSE_TR.txt'), 'utf8');
+  const sourceLicense = await readFile(resolve(desktopRoot, 'docs/LISANS_TR_KAYNAK.txt'), 'utf8');
   const expectedRtf = renderLicenseRtf(sourceLicense);
   const licenseBytes = await readFile(resolve(desktopRoot, 'build/LICENSE_TR.rtf'));
   if ([...licenseBytes].some((byte) => byte > 0x7f)) {

@@ -69,13 +69,13 @@ if (mode === 'contract' || mode === 'runtime') {
     && scope.validation?.localPackageContracts?.checks === 30
     && scope.validation?.localPackageRuntimes?.checks === 172
     && scope.validation?.targeted?.files === 12 && scope.validation?.targeted?.tests === 50
-    && scope.validation?.fullRegression?.status === 'PASS' && scope.validation?.fullRegression?.files === 301
-    && scope.validation?.fullRegression?.tests === 2018 && scope.validation?.rootTypecheck === 'PASS'
+    && scope.validation?.fullRegression?.status === 'PASS' && scope.validation?.fullRegression?.files === 306
+    && scope.validation?.fullRegression?.tests === 2047 && scope.validation?.rootTypecheck === 'PASS'
     && scope.validation?.productionBuilds?.status === 'PASS' && scope.validation?.productionBuilds?.workspaces === 18
-    && scope.validation?.artifactIndex?.checks === 19320 && scope.validation?.artifactIndex?.files === 5969
-    && scope.validation?.artifactIndex?.documents === 3671 && inventory.localEvidence?.fullRegressionStatus === 'PASS'
-    && inventory.localEvidence?.fullRegressionFiles === 301 && inventory.localEvidence?.fullRegressionTests === 2018
-    && audit.includes('301/301') && audit.includes('2018/2018'));
+    && scope.validation?.artifactIndex?.checks === 19394 && scope.validation?.artifactIndex?.files === 5993
+    && scope.validation?.artifactIndex?.documents === 3683 && inventory.localEvidence?.fullRegressionStatus === 'PASS'
+    && inventory.localEvidence?.fullRegressionFiles === 306 && inventory.localEvidence?.fullRegressionTests === 2047
+    && audit.includes('306/306') && audit.includes('2047/2047'));
   check('versioned local receipt rollover is supported while manual and external evidence remain NOT_RUN', Object.values(scope.manualEvidence ?? {}).every((value) => value === 'NOT_RUN')
     && scope.persistentReceiptStatus === 'VERSIONED_LOCAL_RECEIPT_SUPPORTED'
     && scope.persistentReceiptPathPattern === 'artifacts/validation/34-L-bronze-local-closure-receipts/<source-head>-<evidence-digest>.json'

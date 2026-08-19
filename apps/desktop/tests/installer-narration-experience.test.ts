@@ -4,17 +4,17 @@ import { describe, expect, it } from 'vitest';
 const installerUrl = new URL('../build/installer.nsh', import.meta.url);
 const appUrl = new URL('../src/renderer/App.tsx', import.meta.url);
 const accessibilityUrl = new URL('../src/renderer/accessibility.ts', import.meta.url);
+const localizationUrl = new URL('../src/renderer/localization.tsx', import.meta.url);
 const helpUrl = new URL('../src/renderer/NarratedHelpCenter.tsx', import.meta.url);
 const stylesUrl = new URL('../src/renderer/styles.css', import.meta.url);
 const packageUrl = new URL('../package.json', import.meta.url);
 
-describe('installer animation, narration and Silver help experience', () => {
-  it('uses two bounded local installer animation pages and honest Turkish copy', async () => {
+describe('installer progress, narration and Silver help experience', () => {
+  it('keeps pre-install pages static and reserves progress for real file installation', async () => {
     const [source,rawPackage]=await Promise.all([readFile(installerUrl,'utf8'),readFile(packageUrl,'utf8')]);
-    const packageJson=JSON.parse(rawPackage) as {build:{win?:{artifactName?:string};artifactName?:string;nsis?:{shortcutName?:string}}};
+    const packageJson=JSON.parse(rawPackage) as {build:{win?:{artifactName?:string};artifactName?:string;nsis?:{shortcutName?:string;multiLanguageInstaller?:boolean;installerLanguages?:string[]}}};
     for (const marker of [
-      '!macro customWelcomePage','!macro customPageAfterChangeDir','Function AymWelcomeAnimate','Function AymReadyAnimate',
-      '${NSD_CreateTimer} AymWelcomeAnimate 520','${NSD_CreateTimer} AymReadyAnimate 760',
+      '!macro customWelcomePage','!macro customPageAfterChangeDir',
       '!define MUI_FONT "Segoe UI"','!define MUI_FONTSIZE 10',
       '!define PPT_INSTALLER_RELEASE_CHANNEL "Bronze"',
       '!define PPT_INSTALLER_CHANNEL_COLOR "A5672F"',
@@ -25,24 +25,42 @@ describe('installer animation, narration and Silver help experience', () => {
       '!define PPT_INSTALLER_CHANNEL_BITMAP "installer-gold-sidebar.bmp"',
       '!define MUI_WELCOMEFINISHPAGE_BITMAP "${__FILEDIR__}\\${PPT_INSTALLER_CHANNEL_BITMAP}"',
       'SetCtlColors $AymWelcomePulseLabel "${PPT_INSTALLER_CHANNEL_COLOR}" "F0F0F0"',
-      'SetCtlColors $AymReadyPulseLabel "${PPT_INSTALLER_CHANNEL_COLOR}" "F0F0F0"',
       'kurulum sırasında uzak bir sağlayıcıya kişisel veri göndermez','C:\\Program Files\\PPT\\AYM',
       'CreateFont $1 "Segoe UI" 11 400','CreateFont $2 "Segoe UI" 10 600',
-      'Anadolu Parsı Aile Yaşam Merkezi kullanıma hazır','F1 Sesli Yardım Merkezinden yeniden dinleyebilirsiniz'
+      'ParsYuva AYM kullanıma hazır','ParsYuva AYM is ready',
+      'F1 Sesli Yardım Merkezinden yeniden dinleyebilirsiniz','F1 Narrated Help Center',
+      'Function AymInstallProgressTick','${PBM_GETPOS}',
+      'GetDlgItem $AymInstallProgress $0 1004',
+      'GetDlgItem $AymInstallPercentText $0 1006',
+      '!define MUI_PAGE_CUSTOMFUNCTION_SHOW AymInstallFilesShow',
+      '!define MUI_PAGE_CUSTOMFUNCTION_LEAVE AymInstallFilesLeave',
+      '!define AYM_LANG_ENGLISH 1033','!define AYM_LANG_TURKISH 1055',
+      'LangString AymInstallingPercent ${AYM_LANG_TURKISH} "Yükleniyor:"',
+      'LangString AymInstallCompletePercent ${AYM_LANG_TURKISH} "Yükleme tamamlandı: 100%"'
     ]) expect(source).toContain(marker);
-    expect(packageJson.build.nsis?.shortcutName).toBe('Anadolu Parsı AYM');
-    expect(source).not.toMatch(/SetCtlColors \$Aym(?:Welcome|Ready)PulseLabel "\$\{PPT_INSTALLER_CHANNEL_COLOR\}" transparent/u);
+    expect(source).not.toContain('Function AymWelcomeAnimate');
+    expect(source).not.toContain('${NSD_CreateTimer} AymWelcomeAnimate');
+    expect(source).not.toContain('${NSD_CreateProgressBar}');
+    expect(source).not.toContain('Function AymReadyAnimate');
+    expect(source).not.toContain('${NSD_CreateTimer} AymReadyAnimate');
+    expect(source).not.toContain('${NSD_CreateProgressBar} 0 121u 100% 8u ""');
+    expect(source).not.toContain('ParsYuva AYM Aile Yaşam Merkezi');
+    expect(source).not.toContain('ParsYuva AYM Family Life Center');
+    expect(source.match(/\$\{PBM_GETPOS\}/gu)).toHaveLength(1);
+    expect(packageJson.build.nsis?.shortcutName).toBe('ParsYuva AYM');
+    expect(packageJson.build.nsis).toMatchObject({multiLanguageInstaller:true,installerLanguages:['en_US','tr_TR']});
+    expect(source).not.toMatch(/SetCtlColors \$AymWelcomePulseLabel "\$\{PPT_INSTALLER_CHANNEL_COLOR\}" transparent/u);
     const [installerSource, uninstallerSource = ''] = source.split('!macro customUnInstall');
     expect(installerSource).not.toMatch(/https?:|Exec(?:Shell)?|nsExec|inetc|download/iu);
     expect(uninstallerSource).toContain(
-      'ExecWait \'"$INSTDIR\\Anadolu Parsı Aile Yaşam Merkezi.exe" --uninstall-backup-assistant\' $0'
+      'ExecWait \'"$INSTDIR\\ParsYuva AYM.exe" --uninstall-backup-assistant\' $0'
     );
     expect(uninstallerSource).toMatch(/MessageBox MB_YESNOCANCEL\|MB_ICONQUESTION [^\r\n]+ IDYES aym_uninstall_backup IDNO aym_uninstall_delete\r?\n\s+Goto aym_uninstall_cancel/u);
     expect(uninstallerSource).not.toContain('IDCANCEL aym_uninstall_cancel');
     expect(uninstallerSource.match(/\bExec(?:Wait|Shell)?\b/gu)).toEqual(['ExecWait']);
     expect(uninstallerSource).not.toMatch(/https?:|nsExec|inetc|download/iu);
     const artifactTemplate=packageJson.build.win?.artifactName??packageJson.build.artifactName??'';
-    expect(artifactTemplate).toMatch(/^Anadolu-Parsi-Aile-Yasam-Merkezi-(?:Bronze|Silver|Gold)-[A-Za-z0-9_.${}-]+-Kurulum\.\$\{ext\}$/u);
+    expect(artifactTemplate).toMatch(/^ParsYuva-AYM-(?:Bronze|Silver|Gold)-[A-Za-z0-9_.${}-]+-Kurulum\.\$\{ext\}$/u);
     expect(artifactTemplate).not.toMatch(/[çğıöşüÇĞİÖŞÜ]/u);
     const artifactChannel=/-(Bronze|Silver|Gold)-/u.exec(artifactTemplate)?.[1];
     const installerChannel=/!define PPT_INSTALLER_RELEASE_CHANNEL "(Bronze|Silver|Gold)"/u.exec(source)?.[1];
@@ -62,10 +80,11 @@ describe('installer animation, narration and Silver help experience', () => {
   });
 
   it('keeps first-run narration visible, stoppable, rate-adjustable and motion-reduction aware', async () => {
-    const [app, accessibility, styles] = await Promise.all([readFile(appUrl,'utf8'),readFile(accessibilityUrl,'utf8'),readFile(stylesUrl,'utf8')]);
+    const [app, accessibility, localization, styles] = await Promise.all([readFile(appUrl,'utf8'),readFile(accessibilityUrl,'utf8'),readFile(localizationUrl,'utf8'),readFile(stylesUrl,'utf8')]);
     expect(accessibility).toContain('FIRST_RUN_NARRATION_STEPS');
     expect(accessibility).toContain('Kurulum sırasında aile veriniz uzak bir sağlayıcıya gönderilmez.');
-    for (const marker of ['Anlatımı durdur','Daha yavaş','Güvenli kuruluma başla','Tanıtımı şimdilik geç']) expect(app).toContain(marker);
+    for (const marker of ['Anlatımı durdur','Daha yavaş','Güvenli kuruluma başla','Tanıtımı şimdilik geç']) expect(localization).toContain(marker);
+    for (const marker of ['Stop narration','Slower','Start secure setup','Skip introduction for now']) expect(localization).toContain(marker);
     expect(styles).toContain('@keyframes first-run-brand-breathe');
     expect(styles).toContain('data-reduce-motion="true"');
     expect(styles).toContain('@media(prefers-reduced-motion:reduce)');

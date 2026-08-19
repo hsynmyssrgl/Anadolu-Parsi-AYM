@@ -1,15 +1,15 @@
 {
-  "product": "Anadolu Parsı Aile Yaşam Merkezi",
-  "repositoryVersion": "18.08.2026.30",
-  "applicationVersion": "18.08.2026.30",
-  "visibleRelease": "Bronze 18.08.2026.30",
-  "packageVersion": "18.8.2026-30",
+  "product": "ParsYuva AYM",
+  "repositoryVersion": "19.08.2026.33",
+  "applicationVersion": "19.08.2026.33",
+  "visibleRelease": "Bronze 19.08.2026.33",
+  "packageVersion": "19.8.2026-33",
   "edition": "Bronze",
-  "owner": "Panthera pardus tulliana",
-  "releaseId": "bronze-2026-08-18-r30",
-  "revision": "20260818-30",
-  "monthlySequence": 30,
-  "releaseDate": "2026-08-18",
+  "owner": "ParsYuva",
+  "releaseId": "bronze-2026-08-19-r33",
+  "revision": "20260819-33",
+  "monthlySequence": 33,
+  "releaseDate": "2026-08-19",
   "parentSource": {
     "version": "02.08.2026.228",
     "sha256": "0d67125e80bfddd52292aa3db6f17c9d68e115fa6c35c0671e3bd191ecdf1328"
@@ -25,5 +25,5 @@
   "acceptedScopeRegistry": "config/accepted-scope-registry.json",
   "policyVersion": "PPT-PLATFORM-POLICY-2026-08-04-V1",
   "sourceInventoryFileCount": 2227,
-  "generatedDate": "2026-08-18"
+  "generatedDate": "2026-08-19"
 }

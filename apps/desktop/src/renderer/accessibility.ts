@@ -24,7 +24,17 @@ export const FIRST_RUN_NARRATION_STEPS = Object.freeze([
   'İkinci adım: Güçlü parolanızı belirleyin ve kurtarma kodlarınızı uygulamanın dışında güvenli bir yerde saklayın.',
   'Üçüncü adım: Yazı boyutu, kontrast, hareket ve ses tercihlerinizi seçin.'
 ]);
-export const FIRST_RUN_NARRATION_TEXT = `Anadolu Parsı Aile Yaşam Merkezine hoş geldiniz. Bu kısa tanıtımda üç adımı birlikte tamamlayacağız. ${FIRST_RUN_NARRATION_STEPS.join(' ')} Kişisel verileriniz siz giriş yapmadan açılmaz. Kurulum sırasında aile veriniz uzak bir sağlayıcıya gönderilmez.`;
+export const FIRST_RUN_NARRATION_TEXT = `ParsYuva AYM'ye hoş geldiniz. Bu kısa tanıtımda üç adımı birlikte tamamlayacağız. ${FIRST_RUN_NARRATION_STEPS.join(' ')} Kişisel verileriniz siz giriş yapmadan açılmaz. Kurulum sırasında aile veriniz uzak bir sağlayıcıya gönderilmez.`;
+export const FIRST_RUN_NARRATION_STEPS_EN = Object.freeze([
+  'Step one: Create the local family space on this computer.',
+  'Step two: Set a strong password and keep your recovery codes in a safe place outside the application.',
+  'Step three: Choose your text size, contrast, motion and audio preferences.'
+]);
+export const FIRST_RUN_NARRATION_TEXT_EN = `Welcome to ParsYuva AYM. We will complete three steps together in this short introduction. ${FIRST_RUN_NARRATION_STEPS_EN.join(' ')} Your personal data does not open before you sign in. Family data is not sent to a remote provider during setup.`;
+
+export const firstRunNarrationContent = (language: 'tr' | 'en') => language === 'tr'
+  ? { steps:FIRST_RUN_NARRATION_STEPS, text:FIRST_RUN_NARRATION_TEXT, locale:'tr-TR' as const }
+  : { steps:FIRST_RUN_NARRATION_STEPS_EN, text:FIRST_RUN_NARRATION_TEXT_EN, locale:'en-US' as const };
 
 export interface BootstrapPreferenceStorage {
   getItem(key: string): string | null;
@@ -102,6 +112,7 @@ export const cancelFirstRunNarration = (
 
 export const startFirstRunNarration = <TUtterance extends FirstRunNarrationUtterance>(input: {
   muted: boolean;
+  language?: 'tr' | 'en';
   rate?: 'normal' | 'slow';
   synthesis: FirstRunNarrationSynthesis<TUtterance> | undefined;
   createUtterance: ((text: string) => TUtterance) | undefined;
@@ -116,9 +127,10 @@ export const startFirstRunNarration = <TUtterance extends FirstRunNarrationUtter
     return 'unavailable';
   }
   try {
+    const narration = firstRunNarrationContent(input.language ?? 'tr');
     input.synthesis.cancel();
-    const utterance = input.createUtterance(FIRST_RUN_NARRATION_TEXT);
-    utterance.lang = 'tr-TR';
+    const utterance = input.createUtterance(narration.text);
+    utterance.lang = narration.locale;
     utterance.rate = input.rate === 'slow' ? 0.72 : 0.88;
     utterance.pitch = 0.95;
     Object.assign(utterance, {

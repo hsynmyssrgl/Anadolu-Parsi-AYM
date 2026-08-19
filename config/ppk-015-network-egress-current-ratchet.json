@@ -16,8 +16,8 @@
   },
   "currentBoundary": {
     "productionSourceZones": 18,
-    "scannedFiles": 563,
-    "sourceInventorySha256": "f6fb78533a4776d3286a98e8caa3342549ad9f7c7672a1a1061cd483f2820c1b",
+    "scannedFiles": 569,
+    "sourceInventorySha256": "f9e40006172d4d07606aa7a5b4a7913528b5352cae1b74d85ce1c1ee911b310a",
     "maliciousSelfTests": 7,
     "findings": 0,
     "authorizedAdapterCount": 2,
@@ -32,7 +32,7 @@
       "oidc.jwks.fetch"
     ],
     "authorizedInventorySha256": "8c3764ee962b55dda7fa85520b8fbb34088a65ab722febd30254416b7d6898bb",
-    "localOnlyTransportFiles": 2,
+    "localOnlyTransportFiles": 3,
     "directPrimitiveExceptionCount": 0,
     "latestDatabaseMigration": 115
   },

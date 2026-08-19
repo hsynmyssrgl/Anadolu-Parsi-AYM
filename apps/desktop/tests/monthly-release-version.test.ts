@@ -26,8 +26,8 @@ describe('resmî aylık derleme sürümü', () => {
 
   it('kurulum dosya adını kanala ve resmî sürüme bağlar', () => {
     const release = createNextMonthlyRelease({ ledger, now: new Date('2026-08-18T08:00:00.000Z'), channel: 'Silver' });
-    expect(installerArtifactTemplate(release)).toBe('Anadolu-Parsi-Aile-Yasam-Merkezi-Silver-18.08.2026.30-${arch}-Kurulum.${ext}');
-    expect(installerFileName(release)).toBe('Anadolu-Parsi-Aile-Yasam-Merkezi-Silver-18.08.2026.30-x64-Kurulum.exe');
+    expect(installerArtifactTemplate(release)).toBe('ParsYuva-AYM-Silver-18.08.2026.30-${arch}-Kurulum.${ext}');
+    expect(installerFileName(release)).toBe('ParsYuva-AYM-Silver-18.08.2026.30-x64-Kurulum.exe');
   });
 
   it('tanımsız sürüm kanalını reddeder', () => {

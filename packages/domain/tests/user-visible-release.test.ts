@@ -20,9 +20,9 @@ describe('user-visible release boundary', () => {
   });
 
   it('creates the canonical user delivery filename without legacy tokens', () => {
-    expect(USER_VISIBLE_DELIVERY_FILE_NAME).toBe(`Anadolu_Parsi_Aile_Yasam_Merkezi_${APP_META.releaseLabel.replaceAll(' ', '_')}.json`);
+    expect(USER_VISIBLE_DELIVERY_FILE_NAME).toBe(`ParsYuva_AYM_${APP_META.releaseLabel.replaceAll(' ', '_')}.json`);
     expect(createUserVisibleDeliveryFileName(APP_META.name, APP_META.releaseLabel, 'zip'))
-      .toBe(`Anadolu_Parsi_Aile_Yasam_Merkezi_${APP_META.releaseLabel.replaceAll(' ', '_')}.zip`);
+      .toBe(`ParsYuva_AYM_${APP_META.releaseLabel.replaceAll(' ', '_')}.zip`);
     expect(USER_VISIBLE_DELIVERY_FILE_NAME).not.toMatch(/RC2?|MVP|Build/iu);
   });
 

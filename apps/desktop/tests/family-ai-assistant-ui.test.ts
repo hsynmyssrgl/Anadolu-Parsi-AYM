@@ -19,8 +19,9 @@ describe('33-W family AI assistant renderer surface',()=>{
       expect(panel).toContain(`${kind}:`);
   });
 
-  it('uses only three safe bridge methods with stable retry identities',()=>{
-    for(const method of ['getFamilyAiAssistantCenter','generateFamilyAiSuggestion','reviewFamilyAiSuggestion'])expect(panel).toContain(`.${method}(`);
+  it('uses only five safe bridge methods with stable durable retry identities',()=>{
+    for(const method of ['getFamilyAiAssistantCenter','getFamilyAiLocalModelStatus','runFamilyAiLocalModel',
+      'generateFamilyAiSuggestion','reviewFamilyAiSuggestion'])expect(panel).toContain(`.${method}(`);
     expect(panel).toContain('pendingGenerate.current=command');expect(panel).toContain('pendingReviews.current.set(key,command)');
     expect(panel).toContain('aynı işlem kimliğiyle yeniden deneyebilirsiniz');
     for(const forbidden of ['policyReceipt','stateFingerprint','sourceFingerprint','accountId:','familyId:','sourcePath','rawText','providerToken'])
@@ -35,13 +36,15 @@ describe('33-W family AI assistant renderer surface',()=>{
   });
 
   it('states consent, local-only and non-autonomous truth boundaries',()=>{
-    for(const marker of ['Yalnız açık izinli','Ağ, bulut veya model çıkarımı kullanılmaz','ödem','rezervasyon','sağlık','acil durum',
-      'Kaynak izni geri çekilirse','süreli hassas veri onayı'])expect(panel).toContain(marker);
+    for(const marker of ['Yalnız açık izinli','Buluta veya dış ağa veri gönderilmez','model yanıtı yalnız bilgisayardaki',
+      'Model yanıtı kaydedilmez','hiçbir kalıcı işlemi yürütmez','Kaynak izni model çalışırken değişirse',
+      'süreli hassas veri onayı'])expect(panel).toContain(marker);
     expect(panel).toContain("review(suggestion,'confirm')");expect(panel).toContain("review(suggestion,'dismiss')");
   });
 
   it('provides responsive accessible presentation',()=>{
     expect(panel).toContain('aria-labelledby="family-ai-assistant-title"');expect(panel).toContain('aria-label="Aile asistanı doğruluk sınırları"');
+    expect(panel).toContain('aria-labelledby="family-ai-model-title"');expect(panel).toContain('aria-live="polite"');
     expect(styles).toContain('.family-ai-assistant');expect(styles).toContain('@media(max-width:800px)');
   });
 });

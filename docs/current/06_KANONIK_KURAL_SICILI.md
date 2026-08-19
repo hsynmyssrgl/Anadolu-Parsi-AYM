@@ -1,14 +1,22 @@
 # Kanonik Kural Sicili
 
-- Görünür sürüm: **Bronze 04.08.2026.29**
-- Sicil kimliği: `PPT-CANONICAL-RULE-REGISTRY-V9`
-- Toplam kural: **208**
-- Aktif kural: **194**
-- Açıkça superseded tarihsel kural: **14**
-- Kural SHA-256: `5e7e45b7c2ae9f3c7465866a58d9d389ef6a793dab855a68a1434e003eade081`
+- Görünür sürüm: **Bronze 19.08.2026.33**
+- Sicil kimliği: `PPT-CANONICAL-RULE-REGISTRY-V13`
+- Toplam kural: **217**
+- Aktif kural: **197**
+- Açıkça superseded tarihsel kural: **20**
+- Kural SHA-256: `b79db92a03d559f33ccd49348bad159a70b6034fbcf10a07abe5a407549bf0be`
 - Makine okunur tek aktif kaynak: `config/canonical-rule-registry.json`
 
 `PR-186` her bağlayıcı kararın aynı sürümde DEC ve makine defterine kaydını, `PR-187` bilinen belge/kod/kural driftinde kapanış yasağını getirir. `DEC-251` ve `config/documentation-synchronization-policy.json` bu iki kuralı karar anında DEC + etkilenen belge + iş listesi açık/kapalı/neden güncellemesi olarak fail-closed uygular.
+
+`PR-209`–`PR-214`; ParsYuva AYM marka ve teknik uyumluluk sınırını, dış kurumsallaşma no-claim kapısını, aktif metadata'yı, yeni kalıcı kütüphane dalını, platform/cihaz ayrımını ve konu bazlı kurumsal belge yapısını bağlar.
+
+`PR-215`; sistem dilinin Electron ana sürecinde belirlenmesini, yalnız Türkçe ve İngilizce desteğini ve desteklenmeyen/çözülemeyen dilde İngilizcenin kullanıcı verisi açılmadan güvenli varsayılan olmasını bağlar.
+
+`PR-216`; kurulum öncesi sayfalarda hareketli sahte ilerlemeyi yasaklar ve yalnız yerel NSIS dosya kurulum ilerlemesinden okunan tek yüzde görünümüne izin verir.
+
+`PR-217`; ürün ve belge başlıklarında yalnız `ParsYuva AYM` kullanılmasını bağlar. `AYM` kısaltması ile `Aile Yaşam Merkezi` aynı başlıkta tekrar edilemez; açık uzun ad yalnız ayrı açıklama veya hukuk metninde kullanılabilir.
 
 ## Aşılmaz uygulama
 

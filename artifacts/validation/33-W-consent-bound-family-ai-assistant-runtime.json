@@ -5,27 +5,27 @@
   "status": "PASS",
   "governanceState": "PLANNED",
   "countsAsRequirementPass": false,
-  "targetedTestFilesPassed": 5,
-  "targetedTestsPassed": 26,
+  "targetedTestFilesPassed": 6,
+  "targetedTestsPassed": 33,
   "migration101Sha256": "ef3790fad5f64de7bbd089d09a835dcb302092d64ccef6abb85e2105fbab2b5b",
   "ppk021": {
     "status": "PASS",
     "productionSourceZones": 18,
-    "scannedFiles": 555,
-    "privilegedSurfaces": 873,
-    "exactAllowlistEntries": 873,
-    "exactAllowlistSha256": "843cb93dce2402bbaeb3d44b5538b88a3a55f4832436ad23aaf61937bc8c99dc",
+    "scannedFiles": 566,
+    "privilegedSurfaces": 889,
+    "exactAllowlistEntries": 889,
+    "exactAllowlistSha256": "3a297f74d43d4675090a709d4359af9245c2971a7fc338afef2fb87b1c8608dd",
     "surfaceCounts": {
       "CRYPTO_GLOBAL": 21,
-      "CRYPTO_IMPORT": 234,
+      "CRYPTO_IMPORT": 246,
       "DATABASE_IMPORT": 21,
-      "NETWORK_IMPORT": 11,
+      "NETWORK_IMPORT": 12,
       "REPOSITORY_IMPORT": 70,
       "ROLE_PRESENTATION": 2,
       "SQL_CALL": 79,
       "SQL_CONSTRUCTOR": 2,
       "SQL_IMPORT": 2,
-      "USE_CASE_COMPOSITION": 431
+      "USE_CASE_COMPOSITION": 434
     },
     "maliciousSelfTestAssertions": 17,
     "benignSelfTestAssertions": 4,
@@ -35,20 +35,22 @@
   "ppk022": {
     "status": "PASS",
     "productionSourceZones": 18,
-    "scannedFiles": 555,
-    "capabilitySurfaces": 392,
-    "exactManifestSurfaces": 392,
-    "exactManifestSha256": "cb879c739cb8ef3a2e92d1f0e451cd21ba7e9d4b0fcd519f343cddd725c9745c",
+    "scannedFiles": 566,
+    "capabilitySurfaces": 423,
+    "exactManifestSurfaces": 423,
+    "exactManifestSha256": "03945765ce5723f0cbfb8ddc31a6626d1c2dabf5bcf305ba245ef48a7bf30f89",
     "surfaceCounts": {
+      "CAMERA_API": 1,
       "FILE_DIALOG": 2,
-      "FILE_IMPORT": 335,
-      "NETWORK_API": 2,
-      "NETWORK_IMPORT": 13,
+      "FILE_IMPORT": 362,
+      "MICROPHONE_API": 1,
+      "NETWORK_API": 3,
+      "NETWORK_IMPORT": 14,
       "OCR_API": 5,
       "OCR_IMPORT": 35
     },
     "pinnedBootstrapSurfaces": 26,
-    "maliciousSelfTestAssertions": 33,
+    "maliciousSelfTestAssertions": 35,
     "benignSelfTestAssertions": 5,
     "canonicalApplications": 14,
     "protectedCapabilityFamilies": 7,
@@ -59,11 +61,11 @@
   "failed": 0,
   "checks": [
     {
-      "name": "exact five-file local Vitest exits successfully",
+      "name": "exact six-file local Vitest exits successfully",
       "status": "PASS"
     },
     {
-      "name": "local test result meets exact 5/26 ratchet",
+      "name": "local test result meets exact 6/33 ratchet",
       "status": "PASS"
     },
     {
@@ -91,7 +93,7 @@
       "status": "PASS"
     },
     {
-      "name": "provider inference network cloud and downstream action truth remain closed",
+      "name": "default provider remains disabled while bounded transient loopback implementation is truthful",
       "status": "PASS"
     },
     {
@@ -99,5 +101,5 @@
       "status": "PASS"
     }
   ],
-  "generatedAt": "2026-08-16T09:27:30.343Z"
+  "generatedAt": "2026-08-19T05:42:50.556Z"
 }

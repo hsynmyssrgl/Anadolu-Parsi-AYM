@@ -54,7 +54,7 @@
       "passed": true
     },
     {
-      "name": "manifest contains exactly 886 surfaces",
+      "name": "manifest contains exactly 889 surfaces",
       "passed": true
     },
     {
@@ -282,7 +282,7 @@
       "passed": true
     },
     {
-      "name": "scope records six rules and 886 exact surfaces",
+      "name": "scope records six rules and 889 exact surfaces",
       "passed": true
     },
     {
@@ -310,7 +310,7 @@
       "passed": true
     },
     {
-      "name": "decision pins the current local source ratchet without rewriting historical closure",
+      "name": "historical decision preserves the immutable closure boundary",
       "passed": true
     },
     {
@@ -318,7 +318,7 @@
       "passed": true
     },
     {
-      "name": "master register contains DEC-202 and current exact source ratchet",
+      "name": "master register contains the historical DEC-202 reference",
       "passed": true
     },
     {
@@ -350,21 +350,21 @@
   "sourceGate": {
     "status": "PASS",
     "productionSourceZones": 18,
-    "scannedFiles": 563,
-    "privilegedSurfaces": 886,
-    "exactAllowlistEntries": 886,
-    "exactAllowlistSha256": "58a90febf9382776c2b1472e6ffd6a645c9a24a4cd69e499a8afc1fff2e72b30",
+    "scannedFiles": 569,
+    "privilegedSurfaces": 889,
+    "exactAllowlistEntries": 889,
+    "exactAllowlistSha256": "3a297f74d43d4675090a709d4359af9245c2971a7fc338afef2fb87b1c8608dd",
     "surfaceCounts": {
       "CRYPTO_GLOBAL": 21,
       "CRYPTO_IMPORT": 246,
       "DATABASE_IMPORT": 21,
-      "NETWORK_IMPORT": 11,
+      "NETWORK_IMPORT": 12,
       "REPOSITORY_IMPORT": 70,
       "ROLE_PRESENTATION": 2,
       "SQL_CALL": 79,
       "SQL_CONSTRUCTOR": 2,
       "SQL_IMPORT": 2,
-      "USE_CASE_COMPOSITION": 432
+      "USE_CASE_COMPOSITION": 434
     },
     "maliciousSelfTestAssertions": 17,
     "benignSelfTestAssertions": 4,
@@ -372,8 +372,8 @@
     "findings": []
   },
   "protectedRuleCount": 6,
-  "exactAllowlistEntries": 886,
-  "exactAllowlistSha256": "58a90febf9382776c2b1472e6ffd6a645c9a24a4cd69e499a8afc1fff2e72b30",
+  "exactAllowlistEntries": 889,
+  "exactAllowlistSha256": "3a297f74d43d4675090a709d4359af9245c2971a7fc338afef2fb87b1c8608dd",
   "directRoleAuthorizationBypasses": 0,
   "syntaxModel": "TYPESCRIPT_AST",
   "regexOnlyGateAccepted": false,
@@ -387,5 +387,5 @@
   "cutoverAuthorityAttached": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-18T05:01:17.940Z"
+  "generatedAt": "2026-08-19T10:19:45.153Z"
 }

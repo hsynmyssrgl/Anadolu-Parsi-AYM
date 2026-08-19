@@ -5,8 +5,8 @@
   "status": "PASS",
   "governanceState": "PLANNED",
   "countsAsRequirementPass": false,
-  "checkCount": 12,
-  "passed": 12,
+  "checkCount": 13,
+  "passed": 13,
   "failed": 0,
   "checks": [
     {
@@ -22,7 +22,7 @@
       "status": "PASS"
     },
     {
-      "name": "application exposes exact three governed use cases",
+      "name": "application exposes governed suggestion and transient local-model use cases",
       "status": "PASS"
     },
     {
@@ -38,19 +38,23 @@
       "status": "PASS"
     },
     {
-      "name": "DataStore composes three safe methods",
+      "name": "local model transport is exact loopback opt-in bounded and non-persistent",
       "status": "PASS"
     },
     {
-      "name": "IPC exposes exact three bounded channels",
+      "name": "DataStore composes five safe methods",
       "status": "PASS"
     },
     {
-      "name": "renderer states consent local no-action and source-coverage truth",
+      "name": "IPC exposes exact five bounded channels",
       "status": "PASS"
     },
     {
-      "name": "provider network model speech translation OCR and durable-action claims stay false",
+      "name": "renderer states consent local no-action transient model and source-coverage truth",
+      "status": "PASS"
+    },
+    {
+      "name": "default runtime truth stays closed while local model adapter is recorded",
       "status": "PASS"
     },
     {
@@ -58,5 +62,5 @@
       "status": "PASS"
     }
   ],
-  "generatedAt": "2026-08-16T09:26:41.400Z"
+  "generatedAt": "2026-08-19T05:41:52.417Z"
 }

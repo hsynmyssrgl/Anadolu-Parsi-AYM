@@ -14,8 +14,8 @@
   "routeCount": 22,
   "menuEntryCount": 22,
   "renderedScreenCount": 22,
-  "preloadPairCount": 399,
-  "registeredPreloadPairCount": 296,
+  "preloadPairCount": 402,
+  "registeredPreloadPairCount": 297,
   "classifiedUnusedRendererApiCount": 14,
   "unresolvedUnusedRendererApiCount": 0,
   "unusedRendererApis": [
@@ -83,5 +83,5 @@
   },
   "b901CompletedByThisPackage": false,
   "databaseMigrationRequired": false,
-  "generatedAt": "2026-08-18T04:41:25.152Z"
+  "generatedAt": "2026-08-19T10:35:01.746Z"
 }

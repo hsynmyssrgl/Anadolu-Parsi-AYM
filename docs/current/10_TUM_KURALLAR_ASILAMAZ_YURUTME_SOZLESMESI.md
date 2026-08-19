@@ -1,10 +1,10 @@
 # Tüm Kurallar Aşılamaz Yürütme Sözleşmesi
 
-- Sürüm: **Bronze 04.08.2026.29**
+- Sürüm: **Bronze 19.08.2026.33**
 - Karar: **DEC-129**
-- Kanonik kural sayısı: **208**
-- Aktif kural: **194**
-- Kural SHA-256: `5e7e45b7c2ae9f3c7465866a58d9d389ef6a793dab855a68a1434e003eade081`
+- Kanonik kural sayısı: **217**
+- Aktif kural: **197**
+- Kural SHA-256: `b79db92a03d559f33ccd49348bad159a70b6034fbcf10a07abe5a407549bf0be`
 
 ## Değişmez çalışma ilkesi
 

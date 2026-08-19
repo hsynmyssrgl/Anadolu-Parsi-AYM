@@ -363,7 +363,7 @@ export class IpcAdaptiveResourceBudgetStateStore implements IpcAdaptiveResourceB
     const generatedAt = new Date(normalizedNow).toISOString();
     const payload = Object.freeze({
       schemaVersion: 1,
-      product: 'Anadolu Parsı Aile Yaşam Merkezi',
+      product: 'ParsYuva AYM',
       applicationVersion: this.#applicationVersion,
       policyFingerprint: this.#policyFingerprint,
       generatedAt,

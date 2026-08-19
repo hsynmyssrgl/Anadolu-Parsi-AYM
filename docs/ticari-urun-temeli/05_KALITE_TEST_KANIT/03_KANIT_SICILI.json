@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-TICARI-KANIT-SICILI-V1",
+  "kayitlar": [
+    {
+      "id": "KANIT-0001",
+      "tur": "GATE",
+      "kapsam": "Kanonik kural sicili ve governed preflight",
+      "durum": "PASS",
+      "kaynak": "06_KOD/app/artifacts/validation/governed-preflight.json",
+      "sha256": "b79db92a03d559f33ccd49348bad159a70b6034fbcf10a07abe5a407549bf0be",
+      "uretimZamani": "2026-08-19T00:00:00+03:00",
+      "disKaynak": false,
+      "not": "Kural SHA degeridir; yeni kaynak degisikliklerinden sonra preflight yeniden kosulmalidir."
+    },
+    {
+      "id": "KANIT-0002",
+      "tur": "BELGE",
+      "kapsam": "Ticari temel belge alani",
+      "durum": "PASS",
+      "kaynak": "05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json",
+      "uretimZamani": "2026-08-19T13:03:52+03:00",
+      "disKaynak": false,
+      "not": "651 kontrol, 37 dosya, 49 is ve 217 kural bagi PASS."
+    },
+    {
+      "id": "KANIT-0003",
+      "tur": "DIS_ONAY",
+      "kapsam": "Uretim kod imzalama sertifikasi ve Authenticode",
+      "durum": "BLOCKED",
+      "kaynak": "Harici sertifika ve zaman damgasi saglayicisi",
+      "uretimZamani": "2026-08-19T00:00:00+03:00",
+      "disKaynak": true,
+      "not": "Uretim sertifikasi, provenance anahtari ve guncel Authenticode kaniti yok."
+    },
+    {
+      "id": "KANIT-0004",
+      "tur": "UAT",
+      "kapsam": "Gercek cihaz, gercek saglayici ve temiz Windows kurulumu",
+      "durum": "NOT_RUN",
+      "kaynak": "Fiziksel test ortami",
+      "uretimZamani": "2026-08-19T00:00:00+03:00",
+      "disKaynak": true,
+      "not": "Simulasyon ve yerel test gercek cihaz veya saglayici kaniti sayilmaz."
+    },
+    {
+      "id": "KANIT-0005",
+      "tur": "DIS_ONAY",
+      "kapsam": "Hukuk, gizlilik, vergi ve marka incelemesi",
+      "durum": "NOT_RUN",
+      "kaynak": "Yetkili dis uzmanlar",
+      "uretimZamani": "2026-08-19T00:00:00+03:00",
+      "disKaynak": true,
+      "not": "Tek kullanicili yerel kullanim bu kaniti gelistirme icin engellemez; ticari yayin iddiasini engeller."
+    }
+  ]
+}

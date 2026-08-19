@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://parsyuva.local/schemas/ticari-kural-v1.json",
+  "title": "ParsYuva AYM Ticari Kural Kaydi",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "baslik",
+    "metin",
+    "durum",
+    "kaynak",
+    "yurutme",
+    "kanitZorunlu"
+  ],
+  "properties": {
+    "id": { "type": "string", "pattern": "^(PR-[0-9]{3}|TK-[0-9]{3})$" },
+    "baslik": { "type": "string", "minLength": 3 },
+    "metin": { "type": "string", "minLength": 20 },
+    "durum": { "enum": ["ACTIVE", "SUPERSEDED"] },
+    "kaynak": { "type": "string", "minLength": 3 },
+    "yerineGecen": { "type": "string", "pattern": "^(PR-[0-9]{3}|TK-[0-9]{3})$" },
+    "yurutme": { "enum": ["FAIL_CLOSED", "DOCUMENTED_ONLY"] },
+    "kanitZorunlu": { "type": "boolean", "const": true },
+    "bagliKararlar": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^DEC-[0-9]{3}$" },
+      "uniqueItems": true
+    }
+  }
+}

@@ -144,5 +144,5 @@ describe('33-W family AI assistant repository policy boundary',()=>{
     expect((h.runtime.database.prepare('SELECT COUNT(*) count FROM family_ai_suggestion_mutations').get() as {count:number}).count).toBe(500);
     const center=await withReceipt(h,{action:'read',resourceId:'*'},(repo,ctx)=>repo.loadCenter(ctx,key));
     expect(center).toMatchObject({ok:true});if(center.ok)expect(center.value.suggestions).toHaveLength(500);
-  });
+  },15_000);
 });

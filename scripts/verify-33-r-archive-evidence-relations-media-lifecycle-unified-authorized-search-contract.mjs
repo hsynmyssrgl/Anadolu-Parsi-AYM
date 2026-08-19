@@ -85,12 +85,12 @@ const definitions = [
   ['decision and threat model record bounded restart recovery without false atomicity or acceptance claim', hasAll(decision,
     ['countsAsRequirementPass=false', 'Process restart sonrası renderer kimliği değişse bile', 'genel filesystem/SQLite crash atomikliği', 'NOT_RUN'])
       && hasAll(threat, ['filesystem ile SQLite arasında sahte atomiklik', 'kısmi sonuç dönmez', 'certification'])],
-  ['PPK ratchets are pinned exactly while requirement remains open', scope.validation?.ppk021?.scannedProductionFiles === 563
-    && scope.validation?.ppk021?.exactPrivilegedSurfaceCount === 886
-    && scope.validation?.ppk021?.exactAllowlistSha256 === '58a90febf9382776c2b1472e6ffd6a645c9a24a4cd69e499a8afc1fff2e72b30'
-    && scope.validation?.ppk022?.scannedProductionFiles === 563
-    && scope.validation?.ppk022?.exactCapabilitySurfaceCount === 422
-    && scope.validation?.ppk022?.exactCapabilityManifestSha256 === 'dc0234d84a50ff1872f9cde4fb7ab286446b236a69019034055fa938dbb3be1e'
+  ['PPK ratchets are pinned exactly while requirement remains open', scope.validation?.ppk021?.scannedProductionFiles === 568
+    && scope.validation?.ppk021?.exactPrivilegedSurfaceCount === 889
+    && scope.validation?.ppk021?.exactAllowlistSha256 === '3a297f74d43d4675090a709d4359af9245c2971a7fc338afef2fb87b1c8608dd'
+    && scope.validation?.ppk022?.scannedProductionFiles === 568
+    && scope.validation?.ppk022?.exactCapabilitySurfaceCount === 428
+    && scope.validation?.ppk022?.exactCapabilityManifestSha256 === '1bf21d23c862afbccb9611083c093f9ced703adadf7a170c29f53479d21397b1'
     && scope.validation?.countsAsRequirementPass === false && inventory.validation?.countsAsRequirementPass === false]
 ];
 

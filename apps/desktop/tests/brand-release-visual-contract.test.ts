@@ -198,9 +198,9 @@ describe('approved brand and release-channel visual contract', () => {
       "type={passwordVisible?'text':'password'}",
       'aria-controls="local-password"',
       'aria-pressed={passwordVisible}',
-      "aria-label={passwordVisible?'Parolayı gizle':'Parolayı göster'}",
+      "aria-label={passwordVisible?t('auth.hidePassword'):t('auth.showPassword')}",
       "onClick={()=>setPasswordVisible(value=>!value)}",
-      "{passwordVisible?'Gizle':'Göster'}"
+      "{passwordVisible?(language==='tr'?'Gizle':'Hide'):(language==='tr'?'Göster':'Show')}"
     ]) expect(app).toContain(marker);
     for (const marker of [
       '.password-input-shell { position: relative; display: grid; }',

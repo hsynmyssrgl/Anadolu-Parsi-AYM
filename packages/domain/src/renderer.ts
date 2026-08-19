@@ -11,6 +11,14 @@ export {
   type UserVisibleReleaseChannel
 } from './app-meta.js';
 export {
+  DEFAULT_UI_LOCALIZATION,
+  SUPPORTED_UI_LANGUAGES,
+  resolveUiLocalization,
+  type SupportedUiLanguage,
+  type SupportedUiLocale,
+  type UiLocalizationBootstrapView
+} from './ui-localization.js';
+export {
   assessPassword,
   isValidEmail,
   normalizeEmail,

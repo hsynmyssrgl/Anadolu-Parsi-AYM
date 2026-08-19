@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "release": "Bronze 04.08.2026.29",
+  "release": "Bronze 19.08.2026.33",
   "ruleRegistry": "config/canonical-rule-registry.json",
-  "rulesSha256": "5e7e45b7c2ae9f3c7465866a58d9d389ef6a793dab855a68a1434e003eade081",
-  "acknowledgedAt": "2026-08-04T12:55:00+03:00",
+  "rulesSha256": "b79db92a03d559f33ccd49348bad159a70b6034fbcf10a07abe5a407549bf0be",
+  "acknowledgedAt": "2026-08-19T00:47:00+03:00",
   "authority": "Explicit user instruction in current conversation",
-  "statement": "All written project rules are binding and non-skippable. Every ACTIVE rule must be fail-closed enforced or explicitly BLOCKED/NOT_RUN until evidence exists."
+  "statement": "All written project rules, including ParsYuva AYM title non-repetition, brand compatibility, corporate no-claim gates, topic/platform document structure, system-language detection, English fallback, and one native real installer progress indicator, are binding and non-skippable. Every ACTIVE rule must be fail-closed enforced or explicitly BLOCKED/NOT_RUN until evidence exists."
 }

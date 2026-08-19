@@ -5,7 +5,7 @@
   "status": "IN_PROGRESS",
   "completionClaimed": false,
   "release": {
-    "releaseVersion": "18.8.2026-30",
+    "releaseVersion": "19.8.2026-33",
     "channel": "Bronze",
     "productionReleaseEligible": false,
     "blockingState": "EXTERNAL_SIGNING_PENDING"
@@ -81,7 +81,7 @@
       "id": "third-party-license-decision",
       "classification": "NEW_REQUIRED_GATE",
       "paths": [
-        "apps/desktop/build/LICENSE_TR.txt",
+        "apps/desktop/docs/LISANS_TR_KAYNAK.txt",
         "apps/desktop/build/LICENSE_TR.rtf",
         "artifacts/manifests/32-U-ppk-025-third-party-notices.json",
         "artifacts/manifests/32-U-ppk-025-third-party-notices.txt"

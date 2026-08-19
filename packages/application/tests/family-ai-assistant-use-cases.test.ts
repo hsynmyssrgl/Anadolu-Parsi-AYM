@@ -5,8 +5,9 @@ import { FAMILY_AI_ASSISTANT_KINDS,FAMILY_AI_ASSISTANT_MODULES_BY_KIND,FAMILY_AI
 import type { FamilyAiSuggestionMutationRow,FamilyAiSuggestionRow } from '@ppt/repository-contracts';
 import {
   GenerateFamilyAiSuggestionUseCase,ReviewFamilyAiSuggestionUseCase,
+  RunFamilyAiLocalModelUseCase,
   type FamilyAiAssistantAuthorizedCandidate,type FamilyAiAssistantSourcePort,type FamilyAiAssistantUnitOfWork,
-  type FamilyAiAssistantWriteScope,type LifeApplicationContext,type LifePolicyIntent
+  type FamilyAiAssistantModelPort,type FamilyAiAssistantWriteScope,type LifeApplicationContext,type LifePolicyIntent
 } from '../src/index.js';
 
 const NOW=asIsoDateTime('2026-08-15T12:00:00.000Z');
@@ -39,6 +40,14 @@ class MemoryUnit implements FamilyAiAssistantUnitOfWork{
   public execute<T>(_context:LifeApplicationContext,intent:LifePolicyIntent,operation:(scope:FamilyAiAssistantWriteScope)=>Result<T,AppError>){
     this.intents.push(intent);return Promise.resolve(operation(this.scope));
   }
+}
+class MemoryModel implements FamilyAiAssistantModelPort{
+  public calls=0;
+  public getStatus(){return Promise.resolve({provider:'ollama_loopback' as const,configured:true,available:true,
+    model:'test-local:1',endpoint:'http://127.0.0.1:11434' as const,localLoopbackOnly:true as const,
+    networkEgressUsed:false as const,cloudUsed:false as const,checkedAt:NOW});}
+  public run(){this.calls+=1;return Promise.resolve(ok({answer:'İzinli kaynaklara göre aile toplantısını gözden geçirin.',
+    model:'test-local:1',generatedAt:NOW}));}
 }
 
 describe('33-W consent-bound family AI assistant use cases',()=>{
@@ -114,5 +123,33 @@ describe('33-W consent-bound family AI assistant use cases',()=>{
     expect(await useCase.execute({context,command:{clientOperationId:'operation-forged-source',suggestionId:'suggestion-forged-source',
       kind:'meeting_agenda',modules:['event']}})).toMatchObject({ok:false,error:{category:'authorization'}});
     expect(source.calls).toBe(1);
+  });
+
+  it('runs a transient local model response and revalidates the exact source set afterwards',async()=>{
+    const source=new MemorySource();const model=new MemoryModel();const useCase=new RunFamilyAiLocalModelUseCase(source,model);
+    const result=await useCase.execute({context,command:{kind:'authorized_search',modules:['event'],prompt:'aile toplantısı'}});
+    expect(result).toMatchObject({ok:true,value:{kind:'authorized_search',sourceCount:1,provider:'ollama_loopback',
+      model:'test-local:1',answer:'İzinli kaynaklara göre aile toplantısını gözden geçirin.',truth:{localLoopbackOnly:true,
+        networkEgressUsed:false,cloudUsed:false,modelInferencePerformed:true,responsePersisted:false,
+        durableActionPerformed:'not_performed',humanReviewRequired:true,sourceConsentRevalidatedAfterInference:true}}});
+    expect(source.calls).toBe(2);expect(model.calls).toBe(1);
+  });
+
+  it('discards a model response when consent or source state changes during inference',async()=>{
+    const source=new MemorySource();let calls=0;source.loadAuthorizedCandidates=(_context?:unknown,input?:unknown)=>{
+      source.calls+=1;source.inputs.push(input);calls+=1;return Promise.resolve(ok(calls===1?[candidate]:[]));
+    };
+    const model=new MemoryModel();const result=await new RunFamilyAiLocalModelUseCase(source,model).execute({context,
+      command:{kind:'authorized_search',prompt:'aile toplantısı'}});
+    expect(result).toMatchObject({ok:false,error:{category:'authorization'}});expect(model.calls).toBe(1);
+  });
+
+  it('rejects local model authority fields and overlong prompts before loading sources',async()=>{
+    const source=new MemorySource();const useCase=new RunFamilyAiLocalModelUseCase(source,new MemoryModel());
+    expect(await useCase.execute({context,command:{kind:'daily_summary',prompt:'özetle',providerToken:'secret'} as never}))
+      .toMatchObject({ok:false,error:{category:'validation'}});
+    expect(await useCase.execute({context,command:{kind:'daily_summary',prompt:'x'.repeat(401)}}))
+      .toMatchObject({ok:false,error:{category:'validation'}});
+    expect(source.calls).toBe(0);
   });
 });

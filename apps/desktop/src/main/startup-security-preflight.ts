@@ -12,6 +12,7 @@ import {
   writeFileSync
 } from 'node:fs';
 import { dirname } from 'node:path';
+import { CURRENT_PRODUCT_NAME, type PersistedProductName } from '@ppt/domain';
 import type { DeviceSecretProtector } from './device-secret-protector.js';
 import type { RendererSecurityPolicyEvidence } from './renderer-window-security.js';
 
@@ -59,7 +60,7 @@ export interface StartupSecurityPreflightInput {
 
 export interface StartupSecurityPreflightReport {
   readonly schemaVersion: 1;
-  readonly product: 'Anadolu Parsı Aile Yaşam Merkezi';
+  readonly product: PersistedProductName;
   readonly applicationVersion: string;
   readonly packageVersion: string;
   readonly platform: NodeJS.Platform;
@@ -225,7 +226,7 @@ export const runStartupSecurityPreflight = (
   const sentinelState = verifyOrCreateSentinel(input.protector, input.sentinelPath, now);
   const report: StartupSecurityPreflightReport = {
     schemaVersion: EVIDENCE_SCHEMA_VERSION,
-    product: 'Anadolu Parsı Aile Yaşam Merkezi',
+    product: CURRENT_PRODUCT_NAME,
     applicationVersion: input.applicationVersion,
     packageVersion: input.packageVersion,
     platform: input.platform,

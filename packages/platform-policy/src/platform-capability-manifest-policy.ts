@@ -27,7 +27,7 @@ export const PLATFORM_APPLICATION_RUNTIME_CAPABILITY_REQUIREMENTS: Readonly<Reco
   'signed-plugin': Object.freeze([] as const)
 });
 
-export const PPK022_EXPECTED_AST_CAPABILITY_SURFACE_COUNT = 422 as const;
+export const PPK022_EXPECTED_AST_CAPABILITY_SURFACE_COUNT = 435 as const;
 
 export type PlatformCapabilityManifestAuthoritySource =
   | 'core-service-kernel'

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useLocalization } from './localization';
 
 export type SilverHelpTopicId = 'getting-started' | 'current-screen' | 'privacy' | 'accessibility' | 'troubleshooting';
 export type SilverHelpNarrationStatus = 'idle' | 'speaking' | 'ready' | 'unavailable' | 'error';
@@ -43,6 +44,14 @@ export const SILVER_HELP_TOPICS: readonly SilverHelpTopic[] = Object.freeze([
   })
 ]);
 
+export const SILVER_HELP_TOPICS_EN: readonly SilverHelpTopic[] = Object.freeze([
+  Object.freeze({ id:'getting-started', title:'Getting started', summary:'Signing in, menus and the first record steps.', narration:'You are in getting-started help. First open the section you want from the left menu. Before adding a record, confirm that the correct family space is selected. Read the success or error message after saving. The application does not open family data before you sign in.' }),
+  Object.freeze({ id:'current-screen', title:'Describe the current screen', summary:'Explains the open section and how to use it safely.', narration:'The current screen name appears in the top bar and the main content heading. Use Tab to move through interactive controls and Shift plus Tab to move back. Check the screen heading and selected family space before pressing an action button.' }),
+  Object.freeze({ id:'privacy', title:'Privacy and security', summary:'Local data, session lock, backup and sensitive operations.', narration:'You are in privacy help. Personal data opens only after your identity is verified. Lock the session before leaving the computer. Store recovery codes in a safe place outside the application. If an operation uses an external provider, read its scope and consent notice before continuing.' }),
+  Object.freeze({ id:'accessibility', title:'Accessibility and audio', summary:'Text size, contrast, reduced motion and voice narration.', narration:'You are in accessibility help. In Security Center appearance preferences, you can change text size, contrast, reading mode and reduced motion. You can listen to this help at normal or slow speed. The same explanation remains visible when audio is muted.' }),
+  Object.freeze({ id:'troubleshooting', title:'Troubleshooting', summary:'Startup, loading, offline status and safe retry.', narration:'You are in troubleshooting help. If a screen does not load, use the Try again button first. Do not repeatedly submit data while an offline warning is visible. If the application does not open, check the Windows date, free disk space and application logs. If the same error continues, record the error text and the time it occurred.' })
+]);
+
 interface HelpNarrationUtterance {
   lang: string;
   rate: number;
@@ -54,13 +63,14 @@ interface HelpNarrationSynthesis<TUtterance extends HelpNarrationUtterance> {
   speak(utterance: TUtterance): void;
 }
 
-export const silverHelpNarrationText = (topic: SilverHelpTopic, activeScreenLabel: string): string =>
+export const silverHelpNarrationText = (topic: SilverHelpTopic, activeScreenLabel: string, language: 'tr' | 'en' = 'tr'): string =>
   topic.id === 'current-screen'
-    ? `Şu anda ${activeScreenLabel} bölümündesiniz. ${topic.narration}`
+    ? language === 'tr' ? `Şu anda ${activeScreenLabel} bölümündesiniz. ${topic.narration}` : `You are currently in ${activeScreenLabel}. ${topic.narration}`
     : topic.narration;
 
 export const startSilverHelpNarration = <TUtterance extends HelpNarrationUtterance>(input: {
   text: string;
+  language?: 'tr' | 'en';
   rate: 'normal' | 'slow';
   synthesis: HelpNarrationSynthesis<TUtterance> | undefined;
   createUtterance: ((text: string) => TUtterance) | undefined;
@@ -73,7 +83,7 @@ export const startSilverHelpNarration = <TUtterance extends HelpNarrationUtteran
   try {
     input.synthesis.cancel();
     const utterance = input.createUtterance(input.text);
-    utterance.lang = 'tr-TR';
+    utterance.lang = input.language === 'en' ? 'en-US' : 'tr-TR';
     utterance.rate = input.rate === 'slow' ? 0.72 : 0.88;
     utterance.pitch = 0.95;
     Object.assign(utterance, {
@@ -112,13 +122,15 @@ export function NarratedHelpCenter({
   onAudioMutedChange: (muted: boolean) => void;
   onClose: () => void;
 }) {
+  const {language}=useLocalization();
   const [selectedId, setSelectedId] = useState<SilverHelpTopicId>('getting-started');
   const [rate, setRate] = useState<'normal' | 'slow'>('normal');
   const [status, setStatus] = useState<SilverHelpNarrationStatus>('idle');
   const dialogRef = useRef<HTMLElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
-  const selected = SILVER_HELP_TOPICS.find((topic) => topic.id === selectedId) ?? SILVER_HELP_TOPICS[0]!;
-  const text = useMemo(() => silverHelpNarrationText(selected, activeScreenLabel), [activeScreenLabel, selected]);
+  const topics=language==='tr'?SILVER_HELP_TOPICS:SILVER_HELP_TOPICS_EN;
+  const selected = topics.find((topic) => topic.id === selectedId) ?? topics[0]!;
+  const text = useMemo(() => silverHelpNarrationText(selected, activeScreenLabel,language), [activeScreenLabel,language,selected]);
 
   const stop = () => {
     try { speechSynthesis()?.cancel(); } catch { /* Metin her durumda görünür kalır. */ }
@@ -128,6 +140,7 @@ export function NarratedHelpCenter({
     if (audioMuted) onAudioMutedChange(false);
     startSilverHelpNarration({
       text,
+      language,
       rate,
       synthesis: speechSynthesis(),
       createUtterance: typeof globalThis.SpeechSynthesisUtterance === 'undefined'
@@ -172,27 +185,27 @@ export function NarratedHelpCenter({
   return <div className="narrated-help-overlay" role="presentation" onMouseDown={onClose}>
     <section ref={dialogRef} id="narrated-help-dialog" className="narrated-help-center" role="dialog" aria-modal="true" aria-labelledby="narrated-help-title" aria-describedby="narrated-help-description" tabIndex={-1} onMouseDown={(event) => event.stopPropagation()} onKeyDown={handleDialogKeyDown}>
       <header>
-        <div><span className="eyebrow">Silver erişilebilirlik hazırlığı</span><h2 id="narrated-help-title">Sesli Yardım Merkezi</h2><p id="narrated-help-description">İstediğiniz konuyu seçin; açıklamayı okuyun veya Türkçe olarak dinleyin.</p></div>
-        <button type="button" className="narrated-help-close" autoFocus aria-label="Yardım Merkezini kapat" onClick={onClose}>×</button>
+        <div><span className="eyebrow">{language==='tr'?'Silver erişilebilirlik hazırlığı':'Silver accessibility readiness'}</span><h2 id="narrated-help-title">{language==='tr'?'Sesli Yardım Merkezi':'Narrated Help Center'}</h2><p id="narrated-help-description">{language==='tr'?'İstediğiniz konuyu seçin; açıklamayı okuyun veya Türkçe olarak dinleyin.':'Select a topic, read the explanation or listen to it in English.'}</p></div>
+        <button type="button" className="narrated-help-close" autoFocus aria-label={language==='tr'?'Yardım Merkezini kapat':'Close Help Center'} onClick={onClose}>×</button>
       </header>
       <div className="narrated-help-layout">
-        <nav aria-label="Yardım konuları">
-          {SILVER_HELP_TOPICS.map((topic) => <button type="button" key={topic.id} aria-current={selected.id === topic.id ? 'page' : undefined} onClick={() => { stop(); setSelectedId(topic.id); }}><strong>{topic.title}</strong><span>{topic.summary}</span></button>)}
+        <nav aria-label={language==='tr'?'Yardım konuları':'Help topics'}>
+          {topics.map((topic) => <button type="button" key={topic.id} aria-current={selected.id === topic.id ? 'page' : undefined} onClick={() => { stop(); setSelectedId(topic.id); }}><strong>{topic.title}</strong><span>{topic.summary}</span></button>)}
         </nav>
         <article aria-live="polite">
           <span className="eyebrow">{selected.title}</span>
-          <h3>{selected.id === 'current-screen' ? `${activeScreenLabel} bölümü` : selected.title}</h3>
+          <h3>{selected.id === 'current-screen' ? language==='tr'?`${activeScreenLabel} bölümü`:`${activeScreenLabel} section` : selected.title}</h3>
           <p>{text}</p>
           <div className="narrated-help-controls">
-            <button type="button" className="primary" onClick={speak}>{status === 'speaking' ? 'Baştan anlat' : audioMuted ? 'Sesi aç ve anlat' : 'Sesli anlat'}</button>
-            <button type="button" disabled={status !== 'speaking'} onClick={stop}>Durdur</button>
-            <button type="button" aria-pressed={rate === 'slow'} onClick={() => { stop(); setRate((value) => value === 'normal' ? 'slow' : 'normal'); }}>{rate === 'slow' ? 'Normal hız' : 'Daha yavaş'}</button>
-            <button type="button" aria-pressed={audioMuted} onClick={() => { stop(); onAudioMutedChange(!audioMuted); }}>{audioMuted ? 'Sesi aç' : 'Sesi kapat'}</button>
+            <button type="button" className="primary" onClick={speak}>{status === 'speaking' ? (language==='tr'?'Baştan anlat':'Play again') : audioMuted ? (language==='tr'?'Sesi aç ve anlat':'Turn on audio and narrate') : (language==='tr'?'Sesli anlat':'Narrate')}</button>
+            <button type="button" disabled={status !== 'speaking'} onClick={stop}>{language==='tr'?'Durdur':'Stop'}</button>
+            <button type="button" aria-pressed={rate === 'slow'} onClick={() => { stop(); setRate((value) => value === 'normal' ? 'slow' : 'normal'); }}>{rate === 'slow' ? (language==='tr'?'Normal hız':'Normal speed') : (language==='tr'?'Daha yavaş':'Slower')}</button>
+            <button type="button" aria-pressed={audioMuted} onClick={() => { stop(); onAudioMutedChange(!audioMuted); }}>{audioMuted ? (language==='tr'?'Sesi aç':'Turn sound on') : (language==='tr'?'Sesi kapat':'Turn sound off')}</button>
           </div>
-          <small role="status">{narrationStatusText[status]}</small>
+          <small role="status">{language==='tr'?narrationStatusText[status]:({idle:'Select a topic to listen.',speaking:'Voice narration is playing.',ready:'Narration completed.',unavailable:'Voice narration is unavailable on this device; you can read the text on screen.',error:'Voice narration could not be started; the text remains visible.'} as const)[status]}</small>
         </article>
       </div>
-      <footer><span>F1 ile açılır</span><span>Esc ile kapanır</span><span>Metin her zaman görünür kalır</span></footer>
+      <footer><span>{language==='tr'?'F1 ile açılır':'Press F1 to open'}</span><span>{language==='tr'?'Esc ile kapanır':'Press Esc to close'}</span><span>{language==='tr'?'Metin her zaman görünür kalır':'Text always remains visible'}</span></footer>
     </section>
   </div>;
 }

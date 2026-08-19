@@ -4,10 +4,10 @@
   "effectiveBuild": 212,
   "image": "docs/ui/UI_VISUAL_REFERENCE_MANIFESTO_ACTIVE.png",
   "status": "BINDING_BEFORE_SILVER",
-  "product": "Anadolu Parsı Aile Yaşam Merkezi",
-  "brandFamily": "Panthera pardus tulliana",
+  "product": "ParsYuva AYM",
+  "brandFamily": "ParsYuva",
   "brandFamilyVisibleInApplicationUi": false,
-  "logoSubject": "Anadolu parsı",
+  "logoSubject": "Anadolu parsı esintili ParsYuva işareti",
   "brandMark": {
     "path": "apps/desktop/src/renderer/assets/brand-mark.png",
     "style": "warm_bronze_anatolian_leopard",
@@ -131,10 +131,10 @@
     "width": 1491,
     "height": 1055
   },
-  "visualDirection": "Açık, sıcak-nötr masaüstü arayüz; Anadolu parsı logo işareti; yeşil/soft yeşil/bej/açık gri taban; kart tabanlı ve yüksek okunabilirlikli düzen.",
+  "visualDirection": "Açık, sıcak-nötr masaüstü arayüz; Anadolu parsı esintili ParsYuva logo işareti; yeşil/soft yeşil/bej/açık gri taban; kart tabanlı ve yüksek okunabilirlikli düzen.",
   "approvedReferenceCharacteristics": {
     "theme": "light",
-    "logo": "Anadolu parsı baş/figür işareti",
+    "logo": "ParsYuva pars baş/figür işareti",
     "layout": "sol modül navigasyonu + merkezi çalışma alanı + bağlamsal sağ panel",
     "componentLanguage": "ince sınırlar, açık kart yüzeyleri, ölçülü yuvarlatma, düşük gölge, line ikonografi",
     "paletteSampledFromApprovedImage": {

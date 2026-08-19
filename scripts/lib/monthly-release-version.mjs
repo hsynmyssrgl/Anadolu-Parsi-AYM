@@ -49,7 +49,7 @@ export const createNextMonthlyRelease = ({ ledger, now = new Date(), channel = l
 };
 
 export const installerArtifactTemplate = (release) =>
-  `Anadolu-Parsi-Aile-Yasam-Merkezi-${release.channel}-${release.version}-\${arch}-Kurulum.\${ext}`;
+  `ParsYuva-AYM-${release.channel}-${release.version}-\${arch}-Kurulum.\${ext}`;
 
 export const installerFileName = (release, arch = 'x64', extension = 'exe') =>
-  `Anadolu-Parsi-Aile-Yasam-Merkezi-${release.channel}-${release.version}-${arch}-Kurulum.${extension}`;
+  `ParsYuva-AYM-${release.channel}-${release.version}-${arch}-Kurulum.${extension}`;

@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "PPT-KULLANICI-ARAYUZU-DIL-POLITIKASI-V1",
+  "release": "Bronze 19.08.2026.33",
+  "ruleId": "PR-215",
+  "decisionId": "DEC-255",
+  "systemLanguageAuthority": "electron.app.getLocale",
+  "resolutionProcess": "electron-main",
+  "rendererMayChooseLanguage": false,
+  "supportedLanguages": ["tr", "en"],
+  "supportedLocales": ["tr-TR", "en-US"],
+  "fallbackLanguage": "en",
+  "fallbackLocale": "en-US",
+  "unsupportedOrUnresolvedSystemLanguageFallsBackToEnglish": true,
+  "fallbackBeforeUserDataAccess": true,
+  "englishFirstPaintRequired": true,
+  "installer": {
+    "systemLanguageDetection": true,
+    "languages": ["en_US", "tr_TR"],
+    "fallback": "en_US",
+    "localizedLicenseRequired": true
+  },
+  "coverage": {
+    "foundationStatus": "COMPLETE",
+    "coreUserJourneyStatus": "COMPLETE",
+    "fullFeaturePanelTranslationStatus": "PARTIAL",
+    "completeSurfaces": [
+      "first-run-introduction",
+      "first-run-security",
+      "family-setup-and-login",
+      "main-navigation-and-shell",
+      "command-search",
+      "narrated-help",
+      "system-tray-and-quit",
+      "installer-custom-pages"
+    ],
+    "openSurface": "feature-panel-copy",
+    "openReason": "Mevcut geniş özellik panellerindeki tarihsel Türkçe metinler anahtar bazlı İngilizce sözlüğe henüz bütünüyle taşınmadı.",
+    "countsAsFullApplicationEnglishPass": false
+  },
+  "failClosed": true,
+  "waiverAllowed": false
+}

@@ -1,18 +1,18 @@
 {
   "schemaVersion": 1,
-  "product": "Anadolu Parsı Aile Yaşam Merkezi",
+  "product": "ParsYuva AYM",
   "counterPolicy": "MONTHLY_RESET_CONTINUE_FROM_HISTORICAL_COUNT",
   "current": {
     "channel": "Bronze",
-    "date": "2026-08-18",
-    "displayDate": "18.08.2026",
-    "monthlySequence": 30,
-    "version": "18.08.2026.30",
-    "visibleRelease": "Bronze 18.08.2026.30",
-    "packageVersion": "18.8.2026-30",
-    "releaseId": "bronze-2026-08-18-r30",
+    "date": "2026-08-19",
+    "displayDate": "19.08.2026",
+    "monthlySequence": 33,
+    "version": "19.08.2026.33",
+    "visibleRelease": "Bronze 19.08.2026.33",
+    "packageVersion": "19.8.2026-33",
+    "releaseId": "bronze-2026-08-19-r33",
     "status": "IN_PROGRESS",
-    "parentRelease": "Bronze 04.08.2026.29",
+    "parentRelease": "Bronze 18.08.2026.32",
     "summary": "Resmî derleme numarası yalnız paketleme yetkisi tarafından ayrıldı.",
     "parentSourceSha256": "d65e908bf8157d2eff111dcdbbae2762cb48a527021b97c3df26f463e993dea4"
   },
@@ -64,6 +64,36 @@
       "version": "18.08.2026.30",
       "packageVersion": "18.8.2026-30",
       "releaseId": "bronze-2026-08-18-r30",
+      "status": "IN_PROGRESS",
+      "summary": "Resmî derleme numarası yalnız paketleme yetkisi tarafından ayrıldı."
+    },
+    {
+      "channel": "Bronze",
+      "date": "2026-08-18",
+      "monthlySequence": 31,
+      "version": "18.08.2026.31",
+      "packageVersion": "18.8.2026-31",
+      "releaseId": "bronze-2026-08-18-r31",
+      "status": "IN_PROGRESS",
+      "summary": "Resmî derleme numarası yalnız paketleme yetkisi tarafından ayrıldı."
+    },
+    {
+      "channel": "Bronze",
+      "date": "2026-08-18",
+      "monthlySequence": 32,
+      "version": "18.08.2026.32",
+      "packageVersion": "18.8.2026-32",
+      "releaseId": "bronze-2026-08-18-r32",
+      "status": "IN_PROGRESS",
+      "summary": "Resmî derleme numarası yalnız paketleme yetkisi tarafından ayrıldı."
+    },
+    {
+      "channel": "Bronze",
+      "date": "2026-08-19",
+      "monthlySequence": 33,
+      "version": "19.08.2026.33",
+      "packageVersion": "19.8.2026-33",
+      "releaseId": "bronze-2026-08-19-r33",
       "status": "IN_PROGRESS",
       "summary": "Resmî derleme numarası yalnız paketleme yetkisi tarafından ayrıldı."
     }

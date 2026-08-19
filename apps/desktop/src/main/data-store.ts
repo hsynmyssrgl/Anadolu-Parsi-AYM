@@ -169,7 +169,9 @@ import {
   UpdatePlacesTravelItemUseCase,
   DeletePlacesTravelItemUseCase,
   GetFamilyAiAssistantCenterUseCase,
+  GetFamilyAiLocalModelStatusUseCase,
   GenerateFamilyAiSuggestionUseCase,
+  RunFamilyAiLocalModelUseCase,
   ReviewFamilyAiSuggestionUseCase,
   GetMemoryStudioCenterUseCase,
   CreateMemoryStudioRecordUseCase,
@@ -420,9 +422,10 @@ import {
   type WindowsHelloPlatformPort,
   type WindowsHelloDeviceBindingPort
 } from '@ppt/application';
+import type { FamilyAiAssistantModelPort } from '@ppt/application';
 import type { AddArchiveItemVersionInput, AddArchiveRelationEvidenceInput, ArchiveRelationEvidenceHistoryView, ArchiveRelationEvidenceView, ChildEducationCenterView, ChildEducationMutationReceiptView, CreateChildEducationItemInput, CreateHouseholdOperationItemInput, DeleteChildEducationItemInput, DeleteHouseholdOperationItemInput, HealthCareCoordinationCenterView, HealthCareMutationReceiptView, HouseholdOperationMutationReceiptView, HouseholdOperationsCenterView, RecordHealthCareEntryInput, RemoveArchiveRelationEvidenceInput, RevokeHealthCareAccessGrantInput, UnifiedAuthorizedSearchInput, UnifiedAuthorizedSearchView, UpdateChildEducationItemInput, UpdateHouseholdOperationItemInput, UpsertHealthCareAccessGrantInput } from '@ppt/domain';
 import type { CreatePlacesTravelItemInput, DeletePlacesTravelItemInput, PlacesTravelCenterView, PlacesTravelMutationReceiptView, UpdatePlacesTravelItemInput } from '@ppt/domain';
-import type { FamilyAiAssistantCenterView, FamilyAiSuggestionMutationReceiptView, GenerateFamilyAiSuggestionInput, ReviewFamilyAiSuggestionInput } from '@ppt/domain';
+import type { FamilyAiAssistantCenterView, FamilyAiLocalModelResponseView, FamilyAiLocalModelStatusView, FamilyAiSuggestionMutationReceiptView, GenerateFamilyAiSuggestionInput, RunFamilyAiLocalModelInput, ReviewFamilyAiSuggestionInput } from '@ppt/domain';
 import type { CreateMemoryStudioRecordInput, DeleteMemoryStudioRecordInput, CreateMemoryTimeCapsuleInput, MemoryStudioCenterView, MemoryStudioMutationReceiptView, ReviewMemoryTimeCapsuleInput, TransitionMemoryTimeCapsuleInput } from '@ppt/domain';
 import type { GrantSmartHomeCameraConsentInput, RecordSmartHomeObservationInput, RegisterSmartHomeDeviceInput, RevokeSmartHomeCameraConsentInput, SetSmartHomeProcessingInput, SmartHomeEnergyCenterView, SmartHomeMutationReceiptView, UpdateSmartHomeDeviceStatusInput } from '@ppt/domain';
 import type { EmergencyDisableSignedPluginInput, RollbackSignedPluginInput, SetSignedPluginDesiredStateInput, SignedPluginMutationReceiptView, SignedPluginPlatformCenterView, VerifiedSignedPluginReleaseInput } from '@ppt/domain';
@@ -700,6 +703,7 @@ import { FileSystemArchiveVaultFilePort } from './archive-vault-file-application
 import { RepositoryBackedLocalGovernedOcrUnitOfWork } from './local-governed-ocr-application-adapter.js';
 import { createWindowsLocalGovernedOcrRuntimeAdapter } from './local-governed-ocr-runtime-adapter.js';
 import { LocalGovernedOcrResultVault } from './local-governed-ocr-result-vault.js';
+import type { LocalOcrMalwareVerdictPort } from './local-ocr-worker.js';
 import { FileSystemOperationalArtifactFilePort } from './operational-artifact-file-application-adapter.js';
 import { writePrivacyDataExportFile, type PrivacyDataExportFileResult } from './privacy-data-export-service.js';
 import type { OperationalArtifactFilePort } from '@ppt/application';
@@ -890,6 +894,10 @@ interface DataStoreOptions {
   archivePath?: string;
   /** Explicit bounded runtime seam for deterministic production-composition integration tests. */
   localGovernedOcrRuntime?: LocalGovernedOcrRuntimePort;
+  /** Main-only local malware verdict authority. Absence keeps OCR execution fail-closed. */
+  localGovernedOcrMalwareScanner?: LocalOcrMalwareVerdictPort;
+  /** Main-only local model seam. Missing configuration remains visible and fail-closed. */
+  familyAiAssistantModel?: FamilyAiAssistantModelPort;
   /** Must resolve to a dedicated directory disjoint from the archive, database and key paths. */
   localGovernedOcrResultPath?: string;
   archivePolicyEnforcementPointResolver?: ArchivePolicyEnforcementPointResolver;
@@ -1654,7 +1662,9 @@ export class FamilyDataStore {
   readonly #updatePlacesTravelItemUseCase: UpdatePlacesTravelItemUseCase;
   readonly #deletePlacesTravelItemUseCase: DeletePlacesTravelItemUseCase;
   readonly #getFamilyAiAssistantCenterUseCase:GetFamilyAiAssistantCenterUseCase;
+  readonly #getFamilyAiLocalModelStatusUseCase:GetFamilyAiLocalModelStatusUseCase;
   readonly #generateFamilyAiSuggestionUseCase:GenerateFamilyAiSuggestionUseCase;
+  readonly #runFamilyAiLocalModelUseCase:RunFamilyAiLocalModelUseCase;
   readonly #reviewFamilyAiSuggestionUseCase:ReviewFamilyAiSuggestionUseCase;
   readonly #getMemoryStudioCenterUseCase:GetMemoryStudioCenterUseCase;
   readonly #createMemoryStudioRecordUseCase:CreateMemoryStudioRecordUseCase;
@@ -3015,7 +3025,16 @@ export class FamilyDataStore {
       now:()=>this.#clock.now()
     });
     this.#getFamilyAiAssistantCenterUseCase=new GetFamilyAiAssistantCenterUseCase(familyAiAssistantQuery);
+    const familyAiAssistantModel=options.familyAiAssistantModel??Object.freeze({
+      getStatus:async()=>Object.freeze({provider:'ollama_loopback' as const,configured:false,available:false,
+        endpoint:'http://127.0.0.1:11434' as const,localLoopbackOnly:true as const,networkEgressUsed:false as const,
+        cloudUsed:false as const,checkedAt:asIsoDateTime(this.#clock.now())}),
+      run:async(input:Parameters<FamilyAiAssistantModelPort['run']>[0])=>err(createAppError({code:ERROR_CODES.CONFIG_INVALID,
+        message:'Yerel AI modeli yapılandırılmamıştır.',category:'validation',correlationId:input.correlationId}))
+    }) satisfies FamilyAiAssistantModelPort;
+    this.#getFamilyAiLocalModelStatusUseCase=new GetFamilyAiLocalModelStatusUseCase(familyAiAssistantModel);
     this.#generateFamilyAiSuggestionUseCase=new GenerateFamilyAiSuggestionUseCase(familyAiAssistantSource,familyAiAssistantUnitOfWork);
+    this.#runFamilyAiLocalModelUseCase=new RunFamilyAiLocalModelUseCase(familyAiAssistantSource,familyAiAssistantModel);
     this.#reviewFamilyAiSuggestionUseCase=new ReviewFamilyAiSuggestionUseCase(familyAiAssistantUnitOfWork);
     const memoryStudioDependencies={...lifeApplicationDependencies,
       memoryStudioRepository:this.#repositories.memoryStudioRepository,
@@ -3315,6 +3334,9 @@ export class FamilyDataStore {
               }),
               protectedStore: options.protectedSideArtifacts
             }),
+            ...(options.localGovernedOcrMalwareScanner === undefined
+              ? {}
+              : { malwareScanner: options.localGovernedOcrMalwareScanner }),
             now: () => this.#clock.now()
           });
     this.#getLocalGovernedOcrCenterUseCase = new GetLocalGovernedOcrCenterUseCase(localGovernedOcrUnitOfWork);
@@ -6718,6 +6740,17 @@ export class FamilyDataStore {
   public async getFamilyAiAssistantCenter():Promise<FamilyAiAssistantCenterView>{
     const result=await this.#getFamilyAiAssistantCenterUseCase.execute(
       this.#lifeApplicationContext('family-ai-assistant-center'));
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public getFamilyAiLocalModelStatus():Promise<FamilyAiLocalModelStatusView>{
+    return this.#getFamilyAiLocalModelStatusUseCase.execute();
+  }
+
+  public async runFamilyAiLocalModel(input:RunFamilyAiLocalModelInput):Promise<FamilyAiLocalModelResponseView>{
+    const result=await this.#runFamilyAiLocalModelUseCase.execute({
+      context:this.#lifeApplicationContext('family-ai-local-model'),command:input});
     if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
     return result.value;
   }

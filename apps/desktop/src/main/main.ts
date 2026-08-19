@@ -8,13 +8,14 @@ import { performance } from 'node:perf_hooks';
 import { asCorrelationId, asIsoDateTime, createAppError, err, ERROR_CODES, ok, type AppError, type Result } from '@ppt/core';
 import { createWebAuthnChallenge, encryptPortableEmergencyPack, sha256Hex, validateOidcProviderConfiguration, verifyPortableEmergencyPackReadback, type OidcProviderConfiguration, type WebAuthnAssertionInput, type WebAuthnRegistrationInput } from '@ppt/security';
 import { writeContentFreeConsoleEvent } from '@ppt/logging';
-import { APP_META, USER_VISIBLE_APP_INFO, type CreateArchiveItemInput, CreateFamilyEventInput, UpdateFamilyEventInput, SetFamilyEventArchivedInput, UpdateEventParticipantsInput, UpdateEventInvitationInput, UpdateEventNotesInput, AcknowledgeFamilyNotificationInput, CreateFamilyLocationInput, CreateFamilyMemberInput, CreateFamilyRelationInput, LoginInput, SetupAdminInput, ChangePasswordInput, EnableTwoFactorInput, DisableTwoFactorInput, TrustCurrentDeviceInput, ReauthorizeCurrentDeviceInput, CreateFamilyInvitationInput, InspectFamilyInvitationInput, ResendFamilyInvitationInput, AcceptFamilyInvitationInput, UpsertObjectPermissionInput, UpdateFamilyAccountInput, CreateFinanceRecordInput, CreateBankAccountInput, ValidateIbanInput, CreatePaymentCardInput, CreateHealthRecordInput, CreateMedicationPlanInput, CreateFamilyHealthHistoryInput, CreateFinanceValuationInput, CreateLifeRecordInput, CreateAutomationRuleInput, CreateArchiveCategoryInput, UpdateArchiveClassificationInput, UpsertAiConsentInput, AiConsentPurpose, UpsertSensitiveDataConsentInput, SensitiveExportPreviewInput, RunAutomationInput, UpsertDigitalLegacyPlanInput, UpsertLegacyGrantInput, ExecuteLegacyPlanInput, ApproveLegacyExecutionInput, CancelLegacyExecutionInput, ArchiveSearchInput, CreateArchiveRetentionPolicyInput, AssignArchiveRetentionPolicyInput, UpsertBackupTargetInput, MaintenanceResultView, BackupSchedulerResultView, AdaptiveResourceStateView, EnqueueTaskInput, UpsertMaintenancePolicyInput, DiagnosticFilterInput, DiagnosticArchiveSearchInput, MaintenanceHistoryFilterInput, CreateDataRetentionPolicyInput, ArchiveDataResourceInput, RestoreDataResourceInput, RequestDataPurgeInput, CancelDataPurgeInput, ExecuteDataPurgeInput, SetDataLegalHoldInput, UpdateBackupQuarantinePolicyInput, SetBackupQuarantineLegalHoldInput, DestroyBackupQuarantineBatchInput, RegisterExternalBackupCopyInput, ReviewExternalBackupCopyInput, SetExternalBackupCopyLegalHoldInput, AttestExternalBackupCopyDestroyedInput, RegisterExternalBackupEvidenceIssuerInput, RotateExternalBackupEvidenceIssuerInput, RevokeExternalBackupEvidenceIssuerInput, ApplyExternalBackupEvidenceRevocationListInput, UpsertExternalBackupRevocationEndpointInput, PendingRevocationSyncListView, ApplyPendingRevocationSyncInput, RevocationSyncEndpointStateView, RevocationSyncRunResultView, VerifyExternalBackupDestructionEvidenceInput, ApplyFamilyDataImportInput, RollbackFamilyDataImportInput, GenealogyTreePageInput, TimelinePageInput, ArchivePageInput, PersonCatalogPageInput, EventCatalogPageInput, EntityCatalogLookupInput, FamilySnapshotSectionsInput, IpcAdaptiveBudgetMaintenanceOperation, IpcAdaptiveBudgetMaintenanceAuthorizationInput, IpcAdaptiveBudgetMaintenanceReauthenticationInput, IpcAdaptiveBudgetMaintenanceRecoveryInput, UpdateBackupCleanRewritePolicyInput } from '@ppt/domain';
+import { APP_META, USER_VISIBLE_APP_INFO, resolveUiLocalization, type UiLocalizationBootstrapView, type CreateArchiveItemInput, CreateFamilyEventInput, UpdateFamilyEventInput, SetFamilyEventArchivedInput, UpdateEventParticipantsInput, UpdateEventInvitationInput, UpdateEventNotesInput, AcknowledgeFamilyNotificationInput, CreateFamilyLocationInput, CreateFamilyMemberInput, CreateFamilyRelationInput, LoginInput, SetupAdminInput, ChangePasswordInput, EnableTwoFactorInput, DisableTwoFactorInput, TrustCurrentDeviceInput, ReauthorizeCurrentDeviceInput, CreateFamilyInvitationInput, InspectFamilyInvitationInput, ResendFamilyInvitationInput, AcceptFamilyInvitationInput, UpsertObjectPermissionInput, UpdateFamilyAccountInput, CreateFinanceRecordInput, CreateBankAccountInput, ValidateIbanInput, CreatePaymentCardInput, CreateHealthRecordInput, CreateMedicationPlanInput, CreateFamilyHealthHistoryInput, CreateFinanceValuationInput, CreateLifeRecordInput, CreateAutomationRuleInput, CreateArchiveCategoryInput, UpdateArchiveClassificationInput, UpsertAiConsentInput, AiConsentPurpose, UpsertSensitiveDataConsentInput, SensitiveExportPreviewInput, RunAutomationInput, UpsertDigitalLegacyPlanInput, UpsertLegacyGrantInput, ExecuteLegacyPlanInput, ApproveLegacyExecutionInput, CancelLegacyExecutionInput, ArchiveSearchInput, CreateArchiveRetentionPolicyInput, AssignArchiveRetentionPolicyInput, UpsertBackupTargetInput, MaintenanceResultView, BackupSchedulerResultView, AdaptiveResourceStateView, EnqueueTaskInput, UpsertMaintenancePolicyInput, DiagnosticFilterInput, DiagnosticArchiveSearchInput, MaintenanceHistoryFilterInput, CreateDataRetentionPolicyInput, ArchiveDataResourceInput, RestoreDataResourceInput, RequestDataPurgeInput, CancelDataPurgeInput, ExecuteDataPurgeInput, SetDataLegalHoldInput, UpdateBackupQuarantinePolicyInput, SetBackupQuarantineLegalHoldInput, DestroyBackupQuarantineBatchInput, RegisterExternalBackupCopyInput, ReviewExternalBackupCopyInput, SetExternalBackupCopyLegalHoldInput, AttestExternalBackupCopyDestroyedInput, RegisterExternalBackupEvidenceIssuerInput, RotateExternalBackupEvidenceIssuerInput, RevokeExternalBackupEvidenceIssuerInput, ApplyExternalBackupEvidenceRevocationListInput, UpsertExternalBackupRevocationEndpointInput, PendingRevocationSyncListView, ApplyPendingRevocationSyncInput, RevocationSyncEndpointStateView, RevocationSyncRunResultView, VerifyExternalBackupDestructionEvidenceInput, ApplyFamilyDataImportInput, RollbackFamilyDataImportInput, GenealogyTreePageInput, TimelinePageInput, ArchivePageInput, PersonCatalogPageInput, EventCatalogPageInput, EntityCatalogLookupInput, FamilySnapshotSectionsInput, IpcAdaptiveBudgetMaintenanceOperation, IpcAdaptiveBudgetMaintenanceAuthorizationInput, IpcAdaptiveBudgetMaintenanceReauthenticationInput, IpcAdaptiveBudgetMaintenanceRecoveryInput, UpdateBackupCleanRewritePolicyInput } from '@ppt/domain';
 import type { AddArchiveItemVersionInput, AddArchiveRelationEvidenceInput, RemoveArchiveRelationEvidenceInput } from '@ppt/domain';
+import { STABLE_USER_DATA_DIRECTORY_NAME } from '@ppt/domain';
 import type { RecordHealthCareEntryInput, RevokeHealthCareAccessGrantInput, UpsertHealthCareAccessGrantInput } from '@ppt/domain';
 import type { CreateHouseholdOperationItemInput, DeleteHouseholdOperationItemInput, UpdateHouseholdOperationItemInput } from '@ppt/domain';
 import type { CreateChildEducationItemInput, DeleteChildEducationItemInput, UpdateChildEducationItemInput } from '@ppt/domain';
 import type { CreatePlacesTravelItemInput, DeletePlacesTravelItemInput, UpdatePlacesTravelItemInput } from '@ppt/domain';
-import type { GenerateFamilyAiSuggestionInput, ReviewFamilyAiSuggestionInput } from '@ppt/domain';
+import type { GenerateFamilyAiSuggestionInput, RunFamilyAiLocalModelInput, ReviewFamilyAiSuggestionInput } from '@ppt/domain';
 import type { CreateMemoryStudioRecordInput, DeleteMemoryStudioRecordInput, CreateMemoryTimeCapsuleInput, ReviewMemoryTimeCapsuleInput, TransitionMemoryTimeCapsuleInput } from '@ppt/domain';
 import type { GrantSmartHomeCameraConsentInput, RevokeSmartHomeCameraConsentInput, SetSmartHomeProcessingInput } from '@ppt/domain';
 import type { EmergencyDisableSignedPluginInput, RollbackSignedPluginInput, SetSignedPluginDesiredStateInput } from '@ppt/domain';
@@ -172,6 +173,7 @@ import {
   type CommunicationCallPreflightWindowLike
 } from './communication-call-preflight-adapter.js';
 import { PRIMARY_RENDERER_DOCUMENT_URL, PRIMARY_RENDERER_ORIGIN, PRIMARY_RENDERER_SCHEME, resolvePrimaryRendererAssetPath } from './renderer-protocol.js';
+import { respondToOfflineFamilyMapRequest } from './offline-family-map-protocol.js';
 import {
   ElectronSafeStorageDeviceSecretProtector,
   WindowsDpapiDeviceSecretProtector,
@@ -192,6 +194,9 @@ import {
 import { VolatileSqliteSession } from './volatile-sqlite-session.js';
 import { ProtectedSideArtifactStore } from './protected-side-artifact-store.js';
 import { ProtectedOperationalArtifactFilePort } from './operational-artifact-file-application-adapter.js';
+import { OllamaFamilyAiModelAdapter, resolveLocalFamilyAiEnabled } from './local-family-ai-model-adapter.js';
+import { WindowsDefenderCommunicationFileMalwareScanner } from './communication-file-payload-vault.js';
+import { WindowsDefenderLocalOcrMalwareAdapter } from './windows-defender-local-ocr-malware-adapter.js';
 import { runWindowsSecurityEvidenceProbe, type WindowsSecurityEvidenceProbeReport } from './windows-security-evidence-probe.js';
 import { runWindowsOpen021EfsEvidenceProbe, type WindowsOpen021EfsEvidenceProbeReport } from './windows-open021-efs-evidence-probe.js';
 import { runWindowsOpen022SideArtifactEvidenceProbe, type WindowsOpen022SideArtifactEvidenceProbeReport } from './windows-open022-side-artifact-evidence-probe.js';
@@ -387,11 +392,14 @@ const getApplicationSecurityProfileGateBoundaryUseCase = new GetApplicationSecur
 const getProductSurfaceGovernanceUseCase = new GetProductSurfaceGovernanceUseCase(
   createProductSurfaceGovernanceRepository()
 );
-const currentProductName = 'Anadolu Parsı Aile Yaşam Merkezi';
+const currentProductName = APP_META.name;
+let uiLocalizationBootstrap: Readonly<UiLocalizationBootstrapView> = resolveUiLocalization(undefined);
+const mainText = (turkish: string, english: string): string =>
+  uiLocalizationBootstrap.language === 'tr' ? turkish : english;
 const uninstallBackupAssistantRequested = process.argv.includes('--uninstall-backup-assistant');
 assertPinnedBootstrapRuntimeCapability('windows-desktop', 'file.access');
 assertPinnedBootstrapRuntimeCapability('windows-desktop', 'network.access');
-const volatileRuntimeBase = join(app.getPath('temp'), 'Anadolu-Parsi-Aile-Yasam-Merkezi');
+const volatileRuntimeBase = join(app.getPath('temp'), 'ParsYuva-AYM');
 const volatileRuntimeCleanupMarker = join(volatileRuntimeBase, 'last-runtime-root.txt');
 const volatileRuntimeRoot = join(
   volatileRuntimeBase,
@@ -410,7 +418,7 @@ if (process.env.PPT_WINDOWS_LAUNCH_USER_DATA_PATH) {
   app.setPath('userData', process.env.PPT_WINDOWS_LAUNCH_USER_DATA_PATH);
 } else if (app.isPackaged) {
   const appDataPath = app.getPath('appData');
-  const currentUserDataPath = join(appDataPath, currentProductName);
+  const currentUserDataPath = join(appDataPath, STABLE_USER_DATA_DIRECTORY_NAME);
   app.setPath('userData', currentUserDataPath);
 }
 const singleInstanceLock = app.requestSingleInstanceLock();
@@ -1196,6 +1204,18 @@ function store(windowsHelloPlatformOverride?: WindowsHelloPlatformPort): FamilyD
     const coreService = coreServiceConnection();
     const archivePolicyReceiptSink = policyReceiptSink();
     const identityAccess=createIdentityAccessProductionPorts(current,osSecretProtector);
+    const defenderExecutable=join(process.env.ProgramFiles??'C:\\Program Files','Windows Defender','MpCmdRun.exe');
+    let defenderScanner:WindowsDefenderCommunicationFileMalwareScanner|undefined;
+    if(process.platform==='win32'&&existsSync(defenderExecutable)){
+      try{
+        defenderScanner=new WindowsDefenderCommunicationFileMalwareScanner({
+          executablePath:defenderExecutable,
+          scratchDirectory:join(current.config.paths.temp,'windows-defender-scan')
+        });
+      }catch{
+        // The downstream OCR and file-sharing ports remain fail-closed when Defender cannot be attested.
+      }
+    }
     const provisioningCorrelationId=createRuntimeCorrelationId('startup');
     dataStore=current.correlation.run({correlationId:provisioningCorrelationId},()=>desktopRepositoryPolicyScope.runBootstrap({correlationId:provisioningCorrelationId,boundary:'auth:getExternalIdentityProviders'},()=>new FamilyDataStore({
       databasePath,
@@ -1213,6 +1233,15 @@ function store(windowsHelloPlatformOverride?: WindowsHelloPlatformPort): FamilyD
       backupPasswordPath: join(current.config.paths.secrets, 'managed-backup-password.json'),
       securityEventReceiptPath: join(dirname(databasePath), 'security-event-receipts.pptdiag'),
       protectedSideArtifacts: current.protectedArtifacts,
+      familyAiAssistantModel:new OllamaFamilyAiModelAdapter({
+        enabled:resolveLocalFamilyAiEnabled(process.env.PPT_LOCAL_AI_ENABLED),
+        model:process.env.PPT_LOCAL_AI_MODEL?.trim()||'qwen3:4b',
+        clock:()=>current.clock.now()
+      }),
+      ...(defenderScanner===undefined?{}:{
+        communicationFileMalwareScanner:defenderScanner,
+        localGovernedOcrMalwareScanner:new WindowsDefenderLocalOcrMalwareAdapter(defenderScanner)
+      }),
       operationalArtifactFiles: new ProtectedOperationalArtifactFilePort(current.protectedArtifacts),
       archivePath: current.config.paths.archive,
       archivePolicyAuthorizationProvider: coreService.adapter.policyProvider,
@@ -1446,6 +1475,7 @@ function registerIpc(): void {
     requestLifecycles: ipcRequestLifecycles
   });
   registerIpcHandler('app:getInfo', () => USER_VISIBLE_APP_INFO);
+  registerIpcHandler('app:getLocalizationBootstrap', () => uiLocalizationBootstrap);
   registerIpcHandler('auth:getExternalIdentityProviders', () => (oidcDeepLinkProtocolRegistered?oidcFederatedIdentity?.listVisibleConfiguredProviders()??[]:[]).map(({provider})=>({id:provider,label:provider==='apple'?'Apple ile devam et':provider==='google'?'Google ile devam et':'Microsoft ile devam et',configured:true,productionReady:false})));
   registerIpcHandler('auth:getState', () => dataStore ? dataStore.getAuthState() : lockedAuthState());
   registerIpcHandler('auth:getSessionLockState', () => {
@@ -1900,20 +1930,20 @@ function registerIpc(): void {
   registerIpcHandler('system:listHealthHistory', (_event,limit?:number) => store().listSystemHealthHistory(limit));
   registerIpcHandler('system:getHealthTrend', (_event,days?:number) => store().getSystemHealthTrend(days));
   registerIpcHandler('system:listDiagnosticArchives', (_event,limit?:number) => store().listDiagnosticArchives(limit));
-  registerIpcHandler('system:archiveDiagnostics', async (_event,before?:string) => { const cutoff=before??new Date(Date.now()-30*86_400_000).toISOString(); const result=await dialog.showSaveDialog({title:'Tanılama olay arşivini kaydet',defaultPath:`Anadolu_Parsi_Tanilama_Arsivi_${new Date().toISOString().slice(0,10)}.pptdiag`,filters:[{name:'Korumalı Tanılama',extensions:['pptdiag']}]}); if(result.canceled||!result.filePath)return {canceled:true}; return {canceled:false,archive:store().archiveDiagnostics(cutoff,result.filePath)}; });
+  registerIpcHandler('system:archiveDiagnostics', async (_event,before?:string) => { const cutoff=before??new Date(Date.now()-30*86_400_000).toISOString(); const result=await dialog.showSaveDialog({title:'Tanılama olay arşivini kaydet',defaultPath:`ParsYuva_AYM_Tanilama_Arsivi_${new Date().toISOString().slice(0,10)}.pptdiag`,filters:[{name:'Korumalı Tanılama',extensions:['pptdiag']}]}); if(result.canceled||!result.filePath)return {canceled:true}; return {canceled:false,archive:store().archiveDiagnostics(cutoff,result.filePath)}; });
   registerIpcHandler('system:verifyDiagnosticArchive', (_event,id:string) => store().verifyDiagnosticArchive(id));
   registerIpcHandler('system:readDiagnosticReport', (_event,id:string) => store().readDiagnosticReport(id));
   registerIpcHandler('system:verifyDiagnosticReport', (_event,id:string) => store().verifyDiagnosticReport(id));
   registerIpcHandler('system:compareDiagnosticReports', (_event,leftId:string,rightId:string) => store().compareDiagnosticReports(leftId,rightId));
   registerIpcHandler('system:readDiagnosticArchive', (_event,id:string) => store().readDiagnosticArchive(id));
   registerIpcHandler('system:searchDiagnosticArchive', (_event,id:string,input:DiagnosticArchiveSearchInput) => store().searchDiagnosticArchive(id,input));
-  registerIpcHandler('system:exportDiagnosticArchiveEntries', async (_event,id:string,input:DiagnosticArchiveSearchInput,format:'json'|'csv') => { const result=await dialog.showSaveDialog({title:'Arşiv olaylarını dışa aktar',defaultPath:`Anadolu_Parsi_Arsiv_Olaylari_${new Date().toISOString().slice(0,10)}.pptdiag`,filters:[{name:'Korumalı Tanılama',extensions:['pptdiag']}]}); if(result.canceled||!result.filePath)return {canceled:true}; return {canceled:false,export:store().exportDiagnosticArchiveEntries(id,input,format,result.filePath)}; });
+  registerIpcHandler('system:exportDiagnosticArchiveEntries', async (_event,id:string,input:DiagnosticArchiveSearchInput,format:'json'|'csv') => { const result=await dialog.showSaveDialog({title:'Arşiv olaylarını dışa aktar',defaultPath:`ParsYuva_AYM_Arsiv_Olaylari_${new Date().toISOString().slice(0,10)}.pptdiag`,filters:[{name:'Korumalı Tanılama',extensions:['pptdiag']}]}); if(result.canceled||!result.filePath)return {canceled:true}; return {canceled:false,export:store().exportDiagnosticArchiveEntries(id,input,format,result.filePath)}; });
   registerIpcHandler('system:listMaintenanceHistory', (_event,limit?:number) => store().listMaintenanceHistory(limit));
 
   registerIpcHandler('system:searchMaintenanceHistory', (_event,input:MaintenanceHistoryFilterInput) => store().searchMaintenanceHistory(input));
-  registerIpcHandler('system:exportMaintenanceHistory', async (_event,input:MaintenanceHistoryFilterInput,format:'json'|'csv') => { const result=await dialog.showSaveDialog({title:'Bakım geçmişini dışa aktar',defaultPath:`Anadolu_Parsi_Bakim_Gecmisi_${new Date().toISOString().slice(0,10)}.pptdiag`,filters:[{name:'Korumalı Tanılama',extensions:['pptdiag']}]}); if(result.canceled||!result.filePath)return {canceled:true}; return {canceled:false,export:store().exportMaintenanceHistory(input,format,result.filePath)}; });
+  registerIpcHandler('system:exportMaintenanceHistory', async (_event,input:MaintenanceHistoryFilterInput,format:'json'|'csv') => { const result=await dialog.showSaveDialog({title:'Bakım geçmişini dışa aktar',defaultPath:`ParsYuva_AYM_Bakim_Gecmisi_${new Date().toISOString().slice(0,10)}.pptdiag`,filters:[{name:'Korumalı Tanılama',extensions:['pptdiag']}]}); if(result.canceled||!result.filePath)return {canceled:true}; return {canceled:false,export:store().exportMaintenanceHistory(input,format,result.filePath)}; });
   registerIpcHandler('system:searchAllDiagnosticArchives', (_event,input:DiagnosticArchiveSearchInput) => store().searchAllDiagnosticArchives(input));
-  registerIpcHandler('system:exportSystemPdf', async () => { const report=store().getDiagnosticReport(); const result=await dialog.showSaveDialog({title:'Sistem sağlık raporunu PDF olarak kaydet',defaultPath:`Anadolu_Parsi_Sistem_Raporu_${new Date().toISOString().slice(0,10)}.pptreport`,filters:[{name:'Korumalı Sistem Raporu',extensions:['pptreport']}]}); if(result.canceled||!result.filePath)return {canceled:true}; const win=new BrowserWindow({show:false,webPreferences:{sandbox:true}}); const esc=(v:unknown)=>String(v).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]!)); const html=`<!doctype html><html><head><meta charset="utf-8"><style>body{font-family:Arial,sans-serif;padding:32px;color:#1d2433}h1{font-size:24px}h2{font-size:16px;margin-top:24px}.score{font-size:42px;font-weight:700}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.card{border:1px solid #ddd;border-radius:10px;padding:14px}small{color:#667}</style></head><body><h1>Anadolu Parsı Aile Yaşam Merkezi — Sistem Sağlık Raporu</h1><p>${esc(report.generatedAt)}</p><div class="score">${report.healthScore.score}/100</div><p>${esc(report.healthScore.grade)} · ${esc(report.system.status)}</p><div class="grid"><div class="card"><h2>Donanım</h2><p>${esc(report.system.cpuModel)}</p><p>CPU çekirdeği: ${report.system.cpuCores}</p><p>Bellek: ${report.system.memoryUsagePercent.toFixed(1)}%</p></div><div class="card"><h2>Depolama</h2><p>Veritabanı: ${report.system.databaseBytes} bayt</p><p>Arşiv: ${report.system.archiveBytes} bayt</p><p>Bütünlük: ${report.system.integrityOk?'Başarılı':'Başarısız'}</p></div></div><h2>Kesintiler</h2><ul>${report.healthScore.deductions.map(d=>`<li>${esc(d.message)} (-${d.points})</li>`).join('')||'<li>Kesinti yok</li>'}</ul><h2>Son tanılama olayları</h2><ul>${report.diagnostics.slice(0,20).map(d=>`<li>${esc(d.occurredAt)} — ${esc(d.code)} — ${esc(d.message)}</li>`).join('')}</ul></body></html>`; await win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`); const buffer=await win.webContents.printToPDF({printBackground:true,pageSize:'A4'}); const protectedReport=runtime().protectedArtifacts.writeBuffer(result.filePath,'system-health-report-pdf',buffer); buffer.fill(0); win.destroy(); store().recordExportArtifact('system_pdf','pdf',protectedReport.filePath,protectedReport.sha256,protectedReport.sizeBytes); return {canceled:false,...protectedReport}; });
+  registerIpcHandler('system:exportSystemPdf', async () => { const report=store().getDiagnosticReport(); const result=await dialog.showSaveDialog({title:'Sistem sağlık raporunu PDF olarak kaydet',defaultPath:`ParsYuva_AYM_Sistem_Raporu_${new Date().toISOString().slice(0,10)}.pptreport`,filters:[{name:'Korumalı Sistem Raporu',extensions:['pptreport']}]}); if(result.canceled||!result.filePath)return {canceled:true}; const win=new BrowserWindow({show:false,webPreferences:{sandbox:true}}); const esc=(v:unknown)=>String(v).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]!)); const html=`<!doctype html><html><head><meta charset="utf-8"><style>body{font-family:Arial,sans-serif;padding:32px;color:#1d2433}h1{font-size:24px}h2{font-size:16px;margin-top:24px}.score{font-size:42px;font-weight:700}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.card{border:1px solid #ddd;border-radius:10px;padding:14px}small{color:#667}</style></head><body><h1>ParsYuva AYM — Sistem Sağlık Raporu</h1><p>${esc(report.generatedAt)}</p><div class="score">${report.healthScore.score}/100</div><p>${esc(report.healthScore.grade)} · ${esc(report.system.status)}</p><div class="grid"><div class="card"><h2>Donanım</h2><p>${esc(report.system.cpuModel)}</p><p>CPU çekirdeği: ${report.system.cpuCores}</p><p>Bellek: ${report.system.memoryUsagePercent.toFixed(1)}%</p></div><div class="card"><h2>Depolama</h2><p>Veritabanı: ${report.system.databaseBytes} bayt</p><p>Arşiv: ${report.system.archiveBytes} bayt</p><p>Bütünlük: ${report.system.integrityOk?'Başarılı':'Başarısız'}</p></div></div><h2>Kesintiler</h2><ul>${report.healthScore.deductions.map(d=>`<li>${esc(d.message)} (-${d.points})</li>`).join('')||'<li>Kesinti yok</li>'}</ul><h2>Son tanılama olayları</h2><ul>${report.diagnostics.slice(0,20).map(d=>`<li>${esc(d.occurredAt)} — ${esc(d.code)} — ${esc(d.message)}</li>`).join('')}</ul></body></html>`; await win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`); const buffer=await win.webContents.printToPDF({printBackground:true,pageSize:'A4'}); const protectedReport=runtime().protectedArtifacts.writeBuffer(result.filePath,'system-health-report-pdf',buffer); buffer.fill(0); win.destroy(); store().recordExportArtifact('system_pdf','pdf',protectedReport.filePath,protectedReport.sha256,protectedReport.sizeBytes); return {canceled:false,...protectedReport}; });
 
   registerIpcHandler('system:getPerformanceAnomalies', (_event,hours?:number) => store().getPerformanceAnomalies(hours));
   registerIpcHandler('system:getIpcAdaptiveBudgetMaintenanceAuthority', () => adaptiveMaintenanceAuthSnapshot().authority);
@@ -2122,7 +2152,7 @@ function registerIpc(): void {
     const maintenanceSessionFingerprint = consumeAdaptiveMaintenanceSession(event.sender.id, authorization, 'diagnostics-export');
     const result = await dialog.showSaveDialog({
       title: 'Adaptif IPC tanı paketini kaydet',
-      defaultPath: `Anadolu_Parsi_IPC_Adaptif_Tani_${new Date().toISOString().slice(0, 10)}.pptdiag`,
+      defaultPath: `ParsYuva_AYM_IPC_Adaptif_Tani_${new Date().toISOString().slice(0, 10)}.pptdiag`,
       filters: [{ name: 'Korumalı Tanı Paketi', extensions: ['pptdiag'] }]
     });
     if (result.canceled || !result.filePath) return Object.freeze({ canceled: true, maintenanceSessionFingerprint });
@@ -2158,7 +2188,7 @@ function registerIpc(): void {
   registerIpcHandler('system:getDiagnosticReport', () => store().getDiagnosticReport());
   registerIpcHandler('system:listExportArtifacts', (_event,limit?:number) => store().listExportArtifacts(limit));
   registerIpcHandler('system:verifyExportArtifact', (_event,id:string) => store().verifyExportArtifact(id));
-  registerIpcHandler('system:exportDiagnosticReport', async () => { const result=await dialog.showSaveDialog({title:'Tanılama raporunu kaydet',defaultPath:`Anadolu_Parsi_Tanilama_${new Date().toISOString().slice(0,10)}.pptdiag`,filters:[{name:'Korumalı Tanılama Raporu',extensions:['pptdiag']}]}); if(result.canceled||!result.filePath)return {canceled:true}; store().exportDiagnosticReport(result.filePath); return {canceled:false,filePath:result.filePath}; });
+  registerIpcHandler('system:exportDiagnosticReport', async () => { const result=await dialog.showSaveDialog({title:'Tanılama raporunu kaydet',defaultPath:`ParsYuva_AYM_Tanilama_${new Date().toISOString().slice(0,10)}.pptdiag`,filters:[{name:'Korumalı Tanılama Raporu',extensions:['pptdiag']}]}); if(result.canceled||!result.filePath)return {canceled:true}; store().exportDiagnosticReport(result.filePath); return {canceled:false,filePath:result.filePath}; });
   registerIpcHandler('data:getSnapshot', () => store().getSnapshot());
   registerIpcHandler('data:getSnapshotSections', (_event, input:FamilySnapshotSectionsInput) => store().getSnapshotSections(input));
   registerIpcHandler('dashboard:getOverview', () => store().getDashboardOverview());
@@ -2505,8 +2535,8 @@ function registerIpc(): void {
   registerIpcHandler('privacyOwnership:exportEncrypted', async (_event, input:EncryptedPrivacyDataExportRendererInput) => {
     const selected = await dialog.showSaveDialog({
       title: 'Şifreli gizlilik verisi dışa aktarımını kaydet',
-      defaultPath: `Anadolu_Parsi_Gizlilik_Verileri_${new Date().toISOString().slice(0, 10)}.pptprivacy`,
-      filters: [{ name: 'Anadolu Parsı Şifreli Gizlilik Verisi', extensions: ['pptprivacy'] }],
+      defaultPath: `ParsYuva_AYM_Gizlilik_Verileri_${new Date().toISOString().slice(0, 10)}.pptprivacy`,
+      filters: [{ name: 'ParsYuva AYM Şifreli Gizlilik Verisi', extensions: ['pptprivacy'] }],
       properties: ['createDirectory']
     });
     if (selected.canceled || !selected.filePath) throw new PrivacyExportCancelledError();
@@ -2619,6 +2649,9 @@ function registerIpc(): void {
   registerIpcHandler(PLACES_TRAVEL_ASSET_PET_IPC_CHANNELS.deleteItem, async (_event,input:DeletePlacesTravelItemInput)=>
     store().deletePlacesTravelItem(input));
   registerIpcHandler(FAMILY_AI_ASSISTANT_IPC_CHANNELS.getCenter,async()=>store().getFamilyAiAssistantCenter());
+  registerIpcHandler(FAMILY_AI_ASSISTANT_IPC_CHANNELS.getLocalModelStatus,async()=>store().getFamilyAiLocalModelStatus());
+  registerIpcHandler(FAMILY_AI_ASSISTANT_IPC_CHANNELS.runLocalModel,async(_event,input:RunFamilyAiLocalModelInput)=>
+    store().runFamilyAiLocalModel(input));
   registerIpcHandler(FAMILY_AI_ASSISTANT_IPC_CHANNELS.generate,async(_event,input:GenerateFamilyAiSuggestionInput)=>
     store().generateFamilyAiSuggestion(input));
   registerIpcHandler(FAMILY_AI_ASSISTANT_IPC_CHANNELS.review,async(_event,input:ReviewFamilyAiSuggestionInput)=>
@@ -2835,7 +2868,7 @@ function registerIpc(): void {
     const result = await dialog.showOpenDialog({
       title: 'Aile verisi JSON dosyasını ön izle',
       properties: ['openFile'],
-      filters: [{ name: 'Anadolu Parsı Aile Verisi', extensions: ['json'] }]
+      filters: [{ name: 'ParsYuva AYM Aile Verisi', extensions: ['json'] }]
     });
     if (result.canceled || !result.filePaths[0]) return { canceled: true };
     return { canceled: false, preview: store().previewFamilyDataImport(result.filePaths[0]) };
@@ -2948,18 +2981,18 @@ function registerIpc(): void {
     return store().importArchiveFile(result.filePaths[0], input);
   });
   registerIpcHandler('backup:exportFull', async (_event, input: { readonly password: string }) => {
-    const result=await dialog.showSaveDialog({title:'Parola korumalı tam yedeği kaydet',defaultPath:`Anadolu_Parsi_Aile_${new Date().toISOString().slice(0,10)}.pptbackup`,filters:[{name:'Anadolu Parsı Tam Yedek',extensions:['pptbackup']}]});
+    const result=await dialog.showSaveDialog({title:'Parola korumalı tam yedeği kaydet',defaultPath:`ParsYuva_AYM_Aile_${new Date().toISOString().slice(0,10)}.pptbackup`,filters:[{name:'ParsYuva AYM Tam Yedek',extensions:['pptbackup']}]});
     if(result.canceled||!result.filePath) return {canceled:true};
     store().exportFullBackup(result.filePath,input.password);
     return {canceled:false,filePath:result.filePath};
   });
   registerIpcHandler('backup:inspectFull', async (_event, input: { readonly password?: string }) => {
-    const result=await dialog.showOpenDialog({title:'Tam yedeği güvenli biçimde incele',properties:['openFile'],filters:[{name:'Anadolu Parsı Tam Yedek',extensions:['pptbackup']}]});
+    const result=await dialog.showOpenDialog({title:'Tam yedeği güvenli biçimde incele',properties:['openFile'],filters:[{name:'ParsYuva AYM Tam Yedek',extensions:['pptbackup']}]});
     if(result.canceled||!result.filePaths[0]) return {canceled:true};
     return {canceled:false,filePath:result.filePaths[0],inspection:store().inspectFullBackup(result.filePaths[0],input.password)};
   });
   registerIpcHandler('backup:restoreFull', async (_event, input: { readonly password?: string }) => {
-    const result=await dialog.showOpenDialog({title:'Tam yedekten geri yükle',properties:['openFile'],filters:[{name:'Anadolu Parsı Tam Yedek',extensions:['pptbackup']}]});
+    const result=await dialog.showOpenDialog({title:'Tam yedekten geri yükle',properties:['openFile'],filters:[{name:'ParsYuva AYM Tam Yedek',extensions:['pptbackup']}]});
     if(result.canceled||!result.filePaths[0]) return {canceled:true};
     const safetyDir=join(app.getPath('userData'),'safety-backups');
     const safetyPath=join(safetyDir,`Geri_Yukleme_Oncesi_${new Date().toISOString().replace(/[:.]/g,'-')}.pptbackup`);
@@ -2988,8 +3021,8 @@ function registerIpc(): void {
   registerIpcHandler('backup:export', async () => {
     const result = await dialog.showSaveDialog({
       title: 'Cihaz korumalı tam yedeği kaydet',
-      defaultPath: `Anadolu_Parsi_Aile_Yedek_${new Date().toISOString().slice(0, 10)}.pptbackup`,
-      filters: [{ name: 'Anadolu Parsı Korumalı Yedek', extensions: ['pptbackup'] }]
+      defaultPath: `ParsYuva_AYM_Aile_Yedek_${new Date().toISOString().slice(0, 10)}.pptbackup`,
+      filters: [{ name: 'ParsYuva AYM Korumalı Yedek', extensions: ['pptbackup'] }]
     });
     if (result.canceled || !result.filePath) return { canceled: true };
     store().exportBackup(result.filePath);
@@ -3176,7 +3209,7 @@ async function openArchiveInSecurePreview(itemId: string, operationId: string): 
   const preview = new BrowserWindow({
     width: 1080,
     height: 780,
-    title: 'Anadolu Parsı - Güvenli Belge Önizleme',
+    title: 'ParsYuva AYM - Güvenli Belge Önizleme',
     autoHideMenuBar: true,
     webPreferences: { sandbox: true, contextIsolation: true, nodeIntegration: false, webSecurity: true }
   });
@@ -3225,10 +3258,10 @@ function lockApplicationFromTray(): void {
 async function requestExplicitApplicationQuit(): Promise<void> {
   const options = {
     type: 'warning' as const,
-    title: 'Anadolu Parsı AYM',
-    message: 'Uygulamayı tamamen kapatmak istiyor musunuz?',
-    detail: 'Arka plan görevleri durdurulacak ve açık kullanıcı veri oturumu güvenle kilitlenecek.',
-    buttons: ['Tamamen kapat', 'Vazgeç'],
+    title: currentProductName,
+    message: mainText('Uygulamayı tamamen kapatmak istiyor musunuz?', 'Do you want to quit the application completely?'),
+    detail: mainText('Arka plan görevleri durdurulacak ve açık kullanıcı veri oturumu güvenle kilitlenecek.', 'Background tasks will stop and the open user-data session will be locked securely.'),
+    buttons: [mainText('Tamamen kapat','Quit completely'), mainText('Vazgeç','Cancel')],
     defaultId: 1,
     cancelId: 1,
     noLink: true
@@ -3245,12 +3278,12 @@ async function requestExplicitApplicationQuit(): Promise<void> {
 function createApplicationTray(): void {
   if (applicationTray) return;
   applicationTray = new Tray(join(currentDir, 'tray-icon.png'));
-  applicationTray.setToolTip('Anadolu Parsı AYM');
+  applicationTray.setToolTip(currentProductName);
   applicationTray.setContextMenu(Menu.buildFromTemplate([
-    { label: 'Uygulamayı aç', click: () => showPrimaryWindow() },
-    { label: 'Kilitle', click: () => lockApplicationFromTray() },
+    { label: mainText('Uygulamayı aç','Open application'), click: () => showPrimaryWindow() },
+    { label: mainText('Kilitle','Lock'), click: () => lockApplicationFromTray() },
     { type: 'separator' },
-    { label: 'Tamamen kapat', click: () => { void requestExplicitApplicationQuit(); } }
+    { label: mainText('Tamamen kapat','Quit completely'), click: () => { void requestExplicitApplicationQuit(); } }
   ]));
   applicationTray.on('double-click', () => showPrimaryWindow());
 }
@@ -3313,8 +3346,8 @@ function createWindow(): void {
     if (!closeToTrayNoticeShown && applicationTray) {
       closeToTrayNoticeShown = true;
       applicationTray.displayBalloon({
-        title: 'Anadolu Parsı AYM',
-        content: 'Uygulama tamamen kapanmadı; sistem tepsisinde çalışmaya devam ediyor.',
+        title: currentProductName,
+        content: mainText('Uygulama tamamen kapanmadı; sistem tepsisinde çalışmaya devam ediyor.', 'The application did not quit; it is still running in the system tray.'),
         noSound: true
       });
     }
@@ -3371,26 +3404,27 @@ app.on('second-instance', (_event,commandLine) => {
 app.on('open-url',(event,url)=>{event.preventDefault();captureOidcDeepLinkArguments([url]);});
 
 app.whenReady().then(async () => {
+  uiLocalizationBootstrap = resolveUiLocalization(app.getLocale());
   if (uninstallBackupAssistantRequested) {
     const targets = await discoverUninstallBackupTargets({
       documentsPath: app.getPath('documents'), homePath: app.getPath('home'), environment: process.env
     });
     const targetLines = targets.map((target) => `• ${target.kind}: ${target.rootPath}`).join('\n');
     const decision = await dialog.showMessageBox({
-      type: 'question', title: 'Anadolu Parsı AYM kaldırma yedeği',
-      message: 'Şifreli kişisel veriler kaldırılmadan önce yedeklensin mi?',
-      detail: `Yedek aynı anda aşağıdaki kullanılabilir konumlara yazılacak ve SHA-256 ile doğrulanacak. Bulut istemcisinin gerçekten eşitlediği iddia edilmez.\n\n${targetLines}`,
-      buttons: ['Yedekle ve kaldırmaya devam et', 'İptal'], defaultId: 1, cancelId: 1, noLink: true
+      type: 'question', title: `${currentProductName} ${mainText('kaldırma yedeği','uninstall backup')}`,
+      message: mainText('Şifreli kişisel veriler kaldırılmadan önce yedeklensin mi?','Should encrypted personal data be backed up before uninstalling?'),
+      detail: `${mainText('Yedek aynı anda aşağıdaki kullanılabilir konumlara yazılacak ve SHA-256 ile doğrulanacak. Bulut istemcisinin gerçekten eşitlediği iddia edilmez.','The backup will be written to the available locations below at the same time and verified with SHA-256. Actual cloud synchronization is not claimed.')}\n\n${targetLines}`,
+      buttons: [mainText('Yedekle ve kaldırmaya devam et','Back up and continue uninstalling'), mainText('İptal','Cancel')], defaultId: 1, cancelId: 1, noLink: true
     });
     if (decision.response !== 0) { app.exit(2); return; }
     const result = await createVerifiedUninstallBackups({
       userDataPath: app.getPath('userData'), targets, createdAt: new Date().toISOString(), applicationVersion: APP_META.version
     });
     await dialog.showMessageBox({
-      type: 'info', title: 'Anadolu Parsı AYM kaldırma yedeği',
-      message: result.status === 'no_data' ? 'Yedeklenecek kişisel veri bulunmadı.' : 'Kaldırma yedekleri doğrulandı.',
-      detail: result.status === 'no_data' ? 'Kaldırma işlemine devam edilebilir.' : `${result.copiedFiles} dosya, ${result.backupDirectories.length} hedefe doğrulanarak kopyalandı.`,
-      buttons: ['Tamam']
+      type: 'info', title: `${currentProductName} ${mainText('kaldırma yedeği','uninstall backup')}`,
+      message: result.status === 'no_data' ? mainText('Yedeklenecek kişisel veri bulunmadı.','No personal data was found to back up.') : mainText('Kaldırma yedekleri doğrulandı.','Uninstall backups were verified.'),
+      detail: result.status === 'no_data' ? mainText('Kaldırma işlemine devam edilebilir.','Uninstalling can continue.') : mainText(`${result.copiedFiles} dosya, ${result.backupDirectories.length} hedefe doğrulanarak kopyalandı.`,`${result.copiedFiles} files were copied and verified across ${result.backupDirectories.length} destinations.`),
+      buttons: [mainText('Tamam','OK')]
     });
     app.exit(0);
     return;
@@ -3398,6 +3432,8 @@ app.whenReady().then(async () => {
   const rendererRoot = resolve(currentDir, '../renderer');
   const rendererMediaTypes=Object.freeze(new Map<string,string>([['.html','text/html; charset=utf-8'],['.js','text/javascript; charset=utf-8'],['.css','text/css; charset=utf-8'],['.json','application/json; charset=utf-8'],['.svg','image/svg+xml'],['.png','image/png'],['.ico','image/x-icon'],['.woff2','font/woff2'],['.wasm','application/wasm']]));
   protocol.handle(PRIMARY_RENDERER_SCHEME, async (request) => {
+    const offlineMapResponse = respondToOfflineFamilyMapRequest(request, app.getPath('userData'));
+    if (offlineMapResponse) return offlineMapResponse;
     if (request.method !== 'GET') return new Response('Not found', { status: 404 });
     const candidate = resolvePrimaryRendererAssetPath(request.url, rendererRoot);
     if (!candidate) return new Response('Not found', { status: 404 });
@@ -3465,18 +3501,18 @@ app.whenReady().then(async () => {
       throw new Error('Gold aktivasyon dosyası güvenilir değil.');
     }
     licenseStatus = await productLicenseManager.activateGold((await readFile(activationPath, 'utf8')).trim());
-    await dialog.showMessageBox({ type: 'info', title: 'Anadolu Parsı AYM', message: 'Gold aktivasyonu doğrulandı.', detail: 'Bu cihaz için sınırsız kullanım etkinleştirildi.', buttons: ['Tamam'] });
+    await dialog.showMessageBox({ type: 'info', title: currentProductName, message: mainText('Gold aktivasyonu doğrulandı.','Gold activation was verified.'), detail: mainText('Bu cihaz için sınırsız kullanım etkinleştirildi.','Unlimited use was enabled for this device.'), buttons: [mainText('Tamam','OK')] });
     explicitApplicationQuit = true;
     app.quit();
     return;
   }
   if (!licenseStatus.allowed) {
     await dialog.showMessageBox({
-      type: 'error', title: 'Anadolu Parsı AYM', message: '30 günlük kullanım süresi sona erdi.',
+      type: 'error', title: currentProductName, message: mainText('30 günlük kullanım süresi sona erdi.','The 30-day usage period has ended.'),
       detail: productReleaseChannel === 'Gold'
-        ? 'Uygulamayı açmak için bu cihaza ait geçerli Gold aktivasyonunu ayrı yönetici aracıyla kurun.'
-        : `${productReleaseChannel} sürümü süre sonunda kullanılamaz. Kişisel verileriniz silinmedi.`,
-      buttons: ['Kapat']
+        ? mainText('Uygulamayı açmak için bu cihaza ait geçerli Gold aktivasyonunu ayrı yönetici aracıyla kurun.','Install a valid Gold activation for this device with the separate administrator tool to open the application.')
+        : mainText(`${productReleaseChannel} sürümü süre sonunda kullanılamaz. Kişisel verileriniz silinmedi.`,`${productReleaseChannel} cannot be used after the trial period. Your personal data was not deleted.`),
+      buttons: [mainText('Kapat','Close')]
     });
     explicitApplicationQuit = true;
     app.quit();
@@ -3488,7 +3524,7 @@ app.whenReady().then(async () => {
       try {
         const refreshed = await productLicenseManager!.refresh();
         if (!refreshed.allowed) {
-          await dialog.showMessageBox({ type: 'error', title: 'Anadolu Parsı AYM', message: 'Kullanım süresi sona erdi.', detail: 'Açık oturum güvenle kapatılıyor; kişisel verileriniz silinmeyecek.', buttons: ['Kapat'] });
+          await dialog.showMessageBox({ type: 'error', title: currentProductName, message: mainText('Kullanım süresi sona erdi.','The usage period has ended.'), detail: mainText('Açık oturum güvenle kapatılıyor; kişisel verileriniz silinmeyecek.','The open session is being closed securely; your personal data will not be deleted.'), buttons: [mainText('Kapat','Close')] });
           explicitApplicationQuit = true;
           app.quit();
           return;

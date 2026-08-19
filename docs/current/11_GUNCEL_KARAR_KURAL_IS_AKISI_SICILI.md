@@ -1,22 +1,22 @@
-# Anadolu Parsı Aile Yaşam Merkezi — Güncel Karar, Kural ve İş Akışı Sicili
+# ParsYuva AYM — Güncel Karar, Kural ve İş Akışı Sicili
 
-- Belge sürümü: **GUNCEL-2026-08-17-V1**
-- Tarih: **17.08.2026**
-- Görünür ürün sürümü: **Bronze 04.08.2026.29**
-- Kaynak HEAD: `d32a4a26995739bd7069e654d098218fa4526ff4`
+- Belge sürümü: **GUNCEL-2026-08-19-V3**
+- Tarih: **19.08.2026**
+- Görünür ürün sürümü: **Bronze 19.08.2026.33**
+- Kaynak HEAD: `9274e5c9b77415c4add209b963870eac4b721c84`
 - Statü: **ACTIVE_WORKING_REFERENCE_NOT_BUILD_CLOSURE**
-- Kararlar: **DEC-250, DEC-251, DEC-252**
+- Kararlar: **DEC-250, DEC-251, DEC-252, DEC-253, DEC-254**
 
 > Bu sürüm geçmiş PDF/DOCX ve build kapanış belgelerinin üzerine yazmaz. Yerel PASS ile dış kabul kanıtını ayırır; NOT_RUN/PARTIAL/BLOCKED sonuçlarını tamamlanmış göstermez.
 
 ## 1. Denetim sonucu
 
-- Aktif repo Word/PDF tarihsel taraması: **42 dosya / 21 çift / 42 okunabilir**.
+- Aktif repo Word/PDF tarihsel taraması: **46 dosya / 23 çift / 46 okunabilir**.
 - `C:\PPT\AYM` tüm belge türü taraması: **30151 dosya / 30151 okunabilir / 0 sorun**.
 - Office/RTF/PDF: **704**; benzersiz içerik hash'i: **5201**; tekrar kopya: **24950**.
 - Build209–228 master çiftleri ve eski Bronze aktif referans çifti tarihsel olarak korunmuştur.
-- Karar dosyası: **162**; ADR: **106**; security/threat belgesi: **72**.
-- Mevcut tam belge/config/kanıt envanteri: **3665** (yeni sürümden önceki indeks).
+- Karar dosyası: **166**; ADR: **106**; security/threat belgesi: **72**.
+- Mevcut tam belge/config/kanıt envanteri: **3682** (yeni sürümden önceki indeks).
 
 ## 2. Yetki ve öncelik
 
@@ -30,8 +30,8 @@
 ## 3. Kapsam ve kural özeti
 
 - Gereksinim: **358** — COMPLETE 109, PARTIAL 25, FOUNDATION_STARTED 1, NOT_IMPLEMENTED 223.
-- Kural sicili: **PPT-CANONICAL-RULE-REGISTRY-V9**, toplam 208, aktif 194, superseded 14, SHA-256 `5e7e45b7c2ae9f3c7465866a58d9d389ef6a793dab855a68a1434e003eade081`.
-- Kullanıcı karar defteri: **82** açık kullanıcı kararı.
+- Kural sicili: **PPT-CANONICAL-RULE-REGISTRY-V13**, toplam 217, aktif 197, superseded 20, SHA-256 `b79db92a03d559f33ccd49348bad159a70b6034fbcf10a07abe5a407549bf0be`.
+- Kullanıcı karar defteri: **86** açık kullanıcı kararı.
 
 ## 4. İş akışları
 
@@ -83,7 +83,7 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 | 33-N | COMPLETED | ACCEPTED_COMPLETED_WITH_PERSISTENT_RECEIPT | EVET | Kapalı: taslak ve asenkron durum UX paketi için yerel zincir, doğrulama ve kalıcı kabul receipti tamamlandı. | Yok/yerel tamamlandı |
 | 33-O | COMPLETED | ACCEPTED_COMPLETED_WITH_PERSISTENT_RECEIPT | EVET | Kapalı: gizlilik, sahiplik, veri hakları ve yerel olay kontrol paketi için yerel zincir, doğrulama ve kalıcı kabul receipti tamamlandı. | Yok/yerel tamamlandı |
 | 33-P | IN_PROGRESS | IMPLEMENTED_LOCAL_AUTOMATED | HAYIR | Gerçek passkey/authenticator, canlı ve güvenilen federated kimlik sağlayıcısı, cross-device doğrulama, insan UAT ile gizlilik/kimlik incelemeleri tamamlanmadı. | liveProviderAccountTest, realAuthenticatorDevice, crossDeviceSync, credentialVerifierUat, humanUat, privacyReview, legalReview, identityReview |
-| 33-Q | PLANNED | PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE | HAYIR | Varsayılan malware/PDF sağlayıcısı, düşük-yetkili worker izolasyonu, çalışan işi eşzamanlı iptal, kaynak silme crash auto-resume, zamanlanmış orphan/retention sweep ve gerçek Windows UAT tamamlanmadı. | realWindowsLocalOcr, realAppleVisionOcr, offlineFallback, maliciousDocumentMatrix, multilingualAndHandwriting, lowQualityAndAccessibility, crossDevice, legacyArchiveOwnershipReattestation (+5) |
+| 33-Q | PLANNED | PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE | HAYIR | Varsayılan gerçek malware/PDF sağlayıcısı, doğrulanmış düşük-yetkili worker ve işletim sistemi ağ izolasyonu, gerçek Windows/Apple cihaz kabulü, denetlenmiş offline fallback ile haricî ve insan UAT kanıtları tamamlanmadı. Yerel eşzamanlı iptal, kaynak silme crash auto-resume, retention purge ve owner-bound zamanlanmış orphan sweep testleri PASS durumundadır. | realWindowsLocalOcr, realAppleVisionOcr, offlineFallback, maliciousDocumentMatrix, multilingualAndHandwriting, lowQualityAndAccessibility, crossDevice, legacyArchiveOwnershipReattestation (+5) |
 | 33-R | PLANNED | PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE | HAYIR | Gerçek büyük arşiv, medya yaşam döngüsü, arama doğruluğu/performansı ve kullanıcı UAT kanıtları tamamlanmadı. | realUserArchiveEvidenceUat, realMediaVersionRecoveryUat, largeFamilyUnifiedSearchUat, accessibilityReview, privacyReview, legalReview, securityReview |
 | 33-S | PLANNED | PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE | HAYIR | Gerçek sağlık/bakım sağlayıcıları, cihaz akışları, klinik doğruluk ve hukuk-gizlilik incelemesi tamamlanmadı. | realCaregiverUat, realElderlyUserUat, medicalProfessionalReview, sensorAdapterUat, emergencyContactDeliveryUat, accessibilityReview, privacyReview, legalReview (+1) |
 | 33-T | PLANNED | PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE | HAYIR | Gerçek hane verisi, uzun süreli görev/teslimat akışı ve farklı kullanıcı profilleriyle UAT tamamlanmadı. | realFamilyHouseholdUat, realShoppingInventoryMealUat, realExpenseDeliveryGuestPetUat, nutritionAllergyReview, financialReview, accessibilityReview, privacyReview, legalReview (+1) |
@@ -103,15 +103,15 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 | 34-H | PLANNED | LOCAL_PRODUCTION_QUERY_COMPOSED_ACCEPTANCE_INCOMPLETE | HAYIR | Gerçek uzun süreli iletişim audit/arşiv bütünlüğü, saklama/imha ve bağımsız inceleme tamamlanmadı. | realRestoreDrill, remoteReplicationUat, externalBackupReview, securityReview |
 | 34-I | PLANNED | LOCAL_HARDENED_FAIL_CLOSED_FOUNDATION_ACCEPTANCE_INCOMPLETE | HAYIR | Gerçek çoklu node quorum/witness/failover, mTLS kimliği, ağ bölünmesi ve uzun süreli soak tamamlanmadı. | realThreeNodeQuorum, realNetworkPartition, realWindowsServiceLifecycle, realMtlsPairing, realSnapshotBootstrap, realAutomaticFailover, localVolumeIdentityReview, securityReview |
 | 34-J | PLANNED | LOCAL_HARDENED_FAIL_CLOSED_FOUNDATION_ACCEPTANCE_INCOMPLETE | HAYIR | Gerçek dağıtık istemciler, Apple companion, operasyon/felaket kurtarma ve saha provası tamamlanmadı. | realMdnsDiscovery, realRelayOrVpn, realAppleClient, realDifferentDeviceRestore, realRollingUpdate, realWindowsFaultMatrix, realBreakGlassRecovery, securityReview |
-| 34-K | PLANNED | LOCAL_HARDENED_FAIL_CLOSED_FOUNDATION_ACCEPTANCE_INCOMPLETE | HAYIR | Animasyonlu kurulum, sesli Yardım Merkezi ve DPAPI korumalı Core Service companion yerel kaynakta bulundu; eski C:\Program Files\@pptdesktop kurulumu kaldırıldı, güncel imzasız yerel paket C:\Program Files\PPT\AYM hedefine kuruldu ve ana pencere/renderer/Core Service ile açılış PASS verdi. Production Authenticode sertifikası sağlanmadı; temiz işletim sistemi, signed installer, upgrade/repair/yeni uninstall-veri koruma, yeniden başlatma/güç kesintisi, 168 saat soak ve erişilebilirlik UAT tamamlanmadı. | productionCodeSigningCertificate, signedInstallerAndInstalledExecutableAuthenticode, realCleanInstall, realUpgrade, realRepair, realUninstallDataProtection, sevenDaySoak, productionUniversalSearchAuthority (+4) |
+| 34-K | PLANNED | LOCAL_HARDENED_FAIL_CLOSED_FOUNDATION_ACCEPTANCE_INCOMPLETE | HAYIR | Animasyonlu kurulum, sesli Yardım Merkezi, DPAPI korumalı Core Service companion ve gerçek repository-backed anlık evrensel arama yerel kaynakta oluşturulup hedef testlerle doğrulandı. Production Authenticode sertifikası sağlanmadı; temiz işletim sistemi, signed installer, upgrade/repair/yeni uninstall-veri koruma, yeniden başlatma/güç kesintisi, 168 saat soak, üretim politika-zayıflatma doğrulayıcısı ve erişilebilirlik UAT tamamlanmadı. | productionCodeSigningCertificate, signedInstallerAndInstalledExecutableAuthenticode, realCleanInstall, realUpgrade, realRepair, realUninstallDataProtection, sevenDaySoak, productionPolicyWeakeningVerifier (+3) |
 | 34-L | PLANNED_FINAL | LOCAL_CLOSURE_AUTOMATION_COMPOSED_ACCEPTANCE_BLOCKED | HAYIR | Bütün roadmap paketleri kabul edilmedi; gerçek Windows/dağıtık/Apple/uzak sağlayıcı/soak/sertifikasyon ve dış incelemeler NOT_RUN kaldı. | realWindowsLifecycle, sevenDaySoak, realMultiNodeConsensus, realAppleClients, realRemoteProviders, certification |
 
 ## 6. 34-L yerel kapanış gerçeği
 
-- Boundary: PASS / 51 kontrol.
+- Boundary: PASS / 52 kontrol.
 - Contract: PASS / 30 kontrol.
-- Runtime: PASS / 171 kontrol.
-- Full regression: PASS / 292 dosya / 1986 test.
+- Runtime: PASS / 172 kontrol.
+- Full regression: PASS / 301 dosya / 2018 test.
 - Production build: PASS / 18 workspace.
 - Güncel Core Service companion: PASS_LOCAL_NOT_INSTALLER_ACCEPTANCE / 292 dosya / 1986 test / 2 normal paket açılışı.
 - Güncel dağıtım imzası: NotSigned; production sertifikası sağlanmadığı için signed installer ve kurulu uygulama yaşam döngüsü NOT_RUN.
@@ -129,8 +129,8 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 ## 8. Belge sapmaları ve yapılan düzeltmeler
 
 - Aktif kapsam toplamı 344 → 358 olarak düzeltildi ve durum dağılımı eklendi.
-- Kanonik kural sicili V8/200/186/eski SHA → V9/208/194/güncel SHA olarak düzeltildi.
-- Kullanıcı karar özeti 52 → 81 olarak düzeltildi; DEC-250, DEC-251 ve DEC-252 kaydedildi.
+- Kanonik kural sicili V10/214/194 ve güncel SHA ile ParsYuva marka, kurumsallaşma, platform ve belge sınıflandırma kurallarına yükseltildi.
+- Kullanıcı karar defteri 83 kayda yükseltildi; DEC-254 marka uyumluluğu ve kurumsallaşma kararını bağladı.
 - Platform mimarisindeki 'OCR/iletişim başlamadı' anlatımı yerel bileşim var fakat kabul dış kanıta bağlı şeklinde düzeltildi.
 - Yol haritasına her açık paket için yerel uygulama durumu, açık kalma nedeni, eksik kanıt ve requirement PASS alanları eklendi.
 - Görsel sözleşme 17 px body, exact Bronze/Silver/Gold tokenları ve onaylı 512 px sıcak-bronz logo SHA'sıyla hizalandı.
@@ -328,6 +328,10 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - `DEC-251` — DEC-251 — Karar anında eşzamanlı belge ve iş listesi güncellemesi — ACTIVE — `docs/decisions/DEC-251-synchronous-decision-documentation-enforcement.md`
 - `DEC-252` — DEC-252 — Tarihsel kayıtların gelecek içerik denetimlerinden çıkarılması — ACTIVE — `docs/decisions/DEC-252-freeze-historical-records-from-future-content-review.md`
 - `DEC-253` — DEC-253 — Animasyonlu kurulum, yenilenmiş anlatım ve Silver sesli Yardım Merkezi — ACTIVE — `docs/decisions/DEC-253-animated-installer-narration-and-silver-help-center.md`
+- `DEC-254` — DEC-254 — ParsYuva marka kimliği ve kurumsallaşma yol haritası — ACTIVE / PARTIAL_EXTERNAL_ACTION — `docs/decisions/DEC-254-parsyuva-brand-and-institutionalization-roadmap.md`
+- `DEC-255` — DEC-255 — Sistem Dili ve İngilizce Arayüz Altyapısı — KAYITLI — `docs/decisions/DEC-255-sistem-dili-ve-ingilizce-arayuz-altyapisi.md`
+- `DEC-256` — DEC-256 — Tek gerçek kurulum ilerlemesi ve yerel yüzde görünümü — ACTIVE — `docs/decisions/DEC-256-tek-gercek-kurulum-ilerlemesi.md`
+- `DEC-257` — DEC-257 — Başlıklarda ParsYuva AYM adının tekrarsız kullanımı — ACTIVE — `docs/decisions/DEC-257-parsyuva-aym-baslik-tekrar-yasagi.md`
 
 ## 12. ADR dizini
 
@@ -440,7 +444,7 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 
 ## 13. Kanonik kurallar — eksiksiz
 
-- **PR-001 [ACTIVE]** — Tüm proje ailesinin üst markası Latince “Panthera pardus tulliana”dır. Uygulama adı üst markadan ayrıdır ve bu uygulamanın resmî adı “Anadolu Parsı Aile Yaşam Merkezi”dir; yeni uygulamalar “Anadolu Parsı” adına içeriklerini tanımlayan ek ad alır. Üst marka adı normal uygulama kullanıcı arayüzünde gösterilmez.
+- **PR-001 [SUPERSEDED]** — Tüm proje ailesinin üst markası Latince “Panthera pardus tulliana”dır. Uygulama adı üst markadan ayrıdır ve bu uygulamanın resmî adı “Anadolu Parsı Aile Yaşam Merkezi”dir; yeni uygulamalar “Anadolu Parsı” adına içeriklerini tanımlayan ek ad alır. Üst marka adı normal uygulama kullanıcı arayüzünde gösterilmez.
 - **PR-002 [ACTIVE]** — Bu projenin tek geçerli kaynak başlangıcı 20 Temmuz 2026’dır. Bu tarihten önceki sohbet, dosya, karar, proje veya yatırım/otomatik alım-satım çalışması bu projeyle ilişkilendirilemez, bağlam kaynağı yapılamaz veya proje geçmişi olarak kullanıcıya sunulamaz.
 - **PR-003 [ACTIVE]** — Sistemin kök iş varlığı Aile’dir; kişi, hesap, aile, aile dalı, hane ve üyelik ayrı kavramlardır.
 - **PR-004 [ACTIVE]** — Kullanıcı kapsamı yalnız çekirdek aileyle sınırlı değildir; uygun rol, amaç ve süreyle yetkilendirilen diğer kişiler de sisteme dahil olabilir.
@@ -555,7 +559,7 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - **PR-113 [ACTIVE]** — Eski sohbetler veya eski projeler silinemese dahi bu projeyle ilişkilendirilemez, bunlardan bilgi aktarılmaz, proje yanıtlarında gösterilmez ve yeni build planı türetilmez.
 - **PR-114 [ACTIVE]** — Kullanıcı yeni bir öneri ilettiğinde öneri uygulanmadan önce kapsam, mimari, güvenlik, gizlilik, veri bütünlüğü, performans, UI/UX, erişilebilirlik, yedekleme, migration, rollback, test, platform, belge, süre ve teknik borç etkileri kapsamlı analiz edilir; optimize edilmiş öneri kullanıcıya sunulur ve kesin karar bu analiz üzerinden alınır.
 - **PR-115 [ACTIVE]** — Her build sonunda tahmini kodlama tamamlanma yüzdesi, kalan kodlama yüzdesi, 20.07.2026 başlangıcından geçen süre, yakın dönem geliştirme hızı, tahmini Bronze Final/Silver/Gold veya genel bitiş tarihleri ve tahmin güven düzeyi hesaplanır; build sonu zorunlu bildirime ve Ana Build Defteri kaydına eklenir.
-- **PR-116 [ACTIVE]** — Marka mimarisi zorunludur: üst marka “Panthera pardus tulliana”, kullanıcıya görünen uygulama adı “Anadolu Parsı Aile Yaşam Merkezi”dir; Latin üst marka adı normal uygulama ekranlarında kullanılmaz ve yeni uygulama adları “Anadolu Parsı + işlevsel ad” kuralını izler.
+- **PR-116 [SUPERSEDED]** — Marka mimarisi zorunludur: üst marka “Panthera pardus tulliana”, kullanıcıya görünen uygulama adı “Anadolu Parsı Aile Yaşam Merkezi”dir; Latin üst marka adı normal uygulama ekranlarında kullanılmaz ve yeni uygulama adları “Anadolu Parsı + işlevsel ad” kuralını izler.
 - **PR-117 [SUPERSEDED]** — Her buildde tüm aktif sürüm taşıyan kaynak, paket, APP_META, config, manifest, installer metadata, aktif belge ve teslim yüzeyi aynı build sürümüne yükseltilir; aktif alanda eski sürüm driftine veya build atlamasına izin verilmez. Tarihsel kanıt dosyaları kendi özgün build numarasını korur ve aktif dosyalardan açıkça ayrılır.
 - **PR-118 [ACTIVE]** — 20 Temmuz 2026 öncesinde geliştirilmiş yatırım/otomatik işlem projesi, broker, Matriks, İş Yatırım, Deniz Yatırım, piyasa verisi veya otomatik emir kararları bu projede bağlam, tasarım veya gereksinim kaynağı olarak kullanılamaz.
 - **PR-119 [SUPERSEDED]** — API geliştirme önceliği yaşamsal ihtiyaca göre P0/P1/P2 olarak sınıflandırılır: yedekleme, yapay zekâ ve sistemin zorunlu çalışması için gerekli API/adapter sınırları P0’dır; çekirdek işlevi tamamlayanlar P1’dir; banka ve diğer kurum entegrasyonları P2’dir ve proje kararlı üretime girdikten yaklaşık 5-6 ay sonra değerlendirilir.
@@ -566,7 +570,7 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - **PR-124 [ACTIVE]** — Alınan her karar aynı build içinde güncel kural setine, Ana Karar Kaydı’na, etkilenen aktif mimari/güvenlik/UI/kapsam/test belgelerine, makine okunur politikalara, kod karşılığına ve Ana Build Defteri’ne yansıtılır; kod ve belge arasında bilinen drift ile build tamamlanamaz.
 - **PR-125 [ACTIVE]** — Her build sonunda güncel Master Proje Dokümantasyonu hem DOCX hem PDF olarak üretilir ve doğrulanır; etkilenmiş aktif belgeler güncellenmeden ve güncel Word/PDF paketi oluşmadan build COMPLETED olamaz.
 - **PR-126 [ACTIVE]** — Üretim uygulamasında, aktif kaynakta, aktif belgelerde, görsellerde ve teslim paketlerinde gerçek kişi adı, soyadı, aile adı, kişisel kimlik izi veya özel aile temsili bulunamaz; geçmiş demo aile/kişi kimlikleri de kaynakta tutulamaz. Kullanıcı tarafından sonradan girilen gerçek veriler bu kaynak yasağının dışındadır.
-- **PR-127 [ACTIVE]** — Geliştirici/üretici/owner/author/copyright metadata dahil aktif proje metadata’sında doğal kişi kimliği kullanılmaz; gerekli sahiplik ve üretici ifadeleri yalnız marka kimliği “Panthera pardus tulliana” ve ürün kimliği üzerinden tutulur.
+- **PR-127 [SUPERSEDED]** — Geliştirici/üretici/owner/author/copyright metadata dahil aktif proje metadata’sında doğal kişi kimliği kullanılmaz; gerekli sahiplik ve üretici ifadeleri yalnız marka kimliği “Panthera pardus tulliana” ve ürün kimliği üzerinden tutulur.
 - **PR-128 [ACTIVE]** — Bağlayıcı UI baseline gerçek kaynak sözleşmeleriyle tutarlı olmalıdır: Apple uyumlu sistem font zinciri kullanılır, proprietary SF font dosyası gömülmez; aktif kanal menü rengi Bronze için bakır/bronz, Silver için gümüş, Gold için altın tokenlarından gelir ve renk tek başına anlam taşımaz.
 - **PR-129 [ACTIVE]** — UI Görsel Referans Manifestosu kişisel/demo içerikten arındırılmış marka ve boş durum referansıdır; örnek kişi, aile, dosya, sağlık, finans veya özel yaşam verisi görsel baseline’a konulamaz.
 - **PR-130 [ACTIVE]** — Aktif dosyalar ile tarihsel kanıt dosyaları açıkça sınıflandırılır. Aktif dosyalar güncel build sürümünde olmak zorundadır; tarihsel kanıtlar özgün sürümünü korur ve aktif ürün davranışını belirleyemez.
@@ -607,8 +611,8 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - **PR-165 [ACTIVE]** — Uygulama öncesi oluşturulan runtime/log dosyaları yalnız kişisel olmayan operasyon metadata içerir; kimlik doğrulama öncesi hiçbir kişisel veri log, cache veya diagnostic alana yazılamaz.
 - **PR-166 [ACTIVE]** — Parola değiştirildiğinde kullanıcı veri kasasının anahtar sarma bilgisi de atomik olarak yeni parolaya geçirilir; eski parola kasayı açmaya devam edemez.
 - **PR-167 [ACTIVE]** — Haricî kimlik sağlayıcıları için gerçek üretim PASS iddiası sağlayıcı uygulama kaydı, Client ID/redirect URI, gerçek Windows oturumu, token kasası, iptal/çıkış ve hata senaryoları doğrulanmadan yapılamaz; aksi durum NOT_RUN/PENDING olarak raporlanır.
-- **PR-168 [ACTIVE]** — Kalıcı proje kütüphanesi hiyerarşisi /Panthera pardus tulliana/Anadolu Parsı Aile Yaşam Merkezi şeklindedir; bu uygulamaya ait yeni build, kaynak, belge, görsel, hash ve teslim kanıtları yalnız bu dal altında tutulur.
-- **PR-169 [ACTIVE]** — Üst marka altındaki başka/eski proje dosyaları yalnız ad benzerliği nedeniyle Anadolu Parsı Aile Yaşam Merkezi klasörüne taşınamaz veya bağlam kaynağı sayılamaz; proje provenance sınırı fail-closed uygulanır.
+- **PR-168 [SUPERSEDED]** — Kalıcı proje kütüphanesi hiyerarşisi /Panthera pardus tulliana/Anadolu Parsı Aile Yaşam Merkezi şeklindedir; bu uygulamaya ait yeni build, kaynak, belge, görsel, hash ve teslim kanıtları yalnız bu dal altında tutulur.
+- **PR-169 [SUPERSEDED]** — Üst marka altındaki başka/eski proje dosyaları yalnız ad benzerliği nedeniyle Anadolu Parsı Aile Yaşam Merkezi klasörüne taşınamaz veya bağlam kaynağı sayılamaz; proje provenance sınırı fail-closed uygulanır.
 - **PR-170 [ACTIVE]** — Build209 ve sonrasında onboarding, kimlik, veri kasası ve dosya erişimi güvenlik kapıları Anayasanın ayrılmaz parçasıdır; bu maddeler de diğer anayasa kuralları gibi yalnız açık kullanıcı kararı, yeni build, yeni sürüm ve yeni SHA-256 ile değiştirilebilir.
 - **PR-171 [ACTIVE]** — Uzun veya zaman aşımı riski taşıyan geliştirme, doğrulama, belge üretimi, paketleme ve teslim işleri mümkün olan en küçük mantıksal ve bağımsız adımlara bölünmelidir. Her adım: 1. uygulanır, 2. doğrulanır, 3. sonucu kalıcı olarak kaydedilir, 4. kısa durum verilir, 5. ancak bundan sonra sonraki adıma geçilir. Tek seferde dev işlem zincirleri çalıştırma. Yalnız teknik olarak atomik olması zorunlu işlemler istisnadır. Bu kural anayasal ve aşılamazdır.
 - **PR-172 [SUPERSEDED]** — PR-172 yalnız platform tarafından sağlanan gerçek sohbet bağlam kapasitesi yüzde 90 veya üzerindeyken HARD_STOP üretir. Tahmin, geçmiş build tahmini veya kullanılamayan platform sayacı HARD_STOP ya da zorunlu handoff sayılmaz. Gerçek kullanım yüzde 90 altındaysa zorunlu devir üretilmez. Gerçek HARD_STOP durumunda aynı sohbette yeni build başlatılmaz; aynı yanıt içinde tam kopyalanabilir devir metni gösterilir ve NEW_CHAT_HANDOFF_BUILDxxx.md oluşturulur.
@@ -619,7 +623,7 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - **PR-177 [ACTIVE]** — Tek aktif yönetişim kaynağı config/canonical-rule-registry.json ve config/active-governance-ledger.json ikilisidir. Eski Ana Build Defteri, RC/MVP/Build belgeleri ve eski kural setleri tarihsel kanıttır; aktif kararı veya sürümü geçersiz kılamaz.
 - **PR-178 [ACTIVE]** — Her geliştirme oturumu ve her aktif sürüm değişikliği, güncel kanonik kural SHA-256 özeti açıkça doğrulanmadan ve GOVERNED_PREFLIGHT PASS olmadan başlayamaz. Kapı başarısızsa işlem fail-closed durur.
 - **PR-179 [ACTIVE]** — Her geliştirme teslimi GOVERNED_POSTFLIGHT çalıştırılmadan tamamlanamaz. Postflight; kural sicili, karar defteri, sürüm, kapsam gerçekliği, policy, kaynak bütünlüğü, belge envanteri, rapor alanları, kalıcı Library hedefi ve yapılmayan testlerin dürüst durumunu denetler.
-- **PR-180 [ACTIVE]** — Yeni kaynak, belge, görsel, hash, manifest, doğrulama ve teslim kanıtları kalıcı olarak yalnız /Panthera pardus tulliana/Anadolu Parsı Aile Yaşam Merkezi/<Görünür Sürüm>/ dalında tutulur. Library yükleme kanıtı olmadan teslim COMPLETED sayılamaz.
+- **PR-180 [SUPERSEDED]** — Yeni kaynak, belge, görsel, hash, manifest, doğrulama ve teslim kanıtları kalıcı olarak yalnız /Panthera pardus tulliana/Anadolu Parsı Aile Yaşam Merkezi/<Görünür Sürüm>/ dalında tutulur. Library yükleme kanıtı olmadan teslim COMPLETED sayılamaz.
 - **PR-181 [ACTIVE]** — /mnt/data yalnız geçici çalışma alanıdır. Kullanıcının Windows yerel diski, haricî diski veya OneDrive hedeflerine gerçek erişim ve yazma kanıtı yoksa bu hedeflere kayıt yapıldığı söylenemez; durum NOT_RUN/UNAVAILABLE olarak raporlanır.
 - **PR-182 [ACTIVE]** — Her sürümde kaynak ağacındaki bütün dosyalar ve bütün belge/config/kanıt dosyaları hash, boyut, sınıf, aktif/tarihsel durumu ve göreli yolu ile eksiksiz indekslenir. Kullanıcıya tam belge dizini ile tam artifact index bağlantısı verilir; seçilmiş birkaç belgeyi “tüm belgeler” diye sunmak yasaktır.
 - **PR-183 [ACTIVE]** — Her geliştirme sonu bildirimi en az şu alanları taşır: görünür sürüm; yapılan iş; tamamlanan gereksinim ve karar kimlikleri; değişen kaynak alanları; gerçek PASS/FAIL/NOT_RUN/BLOCKED sonuçları; açık hata ve riskler; ağırlıklı Bronze tamamlanma ve kalan yüzdesi; tahmini Bronze bitişi; tahmini Silver ve Gold geçiş tarih aralıkları; tahmin güveni; sohbet kapasitesi platform actual veya UNAVAILABLE; devir promptu durumu; kaynak ZIP/manifest/SHA; kalıcı Library yolu ve yükleme durumu; bütün belge indeksi; sıradaki tek resmî iş; zorunlu doğruluk cümlesi.
@@ -648,11 +652,24 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - **PR-206 [ACTIVE]** — ACTIVE bir kuralın metni, durumu, enforcement sınıfı veya kapısı ancak açık kullanıcı kararı, yeni DEC kaydı ve yeni görünür sürümle değiştirilebilir. Sessiz kural silme, daraltma veya enforcement düşürme fail-closed ihlaldir.
 - **PR-207 [ACTIVE]** — Universal Rule Enforcement Gate hem GOVERNED_PREFLIGHT hem GOVERNED_POSTFLIGHT içinde zorunlu ilk sınıf kapıdır; registry kapsamı, gate dosyaları, evidence yolları ve waiver yasağı doğrulanmadan sürüm kapanamaz.
 - **PR-208 [ACTIVE]** — Büyük iş adımlarının kalıcı checkpoint kanıtı zorunlu Library dalında tutulur. Geçici /mnt/data sonucu, sohbet mesajı veya yalnız yerel dosya kalıcı checkpoint yerine geçmez; persistent receipt yoksa sonraki adım BLOCKED kalır.
+- **PR-209 [ACTIVE]** — Marka mimarisi zorunludur: ana marka ParsYuva, kullanıcıya görünen masaüstü ürün ve kısayol adı ParsYuva AYM, açıklayıcı uzun ad ParsYuva Aile Yaşam Merkezi'dir. Eski Windows appId ve Anadolu Parsı Aile Yaşam Merkezi kullanıcı veri dizini yalnız geriye dönük güncelleme/veri uyumluluğu için değişmez teknik kimlik olarak korunur; yeni kullanıcı yüzeylerinde eski marka gösterilemez.
+- **PR-210 [ACTIVE]** — ParsYuva şirket unvanı, marka, alan adı, sosyal hesap, mağaza hesabı ve hukuk-vergi-gizlilik hazırlığı ancak yetkili güncel dış kanıtla tamamlanmış sayılır. Aday unvan, ön araştırma veya yerel kodlama resmî kuruluş, tescil, rezervasyon, uygunluk, yatırım ya da halka arz kanıtı değildir; eksik kanıt fail-closed NOT_RUN veya BLOCKED_EXTERNAL kalır.
+- **PR-211 [ACTIVE]** — Aktif geliştirici, üretici, owner, author ve copyright metadata'sı doğal kişi kimliği taşıyamaz; marka ve ürün metadata'sı ParsYuva ve ParsYuva AYM kimlikleriyle tutulur. Tarihsel kanıtların özgün eski metadata'sı değiştirilmez.
+- **PR-212 [ACTIVE]** — ParsYuva sonrası yeni kalıcı belge, kaynak, görsel, hash ve teslim kanıtlarının kurumsal kütüphane yolu /ParsYuva/ParsYuva AYM/<Görünür Sürüm> şeklindedir. Önceki /Panthera pardus tulliana/Anadolu Parsı Aile Yaşam Merkezi kayıtları tarihsel ve değişmez kalır; yeni ürün dalına otomatik taşınmaz, güncel kaynak veya tamamlanma kanıtı sayılmaz.
+- **PR-213 [ACTIVE]** — Platform ve cihaz çalışma alanları Microsoft/Windows, Apple/macOS/iOS, ortak cihaz sözleşmeleri ve gelecek Android kapsamı olarak ayrı tutulur. Bir platformun kodu veya kanıtı diğer platformun gerçek cihaz, mağaza, imza ya da UAT kanıtı sayılamaz.
+- **PR-214 [ACTIVE]** — Güncel ana belgeler yapı, karar, kural, kurumsallaşma, platform ve cihaz, test ve kanıt, kullanıcı belgeleri konularına göre kurumsal klasörlerde sınıflandırılır. Dosya adları Türkçe anlamlı ve ASCII karakterli olur; tarihsel kayıtların adı, içeriği ve konumu yeniden yazılmaz.
+- **PR-215 [ACTIVE]** — Uygulama ve kurulum sihirbazı açılış dilini kurulduğu makinenin işletim sistemi dilinden belirler. Türkçe ve İngilizce desteklenir; sistem dili desteklenmiyorsa veya güvenilir biçimde çözülemiyorsa kullanıcı verisi açılmadan önce İngilizce güvenli varsayılan olarak seçilir. Dil seçimi ana süreçte yapılır, renderer yalnız doğrulanmış dil/locale görünümünü alır; İngilizce sözlük eksik anahtarları Türkçeye sessizce düşüremez.
+- **PR-216 [ACTIVE]** — Kurulum öncesi karşılama ve hazır sayfaları işlem yapmıyorsa hareketli ilerleme göstergesi kullanamaz. Kurulum boyunca yalnız gerçek dosya kurulumunu izleyen tek ilerleme çubuğu gösterilir; yüzde değeri NSIS'in yerel kurulum ilerlemesinden okunur ve dekoratif veya simüle ilerleme yasaktır.
+- **PR-217 [ACTIVE]** — Ürün ve belge başlıklarında yalnız ParsYuva AYM kullanılır. AYM kısaltması Aile Yaşam Merkezi anlamını zaten taşıdığı için aynı başlıkta ParsYuva AYM ile Aile Yaşam Merkezi birlikte tekrar edilemez. Açık uzun ad yalnız kısaltmanın açıklanması gereken ayrı tanıtım veya hukuk metninde kullanılabilir.
 
 ## 14. Aktif repo Word/PDF tarihsel denetim envanteri
 
 - `MASTER_PROJE_DOKUMANTASYONU_BRONZE_04.08.2026.28.docx` — DOCX — 50355 bayt, 1 sayfa — OKUNABİLİR
 - `MASTER_PROJE_DOKUMANTASYONU_BRONZE_04.08.2026.28.pdf` — PDF — 270037 bayt, 8 sayfa — OKUNABİLİR
+- `MASTER_PROJE_DOKUMANTASYONU_GUNCEL_17.08.2026_V1.docx` — DOCX — 347679 bayt, 1 sayfa — OKUNABİLİR
+- `MASTER_PROJE_DOKUMANTASYONU_GUNCEL_17.08.2026_V1.pdf` — PDF — 478084 bayt, 21 sayfa — OKUNABİLİR
+- `MASTER_PROJE_DOKUMANTASYONU_GUNCEL_18.08.2026_V2.docx` — DOCX — 348987 bayt, 1 sayfa — OKUNABİLİR
+- `MASTER_PROJE_DOKUMANTASYONU_GUNCEL_18.08.2026_V2.pdf` — PDF — 479923 bayt, 21 sayfa — OKUNABİLİR
 - `MASTER_PROJECT_DOCUMENTATION_BUILD209.docx` — DOCX — 295186 bayt, 1 sayfa — OKUNABİLİR
 - `MASTER_PROJECT_DOCUMENTATION_BUILD209.pdf` — PDF — 391597 bayt, 11 sayfa — OKUNABİLİR
 - `MASTER_PROJECT_DOCUMENTATION_BUILD210.docx` — DOCX — 295232 bayt, 1 sayfa — OKUNABİLİR
@@ -697,3 +714,18 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 ## 15. Kapanış sınırı
 
 Bu belge canlı kaynak gerçeğini toplar; build kapanışı, kanal terfisi, sertifika, hukuk görüşü veya gerçek cihaz/sağlayıcı UAT belgesi değildir. Tarihsel kanıtlar değişmeden kalır.
+
+## 16. DEC-258 çevrimdışı aile haritası
+
+- `DEC-258` — MapLibre GL JS ve PMTiles tabanlı çevrimdışı aile haritası kullanılır.
+- Yerel paket bulunmadığında koordinat ızgarası ve erişilebilir metin listesi çalışır; genel internet karo servisi kullanılmaz.
+- Üretim Türkiye harita paketi kaynak, atıf, lisans, SHA-256 ve güncelleme kanıtı olmadan ticari pakete alınmaz.
+
+## 17. DEC-259 ticari temel çalışma alanı
+
+- `DEC-259` — Git içindeki `docs/ticari-urun-temeli` kanonik ticari çalışma köküdür; `C:\PPT\AYM\12_TICARI_URUN_TEMEL_SURUMU` uyumluluk bağlantısıdır.
+- Kanonik kural otoritesi değişmez: `config/canonical-rule-registry.json` ve `config/active-governance-ledger.json`.
+- Yeni ticari alan ikinci kural kaynağı değildir; kanonik kimlik, sayı ve SHA-256 değerini doğrulanmış bağ olarak taşır.
+- Yeni karar, değişiklik sicili, etkilenen aktif belge ve ana iş listesi aynı değişiklikte güncellenir.
+- `00_PROJE`–`11_FUTURE_PATCHES` tarihsel kayıttır; yeni aktif kaynak olarak yeniden taranmaz.
+- Ticari temel kapısı PASS olmadan governed preflight ve ticari belge teslimi PASS olamaz.

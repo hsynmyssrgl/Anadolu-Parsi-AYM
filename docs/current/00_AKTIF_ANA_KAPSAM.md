@@ -1,6 +1,8 @@
-# Anadolu Parsı Aile Yaşam Merkezi — Aktif Ana Kapsam
+# ParsYuva AYM — Aktif Ana Kapsam
 
-- Aktif kanal ve sürüm: **Bronze 04.08.2026.29**
+- Aktif kanal ve sürüm: **Bronze 19.08.2026.33**
+- Ana marka: **ParsYuva**; açıklayıcı uzun ad: **ParsYuva Aile Yaşam Merkezi**.
+- Kurumsallaşma planı: `docs/current/13_KURUMSALLASMA_VE_GLOBAL_MARKA_PLANI.md`; dış şirket/marka/alan adı işlemleri henüz `NOT_RUN` ve requirement PASS değildir.
 - Kapsam kararı: Kullanıcının 4 Ağustos 2026 tarihli açık onayıyla, bu kaynaktaki bütün kabul edilmiş kapsam girdileri bağlayıcıdır.
 - Gereksinim sicili: `config/accepted-scope-registry.json`
 - Toplam izlenen gereksinim: **358**
@@ -28,6 +30,8 @@ Bir gereksinim ancak karar → domain → şema → migration → use-case → r
 8. Hane operasyonu, afet/acil durum, çocuk/eğitim, bakım/ileri yaş, ev/araç/eşya/evcil hayvan ve mahremiyet merkezi.
 9. AI asistanı, aile hafızası stüdyosu, seyahat, Matter/enerji, doğrulanabilir yetki kartları ve imzalı eklentiler.
 10. Genç, yetişkin, ileri yaş, düşük görme, bakım veren ve çocuk için ayrı ama eşit derecede güvenli kullanıcı deneyimi.
+11. Makine sistem dilinden Türkçe/İngilizce arayüz seçimi; desteklenmeyen dilde veri açılmadan İngilizce güvenli varsayılan.
+12. Kurulum öncesi sayfalarda sahte ilerleme bulunmaması; gerçek kurulumda tek yerel ilerleme çubuğu ve yerel kontrolden okunan yüzde.
 
 ## Kanal sınırları
 

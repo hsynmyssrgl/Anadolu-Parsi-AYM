@@ -165,7 +165,7 @@ export class CoreServiceCompanionManager {
       env: sanitizedUtilityEnvironment(),
       execArgv: [],
       stdio: 'ignore',
-      serviceName: 'Anadolu Parsı Core Service'
+      serviceName: 'ParsYuva Core Service'
     });
     this.#process = child;
     return await new Promise((resolve, reject) => {

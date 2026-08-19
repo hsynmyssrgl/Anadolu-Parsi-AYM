@@ -121,6 +121,45 @@ export interface FamilyAiAssistantCenterView {
   readonly generatedAt: IsoDateTime;
 }
 
+export interface FamilyAiLocalModelStatusView {
+  readonly provider: 'ollama_loopback';
+  readonly configured: boolean;
+  readonly available: boolean;
+  readonly model?: string;
+  readonly endpoint: 'http://127.0.0.1:11434';
+  readonly localLoopbackOnly: true;
+  readonly networkEgressUsed: false;
+  readonly cloudUsed: false;
+  readonly checkedAt: IsoDateTime;
+}
+
+export interface RunFamilyAiLocalModelInput {
+  readonly kind: FamilyAiAssistantKind;
+  readonly modules?: readonly FamilyAiAssistantModule[];
+  /** Human-authored instruction. It is processed transiently and is never persisted. */
+  readonly prompt: string;
+}
+
+export interface FamilyAiLocalModelResponseView {
+  readonly kind: FamilyAiAssistantKind;
+  readonly answer: string;
+  readonly sourceCount: number;
+  readonly provider: 'ollama_loopback';
+  readonly model: string;
+  readonly generatedAt: IsoDateTime;
+  readonly truth: {
+    readonly localLoopbackOnly: true;
+    readonly networkEgressUsed: false;
+    readonly cloudUsed: false;
+    readonly modelInferencePerformed: true;
+    readonly responsePersisted: false;
+    readonly durableActionPerformed: 'not_performed';
+    readonly humanReviewRequired: true;
+    readonly sourceConsentRevalidatedAfterInference: true;
+    readonly medicalFinancialOrEmergencyDecisionProvided: false;
+  };
+}
+
 export interface GenerateFamilyAiSuggestionInput {
   readonly clientOperationId: string;
   readonly suggestionId: string;

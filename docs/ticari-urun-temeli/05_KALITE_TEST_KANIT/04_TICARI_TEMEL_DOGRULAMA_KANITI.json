@@ -1,0 +1,203 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-TICARI-TEMEL-DOGRULAMA-V1",
+  "product": "ParsYuva AYM",
+  "baselineDate": "2026-08-19",
+  "documentSetVersion": "1.0.0-belge.20260819.1",
+  "canonicalRuleRegistry": "PPT-CANONICAL-RULE-REGISTRY-V13",
+  "canonicalRuleCount": 217,
+  "canonicalRuleSha256": "b79db92a03d559f33ccd49348bad159a70b6034fbcf10a07abe5a407549bf0be",
+  "decision": "DEC-259",
+  "workItemCount": 49,
+  "fileCount": 37,
+  "sourceFileCount": 36,
+  "sourceFingerprintSha256": "11fc4b5700576910667471f7d695420d0728622cc4cc6bc9c1378fd0fdf54e92",
+  "checks": 651,
+  "status": "PASS",
+  "commercialReleaseEligible": false,
+  "externalEvidenceDefaultsToNotRun": true,
+  "failures": [],
+  "fileInventory": [
+    {
+      "path": "00_OKU_BENI.md",
+      "bytes": 3311,
+      "sha256": "a2b20f9753e9daa0fbdf93be3148461f8605909180562d64fdc5022dc237b0cb"
+    },
+    {
+      "path": "00_TEMEL_SURUM_MANIFESTOSU.json",
+      "bytes": 1101,
+      "sha256": "3270e79f69dff584237a3a4ba08acb4202caf09b916e25a208dbb8274a028a19"
+    },
+    {
+      "path": "01_YONETIM/01_ASILAMAZ_KURALLAR.md",
+      "bytes": 4099,
+      "sha256": "fff53d6ddd20b892df3ac19ab82dd36375ad64cedb007da6804aeedf795a7a2d"
+    },
+    {
+      "path": "01_YONETIM/02_KARAR_VE_DEGISIKLIK_YONETIMI.md",
+      "bytes": 1633,
+      "sha256": "6b5beb81d306263cf5c12e72485151b97c1923e47c7b3dfaa5493225992f858b"
+    },
+    {
+      "path": "01_YONETIM/03_SORUMLULUK_VE_ONAY_MATRISI.md",
+      "bytes": 1286,
+      "sha256": "e9270d108179126edc8386bd12adb8ed59b1216b7f056aff48d0ade271b5ec6f"
+    },
+    {
+      "path": "01_YONETIM/04_AKTIF_KURAL_SICILI.json",
+      "bytes": 2678,
+      "sha256": "26d4f0c95500dc718fd2580348ca2013b045d78991e374fc903d9a6afee342f7"
+    },
+    {
+      "path": "01_YONETIM/05_DEGISIKLIK_SICILI.json",
+      "bytes": 811,
+      "sha256": "7c49739dc0bb8f500281622d39ce48deb77ce3023d7fa3e455260879df99a124"
+    },
+    {
+      "path": "01_YONETIM/06_RISK_SICILI.md",
+      "bytes": 3210,
+      "sha256": "d91f1083854cb2679c1c56aecb47b0c8707191a923891bbb351a34adcc405808"
+    },
+    {
+      "path": "02_IS_ANALIZI/01_URUN_IS_ANALIZI.md",
+      "bytes": 3721,
+      "sha256": "6b100d1d0d88a65110c035b761b58f8e58d0b64e338f8de792a7799ea823188a"
+    },
+    {
+      "path": "02_IS_ANALIZI/02_KULLANICI_AKISLARI.md",
+      "bytes": 2667,
+      "sha256": "d24a42fcc55c2148663afc5ba885bd62392eb2f112751290cba55f9298f2f4cc"
+    },
+    {
+      "path": "02_IS_ANALIZI/03_GEREKSINIM_IZLENEBILIRLIK_MATRISI.md",
+      "bytes": 3532,
+      "sha256": "959fddf1355266f7fa2bac7fabe11aa3a12b83715c3cb037077d5a67dc83cca2"
+    },
+    {
+      "path": "03_MIMARI/01_SISTEM_MIMARISI.md",
+      "bytes": 2397,
+      "sha256": "9be7be8774dd28a30ed974fdf850074c6c8da22641f5299c5d420f2b72cbf13d"
+    },
+    {
+      "path": "03_MIMARI/02_VERI_MIMARISI.md",
+      "bytes": 2649,
+      "sha256": "4e18249c7ef5cc5a5dd90503fcc03c2b3b04d9a95cbae1feccf5adcf34b4203e"
+    },
+    {
+      "path": "03_MIMARI/03_GUVENLIK_MIMARISI.md",
+      "bytes": 2329,
+      "sha256": "bc58af85b3d0452bb63c3e7b7d48ca5e3ba0d6be2003e5bf3eb1605b6c67c036"
+    },
+    {
+      "path": "03_MIMARI/04_PLATFORM_VE_DAGITIM_MIMARISI.md",
+      "bytes": 1488,
+      "sha256": "eb020320e9ec060aea8a40db6ee25689dacd09a3a5cf6d3590db3f92fdb91347"
+    },
+    {
+      "path": "03_MIMARI/05_ORTAM_VE_YAYIN_TOPOLOJISI.md",
+      "bytes": 1900,
+      "sha256": "2d82b4e73b9122a44e5b036fe2085555edbcaf2e589bb3315fe4031349e99dd8"
+    },
+    {
+      "path": "04_URUN_TASARIMI/01_UX_ERISILEBILIRLIK_VE_MARKA.md",
+      "bytes": 1584,
+      "sha256": "585b0cfe16c57d0356ac72f92b6ad4ff2e525395f5b009a22c875fffa1c7d77a"
+    },
+    {
+      "path": "04_URUN_TASARIMI/02_SURUM_RENK_PALETLERI.md",
+      "bytes": 1609,
+      "sha256": "2ded8b0c78c0a0984a6afddb6e2737174eab5981367087da44266443f2b84458"
+    },
+    {
+      "path": "05_KALITE_TEST_KANIT/01_TEST_VE_KABUL_STRATEJISI.md",
+      "bytes": 1893,
+      "sha256": "f5d4fda88627ce603dc3b1796c733d6268eedf10cca01b52877a5dc2545943e4"
+    },
+    {
+      "path": "05_KALITE_TEST_KANIT/02_KANIT_VE_IZLENEBILIRLIK_SISTEMI.md",
+      "bytes": 1126,
+      "sha256": "cf6b96461c2aabf08e9b305a0466356262418bb26a75847de9c6637d6ff3fad1"
+    },
+    {
+      "path": "05_KALITE_TEST_KANIT/03_KANIT_SICILI.json",
+      "bytes": 2064,
+      "sha256": "632b4b0d9b9cfd74c9ba59b354eadc27528c13007a66d92e2ced764f9f01d1fe"
+    },
+    {
+      "path": "06_DIS_KAYNAK_VE_LISANS/01_TICARI_LISANS_ENVANTERI.md",
+      "bytes": 3440,
+      "sha256": "3bcbdfd7eea28bd097c28396336eb3637c73386bd9b72b465a1049a8353ee18b"
+    },
+    {
+      "path": "06_DIS_KAYNAK_VE_LISANS/02_SAGLAYICI_SECIM_KRITERLERI.md",
+      "bytes": 1307,
+      "sha256": "a02867e85b4b1e9cf5a0700a4df7224014d70d3b870d76e72ad247db97db3fed"
+    },
+    {
+      "path": "07_TICARI_HAZIRLIK/01_TICARILESME_YOL_HARITASI.md",
+      "bytes": 1342,
+      "sha256": "20be91e390efb32541357d577a394d16894f6f7c65124d06e3a99db85c101c67"
+    },
+    {
+      "path": "07_TICARI_HAZIRLIK/02_LISANS_AKTIVASYON_VE_DENEME.md",
+      "bytes": 1379,
+      "sha256": "50c9daa50f63c08c123dca031d52cd71166289184ad2f7c188852cd4608871fe"
+    },
+    {
+      "path": "07_TICARI_HAZIRLIK/03_OPERASYON_DESTEK_VE_OLAY_YONETIMI.md",
+      "bytes": 1697,
+      "sha256": "a20863212d5dcbedd6c34e25fbf95be13c1654a80c7867a8096df32e177f0755"
+    },
+    {
+      "path": "08_IS_LISTESI/01_ANA_IS_LISTESI.md",
+      "bytes": 6076,
+      "sha256": "9e215d321fe53f1cce8e804b8fe56ee22f8c5dc88e15b8d93dbe3b2d4b4f87e2"
+    },
+    {
+      "path": "08_IS_LISTESI/02_DIS_KAYNAK_GEREKTIREN_ISLER.md",
+      "bytes": 1226,
+      "sha256": "27d8e198fa0227dd8c338c11725ca5926e687957c86c29120cff619a0789f81c"
+    },
+    {
+      "path": "08_IS_LISTESI/03_ANA_IS_SICILI.json",
+      "bytes": 15893,
+      "sha256": "6b00338c12a5181c3b9ff44a8c994a4f5ab653c1ea2478cfe6a74f87a8d19673"
+    },
+    {
+      "path": "08_IS_LISTESI/04_IS_YURUTME_SIRASI.md",
+      "bytes": 1709,
+      "sha256": "62e707837e3c5b3fa95aaa6d546b4e0ba90bfacbed84abbede7d2cc7dbf04674"
+    },
+    {
+      "path": "09_TARIHCE/01_PROJE_TARIHCESI.md",
+      "bytes": 1726,
+      "sha256": "aad4f1df8e1ea0ca50e8943c48b0b428a5d45a9526d46e7667b02a6c9c93508b"
+    },
+    {
+      "path": "10_SEMALAR/01_KURAL_SEMASI.schema.json",
+      "bytes": 998,
+      "sha256": "18055791a2fe69a9c4a3ff26cd8936e1ec4952d99bd3675adefb5d9cbe3672ff"
+    },
+    {
+      "path": "10_SEMALAR/02_KARAR_SEMASI.schema.json",
+      "bytes": 1088,
+      "sha256": "01ec4726a5da6564d56df370bea0f7bc8ba4e4e1d581feb9d25079ac2b494711"
+    },
+    {
+      "path": "10_SEMALAR/03_IS_PAKETI_SEMASI.schema.json",
+      "bytes": 1405,
+      "sha256": "94784461402e636641e30849e613d092ac66f7a698390566cd36e9b879bb0ba1"
+    },
+    {
+      "path": "10_SEMALAR/04_KANIT_SEMASI.schema.json",
+      "bytes": 896,
+      "sha256": "e77e6c85a2e3f1569d00a38222ec29c8677aff6675919f020147f444c11d170a"
+    },
+    {
+      "path": "11_OTOMASYON/dogrula-ticari-temel-alani.mjs",
+      "bytes": 13828,
+      "sha256": "8ddd36e02182df50f565db877895840263b5a61d0b9e06d4cce2b33e3c3c875e"
+    }
+  ],
+  "generatedAt": "2026-08-19T10:36:50.430Z"
+}

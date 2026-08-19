@@ -3108,7 +3108,8 @@ const placesTravelResult=(channel:string,result:unknown):IpcIntegrationPolicyDec
 };
 
 export const FAMILY_AI_ASSISTANT_IPC_CHANNELS=Object.freeze({
-  getCenter:'familyAiAssistant:getCenter',generate:'familyAiAssistant:generate',review:'familyAiAssistant:review'
+  getCenter:'familyAiAssistant:getCenter',getLocalModelStatus:'familyAiAssistant:getLocalModelStatus',
+  runLocalModel:'familyAiAssistant:runLocalModel',generate:'familyAiAssistant:generate',review:'familyAiAssistant:review'
 } as const);
 const familyAiAssistantChannels=new Set<string>(Object.values(FAMILY_AI_ASSISTANT_IPC_CHANNELS));
 const familyAiKinds=new Set<unknown>(['authorized_search','daily_summary','weekly_summary','reminder_review','emergency_bag',
@@ -3134,8 +3135,17 @@ const familyAiPurposeByKind=(kind:unknown):string=>kind==='authorized_search'?'s
   :['daily_summary','weekly_summary','plain_explanation'].includes(String(kind))?'summary'
   :['ocr_classification','duplicate_record'].includes(String(kind))?'classification':'recommendation';
 const familyAiInput=(channel:string,args:readonly unknown[]):IpcIntegrationPolicyDecision=>{
-  if(channel===FAMILY_AI_ASSISTANT_IPC_CHANNELS.getCenter)return zeroArguments(args);
+  if(channel===FAMILY_AI_ASSISTANT_IPC_CHANNELS.getCenter||channel===FAMILY_AI_ASSISTANT_IPC_CHANNELS.getLocalModelStatus)
+    return zeroArguments(args);
   if(args.length!==1||!isObject(args[0]))return rejected('FAMILY_AI_OBJECT_REQUIRED','$[0]');const value=args[0];
+  if(channel===FAMILY_AI_ASSISTANT_IPC_CHANNELS.runLocalModel){const optional=['modules'].filter((key)=>value[key]!==undefined);
+    const allowedModules=familyAiModulesByKind[String(value.kind)]??[];
+    return healthCareExactRecord(value,['kind','prompt',...optional])&&familyAiKinds.has(value.kind)
+      &&healthCareText(value.prompt,2,400)
+      &&(value.modules===undefined||(Array.isArray(value.modules)&&value.modules.length>=1&&value.modules.length<=9
+        &&value.modules.every((module)=>familyAiModules.has(module)&&allowedModules.includes(String(module)))
+        &&new Set(value.modules).size===value.modules.length))
+      ?accepted():rejected('FAMILY_AI_LOCAL_MODEL_INPUT_INVALID','$[0]');}
   if(channel===FAMILY_AI_ASSISTANT_IPC_CHANNELS.generate){const optional=['modules','query'].filter((key)=>value[key]!==undefined);
     const allowedModules=familyAiModulesByKind[String(value.kind)]??[];
     return healthCareExactRecord(value,['clientOperationId','suggestionId','kind',...optional])
@@ -3214,8 +3224,30 @@ const familyAiReceiptResult=(value:unknown):boolean=>healthCareExactRecord(value
   &&value.humanConfirmationRecorded===(value.mutationKind==='suggestion_confirm')
   &&(value.mutationKind==='suggestion_generate'?value.previousRevision===0&&value.revision===1:Number(value.previousRevision)>=1)
   &&value.networkUsed===false&&value.cloudUsed===false;
+const familyAiLocalModelStatusResult=(value:unknown):boolean=>{if(!isObject(value))return false;
+  const optional=['model'].filter((key)=>value[key]!==undefined);
+  return healthCareExactRecord(value,['provider','configured','available','endpoint','localLoopbackOnly','networkEgressUsed',
+    'cloudUsed','checkedAt',...optional])&&value.provider==='ollama_loopback'&&typeof value.configured==='boolean'
+    &&typeof value.available==='boolean'&&(!value.configured?value.available===false:true)
+    &&(value.model===undefined||healthCareText(value.model,1,80))&&value.endpoint==='http://127.0.0.1:11434'
+    &&value.localLoopbackOnly===true&&value.networkEgressUsed===false&&value.cloudUsed===false&&healthCareIso(value.checkedAt);};
+const familyAiLocalModelResponseResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['kind','answer','sourceCount','provider','model','generatedAt','truth'])&&familyAiKinds.has(value.kind)
+  &&healthCareText(value.answer,1,4000)&&Number.isSafeInteger(value.sourceCount)&&Number(value.sourceCount)>=1
+  &&Number(value.sourceCount)<=24&&value.provider==='ollama_loopback'&&healthCareText(value.model,1,80)
+  &&healthCareIso(value.generatedAt)&&isObject(value.truth)&&healthCareExactRecord(value.truth,
+    ['localLoopbackOnly','networkEgressUsed','cloudUsed','modelInferencePerformed','responsePersisted','durableActionPerformed',
+      'humanReviewRequired','sourceConsentRevalidatedAfterInference','medicalFinancialOrEmergencyDecisionProvided'])
+  &&value.truth.localLoopbackOnly===true&&value.truth.networkEgressUsed===false&&value.truth.cloudUsed===false
+  &&value.truth.modelInferencePerformed===true&&value.truth.responsePersisted===false
+  &&value.truth.durableActionPerformed==='not_performed'&&value.truth.humanReviewRequired===true
+  &&value.truth.sourceConsentRevalidatedAfterInference===true
+  &&value.truth.medicalFinancialOrEmergencyDecisionProvided===false;
 const familyAiResult=(channel:string,result:unknown):IpcIntegrationPolicyDecision=>{
-  const valid=channel===FAMILY_AI_ASSISTANT_IPC_CHANNELS.getCenter?familyAiCenterResult(result):familyAiReceiptResult(result);
+  const valid=channel===FAMILY_AI_ASSISTANT_IPC_CHANNELS.getCenter?familyAiCenterResult(result)
+    :channel===FAMILY_AI_ASSISTANT_IPC_CHANNELS.getLocalModelStatus?familyAiLocalModelStatusResult(result)
+    :channel===FAMILY_AI_ASSISTANT_IPC_CHANNELS.runLocalModel?familyAiLocalModelResponseResult(result)
+    :familyAiReceiptResult(result);
   return valid?accepted():rejected('FAMILY_AI_RESULT_INVALID','$result');
 };
 

@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-TICARI-TEMEL-20260819-01",
+  "documentSetVersion": "1.0.0-belge.20260819.1",
+  "baselineDate": "2026-08-19",
+  "product": "ParsYuva AYM",
+  "sourceRelease": "Bronze 19.08.2026.33",
+  "status": "ACTIVE_WORKING_BASELINE",
+  "commercialReleaseEligible": false,
+  "canonicalRuleCount": 217,
+  "canonicalRuleSha256": "b79db92a03d559f33ccd49348bad159a70b6034fbcf10a07abe5a407549bf0be",
+  "governedPreflight": "PASS",
+  "worktreeClean": false,
+  "historicalDocumentsRemainImmutable": true,
+  "historicalDocumentsAreActiveAuthority": false,
+  "evidenceRequiredForCompletion": true,
+  "externalEvidenceDefaultsToNotRun": true,
+  "naming": {
+    "language": "tr",
+    "turkishMeaningRequired": true,
+    "turkishCharactersAllowedInFileNames": false,
+    "orderedFolderPrefixesRequired": true
+  },
+  "rootSections": [
+    "01_YONETIM",
+    "02_IS_ANALIZI",
+    "03_MIMARI",
+    "04_URUN_TASARIMI",
+    "05_KALITE_TEST_KANIT",
+    "06_DIS_KAYNAK_VE_LISANS",
+    "07_TICARI_HAZIRLIK",
+    "08_IS_LISTESI",
+    "09_TARIHCE",
+    "10_SEMALAR",
+    "11_OTOMASYON"
+  ]
+}
+

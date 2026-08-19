@@ -13,6 +13,11 @@ import {
   writeFileSync
 } from 'node:fs';
 import { dirname } from 'node:path';
+import {
+  ACCEPTED_PERSISTED_PRODUCT_NAMES,
+  CURRENT_PRODUCT_NAME,
+  type PersistedProductName
+} from '@ppt/domain';
 import { createDataKey, decryptBytes, encryptBytes, type EncryptedEnvelope } from '@ppt/security';
 import type { DeviceSecretProtector } from './device-secret-protector.js';
 
@@ -28,7 +33,7 @@ interface ProtectedSideArtifactKeyEnvelope {
 
 export interface ProtectedSideArtifactEnvelope {
   readonly schemaVersion: 1;
-  readonly product: 'Anadolu Parsı Aile Yaşam Merkezi';
+  readonly product: PersistedProductName;
   readonly applicationVersion: string;
   readonly kind: string;
   readonly generatedAt: string;
@@ -81,7 +86,7 @@ const parseArtifactEnvelope = (raw: Buffer): ProtectedSideArtifactEnvelope => {
   const value = JSON.parse(raw.toString('utf8')) as Partial<ProtectedSideArtifactEnvelope>;
   if (
     value.schemaVersion !== ARTIFACT_SCHEMA_VERSION ||
-    value.product !== 'Anadolu Parsı Aile Yaşam Merkezi' ||
+    !ACCEPTED_PERSISTED_PRODUCT_NAMES.some(product => product === value.product) ||
     typeof value.applicationVersion !== 'string' ||
     typeof value.kind !== 'string' ||
     typeof value.generatedAt !== 'string' ||
@@ -108,7 +113,7 @@ export class ProtectedSideArtifactStore {
   public sealBuffer(kind: string, bytes: Uint8Array): ProtectedSideArtifactEnvelope {
     return Object.freeze({
       schemaVersion: ARTIFACT_SCHEMA_VERSION,
-      product: 'Anadolu Parsı Aile Yaşam Merkezi',
+      product: CURRENT_PRODUCT_NAME,
       applicationVersion: this.options.applicationVersion,
       kind,
       generatedAt: this.#now(),

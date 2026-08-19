@@ -59,7 +59,7 @@
       "passed": true
     },
     {
-      "name": "manifest contains exactly 422 unique surfaces",
+      "name": "manifest contains exactly 435 unique surfaces",
       "passed": true
     },
     {
@@ -419,7 +419,7 @@
       "passed": true
     },
     {
-      "name": "decision pins current Desktop capability truth",
+      "name": "historical decision preserves capability and sandbox truth without acting as current ratchet",
       "passed": true
     },
     {
@@ -427,7 +427,7 @@
       "passed": true
     },
     {
-      "name": "master register contains DEC-203 and current exact capability ratchet",
+      "name": "master register contains the historical DEC-203 reference",
       "passed": true
     },
     {
@@ -458,10 +458,10 @@
   "protectedCapabilityFamilies": 7,
   "canonicalApplications": 14,
   "productionSourceZones": 18,
-  "scannedProductionFiles": 563,
-  "exactCapabilitySurfaces": 422,
-  "exactManifestEntries": 422,
-  "exactManifestSha256": "dc0234d84a50ff1872f9cde4fb7ab286446b236a69019034055fa938dbb3be1e",
+  "scannedProductionFiles": 569,
+  "exactCapabilitySurfaces": 435,
+  "exactManifestEntries": 435,
+  "exactManifestSha256": "dbffb20c1cc054e08361bb91da7f9805d6e1b629ee6838db9306c1521c727787",
   "pinnedBootstrapSurfaces": 26,
   "maliciousAstSelfTests": 35,
   "benignAstSelfTests": 5,
@@ -479,5 +479,5 @@
   "cutoverAuthorityAttached": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-18T05:02:33.204Z"
+  "generatedAt": "2026-08-19T10:21:01.184Z"
 }

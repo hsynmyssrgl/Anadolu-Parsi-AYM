@@ -23,10 +23,10 @@ Bu nedenle `countsAsRequirementPass=false`; gerçek provider, gerçek cihaz ve k
 
 - Migration 109: `619461d7ce65e87d9095fc2ea88cf9f801261b9309da67c0b67183c46094e71b`
 - Hedefli matris: 5 dosya / 23 test
-- PPK-015: 563 dosya, sıfır bulgu
+- PPK-015: 568 dosya, sıfır bulgu
 - PPK-019: sıfır bulgu
-- PPK-021: 563 dosya / 886 yüzey / `58a90febf9382776c2b1472e6ffd6a645c9a24a4cd69e499a8afc1fff2e72b30`
-- PPK-022: 563 dosya / 422 yüzey / `dc0234d84a50ff1872f9cde4fb7ab286446b236a69019034055fa938dbb3be1e`
+- PPK-021: 568 dosya / 889 yüzey / `3a297f74d43d4675090a709d4359af9245c2971a7fc338afef2fb87b1c8608dd`
+- PPK-022: 568 dosya / 428 yüzey / `1bf21d23c862afbccb9611083c093f9ced703adadf7a170c29f53479d21397b1`
 
 Dış sağlayıcı önizlemesi ayrıca profil düzeyinde etkin olmalıdır. Kişisel sözlük girdisinin kaynak dil/hedef dil/kaynak terim kimliği güncellemeyle değiştirilemez. Düzeltme metni ve onun SHA-256 özeti renderer'a verilmez; yalnız düzeltme varlığı ile sınırlandırılmış karakter sayısı gösterilir.
 

@@ -7,6 +7,7 @@ export * from './app-data.js';
 export * from './windows-hello.js';
 
 export * from './app-meta.js';
+export * from './ui-localization.js';
 
 export * from './validation.js';
 

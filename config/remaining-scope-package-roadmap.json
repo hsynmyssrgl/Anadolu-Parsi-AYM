@@ -1144,6 +1144,22 @@
       "closureReason": null
     }
   ],
+  "corporateInstitutionalization": {
+    "decision": "DEC-254",
+    "status": "PLANNED_EXTERNAL_ACTION",
+    "localImplementationStatus": "DOCUMENTED_LOCAL_FOUNDATION_AND_BRAND_MIGRATION_IN_PROGRESS",
+    "countsAsRequirementPass": false,
+    "openReason": "Şirket kuruluşu, ticaret unvanı ve marka tescili, alan adı satın alımı, hukuk-vergi-gizlilik incelemesi, üretim kod imzası ve mağaza hesapları yetkili dış işlemler gerektiriyor.",
+    "missingEvidence": [
+      "mersisCompanyRegistration",
+      "turkpatentTrademarkSearchAndApplication",
+      "domainAndSocialHandlePurchaseReceipts",
+      "legalTaxPrivacyProfessionalApproval",
+      "productionCodeSigningCertificate",
+      "appleMicrosoftGoogleOrganizationAccounts"
+    ],
+    "currentStatusSource": "docs/current/13_KURUMSALLASMA_VE_GLOBAL_MARKA_PLANI.md"
+  },
   "validationInvariants": {
     "assignedRequirementCount": 274,
     "uniqueAssignmentRequired": true,

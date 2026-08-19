@@ -1,11 +1,25 @@
+export const CURRENT_BRAND_NAME = 'ParsYuva' as const;
+export const CURRENT_PRODUCT_NAME = 'ParsYuva AYM' as const;
+export const CURRENT_PRODUCT_LONG_NAME = 'ParsYuva Aile Yaşam Merkezi' as const;
+export const LEGACY_PRODUCT_NAME = 'Anadolu Parsı Aile Yaşam Merkezi' as const;
+export const STABLE_APPLICATION_ID = 'tr.anadoluparsi.aileyasammerkezi' as const;
+// The user-data directory remains stable across the public brand transition so
+// an update never strands or silently recreates an existing family database.
+export const STABLE_USER_DATA_DIRECTORY_NAME = LEGACY_PRODUCT_NAME;
+export const ACCEPTED_PERSISTED_PRODUCT_NAMES = Object.freeze([
+  CURRENT_PRODUCT_NAME,
+  LEGACY_PRODUCT_NAME
+] as const);
+export type PersistedProductName = (typeof ACCEPTED_PERSISTED_PRODUCT_NAMES)[number];
+
 export const APP_META = Object.freeze({
-  name: 'Anadolu Parsı Aile Yaşam Merkezi',
+  name: CURRENT_PRODUCT_NAME,
   edition: 'Bronze',
-  version: '18.08.2026.30',
-  packageVersion: '18.8.2026-30',
-  releaseLabel: 'Bronze 18.08.2026.30',
-  releaseId: 'bronze-2026-08-18-r30',
-  monthlySequence: 30,
+  version: '19.08.2026.33',
+  packageVersion: '19.8.2026-33',
+  releaseLabel: 'Bronze 19.08.2026.33',
+  releaseId: 'bronze-2026-08-19-r33',
+  monthlySequence: 33,
   stage: 'Bronze · Aktif Geliştirme'
 });
 export type AppMeta = typeof APP_META;

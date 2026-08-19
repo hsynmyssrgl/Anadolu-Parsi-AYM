@@ -11,7 +11,7 @@ const [rootPackage, desktopPackage, appMeta, renderer, styles, main, migrations,
   readFile('apps/desktop/src/renderer/styles.css', 'utf8'),
   readFile('apps/desktop/src/main/main.ts', 'utf8'),
   readFile('packages/database/src/family-database-migrations.ts', 'utf8'),
-  readFile('apps/desktop/build/LICENSE_TR.txt', 'utf8'),
+  readFile('apps/desktop/docs/LISANS_TR_KAYNAK.txt', 'utf8'),
   readFile('apps/desktop/build/icon.ico')
 ]);
 const failures = [];

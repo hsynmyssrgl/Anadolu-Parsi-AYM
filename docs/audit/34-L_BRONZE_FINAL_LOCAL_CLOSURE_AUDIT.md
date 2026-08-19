@@ -15,7 +15,7 @@ Bu kayıt yerel kodlama kapsamını izler; ürün/sertifikasyon kapanışı değ
 - 34-G–34-K boundary kapıları: `52/52 PASS`; contract kapıları: `30/30 PASS`.
 - 34-G–34-K runtime kapıları: `172/172 PASS`; bütün paketlerde gereksinim kabulü `false`.
 - Birleşik hedefli matris: `12/12` dosya, `50/50` test `PASS`.
-- Tam Vitest regresyonu: `301/301` test dosyası, `2018/2018` test `PASS`.
+- Tam Vitest regresyonu: `306/306` test dosyası, `2047/2047` test `PASS`.
 - Kök typecheck ve 18 workspace production build'i `PASS`.
 - Belge/kod indeksi: `5969` dosya, `3671` belge ve `19320` doğrulama kontrolü `PASS`.
 - Persistent receipt: `artifacts/validation/34-L-bronze-local-closure-receipts/<source-head>-<evidence-digest>.json`; no-overwrite versioned rollover desteklenir. Eski sabit receipt tarihsel kalır ve güncel kaynak kanıtı sayılmaz.

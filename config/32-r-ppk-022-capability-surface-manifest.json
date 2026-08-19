@@ -18,7 +18,7 @@
   "signedManifestRuntimeCheckRequired": true,
   "buildManifestAloneGrantsRuntimeAuthority": false,
   "productionSourceZoneCount": 18,
-  "scannedProductionFiles": 563,
+  "scannedProductionFiles": 569,
   "protectedCapabilityFamilies": [
     "camera",
     "microphone",
@@ -31,14 +31,14 @@
   "surfaceCounts": {
     "CAMERA_API": 1,
     "FILE_DIALOG": 2,
-    "FILE_IMPORT": 362,
+    "FILE_IMPORT": 367,
     "MICROPHONE_API": 1,
     "NETWORK_API": 3,
-    "NETWORK_IMPORT": 13,
-    "OCR_API": 5,
-    "OCR_IMPORT": 35
+    "NETWORK_IMPORT": 14,
+    "OCR_API": 6,
+    "OCR_IMPORT": 41
   },
-  "exactCapabilitySurfaceCount": 422,
+  "exactCapabilitySurfaceCount": 435,
   "applicationRuntimeCapabilities": {
     "windows-desktop": [
       "camera.access",
@@ -1682,6 +1682,46 @@
       "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
     },
     {
+      "key": "FILE_IMPORT|apps/desktop/src/main/offline-family-map-protocol.ts|node:fs:closeSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/offline-family-map-protocol.ts|node:fs:lstatSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/offline-family-map-protocol.ts|node:fs:openSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/offline-family-map-protocol.ts|node:fs:readSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/offline-family-map-protocol.ts|node:fs:realpathSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
       "key": "FILE_IMPORT|apps/desktop/src/main/oidc-token-vault.ts|node:fs:chmodSync",
       "applicationIds": [
         "windows-desktop"
@@ -3049,6 +3089,14 @@
       "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
     },
     {
+      "key": "NETWORK_IMPORT|apps/desktop/src/main/local-family-ai-model-adapter.ts|node:http:request",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "network.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
       "key": "NETWORK_IMPORT|apps/desktop/src/main/secure-oidc-network-adapter.ts|node:dns/promises:lookup",
       "applicationIds": [
         "windows-desktop"
@@ -3169,6 +3217,14 @@
       "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
     },
     {
+      "key": "OCR_API|apps/desktop/src/main/main.ts|WindowsDefenderLocalOcrMalwareAdapter.constructor",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
       "key": "OCR_IMPORT|apps/desktop/src/main/data-store.ts|./local-governed-ocr-application-adapter.js:RepositoryBackedLocalGovernedOcrUnitOfWork",
       "applicationIds": [
         "windows-desktop"
@@ -3186,6 +3242,14 @@
     },
     {
       "key": "OCR_IMPORT|apps/desktop/src/main/data-store.ts|./local-governed-ocr-runtime-adapter.js:createWindowsLocalGovernedOcrRuntimeAdapter",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/data-store.ts|./local-ocr-worker.js:LocalOcrMalwareVerdictPort",
       "applicationIds": [
         "windows-desktop"
       ],
@@ -3378,6 +3442,46 @@
     },
     {
       "key": "OCR_IMPORT|apps/desktop/src/main/local-ocr-worker.ts|./local-ocr-engine-adapter.js:LocalOcrWorkerQuotas",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/main.ts|./windows-defender-local-ocr-malware-adapter.js:WindowsDefenderLocalOcrMalwareAdapter",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/windows-defender-local-ocr-malware-adapter.ts|./local-ocr-worker.js:LocalOcrMalwareScannerDescriptor",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/windows-defender-local-ocr-malware-adapter.ts|./local-ocr-worker.js:LocalOcrMalwareScanRequest",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/windows-defender-local-ocr-malware-adapter.ts|./local-ocr-worker.js:LocalOcrMalwareScanResult",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/windows-defender-local-ocr-malware-adapter.ts|./local-ocr-worker.js:LocalOcrMalwareVerdictPort",
       "applicationIds": [
         "windows-desktop"
       ],

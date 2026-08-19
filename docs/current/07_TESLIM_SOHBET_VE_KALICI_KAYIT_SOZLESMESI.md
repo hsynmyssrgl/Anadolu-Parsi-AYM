@@ -1,8 +1,9 @@
 # Teslim, Sohbet ve Kalıcı Kayıt Sözleşmesi
 
-- Görünür sürüm: **Bronze 04.08.2026.29**
-- Kalıcı Library kökü: `/Panthera pardus tulliana/Anadolu Parsı Aile Yaşam Merkezi`
-- Bu sürümün zorunlu Library dalı: `/Panthera pardus tulliana/Anadolu Parsı Aile Yaşam Merkezi/Bronze 04.08.2026.29`
+- Görünür sürüm: **Bronze 19.08.2026.33**
+- Yeni kalıcı Library kökü: `/ParsYuva/ParsYuva AYM`
+- Bu sürümün zorunlu Library dalı: `/ParsYuva/ParsYuva AYM/Bronze 19.08.2026.33`
+- Önceki `/Panthera pardus tulliana/Anadolu Parsı Aile Yaşam Merkezi` kayıtları tarihsel ve değişmezdir; yeni kayıtlar o dala yazılmaz.
 
 ## Teslim bitiş alanları
 

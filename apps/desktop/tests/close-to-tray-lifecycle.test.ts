@@ -9,13 +9,13 @@ describe('close-to-tray lifecycle', () => {
     const main = await readFile(mainUrl, 'utf8');
     for (const marker of [
       "new Tray(join(currentDir, 'tray-icon.png'))",
-      "label: 'Uygulamayı aç'",
-      "label: 'Kilitle'",
-      "label: 'Tamamen kapat'",
+      "label: mainText('Uygulamayı aç','Open application')",
+      "label: mainText('Kilitle','Lock')",
+      "label: mainText('Tamamen kapat','Quit completely')",
       "window.on('close', (event) =>",
       'event.preventDefault();',
       'window.hide();',
-      "content: 'Uygulama tamamen kapanmadı; sistem tepsisinde çalışmaya devam ediyor.'"
+      "content: mainText('Uygulama tamamen kapanmadı; sistem tepsisinde çalışmaya devam ediyor.', 'The application did not quit; it is still running in the system tray.')"
     ]) expect(main).toContain(marker);
     expect(main).toMatch(/if \(result\.response !== 0\) return;\s+explicitApplicationQuit = true;\s+app\.quit\(\);/u);
     expect(main).toMatch(/app\.on\('before-quit',[\s\S]*explicitApplicationQuit = true;/u);

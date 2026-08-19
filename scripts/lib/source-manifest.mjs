@@ -210,7 +210,7 @@ export const verifySourceManifestIntegrity = async (root = '.') => {
 
   return {
     schemaVersion: 1,
-    product: 'Anadolu Parsı Aile Yaşam Merkezi',
+    product: 'ParsYuva AYM',
     packageVersion: packageJson.version,
     manifestSchemaVersion: manifest.schemaVersion ?? null,
     manifestFileCount: manifestEntries.length,

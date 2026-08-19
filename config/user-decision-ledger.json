@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
-  "release": "Bronze 04.08.2026.29",
-  "decisionCount": 82,
+  "release": "Bronze 19.08.2026.33",
+  "decisionCount": 88,
   "decisions": [
     {
       "id": "DEC-121",
@@ -2096,6 +2096,171 @@
       "evidence": [
         "apps/desktop/tests/installer-narration-experience.test.ts",
         "apps/desktop/tests/narrated-help-center.test.ts"
+      ]
+    },
+    {
+      "id": "DEC-254",
+      "date": "2026-08-18",
+      "acceptedAt": "2026-08-18T10:00:00+03:00",
+      "title": "ParsYuva marka kimliği ve kurumsallaşma yol haritası",
+      "status": "ACTIVE",
+      "source": "Açık kullanıcı kararı: ilk derlemede uygulama adını ve belgeleri güncelle; önceki kurumsallaşma fikirlerini belgeye bağla; platform ve ana belgeleri kurumsal klasör yapısına ayır",
+      "document": "docs/decisions/DEC-254-parsyuva-brand-and-institutionalization-roadmap.md",
+      "documents": [
+        "docs/current/00_AKTIF_ANA_KAPSAM.md",
+        "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
+        "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
+        "docs/current/13_KURUMSALLASMA_VE_GLOBAL_MARKA_PLANI.md",
+        "config/active-document-set.json",
+        "config/remaining-scope-package-roadmap.json"
+      ],
+      "workListImpact": "ParsYuva AYM yerel marka ve uyumluluk işi ilk derlemeye alındı; şirket kuruluşu, marka/alan adı tescili, hukuk-vergi-gizlilik onayı, üretim kod imzası ve mağaza hesapları dış kanıtları bulunmadığı için açık ve countsAsRequirementPass=false kalır",
+      "syncStatus": "SYNCHRONIZED",
+      "requirements": [],
+      "codeAreas": [
+        "packages/domain/src/app-meta.ts",
+        "apps/desktop/package.json",
+        "apps/desktop/build/installer.nsh",
+        "apps/desktop/src/main",
+        "apps/desktop/src/renderer"
+      ],
+      "evidence": [
+        "scripts/verify-product-brand-identity.mjs",
+        "apps/desktop/tests/product-brand-identity.test.ts"
+      ]
+    },
+    {
+      "id": "DEC-255",
+      "date": "2026-08-18",
+      "acceptedAt": "2026-08-18T23:00:00+03:00",
+      "title": "Sistem dili algılama ve İngilizce arayüz altyapısı",
+      "status": "ACTIVE",
+      "source": "Açık kullanıcı kararı: uygulama dili makinenin sistem diline bakmalı; desteklenmeyen dilde İngilizce açılmalı ve İngilizce altyapı kurulmalı",
+      "document": "docs/decisions/DEC-255-sistem-dili-ve-ingilizce-arayuz-altyapisi.md",
+      "documents": [
+        "config/kullanici-arayuzu-dil-politikasi.json",
+        "docs/current/06_KANONIK_KURAL_SICILI.md",
+        "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
+        "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md"
+      ],
+      "workListImpact": "Sistem dili çözümleyicisi, İngilizce güvenli varsayılan, ana süreç/preload/renderer zinciri, ilk kurulum-giriş-ana kabuk-sesli yardım ve iki dilli NSIS tamamlandı; bütün özellik panellerinin İngilizce metin kapsamı PARTIAL ve sonraki dil paketinde açık kalır",
+      "syncStatus": "SYNCHRONIZED",
+      "requirements": [],
+      "codeAreas": [
+        "packages/domain/src/ui-localization.ts",
+        "apps/desktop/src/main/main.ts",
+        "apps/desktop/src/main/preload.ts",
+        "apps/desktop/src/renderer/localization.tsx",
+        "apps/desktop/src/renderer/main.tsx",
+        "apps/desktop/src/renderer/App.tsx",
+        "apps/desktop/src/renderer/accessibility.ts",
+        "apps/desktop/src/renderer/NarratedHelpCenter.tsx",
+        "apps/desktop/build/installer.nsh"
+      ],
+      "evidence": [
+        "packages/domain/tests/ui-localization.test.ts",
+        "apps/desktop/tests/ui-system-localization.test.ts",
+        "apps/desktop/tests/installer-narration-experience.test.ts"
+      ]
+    },
+    {
+      "id": "DEC-256",
+      "date": "2026-08-19",
+      "acceptedAt": "2026-08-19T00:32:03+03:00",
+      "title": "Tek gerçek kurulum ilerlemesi ve yerel yüzde görünümü",
+      "status": "ACTIVE",
+      "source": "Açık kullanıcı kararı: yükleme ekranı birden fazla kez hareket etmesin; yalnız tek ilerleme çubuğu ve gerçek yüklenme yüzdesi gösterilsin",
+      "document": "docs/decisions/DEC-256-tek-gercek-kurulum-ilerlemesi.md",
+      "documents": [
+        "docs/current/03_AKTIF_UX_ERISILEBILIRLIK_SOZLESMESI.md",
+        "docs/current/04_AKTIF_BRONZE_YOL_HARITASI.md",
+        "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
+        "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md"
+      ],
+      "workListImpact": "Karşılama ve kuruluma hazır sayfalarındaki dekoratif ilerleme kaldırıldı; tek hareketli gösterge NSIS dosya kurulum sayfasındaki gerçek yerel ilerlemedir. İmzalı üretim kurulum EXE'si haricî Authenticode sertifikası olmadan fail-closed BLOCKED_EXTERNAL kalır.",
+      "syncStatus": "SYNCHRONIZED",
+      "requirements": [],
+      "codeAreas": [
+        "apps/desktop/build/installer.nsh",
+        "apps/desktop/scripts/verify-installer.mjs"
+      ],
+      "evidence": [
+        "apps/desktop/tests/installer-narration-experience.test.ts"
+      ]
+    },
+    {
+      "id": "DEC-257",
+      "date": "2026-08-19",
+      "acceptedAt": "2026-08-19T00:47:00+03:00",
+      "title": "Başlıklarda ParsYuva AYM adının tekrarsız kullanımı",
+      "status": "ACTIVE",
+      "source": "Açık kullanıcı kararı: ParsYuva AYM zaten Aile Yaşam Merkezi demektir; kısaltma ile uzun ad aynı başlıkta birlikte yazılmamalıdır",
+      "document": "docs/decisions/DEC-257-parsyuva-aym-baslik-tekrar-yasagi.md",
+      "documents": [
+        "docs/current/03_AKTIF_UX_ERISILEBILIRLIK_SOZLESMESI.md",
+        "docs/current/06_KANONIK_KURAL_SICILI.md",
+        "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
+        "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md"
+      ],
+      "workListImpact": "Yeni aktif Word/PDF kapağı ve kurulum bitiş başlığı yalnız ParsYuva AYM kullanır; açık uzun ad yalnız ayrı açıklayıcı bağlamlarda korunur.",
+      "syncStatus": "SYNCHRONIZED",
+      "requirements": [],
+      "codeAreas": [
+        "scripts/generate-current-master-documentation.py",
+        "apps/desktop/build/installer.nsh"
+      ],
+      "evidence": [
+        "apps/desktop/tests/installer-narration-experience.test.ts",
+        "apps/desktop/tests/product-brand-identity.test.ts"
+      ]
+    },
+    {
+      "id": "DEC-258",
+      "date": "2026-08-19",
+      "acceptedAt": "2026-08-19T09:35:00+03:00",
+      "title": "Cevrimdisi aile haritasi altyapisi",
+      "status": "ACTIVE",
+      "source": "Acik kullanici karari: aile bireyleri icin ticari lisans sinirlarina uygun, ucretsiz ve cevrimdisi harita altyapisi kullanilacak",
+      "document": "docs/decisions/DEC-258-cevrimdisi-aile-haritasi-altyapisi.md",
+      "documents": [
+        "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
+        "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md"
+      ],
+      "workListImpact": "MapLibre GL JS ve PMTiles tabanli yerel harita goruntuleme uygulanmistir; dagitilacak Turkiye harita paketinin kaynak, atif, lisans, SHA-256 ve guncelleme kaniti ayrica tamamlanmadan ticari pakete dahil edilmez.",
+      "syncStatus": "SYNCHRONIZED",
+      "requirements": [],
+      "codeAreas": [
+        "apps/desktop/src/main/offline-family-map-protocol.ts",
+        "apps/desktop/src/renderer/FamilyLocationMap.tsx"
+      ],
+      "evidence": [
+        "apps/desktop/tests/offline-family-map.test.ts"
+      ]
+    },
+    {
+      "id": "DEC-259",
+      "date": "2026-08-19",
+      "acceptedAt": "2026-08-19T13:01:00+03:00",
+      "title": "Ticari temel alani ve asilamaz belge kapisi",
+      "status": "ACTIVE",
+      "source": "Acik kullanici karari: kurallar asilamaz olacak; yeni klasor, tum bilgiler ve altyapi semalari full auto kurulacak",
+      "document": "docs/decisions/DEC-259-ticari-temel-alani-ve-asilamaz-belge-kapisi.md",
+      "documents": [
+        "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
+        "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
+        "docs/current/14_TICARI_URUN_TEMEL_SURUMU.md",
+        "docs/ticari-urun-temeli/00_OKU_BENI.md",
+        "docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md"
+      ],
+      "workListImpact": "Yeni ticari belge kokunun kurulmasi, tum aciklarin gerekce ve kanitla tek ana is listesinde tutulmasi ve dogrulama kapisinin governed preflight icinde zorunlu olmasi kararlastirildi.",
+      "syncStatus": "SYNCHRONIZED",
+      "requirements": [],
+      "codeAreas": [
+        "scripts/run-governed-preflight.mjs",
+        "package.json"
+      ],
+      "evidence": [
+        "docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json"
       ]
     }
   ]

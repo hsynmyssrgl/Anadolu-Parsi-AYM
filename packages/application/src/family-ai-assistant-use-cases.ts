@@ -21,12 +21,15 @@ import {
   familyAiAssistantPurposeForKind,
   type FamilyAiAssistantCenterView,
   type FamilyAiAssistantKind,
+  type FamilyAiLocalModelResponseView,
+  type FamilyAiLocalModelStatusView,
   type FamilyAiAssistantModule,
   type FamilyAiAssistantPurpose,
   type FamilyAiAssistantSourceReferenceView,
   type FamilyAiAssistantSourceResourceType,
   type FamilyAiSuggestionMutationReceiptView,
   type GenerateFamilyAiSuggestionInput,
+  type RunFamilyAiLocalModelInput,
   type ReviewFamilyAiSuggestionInput
 } from '@ppt/domain';
 import {
@@ -57,6 +60,15 @@ export interface FamilyAiAssistantSourcePort {
 
 export interface FamilyAiAssistantQueryPort {
   getCenter(context:LifeApplicationContext):Promise<Result<FamilyAiAssistantCenterView,AppError>>;
+}
+
+export interface FamilyAiAssistantModelPort {
+  getStatus():Promise<FamilyAiLocalModelStatusView>;
+  run(input:{
+    readonly correlationId:LifeApplicationContext['correlationId'];
+    readonly systemPrompt:string;
+    readonly userPrompt:string;
+  }):Promise<Result<{readonly answer:string;readonly model:string;readonly generatedAt:FamilyAiLocalModelResponseView['generatedAt']},AppError>>;
 }
 
 export interface FamilyAiAssistantWriteScope {
@@ -148,6 +160,32 @@ const candidateSafe=(candidate:FamilyAiAssistantAuthorizedCandidate):boolean=>mo
   &&(candidate.occurredAt===undefined||(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u.test(candidate.occurredAt)
     &&Number.isFinite(Date.parse(candidate.occurredAt))));
 
+const modelPrompt=(context:LifeApplicationContext,kind:FamilyAiAssistantKind,prompt:string,
+  candidates:readonly FamilyAiAssistantAuthorizedCandidate[]):Result<string,AppError>=>{
+  const rows:string[]=[];let used=0;
+  for(const candidate of candidates){
+    const text=candidate.searchableText.map((value)=>value.normalize('NFKC').trim().replace(/\s+/gu,' '))
+      .filter(Boolean).join(' | ');
+    if(!text)continue;
+    const row=`[${candidate.module}] ${text}`;if(used+row.length>12_000)break;
+    rows.push(row);used+=row.length;
+  }
+  if(rows.length<1)return err(denied(context,'Yerel model için izinli ve içerik taşıyan kaynak bulunamadı.'));
+  return ok(`İstek türü: ${kind}\nKullanıcı talebi: ${prompt}\n\nYalnız aşağıdaki izinli yerel kaynakları kullan:\n${rows.join('\n')}`);
+};
+
+const candidateFingerprint=(candidates:readonly FamilyAiAssistantAuthorizedCandidate[]):string=>hash(candidates.map((candidate)=>({
+  module:candidate.module,resourceType:candidate.resourceType,resourceId:candidate.resourceId,
+  searchableText:candidate.searchableText.map((value)=>value.normalize('NFKC').trim().replace(/\s+/gu,' ')),
+  occurredAt:candidate.occurredAt??null
+})));
+
+const LOCAL_MODEL_SYSTEM_PROMPT=`Sen ParsYuva AYM içindeki yerel aile yardımcısısın. Yalnız verilen izinli yerel kaynakları kullan.
+Kaynakta bulunmayan bilgiyi uydurma. Parola, anahtar, dosya yolu veya teknik kimlik döndürme.
+Tıbbi, mali ya da acil durum kararı verme; yalnız inceleme özeti sun ve gerektiğinde uzman doğrulaması iste.
+Hiçbir ödeme, rezervasyon, mesaj, silme veya başka kalıcı işlem yaptığını söyleme.
+Türkçe, açık ve en fazla 2500 karakterlik tek bir yanıt üret.`;
+
 const presentation:Readonly<Record<FamilyAiAssistantKind,{readonly title:string;readonly explanation:(count:number)=>string}>>=Object.freeze({
   authorized_search:{title:'İzinli yerel arama sonucu',explanation:(count)=>`${count} izinli yerel kaynak eşleşti; sonuçları kaynağından doğrulayın.`},
   daily_summary:{title:'Günlük aile özeti önerisi',explanation:(count)=>`${count} izinli yerel kaynak günlük gözden geçirme için işaretlendi.`},
@@ -200,6 +238,56 @@ const persist=(context:LifeApplicationContext,scope:FamilyAiAssistantWriteScope,
 export class GetFamilyAiAssistantCenterUseCase {
   public constructor(private readonly queryPort:FamilyAiAssistantQueryPort){}
   public execute(context:LifeApplicationContext){return this.queryPort.getCenter(context);}
+}
+
+export class GetFamilyAiLocalModelStatusUseCase {
+  public constructor(private readonly model:FamilyAiAssistantModelPort){}
+  public execute(){return this.model.getStatus();}
+}
+
+export class RunFamilyAiLocalModelUseCase {
+  public constructor(private readonly source:FamilyAiAssistantSourcePort,private readonly model:FamilyAiAssistantModelPort){}
+  public async execute(input:{readonly context:LifeApplicationContext;readonly command:RunFamilyAiLocalModelInput})
+  :Promise<Result<FamilyAiLocalModelResponseView,AppError>>{
+    const {context,command}=input;
+    if(!context.actor.personId)return err(denied(context,'Yerel model kişi bağlı oturum gerektirir.'));
+    if(!exactRecord(command,['kind','prompt'],['modules'])||!kinds.has(command.kind))
+      return err(invalid(context,'Yerel model komutu yalnız izin verilen alanları taşımalıdır.'));
+    if(typeof command.prompt!=='string')return err(invalid(context,'Yerel model talebi metin olmalıdır.'));
+    const prompt=command.prompt.normalize('NFKC').trim().replace(/\s+/gu,' ');
+    if(prompt.length<2||prompt.length>400||CONTROL.test(prompt))
+      return err(invalid(context,'Yerel model talebi 2-400 karakter arasında olmalıdır.'));
+    const selected=canonicalModules(context,command.kind,command.modules);if(!selected.ok)return selected;
+    const purpose=familyAiAssistantPurposeForKind(command.kind);
+    const queryValue=command.kind==='authorized_search'?prompt:undefined;
+    const load=()=>this.source.loadAuthorizedCandidates(context,{kind:command.kind,purpose,modules:selected.value,
+      ...(queryValue?{query:queryValue}:{})});
+    let before:Result<readonly FamilyAiAssistantAuthorizedCandidate[],AppError>;
+    try{before=await load();}catch{return err(denied(context,'Yerel modelin izinli kaynakları yüklenemedi.'));}
+    if(!before.ok)return before;
+    if(before.value.length<1||before.value.length>24||before.value.some((candidate)=>!candidateSafe(candidate)
+      ||!selected.value.includes(candidate.module)))return err(denied(context,'Yerel model yalnız tam ve sınırlı izinli kaynak kümesiyle çalışır.'));
+    const userPrompt=modelPrompt(context,command.kind,prompt,before.value);if(!userPrompt.ok)return userPrompt;
+    const fingerprint=candidateFingerprint(before.value);
+    let generated:Awaited<ReturnType<FamilyAiAssistantModelPort['run']>>;
+    try{generated=await this.model.run({correlationId:context.correlationId,systemPrompt:LOCAL_MODEL_SYSTEM_PROMPT,
+      userPrompt:userPrompt.value});}catch{return err(createAppError({code:ERROR_CODES.CORE_UNEXPECTED,
+      message:'Yerel model yanıt vermedi.',category:'infrastructure',retryable:true,correlationId:context.correlationId}));}
+    if(!generated.ok)return generated;
+    const answer=generated.value.answer.normalize('NFKC').trim();
+    if(answer.length<1||answer.length>4000||CONTROL.test(answer))return err(createAppError({code:ERROR_CODES.CORE_UNEXPECTED,
+      message:'Yerel model güvenli yanıt sınırını aşan bir sonuç verdi.',category:'security',correlationId:context.correlationId}));
+    let after:Result<readonly FamilyAiAssistantAuthorizedCandidate[],AppError>;
+    try{after=await load();}catch{return err(denied(context,'Model yanıtından sonra kaynak izni yeniden doğrulanamadı.'));}
+    if(!after.ok)return after;
+    if(candidateFingerprint(after.value)!==fingerprint)return err(denied(context,
+      'Model çalışırken kaynak veya izin kapsamı değişti; geçici yanıt güvenle atıldı.'));
+    return ok(Object.freeze({kind:command.kind,answer,sourceCount:before.value.length,provider:'ollama_loopback' as const,
+      model:generated.value.model,generatedAt:generated.value.generatedAt,truth:Object.freeze({localLoopbackOnly:true as const,
+        networkEgressUsed:false as const,cloudUsed:false as const,modelInferencePerformed:true as const,responsePersisted:false as const,
+        durableActionPerformed:'not_performed' as const,humanReviewRequired:true as const,
+        sourceConsentRevalidatedAfterInference:true as const,medicalFinancialOrEmergencyDecisionProvided:false as const})}));
+  }
 }
 
 export class GenerateFamilyAiSuggestionUseCase {

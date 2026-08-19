@@ -3,7 +3,7 @@
   "step": "34-H",
   "decision": "DEC-245",
   "mode": "contract",
-  "sourceBaseHead": "e4cf36c020e9c0f695fa5c1b1e695651615bb23f",
+  "sourceBaseHead": "9274e5c9b77415c4add209b963870eac4b721c84",
   "status": "PASS",
   "governanceState": "PLANNED",
   "localImplementationStatus": "LOCAL_PRODUCTION_QUERY_COMPOSED_ACCEPTANCE_INCOMPLETE",
@@ -44,5 +44,5 @@
       "detail": ""
     }
   ],
-  "generatedAt": "2026-08-18T02:45:49.570Z"
+  "generatedAt": "2026-08-19T08:59:08.622Z"
 }

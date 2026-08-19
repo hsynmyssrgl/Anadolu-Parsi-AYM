@@ -8,6 +8,7 @@
   "implementationChain": {
     "domain": ["packages/domain/src/family-ai-assistant.ts"],
     "application": ["packages/application/src/family-ai-assistant-use-cases.ts"],
+    "localModelProvider": ["apps/desktop/src/main/local-family-ai-model-adapter.ts"],
     "repositoryContract": ["packages/repository-contracts/src/family-ai-assistant-repository.ts"],
     "migration": ["packages/database/src/family-database-migrations.ts#101"],
     "repository": ["packages/repositories/src/family-ai-assistant-repository.ts"],
@@ -21,7 +22,8 @@
     "packages/repositories/family-ai-assistant-repository-policy.test.ts",
     "apps/desktop/tests/family-ai-assistant-data-store.test.ts",
     "apps/desktop/tests/family-ai-assistant-ipc-integration.test.ts",
-    "apps/desktop/tests/family-ai-assistant-ui.test.ts"
+    "apps/desktop/tests/family-ai-assistant-ui.test.ts",
+    "apps/desktop/tests/local-family-ai-model-adapter.test.ts"
   ],
   "securityControls": {
     "centralPepReceiptFence": true,
@@ -38,18 +40,23 @@
     "boundedIpcAndReadResults": true,
     "rendererAuthorityExcluded": true,
     "downstreamDurableActionExcluded": true,
-    "rawSourceContentExcluded": true
+    "rawSourceContentExcluded": true,
+    "loopbackEndpointExact": "http://127.0.0.1:11434",
+    "remoteEndpointDenied": true,
+    "explicitEnablementRequired": true,
+    "modelResponseTransient": true,
+    "sourceConsentRevalidatedAfterInference": true
   },
   "validation": {
-    "targetedTestFileRatchet": 5,
-    "targetedTestRatchet": 26,
+    "targetedTestFileRatchet": 6,
+    "targetedTestRatchet": 34,
     "migrationVersion": 101,
     "migrationSha256": "ef3790fad5f64de7bbd089d09a835dcb302092d64ccef6abb85e2105fbab2b5b",
-    "ppk021": {"status":"PASS","files":563,"surfaces":886,"sha256":"58a90febf9382776c2b1472e6ffd6a645c9a24a4cd69e499a8afc1fff2e72b30","targeted":17,"contract":84,"runtime":20},
-    "ppk022": {"status":"PASS","files":563,"surfaces":422,"sha256":"dc0234d84a50ff1872f9cde4fb7ab286446b236a69019034055fa938dbb3be1e","targeted":19,"contract":110,"runtime":24},
+    "ppk021": {"status":"PASS","files":568,"surfaces":889,"sha256":"3a297f74d43d4675090a709d4359af9245c2971a7fc338afef2fb87b1c8608dd","targeted":17,"contract":84,"runtime":20},
+    "ppk022": {"status":"PASS","files":568,"surfaces":428,"sha256":"1bf21d23c862afbccb9611083c093f9ced703adadf7a170c29f53479d21397b1","targeted":19,"contract":111,"runtime":24},
     "countsAsRequirementPass": false
   },
-  "residualRiskStatus": "OPEN_RETENTION_PERMISSION_REVALIDATION_AND_EXTERNAL_UAT",
+  "residualRiskStatus": "OPEN_RETENTION_PERSISTED_SUGGESTION_PERMISSION_REVALIDATION_LOCAL_MODEL_INSTALLATION_AND_EXTERNAL_UAT",
   "externalAndManualEvidence": "NOT_RUN",
   "countsAsRequirementPass": false
 }

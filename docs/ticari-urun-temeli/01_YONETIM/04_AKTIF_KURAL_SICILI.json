@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-TICARI-KURAL-BAGI-V1",
+  "durum": "ACTIVE",
+  "istisnaIzinli": false,
+  "anaKuralKaynagi": "../06_KOD/app/config/canonical-rule-registry.json",
+  "anaKuralSiciliId": "PPT-CANONICAL-RULE-REGISTRY-V13",
+  "anaKuralSayisi": 217,
+  "aktifKuralSayisi": 197,
+  "degistirilmisKuralSayisi": 20,
+  "anaKuralSha256": "b79db92a03d559f33ccd49348bad159a70b6034fbcf10a07abe5a407549bf0be",
+  "yurutmeKapisi": "../06_KOD/app/scripts/run-governed-preflight.mjs",
+  "temelAlanDogrulamaKapisi": "11_OTOMASYON/dogrula-ticari-temel-alani.mjs",
+  "kurallar": [
+    {
+      "id": "TK-001",
+      "baslik": "Kanit olmadan tamamlanma yok",
+      "metin": "Kod, test, belge ve kanit zinciri PASS olmadan hicbir ticari is tamamlanmis sayilamaz.",
+      "durum": "ACTIVE",
+      "kaynak": "PR-179, PR-187 ve kullanici karari 2026-08-19",
+      "yurutme": "FAIL_CLOSED",
+      "kanitZorunlu": true
+    },
+    {
+      "id": "TK-002",
+      "baslik": "Tarihsel alan aktif kaynak degildir",
+      "metin": "00 ile 11 arasindaki tarihsel alanlar silinmez fakat aktif karar veya gereksinim kaynagi olarak kullanilamaz.",
+      "durum": "ACTIVE",
+      "kaynak": "PR-177, PR-214 ve DEC-252",
+      "yurutme": "FAIL_CLOSED",
+      "kanitZorunlu": true
+    },
+    {
+      "id": "TK-003",
+      "baslik": "Yeni karar ayni degisiklikte kaydedilir",
+      "metin": "Yeni kullanici karari karar siciline, etkilenen aktif belgeye ve ana is listesine ayni degisiklikte yazilir.",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-251 ve kullanici karari 2026-08-19",
+      "yurutme": "FAIL_CLOSED",
+      "kanitZorunlu": true
+    },
+    {
+      "id": "TK-004",
+      "baslik": "Dosya adlari Turkce anlamli ASCII olur",
+      "metin": "Yeni klasor ve dosya adlari Turkce anlamli olur, Turkce karakter icermez ve sirali klasor mantigina uyar.",
+      "durum": "ACTIVE",
+      "kaynak": "PR-214",
+      "yurutme": "FAIL_CLOSED",
+      "kanitZorunlu": true
+    },
+    {
+      "id": "TK-005",
+      "baslik": "Dis kanit olmadan ticari iddia yok",
+      "metin": "Imza, hukuk, gizlilik, saglayici ve gercek cihaz kaniti yoksa ilgili ticari durum NOT_RUN veya BLOCKED kalir.",
+      "durum": "ACTIVE",
+      "kaynak": "PR-210 ve proje anayasasi",
+      "yurutme": "FAIL_CLOSED",
+      "kanitZorunlu": true
+    },
+    {
+      "id": "TK-006",
+      "baslik": "Calisma agaci gercegi gizlenmez",
+      "metin": "Kirli veya paylasilan calisma agaci temiz kabul edilmez; kullanici degisiklikleri silinmez ve teslim kaniti yeniden uretilir.",
+      "durum": "ACTIVE",
+      "kaynak": "PR-187 ve ticari temel manifestosu",
+      "yurutme": "FAIL_CLOSED",
+      "kanitZorunlu": true
+    }
+  ]
+}

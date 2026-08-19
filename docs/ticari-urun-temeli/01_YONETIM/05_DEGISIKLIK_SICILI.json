@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-TICARI-DEGISIKLIK-SICILI-V1",
+  "temelTarihi": "2026-08-19",
+  "sonKayit": "TICARI-001",
+  "kayitlar": [
+    {
+      "id": "TICARI-001",
+      "tarih": "2026-08-19",
+      "baslik": "Ilk temiz ticari urun belge temelinin kurulmasi",
+      "durum": "ACTIVE",
+      "kaynak": "Kullanici talebi: kurallar asilamaz olacak, yeni klasor ve tum bilgi ile altyapi semalari full auto kurulacak",
+      "etkilenenAlanlar": [
+        "docs/ticari-urun-temeli",
+        "06_KOD/app/config/user-decision-ledger.json",
+        "06_KOD/app/scripts/run-governed-preflight.mjs"
+      ],
+      "isListesiEtkisi": "IS-0001 ve IS-0005 icin belge ve otomasyon temeli olusturuldu; teknik dogrulama tamamlanana kadar durum DEVAM kalir.",
+      "senkronDurumu": "SYNCHRONIZED"
+    }
+  ]
+}

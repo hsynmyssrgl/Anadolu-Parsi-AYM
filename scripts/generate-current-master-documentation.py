@@ -37,11 +37,11 @@ from reportlab.platypus import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
-AS_OF = "17.08.2026"
-VERSION = "GUNCEL-2026-08-17-V1"
+AS_OF = "19.08.2026"
+VERSION = "GUNCEL-2026-08-19-V3"
 SOURCE = ROOT / "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md"
-DOCX_OUT = ROOT / "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_17.08.2026_V1.docx"
-PDF_OUT = ROOT / "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_17.08.2026_V1.pdf"
+DOCX_OUT = ROOT / "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_19.08.2026_V3.docx"
+PDF_OUT = ROOT / "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_19.08.2026_V3.pdf"
 LOGO = ROOT / "apps/desktop/src/renderer/assets/brand-mark.png"
 
 BRONZE = "7C4D20"
@@ -170,6 +170,7 @@ INFRASTRUCTURE = [
     ("Dağıtık platform", "Mutation/consensus/tenancy, distributed clients/operations/DR ve Windows resilience için local hardened foundation."),
     ("Görsel sistem", "Onaylı sıcak-nötr açık tema, exact release colors, 512 px sıcak-bronz logo, merkezi typography/accessibility tokenları."),
     ("Belge yönetişimi", "DEC-251 eşzamanlı karar-belge-iş listesi kapısı; tüm belge türü hash/okunabilirlik denetimi; tarihsel kayıtların değişmezliği."),
+    ("Marka ve kurumsallaşma", "DEC-254 ile ana marka ParsYuva, ürün ParsYuva AYM; eski appId ve veri dizini güncelleme uyumluluğu için korunur. Şirket, marka, alan adı, hukuk/vergi/gizlilik ve mağaza kanıtları NOT_RUN iken tamamlanmış gösterilmez."),
 ]
 
 
@@ -185,8 +186,8 @@ EXTERNAL_DEPENDENCIES = [
 
 DRIFT_FIXES = [
     "Aktif kapsam toplamı 344 → 358 olarak düzeltildi ve durum dağılımı eklendi.",
-    "Kanonik kural sicili V8/200/186/eski SHA → V9/208/194/güncel SHA olarak düzeltildi.",
-    "Kullanıcı karar özeti 52 → 81 olarak düzeltildi; DEC-250, DEC-251 ve DEC-252 kaydedildi.",
+    "Kanonik kural sicili V10/214/194 ve güncel SHA ile ParsYuva marka, kurumsallaşma, platform ve belge sınıflandırma kurallarına yükseltildi.",
+    "Kullanıcı karar defteri 83 kayda yükseltildi; DEC-254 marka uyumluluğu ve kurumsallaşma kararını bağladı.",
     "Platform mimarisindeki 'OCR/iletişim başlamadı' anlatımı yerel bileşim var fakat kabul dış kanıta bağlı şeklinde düzeltildi.",
     "Yol haritasına her açık paket için yerel uygulama durumu, açık kalma nedeni, eksik kanıt ve requirement PASS alanları eklendi.",
     "Görsel sözleşme 17 px body, exact Bronze/Silver/Gold tokenları ve onaylı 512 px sıcak-bronz logo SHA'sıyla hizalandı.",
@@ -212,14 +213,14 @@ def package_status_reason(item: dict) -> str:
 
 def build_markdown() -> str:
     lines = [
-        "# Anadolu Parsı Aile Yaşam Merkezi — Güncel Karar, Kural ve İş Akışı Sicili",
+        "# ParsYuva AYM — Güncel Karar, Kural ve İş Akışı Sicili",
         "",
         f"- Belge sürümü: **{VERSION}**",
         f"- Tarih: **{AS_OF}**",
         f"- Görünür ürün sürümü: **{ledger['release']}**",
         f"- Kaynak HEAD: `{git_head()}`",
         "- Statü: **ACTIVE_WORKING_REFERENCE_NOT_BUILD_CLOSURE**",
-        "- Kararlar: **DEC-250, DEC-251, DEC-252**",
+        "- Kararlar: **DEC-250, DEC-251, DEC-252, DEC-253, DEC-254**",
         "",
         "> Bu sürüm geçmiş PDF/DOCX ve build kapanış belgelerinin üzerine yazmaz. Yerel PASS ile dış kabul kanıtını ayırır; NOT_RUN/PARTIAL/BLOCKED sonuçlarını tamamlanmış göstermez.",
         "",
@@ -465,7 +466,7 @@ def build_docx():
 
     header = section.header.paragraphs[0]
     header.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    set_run_font(header.add_run("ANADOLU PARSI  •  GÜNCEL MASTER DOKÜMANTASYON"), size=8, color=MUTED, bold=True)
+    set_run_font(header.add_run("PARSYUVA AYM  •  GÜNCEL MASTER DOKÜMANTASYON"), size=8, color=MUTED, bold=True)
     footer = section.footer.paragraphs[0]
     footer.alignment = WD_ALIGN_PARAGRAPH.CENTER
     set_run_font(footer.add_run(f"{VERSION}  •  Sayfa "), size=8, color=MUTED)
@@ -482,10 +483,7 @@ def build_docx():
     title = doc.add_paragraph()
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
     title.paragraph_format.space_after = Pt(4)
-    set_run_font(title.add_run("ANADOLU PARSI"), size=28, color=BRONZE, bold=True)
-    sub = doc.add_paragraph()
-    sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    set_run_font(sub.add_run("Aile Yaşam Merkezi"), size=21, color=INK, bold=True)
+    set_run_font(title.add_run("PARSYUVA AYM"), size=28, color=BRONZE, bold=True)
     sub2 = doc.add_paragraph()
     sub2.alignment = WD_ALIGN_PARAGRAPH.CENTER
     sub2.paragraph_format.space_after = Pt(16)
@@ -600,10 +598,10 @@ def build_docx():
     add_doc_table(doc, ["Dosya", "Tür", "Bayt", "Sayfa", "Okuma"], audit_rows, [5000, 800, 1300, 850, 1410], 7.0)
     add_doc_paragraph(doc, "Yeni sürüm, tarihsel dosyaların yerine geçmez; yalnız aktif çalışma gerçeğini tek yerde toplar.")
 
-    doc.core_properties.title = "Anadolu Parsı Aile Yaşam Merkezi Güncel Master Dokümantasyon"
+    doc.core_properties.title = "ParsYuva AYM Güncel Master Dokümantasyon"
     doc.core_properties.subject = "Karar, kural, mimari, iş akışı, açık iş ve kanıt sicili"
-    doc.core_properties.author = "Panthera pardus tulliana"
-    doc.core_properties.keywords = "Anadolu Parsı, governance, güvenlik, iş akışı, karar, kural"
+    doc.core_properties.author = "ParsYuva"
+    doc.core_properties.keywords = "ParsYuva AYM, governance, güvenlik, kurumsallaşma, iş akışı, karar, kural"
     DOCX_OUT.parent.mkdir(parents=True, exist_ok=True)
     doc.save(DOCX_OUT)
 
@@ -633,7 +631,7 @@ def build_pdf():
         canvas.saveState()
         canvas.setFont(font, 7)
         canvas.setFillColor(colors.HexColor(f"#{MUTED}"))
-        canvas.drawString(0.65 * inch, 0.36 * inch, f"Anadolu Parsı Aile Yaşam Merkezi • {VERSION}")
+        canvas.drawString(0.65 * inch, 0.36 * inch, f"ParsYuva AYM • {VERSION}")
         canvas.drawRightString(7.85 * inch, 0.36 * inch, f"Sayfa {doc.page}")
         canvas.restoreState()
 
@@ -664,8 +662,7 @@ def build_pdf():
         story += [logo, Spacer(1, 6)]
     story += [
         Paragraph("GÜNCEL ÇALIŞMA REFERANSI", ParagraphStyle("Kicker", parent=body, alignment=TA_CENTER, fontName=bold, fontSize=9, textColor=colors.HexColor(f"#{GOLD}"))),
-        Paragraph("ANADOLU PARSI", title_style),
-        Paragraph("Aile Yaşam Merkezi", ParagraphStyle("Product", parent=title_style, fontSize=19, textColor=colors.HexColor(f"#{INK}"))),
+        Paragraph("PARSYUVA AYM", title_style),
         Paragraph("Karar • Kural • Mimari • İş Akışı • Açık İş • Kanıt Sicili", subtitle_style),
         pdf_table(["Alan", "Güncel değer"], [
             ["Belge sürümü", VERSION], ["Tarih", AS_OF], ["Ürün sürümü", ledger["release"]], ["Kaynak HEAD", git_head()],
@@ -714,7 +711,7 @@ def build_pdf():
     audit_rows = [[row["name"], row["type"].upper(), str(row["bytes"]), str(row.get("pages", "-")), "OK" if row["readable"] else "HATA"] for row in word_pdf_scan]
     story += [PageBreak(), Paragraph("16. Aktif repo Word/PDF tarihsel envanter denetimi", h1), pdf_table(["Dosya", "Tür", "Bayt", "Sayfa", "Okuma"], audit_rows, [4.1*inch,0.55*inch,0.8*inch,0.6*inch,0.95*inch], 6.1), p("Yeni sürüm tarihsel dosyaların yerine geçmez; yalnız aktif çalışma gerçeğini tek yerde toplar.")]
     PDF_OUT.parent.mkdir(parents=True, exist_ok=True)
-    document = SimpleDocTemplate(str(PDF_OUT), pagesize=letter, leftMargin=0.65*inch, rightMargin=0.65*inch, topMargin=0.6*inch, bottomMargin=0.58*inch, title="Anadolu Parsı Güncel Master Dokümantasyon", author="Panthera pardus tulliana")
+    document = SimpleDocTemplate(str(PDF_OUT), pagesize=letter, leftMargin=0.65*inch, rightMargin=0.65*inch, topMargin=0.6*inch, bottomMargin=0.58*inch, title="ParsYuva AYM Güncel Master Dokümantasyon", author="ParsYuva")
     document.build(story, onFirstPage=footer, onLaterPages=footer)
 
 

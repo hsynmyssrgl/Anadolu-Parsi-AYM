@@ -16,7 +16,8 @@ const AUTHORIZED_EGRESS_USE_CASE = 'apps/desktop/src/main/governed-network-egres
 const AUTHORIZED_EGRESS_CALLER = 'apps/desktop/src/main/secure-revocation-sync-service.ts';
 const LOCAL_TRANSPORT_FILES = new Set([
   'apps/core-service/src/local-admin-server.ts',
-  'packages/core-service-client/src/local-admin-client.ts'
+  'packages/core-service-client/src/local-admin-client.ts',
+  'apps/desktop/src/main/local-family-ai-model-adapter.ts'
 ]);
 const NETWORK_MODULES = /^(?:node:)?(?:http|https|http2|net|tls|dgram|dns)(?:\/promises)?$/u;
 const NETWORK_PACKAGES = new Set(['axios', 'got', 'undici', 'ws', 'node-fetch', 'superagent']);
@@ -39,7 +40,10 @@ export const scanNetworkEgressSourceText = (path, source) => {
     if (NETWORK_MODULES.test(text)) {
       const adapterModule = AUTHORIZED_EGRESS_ADAPTERS.has(normalizedPath)
         && ['node:https', 'node:dns/promises', 'node:net'].includes(text);
-      const localTransport = LOCAL_TRANSPORT_FILES.has(normalizedPath) && text === 'node:net';
+      const localTransport = LOCAL_TRANSPORT_FILES.has(normalizedPath)
+        && (text === 'node:net'
+          || (normalizedPath === 'apps/desktop/src/main/local-family-ai-model-adapter.ts'
+            && text === 'node:http'));
       if (!adapterModule && !localTransport) report('DIRECT_NETWORK_MODULE', text, offset);
     }
     if (NETWORK_PACKAGES.has(text)) report('THIRD_PARTY_NETWORK_CLIENT', text, offset);
