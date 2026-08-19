@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-INGILIZCE-UZMAN-PANEL-DALGA-ON-DORT-20260819-01",
+  "executedAt": "2026-08-19T16:59:00+03:00",
+  "repositoryBaseCommitAtExecution": "ff07f1eb96e1326abd04179adceb99e13652b298",
+  "workItem": "IS-0106",
+  "result": {"status":"PASS_WITH_REMAINING_PANELS_OPEN","targetedTestFilesPassed":1,"targetedTestFilesTotal":1,"targetedTestsPassed":2,"targetedTestsTotal":2,"desktopTypecheck":"PASS"},
+  "translatedPanels": ["FamilyMeetingPanel"],
+  "englishLocaleVisibleTurkishCharacterCount": 0,
+  "turkishLocalePreserved": true,
+  "remainingFeaturePanelsOpen": true,
+  "fullApplicationEnglishPass": false,
+  "requirementPass": false,
+  "note": "On dorduncu dalga aile toplantilari panelinde iki dilli gorunur metin kapisini tamamlar; kalan paneller aciktir."
+}
