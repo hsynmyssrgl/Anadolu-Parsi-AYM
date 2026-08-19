@@ -43,10 +43,11 @@ Dil kararı Electron ana sürecinde `app.getLocale()` üzerinden verilir. Render
 - Windows Hello kayıt, cihaz bağı, güçlü yeniden doğrulama ve açık parola-yedeği metinleri ile geçersiz menü hedefi; ana kabuk dokuzuncu dalga render testinde görünür Türkçe karakter sayısı sıfırdır. Yerel parola yedeği Windows Hello iptalinde otomatik gönderilmez.
 - Veri Yaşam Döngüsü'nün saklama, geri alma, kalıcı imha, yedek yeniden yazımı, karantina, dış kopya ve sağlayıcı güven zinciri metinleri; ana kabuk onuncu dalga render testinde görünür Türkçe karakter sayısı sıfırdır. İngilizce metinler fiziksel imha, dış kopya ve güvenilir imza sınırlarında daha güçlü garanti üretmez.
 - Sistem, Bakım ve Operasyon merkezinin yedekleme, tanılama, performans, fabrika ayarına dönüş ve fail-closed politika sınırı metinleri; ana kabuk on birinci dalga render testinde görünür Türkçe karakter sayısı sıfırdır. Fabrika ayarına dönüşün geri alınamazlık, yedek oluşturmama ve etkinleştirme/deneme sınırları korunur.
+- Gizlilik, Sahiplik ve Olay Kontrol Merkezi'nin envanter, AI hafıza denetimi, veri hakları, şifreli dışa aktarım, olay containment ve salt-okunur izin simülasyonu metinleri; ana kabuk on ikinci dalga render ve sözlük testlerinde görünür Türkçe karakter sayısı sıfırdır. Uzaktan silme, MDM, ağ teslimi, harici kopya silme veya hukuk/gizlilik sertifikasyonu garantisi eklenmez.
 
 ## Açık kalan iş
 
-İlk yirmi dört uzman panel ile ana pano, kişi kataloğu, aile, soy ağacı, zaman tüneli, önemli günler, birleşik yetkili arama, Doküman Merkezi, ilk kurulum/giriş, aile daveti, ilişki ekleme, dijital miras, AI izin merkezi, yönetilen taslak merkezi, Windows Hello, geçersiz menü hedefi, Veri Yaşam Döngüsü ve Sistem/Bakım merkezi tamamlanmış olsa da ana uygulama kabuğunun kalan ekranlarındaki tarihsel görünür Türkçe metinlerin son taraması henüz bitmedi. Bu nedenle İngilizce altyapı ve çekirdek kullanıcı yolculuğu `COMPLETE`, uygulamanın uçtan uca bütün ekran İngilizcesi `PARTIAL` ve `countsAsFullApplicationEnglishPass=false` durumundadır. Eksik metinler Türkçeye sessiz fallback yapılarak tamamlanmış sayılamaz.
+İlk yirmi dört uzman panel ile ana pano, kişi kataloğu, aile, soy ağacı, zaman tüneli, önemli günler, birleşik yetkili arama, Doküman Merkezi, ilk kurulum/giriş, aile daveti, ilişki ekleme, dijital miras, AI izin merkezi, yönetilen taslak merkezi, Windows Hello, geçersiz menü hedefi, Veri Yaşam Döngüsü, Sistem/Bakım ve Gizlilik/Sahiplik merkezleri tamamlanmış olsa da ana uygulama kabuğunun kalan ekranlarındaki tarihsel görünür Türkçe metinlerin son taraması henüz bitmedi. Bu nedenle İngilizce altyapı ve çekirdek kullanıcı yolculuğu `COMPLETE`, uygulamanın uçtan uca bütün ekran İngilizcesi `PARTIAL` ve `countsAsFullApplicationEnglishPass=false` durumundadır. Eksik metinler Türkçeye sessiz fallback yapılarak tamamlanmış sayılamaz.
 
 ## Kanıt
 
@@ -81,6 +82,7 @@ Dil kararı Electron ana sürecinde `app.getLocale()` üzerinden verilir. Render
 - `apps/desktop/tests/app-shell-localization-wave-twenty-seven.test.ts`
 - `apps/desktop/tests/app-shell-localization-wave-twenty-eight.test.ts`
 - `apps/desktop/tests/app-shell-localization-wave-twenty-nine.test.ts`
+- `apps/desktop/tests/app-shell-localization-wave-thirty.test.ts`
 - `apps/desktop/tests/accessibility-preference-center.test.ts`
 - `apps/desktop/tests/narrated-help-center.test.ts`
 - `apps/desktop/tests/installer-narration-experience.test.ts`

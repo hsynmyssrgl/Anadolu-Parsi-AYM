@@ -462,6 +462,16 @@
       "uretimZamani": "2026-08-19T18:59:46+03:00",
       "disKaynak": false,
       "not": "Sistem, Bakim ve Operasyon merkezi English locale renderinda gorunur Turkce karakter sifir; fabrika ayari ve fail-closed politika sinirlari korunur."
+    },
+    {
+      "id": "KANIT-0047",
+      "tur": "TEST",
+      "kapsam": "English ana uygulama kabugu yerellestirme on ikinci dalgasi",
+      "durum": "PASS_WITH_REMAINING_APP_SHELL_OPEN",
+      "kaynak": "05_KALITE_TEST_KANIT/46_INGILIZCE_ANA_KABUK_DALGA_ON_IKI_KANITI.json",
+      "uretimZamani": "2026-08-19T19:04:41+03:00",
+      "disKaynak": false,
+      "not": "Gizlilik, Sahiplik ve Olay Kontrol Merkezi English locale render ve sozluk testlerinde gorunur Turkce karakter sifir; uzaktan silme, MDM ve dis kopya garantisi eklenmez."
     }
   ]
 }

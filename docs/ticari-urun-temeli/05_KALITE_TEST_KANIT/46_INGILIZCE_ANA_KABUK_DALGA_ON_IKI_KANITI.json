@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-INGILIZCE-ANA-KABUK-DALGA-ON-IKI-20260819-01",
+  "executedAt": "2026-08-19T19:04:41+03:00",
+  "repositoryBaseCommitAtExecution": "a3cfcac6e03f53e08276d3492fd6080a0748344a",
+  "workItem": "IS-0106",
+  "result": {"status":"PASS_WITH_REMAINING_APP_SHELL_OPEN","targetedTestFilesPassed":2,"targetedTestFilesTotal":2,"targetedTestsPassed":5,"targetedTestsTotal":5,"desktopTypecheck":"PASS"},
+  "translatedSurfaces": ["PrivacyOwnershipCenter"],
+  "englishLocaleVisibleTurkishCharacterCount": 0,
+  "turkishLocalePreserved": true,
+  "remoteDeletionGuaranteeAdded": false,
+  "mdmGuaranteeAdded": false,
+  "externalCopyDeletionGuaranteeAdded": false,
+  "legalPrivacyCertificationClaimAdded": false,
+  "remainingApplicationShellAuditOpen": true,
+  "fullApplicationEnglishPass": false,
+  "requirementPass": false,
+  "note": "Ana kabuk on ikinci dalga Gizlilik, Sahiplik ve Olay Kontrol Merkezini iki dilli hale getirir; yerel yetki ve fail-honest dis sinirlar korunur."
+}

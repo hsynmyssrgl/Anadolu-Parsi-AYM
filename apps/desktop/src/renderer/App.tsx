@@ -32,6 +32,7 @@ import { localizeDraftCenterNode, translateDraftCenterCopy } from './TaslakMerke
 import { localizeWindowsHelloNode, translateWindowsHelloCopy } from './WindowsHelloYerellestirme';
 import { localizeDataLifecycleNode, translateDataLifecycleCopy } from './VeriYasamDongusuYerellestirme';
 import { localizeSystemMaintenanceNode } from './SistemBakimYerellestirme';
+import { localizePrivacyOwnershipNode } from './GizlilikSahiplikYerellestirme';
 import { FamilyMeetingPanel } from './FamilyMeetingPanel';
 import { UniversalUxConsolidationPanel } from './UniversalUxConsolidationPanel';
 import { FamilyLocationMap } from './FamilyLocationMap';
@@ -1419,7 +1420,8 @@ export function WindowsHelloScreen({auth}:{auth:AuthStateView}) {
   return localizeWindowsHelloNode(panel,language);
 }
 
-function PrivacyOwnershipCenter() {
+export function PrivacyOwnershipCenter() {
+  const {language}=useLocalization();
   const [center,setCenter]=useState<PrivacyOwnershipControlCenterView|null>(null);
   const [phase,setPhase]=useState<'loading'|'ready'|'error'>('loading');
   const [message,setMessage]=useState('');
@@ -1458,10 +1460,10 @@ function PrivacyOwnershipCenter() {
   const exportEncrypted=async()=>{if(!window.pardus||!exportRequestId||!exportPassphrase)return;setBusy('export');setMessage('');try{const result=await window.pardus.exportEncryptedPrivacyData({requestId:exportRequestId,passphrase:exportPassphrase});await load();setMessage(`${result.fileName} doğrulandı · ${result.artifactSizeBytes} bayt · ağ teslimi yapılmadı.`);}catch(error){setMessage(error instanceof Error?error.message:'Şifreli dışa aktarım tamamlanamadı.');}finally{setExportPassphrase('');setBusy('');}};
   const inventoryRecordCount=center?.dataInventory.reduce((total,item)=>total+item.recordCount,0)??0;
   const activeExportRequests=center?.rightsRequests.filter(item=>['encrypted_export','legacy_export'].includes(item.kind)&&['requested','in_review'].includes(item.status))??[];
-  if(phase==='loading')return <AsyncStatePanel state="loading" title="Gizlilik ve sahiplik merkezi yükleniyor" message="Sahibine bağlı yerel envanter ve denetim görünümü hazırlanıyor."/>;
-  if(phase==='error')return <AsyncStatePanel state="error" title="Gizlilik merkezi yüklenemedi" message={message||'Yetkili yerel görünüm kurulamadı.'} onRetry={load}/>;
-  if(!center)return <AsyncStatePanel state="empty" title="Gizlilik merkezi boş" message="Bu sahip için yerel gözlem veya yönetilebilir kayıt bulunamadı."/>;
-  return <section className="privacy-ownership-center" aria-labelledby="privacy-ownership-title">
+  if(phase==='loading')return localizePrivacyOwnershipNode(<AsyncStatePanel state="loading" title="Gizlilik ve sahiplik merkezi yükleniyor" message="Sahibine bağlı yerel envanter ve denetim görünümü hazırlanıyor."/>,language);
+  if(phase==='error')return localizePrivacyOwnershipNode(<AsyncStatePanel state="error" title="Gizlilik merkezi yüklenemedi" message={message||'Yetkili yerel görünüm kurulamadı.'} onRetry={load}/>,language);
+  if(!center)return localizePrivacyOwnershipNode(<AsyncStatePanel state="empty" title="Gizlilik merkezi boş" message="Bu sahip için yerel gözlem veya yönetilebilir kayıt bulunamadı."/>,language);
+  const panel=<section className="privacy-ownership-center" aria-labelledby="privacy-ownership-title">
     <SectionHeader eyebrow="Yerel gözlem ve sahiplik" title="Gizlilik, Sahiplik ve Olay Kontrol Merkezi"/>
     <p id="privacy-ownership-title">Bu görünüm yalnız yerel gözlem ve yerel yetkiyi gösterir. Uzaktan silme, MDM, ağ teslimi, uzak durum veya hukuk/gizlilik sertifikasyonu iddiası yoktur.</p>
     <div className="privacy-ownership-grid">
@@ -1475,6 +1477,7 @@ function PrivacyOwnershipCenter() {
       <section><h3>Karşı taraf izin simülasyonu</h3><p>Salt okunurdur; yetki oluşturmaz, erişim yapmaz ve erişim denetim kaydı üretmez.</p><label>Karşı taraf hesap kimliği<input value={simulationAccountId} onChange={event=>setSimulationAccountId(event.target.value)}/></label><Button disabled={Boolean(busy)||!simulationAccountId} onClick={()=>void simulate()}>Görünürlüğü simüle et</Button>{simulationResult&&<StatusMessage>{simulationResult}</StatusMessage>}</section>
     </div>{busy&&<StatusMessage tone="info">İşlem sürüyor; aynı kayıt için ikinci gönderim kilitli.</StatusMessage>}{message&&<StatusMessage>{message}</StatusMessage>}
   </section>;
+  return localizePrivacyOwnershipNode(panel,language);
 }
 
 interface IdentityAccessRegistrationResponseInput {
