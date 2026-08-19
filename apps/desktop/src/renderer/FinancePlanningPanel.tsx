@@ -231,7 +231,7 @@ export function FinancePlanningPanel({ people, workspace, onRecord, onWorkspaceC
           <small>{text('Borç oranı','Debt ratio')} {summary.debtRatioBasisPoints === undefined ? text('hesaplanamadı','not calculated') : `%${(summary.debtRatioBasisPoints / 100).toLocaleString(locale, { maximumFractionDigits: 2 })}`} · {text('Gerçekleşen gelir','Realized income')} {money(summary.realizedIncome, summary.currency)} · {text('gider','expense')} {money(summary.realizedExpense, summary.currency)}</small>
         </div>)}
       </div>
-      {(activeSummary?.currencySummaries.length ?? 0) === 0 && <EmptyState title={text('Bu kapsamda finans özeti yok','No finance summary in this scope')} body={text('Kategori, nakit akışı veya portföy varlığı eklediğinizde para birimi bazlı özet oluşur.','A currency-based summary is created when you add a category, cash flow, or portfolio asset.')}/>} 
+      {(activeSummary?.currencySummaries.length ?? 0) === 0 && <EmptyState title={text('Bu kapsamda finans özeti yok','No finance summary in this scope')} body={text('Kategori, nakit akışı veya portföy varlığı eklediğinizde para birimi bazlı özet oluşur.','A currency-based summary is created when you add a category, cash flow, or portfolio asset.')}/>}
     </Surface>
 
     <FinanceImportPanel people={people} workspace={workspace} onWorkspaceChange={onWorkspaceChange}/>
