@@ -35,7 +35,10 @@
       "installer-custom-pages",
       "distributed-operations-panel",
       "universal-ux-panel",
-      "signed-plugin-platform-panel"
+      "signed-plugin-platform-panel",
+      "family-location-map",
+      "local-translation-language-panel",
+      "family-ai-assistant-panel"
     ],
     "translatedFeaturePanelWaveOne": [
       "DistributedOperationsPanel",
@@ -43,8 +46,14 @@
       "SignedPluginPlatformPanel"
     ],
     "translatedFeaturePanelWaveOneEnglishVisibleTurkishTextCount": 0,
+    "translatedFeaturePanelWaveTwo": [
+      "FamilyLocationMap",
+      "LocalTranslationLanguagePanel",
+      "FamilyAiAssistantPanel"
+    ],
+    "translatedFeaturePanelWaveTwoEnglishVisibleTurkishTextCount": 0,
     "openSurface": "remaining-feature-panel-copy",
-    "openReason": "İlk üç uzman panel iki dilli ve English locale görünür Türkçe metin sayısı sıfırdır; kalan geniş özellik panellerindeki tarihsel Türkçe metinler henüz bütünüyle taşınmadı.",
+    "openReason": "İlk altı uzman panel iki dilli ve English locale görünür Türkçe metin sayısı sıfırdır; kalan geniş özellik panellerindeki tarihsel Türkçe metinler henüz bütünüyle taşınmadı.",
     "countsAsFullApplicationEnglishPass": false
   },
   "failClosed": true,

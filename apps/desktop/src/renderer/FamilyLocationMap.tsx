@@ -5,6 +5,7 @@ import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
 import { PMTiles, Protocol, TileType } from 'pmtiles';
 import type { FamilyLocationView } from '@ppt/domain';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { selectUiCopy, useLocalization } from './localization';
 
 const OFFLINE_MAP_URL = 'pardus-app://renderer/offline-map/turkiye.pmtiles';
 const DEFAULT_CENTER: [number, number] = [35.2, 39.0];
@@ -39,7 +40,7 @@ function coordinateGrid() {
   return { type: 'FeatureCollection', features };
 }
 
-function baseStyle(packageKind: 'vector' | 'raster' | 'none'): StyleSpecification {
+function baseStyle(packageKind: 'vector' | 'raster' | 'none', language: 'tr' | 'en'): StyleSpecification {
   const sources: StyleSpecification['sources'] = {
     'coordinate-grid': { type: 'geojson', data: coordinateGrid() }
   };
@@ -48,8 +49,8 @@ function baseStyle(packageKind: 'vector' | 'raster' | 'none'): StyleSpecificatio
   ];
   if (packageKind !== 'none') {
     sources['offline-turkiye'] = packageKind === 'vector'
-      ? { type: 'vector', url: `pmtiles://${OFFLINE_MAP_URL}`, attribution: '© OpenStreetMap katkıda bulunanlar' }
-      : { type: 'raster', url: `pmtiles://${OFFLINE_MAP_URL}`, tileSize: 256, attribution: '© OpenStreetMap katkıda bulunanlar' };
+      ? { type: 'vector', url: `pmtiles://${OFFLINE_MAP_URL}`, attribution: language === 'tr' ? '© OpenStreetMap katkıda bulunanlar' : '© OpenStreetMap contributors' }
+      : { type: 'raster', url: `pmtiles://${OFFLINE_MAP_URL}`, tileSize: 256, attribution: language === 'tr' ? '© OpenStreetMap katkıda bulunanlar' : '© OpenStreetMap contributors' };
     if (packageKind === 'raster') {
       layers.push({ id: 'offline-raster', type: 'raster', source: 'offline-turkiye' });
     } else {
@@ -74,6 +75,8 @@ function baseStyle(packageKind: 'vector' | 'raster' | 'none'): StyleSpecificatio
 type MapStatus = 'loading' | 'offline-package' | 'coordinate-fallback' | 'unavailable';
 
 export function FamilyLocationMap({ locations }: { readonly locations: readonly FamilyLocationView[] }) {
+  const {language}=useLocalization();
+  const text=(turkish:string,english:string)=>selectUiCopy(language,turkish,english);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [status, setStatus] = useState<MapStatus>('loading');
   const mappableLocations = useMemo(() => locations.filter(isMappable), [locations]);
@@ -93,7 +96,7 @@ export function FamilyLocationMap({ locations }: { readonly locations: readonly 
         if (cancelled) return;
         if (header.tileType === TileType.Mvt) packageKind = 'vector';
         else if ([TileType.Png, TileType.Jpeg, TileType.Webp, TileType.Avif].includes(header.tileType)) packageKind = 'raster';
-        else throw new Error('Desteklenmeyen çevrimdışı harita paket türü.');
+        else throw new Error(text('Desteklenmeyen çevrimdışı harita paket türü.','Unsupported offline map package type.'));
         offlineProtocol.add(packageFile);
       } catch {
         packageKind = 'none';
@@ -102,7 +105,7 @@ export function FamilyLocationMap({ locations }: { readonly locations: readonly 
       try {
         map = new maplibregl.Map({
           container,
-          style: baseStyle(packageKind),
+          style: baseStyle(packageKind,language),
           center: DEFAULT_CENTER,
           zoom: 4.4,
           minZoom: 2.5,
@@ -119,7 +122,7 @@ export function FamilyLocationMap({ locations }: { readonly locations: readonly 
           const markerElement = document.createElement('button');
           markerElement.type = 'button';
           markerElement.className = 'family-map-marker';
-          markerElement.setAttribute('aria-label', `${location.label} konumunu göster`);
+          markerElement.setAttribute('aria-label', `${text('Konumu göster','Show location')}: ${location.label}`);
           const markerGlyph = document.createElement('span');
           markerGlyph.textContent = '⌖';
           markerElement.append(markerGlyph);
@@ -150,28 +153,28 @@ export function FamilyLocationMap({ locations }: { readonly locations: readonly 
       cancelled = true;
       map?.remove();
     };
-  }, [mappableLocations]);
+  }, [language,mappableLocations]);
 
   const statusText = status === 'loading'
-    ? 'Yerel harita hazırlanıyor.'
+    ? text('Yerel harita hazırlanıyor.','Preparing the local map.')
     : status === 'offline-package'
-      ? 'Çevrimdışı Türkiye harita paketi kullanılıyor. Ağ ve bulut kullanılmadı.'
+      ? text('Çevrimdışı Türkiye harita paketi kullanılıyor. Ağ ve bulut kullanılmadı.','The offline Türkiye map package is in use. Network and cloud services were not used.')
       : status === 'coordinate-fallback'
-        ? 'Çevrimdışı harita paketi bulunamadı; koordinat ızgarası ve kayıtlı işaretler gösteriliyor. Ağ kullanılmadı.'
-        : 'Bu cihazda görsel harita başlatılamadı. Kayıtlı konum listesi kullanılabilir.';
+        ? text('Çevrimdışı harita paketi bulunamadı; koordinat ızgarası ve kayıtlı işaretler gösteriliyor. Ağ kullanılmadı.','The offline map package was not found; the coordinate grid and saved markers are shown. The network was not used.')
+        : text('Bu cihazda görsel harita başlatılamadı. Kayıtlı konum listesi kullanılabilir.','The visual map could not be started on this device. The saved location list remains available.');
 
   return (
     <article className="panel family-location-map-card">
       <div className="family-location-map-heading">
         <div>
-          <span className="eyebrow">Yerel ve çevrimdışı</span>
-          <h2>Aile konum haritası</h2>
+          <span className="eyebrow">{text('Yerel ve çevrimdışı','Local and offline')}</span>
+          <h2>{text('Aile konum haritası','Family location map')}</h2>
         </div>
         <span className={`family-location-map-state is-${status}`} role="status">{statusText}</span>
       </div>
-      <div className="family-location-map-canvas" ref={containerRef} aria-label="Aile konumlarının çevrimdışı haritası" />
+      <div className="family-location-map-canvas" ref={containerRef} aria-label={text('Aile konumlarının çevrimdışı haritası','Offline map of family locations')} />
       <p className="family-location-map-truth">
-        Konumlar yalnız bu cihazda işlenir. Harita, rota takibi veya arka planda canlı konum gönderimi yapmaz.
+        {text('Konumlar yalnız bu cihazda işlenir. Harita, rota takibi veya arka planda canlı konum gönderimi yapmaz.','Locations are processed only on this device. The map does not track routes or send live location in the background.')}
       </p>
     </article>
   );
