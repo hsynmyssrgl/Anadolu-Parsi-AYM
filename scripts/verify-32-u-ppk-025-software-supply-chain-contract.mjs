@@ -35,6 +35,8 @@ const exactSet = (actual, expected) => Array.isArray(actual)
   && new Set(actual).size === actual.length
   && expected.every((item) => actual.includes(item));
 const sha256Pattern = /^[a-f0-9]{64}$/u;
+const appMetaSource = await readText('packages/domain/src/app-meta.ts');
+const activeRelease = appMetaSource.match(/releaseLabel: '([^']+)'/)?.[1] ?? 'Bronze UNKNOWN';
 
 const paths = {
   scope: 'config/32-u-ppk-025-software-supply-chain-scope.json',
@@ -170,7 +172,7 @@ const expectedRegistrySignatureScopes = ['root', 'windows-packager'];
 const expectedAssets = ['electron', '7zip', 'nsis', 'nsis-resources', 'winCodeSign'];
 const expectedLicenses = [
   '0BSD', 'Apache-2.0', 'BSD-2-Clause', 'BSD-3-Clause', 'ISC', 'MIT', 'MPL-2.0',
-  'BlueOak-1.0.0', 'Python-2.0', 'WTFPL', '(MIT OR CC0-1.0)', '(WTFPL OR MIT)', 'WTFPL OR ISC'
+  'BlueOak-1.0.0', 'Python-2.0', 'WTFPL', '(MIT OR Apache-2.0)', '(MIT OR CC0-1.0)', '(WTFPL OR MIT)', 'WTFPL OR ISC'
 ];
 const expectedCandidateReasons = [
   'AUTHENTICODE_ARTIFACT_MISSING',
@@ -262,19 +264,19 @@ check('platform snapshot exposes no component vulnerability hash or certificate 
 check('platform policy exports the canonical release authority exactly once', (policyIndex.match(/supply-chain-release-policy\.js/gu) ?? []).length === 1);
 
 check('root and packager lockfiles are npm lockfile version three', rootLock?.lockfileVersion === 3 && packagerLock?.lockfileVersion === 3);
-check('two lock graphs contain exact 417 component nodes', combinedPackages.length === 417, String(combinedPackages.length));
+check('two lock graphs contain exact 442 component nodes', combinedPackages.length === 442, String(combinedPackages.length));
 check('root lock contains exact 18 workspaces', rootWorkspaces.length === 18, String(rootWorkspaces.length));
-check('two lock graphs contain exact 377 registry tarballs', registryPackages.length === 377, String(registryPackages.length));
+check('two lock graphs contain exact 402 registry tarballs', registryPackages.length === 402, String(registryPackages.length));
 check('all external dependency tarballs use canonical HTTPS npm registry and SHA-512 integrity', registryPackages.every(([, entry]) => /^https:\/\/registry\.npmjs\.org\//u.test(entry.resolved) && /^sha512-[A-Za-z0-9+/]+={0,2}$/u.test(entry.integrity ?? '')));
 check('policy declares exact two lock graphs and 18 workspaces', policyConfig?.lockfiles?.length === 2 && exactArray(policyConfig.lockfiles.map((item) => item.path), ['package-lock.json', 'tools/windows-packager/package-lock.json']) && policyConfig.lockfiles[0].workspaceCount === 18);
-check('policy pins exact 417 377 and 358 coverage', policyConfig?.requiredSbomComponentCount === 417 && policyConfig.requiredDependencyNodeCount === 417 && policyConfig.requiredRegistryPackageCount === 377 && policyConfig.requiredLicenseComponentCount === 358);
+check('policy pins exact 442 402 and 382 coverage', policyConfig?.requiredSbomComponentCount === 442 && policyConfig.requiredDependencyNodeCount === 442 && policyConfig.requiredRegistryPackageCount === 402 && policyConfig.requiredLicenseComponentCount === 382);
 
 const bomRefs = sbom?.components?.map((item) => item['bom-ref']) ?? [];
-check('CycloneDX 1.6 SBOM has exact 417 unique components', sbom?.bomFormat === 'CycloneDX' && sbom.specVersion === '1.6' && bomRefs.length === 417 && new Set(bomRefs).size === 417);
-check('SBOM has exact 417 dependency nodes with known refs', sbom?.dependencies?.length === 417 && sbom.dependencies.every((item) => bomRefs.includes(item.ref) && item.dependsOn.every((ref) => bomRefs.includes(ref))));
-check('third-party notice inventory has exact 358 components', notices?.entries?.length === 358, String(notices?.entries?.length ?? 0));
+check('CycloneDX 1.6 SBOM has exact 442 unique components', sbom?.bomFormat === 'CycloneDX' && sbom.specVersion === '1.6' && bomRefs.length === 442 && new Set(bomRefs).size === 442);
+check('SBOM has exact 442 dependency nodes with known refs', sbom?.dependencies?.length === 442 && sbom.dependencies.every((item) => bomRefs.includes(item.ref) && item.dependsOn.every((ref) => bomRefs.includes(ref))));
+check('third-party notice inventory has exact 382 components', notices?.entries?.length === 382, String(notices?.entries?.length ?? 0));
 check('third-party notice text is non-empty and separately material-bound', (await readText(paths.noticesText)).length > 1_000);
-check('license verification is a real exact-coverage PASS artifact', licenseGate?.status === 'PASS' && licenseGate.licenseInventoryComponentCount === 358 && licenseGate.failed === 0);
+check('license verification is a real exact-coverage PASS artifact', licenseGate?.status === 'PASS' && licenseGate.licenseInventoryComponentCount === 382 && licenseGate.failed === 0);
 check('approved licenses are exact and waivers remain forbidden', exactArray(policyConfig?.approvedLicenses, expectedLicenses) && policyConfig?.licenses?.unknownAllowed === false && policyConfig.licenses.missingAllowed === false && policyConfig.licenses.noticeMissingAllowed === false && policyConfig.waivers?.productionReleaseWaiversAllowed === false && policyConfig.waivers?.wildcardsAllowed === false);
 
 check('policy has exact three vulnerability scopes and fail-closed feed rules', exactArray(policyConfig?.vulnerability?.scopes, expectedVulnerabilityScopes) && policyConfig.vulnerability.maxAgeMs === 86_400_000 && policyConfig.vulnerability.maxFutureSkewMs === 300_000 && policyConfig.vulnerability.zeroFindingsRequired === true && policyConfig.vulnerability.feedUnavailableDecision === 'DENY');
@@ -378,12 +380,12 @@ check('root package has exact three-file targeted command', rootPackage?.scripts
 check('root package has exact contract and runtime commands', rootPackage?.scripts?.['verify:ppk025:contract'] === 'node scripts/verify-32-u-ppk-025-software-supply-chain-contract.mjs' && rootPackage?.scripts?.['verify:ppk025:runtime'] === 'node scripts/verify-32-u-ppk-025-software-supply-chain-runtime.mjs');
 check('root package exposes exact SBOM license vulnerability and governance commands', rootPackage?.scripts?.['verify:ppk025:sbom'] === 'node scripts/generate-ppk025-sbom.mjs' && rootPackage?.scripts?.['verify:ppk025:licenses'] === 'node scripts/generate-ppk025-third-party-notices.mjs' && rootPackage?.scripts?.['audit:production:evidence']?.includes('--scope root-production') && rootPackage?.scripts?.['audit:toolchain:evidence']?.includes('--scope root-build-toolchain') && rootPackage?.scripts?.['audit:windows-packager:evidence']?.includes('--scope windows-packager'));
 check('targeted tests cover policy application and Desktop packaging gates', (policyTest.match(/\bit\(/gu) ?? []).length >= 13 && (applicationTest.match(/\bit\(/gu) ?? []).length >= 3 && (desktopTest.match(/\bit\(/gu) ?? []).length >= 6);
-check('targeted tests exercise 417 377 358 and signed happy path', includesAll(policyTest, ['417', '377', '358', 'allows only an exactly covered, signed and trusted release fixture']));
+check('targeted tests exercise 442 402 382 and signed happy path', includesAll(policyTest, ['442', '402', '382', 'allows only an exactly covered, signed and trusted release fixture']));
 check('targeted tests exercise provenance tamper and fail-closed application callback', policyTest.includes('denies provenance tampering') && applicationTest.includes('blocks a tampered attestation before the callback'));
 check('Desktop tests cover fail-before-unsigned and full Authenticode trust', includesAll(desktopTest, ['fails before packaging', 'No unsigned installer will be emitted by package:win', 'Valid Authenticode', 'TimeStamperCertificate', 'selfSignedCertificateRejected']));
 
 check('all current release material hashes are valid and exact', Object.values(currentMaterials).every((value) => sha256Pattern.test(value ?? '')) && Object.entries(currentMaterials).every(([name, value]) => releaseEvidence?.materials?.[name] === value) && Object.keys(releaseEvidence?.materials ?? {}).length === Object.keys(currentMaterials).length);
-check('release evidence has exact 18 417 417 377 358 coverage', releaseEvidence?.coverage?.workspaceCount === 18 && releaseEvidence.coverage.sbomComponentCount === 417 && releaseEvidence.coverage.dependencyNodeCount === 417 && releaseEvidence.coverage.externalRegistryPackageCount === 377 && releaseEvidence.coverage.licenseInventoryComponentCount === 358);
+check('release evidence has exact 18 442 442 402 382 coverage', releaseEvidence?.coverage?.workspaceCount === 18 && releaseEvidence.coverage.sbomComponentCount === 442 && releaseEvidence.coverage.dependencyNodeCount === 442 && releaseEvidence.coverage.externalRegistryPackageCount === 402 && releaseEvidence.coverage.licenseInventoryComponentCount === 382);
 check('release evidence contains exact three vulnerability and two signature records', exactArray(releaseEvidence?.vulnerabilities?.map((item) => item.scope), expectedVulnerabilityScopes) && exactArray(releaseEvidence?.registrySignatures?.map((item) => item.scope), expectedRegistrySignatureScopes));
 check('release evidence contains exact five external assets and DSSE shape', exactArray(releaseEvidence?.externalAssets?.map((item) => item.id), expectedAssets) && releaseEvidence?.provenance?.envelope === 'DSSE' && releaseEvidence.provenance.algorithm === 'Ed25519' && releaseEvidence.provenance.signatureCount === 1);
 check('release decision is bound to exact evidence bytes', releaseDecision?.evidenceSha256 === await hashFile(paths.releaseEvidence));
@@ -412,7 +414,7 @@ if (candidateMode) {
 
 const report = {
   schemaVersion: 1,
-  release: 'Bronze 04.08.2026.29',
+  release: activeRelease,
   step: '32-U',
   requirement: 'PPK-025',
   phase: candidateMode ? 'SOFTWARE_SUPPLY_CHAIN_CANDIDATE_CONTRACT' : 'SOFTWARE_SUPPLY_CHAIN_CONTRACT',

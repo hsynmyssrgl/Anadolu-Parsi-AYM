@@ -1,6 +1,7 @@
 import { spawn } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
-import { dirname, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import {
   PPK025_MAX_FUTURE_SKEW_MS,
   PPK025_VULNERABILITY_MAX_AGE_MS,
@@ -30,19 +31,15 @@ const reportPath = resolve(option('--report'));
 const sbomPath = option('--sbom', 'artifacts/manifests/32-U-ppk-025-cyclonedx-sbom.json');
 const lockSha256Before = await sha256File(config.lockfile);
 const sbomSha256 = await sha256File(sbomPath);
+const npmCli = [
+  process.env.npm_execpath,
+  join(dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npm-cli.js'),
+  resolve('.tmp', 'npm-10.9.2', 'package', 'bin', 'npm-cli.js')
+].find((candidate) => typeof candidate === 'string' && existsSync(candidate));
+if (!npmCli) throw new Error('A trusted npm CLI could not be resolved from the active Node installation.');
 
 const run = () => new Promise((resolveRun, rejectRun) => {
-  const command = process.env.npm_execpath
-    ? process.execPath
-    : process.platform === 'win32'
-      ? process.env.ComSpec ?? 'cmd.exe'
-      : 'npm';
-  const commandArgs = process.env.npm_execpath
-    ? [process.env.npm_execpath, 'audit', 'signatures', '--json', '--registry=https://registry.npmjs.org/']
-    : process.platform === 'win32'
-      ? ['/d', '/s', '/c', 'npm', 'audit', 'signatures', '--json', '--registry=https://registry.npmjs.org/']
-      : ['audit', 'signatures', '--json', '--registry=https://registry.npmjs.org/'];
-  const child = spawn(command, commandArgs, {
+  const child = spawn(process.execPath, [npmCli, 'audit', 'signatures', '--json', '--registry=https://registry.npmjs.org/'], {
     cwd: resolve(config.cwd),
     env: { ...process.env, NPM_CONFIG_REGISTRY: 'https://registry.npmjs.org/' },
     shell: false,

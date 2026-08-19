@@ -17,8 +17,8 @@
         "id": "root",
         "path": "package-lock.json",
         "purpose": "18 workspace ile root production ve build dependency graph",
-        "observedCanonicalRegistryTarballs": 134,
-        "rootPackageLockSha256": "f3a5c10e6b8b9d1586ecc15bacf54f4ae29840828d46d92a3b309202b08a9951",
+        "observedCanonicalRegistryTarballs": 159,
+        "rootPackageLockSha256": "de3c2d898b36550a385f8777859a14c15716466710ad7c938ef2ba15b3189fdb",
         "finalHashBindingPending": false
       },
       {
@@ -26,16 +26,16 @@
         "path": "tools/windows-packager/package-lock.json",
         "purpose": "İzole Electron Builder, NSIS ve Windows paketleme toolchain graph",
         "observedCanonicalRegistryTarballs": 243,
-        "windowsPackagerLockSha256": "8690e463f4891677088e15c855cba98be8ed09a7e69de8614677ab0a857f7bcd",
+        "windowsPackagerLockSha256": "dea612d533cd219dbc409f4a51714922335a5f73c47e9ada9f02cb3d0b360807",
         "finalHashBindingPending": false
       }
     ],
     "approvedLocalToolPaths": [
       "tools/electron-builder-squirrel-windows-stub"
     ],
-    "requiredRegistryPackageCount": 377,
-    "requiredLicenseComponentCount": 358,
-    "expectedCycloneDxComponentCount": 417,
+    "requiredRegistryPackageCount": 402,
+    "requiredLicenseComponentCount": 382,
+    "expectedCycloneDxComponentCount": 442,
     "observationIsClosureEvidence": false
   },
   "controls": [

@@ -1,6 +1,7 @@
 import { spawn } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { dirname, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import {
   PPK025_VULNERABILITY_MAX_AGE_MS,
   prettyCanonicalJson,
@@ -47,20 +48,15 @@ const auditArgs = ['audit', '--json', '--registry=https://registry.npmjs.org/'];
 if (scopeConfig.omitDev) auditArgs.push('--omit=dev');
 const lockSha256Before = await sha256File(scopeConfig.lockfile);
 const sbomSha256 = await sha256File(sbomPath);
+const npmCli = [
+  process.env.npm_execpath,
+  join(dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npm-cli.js'),
+  resolve('.tmp', 'npm-10.9.2', 'package', 'bin', 'npm-cli.js')
+].find((candidate) => typeof candidate === 'string' && existsSync(candidate));
+if (!npmCli) throw new Error('A trusted npm CLI could not be resolved from the active Node installation.');
 
 const runNpm = (npmArgs) => new Promise((resolveAudit, rejectAudit) => {
-  const npmExecPath = process.env.npm_execpath;
-  const command = npmExecPath
-    ? process.execPath
-    : process.platform === 'win32'
-      ? process.env.ComSpec ?? 'cmd.exe'
-      : 'npm';
-  const commandArgs = npmExecPath
-    ? [npmExecPath, ...npmArgs]
-    : process.platform === 'win32'
-      ? ['/d', '/s', '/c', 'npm', ...npmArgs]
-      : npmArgs;
-  const child = spawn(command, commandArgs, {
+  const child = spawn(process.execPath, [npmCli, ...npmArgs], {
     cwd: resolve(scopeConfig.cwd),
     env: { ...process.env, NPM_CONFIG_REGISTRY: 'https://registry.npmjs.org/' },
     shell: false,

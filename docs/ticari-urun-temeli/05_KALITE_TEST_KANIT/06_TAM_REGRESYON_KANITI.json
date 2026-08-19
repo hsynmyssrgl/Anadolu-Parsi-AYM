@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-TAM-REGRESYON-20260819-01",
+  "executedAt": "2026-08-19T14:59:51+03:00",
+  "completedAt": "2026-08-19T15:09:16+03:00",
+  "repositoryBaseCommitAtExecution": "a866764a3a8bbac00aecfc834387adc44dbe08eb",
+  "workStep": "33-P",
+  "command": "PPT_WORK_STEP=33-P npm test",
+  "preconditions": {
+    "governedPreflightFresh": true,
+    "activeWorkStep": "PASS"
+  },
+  "result": {
+    "status": "PASS",
+    "testFilesPassed": 307,
+    "testFilesTotal": 307,
+    "testsPassed": 2053,
+    "testsTotal": 2053,
+    "durationSeconds": 564.52
+  },
+  "typecheck": "PASS",
+  "commercialReleaseEligible": false,
+  "note": "Bu kanit yerel tam regresyonu dogrular; gercek cihaz, imzali installer veya dis saglayici UAT kaniti degildir."
+}

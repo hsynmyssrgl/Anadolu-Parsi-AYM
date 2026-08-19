@@ -1,6 +1,6 @@
 # Bronze guncel tamamlama denetimi
 
-Olusturma (UTC): 2026-08-15T11:57:55.890Z
+Olusturma (UTC): 2026-08-19T11:55:12.051Z
 
 ## Sonuc
 
@@ -39,9 +39,9 @@ Bu oranlar farkli seyleri olcer ve tek bir uydurma yuzdede birlestirilemez.
 
 ## Kural ve kapilar
 
-- Kanonik kural: 208
-- Aktif kural: 194
-- Enforcement kaydi: 194
+- Kanonik kural: 217
+- Aktif kural: 197
+- Enforcement kaydi: 197
 - Tum guncel kapilar PASS: true
 - 29-D5 dogrulayici: FAIL; yalniz tarihsel baseline, guncel 30-Z kapisi degildir.
 

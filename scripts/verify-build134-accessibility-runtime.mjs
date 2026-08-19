@@ -1,11 +1,14 @@
 import assert from 'node:assert/strict';
-import { mkdir, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { resolveTypeScriptCommand } from './lib/typescript-command.mjs';
 
 const root = process.cwd();
+const rootPackage = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
+const appMetaSource = await readFile(join(root, 'packages', 'domain', 'src', 'app-meta.ts'), 'utf8');
+const activeDisplayVersion = appMetaSource.match(/version: '([^']+)'/)?.[1] ?? '';
 const compileRoot = join(root, '.tmp', 'build134-accessibility-runtime');
 const compiler = resolveTypeScriptCommand(root);
 await rm(compileRoot, { recursive: true, force: true });
@@ -50,14 +53,29 @@ const check = (label, action) => {
 check('default text scale', () => assert.equal(DEFAULT_ACCESSIBILITY_PREFERENCES.textScale, 'standard'));
 check('default high contrast', () => assert.equal(DEFAULT_ACCESSIBILITY_PREFERENCES.highContrast, false));
 check('default reduced motion', () => assert.equal(DEFAULT_ACCESSIBILITY_PREFERENCES.reduceMotion, false));
-check('system preferences apply without storage', () => assert.deepEqual(parseAccessibilityPreferences(null, { highContrast: true, reduceMotion: true }), { textScale: 'standard', highContrast: true, reduceMotion: true }));
-check('stored values override system values', () => assert.deepEqual(parseAccessibilityPreferences('{"textScale":"large","highContrast":false,"reduceMotion":false}', { highContrast: true, reduceMotion: true }), { textScale: 'large', highContrast: false, reduceMotion: false }));
+check('system preferences apply without storage', () => {
+  const parsed = parseAccessibilityPreferences(null, { highContrast: true, reduceMotion: true });
+  assert.equal(parsed.textScale, 'standard');
+  assert.equal(parsed.highContrast, true);
+  assert.equal(parsed.reduceMotion, true);
+});
+check('stored values override system values', () => {
+  const parsed = parseAccessibilityPreferences('{"textScale":"large","highContrast":false,"reduceMotion":false}', { highContrast: true, reduceMotion: true });
+  assert.equal(parsed.textScale, 'large');
+  assert.equal(parsed.highContrast, false);
+  assert.equal(parsed.reduceMotion, false);
+});
 check('extra large is accepted', () => assert.equal(parseAccessibilityPreferences('{"textScale":"extra-large"}').textScale, 'extra-large'));
 check('invalid scale falls back', () => assert.equal(parseAccessibilityPreferences('{"textScale":"huge"}').textScale, 'standard'));
-check('invalid JSON falls back safely', () => assert.deepEqual(parseAccessibilityPreferences('{', { highContrast: true, reduceMotion: false }), { textScale: 'standard', highContrast: true, reduceMotion: false }));
+check('invalid JSON falls back safely', () => {
+  const parsed = parseAccessibilityPreferences('{', { highContrast: true, reduceMotion: false });
+  assert.equal(parsed.textScale, 'standard');
+  assert.equal(parsed.highContrast, true);
+  assert.equal(parsed.reduceMotion, false);
+});
 check('invalid boolean uses system contrast', () => assert.equal(parseAccessibilityPreferences('{"highContrast":"yes"}', { highContrast: true, reduceMotion: false }).highContrast, true));
 check('serialization is round-trippable', () => {
-  const input = { textScale: 'large', highContrast: true, reduceMotion: true };
+  const input = { ...DEFAULT_ACCESSIBILITY_PREFERENCES, textScale: 'large', textScalePercent: 150, highContrast: true, reduceMotion: true };
   assert.deepEqual(parseAccessibilityPreferences(serializeAccessibilityPreferences(input)), input);
 });
 check('empty roving collection returns -1', () => assert.equal(nextRovingIndex(0, 0, 'ArrowDown'), -1));
@@ -72,9 +90,9 @@ check('announcement includes section name', () => assert.equal(accessibilityAnno
 
 const evidence = {
   schemaVersion: 1,
-  product: 'Anadolu Parsı Aile Yaşam Merkezi',
-  applicationVersion: '27.07.2026.134',
-  packageVersion: '27.7.2026-134',
+  product: 'ParsYuva AYM',
+  applicationVersion: activeDisplayVersion,
+  packageVersion: rootPackage.version,
   checks: checks.length,
   status: failures.length === 0 ? 'PASS' : 'FAIL',
   failures,

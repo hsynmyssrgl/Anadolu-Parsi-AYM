@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-MARKA-KIMLIGI-20260819-01",
+  "executedAt": "2026-08-19T14:05:00+03:00",
+  "product": "ParsYuva AYM",
+  "result": {
+    "status": "PASS",
+    "brandIdentityChecksPassed": 20,
+    "targetedTestFilesPassed": 3,
+    "targetedTestsPassed": 12
+  },
+  "commands": [
+    "node scripts/verify-product-brand-identity.mjs",
+    "npx vitest run apps/desktop/tests/product-brand-identity.test.ts apps/desktop/tests/brand-release-visual-contract.test.ts apps/desktop/tests/installer-narration-experience.test.ts"
+  ],
+  "verifiedSurfaces": [
+    "Windows pencere ve paket urun adi",
+    "NSIS installer bitis metni ve calistirilabilir dosya adi",
+    "Masaustu kisayolu",
+    "Yardim ve tanitim yuzeyi",
+    "Guncel kurumsallasma raporu",
+    "Korumali artifact yazma kimligi"
+  ],
+  "legacyCompatibility": {
+    "stableApplicationIdPreserved": true,
+    "stableUserDataDirectoryPreserved": true,
+    "legacyNameVisibleToNewUserSurfaces": false
+  },
+  "commercialReleaseEligible": false,
+  "note": "Eski urun adi yalniz tarihsel belgelerde ve geriye donuk veri/kurulum uyumlulugu icin teknik kimlik olarak korunur."
+}

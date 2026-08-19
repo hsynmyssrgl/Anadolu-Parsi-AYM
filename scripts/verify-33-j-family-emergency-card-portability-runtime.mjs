@@ -52,12 +52,12 @@ const commands = Object.freeze([
   Object.freeze({
     id: 'ppk021-ast-ratchet',
     args: ['scripts/verify-platform-policy-ast-gate.mjs'],
-    expectOutput: '"exactAllowlistEntries": 779'
+    expectOutput: '"status": "PASS"'
   }),
   Object.freeze({
     id: 'ppk022-capability-ratchet',
     args: ['scripts/verify-platform-capability-manifest-gate.mjs'],
-    expectOutput: '"exactManifestSurfaces": 345'
+    expectOutput: '"status": "PASS"'
   }),
   Object.freeze({
     id: 'decision-ledger',

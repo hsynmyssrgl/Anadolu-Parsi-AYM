@@ -1,8 +1,8 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 const read=(path)=>readFile(path,'utf8');
-const [domain,contract,repository,service,migration,composition,dataStore,main,preload,globalTypes,renderer,styles,packageText,ledgerText]=await Promise.all([
-  read('packages/domain/src/app-data.ts'),read('packages/repository-contracts/src/large-family-read-model-repository.ts'),read('packages/repositories/src/large-family-read-model-repository.ts'),read('apps/desktop/src/main/large-family-read-model-service.ts'),read('packages/database/src/family-database-migrations.ts'),read('apps/desktop/src/main/repository-composition-root.ts'),read('apps/desktop/src/main/data-store.ts'),read('apps/desktop/src/main/main.ts'),read('apps/desktop/src/main/preload.ts'),read('apps/desktop/src/renderer/global.d.ts'),read('apps/desktop/src/renderer/App.tsx'),read('apps/desktop/src/renderer/styles.css'),read('package.json'),read('artifacts/manifests/VERSION_LEDGER.json')
+const [domain,contract,repository,service,migration,composition,dataStore,main,preload,globalTypes,renderer,styles,packageText,appMeta]=await Promise.all([
+  read('packages/domain/src/app-data.ts'),read('packages/repository-contracts/src/large-family-read-model-repository.ts'),read('packages/repositories/src/large-family-read-model-repository.ts'),read('apps/desktop/src/main/large-family-read-model-service.ts'),read('packages/database/src/family-database-migrations.ts'),read('apps/desktop/src/main/repository-composition-root.ts'),read('apps/desktop/src/main/data-store.ts'),read('apps/desktop/src/main/main.ts'),read('apps/desktop/src/main/preload.ts'),read('apps/desktop/src/renderer/global.d.ts'),read('apps/desktop/src/renderer/App.tsx'),read('apps/desktop/src/renderer/styles.css'),read('package.json'),read('packages/domain/src/app-meta.ts')
 ]);
 let assertions=0;const failures=[];const verify=(condition,label)=>{assertions++;if(!condition)failures.push(label);};
 verify(domain.includes('interface GenealogyTreePageInput')&&domain.includes('interface GenealogyTreePageView'),'tree page domain contract');
@@ -36,8 +36,8 @@ verify(renderer.includes('Sonraki 80 kişiyi yükle')&&renderer.includes('Sonrak
 verify(renderer.includes('revision={archiveRevision}')&&!renderer.includes('items={archiveItems}'),'archive no longer receives full startup list');
 verify(!renderer.includes('window.pardus.listArchive()'),'startup/full archive fetch removed from renderer');
 verify(styles.includes('.large-tree-window')&&styles.includes('.large-timeline-window')&&styles.includes('.large-data-load-more'),'bounded window styles');
-const pkg=JSON.parse(packageText),ledger=JSON.parse(ledgerText),current=ledger.entries?.at(-1);
-verify(pkg.version===current?.packageVersion,'package and ledger version alignment');
-const report={schemaVersion:1,product:'Anadolu Parsı Aile Yaşam Merkezi',featureBuild:147,applicationVersion:current?.version??null,packageVersion:pkg.version,stage:'Bronze RC2 Active Development',scope:'Large genealogy tree, timeline and archive keyset pagination, bounded rendering, permission-aware page models and SQLite indexing',assertions,status:failures.length?'FAIL':'PASS',failures,generatedAt:new Date().toISOString()};
+const pkg=JSON.parse(packageText),displayVersion=/version: '([^']+)'/u.exec(appMeta)?.[1]??null;
+verify(appMeta.includes(`packageVersion: '${pkg.version}'`),'package and APP_META version alignment');
+const report={schemaVersion:1,product:'ParsYuva AYM',featureBuild:147,applicationVersion:displayVersion,packageVersion:pkg.version,stage:'Bronze Active Development',scope:'Large genealogy tree, timeline and archive keyset pagination, bounded rendering, permission-aware page models and SQLite indexing',assertions,status:failures.length?'FAIL':'PASS',failures,generatedAt:new Date().toISOString()};
 const reportPath='artifacts/validation/build147-large-data-performance-contract.json';await mkdir(dirname(reportPath),{recursive:true});await writeFile(reportPath,`${JSON.stringify(report,null,2)}\n`);
 if(failures.length){console.error(`Build 147 large-data performance contract: FAIL (${assertions-failures.length}/${assertions})`);for(const failure of failures)console.error(`- ${failure}`);process.exitCode=1;}else console.log(`Build 147 large-data performance contract: PASS (${assertions}/${assertions}).`);

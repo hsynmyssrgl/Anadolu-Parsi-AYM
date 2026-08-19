@@ -73,8 +73,8 @@ check(!protector.includes("from 'electron'") && !protector.includes("from \"elec
 check(!protector.includes('databasePath') && !protector.includes('userDataPath'), 'shared provider has no database or user-data path');
 check(shim.includes("from '@ppt/security'") && shim.includes('type DeviceSecretProtector'), 'Desktop module path is a compatibility re-export');
 check(!shim.includes('spawnSync') && !shim.includes('ProtectedData]::Protect') && !shim.includes('class WindowsDpapiDeviceSecretProtector'), 'Desktop shim contains no second implementation');
-check(packageJson.dependencies['@ppt/security'] === '4.8.2026-29', 'Core Service declares security dependency');
-check(lock.packages['apps/core-service'].dependencies['@ppt/security'] === '4.8.2026-29', 'lockfile binds Core Service security dependency');
+check(packageJson.dependencies['@ppt/security'] === packageJson.version, 'Core Service declares same-release security dependency');
+check(lock.packages['apps/core-service'].dependencies['@ppt/security'] === packageJson.version, 'lockfile binds same-release Core Service security dependency');
 
 check(contracts.includes('CoreServiceDeviceSecretProtectionStatusContract'), 'typed device-secret status contract');
 check(contracts.includes("readonly 'device-secret-protection.status'"), 'device-secret status is in canonical method map');

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-SBOM-LISANS-20260819-01",
+  "executedAt": "2026-08-19T14:12:00+03:00",
+  "result": {
+    "status": "PASS",
+    "cycloneDxVersion": "1.6",
+    "sbomComponents": 442,
+    "dependencyNodes": 442,
+    "externalRegistryComponents": 402,
+    "licenseInventoryComponents": 382,
+    "approvedLicenseExpressions": 14,
+    "deniedLicenseExpressions": 0,
+    "missingLicenseExpressions": 0
+  },
+  "artifacts": [
+    "artifacts/manifests/32-U-ppk-025-cyclonedx-sbom.json",
+    "artifacts/manifests/32-U-ppk-025-third-party-notices.json",
+    "artifacts/manifests/32-U-ppk-025-third-party-notices.txt",
+    "artifacts/validation/32-U-ppk-025-sbom-verification.json",
+    "artifacts/validation/32-U-ppk-025-license-verification.json"
+  ],
+  "targetedTests": {
+    "filesPassed": 3,
+    "testsPassed": 50
+  },
+  "legalApprovalImplied": false,
+  "commercialReleaseEligible": false,
+  "note": "Bu teknik envanter belirsiz veya yasak paket lisansi bulunmadigini kanitlar; yetkili hukuk incelemesinin yerine gecmez."
+}

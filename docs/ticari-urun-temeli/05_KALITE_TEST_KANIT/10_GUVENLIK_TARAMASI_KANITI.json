@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-GUVENLIK-TARAMASI-20260819-01",
+  "executedAt": "2026-08-19T14:15:00+03:00",
+  "result": {
+    "status": "PASS",
+    "criticalFindings": 0,
+    "highFindings": 0,
+    "dependencyFindings": 0,
+    "secretFindings": 0,
+    "registrySignatureInvalid": 0,
+    "registrySignatureMissing": 0
+  },
+  "dependencyAuditScopes": [
+    "root-production",
+    "root-build-toolchain",
+    "windows-packager"
+  ],
+  "staticSecurityGates": {
+    "ppk021PlatformPolicyAst": "PASS_889_SURFACES_0_FINDINGS",
+    "ppk022CapabilityManifest": "PASS_435_SURFACES_0_FINDINGS",
+    "desktopSecurityBoundary": "PASS_26_OF_26",
+    "ipcPayloadSecurity": "PASS_138_ASSERTIONS",
+    "rendererSessionSecurity": "PASS_35_ASSERTIONS",
+    "buildToolchainSecurity": "PASS_82_ASSERTIONS"
+  },
+  "artifacts": [
+    "artifacts/validation/ticari-guvenlik-taramasi.json",
+    "artifacts/validation/32-U-ppk-025-vulnerability-gate.json",
+    "artifacts/validation/32-U-ppk-025-registry-signature-gate.json"
+  ],
+  "externalPenetrationTestImplied": false,
+  "commercialReleaseEligible": false,
+  "note": "Yerel statik, dependency ve secret taramalari PASS olsa da dis penetrasyon testi ve uretim imzasi ayri kanitlardir."
+}

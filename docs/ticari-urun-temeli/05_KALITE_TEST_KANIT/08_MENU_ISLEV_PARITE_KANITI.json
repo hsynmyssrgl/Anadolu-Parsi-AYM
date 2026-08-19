@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-MENU-ISLEV-PARITE-20260819-01",
+  "executedAt": "2026-08-19T14:07:00+03:00",
+  "source": "artifacts/validation/feature-reality-gate.json",
+  "result": {
+    "status": "PASS",
+    "productModules": 17,
+    "governanceSurfaces": 5,
+    "routes": 22,
+    "menuEntries": 22,
+    "renderedScreens": 22,
+    "unresolvedOrphanRendererApis": 0
+  },
+  "classifiedNonMenuApis": {
+    "count": 14,
+    "allowedClasses": [
+      "BACKGROUND_OPERATIONAL",
+      "DIAGNOSTIC_OPERATOR_API",
+      "SUPERSEDED_READ_MODEL"
+    ],
+    "interpretation": "Bu API'ler yetim degildir; arka plan, tanilama veya yerine yeni okuma modeli gelmis uyumluluk yuzeyleri olarak kapali taksonomide siniflandirilmistir."
+  },
+  "selfTests": {
+    "incompleteCompleteChainRejected": true,
+    "unclassifiedApiRejected": true,
+    "missingRouteRejected": true
+  },
+  "commercialReleaseEligible": false,
+  "note": "Silver hazirligi ve ticari yayin uygunlugu bu parite kanitindan bagimsiz olarak BLOCKED kalir."
+}

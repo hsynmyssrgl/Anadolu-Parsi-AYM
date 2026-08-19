@@ -62,6 +62,66 @@
       "uretimZamani": "2026-08-19T13:48:04+03:00",
       "disKaynak": false,
       "not": "Ayni commit main, github/main ve backup/main referanslarinda dogrulanmistir."
+    },
+    {
+      "id": "KANIT-0007",
+      "tur": "TEST",
+      "kapsam": "Tum yerel Vitest ve TypeScript regresyonu",
+      "durum": "PASS",
+      "kaynak": "05_KALITE_TEST_KANIT/06_TAM_REGRESYON_KANITI.json",
+      "uretimZamani": "2026-08-19T15:09:16+03:00",
+      "disKaynak": false,
+      "not": "307/307 test dosyasi, 2053/2053 test ve root typecheck PASS."
+    },
+    {
+      "id": "KANIT-0008",
+      "tur": "TEST",
+      "kapsam": "ParsYuva AYM marka kimligi ve yuzey tutarliligi",
+      "durum": "PASS",
+      "kaynak": "05_KALITE_TEST_KANIT/07_MARKA_KIMLIGI_DOGRULAMA_KANITI.json",
+      "uretimZamani": "2026-08-19T14:05:00+03:00",
+      "disKaynak": false,
+      "not": "Marka kapisi 20/20 ve hedefli gorsel/installer testleri 3 dosya 12/12 PASS."
+    },
+    {
+      "id": "KANIT-0009",
+      "tur": "GATE",
+      "kapsam": "Menu rota ekran ve renderer API paritesi",
+      "durum": "PASS",
+      "kaynak": "05_KALITE_TEST_KANIT/08_MENU_ISLEV_PARITE_KANITI.json",
+      "uretimZamani": "2026-08-19T14:07:00+03:00",
+      "disKaynak": false,
+      "not": "22 rota, 22 menu ve 22 ekran eslesir; cozumlenecek yetim renderer API sayisi 0."
+    },
+    {
+      "id": "KANIT-0010",
+      "tur": "GATE",
+      "kapsam": "CycloneDX SBOM ve ucuncu taraf lisans envanteri",
+      "durum": "PASS",
+      "kaynak": "05_KALITE_TEST_KANIT/09_SBOM_VE_LISANS_KANITI.json",
+      "uretimZamani": "2026-08-19T14:12:00+03:00",
+      "disKaynak": false,
+      "not": "442 SBOM bileseni, 382 lisans envanteri bileseni ve sifir reddedilen/belirsiz lisans."
+    },
+    {
+      "id": "KANIT-0011",
+      "tur": "GATE",
+      "kapsam": "SAST dependency registry signature ve secret taramasi",
+      "durum": "PASS",
+      "kaynak": "05_KALITE_TEST_KANIT/10_GUVENLIK_TARAMASI_KANITI.json",
+      "uretimZamani": "2026-08-19T14:15:00+03:00",
+      "disKaynak": false,
+      "not": "Uc audit kapsami ve yerel guvenlik kapilari sifir kritik/yuksek/secret bulguyla PASS."
+    },
+    {
+      "id": "KANIT-0012",
+      "tur": "TEST",
+      "kapsam": "Otomatik erisilebilirlik ve klavye semantigi",
+      "durum": "PASS_WITH_EXTERNAL_UAT_OPEN",
+      "kaynak": "05_KALITE_TEST_KANIT/11_ERISILEBILIRLIK_OTOMATIK_KANITI.json",
+      "uretimZamani": "2026-08-19T14:36:00+03:00",
+      "disKaynak": false,
+      "not": "Otomatik kapilar PASS; gercek Narrator, Magnifier, klavye ve insan UAT kaniti NOT_RUN."
     }
   ]
 }

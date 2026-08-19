@@ -613,6 +613,7 @@
     "verify:conversation-capacity": "node scripts/verify-conversation-capacity-policy.mjs",
     "verify:delivery-report:v2": "node scripts/verify-delivery-report-contract-v2.mjs",
     "verify:commercial-baseline": "node docs/ticari-urun-temeli/11_OTOMASYON/dogrula-ticari-temel-alani.mjs",
+    "verify:commercial-security": "node scripts/dogrula-ticari-guvenlik-taramasi.mjs",
     "governance:preflight": "node scripts/run-governed-preflight.mjs",
     "governance:postflight": "node scripts/run-governed-postflight.mjs",
     "verify:core-service:local-admin:contract": "node scripts/verify-core-service-local-admin-contract.mjs",

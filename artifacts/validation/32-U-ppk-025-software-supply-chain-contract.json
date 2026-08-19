@@ -1,23 +1,14 @@
 {
   "schemaVersion": 1,
-  "release": "Bronze 04.08.2026.29",
+  "release": "Bronze 19.08.2026.33",
   "step": "32-U",
   "requirement": "PPK-025",
-  "phase": "SOFTWARE_SUPPLY_CHAIN_CONTRACT",
-  "status": "FAIL",
+  "phase": "SOFTWARE_SUPPLY_CHAIN_CANDIDATE_CONTRACT",
+  "status": "PASS",
   "checkCount": 94,
-  "passed": 86,
-  "failed": 8,
-  "failures": [
-    "all current release material hashes are valid and exact",
-    "final registry closes the complete PPK-025 chain",
-    "final scope closes only after recorded validation",
-    "final inventory closes without blockers",
-    "final trust config contains external production trust roots without private material",
-    "final Windows signature evidence passes both final PE targets",
-    "final release decision is exact eligible truth",
-    "final audit records only real contract runtime and signing evidence"
-  ],
+  "passed": 94,
+  "failed": 0,
+  "failures": [],
   "checks": [
     {
       "name": "scope identity is exact",
@@ -129,9 +120,9 @@
       "passed": true
     },
     {
-      "name": "two lock graphs contain exact 417 component nodes",
+      "name": "two lock graphs contain exact 442 component nodes",
       "passed": true,
-      "detail": "417"
+      "detail": "442"
     },
     {
       "name": "root lock contains exact 18 workspaces",
@@ -139,9 +130,9 @@
       "detail": "18"
     },
     {
-      "name": "two lock graphs contain exact 377 registry tarballs",
+      "name": "two lock graphs contain exact 402 registry tarballs",
       "passed": true,
-      "detail": "377"
+      "detail": "402"
     },
     {
       "name": "all external dependency tarballs use canonical HTTPS npm registry and SHA-512 integrity",
@@ -152,21 +143,21 @@
       "passed": true
     },
     {
-      "name": "policy pins exact 417 377 and 358 coverage",
+      "name": "policy pins exact 442 402 and 382 coverage",
       "passed": true
     },
     {
-      "name": "CycloneDX 1.6 SBOM has exact 417 unique components",
+      "name": "CycloneDX 1.6 SBOM has exact 442 unique components",
       "passed": true
     },
     {
-      "name": "SBOM has exact 417 dependency nodes with known refs",
+      "name": "SBOM has exact 442 dependency nodes with known refs",
       "passed": true
     },
     {
-      "name": "third-party notice inventory has exact 358 components",
+      "name": "third-party notice inventory has exact 382 components",
       "passed": true,
-      "detail": "358"
+      "detail": "382"
     },
     {
       "name": "third-party notice text is non-empty and separately material-bound",
@@ -329,7 +320,7 @@
       "passed": true
     },
     {
-      "name": "targeted tests exercise 417 377 358 and signed happy path",
+      "name": "targeted tests exercise 442 402 382 and signed happy path",
       "passed": true
     },
     {
@@ -342,10 +333,10 @@
     },
     {
       "name": "all current release material hashes are valid and exact",
-      "passed": false
+      "passed": true
     },
     {
-      "name": "release evidence has exact 18 417 417 377 358 coverage",
+      "name": "release evidence has exact 18 442 442 402 382 coverage",
       "passed": true
     },
     {
@@ -373,32 +364,33 @@
       "passed": true
     },
     {
-      "name": "final registry closes the complete PPK-025 chain",
-      "passed": false
+      "name": "candidate registry truthfully remains partial with only evidence open",
+      "passed": true
     },
     {
-      "name": "final scope closes only after recorded validation",
-      "passed": false
+      "name": "candidate scope records local validation PASS and external signing pending without completion",
+      "passed": true
     },
     {
-      "name": "final inventory closes without blockers",
-      "passed": false
+      "name": "candidate inventory records exact three external blockers after local validation",
+      "passed": true
     },
     {
-      "name": "final trust config contains external production trust roots without private material",
-      "passed": false
+      "name": "candidate policy and signing trust remain externally blocked",
+      "passed": true
     },
     {
-      "name": "final Windows signature evidence passes both final PE targets",
-      "passed": false
+      "name": "candidate release decision is exact current fail-closed BLOCKED truth",
+      "passed": true,
+      "detail": "[\"AUTHENTICODE_ARTIFACT_MISSING\",\"AUTHENTICODE_CERTIFICATE_UNTRUSTED\",\"AUTHENTICODE_STATUS_INVALID\",\"AUTHENTICODE_TIMESTAMP_MISSING\",\"PRODUCTION_CERTIFICATE_NOT_PROVISIONED\",\"PROVENANCE_KEY_UNTRUSTED\",\"PROVENANCE_SIGNATURE_INVALID\"]"
     },
     {
-      "name": "final release decision is exact eligible truth",
-      "passed": false
+      "name": "candidate release evidence contains no fake production signing authority",
+      "passed": true
     },
     {
-      "name": "final audit records only real contract runtime and signing evidence",
-      "passed": false
+      "name": "candidate documents record local validation without final completion claim",
+      "passed": true
     }
   ],
   "sourceScan": {
@@ -418,17 +410,25 @@
   "coverage": {
     "lockfiles": 2,
     "workspaces": 18,
-    "sbomComponents": 417,
-    "dependencyNodes": 417,
-    "registryPackages": 377,
-    "licenseComponents": 358,
+    "sbomComponents": 442,
+    "dependencyNodes": 442,
+    "registryPackages": 402,
+    "licenseComponents": 382,
     "vulnerabilityScopes": 3,
     "registrySignatureScopes": 2,
     "externalAssets": 5,
     "authenticodeArtifacts": 2,
     "targetedTestFiles": 3
   },
-  "candidateDecisionExpectedReasons": [],
+  "candidateDecisionExpectedReasons": [
+    "AUTHENTICODE_ARTIFACT_MISSING",
+    "AUTHENTICODE_CERTIFICATE_UNTRUSTED",
+    "AUTHENTICODE_STATUS_INVALID",
+    "AUTHENTICODE_TIMESTAMP_MISSING",
+    "PRODUCTION_CERTIFICATE_NOT_PROVISIONED",
+    "PROVENANCE_KEY_UNTRUSTED",
+    "PROVENANCE_SIGNATURE_INVALID"
+  ],
   "productionReleaseEligible": false,
   "productionPrivateMaterialPersisted": false,
   "checksumAloneGrantsReleaseAuthority": false,
@@ -443,5 +443,5 @@
   "sqliteOwnershipTransferred": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": false,
-  "generatedAt": "2026-08-18T21:57:05.027Z"
+  "generatedAt": "2026-08-19T11:50:24.517Z"
 }

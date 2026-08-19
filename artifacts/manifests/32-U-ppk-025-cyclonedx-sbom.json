@@ -134,6 +134,50 @@
       "version": "3.0.3"
     },
     {
+      "bom-ref": "urn:ppt:npm:root:01dc4371ad01822f22852e10",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "dc2359d839eba41c86f4daa3e97a3cbea6e34f817a37eb5be066f6f04480663619e72aaf99ce7a27efe4b88c2468030ec9b953421516ecfc4c9146fc437e8ddd"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ],
+      "name": "json-stringify-pretty-compact",
+      "properties": [
+        {
+          "name": "ppt:dependencyScope",
+          "value": "required"
+        },
+        {
+          "name": "ppt:integrity",
+          "value": "sha512-3CNZ2DnrpByG9Nqj6Xo8vqbjT4F6N+tb4Gb28ESAZjYZ5yqvmc56J+/kuIwkaAMOyblTQhUW7PxMkUb8Q36N3Q=="
+        },
+        {
+          "name": "ppt:lockfile",
+          "value": "package-lock.json"
+        },
+        {
+          "name": "ppt:lockPath",
+          "value": "node_modules/json-stringify-pretty-compact"
+        },
+        {
+          "name": "ppt:resolved",
+          "value": "https://registry.npmjs.org/json-stringify-pretty-compact/-/json-stringify-pretty-compact-4.0.0.tgz"
+        },
+        {
+          "name": "ppt:sourceGraph",
+          "value": "root"
+        }
+      ],
+      "purl": "pkg:npm/json-stringify-pretty-compact@4.0.0",
+      "type": "library",
+      "version": "4.0.0"
+    },
+    {
       "bom-ref": "urn:ppt:npm:root:0830b7c0be8a37a32256f361",
       "hashes": [
         {
@@ -178,6 +222,50 @@
       "version": "8.5.23"
     },
     {
+      "bom-ref": "urn:ppt:npm:root:085484e408a39549de39582d",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "db2c8047ca8190ddd8ba17896a7529582e54ddb6f9a2c0f2c0d07c4730d5943c031dba1c009bdeaaa8f5bbcf92543ee39164f8cafb070a95aaa96a80c5bd3308"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ],
+      "name": "minimist",
+      "properties": [
+        {
+          "name": "ppt:dependencyScope",
+          "value": "required"
+        },
+        {
+          "name": "ppt:integrity",
+          "value": "sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA=="
+        },
+        {
+          "name": "ppt:lockfile",
+          "value": "package-lock.json"
+        },
+        {
+          "name": "ppt:lockPath",
+          "value": "node_modules/minimist"
+        },
+        {
+          "name": "ppt:resolved",
+          "value": "https://registry.npmjs.org/minimist/-/minimist-1.2.8.tgz"
+        },
+        {
+          "name": "ppt:sourceGraph",
+          "value": "root"
+        }
+      ],
+      "purl": "pkg:npm/minimist@1.2.8",
+      "type": "library",
+      "version": "1.2.8"
+    },
+    {
       "bom-ref": "urn:ppt:npm:root:09a34adc20b06af895dedf0c",
       "name": "@ppt/core-service-contracts",
       "properties": [
@@ -198,9 +286,9 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/core-service-contracts@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/core-service-contracts@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
     },
     {
       "bom-ref": "urn:ppt:npm:root:0a73dfcc06cd4d73665846a6",
@@ -407,9 +495,9 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/application@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/application@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
     },
     {
       "bom-ref": "urn:ppt:npm:root:11d785d1adb7f49c9bd0c1c7",
@@ -484,9 +572,9 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/contracts@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/contracts@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
     },
     {
       "bom-ref": "urn:ppt:npm:root:1671723bfc29451fb980e547",
@@ -553,9 +641,9 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/domain@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/domain@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
     },
     {
       "bom-ref": "urn:ppt:npm:root:1747312f048021059a485abd",
@@ -586,9 +674,53 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/security@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/security@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
+    },
+    {
+      "bom-ref": "urn:ppt:npm:root:18075d5e3de694ae7ae94397",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "4ef9a436192ff3272dd125414b2fa8f306335e3138673dcf09eb1b7ecf078825d775c4eea1c02916fd7551694d156298b0fda892aae16fb24d9529bd22706123"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ],
+      "name": "murmurhash-js",
+      "properties": [
+        {
+          "name": "ppt:dependencyScope",
+          "value": "required"
+        },
+        {
+          "name": "ppt:integrity",
+          "value": "sha512-TvmkNhkv8yct0SVBSy+o8wYzXjE4Zz3PCesbfs8HiCXXdcTuocApFv11UWlNFWKYsP2okqrhb7JNlSm9InBhIw=="
+        },
+        {
+          "name": "ppt:lockfile",
+          "value": "package-lock.json"
+        },
+        {
+          "name": "ppt:lockPath",
+          "value": "node_modules/murmurhash-js"
+        },
+        {
+          "name": "ppt:resolved",
+          "value": "https://registry.npmjs.org/murmurhash-js/-/murmurhash-js-1.0.0.tgz"
+        },
+        {
+          "name": "ppt:sourceGraph",
+          "value": "root"
+        }
+      ],
+      "purl": "pkg:npm/murmurhash-js@1.0.0",
+      "type": "library",
+      "version": "1.0.0"
     },
     {
       "bom-ref": "urn:ppt:npm:root:1929bd3a75dff108e9fa61ac",
@@ -899,6 +1031,50 @@
       "version": "7.0.2"
     },
     {
+      "bom-ref": "urn:ppt:npm:root:1f228103ffc2f27c3fdb60fc",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "95ab529f20cdb7ff3361407a54827a3c28768c18c95fa8270eca0267b2f25bb1a4aab0f9d445b06bda82a068b18fc62a06d11340aff163b3a6a5317cc73d4375"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ],
+      "name": "gl-matrix",
+      "properties": [
+        {
+          "name": "ppt:dependencyScope",
+          "value": "required"
+        },
+        {
+          "name": "ppt:integrity",
+          "value": "sha512-latSnyDNt/8zYUB6VIJ6PCh2jBjJX6gnDsoCZ7LyW7GkqrD51EWwa9qCoGixj8YqBtETQK/xY7OmpTF8xz1DdQ=="
+        },
+        {
+          "name": "ppt:lockfile",
+          "value": "package-lock.json"
+        },
+        {
+          "name": "ppt:lockPath",
+          "value": "node_modules/gl-matrix"
+        },
+        {
+          "name": "ppt:resolved",
+          "value": "https://registry.npmjs.org/gl-matrix/-/gl-matrix-3.4.4.tgz"
+        },
+        {
+          "name": "ppt:sourceGraph",
+          "value": "root"
+        }
+      ],
+      "purl": "pkg:npm/gl-matrix@3.4.4",
+      "type": "library",
+      "version": "3.4.4"
+    },
+    {
       "bom-ref": "urn:ppt:npm:root:203b667f358057a7fb2bad35",
       "name": "@ppt/test-data",
       "properties": [
@@ -919,9 +1095,9 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/test-data@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/test-data@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
     },
     {
       "bom-ref": "urn:ppt:npm:root:226dede9c7438e383eb6af23",
@@ -944,9 +1120,9 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/security@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/security@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
     },
     {
       "bom-ref": "urn:ppt:npm:root:2300dff8f135f28c1111bbce",
@@ -1257,6 +1433,50 @@
       "version": "1.0.1"
     },
     {
+      "bom-ref": "urn:ppt:npm:root:29b8ea3c23d6613f91bb4d7c",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "7bdbeeaf3ad7250ac55fa724a473f76ef8f997ef429d8ce4c43367350d61d904ea756b1400981788a74635c39ad4463ce5d53c29b43ecff15d41d07b3fef727d"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "ISC"
+        }
+      ],
+      "name": "kdbush",
+      "properties": [
+        {
+          "name": "ppt:dependencyScope",
+          "value": "required"
+        },
+        {
+          "name": "ppt:integrity",
+          "value": "sha512-e9vurzrXJQrFX6ckpHP3bvj5l+9CnYzkxDNnNQ1h2QTqdWsUAJgXiKdGNcOa1EY85dU8KbQ+z/FdQdB7P+9yfQ=="
+        },
+        {
+          "name": "ppt:lockfile",
+          "value": "package-lock.json"
+        },
+        {
+          "name": "ppt:lockPath",
+          "value": "node_modules/kdbush"
+        },
+        {
+          "name": "ppt:resolved",
+          "value": "https://registry.npmjs.org/kdbush/-/kdbush-4.1.0.tgz"
+        },
+        {
+          "name": "ppt:sourceGraph",
+          "value": "root"
+        }
+      ],
+      "purl": "pkg:npm/kdbush@4.1.0",
+      "type": "library",
+      "version": "4.1.0"
+    },
+    {
       "bom-ref": "urn:ppt:npm:root:2b27e290826d0d89de8727c2",
       "hashes": [
         {
@@ -1497,9 +1717,53 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/logging@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/logging@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
+    },
+    {
+      "bom-ref": "urn:ppt:npm:root:31796878d5cee3aca571be96",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "546d8aeb7220922bfda7bead93596295ccc42b5713fa40a32ad91d870d5d41957793721725b777a3a1e8f1bf732596874a74f684a7b823e39b997f70ea6e5299"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ],
+      "name": "protocol-buffers-schema",
+      "properties": [
+        {
+          "name": "ppt:dependencyScope",
+          "value": "required"
+        },
+        {
+          "name": "ppt:integrity",
+          "value": "sha512-VG2K63Igkiv9p76tk1lilczEK1cT+kCjKtkdhw1dQZV3k3IXJbd3o6Ho8b9zJZaHSnT2hKe4I+ObmX9w6m5SmQ=="
+        },
+        {
+          "name": "ppt:lockfile",
+          "value": "package-lock.json"
+        },
+        {
+          "name": "ppt:lockPath",
+          "value": "node_modules/protocol-buffers-schema"
+        },
+        {
+          "name": "ppt:resolved",
+          "value": "https://registry.npmjs.org/protocol-buffers-schema/-/protocol-buffers-schema-3.6.1.tgz"
+        },
+        {
+          "name": "ppt:sourceGraph",
+          "value": "root"
+        }
+      ],
+      "purl": "pkg:npm/protocol-buffers-schema@3.6.1",
+      "type": "library",
+      "version": "3.6.1"
     },
     {
       "bom-ref": "urn:ppt:npm:root:33b86077fc0baf8bd43dc145",
@@ -1530,9 +1794,9 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/repositories@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/repositories@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
     },
     {
       "bom-ref": "urn:ppt:npm:root:350ea97a60fd96ab476c83b6",
@@ -1599,9 +1863,9 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/platform-policy@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/platform-policy@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
     },
     {
       "bom-ref": "urn:ppt:npm:root:36a9fb7b6e5fc09d91fd14cb",
@@ -1668,9 +1932,9 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/database@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/database@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
     },
     {
       "bom-ref": "urn:ppt:npm:root:3781801e0f33810297520db0",
@@ -1981,6 +2245,50 @@
       "version": "3.2.2"
     },
     {
+      "bom-ref": "urn:ppt:npm:root:449b309353ffbe76a072ab30",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "65e2b9c364d378739a8dc2da110b352995f0d95f7020aa353e64e197196c1e85ec42c62506a2c9ccf39dead24746d1930a1518dc33cf9a35d102b615bc06e667"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "(MIT OR Apache-2.0)"
+        }
+      ],
+      "name": "@maplibre/mlt",
+      "properties": [
+        {
+          "name": "ppt:dependencyScope",
+          "value": "required"
+        },
+        {
+          "name": "ppt:integrity",
+          "value": "sha512-ZeK5w2TTeHOajcLaEQs1KZXw2V9wIKo1PmThlxlsHoXsQsYlBqLJzPOd6tJHRtGTChUY3DPPmjXRArYVvAbmZw=="
+        },
+        {
+          "name": "ppt:lockfile",
+          "value": "package-lock.json"
+        },
+        {
+          "name": "ppt:lockPath",
+          "value": "node_modules/@maplibre/mlt"
+        },
+        {
+          "name": "ppt:resolved",
+          "value": "https://registry.npmjs.org/@maplibre/mlt/-/mlt-1.1.12.tgz"
+        },
+        {
+          "name": "ppt:sourceGraph",
+          "value": "root"
+        }
+      ],
+      "purl": "pkg:npm/%40maplibre/mlt@1.1.12",
+      "type": "library",
+      "version": "1.1.12"
+    },
+    {
       "bom-ref": "urn:ppt:npm:root:4670c536d69889dd9edd05e6",
       "hashes": [
         {
@@ -2053,9 +2361,9 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/core-service-contracts@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/core-service-contracts@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
     },
     {
       "bom-ref": "urn:ppt:npm:root:47df22d84e2c900da846c083",
@@ -2254,9 +2562,9 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/core-service-client@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/core-service-client@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
     },
     {
       "bom-ref": "urn:ppt:npm:root:4f1d1480aab84e5ab5e8aaa8",
@@ -2347,6 +2655,50 @@
       "version": "1.1.5"
     },
     {
+      "bom-ref": "urn:ppt:npm:root:4ff41820d2f7beb467cfeaf5",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "41fd744b5b881cc936d2b8bf215067a52f9eb1412455a4791dfb66cfcf234c89eba665a03c625f3dedcb5638e513beedacbc7cb47eaa8d31bbb961fd848abfd1"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "BSD-3-Clause"
+        }
+      ],
+      "name": "@mapbox/vector-tile",
+      "properties": [
+        {
+          "name": "ppt:dependencyScope",
+          "value": "required"
+        },
+        {
+          "name": "ppt:integrity",
+          "value": "sha512-Qf10S1uIHMk20ri/IVBnpS+esUEkVaR5Hftmz88jTInrpmWgPGJfPe3LVjjlE77trLx8tH6qjTG7uWH9hIq/0Q=="
+        },
+        {
+          "name": "ppt:lockfile",
+          "value": "package-lock.json"
+        },
+        {
+          "name": "ppt:lockPath",
+          "value": "node_modules/@mapbox/vector-tile"
+        },
+        {
+          "name": "ppt:resolved",
+          "value": "https://registry.npmjs.org/@mapbox/vector-tile/-/vector-tile-3.0.0.tgz"
+        },
+        {
+          "name": "ppt:sourceGraph",
+          "value": "root"
+        }
+      ],
+      "purl": "pkg:npm/%40mapbox/vector-tile@3.0.0",
+      "type": "library",
+      "version": "3.0.0"
+    },
+    {
       "bom-ref": "urn:ppt:npm:root:50d86c87e0e6ea0b19dbd871",
       "hashes": [
         {
@@ -2411,9 +2763,9 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/application@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/application@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
     },
     {
       "bom-ref": "urn:ppt:npm:root:52392250cdc84bfa3e14da50",
@@ -2524,9 +2876,9 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/repository-contracts@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/repository-contracts@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
     },
     {
       "bom-ref": "urn:ppt:npm:root:5a9b5e6e030b2ea940243918",
@@ -2615,6 +2967,50 @@
       "purl": "pkg:npm/%40types/estree@1.0.9",
       "type": "library",
       "version": "1.0.9"
+    },
+    {
+      "bom-ref": "urn:ppt:npm:root:5ba0aa9b876cd11df65a3f52",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "d12125695d2e331127c73061857f564ee3f251e32c00dfd24b48b5ead8ee6dae3f9a2a3adcc1bd9218c2d5ad090223c65c0c2fc26e147c725444237b9f2b9d42"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ],
+      "name": "@mapbox/jsonlint-lines-primitives",
+      "properties": [
+        {
+          "name": "ppt:dependencyScope",
+          "value": "required"
+        },
+        {
+          "name": "ppt:integrity",
+          "value": "sha512-0SElaV0uMxEnxzBhhX9WTuPyUeMsAN/SS0i16tjuba4/mio63MG9khjC1a0JAiPGXAwvwm4UfHJURCN7nyudQg=="
+        },
+        {
+          "name": "ppt:lockfile",
+          "value": "package-lock.json"
+        },
+        {
+          "name": "ppt:lockPath",
+          "value": "node_modules/@mapbox/jsonlint-lines-primitives"
+        },
+        {
+          "name": "ppt:resolved",
+          "value": "https://registry.npmjs.org/@mapbox/jsonlint-lines-primitives/-/jsonlint-lines-primitives-2.0.3.tgz"
+        },
+        {
+          "name": "ppt:sourceGraph",
+          "value": "root"
+        }
+      ],
+      "purl": "pkg:npm/%40mapbox/jsonlint-lines-primitives@2.0.3",
+      "type": "library",
+      "version": "2.0.3"
     },
     {
       "bom-ref": "urn:ppt:npm:root:5fb9585c319c3a79927a1a74",
@@ -2821,9 +3217,9 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/database@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/database@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
     },
     {
       "bom-ref": "urn:ppt:npm:root:65547f1d1e9ce9afff5cb197",
@@ -2868,6 +3264,50 @@
       "purl": "pkg:npm/html-escaper@2.0.2",
       "type": "library",
       "version": "2.0.2"
+    },
+    {
+      "bom-ref": "urn:ppt:npm:root:690365ea2a3b0a99348464ab",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "e82f27a96babde3f7c53afa55c37d351621f82f654f84ba6be91ca7188ee8ca1fbc286322e3dac5267dfd2d461aea33b068854c3b3f3dd90758e3da05bd16f9a"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ],
+      "name": "@types/geojson",
+      "properties": [
+        {
+          "name": "ppt:dependencyScope",
+          "value": "required"
+        },
+        {
+          "name": "ppt:integrity",
+          "value": "sha512-6C8nqWur3j98U6+lXDfTUWIfgvZU+EumvpHKcYjujKH7woYyLj2sUmff0tRhrqM7BohUw7Pz3ZB1jj2gW9Fvmg=="
+        },
+        {
+          "name": "ppt:lockfile",
+          "value": "package-lock.json"
+        },
+        {
+          "name": "ppt:lockPath",
+          "value": "node_modules/@types/geojson"
+        },
+        {
+          "name": "ppt:resolved",
+          "value": "https://registry.npmjs.org/@types/geojson/-/geojson-7946.0.16.tgz"
+        },
+        {
+          "name": "ppt:sourceGraph",
+          "value": "root"
+        }
+      ],
+      "purl": "pkg:npm/%40types/geojson@7946.0.16",
+      "type": "library",
+      "version": "7946.0.16"
     },
     {
       "bom-ref": "urn:ppt:npm:root:6a2014cb7969c9852ac3f178",
@@ -3046,6 +3486,50 @@
       "version": "1.1.1"
     },
     {
+      "bom-ref": "urn:ppt:npm:root:72c6f89cdf5753a901a127fa",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "908e5f7d38995a625a4bf86e33cc197c431eaf579177ba094210eec5e08b7b7b7b37b997df3f7808dd313f1050c456104d2373f53d22fafea29caa9274af31ad"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ],
+      "name": "resolve-protobuf-schema",
+      "properties": [
+        {
+          "name": "ppt:dependencyScope",
+          "value": "required"
+        },
+        {
+          "name": "ppt:integrity",
+          "value": "sha512-kI5ffTiZWmJaS/huM8wZfEMer1eRd7oJQhDuxeCLe3t7N7mX3z94CN0xPxBQxFYQTSNz9T0i+v6inKqSdK8xrQ=="
+        },
+        {
+          "name": "ppt:lockfile",
+          "value": "package-lock.json"
+        },
+        {
+          "name": "ppt:lockPath",
+          "value": "node_modules/resolve-protobuf-schema"
+        },
+        {
+          "name": "ppt:resolved",
+          "value": "https://registry.npmjs.org/resolve-protobuf-schema/-/resolve-protobuf-schema-2.1.0.tgz"
+        },
+        {
+          "name": "ppt:sourceGraph",
+          "value": "root"
+        }
+      ],
+      "purl": "pkg:npm/resolve-protobuf-schema@2.1.0",
+      "type": "library",
+      "version": "2.1.0"
+    },
+    {
       "bom-ref": "urn:ppt:npm:root:74f00cb8319169bcfbda4dc2",
       "hashes": [
         {
@@ -3162,9 +3646,9 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/domain@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/domain@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
     },
     {
       "bom-ref": "urn:ppt:npm:root:78632d56d2f57d954a98b487",
@@ -3255,6 +3739,50 @@
       "version": "1.11.1"
     },
     {
+      "bom-ref": "urn:ppt:npm:root:7b194cacbd102d821f5a1482",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "7ea779d797e306600d2861ac436f3a1365af8ff5ef0c5a46cf0271ab8088ea3310b9ee8ecb4e2e08aa7e256285d34c514e693a704bb58cf27da77c6a1fc616a9"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "BSD-2-Clause"
+        }
+      ],
+      "name": "@mapbox/unitbezier",
+      "properties": [
+        {
+          "name": "ppt:dependencyScope",
+          "value": "required"
+        },
+        {
+          "name": "ppt:integrity",
+          "value": "sha512-fqd515fjBmANKGGsQ286E2Wvj/XvDFpGzwJxq4CI6jMQue6Oy04uCKp+JWKF00xRTmk6cEu1jPJ9p3xqH8YWqQ=="
+        },
+        {
+          "name": "ppt:lockfile",
+          "value": "package-lock.json"
+        },
+        {
+          "name": "ppt:lockPath",
+          "value": "node_modules/@mapbox/unitbezier"
+        },
+        {
+          "name": "ppt:resolved",
+          "value": "https://registry.npmjs.org/@mapbox/unitbezier/-/unitbezier-1.0.0.tgz"
+        },
+        {
+          "name": "ppt:sourceGraph",
+          "value": "root"
+        }
+      ],
+      "purl": "pkg:npm/%40mapbox/unitbezier@1.0.0",
+      "type": "library",
+      "version": "1.0.0"
+    },
+    {
       "bom-ref": "urn:ppt:npm:root:7bf6cc1c4f3ff7f1a07fef65",
       "hashes": [
         {
@@ -3319,9 +3847,9 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/config@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/config@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
     },
     {
       "bom-ref": "urn:ppt:npm:root:7e36ad702fb93ba94537a256",
@@ -3412,6 +3940,50 @@
       "version": "2.8.1"
     },
     {
+      "bom-ref": "urn:ppt:npm:root:7faa5ea12870228c12eb4d69",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "15530e72648fff2aa8978e6ded2b40a44c932f9fef9aa042b85847f67f9f16e20d7a785a5fe6201c722dd7227ce92f24967dee24b70cbe6114d9c7e7e84d9e09"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "ISC"
+        }
+      ],
+      "name": "@maplibre/geojson-vt",
+      "properties": [
+        {
+          "name": "ppt:dependencyScope",
+          "value": "required"
+        },
+        {
+          "name": "ppt:integrity",
+          "value": "sha512-FVMOcmSP/yqol45t7StApEyTL5/vmqBCuFhH9n+fFuINenhaX+YgHHIt1yJ86S8kln3uJLcMvmEU2cfn6E2eCQ=="
+        },
+        {
+          "name": "ppt:lockfile",
+          "value": "package-lock.json"
+        },
+        {
+          "name": "ppt:lockPath",
+          "value": "node_modules/@maplibre/geojson-vt"
+        },
+        {
+          "name": "ppt:resolved",
+          "value": "https://registry.npmjs.org/@maplibre/geojson-vt/-/geojson-vt-6.1.1.tgz"
+        },
+        {
+          "name": "ppt:sourceGraph",
+          "value": "root"
+        }
+      ],
+      "purl": "pkg:npm/%40maplibre/geojson-vt@6.1.1",
+      "type": "library",
+      "version": "6.1.1"
+    },
+    {
       "bom-ref": "urn:ppt:npm:root:813d93a45c38d1fdd1f8e38c",
       "hashes": [
         {
@@ -3500,6 +4072,50 @@
       "version": "1.1.5"
     },
     {
+      "bom-ref": "urn:ppt:npm:root:848106b3698ed3dd550a2f77",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "b5b64db89acbc06529df3b2106d772e16f8e47166e221f1ae629722044030b9ad8d5fdd4db424caf2d0b977581cd4e7c1192ac12e2455e16f9830bfc0ac3ef80"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ],
+      "name": "fflate",
+      "properties": [
+        {
+          "name": "ppt:dependencyScope",
+          "value": "required"
+        },
+        {
+          "name": "ppt:integrity",
+          "value": "sha512-tbZNuJrLwGUp3zshBtdy4W+ORxZuIh8a5ilyIEQDC5rY1f3U20JMry0Ll3WBzU58EZKsEuJFXhb5gwv8CsPvgA=="
+        },
+        {
+          "name": "ppt:lockfile",
+          "value": "package-lock.json"
+        },
+        {
+          "name": "ppt:lockPath",
+          "value": "node_modules/fflate"
+        },
+        {
+          "name": "ppt:resolved",
+          "value": "https://registry.npmjs.org/fflate/-/fflate-0.8.3.tgz"
+        },
+        {
+          "name": "ppt:sourceGraph",
+          "value": "root"
+        }
+      ],
+      "purl": "pkg:npm/fflate@0.8.3",
+      "type": "library",
+      "version": "0.8.3"
+    },
+    {
       "bom-ref": "urn:ppt:npm:root:86ee6ecf076a1aa3b8e5b731",
       "name": "@ppt/repository-contracts",
       "properties": [
@@ -3528,9 +4144,9 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/repository-contracts@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/repository-contracts@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
     },
     {
       "bom-ref": "urn:ppt:npm:root:88f18a10ce075e3897612f10",
@@ -3553,9 +4169,9 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/infrastructure@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/infrastructure@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
     },
     {
       "bom-ref": "urn:ppt:npm:root:8ac6aaa61b359eea5ccb4068",
@@ -3586,9 +4202,9 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/test-data@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/test-data@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
     },
     {
       "bom-ref": "urn:ppt:npm:root:8b5be7a755ee99b6821f6938",
@@ -3619,9 +4235,9 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/logging@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/logging@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
     },
     {
       "bom-ref": "urn:ppt:npm:root:8bccf5b6ff1a0b6c6e1e625f",
@@ -3800,6 +4416,94 @@
       "version": "1.33.0"
     },
     {
+      "bom-ref": "urn:ppt:npm:root:8ea8b94d3fc59fff5206999f",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "a5c6928507354a1ab4cbe13b1aa26abd98fc0d3b61595d4a78719d8b467a2008a7d8e8b72672c239fc270a8f38a9cf87029e76c13f672bd1fb140269e5ae3819"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "ISC"
+        }
+      ],
+      "name": "potpack",
+      "properties": [
+        {
+          "name": "ppt:dependencyScope",
+          "value": "required"
+        },
+        {
+          "name": "ppt:integrity",
+          "value": "sha512-pcaShQc1Shq0y+E7GqJqvZj8DTthWV1KeHGdi0Z6IAin2Oi3JnLCOfwnCo84qc+HAp52wT9nK9H7FAJp5a44GQ=="
+        },
+        {
+          "name": "ppt:lockfile",
+          "value": "package-lock.json"
+        },
+        {
+          "name": "ppt:lockPath",
+          "value": "node_modules/potpack"
+        },
+        {
+          "name": "ppt:resolved",
+          "value": "https://registry.npmjs.org/potpack/-/potpack-2.1.0.tgz"
+        },
+        {
+          "name": "ppt:sourceGraph",
+          "value": "root"
+        }
+      ],
+      "purl": "pkg:npm/potpack@2.1.0",
+      "type": "library",
+      "version": "2.1.0"
+    },
+    {
+      "bom-ref": "urn:ppt:npm:root:8ec5ccbf1ef3e4d6cd9cf8d1",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "2b3c502ad7c1bbfa52cf50bec96d61352f5eca3da1da50bbb9f7408bafd212dd7bee7de801f0df9949ac9517c975763b45e00505c9efc2caa68b2a0386d03d19"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "BSD-3-Clause"
+        }
+      ],
+      "name": "maplibre-gl",
+      "properties": [
+        {
+          "name": "ppt:dependencyScope",
+          "value": "required"
+        },
+        {
+          "name": "ppt:integrity",
+          "value": "sha512-KzxQKtfBu/pSz1C+yW1hNS9eyj2h2lC7ufdAi6/SEt177n3oAfDfmUmslRfJdXY7ReAFBcnvwsqmiyoDhtA9GQ=="
+        },
+        {
+          "name": "ppt:lockfile",
+          "value": "package-lock.json"
+        },
+        {
+          "name": "ppt:lockPath",
+          "value": "node_modules/maplibre-gl"
+        },
+        {
+          "name": "ppt:resolved",
+          "value": "https://registry.npmjs.org/maplibre-gl/-/maplibre-gl-6.4.1.tgz"
+        },
+        {
+          "name": "ppt:sourceGraph",
+          "value": "root"
+        }
+      ],
+      "purl": "pkg:npm/maplibre-gl@6.4.1",
+      "type": "library",
+      "version": "6.4.1"
+    },
+    {
       "bom-ref": "urn:ppt:npm:root:8f47e34deb1a02bfb2a299c5",
       "hashes": [
         {
@@ -3886,6 +4590,50 @@
       "purl": "pkg:npm/%40babel/helper-string-parser@7.29.7",
       "type": "library",
       "version": "7.29.7"
+    },
+    {
+      "bom-ref": "urn:ppt:npm:root:908d954fb8d7d618babe8041",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "4052825e439e4b33abf2317be639ba93248e83e754bce7a13e1462ebc81c3983c76fb539265a14ab47495b4639fdf655f3281f4f4569d915a876fabe7f2c4558"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "ISC"
+        }
+      ],
+      "name": "@maplibre/maplibre-gl-style-spec",
+      "properties": [
+        {
+          "name": "ppt:dependencyScope",
+          "value": "required"
+        },
+        {
+          "name": "ppt:integrity",
+          "value": "sha512-QFKCXkOeSzOr8jF75jm6kySOg+dUvOehPhRi68gcOYPHb7U5JloUq0dJW0Y5/fZV8ygfT0Vp2RWodvq+fyxFWA=="
+        },
+        {
+          "name": "ppt:lockfile",
+          "value": "package-lock.json"
+        },
+        {
+          "name": "ppt:lockPath",
+          "value": "node_modules/@maplibre/maplibre-gl-style-spec"
+        },
+        {
+          "name": "ppt:resolved",
+          "value": "https://registry.npmjs.org/@maplibre/maplibre-gl-style-spec/-/maplibre-gl-style-spec-26.2.1.tgz"
+        },
+        {
+          "name": "ppt:sourceGraph",
+          "value": "root"
+        }
+      ],
+      "purl": "pkg:npm/%40maplibre/maplibre-gl-style-spec@26.2.1",
+      "type": "library",
+      "version": "26.2.1"
     },
     {
       "bom-ref": "urn:ppt:npm:root:91867835cc8c9f72e3421bff",
@@ -3977,7 +4725,7 @@
     },
     {
       "bom-ref": "urn:ppt:npm:root:9339b8a5801c2c8f30653917",
-      "name": "panthera-pardus-tulliana-family-platform",
+      "name": "parsyuva-aym-family-platform",
       "properties": [
         {
           "name": "ppt:dependencyScope",
@@ -3996,9 +4744,9 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/panthera-pardus-tulliana-family-platform@4.8.2026-29",
+      "purl": "pkg:npm/parsyuva-aym-family-platform@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
     },
     {
       "bom-ref": "urn:ppt:npm:root:939aa000829ccc67ffc0aeb0",
@@ -4293,9 +5041,9 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/core-service-client@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/core-service-client@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
     },
     {
       "bom-ref": "urn:ppt:npm:root:a3709d42efc01b24e5448843",
@@ -4318,9 +5066,9 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/repositories@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/repositories@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
     },
     {
       "bom-ref": "urn:ppt:npm:root:a718f78818dfd639fa4ead13",
@@ -4351,9 +5099,9 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/events@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/events@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
     },
     {
       "bom-ref": "urn:ppt:npm:root:a87a4414a14c61f1c1de079c",
@@ -4420,9 +5168,53 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/desktop@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/desktop@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
+    },
+    {
+      "bom-ref": "urn:ppt:npm:root:aadb2371b2cff112e4f9d545",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "5dd8d402b6cae019b97cb2ef966e4aa5314e88e4e181f5962386b10190d683813fd2629d67223db4d11f76cdbba828b5cdefefc13475ea4be6986851adaddcda"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "ISC"
+        }
+      ],
+      "name": "quickselect",
+      "properties": [
+        {
+          "name": "ppt:dependencyScope",
+          "value": "required"
+        },
+        {
+          "name": "ppt:integrity",
+          "value": "sha512-XdjUArbK4Bm5fLLvlm5KpTFOiOThgfWWI4axAZDWg4E/0mKdZyI9tNEfds27qCi1ze/vwTR16kvmmGhRra3c2g=="
+        },
+        {
+          "name": "ppt:lockfile",
+          "value": "package-lock.json"
+        },
+        {
+          "name": "ppt:lockPath",
+          "value": "node_modules/quickselect"
+        },
+        {
+          "name": "ppt:resolved",
+          "value": "https://registry.npmjs.org/quickselect/-/quickselect-3.0.0.tgz"
+        },
+        {
+          "name": "ppt:sourceGraph",
+          "value": "root"
+        }
+      ],
+      "purl": "pkg:npm/quickselect@3.0.0",
+      "type": "library",
+      "version": "3.0.0"
     },
     {
       "bom-ref": "urn:ppt:npm:root:ab22cd11aa51690af8611e2a",
@@ -4665,9 +5457,9 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/events@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/events@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
     },
     {
       "bom-ref": "urn:ppt:npm:root:b024dab77273e03d6eec5ad3",
@@ -4756,6 +5548,50 @@
       "purl": "pkg:npm/magic-string@0.30.21",
       "type": "library",
       "version": "0.30.21"
+    },
+    {
+      "bom-ref": "urn:ppt:npm:root:b9fcae7d4d376e4483209cca",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "8116bd830614dc40a6418bf796c96db39871b886bdd2f79a11cc4362ebb740638800433698e664547a78f00349baed42511b51747294058e4b9b5b4757eb03e2"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "ISC"
+        }
+      ],
+      "name": "tinyqueue",
+      "properties": [
+        {
+          "name": "ppt:dependencyScope",
+          "value": "required"
+        },
+        {
+          "name": "ppt:integrity",
+          "value": "sha512-gRa9gwYU3ECmQYv3lslts5hxuIa90veaEcxDYuu3QGOIAEM2mOZkVHp48ANJuu1CURtRdHKUBY5Lm1tHV+sD4g=="
+        },
+        {
+          "name": "ppt:lockfile",
+          "value": "package-lock.json"
+        },
+        {
+          "name": "ppt:lockPath",
+          "value": "node_modules/tinyqueue"
+        },
+        {
+          "name": "ppt:resolved",
+          "value": "https://registry.npmjs.org/tinyqueue/-/tinyqueue-3.0.0.tgz"
+        },
+        {
+          "name": "ppt:sourceGraph",
+          "value": "root"
+        }
+      ],
+      "purl": "pkg:npm/tinyqueue@3.0.0",
+      "type": "library",
+      "version": "3.0.0"
     },
     {
       "bom-ref": "urn:ppt:npm:root:ba78b41251041248c56c6663",
@@ -5242,6 +6078,50 @@
       "version": "0.139.0"
     },
     {
+      "bom-ref": "urn:ppt:npm:root:ca980a8c26524403ce1c7943",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "8faa7401d8ef011d7d6775da0b2b257bb038652a34f2d60ecf10f463d350ca5c0f024c0925e62e6f96f6795b9c75e0e1edeae1bfaf436a1a0b39ebc344445153"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ],
+      "name": "@maplibre/vt-pbf",
+      "properties": [
+        {
+          "name": "ppt:dependencyScope",
+          "value": "required"
+        },
+        {
+          "name": "ppt:integrity",
+          "value": "sha512-j6p0AdjvAR19Z3XaCysle7A4ZSo08tYOzxD0Y9NQylwPAkwJJeYub5b2eVucdeDh7erhv69DahoLOevDRERRUw=="
+        },
+        {
+          "name": "ppt:lockfile",
+          "value": "package-lock.json"
+        },
+        {
+          "name": "ppt:lockPath",
+          "value": "node_modules/@maplibre/vt-pbf"
+        },
+        {
+          "name": "ppt:resolved",
+          "value": "https://registry.npmjs.org/@maplibre/vt-pbf/-/vt-pbf-4.3.2.tgz"
+        },
+        {
+          "name": "ppt:sourceGraph",
+          "value": "root"
+        }
+      ],
+      "purl": "pkg:npm/%40maplibre/vt-pbf@4.3.2",
+      "type": "library",
+      "version": "4.3.2"
+    },
+    {
       "bom-ref": "urn:ppt:npm:root:caa71619c773fddcd549e755",
       "hashes": [
         {
@@ -5314,9 +6194,9 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/platform-policy@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/platform-policy@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
     },
     {
       "bom-ref": "urn:ppt:npm:root:d07d5c869480e3065dae06a6",
@@ -5435,9 +6315,53 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/desktop@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/desktop@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
+    },
+    {
+      "bom-ref": "urn:ppt:npm:root:d4287503e0532ec18488d788",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "606701cf5720e004d70c233fef52fdc6f7a1e1dca77c699c2c3aae7d1fa7410cb77cac2c019b1677fc78eb6d7feae25a781f66c0e1c4ea13de0e05f3f6e56251"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "ISC"
+        }
+      ],
+      "name": "@mapbox/point-geometry",
+      "properties": [
+        {
+          "name": "ppt:dependencyScope",
+          "value": "required"
+        },
+        {
+          "name": "ppt:integrity",
+          "value": "sha512-YGcBz1cg4ATXDCM/71L9xveh4dynfGmcLDqufR+nQQy3fKwsAZsWd/x4621/6uJaeB9mwOHE6hPeDgXz9uViUQ=="
+        },
+        {
+          "name": "ppt:lockfile",
+          "value": "package-lock.json"
+        },
+        {
+          "name": "ppt:lockPath",
+          "value": "node_modules/@mapbox/point-geometry"
+        },
+        {
+          "name": "ppt:resolved",
+          "value": "https://registry.npmjs.org/@mapbox/point-geometry/-/point-geometry-1.1.0.tgz"
+        },
+        {
+          "name": "ppt:sourceGraph",
+          "value": "root"
+        }
+      ],
+      "purl": "pkg:npm/%40mapbox/point-geometry@1.1.0",
+      "type": "library",
+      "version": "1.1.0"
     },
     {
       "bom-ref": "urn:ppt:npm:root:d490a6d4382dfd684072aac4",
@@ -5688,9 +6612,9 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/infrastructure@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/infrastructure@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
     },
     {
       "bom-ref": "urn:ppt:npm:root:e02b18826f64563691df5031",
@@ -5889,9 +6813,9 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/core@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/core@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
     },
     {
       "bom-ref": "urn:ppt:npm:root:e295d2ab5a7313889137ee37",
@@ -6098,9 +7022,9 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/config@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/config@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
     },
     {
       "bom-ref": "urn:ppt:npm:root:e7b40ffca5b4bcaf4a10ac61",
@@ -6145,6 +7069,50 @@
       "purl": "pkg:npm/debug@4.4.3",
       "type": "library",
       "version": "4.4.3"
+    },
+    {
+      "bom-ref": "urn:ppt:npm:root:e8d6a56d80bf476001a54535",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "be74b8015c29d4a1c0175de2d6fa75ff60f97af5b2de4e6efe25bf07cd5056c519b55f1cbf6b54d1bd9534596abe1e24630ac53037633c27c099fc895bdcb5e1"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "ISC"
+        }
+      ],
+      "name": "earcut",
+      "properties": [
+        {
+          "name": "ppt:dependencyScope",
+          "value": "required"
+        },
+        {
+          "name": "ppt:integrity",
+          "value": "sha512-vnS4AVwp1KHAF13i1vp1/2D5evWy3k5u/iW/B81QVsUZtV8cv2tU0b2VNFlqvh4kYwrFMDdjPCfAmfyJW9y14Q=="
+        },
+        {
+          "name": "ppt:lockfile",
+          "value": "package-lock.json"
+        },
+        {
+          "name": "ppt:lockPath",
+          "value": "node_modules/earcut"
+        },
+        {
+          "name": "ppt:resolved",
+          "value": "https://registry.npmjs.org/earcut/-/earcut-3.2.3.tgz"
+        },
+        {
+          "name": "ppt:sourceGraph",
+          "value": "root"
+        }
+      ],
+      "purl": "pkg:npm/earcut@3.2.3",
+      "type": "library",
+      "version": "3.2.3"
     },
     {
       "bom-ref": "urn:ppt:npm:root:ea239ee49667807638434d65",
@@ -6219,9 +7187,53 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/core-service@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/core-service@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
+    },
+    {
+      "bom-ref": "urn:ppt:npm:root:eb0120e80fdcbd364eee76a8",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "9a7bc676f3ab22f24e04650474692b5578cdf04fd590824291fd9e4b50c7db2bfcd8e45494bb6d983b74ad6637f32619995c1c899c0152f1ccdb4ab10597f8d3"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "BSD-3-Clause"
+        }
+      ],
+      "name": "pbf",
+      "properties": [
+        {
+          "name": "ppt:dependencyScope",
+          "value": "required"
+        },
+        {
+          "name": "ppt:integrity",
+          "value": "sha512-mnvGdvOrIvJOBGUEdGkrVXjN8E/VkIJCkf2eS1DH2yv82ORUlLttmDt0rWY38yYZmVwciZwBUvHM20qxBZf40w=="
+        },
+        {
+          "name": "ppt:lockfile",
+          "value": "package-lock.json"
+        },
+        {
+          "name": "ppt:lockPath",
+          "value": "node_modules/pbf"
+        },
+        {
+          "name": "ppt:resolved",
+          "value": "https://registry.npmjs.org/pbf/-/pbf-5.1.2.tgz"
+        },
+        {
+          "name": "ppt:sourceGraph",
+          "value": "root"
+        }
+      ],
+      "purl": "pkg:npm/pbf@5.1.2",
+      "type": "library",
+      "version": "5.1.2"
     },
     {
       "bom-ref": "urn:ppt:npm:root:ebe2ec39e3b556204cfbb715",
@@ -6576,6 +7588,50 @@
       "version": "4.0.0"
     },
     {
+      "bom-ref": "urn:ppt:npm:root:f1fd5a8d5057e1c6ba17711a",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "081783e12a1496e173886772ffc93b14e8d0c50cb8f3a9fef76f56fed5a8a616aebcc202a64676eaf1815a10edffa6f515941635a7f88c5753ff9faad168a2e7"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "BSD-3-Clause"
+        }
+      ],
+      "name": "pmtiles",
+      "properties": [
+        {
+          "name": "ppt:dependencyScope",
+          "value": "required"
+        },
+        {
+          "name": "ppt:integrity",
+          "value": "sha512-CBeD4SoUluFziGdy/8k7FOjQxQy486n+929W/tWophauvMICpkZ26vGBWhDt/6b1FZQWNaf4jFdT/5+q0Wii5w=="
+        },
+        {
+          "name": "ppt:lockfile",
+          "value": "package-lock.json"
+        },
+        {
+          "name": "ppt:lockPath",
+          "value": "node_modules/pmtiles"
+        },
+        {
+          "name": "ppt:resolved",
+          "value": "https://registry.npmjs.org/pmtiles/-/pmtiles-4.5.0.tgz"
+        },
+        {
+          "name": "ppt:sourceGraph",
+          "value": "root"
+        }
+      ],
+      "purl": "pkg:npm/pmtiles@4.5.0",
+      "type": "library",
+      "version": "4.5.0"
+    },
+    {
       "bom-ref": "urn:ppt:npm:root:f25b96b428453dc4ab8f3a99",
       "hashes": [
         {
@@ -6640,9 +7696,9 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/contracts@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/contracts@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
     },
     {
       "bom-ref": "urn:ppt:npm:root:f4ab94d3b59e15f2a4814ab0",
@@ -6673,9 +7729,53 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/core@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/core@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
+    },
+    {
+      "bom-ref": "urn:ppt:npm:root:f8279b2f4c3f1099b372ffdc",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "2d52f8c2023d600ba6e55f8b35540ee9080504fc3bfcc2086385c93cdb0f0ccae3130704f897ca9352ee225f069c5d7dede8d5742f5074f6b1af1e607e07465e"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "BSD-2-Clause"
+        }
+      ],
+      "name": "@mapbox/tiny-sdf",
+      "properties": [
+        {
+          "name": "ppt:dependencyScope",
+          "value": "required"
+        },
+        {
+          "name": "ppt:integrity",
+          "value": "sha512-LVL4wgI9YAum5V+LNVQO6QgFBPw7/MIIY4XJPNsPDMrjEwcE+JfKk1LuIl8GnF197ejVdC9QdPaxrx5gfgdGXg=="
+        },
+        {
+          "name": "ppt:lockfile",
+          "value": "package-lock.json"
+        },
+        {
+          "name": "ppt:lockPath",
+          "value": "node_modules/@mapbox/tiny-sdf"
+        },
+        {
+          "name": "ppt:resolved",
+          "value": "https://registry.npmjs.org/@mapbox/tiny-sdf/-/tiny-sdf-2.2.0.tgz"
+        },
+        {
+          "name": "ppt:sourceGraph",
+          "value": "root"
+        }
+      ],
+      "purl": "pkg:npm/%40mapbox/tiny-sdf@2.2.0",
+      "type": "library",
+      "version": "2.2.0"
     },
     {
       "bom-ref": "urn:ppt:npm:root:f85f2f4047c12968fdbfd6bc",
@@ -6742,9 +7842,9 @@
           "value": "root"
         }
       ],
-      "purl": "pkg:npm/%40ppt/core-service@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/core-service@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
     },
     {
       "bom-ref": "urn:ppt:npm:root:f9a9c3213a0b3bcda13cf64b",
@@ -12619,9 +13719,9 @@
           "value": "windows-packager"
         }
       ],
-      "purl": "pkg:npm/%40ppt/windows-packager@4.8.2026-29",
+      "purl": "pkg:npm/%40ppt/windows-packager@19.8.2026-33",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
     },
     {
       "bom-ref": "urn:ppt:npm:windows-packager:943c9914f6b91765534975c4",
@@ -17763,12 +18863,20 @@
       "ref": "urn:ppt:npm:root:01468cbcb01a7379172d696a"
     },
     {
+      "dependsOn": [],
+      "ref": "urn:ppt:npm:root:01dc4371ad01822f22852e10"
+    },
+    {
       "dependsOn": [
         "urn:ppt:npm:root:704e4df8a5a7f834fb140151",
         "urn:ppt:npm:root:c447b62b9ea487cf9647ea34",
         "urn:ppt:npm:root:ef6c34dd10459938014d3ec4"
       ],
       "ref": "urn:ppt:npm:root:0830b7c0be8a37a32256f361"
+    },
+    {
+      "dependsOn": [],
+      "ref": "urn:ppt:npm:root:085484e408a39549de39582d"
     },
     {
       "dependsOn": [
@@ -17823,6 +18931,10 @@
       "ref": "urn:ppt:npm:root:1747312f048021059a485abd"
     },
     {
+      "dependsOn": [],
+      "ref": "urn:ppt:npm:root:18075d5e3de694ae7ae94397"
+    },
+    {
       "dependsOn": [
         "urn:ppt:npm:root:24af2c3b1aa211bbe99201c3",
         "urn:ppt:npm:root:3bbaefa8dc436e99e24cc48a",
@@ -17856,6 +18968,10 @@
     {
       "dependsOn": [],
       "ref": "urn:ppt:npm:root:1ece26a6d045533760505767"
+    },
+    {
+      "dependsOn": [],
+      "ref": "urn:ppt:npm:root:1f228103ffc2f27c3fdb60fc"
     },
     {
       "dependsOn": [
@@ -17907,6 +19023,10 @@
       "ref": "urn:ppt:npm:root:28892b95cd0b6e51bee932d5"
     },
     {
+      "dependsOn": [],
+      "ref": "urn:ppt:npm:root:29b8ea3c23d6613f91bb4d7c"
+    },
+    {
       "dependsOn": [
         "urn:ppt:npm:root:a87a4414a14c61f1c1de079c",
         "urn:ppt:npm:root:abdaa5046e9eb43cb6b8e7e5",
@@ -17938,6 +19058,10 @@
         "urn:ppt:npm:root:f4ab94d3b59e15f2a4814ab0"
       ],
       "ref": "urn:ppt:npm:root:301ec4a160aadef038fd2fff"
+    },
+    {
+      "dependsOn": [],
+      "ref": "urn:ppt:npm:root:31796878d5cee3aca571be96"
     },
     {
       "dependsOn": [],
@@ -18002,6 +19126,12 @@
       "ref": "urn:ppt:npm:root:42dd292b298c369fdf318a30"
     },
     {
+      "dependsOn": [
+        "urn:ppt:npm:root:d4287503e0532ec18488d788"
+      ],
+      "ref": "urn:ppt:npm:root:449b309353ffbe76a072ab30"
+    },
+    {
       "dependsOn": [],
       "ref": "urn:ppt:npm:root:4670c536d69889dd9edd05e6"
     },
@@ -18041,6 +19171,14 @@
     {
       "dependsOn": [],
       "ref": "urn:ppt:npm:root:4f466c36c01f8e161e2e3bb7"
+    },
+    {
+      "dependsOn": [
+        "urn:ppt:npm:root:690365ea2a3b0a99348464ab",
+        "urn:ppt:npm:root:d4287503e0532ec18488d788",
+        "urn:ppt:npm:root:eb0120e80fdcbd364eee76a8"
+      ],
+      "ref": "urn:ppt:npm:root:4ff41820d2f7beb467cfeaf5"
     },
     {
       "dependsOn": [],
@@ -18092,6 +19230,10 @@
     },
     {
       "dependsOn": [],
+      "ref": "urn:ppt:npm:root:5ba0aa9b876cd11df65a3f52"
+    },
+    {
+      "dependsOn": [],
       "ref": "urn:ppt:npm:root:5fb9585c319c3a79927a1a74"
     },
     {
@@ -18119,6 +19261,10 @@
     },
     {
       "dependsOn": [],
+      "ref": "urn:ppt:npm:root:690365ea2a3b0a99348464ab"
+    },
+    {
+      "dependsOn": [],
       "ref": "urn:ppt:npm:root:6a2014cb7969c9852ac3f178"
     },
     {
@@ -18140,6 +19286,12 @@
     {
       "dependsOn": [],
       "ref": "urn:ppt:npm:root:704e4df8a5a7f834fb140151"
+    },
+    {
+      "dependsOn": [
+        "urn:ppt:npm:root:31796878d5cee3aca571be96"
+      ],
+      "ref": "urn:ppt:npm:root:72c6f89cdf5753a901a127fa"
     },
     {
       "dependsOn": [],
@@ -18166,6 +19318,10 @@
     },
     {
       "dependsOn": [],
+      "ref": "urn:ppt:npm:root:7b194cacbd102d821f5a1482"
+    },
+    {
+      "dependsOn": [],
       "ref": "urn:ppt:npm:root:7bf6cc1c4f3ff7f1a07fef65"
     },
     {
@@ -18183,12 +19339,22 @@
       "ref": "urn:ppt:npm:root:7e89d502d0a3120d1e79db68"
     },
     {
+      "dependsOn": [
+        "urn:ppt:npm:root:29b8ea3c23d6613f91bb4d7c"
+      ],
+      "ref": "urn:ppt:npm:root:7faa5ea12870228c12eb4d69"
+    },
+    {
       "dependsOn": [],
       "ref": "urn:ppt:npm:root:813d93a45c38d1fdd1f8e38c"
     },
     {
       "dependsOn": [],
       "ref": "urn:ppt:npm:root:81b59fa2473694e1e82badb8"
+    },
+    {
+      "dependsOn": [],
+      "ref": "urn:ppt:npm:root:848106b3698ed3dd550a2f77"
     },
     {
       "dependsOn": [],
@@ -18232,11 +19398,48 @@
     },
     {
       "dependsOn": [],
+      "ref": "urn:ppt:npm:root:8ea8b94d3fc59fff5206999f"
+    },
+    {
+      "dependsOn": [
+        "urn:ppt:npm:root:18075d5e3de694ae7ae94397",
+        "urn:ppt:npm:root:1f228103ffc2f27c3fdb60fc",
+        "urn:ppt:npm:root:29b8ea3c23d6613f91bb4d7c",
+        "urn:ppt:npm:root:449b309353ffbe76a072ab30",
+        "urn:ppt:npm:root:4ff41820d2f7beb467cfeaf5",
+        "urn:ppt:npm:root:690365ea2a3b0a99348464ab",
+        "urn:ppt:npm:root:7b194cacbd102d821f5a1482",
+        "urn:ppt:npm:root:7faa5ea12870228c12eb4d69",
+        "urn:ppt:npm:root:8ea8b94d3fc59fff5206999f",
+        "urn:ppt:npm:root:908d954fb8d7d618babe8041",
+        "urn:ppt:npm:root:aadb2371b2cff112e4f9d545",
+        "urn:ppt:npm:root:b9fcae7d4d376e4483209cca",
+        "urn:ppt:npm:root:ca980a8c26524403ce1c7943",
+        "urn:ppt:npm:root:d4287503e0532ec18488d788",
+        "urn:ppt:npm:root:e8d6a56d80bf476001a54535",
+        "urn:ppt:npm:root:eb0120e80fdcbd364eee76a8",
+        "urn:ppt:npm:root:f8279b2f4c3f1099b372ffdc"
+      ],
+      "ref": "urn:ppt:npm:root:8ec5ccbf1ef3e4d6cd9cf8d1"
+    },
+    {
+      "dependsOn": [],
       "ref": "urn:ppt:npm:root:8f47e34deb1a02bfb2a299c5"
     },
     {
       "dependsOn": [],
       "ref": "urn:ppt:npm:root:8fc1a8f3c7e831cf8da7714d"
+    },
+    {
+      "dependsOn": [
+        "urn:ppt:npm:root:01dc4371ad01822f22852e10",
+        "urn:ppt:npm:root:085484e408a39549de39582d",
+        "urn:ppt:npm:root:5ba0aa9b876cd11df65a3f52",
+        "urn:ppt:npm:root:7b194cacbd102d821f5a1482",
+        "urn:ppt:npm:root:aadb2371b2cff112e4f9d545",
+        "urn:ppt:npm:root:b9fcae7d4d376e4483209cca"
+      ],
+      "ref": "urn:ppt:npm:root:908d954fb8d7d618babe8041"
     },
     {
       "dependsOn": [],
@@ -18358,6 +19561,7 @@
         "urn:ppt:npm:root:772d8dbb1be6c61469cfb969",
         "urn:ppt:npm:root:86ee6ecf076a1aa3b8e5b731",
         "urn:ppt:npm:root:8b5be7a755ee99b6821f6938",
+        "urn:ppt:npm:root:8ec5ccbf1ef3e4d6cd9cf8d1",
         "urn:ppt:npm:root:a32ff84933d74f1c296aef84",
         "urn:ppt:npm:root:a718f78818dfd639fa4ead13",
         "urn:ppt:npm:root:c32755efedd6ef6b93b08f37",
@@ -18365,9 +19569,14 @@
         "urn:ppt:npm:root:d5a4b102c030976252d3031e",
         "urn:ppt:npm:root:ddf11e1c7b1bb24d7449ff84",
         "urn:ppt:npm:root:e7309f887bb7250bbd1c5b8c",
+        "urn:ppt:npm:root:f1fd5a8d5057e1c6ba17711a",
         "urn:ppt:npm:root:f4ab94d3b59e15f2a4814ab0"
       ],
       "ref": "urn:ppt:npm:root:a98dfc0ab16f8cbdfc42d675"
+    },
+    {
+      "dependsOn": [],
+      "ref": "urn:ppt:npm:root:aadb2371b2cff112e4f9d545"
     },
     {
       "dependsOn": [
@@ -18441,6 +19650,10 @@
     },
     {
       "dependsOn": [],
+      "ref": "urn:ppt:npm:root:b9fcae7d4d376e4483209cca"
+    },
+    {
+      "dependsOn": [],
       "ref": "urn:ppt:npm:root:ba78b41251041248c56c6663"
     },
     {
@@ -18492,6 +19705,14 @@
       "ref": "urn:ppt:npm:root:c978204330b3cba49736f347"
     },
     {
+      "dependsOn": [
+        "urn:ppt:npm:root:690365ea2a3b0a99348464ab",
+        "urn:ppt:npm:root:d4287503e0532ec18488d788",
+        "urn:ppt:npm:root:eb0120e80fdcbd364eee76a8"
+      ],
+      "ref": "urn:ppt:npm:root:ca980a8c26524403ce1c7943"
+    },
+    {
       "dependsOn": [],
       "ref": "urn:ppt:npm:root:caa71619c773fddcd549e755"
     },
@@ -18513,6 +19734,10 @@
     {
       "dependsOn": [],
       "ref": "urn:ppt:npm:root:d24798500be543e2be79f636"
+    },
+    {
+      "dependsOn": [],
+      "ref": "urn:ppt:npm:root:d4287503e0532ec18488d788"
     },
     {
       "dependsOn": [],
@@ -18622,6 +19847,10 @@
       "ref": "urn:ppt:npm:root:e7b40ffca5b4bcaf4a10ac61"
     },
     {
+      "dependsOn": [],
+      "ref": "urn:ppt:npm:root:e8d6a56d80bf476001a54535"
+    },
+    {
       "dependsOn": [
         "urn:ppt:npm:root:0019a53c1ac5e87d26614f3c",
         "urn:ppt:npm:root:1671723bfc29451fb980e547",
@@ -18651,6 +19880,12 @@
     {
       "dependsOn": [],
       "ref": "urn:ppt:npm:root:ea5d1485b0db18c017332398"
+    },
+    {
+      "dependsOn": [
+        "urn:ppt:npm:root:72c6f89cdf5753a901a127fa"
+      ],
+      "ref": "urn:ppt:npm:root:eb0120e80fdcbd364eee76a8"
     },
     {
       "dependsOn": [],
@@ -18688,6 +19923,12 @@
       "ref": "urn:ppt:npm:root:f1fca093ff3b8af0b1bf9413"
     },
     {
+      "dependsOn": [
+        "urn:ppt:npm:root:848106b3698ed3dd550a2f77"
+      ],
+      "ref": "urn:ppt:npm:root:f1fd5a8d5057e1c6ba17711a"
+    },
+    {
       "dependsOn": [],
       "ref": "urn:ppt:npm:root:f25b96b428453dc4ab8f3a99"
     },
@@ -18702,6 +19943,10 @@
       "ref": "urn:ppt:npm:root:f4ab94d3b59e15f2a4814ab0"
     },
     {
+      "dependsOn": [],
+      "ref": "urn:ppt:npm:root:f8279b2f4c3f1099b372ffdc"
+    },
+    {
       "dependsOn": [
         "urn:ppt:npm:root:f1fca093ff3b8af0b1bf9413"
       ],
@@ -18711,6 +19956,7 @@
       "dependsOn": [
         "urn:ppt:npm:root:1747312f048021059a485abd",
         "urn:ppt:npm:root:46c426a615b2fe0394ccccaa",
+        "urn:ppt:npm:root:772d8dbb1be6c61469cfb969",
         "urn:ppt:npm:root:8b5be7a755ee99b6821f6938",
         "urn:ppt:npm:root:cac358fdaa9e6fe66c2bdf5f",
         "urn:ppt:npm:root:f4ab94d3b59e15f2a4814ab0"
@@ -20223,10 +21469,10 @@
   ],
   "metadata": {
     "component": {
-      "bom-ref": "pkg:npm/panthera-pardus-tulliana-family-platform@4.8.2026-29",
+      "bom-ref": "pkg:npm/panthera-pardus-tulliana-family-platform@19.8.2026-33",
       "name": "panthera-pardus-tulliana-family-platform",
       "type": "application",
-      "version": "4.8.2026-29"
+      "version": "19.8.2026-33"
     },
     "properties": [
       {
@@ -20239,7 +21485,7 @@
       },
       {
         "name": "ppt:releaseId",
-        "value": "anadolu-parsi-aym-bronze-4.8.2026-29"
+        "value": "anadolu-parsi-aym-bronze-19.8.2026-33"
       }
     ]
   },

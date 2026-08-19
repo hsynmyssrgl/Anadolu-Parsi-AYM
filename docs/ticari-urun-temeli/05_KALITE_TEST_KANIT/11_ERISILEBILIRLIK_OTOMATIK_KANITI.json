@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-ERISILEBILIRLIK-OTOMATIK-20260819-01",
+  "executedAt": "2026-08-19T14:36:00+03:00",
+  "result": {
+    "status": "PASS_WITH_EXTERNAL_UAT_OPEN",
+    "build134Contract": "PASS_64_OF_64",
+    "build134Runtime": "PASS_19_OF_19",
+    "targetedTests": "PASS_5_FILES_27_TESTS",
+    "accessibilityBoundary": "PASS_27_OF_27",
+    "accessibilityContract": "PASS_15_OF_15",
+    "accessibilityRuntime": "PASS_9_OF_9_25_TESTS"
+  },
+  "covered": [
+    "governed accessibility preference persistence",
+    "100 to 225 percent text scale",
+    "visible keyboard focus and modal focus continuity",
+    "minimum 44 pixel targets",
+    "forced colors and high contrast",
+    "reduced motion",
+    "captions and written narration alternative"
+  ],
+  "externalUat": {
+    "status": "NOT_RUN",
+    "required": [
+      "Windows Narrator on an installed build",
+      "Windows Magnifier and 200 percent display scaling",
+      "keyboard-only end-to-end navigation",
+      "human usability review"
+    ]
+  },
+  "requirementPass": false,
+  "note": "Otomatik erisilebilirlik kapilari PASS olsa da gercek ekran okuyucu, buyutec ve insan UAT kaniti olmadan IS-0605 tamamlanmis sayilmaz."
+}

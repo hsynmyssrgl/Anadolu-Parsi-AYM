@@ -5,6 +5,8 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 const candidateMode = process.argv.includes('--candidate');
 const node = process.execPath;
 const root = process.cwd();
+const appMetaSource = await readFile('packages/domain/src/app-meta.ts', 'utf8');
+const activeRelease = appMetaSource.match(/releaseLabel: '([^']+)'/)?.[1] ?? 'Bronze UNKNOWN';
 const normalize = (value) => String(value ?? '').replace(/\r\n/gu, '\n').trim();
 const sha256 = (value) => createHash('sha256').update(value, 'utf8').digest('hex');
 const nodeStep = (args, cwd = root) => ({ executable: node, args, cwd });
@@ -226,7 +228,7 @@ const targeted = results.find((item) => item.id === 'ppk-025-three-file-targeted
 const releaseDecision = results.find((item) => item.id === (candidateMode ? 'ppk-025-candidate-release-material-reseal' : 'ppk-025-production-release-material-reseal'));
 const report = {
   schemaVersion: 1,
-  release: 'Bronze 04.08.2026.29',
+  release: activeRelease,
   step: '32-U',
   requirement: 'PPK-025',
   phase: candidateMode ? 'SOFTWARE_SUPPLY_CHAIN_CANDIDATE_RUNTIME' : 'SOFTWARE_SUPPLY_CHAIN_RUNTIME',
@@ -237,9 +239,9 @@ const report = {
   results,
   validatedBoundaries: [
     'TWO_EXACT_NPM_LOCK_GRAPHS_AND_EIGHTEEN_WORKSPACES',
-    'CYCLONEDX_1_6_EXACT_417_COMPONENT_AND_DEPENDENCY_COVERAGE',
-    'EXACT_377_CANONICAL_REGISTRY_PACKAGES_WITH_SHA512_INTEGRITY',
-    'EXACT_358_LICENSE_AND_THIRD_PARTY_NOTICE_COMPONENTS',
+    'CYCLONEDX_1_6_EXACT_442_COMPONENT_AND_DEPENDENCY_COVERAGE',
+    'EXACT_402_CANONICAL_REGISTRY_PACKAGES_WITH_SHA512_INTEGRITY',
+    'EXACT_382_LICENSE_AND_THIRD_PARTY_NOTICE_COMPONENTS',
     'THREE_FRESH_ZERO_FINDING_VULNERABILITY_SCOPES',
     'TWO_LIVE_CANONICAL_NPM_REGISTRY_SIGNATURE_GRAPHS_WITH_ZERO_INVALID_OR_MISSING',
     'FIVE_EXACT_EXTERNAL_BINARY_ASSET_HASH_PINS',
@@ -254,10 +256,10 @@ const report = {
   ],
   lockfiles: 2,
   workspaces: 18,
-  sbomComponents: 417,
-  dependencyNodes: 417,
-  registryPackages: 377,
-  licenseComponents: 358,
+  sbomComponents: 442,
+  dependencyNodes: 442,
+  registryPackages: 402,
+  licenseComponents: 382,
   vulnerabilityScopes: 3,
   registrySignatureScopes: 2,
   externalAssets: 5,

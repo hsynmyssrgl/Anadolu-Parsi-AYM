@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "id": "BRONZE-CURRENT-COMPLETION-AUDIT",
-  "generatedAt": "2026-08-15T11:57:55.890Z",
-  "release": "Bronze 04.08.2026.29",
+  "generatedAt": "2026-08-19T11:55:12.051Z",
+  "release": "Bronze 19.08.2026.33",
   "PPK002": "COMPLETE",
   "PPK003": "COMPLETE",
   "PPK004": "COMPLETE",
@@ -66,9 +66,9 @@
     }
   },
   "rules": {
-    "canonicalRuleCount": 208,
-    "activeRuleCount": 194,
-    "enforcementEntryCount": 194,
+    "canonicalRuleCount": 217,
+    "activeRuleCount": 197,
+    "enforcementEntryCount": 197,
     "allActiveRulesHaveEnforcementEntry": true
   },
   "gates": {
@@ -78,7 +78,7 @@
         "exitCode": 0,
         "status": "PASS",
         "tail": [
-          "Canonical Rule Registry: PASS (889 checks / 208 rules / 5e7e45b7c2ae9f3c7465866a58d9d389ef6a793dab855a68a1434e003eade081)."
+          "Canonical Rule Registry: PASS (940 checks / 217 rules / b79db92a03d559f33ccd49348bad159a70b6034fbcf10a07abe5a407549bf0be)."
         ]
       },
       {
@@ -86,7 +86,7 @@
         "exitCode": 0,
         "status": "PASS",
         "tail": [
-          "Universal Rule Enforcement: PASS (2348 checks / 194 ACTIVE rules / no waiver)."
+          "Universal Rule Enforcement: PASS (2386 checks / 197 ACTIVE rules / no waiver)."
         ]
       },
       {
@@ -1222,7 +1222,7 @@
     "freshnessVerifier": "scripts/generate-current-delivery-report.mjs invokes local and external live source-protection verification",
     "officialCompletionClaimed": true,
     "storageBackend": "EXTERNAL_USB_D_DRIVE",
-    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\82fe78164d842a960150c5054a1489b68ec3d46de71714bc3164b9211638b120"
+    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\4416e7399d82bb12c9ae22dd0a953d1474245d3012938e7d4e618631e7ab6084"
   },
   "remainingWork": [
     {

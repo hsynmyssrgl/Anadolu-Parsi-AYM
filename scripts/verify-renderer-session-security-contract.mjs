@@ -56,7 +56,7 @@ if (compile.status === 0) {
     session,
     on(event, listener) { handlers.set(`web:${event}`, listener); }
   };
-  const trustedDocumentUrl = 'file:///app/renderer/index.html';
+  const trustedDocumentUrl = 'pardus-app://renderer/index.html';
   contract.installRendererSessionSecurity({ webContents, trustedDocumentUrl, onViolation: (violation) => violations.push(violation) });
 
   verify(typeof permissionRequestHandler === 'function', 'permission request handler was not installed');
@@ -74,16 +74,16 @@ if (compile.status === 0) {
 
   const event = () => ({ prevented: false, preventDefault() { this.prevented = true; } });
   const trustedNavigation = event();
-  handlers.get('web:will-navigate')(trustedNavigation, 'file:///app/renderer/index.html#route');
+  handlers.get('web:will-navigate')(trustedNavigation, 'pardus-app://renderer/index.html#route');
   verify(trustedNavigation.prevented === false, 'trusted hash navigation was rejected');
   const untrustedNavigation = event();
-  handlers.get('web:will-navigate')(untrustedNavigation, 'file:///app/renderer/other.html');
+  handlers.get('web:will-navigate')(untrustedNavigation, 'pardus-app://renderer/other.html');
   verify(untrustedNavigation.prevented === true, 'untrusted file navigation was allowed');
   const untrustedRedirect = event();
   handlers.get('web:will-redirect')(untrustedRedirect, 'https://example.com/login');
   verify(untrustedRedirect.prevented === true, 'remote redirect was allowed');
   const queryRedirect = event();
-  handlers.get('web:will-redirect')(queryRedirect, 'file:///app/renderer/index.html?spoof=1');
+  handlers.get('web:will-redirect')(queryRedirect, 'pardus-app://renderer/index.html?spoof=1');
   verify(queryRedirect.prevented === true, 'query-changing redirect was allowed');
 
   const webviewEvent = event();
@@ -111,22 +111,27 @@ if (compile.status === 0) {
 }
 
 const mainSource = await readFile('apps/desktop/src/main/main.ts', 'utf8');
+const rendererWindowSecuritySource = await readFile('apps/desktop/src/main/renderer-window-security.ts', 'utf8');
 for (const marker of [
   'installRendererSessionSecurity',
   'renderer.session.violation',
+  'createSecureRendererPreferences',
+  'assertSecureRendererPreferences'
+]) verify(mainSource.includes(marker), `main renderer session integration marker missing=${marker}`);
+for (const marker of [
   'webSecurity: true',
   'allowRunningInsecureContent: false',
   'webviewTag: false',
   'navigateOnDragDrop: false'
-]) verify(mainSource.includes(marker), `main renderer session integration marker missing=${marker}`);
+]) verify(rendererWindowSecuritySource.includes(marker), `renderer window security marker missing=${marker}`);
 verify(!mainSource.includes("window.webContents.on('will-navigate'"), 'legacy standalone will-navigate handler remains');
 
 const report = {
   schemaVersion: 1,
-  product: 'Panthera pardus tulliana Aile',
-  applicationVersion: '25.07.2026.119',
-  packageVersion: '25.7.2026-119',
-  stage: 'Bronze RC2 Active Development',
+  product: 'ParsYuva AYM',
+  applicationVersion: '19.8.2026-33',
+  packageVersion: '19.8.2026-33',
+  stage: 'Bronze Active Development',
   scope: 'Electron renderer session permission, download, navigation, redirect and webview deny-by-default boundary',
   assertions,
   failures,

@@ -8,31 +8,31 @@ Uygulama, installer, tanitim, yardim ve raporlar etkin surum kanalini ana koddan
 
 | Token | Deger | Kullanim |
 |---|---|---|
-| `--kanal-ana` | `#A96532` | Ana vurgu |
-| `--kanal-koyu` | `#7A4524` | Metin/hover |
-| `--kanal-acik` | `#F2E3D4` | Secili zemin |
-| `--kanal-parlak` | `#C8844A` | Ikincil vurgu |
-| `--kanal-metal` | `#B87333` | Metalik bronz |
+| `--release-accent` | `#A5672F` | Ana vurgu |
+| `--release-accent-strong` | `#71441F` | Metin/hover |
+| `--release-accent-soft` | `#FFD39B` | Secili zemin |
+| `--release-accent-edge` | `#DC9852` | Ikincil vurgu |
+| `--release-primary` | `#467259` | Ana eylem |
 
 ## Silver
 
 | Token | Deger | Kullanim |
 |---|---|---|
-| `--kanal-ana` | `#6F7B87` | Ana vurgu |
-| `--kanal-koyu` | `#46515C` | Metin/hover |
-| `--kanal-acik` | `#E7EBEF` | Secili zemin |
-| `--kanal-parlak` | `#A9B2BC` | Ikincil vurgu |
-| `--kanal-metal` | `#C0C0C0` | Metalik gumus |
+| `--release-accent` | `#718494` | Ana vurgu |
+| `--release-accent-strong` | `#4F5F6B` | Metin/hover |
+| `--release-accent-soft` | `#D4DDE4` | Secili zemin |
+| `--release-accent-edge` | `#AEBCC7` | Ikincil vurgu |
+| `--release-primary` | `#607888` | Ana eylem |
 
 ## Gold
 
 | Token | Deger | Kullanim |
 |---|---|---|
-| `--kanal-ana` | `#B8860B` | Ana vurgu |
-| `--kanal-koyu` | `#6E5208` | Metin/hover |
-| `--kanal-acik` | `#F7EBC4` | Secili zemin |
-| `--kanal-parlak` | `#D6AE3D` | Ikincil vurgu |
-| `--kanal-metal` | `#D4AF37` | Metalik altin |
+| `--release-accent` | `#A57E17` | Ana vurgu |
+| `--release-accent-strong` | `#6E5411` | Metin/hover |
+| `--release-accent-soft` | `#FFE9A0` | Secili zemin |
+| `--release-accent-edge` | `#F0CC58` | Ikincil vurgu |
+| `--release-primary` | `#8A6A18` | Ana eylem |
 
 ## Saydamlik
 
@@ -44,4 +44,3 @@ Apple benzeri saydamlik; beyaz zemin uzerinde hafif blur, sinir ve golge olarak 
 - Installer buyuk renk alani etkin kanal rengindedir.
 - Mavi varsayilan NSIS gorseli kalmaz.
 - Ekran goruntusu kontrast ve tema snapshot testi her kanal icin kosar.
-

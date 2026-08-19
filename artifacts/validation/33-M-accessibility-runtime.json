@@ -21,7 +21,7 @@
   "checksPassed": 9,
   "checksFailed": 0,
   "targetedTestFilesPassed": 5,
-  "targetedTestsPassed": 19,
+  "targetedTestsPassed": 25,
   "checks": [
     {
       "name": "targeted vitest exits successfully",
@@ -71,5 +71,5 @@
     "exitCode": 0,
     "signal": null
   },
-  "generatedAt": "2026-08-13T22:01:38.424Z"
+  "generatedAt": "2026-08-19T11:36:01.349Z"
 }

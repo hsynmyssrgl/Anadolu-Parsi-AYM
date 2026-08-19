@@ -18,7 +18,7 @@ const copySource = async (source, target, transform = (value) => value) => {
   await writeFile(destination, transform(await readFile(resolve(root, source), 'utf8')));
 };
 await copySource('packages/security/src/device-identity.ts', 'security-device-identity.ts', (source) => source.replace("import type { IsoDateTime } from '@ppt/core';", 'type IsoDateTime = string;'));
-await copySource('apps/desktop/src/main/device-secret-protector.ts', 'device-secret-protector.ts');
+await copySource('packages/security/src/device-secret-protector.ts', 'device-secret-protector.ts');
 await copySource('apps/desktop/src/main/device-identity.ts', 'device-identity.ts', (source) => source
   .replace("import type { Clock } from '@ppt/core';", 'interface Clock { now(): string; }')
   .replace("from '@ppt/security';", "from './security-device-identity.js';"));

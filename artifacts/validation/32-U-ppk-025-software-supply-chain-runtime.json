@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "release": "Bronze 04.08.2026.29",
+  "release": "Bronze 19.08.2026.33",
   "step": "32-U",
   "requirement": "PPK-025",
   "phase": "SOFTWARE_SUPPLY_CHAIN_CANDIDATE_RUNTIME",
@@ -17,7 +17,7 @@
       "executedSteps": 1,
       "expectedSteps": 1,
       "commandLines": [
-        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/verify-32-u-ppk-025-software-supply-chain-contract.mjs --candidate"
+        "C:\\Program Files\\nodejs\\node.exe scripts/verify-32-u-ppk-025-software-supply-chain-contract.mjs --candidate"
       ],
       "expectedOutput": "PPK-025 candidate contract: PASS",
       "outputSha256": "dbce1364a2ed2ec8db39ed388356c7c417b51df3e8efba99a2417b92593ea769",
@@ -31,14 +31,14 @@
       "executedSteps": 1,
       "expectedSteps": 1,
       "commandLines": [
-        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/vitest/vitest.mjs run packages/platform-policy/supply-chain-release-policy.test.ts packages/application/tests/supply-chain-release-use-cases.test.ts apps/desktop/tests/ppk025-software-supply-chain-gates.test.ts --reporter=dot --maxWorkers=1"
+        "C:\\Program Files\\nodejs\\node.exe node_modules/vitest/vitest.mjs run packages/platform-policy/supply-chain-release-policy.test.ts packages/application/tests/supply-chain-release-use-cases.test.ts apps/desktop/tests/ppk025-software-supply-chain-gates.test.ts --reporter=dot --maxWorkers=1"
       ],
       "tests": 50,
       "testFiles": 3,
       "minimumTests": 22,
       "minimumTestFiles": 3,
-      "outputSha256": "ef284e8a17d19cd9ce996ec3aed86ad5e1a4b2a941193c91b9156237198add51",
-      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n··················································\n\n Test Files  3 passed (3)\n      Tests  50 passed (50)\n   Start at  14:53:12\n   Duration  1.66s (transform 329ms, setup 0ms, import 678ms, tests 149ms, environment 0ms)"
+      "outputSha256": "1e9e8750d41a8193dc224ac532ed7b08cc0f5f1c1d859478fa8ca6078382e584",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n··················································\n\n Test Files  3 passed (3)\n      Tests  50 passed (50)\n   Start at  14:50:01\n   Duration  1.64s (transform 315ms, setup 0ms, import 667ms, tests 150ms, environment 0ms)"
     },
     {
       "id": "root-typescript",
@@ -48,7 +48,7 @@
       "executedSteps": 1,
       "expectedSteps": 1,
       "commandLines": [
-        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/typescript/bin/tsc -p tsconfig.json --noEmit"
+        "C:\\Program Files\\nodejs\\node.exe node_modules/typescript/bin/tsc -p tsconfig.json --noEmit"
       ],
       "outputSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "outputTail": ""
@@ -61,11 +61,11 @@
       "executedSteps": 1,
       "expectedSteps": 1,
       "commandLines": [
-        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/verify-software-supply-chain-boundary.mjs"
+        "C:\\Program Files\\nodejs\\node.exe scripts/verify-software-supply-chain-boundary.mjs"
       ],
       "expectedOutput": "PPK-025 software supply-chain boundary: PASS",
-      "outputSha256": "6302f515554ce3f037e297d692b1db30c6ce892f6ee315e8ec0daf9747efc8d1",
-      "outputTail": "PPK-025 software supply-chain boundary: PASS (2 zones / 755 files / 7 canonical references / 6 malicious / 4 benign / 0 findings)."
+      "outputSha256": "c19d0d0ad09ef3c760b1d7eb4dfa52d2f449fdff4004596f53ff740956781912",
+      "outputTail": "PPK-025 software supply-chain boundary: PASS (2 zones / 889 files / 7 canonical references / 6 malicious / 4 benign / 0 findings)."
     },
     {
       "id": "ppk-025-deterministic-sbom",
@@ -75,12 +75,12 @@
       "executedSteps": 2,
       "expectedSteps": 2,
       "commandLines": [
-        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/generate-ppk025-sbom.mjs",
-        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/verify-ppk025-sbom.mjs"
+        "C:\\Program Files\\nodejs\\node.exe scripts/generate-ppk025-sbom.mjs",
+        "C:\\Program Files\\nodejs\\node.exe scripts/verify-ppk025-sbom.mjs"
       ],
       "expectedOutput": "PPK-025 SBOM verification: PASS",
-      "outputSha256": "431b681cf1f17cd227fb97389358818a4e5bf418f323277e7a83b08ad363ead1",
-      "outputTail": "PPK-025 deterministic CycloneDX SBOM: PASS (417 components / 377 external / 417 dependency nodes).\n\n\nPPK-025 SBOM verification: PASS (12/12, sha256=880b0f4d96c5)."
+      "outputSha256": "b2988c09bb74685449ea16a480c4eab0db50dfebb7ea96bed083923994ec4dc0",
+      "outputTail": "PPK-025 deterministic CycloneDX SBOM: PASS (442 components / 402 external / 442 dependency nodes).\n\n\nPPK-025 SBOM verification: PASS (12/12, sha256=69de8b685b90)."
     },
     {
       "id": "ppk-025-license-and-notices",
@@ -90,12 +90,12 @@
       "executedSteps": 2,
       "expectedSteps": 2,
       "commandLines": [
-        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/generate-ppk025-third-party-notices.mjs",
-        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/verify-ppk025-license-policy.mjs"
+        "C:\\Program Files\\nodejs\\node.exe scripts/generate-ppk025-third-party-notices.mjs",
+        "C:\\Program Files\\nodejs\\node.exe scripts/verify-ppk025-license-policy.mjs"
       ],
       "expectedOutput": "PPK-025 license policy: PASS",
-      "outputSha256": "8f3243da01afbe9d8a73b20431b7ea810ce3809b0580c29dad738288df47975e",
-      "outputTail": "PPK-025 third-party license gate: PASS (358 components / 13 expressions / 0 denied).\n\n\nPPK-025 license policy: PASS (11/11, 358 components / 13 expressions)."
+      "outputSha256": "e0b156ba11bfdb3e84ad60672427f3f3d79e2d376217917cd8ffc00940a7918d",
+      "outputTail": "PPK-025 third-party license gate: PASS (382 components / 14 expressions / 0 denied).\n\n\nPPK-025 license policy: PASS (11/11, 382 components / 14 expressions)."
     },
     {
       "id": "ppk-025-five-external-build-assets",
@@ -105,7 +105,7 @@
       "executedSteps": 1,
       "expectedSteps": 1,
       "commandLines": [
-        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/verify-ppk025-external-build-assets.mjs"
+        "C:\\Program Files\\nodejs\\node.exe scripts/verify-ppk025-external-build-assets.mjs"
       ],
       "expectedOutput": "5 pinned assets",
       "outputSha256": "4d0ae2dfce6c64e2c6cf2bfc7d520e9ba527cbd995aa5a29b949c982bde2c207",
@@ -119,14 +119,14 @@
       "executedSteps": 4,
       "expectedSteps": 4,
       "commandLines": [
-        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/run-npm-audit-evidence.mjs --scope root-production --raw artifacts/validation/32-U-ppk-025-root-production-npm-audit-raw.json --report artifacts/validation/32-U-ppk-025-root-production-vulnerability.json",
-        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/run-npm-audit-evidence.mjs --scope root-build-toolchain --raw artifacts/validation/32-U-ppk-025-root-build-npm-audit-raw.json --report artifacts/validation/32-U-ppk-025-root-build-vulnerability.json",
-        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/run-npm-audit-evidence.mjs --scope windows-packager --raw artifacts/validation/32-U-ppk-025-windows-packager-npm-audit-raw.json --report artifacts/validation/32-U-ppk-025-windows-packager-vulnerability.json",
-        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/verify-ppk025-vulnerability-gate.mjs"
+        "C:\\Program Files\\nodejs\\node.exe scripts/run-npm-audit-evidence.mjs --scope root-production --raw artifacts/validation/32-U-ppk-025-root-production-npm-audit-raw.json --report artifacts/validation/32-U-ppk-025-root-production-vulnerability.json",
+        "C:\\Program Files\\nodejs\\node.exe scripts/run-npm-audit-evidence.mjs --scope root-build-toolchain --raw artifacts/validation/32-U-ppk-025-root-build-npm-audit-raw.json --report artifacts/validation/32-U-ppk-025-root-build-vulnerability.json",
+        "C:\\Program Files\\nodejs\\node.exe scripts/run-npm-audit-evidence.mjs --scope windows-packager --raw artifacts/validation/32-U-ppk-025-windows-packager-npm-audit-raw.json --report artifacts/validation/32-U-ppk-025-windows-packager-vulnerability.json",
+        "C:\\Program Files\\nodejs\\node.exe scripts/verify-ppk025-vulnerability-gate.mjs"
       ],
       "expectedOutput": "PPK-025 vulnerability gate: PASS",
-      "outputSha256": "284d95c003b43e2bed98a0c966d774b3151a79a0a407bb070a47aa9f325ea5d6",
-      "outputTail": "npm audit evidence (root-production): PASS — 0 finding(s), lock=bc14e53dbb6c, sbom=880b0f4d96c5.\n\n\nnpm audit evidence (root-build-toolchain): PASS — 0 finding(s), lock=bc14e53dbb6c, sbom=880b0f4d96c5.\n\n\nnpm audit evidence (windows-packager): PASS — 0 finding(s), lock=8690e463f489, sbom=880b0f4d96c5.\n\n\nPPK-025 vulnerability gate: PASS (25/25, 3 scopes, 0 findings)."
+      "outputSha256": "1c5c497fb0a70c07a37167b758c1c5e65113bf9446134e657dd064c6c5d75e64",
+      "outputTail": "npm audit evidence (root-production): PASS — 0 finding(s), lock=de3c2d898b36, sbom=69de8b685b90.\n\n\nnpm audit evidence (root-build-toolchain): PASS — 0 finding(s), lock=de3c2d898b36, sbom=69de8b685b90.\n\n\nnpm audit evidence (windows-packager): PASS — 0 finding(s), lock=dea612d533cd, sbom=69de8b685b90.\n\n\nPPK-025 vulnerability gate: PASS (25/25, 3 scopes, 0 findings)."
     },
     {
       "id": "ppk-025-two-graph-registry-signature-evidence",
@@ -136,9 +136,9 @@
       "executedSteps": 3,
       "expectedSteps": 3,
       "commandLines": [
-        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/run-ppk025-registry-signature-gate.mjs --scope root --report artifacts/validation/32-U-ppk-025-root-registry-signatures.json",
-        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/run-ppk025-registry-signature-gate.mjs --scope windows-packager --report artifacts/validation/32-U-ppk-025-windows-packager-registry-signatures.json",
-        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/verify-ppk025-registry-signature-evidence.mjs"
+        "C:\\Program Files\\nodejs\\node.exe scripts/run-ppk025-registry-signature-gate.mjs --scope root --report artifacts/validation/32-U-ppk-025-root-registry-signatures.json",
+        "C:\\Program Files\\nodejs\\node.exe scripts/run-ppk025-registry-signature-gate.mjs --scope windows-packager --report artifacts/validation/32-U-ppk-025-windows-packager-registry-signatures.json",
+        "C:\\Program Files\\nodejs\\node.exe scripts/verify-ppk025-registry-signature-evidence.mjs"
       ],
       "expectedOutput": "PPK-025 registry signature evidence: PASS",
       "outputSha256": "ce000dea1ae7940fd8a0d07eb2f8cdfb6129aa030dc6989cdb21a45fa90391ce",
@@ -152,8 +152,8 @@
       "executedSteps": 2,
       "expectedSteps": 2,
       "commandLines": [
-        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/typescript/bin/tsc -p packages/platform-policy/tsconfig.json",
-        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/create-ppk025-release-evidence.mjs --candidate"
+        "C:\\Program Files\\nodejs\\node.exe node_modules/typescript/bin/tsc -p packages/platform-policy/tsconfig.json",
+        "C:\\Program Files\\nodejs\\node.exe scripts/create-ppk025-release-evidence.mjs --candidate"
       ],
       "expectedOutput": "PPK-025 candidate release decision: BLOCKED",
       "decisionSummary": {
@@ -183,13 +183,13 @@
       "executedSteps": 3,
       "expectedSteps": 3,
       "commandLines": [
-        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/verify-lockfile-integrity.mjs",
-        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/verify-dependency-supply.mjs",
-        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/verify-workspace-dependencies.mjs"
+        "C:\\Program Files\\nodejs\\node.exe scripts/verify-lockfile-integrity.mjs",
+        "C:\\Program Files\\nodejs\\node.exe scripts/verify-dependency-supply.mjs",
+        "C:\\Program Files\\nodejs\\node.exe scripts/verify-workspace-dependencies.mjs"
       ],
       "expectedOutput": "acyclic production graph",
-      "outputSha256": "78273945de216033124cf4b9fcd075bc74cceac0a7a7d0ff2dace8c27dcab8b9",
-      "outputTail": "Lockfile integrity verified: 1523 assertions across 18 workspaces.\n\n\nDependency supply verified: 1549 assertions / 377 canonical external tarballs / 2 lock graphs.\n- root: 171 packages / 134 tarballs / bc14e53dbb6c\n- windows-packager: 246 packages / 243 tarballs / 8690e463f489\n\n\nWorkspace dependency contracts verified: 549 assertions / 18 workspaces / acyclic production graph."
+      "outputSha256": "5faaac10ada600f990fad53a3b796e81e390be8d2c225ff2b1efc9b981071aef",
+      "outputTail": "Lockfile integrity verified: 1581 assertions across 18 workspaces.\n\n\nDependency supply verified: 1651 assertions / 402 canonical external tarballs / 2 lock graphs.\n- root: 196 packages / 159 tarballs / de3c2d898b36\n- windows-packager: 246 packages / 243 tarballs / dea612d533cd\n\n\nWorkspace dependency contracts verified: 571 assertions / 18 workspaces / acyclic production graph."
     },
     {
       "id": "ppk-025-build-toolchain-security",
@@ -199,7 +199,7 @@
       "executedSteps": 1,
       "expectedSteps": 1,
       "commandLines": [
-        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/verify-build-toolchain-security-contract.mjs --report artifacts/validation/32-U-ppk-025-build-toolchain-security.json"
+        "C:\\Program Files\\nodejs\\node.exe scripts/verify-build-toolchain-security-contract.mjs --report artifacts/validation/32-U-ppk-025-build-toolchain-security.json"
       ],
       "expectedOutput": "Build toolchain security contract: PASS",
       "outputSha256": "08a0532606ef1ca65d2e6e54831e3382c5e8b5d04d2aa3bff0cd9ab1c460d684",
@@ -213,7 +213,7 @@
       "executedSteps": 1,
       "expectedSteps": 1,
       "commandLines": [
-        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/create-ppk025-release-evidence.mjs --candidate"
+        "C:\\Program Files\\nodejs\\node.exe scripts/create-ppk025-release-evidence.mjs --candidate"
       ],
       "expectedOutput": "PPK-025 candidate release decision: BLOCKED",
       "decisionSummary": {
@@ -243,7 +243,7 @@
       "executedSteps": 1,
       "expectedSteps": 1,
       "commandLines": [
-        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/verify-32-u-ppk-025-software-supply-chain-contract.mjs --candidate"
+        "C:\\Program Files\\nodejs\\node.exe scripts/verify-32-u-ppk-025-software-supply-chain-contract.mjs --candidate"
       ],
       "expectedOutput": "PPK-025 candidate contract: PASS",
       "outputSha256": "dbce1364a2ed2ec8db39ed388356c7c417b51df3e8efba99a2417b92593ea769",
@@ -257,11 +257,11 @@
       "executedSteps": 1,
       "expectedSteps": 1,
       "commandLines": [
-        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/verify-user-decision-ledger.mjs"
+        "C:\\Program Files\\nodejs\\node.exe scripts/verify-user-decision-ledger.mjs"
       ],
       "expectedOutput": "User Decision Ledger: PASS",
-      "outputSha256": "d0171072db0cee3f9222a57df8a019bf436950c7ec37be1ee890270dac368d82",
-      "outputTail": "User Decision Ledger: PASS (413 checks / 78 decisions)."
+      "outputSha256": "668f06241094bd8eb9032d9aff42d2782ce4e3d3a5d4f09405993831e3d32ce8",
+      "outputTail": "User Decision Ledger: PASS (504 checks / 88 decisions)."
     },
     {
       "id": "bronze-current-audit",
@@ -271,7 +271,7 @@
       "executedSteps": 1,
       "expectedSteps": 1,
       "commandLines": [
-        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/audit-bronze-current-state.mjs"
+        "C:\\Program Files\\nodejs\\node.exe scripts/audit-bronze-current-state.mjs"
       ],
       "expectedOutput": "Bronze current audit: PASS_WITH_OPEN_SCOPE",
       "outputSha256": "d5910fc146919b1af9517ba234920d7263b049d906df890a488722e687bb3df8",
@@ -280,9 +280,9 @@
   ],
   "validatedBoundaries": [
     "TWO_EXACT_NPM_LOCK_GRAPHS_AND_EIGHTEEN_WORKSPACES",
-    "CYCLONEDX_1_6_EXACT_417_COMPONENT_AND_DEPENDENCY_COVERAGE",
-    "EXACT_377_CANONICAL_REGISTRY_PACKAGES_WITH_SHA512_INTEGRITY",
-    "EXACT_358_LICENSE_AND_THIRD_PARTY_NOTICE_COMPONENTS",
+    "CYCLONEDX_1_6_EXACT_442_COMPONENT_AND_DEPENDENCY_COVERAGE",
+    "EXACT_402_CANONICAL_REGISTRY_PACKAGES_WITH_SHA512_INTEGRITY",
+    "EXACT_382_LICENSE_AND_THIRD_PARTY_NOTICE_COMPONENTS",
     "THREE_FRESH_ZERO_FINDING_VULNERABILITY_SCOPES",
     "TWO_LIVE_CANONICAL_NPM_REGISTRY_SIGNATURE_GRAPHS_WITH_ZERO_INVALID_OR_MISSING",
     "FIVE_EXACT_EXTERNAL_BINARY_ASSET_HASH_PINS",
@@ -297,10 +297,10 @@
   ],
   "lockfiles": 2,
   "workspaces": 18,
-  "sbomComponents": 417,
-  "dependencyNodes": 417,
-  "registryPackages": 377,
-  "licenseComponents": 358,
+  "sbomComponents": 442,
+  "dependencyNodes": 442,
+  "registryPackages": 402,
+  "licenseComponents": 382,
   "vulnerabilityScopes": 3,
   "registrySignatureScopes": 2,
   "externalAssets": 5,
@@ -347,5 +347,5 @@
   "sqliteOwnershipTransferred": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": false,
-  "generatedAt": "2026-08-15T11:57:55.916Z"
+  "generatedAt": "2026-08-19T11:55:12.073Z"
 }

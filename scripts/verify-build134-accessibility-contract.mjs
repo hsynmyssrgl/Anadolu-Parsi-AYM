@@ -21,12 +21,12 @@ const verify = (condition, message) => {
 };
 
 const activePackageVersion = rootPackage.version;
-const activeSequence = activePackageVersion.split('-').at(-1);
 const activeDisplayVersion = appMeta.match(/version: '([^']+)'/)?.[1] ?? '';
+const activeStage = appMeta.match(/stage: '([^']+)'/)?.[1] ?? '';
 verify(desktopPackage.version === activePackageVersion, `desktop package version=${desktopPackage.version}`);
 verify(appMeta.includes(`version: '${activeDisplayVersion}'`), 'active application version marker is missing');
 verify(appMeta.includes(`packageVersion: '${activePackageVersion}'`), 'active package version marker is missing');
-verify(appMeta.includes(`Build ${activeSequence}`), 'active stage/build marker is missing');
+verify(appMeta.includes(`stage: '${activeStage}'`) && activeStage.length > 0, 'active stage marker is missing');
 verify(rootPackage.scripts?.['verify:build134:accessibility'] === 'node scripts/verify-build134-accessibility-contract.mjs', 'Build 134 contract command is missing');
 verify(rootPackage.scripts?.['verify:accessibility:runtime'] === 'node scripts/verify-build134-accessibility-runtime.mjs', 'Build 134 runtime command is missing');
 
@@ -38,13 +38,14 @@ for (const marker of [
   'accessibilityAnnouncement'
 ]) verify(accessibility.includes(marker), `accessibility helper missing: ${marker}`);
 
-verify(app.includes("localStorage?.getItem('ppt-accessibility')"), 'accessibility preference read is missing');
-verify(app.includes("localStorage?.setItem('ppt-accessibility'"), 'accessibility preference persistence is missing');
+verify(app.includes("readBootstrapPreference(storage, 'ppt-accessibility')"), 'safe bootstrap accessibility preference read is missing');
+verify(app.includes("writeBootstrapPreference(storage,'ppt-accessibility',serializeAccessibilityPreferences(accessibility))"), 'safe bootstrap accessibility preference persistence is missing');
+verify(app.includes('window.pardus!.updateAccessibilityPreferences(command)'), 'governed accessibility preference persistence is missing');
 verify(app.includes('data-text-scale={accessibility.textScale}'), 'text scale data binding is missing');
 verify(app.includes("data-high-contrast={accessibility.highContrast ? 'true' : 'false'}"), 'high contrast data binding is missing');
 verify(app.includes("data-reduce-motion={accessibility.reduceMotion ? 'true' : 'false'}"), 'reduced motion data binding is missing');
-verify(app.includes('Erişilebilirlik</h3>'), 'accessibility settings panel is missing');
-verify(app.includes('Metin boyutu<select'), 'text scale control is missing');
+verify(app.includes('Erişilebilirlik ve görünüm merkezi</h3>'), 'accessibility settings panel is missing');
+verify(app.includes('Metin görünümü<select'), 'text scale control is missing');
 verify(app.includes('Yüksek kontrast'), 'high contrast control is missing');
 verify(app.includes('Hareketi azalt'), 'reduced motion control is missing');
 verify(app.includes('aria-live="polite" aria-atomic="true"'), 'route live-region announcement is missing');
@@ -98,11 +99,11 @@ verify(!styles.includes('outline: none !important'), 'focus indicators are globa
 
 const report = {
   schemaVersion: 1,
-  product: 'Anadolu Parsı Aile Yaşam Merkezi',
+  product: 'ParsYuva AYM',
   featureBuild: 134,
   applicationVersion: activeDisplayVersion,
   packageVersion: activePackageVersion,
-  stage: 'Bronze RC2 Active Development',
+  stage: activeStage,
   scope: 'Persistent accessibility preferences, visible focus, route announcements, keyboard command navigation, modal continuity and forced-colors support',
   assertions,
   status: failures.length === 0 ? 'PASS' : 'FAIL',

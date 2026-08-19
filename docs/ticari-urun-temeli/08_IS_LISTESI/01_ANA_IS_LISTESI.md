@@ -16,11 +16,11 @@ Durumlar: `TAMAMLANDI`, `DEVAM`, `ACIK`, `BLOCKED`, `NOT_RUN`.
 
 | ID | Is | Sorumlu | Durum | Kabul |
 |---|---|---|---|---|
-| IS-0101 | ParsYuva AYM marka tutarliligi | Codex | DEVAM | Pencere/installer/yardim/rapor ayni ad |
+| IS-0101 | ParsYuva AYM marka tutarliligi | Codex | TAMAMLANDI | Pencere/installer/yardim/rapor ayni ad |
 | IS-0102 | Bronze/Silver/Gold merkezi tema tokenlari | Codex | DEVAM | 3 kanal kontrast ve screenshot testi |
 | IS-0103 | Acik beyaz zemin ve saydamlik sistemi | Codex | ACIK | Reduced motion/transparency ile UAT |
 | IS-0104 | Sol/alt/sag tipografi orani | Codex | ACIK | %200 zoomda tasma yok |
-| IS-0105 | Tum menu-islev parite taramasi | Codex | ACIK | Yetim menu/API sayisi 0 |
+| IS-0105 | Tum menu-islev parite taramasi | Codex | TAMAMLANDI | Yetim menu/API sayisi 0 |
 | IS-0106 | Tam English uzman panel cevirisi | Codex | ACIK | Gorunur Turkce sabit metin 0 (English locale) |
 | IS-0107 | Ilk tanitim ve yardim sesli anlatim | Codex | DEVAM | TR/EN metin-ses, fallback ve erisilebilirlik PASS |
 
@@ -73,11 +73,11 @@ Durumlar: `TAMAMLANDI`, `DEVAM`, `ACIK`, `BLOCKED`, `NOT_RUN`.
 
 | ID | Is | Sorumlu | Durum | Kabul |
 |---|---|---|---|---|
-| IS-0601 | Tam regresyonu yeni kaynakta tekrar kos | Codex | ACIK | Tum dosya/test PASS |
-| IS-0602 | SBOM ve lisans kapisi | Codex | ACIK | Belirsiz/yasak lisans 0 |
-| IS-0603 | SAST/dependency/secret tarama | Codex | ACIK | Kritik/yuksek 0 |
-| IS-0604 | Performans ve buyuk aile testi | Codex | ACIK | Bellek/CPU/startup SLA baseline |
-| IS-0605 | Erisilebilirlik test matrisi | Codex + Kullanici | ACIK | Klavye, screen reader, zoom, kontrast |
+| IS-0601 | Tam regresyonu yeni kaynakta tekrar kos | Codex | TAMAMLANDI | 307/307 dosya ve 2053/2053 test PASS |
+| IS-0602 | SBOM ve lisans kapisi | Codex | TAMAMLANDI | Belirsiz/yasak lisans 0 |
+| IS-0603 | SAST/dependency/secret tarama | Codex | TAMAMLANDI | Kritik/yuksek 0 |
+| IS-0604 | Performans ve buyuk aile testi | Codex | DEVAM | Buyuk aile ve fresh-profile dogruluk PASS; paketlenmis Electron bellek/CPU/startup SLA baseline acik |
+| IS-0605 | Erisilebilirlik test matrisi | Codex + Kullanici | DEVAM | Otomatik matris PASS; kurulu uygulamada Narrator, Magnifier, yalniz klavye ve insan UAT acik |
 | IS-0606 | Temiz Windows kurulum UAT | Codex + Kullanici | NOT_RUN | Installer/acilis/kapanis/update/uninstall |
 
 ## 7. Kurumsal ve dis yayin
