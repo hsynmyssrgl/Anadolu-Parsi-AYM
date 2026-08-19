@@ -715,8 +715,10 @@ function FirstRunSecuritySetup({onComplete}:{onComplete:(state:AuthStateView)=>v
   return <main className="first-run-security-shell"><section className="first-run-card panel"><img src={brandMarkUrl} alt="ParsYuva AYM"/><span className="eyebrow">{t('security.eyebrow')}</span><h1>{t('security.title')}</h1><p>{t('security.body')}</p>{!setup?<Button tone="primary" onClick={()=>void begin()}>{t('security.start')}</Button>:<><div className="notes-card"><strong>{t('security.authenticator')}</strong><small>{t('security.key')}: {setup.secret}</small><small>{t('security.uri')}: {setup.otpauthUri}</small><strong>{t('security.recoveryCodes')}</strong><small>{setup.recoveryCodes.join(' · ')}</small><Button onClick={()=>void navigator.clipboard.writeText(setup.recoveryCodes.join('\n'))}>{t('security.copy')}</Button></div><label>{t('security.code')}<input inputMode="numeric" autoComplete="one-time-code" value={code} onChange={event=>setCode(event.target.value.replace(/\s+/g,''))}/></label><label className="check-label"><input type="checkbox" checked={saved} onChange={event=>setSaved(event.target.checked)}/>{t('security.saved')}</label><Button tone="primary" disabled={!saved||code.trim().length<6} onClick={()=>void finish()}>{t('security.finish')}</Button></>}{message&&<StatusMessage tone="info">{message}</StatusMessage>}</section></main>;
 }
 
-function InvitationAcceptancePanel({onAccepted}:{onAccepted:(state:AuthStateView)=>Promise<void>}){
-  const [expanded,setExpanded]=useState(false);
+export function InvitationAcceptancePanel({onAccepted,initiallyExpanded=false}:{onAccepted:(state:AuthStateView)=>Promise<void>;initiallyExpanded?:boolean}){
+  const {language}=useLocalization();
+  const text=(tr:string,en:string)=>language==='tr'?tr:en;
+  const [expanded,setExpanded]=useState(initiallyExpanded);
   const [token,setToken]=useState('');
   const [displayName,setDisplayName]=useState('');
   const [password,setPassword]=useState('');
@@ -726,37 +728,37 @@ function InvitationAcceptancePanel({onAccepted}:{onAccepted:(state:AuthStateView
   const assessment=assessPassword(password);
   const inspect=async()=>{
     setMessage('');setInspection(undefined);
-    if(!window.pardus||!token.trim()){setMessage('Davet kodunu eksiksiz yazın.');return;}
+    if(!window.pardus||!token.trim()){setMessage(text('Davet kodunu eksiksiz yazın.','Enter the complete invitation code.'));return;}
     setBusy(true);
     try{setInspection(await window.pardus.inspectInvitation({token:token.trim()}));}
-    catch(error){setMessage(error instanceof Error?error.message:'Davet kodu doğrulanamadı.');}
+    catch(error){setMessage(error instanceof Error?error.message:text('Davet kodu doğrulanamadı.','The invitation code could not be verified.'));}
     finally{setBusy(false);}
   };
   const accept=async(event:FormEvent<HTMLFormElement>)=>{
     event.preventDefault();setMessage('');
-    if(!inspection?.canAccept){setMessage('Önce geçerli davet kodunu doğrulayın.');return;}
-    if(displayName.trim().length<2){setMessage('Ad soyad en az 2 karakter olmalıdır.');return;}
-    if(!assessment.valid){setMessage('Parola bütün güvenlik koşullarını karşılamalıdır.');return;}
+    if(!inspection?.canAccept){setMessage(text('Önce geçerli davet kodunu doğrulayın.','Verify a valid invitation code first.'));return;}
+    if(displayName.trim().length<2){setMessage(text('Ad soyad en az 2 karakter olmalıdır.','The full name must contain at least 2 characters.'));return;}
+    if(!assessment.valid){setMessage(text('Parola bütün güvenlik koşullarını karşılamalıdır.','The password must meet every security requirement.'));return;}
     if(!window.pardus)return;
     setBusy(true);
     try{const state=await window.pardus.acceptInvitation({token:token.trim(),displayName:displayName.trim(),password});setToken('');setPassword('');await onAccepted(state);}
-    catch(error){setMessage(error instanceof Error?error.message:'Davet kabul edilemedi.');}
+    catch(error){setMessage(error instanceof Error?error.message:text('Davet kabul edilemedi.','The invitation could not be accepted.'));}
     finally{setBusy(false);}
   };
-  if(!expanded)return <button type="button" className="invitation-entry-toggle" onClick={()=>setExpanded(true)}>Davet kodum var</button>;
+  if(!expanded)return <button type="button" className="invitation-entry-toggle" onClick={()=>setExpanded(true)}>{text('Davet kodum var','I have an invitation code')}</button>;
   return <form className="invitation-accept-card" aria-labelledby="invitation-accept-title" onSubmit={event=>void accept(event)}>
-    <div className="auth-heading"><span className="eyebrow">Aile profili daveti</span><h2 id="invitation-accept-title">Davetle katılın</h2><p>Kodu önce güvenli biçimde doğrulayın; geçerli bir davet yalnız bir kez kabul edilebilir.</p></div>
-    <label>Davet kodu<div className="invitation-token-row"><input autoComplete="one-time-code" value={token} onChange={event=>{setToken(event.target.value);setInspection(undefined);setMessage('');}} placeholder="Davet kodunu yapıştırın"/><Button type="button" disabled={busy||!token.trim()} onClick={()=>void inspect()}>{busy?'Doğrulanıyor…':'Kodu doğrula'}</Button></div></label>
-    {inspection&&<StatusMessage tone={inspection.canAccept?'success':'danger'}>{inspection.message}{inspection.startsAt?` Başlangıç: ${formatDate(inspection.startsAt,{dateStyle:'medium',timeStyle:'short'})}.`:''}{inspection.endsAt?` Son tarih: ${formatDate(inspection.endsAt,{dateStyle:'medium',timeStyle:'short'})}.`:''}</StatusMessage>}
-    {inspection?.canAccept&&<><label>Adınız ve soyadınız<input autoComplete="name" value={displayName} onChange={event=>setDisplayName(event.target.value)} minLength={2} required/></label><label>Yeni yerel parola<input type="password" autoComplete="new-password" value={password} onChange={event=>setPassword(event.target.value)} minLength={12} required/><div className="password-checklist" aria-live="polite"><strong>{assessment.remainingCharacters?`${assessment.remainingCharacters} karakter daha gerekli`:'Uzunluk koşulu tamam'}</strong><span className={assessment.checks.uppercase?'ok':''}>Büyük harf</span><span className={assessment.checks.lowercase?'ok':''}>Küçük harf</span><span className={assessment.checks.digit?'ok':''}>Rakam</span><span className={assessment.checks.symbol?'ok':''}>Sembol</span></div></label><Button tone="primary" type="submit" disabled={busy||displayName.trim().length<2||!assessment.valid}>{busy?'Profil hazırlanıyor…':'Daveti kabul et'}</Button></>}
+    <div className="auth-heading"><span className="eyebrow">{text('Aile profili daveti','Family profile invitation')}</span><h2 id="invitation-accept-title">{text('Davetle katılın','Join by invitation')}</h2><p>{text('Kodu önce güvenli biçimde doğrulayın; geçerli bir davet yalnız bir kez kabul edilebilir.','Verify the code securely first; a valid invitation can be accepted only once.')}</p></div>
+    <label>{text('Davet kodu','Invitation code')}<div className="invitation-token-row"><input autoComplete="one-time-code" value={token} onChange={event=>{setToken(event.target.value);setInspection(undefined);setMessage('');}} placeholder={text('Davet kodunu yapıştırın','Paste the invitation code')}/><Button type="button" disabled={busy||!token.trim()} onClick={()=>void inspect()}>{busy?text('Doğrulanıyor…','Verifying…'):text('Kodu doğrula','Verify code')}</Button></div></label>
+    {inspection&&<StatusMessage tone={inspection.canAccept?'success':'danger'}>{inspection.message}{inspection.startsAt?` ${text('Başlangıç','Starts')}: ${formatDate(inspection.startsAt,{dateStyle:'medium',timeStyle:'short'})}.`:''}{inspection.endsAt?` ${text('Son tarih','Ends')}: ${formatDate(inspection.endsAt,{dateStyle:'medium',timeStyle:'short'})}.`:''}</StatusMessage>}
+    {inspection?.canAccept&&<><label>{text('Adınız ve soyadınız','Your full name')}<input autoComplete="name" value={displayName} onChange={event=>setDisplayName(event.target.value)} minLength={2} required/></label><label>{text('Yeni yerel parola','New local password')}<input type="password" autoComplete="new-password" value={password} onChange={event=>setPassword(event.target.value)} minLength={12} required/><div className="password-checklist" aria-live="polite"><strong>{assessment.remainingCharacters?text(`${assessment.remainingCharacters} karakter daha gerekli`,`${assessment.remainingCharacters} more characters required`):text('Uzunluk koşulu tamam','Length requirement met')}</strong><span className={assessment.checks.uppercase?'ok':''}>{text('Büyük harf','Uppercase')}</span><span className={assessment.checks.lowercase?'ok':''}>{text('Küçük harf','Lowercase')}</span><span className={assessment.checks.digit?'ok':''}>{text('Rakam','Number')}</span><span className={assessment.checks.symbol?'ok':''}>{text('Sembol','Symbol')}</span></div></label><Button tone="primary" type="submit" disabled={busy||displayName.trim().length<2||!assessment.valid}>{busy?text('Profil hazırlanıyor…','Preparing profile…'):text('Daveti kabul et','Accept invitation')}</Button></>}
     {message&&<StatusMessage tone="danger">{message}</StatusMessage>}
-    <button type="button" className="invitation-entry-toggle" onClick={()=>{setExpanded(false);setInspection(undefined);setMessage('');}}>Normal girişe dön</button>
+    <button type="button" className="invitation-entry-toggle" onClick={()=>{setExpanded(false);setInspection(undefined);setMessage('');}}>{text('Normal girişe dön','Return to standard sign-in')}</button>
   </form>;
 }
 
 const windowsHelloOutcomeMessage = (
   outcome: WindowsHelloAuthenticationOutcome | WindowsHelloEnrollmentView['outcome']
-): string => ({
+): string => (getActiveUiLocale().toLowerCase().startsWith('tr')?{
   verified: 'Windows Hello doğrulaması tamamlandı.',
   enrolled: 'Windows Hello kaydı ve güvenli kasa bağı tamamlandı.',
   cancelled: 'Windows Hello doğrulaması kullanıcı tarafından iptal edildi.',
@@ -773,9 +775,26 @@ const windowsHelloOutcomeMessage = (
   registration_not_found: 'Bu cihaz için etkin Windows Hello kaydı bulunamadı.',
   account_unavailable: 'Bağlı yerel hesap kullanılamıyor.',
   error: 'Windows Hello işlemi güvenli biçimde tamamlanamadı.'
+}:{
+  verified: 'Windows Hello verification is complete.',
+  enrolled: 'Windows Hello enrollment and the secure-vault binding are complete.',
+  cancelled: 'Windows Hello verification was cancelled by the user.',
+  retries_exhausted: 'Windows Hello attempts are exhausted; you can continue with your password.',
+  device_not_present: 'No available Windows Hello hardware was found on this device.',
+  not_configured_for_user: 'Windows Hello is not configured for this Windows user.',
+  disabled_by_policy: 'Windows Hello is disabled by system policy.',
+  device_busy: 'Windows Hello is currently being used by another operation.',
+  platform_not_supported: 'This operating system does not support Windows Hello verification.',
+  fallback_required: 'Windows Hello could not continue; a strong local password is required.',
+  device_changed: 'The device security binding changed; sign in with your password and enroll again.',
+  principal_changed: 'The Windows user binding changed; sign in with your password and enroll again.',
+  security_epoch_changed: 'The account security epoch changed; enroll again with your password and 2FA.',
+  registration_not_found: 'No active Windows Hello enrollment was found for this device.',
+  account_unavailable: 'The linked local account is unavailable.',
+  error: 'The Windows Hello operation could not be completed securely.'
 })[outcome];
 
-function AuthScreen({ auth, onSetup, onLogin, onWindowsHelloLogin, onInvitationAccepted }: { auth: AuthStateView; onSetup:(input:SetupAdminInput)=>Promise<void>; onLogin:(input:LoginInput)=>Promise<void>; onWindowsHelloLogin:(input:LoginWithWindowsHelloInput)=>Promise<void>; onInvitationAccepted:(state:AuthStateView)=>Promise<void> }) {
+export function AuthScreen({ auth, onSetup, onLogin, onWindowsHelloLogin, onInvitationAccepted }: { auth: AuthStateView; onSetup:(input:SetupAdminInput)=>Promise<void>; onLogin:(input:LoginInput)=>Promise<void>; onWindowsHelloLogin:(input:LoginWithWindowsHelloInput)=>Promise<void>; onInvitationAccepted:(state:AuthStateView)=>Promise<void> }) {
   const {language,t}=useLocalization();
   const [familyName,setFamilyName]=useState('');
   const [displayName,setDisplayName]=useState('');
@@ -808,7 +827,7 @@ function AuthScreen({ auth, onSetup, onLogin, onWindowsHelloLogin, onInvitationA
   const loginWithHello=async()=>{
     setError('');setHelloBusy(true);
     try{await onWindowsHelloLogin(selectedAccountId?{accountId:selectedAccountId}:{});}
-    catch(caught){setError(caught instanceof Error?caught.message:'Windows Hello ile giriş tamamlanamadı.');}
+    catch(caught){setError(caught instanceof Error?caught.message:language==='tr'?'Windows Hello ile giriş tamamlanamadı.':'Windows Hello sign-in could not be completed.');}
     finally{setHelloBusy(false);}
   };
   const submit=async()=>{
@@ -839,13 +858,13 @@ function AuthScreen({ auth, onSetup, onLogin, onWindowsHelloLogin, onInvitationA
         {!auth.initialized&&<div className="auth-fields"><label>{t('auth.familyName')}<input ref={familyNameRef} autoFocus autoComplete="organization" value={familyName} onChange={event=>{setFamilyName(event.target.value);setError('');}} required minLength={2} aria-invalid={familyNameInvalid} placeholder={t('auth.familyPlaceholder')}/></label><label>{t('auth.fullName')}<input ref={displayNameRef} autoComplete="name" value={displayName} onChange={event=>{setDisplayName(event.target.value);setError('');}} required minLength={2} aria-invalid={displayNameInvalid} placeholder={t('auth.namePlaceholder')}/></label></div>}
         {auth.initialized&&profiles.length>0&&<div className="profile-grid" role="radiogroup" aria-label={t('auth.localProfiles')}>{profiles.map(profile=><button type="button" role="radio" aria-checked={selectedAccountId===profile.id} className={`profile-card ${selectedAccountId===profile.id?'selected':''}`} key={profile.id} onClick={()=>setSelectedAccountId(profile.id)}><span>{profile.initials}</span><div><strong>{profile.displayName}</strong><small>{profile.role==='family_admin'?t('auth.admin'):t('auth.member')}</small></div><i>{selectedAccountId===profile.id?'✓':''}</i></button>)}</div>}
         <div className="auth-fields"><label>{t('auth.localPassword')}<div className="password-input-shell"><input id="local-password" ref={passwordRef} type={passwordVisible?'text':'password'} autoComplete={auth.initialized?'current-password':'new-password'} value={password} onChange={event=>{setPassword(event.target.value);setError('');}} required minLength={12} aria-invalid={passwordInvalid} placeholder={t('auth.passwordPlaceholder')}/><button type="button" className="password-visibility-toggle" aria-controls="local-password" aria-pressed={passwordVisible} aria-label={passwordVisible?t('auth.hidePassword'):t('auth.showPassword')} onClick={()=>setPasswordVisible(value=>!value)}>{passwordVisible?(language==='tr'?'Gizle':'Hide'):(language==='tr'?'Göster':'Show')}</button></div>{!auth.initialized&&<div className="password-checklist" aria-live="polite"><strong>{passwordAssessment.remainingCharacters?t('auth.moreCharacters',{count:passwordAssessment.remainingCharacters}):t('auth.lengthComplete')}</strong><span className={passwordAssessment.checks.uppercase?'ok':''}>{t('auth.uppercase')}</span><span className={passwordAssessment.checks.lowercase?'ok':''}>{t('auth.lowercase')}</span><span className={passwordAssessment.checks.digit?'ok':''}>{t('auth.digit')}</span><span className={passwordAssessment.checks.symbol?'ok':''}>{t('auth.symbol')}</span></div>}</label>{auth.initialized&&<label>{language==='tr'?'İki aşamalı doğrulama kodu':'Two-factor authentication code'} <small>({language==='tr'?'etkinse':'if enabled'})</small><input value={secondFactorCode} onChange={e=>setSecondFactorCode(e.target.value)} inputMode="numeric" autoComplete="one-time-code" placeholder={language==='tr'?'6 haneli kod veya kurtarma kodu':'6-digit code or recovery code'}/></label>}</div>
-        {externalProviders.some(p=>p.productionReady)&&<div className="external-identity-ready" aria-label="Haricî kimlik sağlayıcıları">{externalProviders.filter(p=>p.productionReady).map(p=><span key={p.id}>{p.label}</span>)}</div>}
+        {externalProviders.some(p=>p.productionReady)&&<div className="external-identity-ready" aria-label={language==='tr'?'Haricî kimlik sağlayıcıları':'External identity providers'}>{externalProviders.filter(p=>p.productionReady).map(p=><span key={p.id}>{p.label}</span>)}</div>}
         {error&&<div className="form-error" role="alert">{error}</div>}
-        {auth.initialized&&helloState?.enrolled&&<Button type="button" tone="primary" disabled={busy||helloBusy||helloState.availability!=='available'} onClick={()=>void loginWithHello()}>{helloBusy?'Windows Hello bekleniyor…':'Windows Hello ile devam et'}</Button>}
+        {auth.initialized&&helloState?.enrolled&&<Button type="button" tone="primary" disabled={busy||helloBusy||helloState.availability!=='available'} onClick={()=>void loginWithHello()}>{helloBusy?(language==='tr'?'Windows Hello bekleniyor…':'Waiting for Windows Hello…'):(language==='tr'?'Windows Hello ile devam et':'Continue with Windows Hello')}</Button>}
         {auth.initialized&&helloState?.enrolled&&helloState.availability!=='available'&&<StatusMessage tone="info">{windowsHelloOutcomeMessage(helloState.availability)}</StatusMessage>}
         <Button tone="primary" type="button" disabled={busy||helloBusy} aria-describedby="auth-submit-guidance" onClick={()=>void submit()}>{busy?t('auth.working'):auth.initialized?t('auth.login'):t('auth.create')}</Button>
         <p id="auth-submit-guidance" className="auth-submit-guidance" aria-live="polite">{busy?(language==='tr'?'Güvenli yerel alan hazırlanıyor; lütfen bekleyin.':'The secure local space is being prepared; please wait.'):auth.initialized?(language==='tr'?'Profil ve parola doğrulandıktan sonra aile alanınız açılır.':'Your family space opens after the profile and password are verified.'):(language==='tr'?'Düğmeye bastığınızda eksik alan gösterilir; bilgiler uygunsa güvenli kurulum başlar.':'Missing fields are highlighted when you press the button; secure setup starts when the information is valid.')}</p>
-        <small className="auth-footnote">{USER_VISIBLE_APP_INFO.releaseLabel} · {USER_VISIBLE_APP_INFO.stage}</small>
+        <small className="auth-footnote">{USER_VISIBLE_APP_INFO.releaseLabel} · {language==='tr'?USER_VISIBLE_APP_INFO.stage:'Bronze · Active Development'}</small>
       </form>
       {auth.initialized&&<InvitationAcceptancePanel onAccepted={onInvitationAccepted}/>}
     </section>
@@ -3207,7 +3226,7 @@ export function App() {
             })}
           </section>)}
         </nav>
-        <div className="sidebar-footer"><div className="sync-state"><span>◌</span><div><strong>{t('shell.localReady')}</strong><small>{formatDate(snapshot.lastUpdatedAt, { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' })}</small></div><i>✓</i></div><div className="edition-line"><span>{appInfo.releaseLabel}</span><small>{appInfo.stage}</small></div></div>
+        <div className="sidebar-footer"><div className="sync-state"><span>◌</span><div><strong>{t('shell.localReady')}</strong><small>{formatDate(snapshot.lastUpdatedAt, { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' })}</small></div><i>✓</i></div><div className="edition-line"><span>{appInfo.releaseLabel}</span><small>{language==='tr'?appInfo.stage:'Bronze · Active Development'}</small></div></div>
       </aside>
       <main ref={mainContentRef} id="main-content" className="main-area" tabIndex={-1} aria-labelledby="current-section-title">
         <header className="topbar">

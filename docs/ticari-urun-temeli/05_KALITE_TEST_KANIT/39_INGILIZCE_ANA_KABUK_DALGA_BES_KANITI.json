@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-INGILIZCE-ANA-KABUK-DALGA-BES-20260819-01",
+  "executedAt": "2026-08-19T18:22:10+03:00",
+  "repositoryBaseCommitAtExecution": "ed193c547a26c9c64f865bc14efa1359f100f6a3",
+  "workItem": "IS-0106",
+  "result": {"status":"PASS_WITH_REMAINING_APP_SHELL_OPEN","targetedTestFilesPassed":3,"targetedTestFilesTotal":3,"targetedTestsPassed":10,"targetedTestsTotal":10,"desktopTypecheck":"PASS"},
+  "translatedSurfaces": ["AuthScreen", "InvitationAcceptancePanel"],
+  "englishLocaleVisibleTurkishCharacterCount": 0,
+  "turkishLocalePreserved": true,
+  "providerUsesBoundBootstrapLanguage": true,
+  "remainingApplicationShellAuditOpen": true,
+  "fullApplicationEnglishPass": false,
+  "requirementPass": false,
+  "note": "Ana kabuk besinci dalga ilk kurulum, geri donus girisi ve aile daveti metinlerini iki dilli hale getirir; mesaj cozumu provider bootstrap diline baglanir."
+}

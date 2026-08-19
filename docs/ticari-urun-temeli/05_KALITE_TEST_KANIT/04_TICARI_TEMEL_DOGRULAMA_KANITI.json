@@ -9,10 +9,10 @@
   "canonicalRuleSha256": "b79db92a03d559f33ccd49348bad159a70b6034fbcf10a07abe5a407549bf0be",
   "decision": "DEC-259",
   "workItemCount": 49,
-  "fileCount": 71,
-  "sourceFileCount": 70,
-  "sourceFingerprintSha256": "e9b029be260d9b84085ff8542e9454442c0d2b0a0276adb419114eb2e34b2008",
-  "checks": 901,
+  "fileCount": 72,
+  "sourceFileCount": 71,
+  "sourceFingerprintSha256": "86880332d1f60cccab405144b46fd60744593b6ebce3465a08b2b170afedfc6e",
+  "checks": 908,
   "status": "PASS",
   "commercialReleaseEligible": false,
   "externalEvidenceDefaultsToNotRun": true,
@@ -120,8 +120,8 @@
     },
     {
       "path": "05_KALITE_TEST_KANIT/03_KANIT_SICILI.json",
-      "bytes": 17734,
-      "sha256": "a167806b72c6c7d15d486fe9f53f34edaba2523482c440925c2bd6172c91aa04"
+      "bytes": 18227,
+      "sha256": "150097dc4f49b9f90aff9839ead86ec88b899f455bf4e274139f81c7d38003d6"
     },
     {
       "path": "05_KALITE_TEST_KANIT/05_GIT_YEDEK_DOGRULAMA_KANITI.json",
@@ -294,6 +294,11 @@
       "sha256": "d1588f54e5442aa18ceb3bb97c549e6c0ba1ddabf0ffa6c0af9052dd904d393e"
     },
     {
+      "path": "05_KALITE_TEST_KANIT/39_INGILIZCE_ANA_KABUK_DALGA_BES_KANITI.json",
+      "bytes": 913,
+      "sha256": "fedd2134ee1de23558ea1efb8ce5eba0c73d46367e235f68a23ad6ed3d57a59a"
+    },
+    {
       "path": "06_DIS_KAYNAK_VE_LISANS/01_TICARI_LISANS_ENVANTERI.md",
       "bytes": 3440,
       "sha256": "3bcbdfd7eea28bd097c28396336eb3637c73386bd9b72b465a1049a8353ee18b"
@@ -330,8 +335,8 @@
     },
     {
       "path": "08_IS_LISTESI/03_ANA_IS_SICILI.json",
-      "bytes": 18638,
-      "sha256": "c247fc24d3db05bd33da228c6dd60e934af70b401ffa35d2b49dfadfa0b9f472"
+      "bytes": 18738,
+      "sha256": "803e8f339c3b389d734e6ef1d1d54b9d4c7f837a9219eb024c8500950cfffb21"
     },
     {
       "path": "08_IS_LISTESI/04_IS_YURUTME_SIRASI.md",
@@ -369,5 +374,5 @@
       "sha256": "3b489e065d5b3cc6d84a81ac26775a144c0babca825dbd943364c74f7f309527"
     }
   ],
-  "generatedAt": "2026-08-19T15:18:19.025Z"
+  "generatedAt": "2026-08-19T15:25:16.669Z"
 }

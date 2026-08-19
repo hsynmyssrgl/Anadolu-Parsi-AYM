@@ -230,13 +230,19 @@ export const localizeNavigationLabel = (id: ProductScreenId, turkishLabel: strin
 export const localizeNavigationGroup = (id: ProductNavigationGroupId, turkishLabel: string): string =>
   activeLocalization.language === 'tr' ? turkishLabel : englishNavigationGroups[id];
 
-export const translateUiMessage = (
+const translateUiMessageForLanguage = (
+  language: SupportedUiLanguage,
   key: UiMessageKey,
   variables: Readonly<Record<string, string | number>> = {}
 ): string => Object.entries(variables).reduce(
   (message, [name, value]) => message.replaceAll(`{${name}}`, String(value)),
-  messageCatalog[activeLocalization.language][key]
+  messageCatalog[language][key]
 );
+
+export const translateUiMessage = (
+  key: UiMessageKey,
+  variables: Readonly<Record<string, string | number>> = {}
+): string => translateUiMessageForLanguage(activeLocalization.language,key,variables);
 
 interface LocalizationContextValue {
   readonly bootstrap: UiLocalizationBootstrapView;
@@ -263,7 +269,7 @@ export function LocalizationProvider({
     bootstrap,
     language: bootstrap.language,
     locale: bootstrap.locale,
-    t: translateUiMessage
+    t: (key,variables={})=>translateUiMessageForLanguage(bootstrap.language,key,variables)
   }}>{children}</LocalizationContext.Provider>;
 }
 

@@ -83,6 +83,11 @@ check(rendererApp.includes("import { localizeArchiveCenterNode, translateArchive
   &&rendererApp.includes('return localizeArchiveCenterNode(panel,language);'),'document-center localization binding missing');
 check(archiveLocalization.includes("'Doküman Merkezi':'Document Center'")
   &&archiveLocalization.includes("element.props['data-localization-preserve']===true"),'document-center translation or user-value preservation missing');
+check(JSON.stringify(policy.coverage.translatedApplicationShellWaveFive)===JSON.stringify(['AuthScreen','InvitationAcceptancePanel'])
+  &&policy.coverage.translatedApplicationShellWaveFiveEnglishVisibleTurkishTextCount===0,'application-shell wave-five truth mismatch');
+check(rendererApp.includes('export function InvitationAcceptancePanel')&&rendererApp.includes("text('Davetle katılın','Join by invitation')")
+  &&rendererApp.includes('export function AuthScreen'),'auth and invitation localization binding missing');
+check(localization.includes("t: (key,variables={})=>translateUiMessageForLanguage(bootstrap.language,key,variables)"),'provider-local message resolver missing');
 check(domain.includes("primaryLanguage === 'tr' ? 'tr' : 'en'")&&domain.includes("resolveUiLocalization('en-US')"),'domain fallback resolver missing');
 check(main.includes('resolveUiLocalization(app.getLocale())')&&main.includes("registerIpcHandler('app:getLocalizationBootstrap'"),'main system-locale authority missing');
 check(preload.includes("invoke('app:getLocalizationBootstrap')")&&globalTypes.includes('getLocalizationBootstrap()'),'preload/global localization bridge missing');

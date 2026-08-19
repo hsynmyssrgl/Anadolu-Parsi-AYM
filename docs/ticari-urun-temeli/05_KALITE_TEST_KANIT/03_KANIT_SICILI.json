@@ -392,6 +392,16 @@
       "uretimZamani": "2026-08-19T18:14:21+03:00",
       "disKaynak": false,
       "not": "Dokuman Merkezi English locale renderinda gorunur Turkce karakter sifir; kullanici verileri ceviriden korunur ve kalan ana kabuk ekranlari aciktir."
+    },
+    {
+      "id": "KANIT-0040",
+      "tur": "TEST",
+      "kapsam": "English ana uygulama kabugu yerellestirme besinci dalgasi",
+      "durum": "PASS_WITH_REMAINING_APP_SHELL_OPEN",
+      "kaynak": "05_KALITE_TEST_KANIT/39_INGILIZCE_ANA_KABUK_DALGA_BES_KANITI.json",
+      "uretimZamani": "2026-08-19T18:22:10+03:00",
+      "disKaynak": false,
+      "not": "Ilk kurulum, giris ve aile daveti English locale renderinda gorunur Turkce karakter sifir; kalan ana kabuk ekranlari aciktir."
     }
   ]
 }
