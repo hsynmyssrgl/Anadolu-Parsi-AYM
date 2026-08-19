@@ -482,6 +482,16 @@
       "uretimZamani": "2026-08-19T19:11:30+03:00",
       "disKaynak": false,
       "not": "Aile uyesi, onemli gun, konum formlari ve Konum/Harita yuzeyi English locale renderinda gorunur Turkce karakter sifir; yakinlik ve AI izin semantigi korunur."
+    },
+    {
+      "id": "KANIT-0049",
+      "tur": "TEST",
+      "kapsam": "English ana uygulama kabugu yerellestirme on dorduncu dalgasi",
+      "durum": "PASS_WITH_REMAINING_APP_SHELL_OPEN",
+      "kaynak": "05_KALITE_TEST_KANIT/48_INGILIZCE_ANA_KABUK_DALGA_ON_DORT_KANITI.json",
+      "uretimZamani": "2026-08-19T19:18:04+03:00",
+      "disKaynak": false,
+      "not": "Saglik, Yasam, Otomasyon ve Raporlama merkezleri English locale renderinda gorunur Turkce karakter sifir; gizlilik ve yerel isleme semantigi korunur."
     }
   ]
 }
