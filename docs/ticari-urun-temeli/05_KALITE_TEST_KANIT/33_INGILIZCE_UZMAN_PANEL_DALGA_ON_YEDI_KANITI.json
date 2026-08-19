@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-INGILIZCE-UZMAN-PANEL-DALGA-ON-YEDI-20260819-01",
+  "executedAt": "2026-08-19T17:21:48+03:00",
+  "repositoryBaseCommitAtExecution": "8c327258975b5f5b0cf1265dfd1e07673ed3e30a",
+  "workItem": "IS-0106",
+  "result": {"status":"PASS_WITH_REMAINING_PANELS_OPEN","targetedTestFilesPassed":1,"targetedTestFilesTotal":1,"targetedTestsPassed":2,"targetedTestsTotal":2,"desktopTypecheck":"PASS"},
+  "translatedPanels": ["LongTermPortfolioPanel"],
+  "englishLocaleVisibleTurkishCharacterCount": 0,
+  "turkishLocalePreserved": true,
+  "remainingFeaturePanelsOpen": true,
+  "fullApplicationEnglishPass": false,
+  "requirementPass": false,
+  "note": "On yedinci dalga uzun vadeli portfoy panelinde iki dilli gorunur metin ve locale-uyumlu sayi, tarih, para bicimlendirme kapisini tamamlar; kalan paneller aciktir."
+}

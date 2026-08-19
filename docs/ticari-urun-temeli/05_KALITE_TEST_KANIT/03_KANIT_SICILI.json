@@ -332,6 +332,16 @@
       "uretimZamani": "2026-08-19T17:10:00+03:00",
       "disKaynak": false,
       "not": "Yerel OCR paneli English locale renderinda gorunur Turkce karakter sifir; kalan paneller acik."
+    },
+    {
+      "id": "KANIT-0034",
+      "tur": "TEST",
+      "kapsam": "English uzman panel yerellestirme on yedinci dalgasi",
+      "durum": "PASS_WITH_REMAINING_PANELS_OPEN",
+      "kaynak": "05_KALITE_TEST_KANIT/33_INGILIZCE_UZMAN_PANEL_DALGA_ON_YEDI_KANITI.json",
+      "uretimZamani": "2026-08-19T17:21:48+03:00",
+      "disKaynak": false,
+      "not": "Uzun vadeli portfoy paneli English locale renderinda gorunur Turkce karakter sifir; kalan paneller acik."
     }
   ]
 }

@@ -6,7 +6,7 @@ const check=(condition,message)=>{checks+=1;if(!condition)failures.push(message)
 const read=(path)=>readFile(path,'utf8');
 const policy=JSON.parse(await read('config/kullanici-arayuzu-dil-politikasi.json'));
 const desktopPackage=JSON.parse(await read('apps/desktop/package.json'));
-const [domain,main,preload,globalTypes,rendererMain,localization,accessibility,help,installer,distributed,universalUx,signedPlugin,familyMap,localTranslation,familyAi,communicationAudit,communicationRecording,communicationSecurity,communicationCalling,smartHome,financeImport,communicationMessaging,communicationFileSharing,memoryStudio,placesTravel,healthCare,childEducation,householdOperations,familyMeeting,financePlanning,localOcr]=await Promise.all([
+const [domain,main,preload,globalTypes,rendererMain,localization,accessibility,help,installer,distributed,universalUx,signedPlugin,familyMap,localTranslation,familyAi,communicationAudit,communicationRecording,communicationSecurity,communicationCalling,smartHome,financeImport,communicationMessaging,communicationFileSharing,memoryStudio,placesTravel,healthCare,childEducation,householdOperations,familyMeeting,financePlanning,localOcr,longTermPortfolio]=await Promise.all([
   read('packages/domain/src/ui-localization.ts'),read('apps/desktop/src/main/main.ts'),read('apps/desktop/src/main/preload.ts'),
   read('apps/desktop/src/renderer/global.d.ts'),read('apps/desktop/src/renderer/main.tsx'),read('apps/desktop/src/renderer/localization.tsx'),
   read('apps/desktop/src/renderer/accessibility.ts'),read('apps/desktop/src/renderer/NarratedHelpCenter.tsx'),read('apps/desktop/build/installer.nsh'),
@@ -20,7 +20,8 @@ const [domain,main,preload,globalTypes,rendererMain,localization,accessibility,h
   read('apps/desktop/src/renderer/MemoryStudioPanel.tsx'),read('apps/desktop/src/renderer/PlacesTravelAssetPetPanel.tsx'),
   read('apps/desktop/src/renderer/HealthCareCoordinationPanel.tsx'),read('apps/desktop/src/renderer/ChildEducationCoordinationPanel.tsx'),
   read('apps/desktop/src/renderer/HouseholdOperationsPanel.tsx'),read('apps/desktop/src/renderer/FamilyMeetingPanel.tsx'),
-  read('apps/desktop/src/renderer/FinancePlanningPanel.tsx'),read('apps/desktop/src/renderer/LocalGovernedOcrPanel.tsx')
+  read('apps/desktop/src/renderer/FinancePlanningPanel.tsx'),read('apps/desktop/src/renderer/LocalGovernedOcrPanel.tsx'),
+  read('apps/desktop/src/renderer/LongTermPortfolioPanel.tsx')
 ]);
 
 check(policy.ruleId==='PR-215'&&policy.decisionId==='DEC-255','policy rule/decision binding mismatch');
@@ -65,6 +66,8 @@ check(JSON.stringify(policy.coverage.translatedFeaturePanelWaveFifteen)===JSON.s
   &&policy.coverage.translatedFeaturePanelWaveFifteenEnglishVisibleTurkishTextCount===0,'feature-panel wave-fifteen truth mismatch');
 check(JSON.stringify(policy.coverage.translatedFeaturePanelWaveSixteen)===JSON.stringify(['LocalGovernedOcrPanel'])
   &&policy.coverage.translatedFeaturePanelWaveSixteenEnglishVisibleTurkishTextCount===0,'feature-panel wave-sixteen truth mismatch');
+check(JSON.stringify(policy.coverage.translatedFeaturePanelWaveSeventeen)===JSON.stringify(['LongTermPortfolioPanel'])
+  &&policy.coverage.translatedFeaturePanelWaveSeventeenEnglishVisibleTurkishTextCount===0,'feature-panel wave-seventeen truth mismatch');
 check(domain.includes("primaryLanguage === 'tr' ? 'tr' : 'en'")&&domain.includes("resolveUiLocalization('en-US')"),'domain fallback resolver missing');
 check(main.includes('resolveUiLocalization(app.getLocale())')&&main.includes("registerIpcHandler('app:getLocalizationBootstrap'"),'main system-locale authority missing');
 check(preload.includes("invoke('app:getLocalizationBootstrap')")&&globalTypes.includes('getLocalizationBootstrap()'),'preload/global localization bridge missing');
@@ -93,6 +96,7 @@ check(householdOperations.includes("useLocalization()")&&householdOperations.inc
 check(familyMeeting.includes("useLocalization()")&&familyMeeting.includes("text('Aile toplantıları','Family meetings')"),'family-meeting English localization binding missing');
 check(financePlanning.includes("useLocalization()")&&financePlanning.includes("text('Bütçe, hedef, portföy ve net değer merkezi','Budget, goals, portfolio, and net worth center')"),'finance-planning English localization binding missing');
 check(localOcr.includes("useLocalization()")&&localOcr.includes("text('Yerel OCR merkezi yükleniyor','Loading local OCR center')"),'local OCR English localization binding missing');
+check(longTermPortfolio.includes("useLocalization()")&&longTermPortfolio.includes("text('Uzun Vadeli Portföy','Long-Term Portfolio')"),'long-term portfolio English localization binding missing');
 for(const [name,source,marker] of [
   ['communication audit',communicationAudit,"text('Denetim zinciri yükleniyor','Loading audit chain')"],
   ['communication recording',communicationRecording,"text('Görüşme kaydı rıza planı','Call recording consent plan')"],
