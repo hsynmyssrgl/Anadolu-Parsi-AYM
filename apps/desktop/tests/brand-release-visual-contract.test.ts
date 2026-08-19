@@ -117,6 +117,9 @@ describe('approved brand and release-channel visual contract', () => {
       '--glass-filter:blur(24px) saturate(1.18)',
       'backdrop-filter:var(--glass-filter)',
       '.app-shell[data-high-contrast="true"]',
+      '@media(prefers-reduced-transparency:reduce)',
+      'body:has(.app-shell[data-high-contrast="true"])',
+      '@media(forced-colors:active)',
       '@supports not ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px)))'
     ]) expect(styles).toContain(marker);
   });
@@ -171,6 +174,18 @@ describe('approved brand and release-channel visual contract', () => {
           maximumClippedTextElements: number;
           verticalPageScrollAllowed: boolean;
         };
+        transparencyFallbackBaseline: {
+          captureId: string;
+          channel: string;
+          highContrast: boolean;
+          reduceMotion: boolean;
+          path: string;
+          sha256: string;
+          requiredOpaqueSelectors: string[];
+          expectedBackdropFilter: string;
+          expectedAnimationDuration: string;
+          expectedTransitionDuration: string;
+        };
         mismatchPolicy: string;
       };
     };
@@ -193,6 +208,8 @@ describe('approved brand and release-channel visual contract', () => {
         captureId: string;
         channel: string;
         textScalePercent: number;
+        highContrast: boolean;
+        reduceMotion: boolean;
         path: string;
         sha256: string;
         width: number;
@@ -210,6 +227,14 @@ describe('approved brand and release-channel visual contract', () => {
           }>;
           clippedText: Array<Record<string, string>>;
         };
+        visualEffects: Record<string, {
+          backdropFilter: string;
+          backgroundColor: string;
+          borderWidth: string;
+          boxShadow: string;
+          animationDuration: string;
+          transitionDuration: string;
+        }>;
       }>;
     };
     const baselines = manifest.releaseChannelScreenshotBaselines;
@@ -226,7 +251,7 @@ describe('approved brand and release-channel visual contract', () => {
       visualManifestSha256: createHash('sha256').update(rawManifest).digest('hex')
     });
     expect(baselines.mismatchPolicy).toBe('fail visual contract test before packaging');
-    const channelEntries = screenshotManifest.entries.filter((entry) => entry.textScalePercent === 100);
+    const channelEntries = screenshotManifest.entries.filter((entry) => entry.textScalePercent === 100 && !entry.highContrast);
     expect(channelEntries.map((entry) => entry.captureId)).toEqual(['Bronze', 'Silver', 'Gold']);
 
     const paletteKeys = {
@@ -289,6 +314,33 @@ describe('approved brand and release-channel visual contract', () => {
     expect(typographyBaseline.verticalPageScrollAllowed).toBe(true);
     expect(typographyEntry!.layoutChecks.regions['.page-content']!.scrollHeight)
       .toBeGreaterThanOrEqual(typographyEntry!.layoutChecks.regions['.page-content']!.clientHeight);
+
+    const transparencyBaseline = baselines.transparencyFallbackBaseline;
+    const transparencyEntry = screenshotManifest.entries.find((entry) => entry.captureId === transparencyBaseline.captureId);
+    const normalBronzeEntry = screenshotManifest.entries.find((entry) => entry.captureId === 'Bronze');
+    expect(transparencyEntry).toBeDefined();
+    expect(normalBronzeEntry).toBeDefined();
+    expect(transparencyEntry).toMatchObject({
+      channel: transparencyBaseline.channel,
+      highContrast: transparencyBaseline.highContrast,
+      reduceMotion: transparencyBaseline.reduceMotion,
+      path: transparencyBaseline.path,
+      sha256: transparencyBaseline.sha256,
+      width: baselines.viewport.width,
+      height: baselines.viewport.height
+    });
+    const transparencyPng = await readFile(new URL(`../../../${transparencyBaseline.path}`, import.meta.url));
+    expect(createHash('sha256').update(transparencyPng).digest('hex')).toBe(transparencyBaseline.sha256);
+    for (const selector of transparencyBaseline.requiredOpaqueSelectors) {
+      expect(normalBronzeEntry!.visualEffects[selector]!.backdropFilter, `${selector} normal glass`).not.toBe('none');
+      expect(transparencyEntry!.visualEffects[selector]).toMatchObject({
+        backdropFilter: transparencyBaseline.expectedBackdropFilter,
+        boxShadow: 'none',
+        animationDuration: transparencyBaseline.expectedAnimationDuration,
+        transitionDuration: transparencyBaseline.expectedTransitionDuration
+      });
+      expect(transparencyEntry!.visualEffects[selector]!.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+    }
   });
 
   it('pins the approved transparent warm-Bronze Anadolu parsı mark', async () => {

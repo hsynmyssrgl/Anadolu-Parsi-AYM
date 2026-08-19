@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-SAYDAMLIK-HAREKET-AZALTMA-20260819-01",
+  "executedAt": "2026-08-19T15:49:06+03:00",
+  "repositoryBaseCommitAtExecution": "df08b3bf454d07066a514a380ab666603705535f",
+  "workItem": "IS-0103",
+  "result": {
+    "status": "PASS",
+    "electronCapturesPassed": 5,
+    "electronCapturesTotal": 5,
+    "targetedTestFilesPassed": 2,
+    "targetedTestFilesTotal": 2,
+    "targetedTestsPassed": 12,
+    "targetedTestsTotal": 12,
+    "desktopTypecheck": "PASS",
+    "rendererProductionBuild": "PASS"
+  },
+  "opaqueFallback": {
+    "path": "apps/desktop/tests/fixtures/surum-paletleri/bronze-opak-erisilebilirlik-ekran-goruntusu.png",
+    "sha256": "7d51e0959ac00f8bb5221d69340f39971b1f74750da54c428655d095146a4c09",
+    "highContrast": true,
+    "reduceMotion": true,
+    "requiredSelectors": [".sidebar", ".topbar", ".panel"],
+    "backdropFilter": "none",
+    "opaqueBackground": "PASS",
+    "boxShadow": "none",
+    "animationDuration": "1e-06s",
+    "transitionDuration": "1e-06s"
+  },
+  "normalGlass": {
+    "sidebarBackdropFilter": "blur(22px) saturate(1.12)",
+    "topbarBackdropFilter": "blur(22px) saturate(1.12)",
+    "panelBackdropFilter": "blur(22px) saturate(1.12)"
+  },
+  "fallbackTriggers": [
+    "application high-contrast preference",
+    "prefers-reduced-transparency",
+    "forced-colors",
+    "unsupported backdrop-filter",
+    "application reduce-motion preference",
+    "prefers-reduced-motion"
+  ],
+  "externalAccessibilityUat": "Windows Narrator Magnifier keyboard-only and human review remain separately NOT_RUN in IS-0605.",
+  "requirementPass": true,
+  "note": "IS-0103 cam yuzey ve opak erisilebilirlik davranisi gercek Electron hesaplanmis stilleri ve sabit ekran goruntusu ile tamamlandi."
+}

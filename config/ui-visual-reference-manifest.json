@@ -135,6 +135,18 @@
       "maximumClippedTextElements": 0,
       "verticalPageScrollAllowed": true
     },
+    "transparencyFallbackBaseline": {
+      "captureId": "Bronze-Opaque",
+      "channel": "Bronze",
+      "highContrast": true,
+      "reduceMotion": true,
+      "path": "apps/desktop/tests/fixtures/surum-paletleri/bronze-opak-erisilebilirlik-ekran-goruntusu.png",
+      "sha256": "7d51e0959ac00f8bb5221d69340f39971b1f74750da54c428655d095146a4c09",
+      "requiredOpaqueSelectors": [".sidebar", ".topbar", ".panel"],
+      "expectedBackdropFilter": "none",
+      "expectedAnimationDuration": "1e-06s",
+      "expectedTransitionDuration": "1e-06s"
+    },
     "mismatchPolicy": "fail visual contract test before packaging"
   },
   "releasePaletteRule": {

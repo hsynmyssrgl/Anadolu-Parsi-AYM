@@ -1280,7 +1280,14 @@ linear-gradient(145deg,#071a2d 0%,#0b2744 52%,#0b1c31 100%)}
   background:var(--shell-panel-solid);
 }
 @media(prefers-contrast:more){.app-shell :is(.sidebar,.topbar,.menu-popover,.sidebar-popover,.command-palette,.panel,.surface,.modal,.auth-form,.narrated-help-center){-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--shell-panel-solid)}}
+@media(prefers-reduced-transparency:reduce){.app-shell :is(.sidebar,.topbar,.menu-popover,.sidebar-popover,.command-palette,.panel,.surface,.modal,.auth-form,.narrated-help-center){-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--shell-panel-solid);box-shadow:none}}
 @supports not ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){.app-shell :is(.sidebar,.topbar,.menu-popover,.sidebar-popover,.command-palette,.panel,.surface,.modal,.auth-form,.narrated-help-center){background:var(--shell-panel-solid)}}
+body:has(.app-shell[data-high-contrast="true"]) :is(.modal-backdrop,.narrated-help-overlay,.session-lock-backdrop) {
+  -webkit-backdrop-filter:none;
+  backdrop-filter:none;
+}
+@media(prefers-reduced-transparency:reduce){:is(.modal-backdrop,.narrated-help-overlay,.session-lock-backdrop){-webkit-backdrop-filter:none;backdrop-filter:none}}
+@media(forced-colors:active){:is(.modal-backdrop,.narrated-help-overlay,.session-lock-backdrop){-webkit-backdrop-filter:none;backdrop-filter:none}}
 .app-shell[data-theme="light"] {
   --bg:var(--release-background);
   --bg-soft:var(--release-panel-secondary);

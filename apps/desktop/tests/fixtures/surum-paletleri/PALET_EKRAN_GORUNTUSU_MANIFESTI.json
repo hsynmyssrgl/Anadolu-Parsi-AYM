@@ -12,15 +12,17 @@
   },
   "networkUsed": false,
   "userOrDemoDataIncluded": false,
-  "sourceStylesCssSha256": "74baef4cc709eb90111ae4127dafc61521162a639586469f09e5fe683836fa8c",
+  "sourceStylesCssSha256": "68a6d052fb9672ffcc174ed8308718429b93aee82914f6fdbea435650f84519a",
   "sourceTypographyCssSha256": "87411509e13f85f101d9182b53167442db9e54b851502e13169e69141809ff2d",
-  "combinedCssSha256": "1f5803652d8596be0b083f06e75143b88f06c0e5cb9eb0b4f172f6d31be1d54b",
-  "visualManifestSha256": "d41ea3e97ea69bd43cedae4c567337ed230255b2cc35e46641f61591fd35c2ef",
+  "combinedCssSha256": "1240d3398d549dd96809e74977b616b06f671d8d2e7cd59be11e5aee9a1416a2",
+  "visualManifestSha256": "192a1b147054d7467fd65435c019635b102026ccd8c3146ed7f05c2a471ae1ab",
   "entries": [
     {
       "captureId": "Bronze",
       "channel": "Bronze",
       "textScalePercent": 100,
+      "highContrast": false,
+      "reduceMotion": false,
       "path": "apps/desktop/tests/fixtures/surum-paletleri/bronze-palet-ekran-goruntusu.png",
       "sha256": "ec0748ac640881c5c764cdada3d3247b76c4b542b95ed4058cd5a32eae4d7c9e",
       "width": 1280,
@@ -123,12 +125,48 @@
             "text": "Örnek içermeyen güvenli görünüm"
           }
         ]
+      },
+      "visualEffects": {
+        ".sidebar": {
+          "backdropFilter": "blur(22px) saturate(1.12)",
+          "backgroundColor": "color(srgb 0.992157 0.992157 0.988235 / 0.94)",
+          "borderWidth": "0px 1px 0px 0px",
+          "boxShadow": "none",
+          "animationDuration": "0s",
+          "transitionDuration": "0s"
+        },
+        ".topbar": {
+          "backdropFilter": "blur(22px) saturate(1.12)",
+          "backgroundColor": "color(srgb 0.992157 0.992157 0.988235 / 0.86)",
+          "borderWidth": "0px 0px 1px",
+          "boxShadow": "none",
+          "animationDuration": "0s",
+          "transitionDuration": "0s"
+        },
+        ".panel": {
+          "backdropFilter": "blur(22px) saturate(1.12)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderWidth": "1px",
+          "boxShadow": "rgba(0, 8, 20, 0.16) 0px 18px 50px 0px, rgba(255, 255, 255, 0.035) 0px 1px 0px 0px inset",
+          "animationDuration": "0s",
+          "transitionDuration": "0s"
+        },
+        ".metric-card": {
+          "backdropFilter": "none",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderWidth": "1px",
+          "boxShadow": "none",
+          "animationDuration": "0s",
+          "transitionDuration": "0s"
+        }
       }
     },
     {
       "captureId": "Silver",
       "channel": "Silver",
       "textScalePercent": 100,
+      "highContrast": false,
+      "reduceMotion": false,
       "path": "apps/desktop/tests/fixtures/surum-paletleri/silver-palet-ekran-goruntusu.png",
       "sha256": "f3ab7b2e088f0c29e2d1063a7a593d253146967d65f0c0aa6c30ad6aae3e8e3a",
       "width": 1280,
@@ -231,12 +269,48 @@
             "text": "Örnek içermeyen güvenli görünüm"
           }
         ]
+      },
+      "visualEffects": {
+        ".sidebar": {
+          "backdropFilter": "blur(26px) saturate(1.05)",
+          "backgroundColor": "color(srgb 0.988235 0.992157 0.992157 / 0.94)",
+          "borderWidth": "0px 1px 0px 0px",
+          "boxShadow": "none",
+          "animationDuration": "0s",
+          "transitionDuration": "0s"
+        },
+        ".topbar": {
+          "backdropFilter": "blur(26px) saturate(1.05)",
+          "backgroundColor": "color(srgb 0.988235 0.992157 0.992157 / 0.86)",
+          "borderWidth": "0px 0px 1px",
+          "boxShadow": "none",
+          "animationDuration": "0s",
+          "transitionDuration": "0s"
+        },
+        ".panel": {
+          "backdropFilter": "blur(26px) saturate(1.05)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderWidth": "1px",
+          "boxShadow": "rgba(0, 8, 20, 0.16) 0px 18px 50px 0px, rgba(255, 255, 255, 0.035) 0px 1px 0px 0px inset",
+          "animationDuration": "0s",
+          "transitionDuration": "0s"
+        },
+        ".metric-card": {
+          "backdropFilter": "none",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderWidth": "1px",
+          "boxShadow": "none",
+          "animationDuration": "0s",
+          "transitionDuration": "0s"
+        }
       }
     },
     {
       "captureId": "Gold",
       "channel": "Gold",
       "textScalePercent": 100,
+      "highContrast": false,
+      "reduceMotion": false,
       "path": "apps/desktop/tests/fixtures/surum-paletleri/gold-palet-ekran-goruntusu.png",
       "sha256": "6745e07d767272be8612aac606cc89ed2ca1a2f59cc71a0c79dcd02446ca22bb",
       "width": 1280,
@@ -339,12 +413,48 @@
             "text": "Örnek içermeyen güvenli görünüm"
           }
         ]
+      },
+      "visualEffects": {
+        ".sidebar": {
+          "backdropFilter": "blur(24px) saturate(1.18)",
+          "backgroundColor": "color(srgb 1 0.992157 0.964706 / 0.94)",
+          "borderWidth": "0px 1px 0px 0px",
+          "boxShadow": "none",
+          "animationDuration": "0s",
+          "transitionDuration": "0s"
+        },
+        ".topbar": {
+          "backdropFilter": "blur(24px) saturate(1.18)",
+          "backgroundColor": "color(srgb 1 0.992157 0.964706 / 0.86)",
+          "borderWidth": "0px 0px 1px",
+          "boxShadow": "none",
+          "animationDuration": "0s",
+          "transitionDuration": "0s"
+        },
+        ".panel": {
+          "backdropFilter": "blur(24px) saturate(1.18)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderWidth": "1px",
+          "boxShadow": "rgba(0, 8, 20, 0.16) 0px 18px 50px 0px, rgba(255, 255, 255, 0.035) 0px 1px 0px 0px inset",
+          "animationDuration": "0s",
+          "transitionDuration": "0s"
+        },
+        ".metric-card": {
+          "backdropFilter": "none",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderWidth": "1px",
+          "boxShadow": "none",
+          "animationDuration": "0s",
+          "transitionDuration": "0s"
+        }
       }
     },
     {
       "captureId": "Bronze-200",
       "channel": "Bronze",
       "textScalePercent": 200,
+      "highContrast": false,
+      "reduceMotion": true,
       "path": "apps/desktop/tests/fixtures/surum-paletleri/bronze-200-yuzde-tipografi-ekran-goruntusu.png",
       "sha256": "535bd6872425e1311a7767019254b79b1c7d37271853adb8405f57812aa6d189",
       "width": 1280,
@@ -441,6 +551,184 @@
           }
         },
         "clippedText": []
+      },
+      "visualEffects": {
+        ".sidebar": {
+          "backdropFilter": "blur(22px) saturate(1.12)",
+          "backgroundColor": "color(srgb 0.992157 0.992157 0.988235 / 0.94)",
+          "borderWidth": "0px 1px 0px 0px",
+          "boxShadow": "none",
+          "animationDuration": "1e-06s",
+          "transitionDuration": "1e-06s"
+        },
+        ".topbar": {
+          "backdropFilter": "blur(22px) saturate(1.12)",
+          "backgroundColor": "color(srgb 0.992157 0.992157 0.988235 / 0.86)",
+          "borderWidth": "0px 0px 1px",
+          "boxShadow": "none",
+          "animationDuration": "1e-06s",
+          "transitionDuration": "1e-06s"
+        },
+        ".panel": {
+          "backdropFilter": "blur(22px) saturate(1.12)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderWidth": "1px",
+          "boxShadow": "rgba(0, 8, 20, 0.16) 0px 18px 50px 0px, rgba(255, 255, 255, 0.035) 0px 1px 0px 0px inset",
+          "animationDuration": "1e-06s",
+          "transitionDuration": "1e-06s"
+        },
+        ".metric-card": {
+          "backdropFilter": "none",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderWidth": "1px",
+          "boxShadow": "none",
+          "animationDuration": "1e-06s",
+          "transitionDuration": "1e-06s"
+        }
+      }
+    },
+    {
+      "captureId": "Bronze-Opaque",
+      "channel": "Bronze",
+      "textScalePercent": 100,
+      "highContrast": true,
+      "reduceMotion": true,
+      "path": "apps/desktop/tests/fixtures/surum-paletleri/bronze-opak-erisilebilirlik-ekran-goruntusu.png",
+      "sha256": "7d51e0959ac00f8bb5221d69340f39971b1f74750da54c428655d095146a4c09",
+      "width": 1280,
+      "height": 800,
+      "bytes": 208468,
+      "computedTokens": {
+        "background": "#F4F3F0",
+        "panel": "#FDFDFC",
+        "panel-secondary": "#F7F5F1",
+        "text": "#333537",
+        "muted": "#676B6A",
+        "border": "#8E8A82",
+        "accent": "#A5672F",
+        "accent-soft": "#FFD39B",
+        "accent-edge": "#DC9852",
+        "accent-strong": "#71441F",
+        "primary": "#467259",
+        "primary-hover": "#36563F",
+        "focus": "#3979E6"
+      },
+      "layoutChecks": {
+        "rootWidth": 1280,
+        "rootHeight": 826,
+        "regions": {
+          ".app-shell": {
+            "clientWidth": 1280,
+            "scrollWidth": 1280,
+            "clientHeight": 826,
+            "scrollHeight": 826,
+            "horizontalOverflow": 0
+          },
+          ".sidebar": {
+            "clientWidth": 277,
+            "scrollWidth": 277,
+            "clientHeight": 826,
+            "scrollHeight": 826,
+            "horizontalOverflow": 0
+          },
+          ".window-brand": {
+            "clientWidth": 277,
+            "scrollWidth": 277,
+            "clientHeight": 53,
+            "scrollHeight": 53,
+            "horizontalOverflow": 0
+          },
+          ".family-switcher": {
+            "clientWidth": 251,
+            "scrollWidth": 251,
+            "clientHeight": 69,
+            "scrollHeight": 69,
+            "horizontalOverflow": 0
+          },
+          ".sidebar nav": {
+            "clientWidth": 253,
+            "scrollWidth": 253,
+            "clientHeight": 176,
+            "scrollHeight": 176,
+            "horizontalOverflow": 0
+          },
+          ".sidebar-footer": {
+            "clientWidth": 253,
+            "scrollWidth": 253,
+            "clientHeight": 127,
+            "scrollHeight": 127,
+            "horizontalOverflow": 0
+          },
+          ".topbar": {
+            "clientWidth": 1002,
+            "scrollWidth": 1002,
+            "clientHeight": 63,
+            "scrollHeight": 63,
+            "horizontalOverflow": 0
+          },
+          ".page-content": {
+            "clientWidth": 1002,
+            "scrollWidth": 1002,
+            "clientHeight": 768,
+            "scrollHeight": 768,
+            "horizontalOverflow": 0
+          },
+          ".welcome-panel": {
+            "clientWidth": 942,
+            "scrollWidth": 942,
+            "clientHeight": 259,
+            "scrollHeight": 259,
+            "horizontalOverflow": 0
+          },
+          ".metric-grid": {
+            "clientWidth": 946,
+            "scrollWidth": 946,
+            "clientHeight": 256,
+            "scrollHeight": 256,
+            "horizontalOverflow": 0
+          }
+        },
+        "clippedText": [
+          {
+            "tag": "STRONG",
+            "className": "",
+            "text": "Örnek içermeyen güvenli görünüm"
+          }
+        ]
+      },
+      "visualEffects": {
+        ".sidebar": {
+          "backdropFilter": "none",
+          "backgroundColor": "rgb(253, 253, 252)",
+          "borderWidth": "0px 1px 0px 0px",
+          "boxShadow": "none",
+          "animationDuration": "1e-06s",
+          "transitionDuration": "1e-06s"
+        },
+        ".topbar": {
+          "backdropFilter": "none",
+          "backgroundColor": "rgb(253, 253, 252)",
+          "borderWidth": "0px 0px 1px",
+          "boxShadow": "none",
+          "animationDuration": "1e-06s",
+          "transitionDuration": "1e-06s"
+        },
+        ".panel": {
+          "backdropFilter": "none",
+          "backgroundColor": "rgb(253, 253, 252)",
+          "borderWidth": "2px",
+          "boxShadow": "none",
+          "animationDuration": "1e-06s",
+          "transitionDuration": "1e-06s"
+        },
+        ".metric-card": {
+          "backdropFilter": "none",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderWidth": "1px",
+          "boxShadow": "none",
+          "animationDuration": "1e-06s",
+          "transitionDuration": "1e-06s"
+        }
       }
     }
   ]

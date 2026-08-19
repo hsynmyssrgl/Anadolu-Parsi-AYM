@@ -3,7 +3,7 @@
   "id": "PARSYUVA-AYM-ANA-IS-SICILI-V1",
   "kaynak": "01_ANA_IS_LISTESI.md",
   "toplamIs": 49,
-  "tamamlandi": 13,
+  "tamamlandi": 14,
   "requirementPass": false,
   "izinliDurumlar": ["TAMAMLANDI", "DEVAM", "ACIK", "BLOCKED", "NOT_RUN"],
   "isler": [
@@ -15,7 +15,7 @@
 
     {"id":"IS-0101","alan":"Urun Tasarimi","is":"ParsYuva AYM marka tutarliligi","sorumlu":"Codex","durum":"TAMAMLANDI","kabul":"Pencere installer yardim ve raporda ayni ad","kanit":["05_KALITE_TEST_KANIT/07_MARKA_KIMLIGI_DOGRULAMA_KANITI.json"],"disKaynakGerekli":false,"acikNedeni":"","bagimliliklar":[],"requirementPass":true},
     {"id":"IS-0102","alan":"Urun Tasarimi","is":"Bronze Silver Gold merkezi tema tokenlari","sorumlu":"Codex","durum":"TAMAMLANDI","kabul":"Uc kanal kontrast ve ekran goruntusu testi","kanit":["05_KALITE_TEST_KANIT/14_SURUM_PALET_KONTRAST_KANITI.json","../../apps/desktop/tests/fixtures/surum-paletleri/PALET_EKRAN_GORUNTUSU_MANIFESTI.json"],"disKaynakGerekli":false,"acikNedeni":"","bagimliliklar":["IS-0101"],"requirementPass":true},
-    {"id":"IS-0103","alan":"Urun Tasarimi","is":"Acik beyaz zemin ve saydamlik sistemi","sorumlu":"Codex","durum":"ACIK","kabul":"Reduced motion ve transparency UAT","kanit":[],"disKaynakGerekli":false,"acikNedeni":"Tum ekranlarda saydamlik ve fallback uygulanmadi.","bagimliliklar":["IS-0102"],"requirementPass":false},
+    {"id":"IS-0103","alan":"Urun Tasarimi","is":"Acik beyaz zemin ve saydamlik sistemi","sorumlu":"Codex","durum":"TAMAMLANDI","kabul":"Reduced motion ve transparency UAT","kanit":["05_KALITE_TEST_KANIT/16_SAYDAMLIK_VE_HAREKET_AZALTMA_KANITI.json","../../apps/desktop/tests/fixtures/surum-paletleri/bronze-opak-erisilebilirlik-ekran-goruntusu.png"],"disKaynakGerekli":false,"acikNedeni":"","bagimliliklar":["IS-0102"],"requirementPass":true},
     {"id":"IS-0104","alan":"Urun Tasarimi","is":"Sol alt ve sag tipografi orani","sorumlu":"Codex","durum":"TAMAMLANDI","kabul":"Yuzde 200 zoomda tasma yok","kanit":["05_KALITE_TEST_KANIT/15_TIPOGRAFI_YUZDE_200_KANITI.json","../../apps/desktop/tests/fixtures/surum-paletleri/bronze-200-yuzde-tipografi-ekran-goruntusu.png"],"disKaynakGerekli":false,"acikNedeni":"","bagimliliklar":["IS-0102"],"requirementPass":true},
     {"id":"IS-0105","alan":"Urun Tasarimi","is":"Menu ve islev parite taramasi","sorumlu":"Codex","durum":"TAMAMLANDI","kabul":"Yetim menu ve API sayisi sifir","kanit":["05_KALITE_TEST_KANIT/08_MENU_ISLEV_PARITE_KANITI.json"],"disKaynakGerekli":false,"acikNedeni":"","bagimliliklar":[],"requirementPass":true},
     {"id":"IS-0106","alan":"Urun Tasarimi","is":"Tam Ingilizce uzman panel cevirisi","sorumlu":"Codex","durum":"ACIK","kabul":"English locale gorunur Turkce sabit metin sifir","kanit":[],"disKaynakGerekli":false,"acikNedeni":"Tum ozellik ekranlari cevrilmedi.","bagimliliklar":[],"requirementPass":false},

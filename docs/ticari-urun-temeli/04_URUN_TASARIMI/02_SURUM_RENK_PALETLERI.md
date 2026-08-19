@@ -47,6 +47,10 @@ Uygulama, installer, tanitim, yardim ve raporlar etkin surum kanalini ana koddan
 
 Apple benzeri saydamlik; beyaz zemin uzerinde hafif blur, sinir ve golge olarak uygulanir. Metin veya form alaninin arkasinda kontrasti bozacak kadar saydamlik kullanilmaz. Windows reduce-transparency veya reduce-motion tercihleri saydamligi/animasyonu azaltir.
 
+Merkezi cam yuzey listesi; sol menu, ust cubuk, acilir menuler, komut paleti, kart/panel, modal, kimlik formu ve sesli yardim merkezidir. Uygulama yuksek kontrasti, `prefers-reduced-transparency`, `forced-colors` veya backdrop-filter destegi yoklugunu gordugunde blur kapatilir; opak `--shell-panel-solid` zemini kullanilir ve dekoratif golge kaldirilir. `data-reduce-motion="true"` veya `prefers-reduced-motion` tum dekoratif animasyon/gecisleri 0.001 ms'e indirir.
+
+Normal cam ve opak erisilebilirlik referanslari ayni Electron yakalama zincirinde uretilir. Opak referans: `apps/desktop/tests/fixtures/surum-paletleri/bronze-opak-erisilebilirlik-ekran-goruntusu.png`.
+
 ## Dogrulama
 
 - Kanal degisimi uygulama yeniden acilisinda dogru paleti etkinlestirir.
