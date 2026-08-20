@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "id": "BRONZE-CURRENT-COMPLETION-AUDIT",
-  "generatedAt": "2026-08-19T11:55:12.051Z",
-  "release": "Bronze 19.08.2026.33",
+  "generatedAt": "2026-08-20T09:59:57.205Z",
+  "release": "Bronze 20.08.2026.35",
   "PPK002": "COMPLETE",
   "PPK003": "COMPLETE",
   "PPK004": "COMPLETE",
@@ -78,7 +78,7 @@
         "exitCode": 0,
         "status": "PASS",
         "tail": [
-          "Canonical Rule Registry: PASS (940 checks / 217 rules / b79db92a03d559f33ccd49348bad159a70b6034fbcf10a07abe5a407549bf0be)."
+          "Canonical Rule Registry: PASS (940 checks / 217 rules / 5b83854fb2d21e978ffe1dc79cfbcf180547f42d06cd32a8ba7918a58cf1a0ed)."
         ]
       },
       {

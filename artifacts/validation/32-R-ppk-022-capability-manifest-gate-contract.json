@@ -59,7 +59,7 @@
       "passed": true
     },
     {
-      "name": "manifest contains exactly 444 unique surfaces",
+      "name": "manifest contains exactly 447 unique surfaces",
       "passed": true
     },
     {
@@ -458,10 +458,10 @@
   "protectedCapabilityFamilies": 7,
   "canonicalApplications": 14,
   "productionSourceZones": 18,
-  "scannedProductionFiles": 585,
-  "exactCapabilitySurfaces": 444,
-  "exactManifestEntries": 444,
-  "exactManifestSha256": "881cf34eb037ff1c00061aeb3cae5fb8aabf08773d94c27395bcfb54e338c880",
+  "scannedProductionFiles": 588,
+  "exactCapabilitySurfaces": 447,
+  "exactManifestEntries": 447,
+  "exactManifestSha256": "2ac32190c1b40c455093841eb2456c06a168c9aaf519068a14f570705b8a177a",
   "pinnedBootstrapSurfaces": 26,
   "maliciousAstSelfTests": 35,
   "benignAstSelfTests": 5,
@@ -479,5 +479,5 @@
   "cutoverAuthorityAttached": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-19T17:04:20.262Z"
+  "generatedAt": "2026-08-20T13:17:21.711Z"
 }

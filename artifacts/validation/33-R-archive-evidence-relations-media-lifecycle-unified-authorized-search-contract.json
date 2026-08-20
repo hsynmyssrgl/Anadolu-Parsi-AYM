@@ -51,7 +51,7 @@
       "status": "PASS"
     },
     {
-      "name": "DataStore test proves encrypted files replay rollback and no raw metadata leak",
+      "name": "DataStore test proves encrypted files restart replay rollback and no raw metadata leak",
       "status": "PASS"
     },
     {
@@ -63,7 +63,7 @@
       "status": "PASS"
     },
     {
-      "name": "decision and threat model record no false atomicity or acceptance claim",
+      "name": "decision and threat model record bounded restart recovery without false atomicity or acceptance claim",
       "status": "PASS"
     },
     {
@@ -71,5 +71,5 @@
       "status": "PASS"
     }
   ],
-  "generatedAt": "2026-08-16T05:28:46.128Z"
+  "generatedAt": "2026-08-20T08:47:51.099Z"
 }

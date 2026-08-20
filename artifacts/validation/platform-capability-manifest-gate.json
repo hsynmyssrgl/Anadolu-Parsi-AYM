@@ -1,17 +1,17 @@
 {
   "status": "PASS",
   "productionSourceZones": 18,
-  "scannedFiles": 585,
-  "capabilitySurfaces": 444,
-  "exactManifestSurfaces": 444,
-  "exactManifestSha256": "881cf34eb037ff1c00061aeb3cae5fb8aabf08773d94c27395bcfb54e338c880",
+  "scannedFiles": 588,
+  "capabilitySurfaces": 447,
+  "exactManifestSurfaces": 447,
+  "exactManifestSha256": "2ac32190c1b40c455093841eb2456c06a168c9aaf519068a14f570705b8a177a",
   "surfaceCounts": {
     "CAMERA_API": 1,
     "FILE_DIALOG": 2,
     "FILE_IMPORT": 376,
     "MICROPHONE_API": 1,
     "NETWORK_API": 3,
-    "NETWORK_IMPORT": 14,
+    "NETWORK_IMPORT": 17,
     "OCR_API": 6,
     "OCR_IMPORT": 41
   },

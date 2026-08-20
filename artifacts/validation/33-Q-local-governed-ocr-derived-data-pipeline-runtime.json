@@ -36,9 +36,9 @@
   "sourceStabilizationStatus": "STABLE_LOCAL_SNAPSHOT",
   "ratchetSemantics": "EXACT_LOCAL_SNAPSHOT_NOT_REQUIREMENT_CLOSURE",
   "targetedTestFilesPassed": 20,
-  "targetedTestsPassed": 147,
+  "targetedTestsPassed": 148,
   "targetedTestFileRatchet": 20,
-  "targetedTestRatchet": 147,
+  "targetedTestRatchet": 148,
   "testFiles": [
     "packages/application/tests/local-governed-ocr-use-cases.test.ts",
     "packages/repositories/local-governed-ocr-repository-policy.test.ts",
@@ -66,9 +66,9 @@
   "ppkGateEvidence": {
     "ppk021": {
       "status": "PASS",
-      "scannedProductionFiles": 555,
-      "exactPrivilegedSurfaceCount": 874,
-      "exactAllowlistSha256": "930119485fa3459f55ed3f23909ba9846560e785030bb991b5fb3105383d5d1a",
+      "scannedProductionFiles": 588,
+      "exactPrivilegedSurfaceCount": 895,
+      "exactAllowlistSha256": "fad3ceeb9485bffc9d6f9878f7bb486f56a73b4aa5d045580471c70a49e59da6",
       "targetedTestsPassed": 17,
       "contractChecksPassed": 84,
       "runtimeChecksPassed": 20,
@@ -76,11 +76,11 @@
     },
     "ppk022": {
       "status": "PASS",
-      "scannedProductionFiles": 555,
-      "exactCapabilitySurfaceCount": 392,
-      "exactCapabilityManifestSha256": "cb879c739cb8ef3a2e92d1f0e451cd21ba7e9d4b0fcd519f343cddd725c9745c",
+      "scannedProductionFiles": 588,
+      "exactCapabilitySurfaceCount": 447,
+      "exactCapabilityManifestSha256": "2ac32190c1b40c455093841eb2456c06a168c9aaf519068a14f570705b8a177a",
       "targetedTestsPassed": 19,
-      "contractChecksPassed": 110,
+      "contractChecksPassed": 111,
       "runtimeChecksPassed": 24,
       "canonicalAvailabilityChecksPassed": 19,
       "findings": 0
@@ -109,7 +109,7 @@
       "status": "PASS"
     },
     {
-      "name": "local test result meets the exact 20/147 ratchet",
+      "name": "local test result meets the exact 20/148 ratchet",
       "status": "PASS"
     },
     {
@@ -158,5 +158,5 @@
     "signal": null,
     "reason": "Local composed component matrix completed; requirement, external and manual evidence remain open."
   },
-  "generatedAt": "2026-08-16T23:39:30.533Z"
+  "generatedAt": "2026-08-20T13:22:10.405Z"
 }

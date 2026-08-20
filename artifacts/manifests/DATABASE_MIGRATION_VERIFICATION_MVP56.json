@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "product": "Panthera pardus tulliana",
   "version": "20.08.2026.35",
-  "milestone": "Bronze RC2 Build undefined",
+  "milestone": "Bronze 20.08.2026.35",
   "status": "passed",
   "checkCount": 9,
   "checks": [
@@ -592,7 +592,17 @@
       "version": 115,
       "name": "windows_resilience_universal_ux",
       "checksum": "e9e67d7ef5c3097f4e39ea3a01aca76a7f9b64fe5b54de8da4de8cfbfc42e5cc"
+    },
+    {
+      "version": 116,
+      "name": "b4_banking_catalog_2026_refresh",
+      "checksum": "90ce518f7e25bff775f93181f8232c3c150fc546825c009d0522057afde344f6"
+    },
+    {
+      "version": 117,
+      "name": "communication_scheduled_message_release",
+      "checksum": "9602df3d935441f033eb45d89d7403e09d8dbed3849873cfe68a098ff754dde3"
     }
   ],
-  "generatedAt": "2026-08-20T03:48:20.582Z"
+  "generatedAt": "2026-08-20T13:25:47.008Z"
 }

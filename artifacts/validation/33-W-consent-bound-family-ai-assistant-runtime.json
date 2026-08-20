@@ -6,26 +6,26 @@
   "governanceState": "PLANNED",
   "countsAsRequirementPass": false,
   "targetedTestFilesPassed": 6,
-  "targetedTestsPassed": 33,
+  "targetedTestsPassed": 34,
   "migration101Sha256": "ef3790fad5f64de7bbd089d09a835dcb302092d64ccef6abb85e2105fbab2b5b",
   "ppk021": {
     "status": "PASS",
     "productionSourceZones": 18,
-    "scannedFiles": 566,
-    "privilegedSurfaces": 889,
-    "exactAllowlistEntries": 889,
-    "exactAllowlistSha256": "3a297f74d43d4675090a709d4359af9245c2971a7fc338afef2fb87b1c8608dd",
+    "scannedFiles": 588,
+    "privilegedSurfaces": 895,
+    "exactAllowlistEntries": 895,
+    "exactAllowlistSha256": "fad3ceeb9485bffc9d6f9878f7bb486f56a73b4aa5d045580471c70a49e59da6",
     "surfaceCounts": {
-      "CRYPTO_GLOBAL": 21,
-      "CRYPTO_IMPORT": 246,
+      "CRYPTO_GLOBAL": 22,
+      "CRYPTO_IMPORT": 247,
       "DATABASE_IMPORT": 21,
-      "NETWORK_IMPORT": 12,
+      "NETWORK_IMPORT": 15,
       "REPOSITORY_IMPORT": 70,
       "ROLE_PRESENTATION": 2,
       "SQL_CALL": 79,
       "SQL_CONSTRUCTOR": 2,
       "SQL_IMPORT": 2,
-      "USE_CASE_COMPOSITION": 434
+      "USE_CASE_COMPOSITION": 435
     },
     "maliciousSelfTestAssertions": 17,
     "benignSelfTestAssertions": 4,
@@ -35,19 +35,19 @@
   "ppk022": {
     "status": "PASS",
     "productionSourceZones": 18,
-    "scannedFiles": 566,
-    "capabilitySurfaces": 423,
-    "exactManifestSurfaces": 423,
-    "exactManifestSha256": "03945765ce5723f0cbfb8ddc31a6626d1c2dabf5bcf305ba245ef48a7bf30f89",
+    "scannedFiles": 588,
+    "capabilitySurfaces": 447,
+    "exactManifestSurfaces": 447,
+    "exactManifestSha256": "2ac32190c1b40c455093841eb2456c06a168c9aaf519068a14f570705b8a177a",
     "surfaceCounts": {
       "CAMERA_API": 1,
       "FILE_DIALOG": 2,
-      "FILE_IMPORT": 362,
+      "FILE_IMPORT": 376,
       "MICROPHONE_API": 1,
       "NETWORK_API": 3,
-      "NETWORK_IMPORT": 14,
-      "OCR_API": 5,
-      "OCR_IMPORT": 35
+      "NETWORK_IMPORT": 17,
+      "OCR_API": 6,
+      "OCR_IMPORT": 41
     },
     "pinnedBootstrapSurfaces": 26,
     "maliciousSelfTestAssertions": 35,
@@ -65,7 +65,7 @@
       "status": "PASS"
     },
     {
-      "name": "local test result meets exact 6/33 ratchet",
+      "name": "local test result meets exact 6/34 ratchet",
       "status": "PASS"
     },
     {
@@ -101,5 +101,5 @@
       "status": "PASS"
     }
   ],
-  "generatedAt": "2026-08-19T05:42:50.556Z"
+  "generatedAt": "2026-08-20T13:25:59.524Z"
 }

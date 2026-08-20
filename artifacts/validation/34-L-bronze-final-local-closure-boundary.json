@@ -3,7 +3,7 @@
   "step": "34-L",
   "decision": "DEC-249",
   "mode": "boundary",
-  "sourceBaseHead": "5b2a6ea8c7f50d7795f4a6ac0f70ae3e822ac8b7",
+  "sourceBaseHead": "a12d202519fe30df64bd36ee1185905369cf6fa1",
   "status": "PASS",
   "governanceState": "PLANNED_FINAL",
   "localImplementationStatus": "LOCAL_CLOSURE_AUTOMATION_COMPOSED_ACCEPTANCE_BLOCKED",
@@ -12,7 +12,7 @@
   "checkCount": 7,
   "passed": 7,
   "failed": 0,
-  "evidenceDigest": "3ae25182ea8f3249632d3e6eaa9be213a731bc010e186f6a61b78aed17504e78",
+  "evidenceDigest": "03864a7011819a990864945531bc5a27b98bcbb1087e1a1d0b4042c3d6f24678",
   "checks": [
     {
       "name": "34-L governance and automation files exist",
@@ -34,13 +34,13 @@
       "name": "34-H boundary",
       "status": "PASS",
       "exitCode": 0,
-      "output": "34-H boundary: PASS (9/9; requirement PASS=false; write=false).\n"
+      "output": "34-H boundary: PASS (12/12; requirement PASS=false; write=false).\n"
     },
     {
       "name": "34-I boundary",
       "status": "PASS",
       "exitCode": 0,
-      "output": "34-I boundary: PASS (9/9; requirement PASS=false; write=false).\n"
+      "output": "34-I boundary: PASS (14/14; requirement PASS=false; write=false).\n"
     },
     {
       "name": "34-J boundary",
@@ -55,5 +55,5 @@
       "output": "34-K boundary: PASS (11/11; requirement PASS=false; write=false).\n"
     }
   ],
-  "generatedAt": "2026-08-18T05:17:00.857Z"
+  "generatedAt": "2026-08-20T13:26:18.919Z"
 }
