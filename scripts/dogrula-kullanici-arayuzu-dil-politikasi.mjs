@@ -40,7 +40,15 @@ check(policy.firstLaunchPreference==='system'&&policy.persistentUserPreferenceAl
   &&JSON.stringify(policy.persistentPreferenceValues)===JSON.stringify(['system','tr','en'])
   &&policy.userPreferenceOverridesSystemAfterFirstLaunch===true,'persistent user language preference truth mismatch');
 check(policy.coverage.foundationStatus==='COMPLETE'&&policy.coverage.coreUserJourneyStatus==='COMPLETE','localization foundation incomplete');
-check(policy.coverage.fullFeaturePanelTranslationStatus==='PARTIAL'&&policy.coverage.countsAsFullApplicationEnglishPass===false,'partial full-feature truth missing');
+check(policy.coverage.fullFeaturePanelTranslationStatus==='COMPLETE'
+  &&policy.coverage.countsAsFullApplicationEnglishPass===true
+  &&policy.coverage.openSurface===null&&policy.coverage.openReason===null,'full-application English closure truth missing');
+check(policy.coverage.completionEvidence?.featurePanelRenderTestWaves===18
+  &&policy.coverage.completionEvidence?.applicationShellRenderTestWaves===18
+  &&policy.coverage.completionEvidence?.englishVisibleTurkishTextCount===0
+  &&policy.coverage.completionEvidence?.systemLanguageFallbackVerified===true
+  &&policy.coverage.completionEvidence?.persistentUserPreferenceVerified===true
+  &&policy.coverage.completionEvidence?.installerLanguagePairVerified===true,'full-application English completion evidence mismatch');
 check(JSON.stringify(policy.coverage.translatedFeaturePanelWaveOne)===JSON.stringify([
   'DistributedOperationsPanel','UniversalUxConsolidationPanel','SignedPluginPlatformPanel'
 ])&&policy.coverage.translatedFeaturePanelWaveOneEnglishVisibleTurkishTextCount===0,'feature-panel wave-one truth mismatch');

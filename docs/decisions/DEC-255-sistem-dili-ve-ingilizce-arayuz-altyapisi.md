@@ -52,9 +52,9 @@ Dil kararı Electron ana sürecinde `app.getLocale()` ve ana sürecin doğrulad�
 - Kimlik, passkey, federated bağlantı, geçici doğrulanabilir yetki ve salt-okunur companion merkezi; ana kabuk on yedinci dalga render ve sözlük testlerinde görünür Türkçe karakter sayısı sıfırdır. Özel anahtar/biyometri saklamama, yapılandırılmamış sağlayıcıyı gizleme, minimum disclosure ve Windows tek-yazar sınırları korunur.
 - Bağlamsal Yetkiler yüzeyi; ana kabuk on sekizinci dalga render ve sözlük testlerinde görünür Türkçe karakter sayısı sıfırdır. Yönetici yetkisi, amaç/aile dalı/süre/sahiplik bağları, açık ret ve sonlu çevrimdışı kira sınırları korunur.
 
-## Açık kalan iş
+## Kapanış durumu
 
-İlk yirmi dört uzman panel ile ana pano, kişi kataloğu, aile, soy ağacı, zaman tüneli, önemli günler, birleşik yetkili arama, Doküman Merkezi, ilk kurulum/giriş, aile daveti, ilişki ekleme, dijital miras, AI izin merkezi, yönetilen taslak merkezi, Windows Hello, geçersiz menü hedefi, Veri Yaşam Döngüsü, Sistem/Bakım, Gizlilik/Sahiplik, aile olay/konum, Sağlık, Yaşam, Otomasyon ve Raporlama yüzeyleri tamamlanmış olsa da ana uygulama kabuğunun kalan ekranlarındaki tarihsel görünür Türkçe metinlerin son taraması henüz bitmedi. Bu nedenle İngilizce altyapı ve çekirdek kullanıcı yolculuğu `COMPLETE`, uygulamanın uçtan uca bütün ekran İngilizcesi `PARTIAL` ve `countsAsFullApplicationEnglishPass=false` durumundadır. Eksik metinler Türkçeye sessiz fallback yapılarak tamamlanmış sayılamaz.
+On sekiz uzman panel render dalgası ile on sekiz ana kabuk render dalgası tamamlandı. İngilizce görünümde kullanıcıya görünen Türkçe metin sayısı sıfır, sistem dili çözümleme/fallback, kalıcı `system|tr|en` tercihi ve iki dilli kurulum sözleşmesi testlidir. Bu nedenle İngilizce altyapı, çekirdek kullanıcı yolculuğu ve uygulamanın uçtan uca ekran İngilizcesi `COMPLETE`; `countsAsFullApplicationEnglishPass=true` durumundadır. Kullanıcının girdiği aile adları, kişi adları ve içerikler çeviri kapsamına alınmaz; desteklenmeyen yeni bir yüzey İngilizce metin sağlamadan eklenirse doğrulama fail-closed durur.
 
 ## Kanıt
 

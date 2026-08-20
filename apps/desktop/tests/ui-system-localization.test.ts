@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { resolveUiLocalization } from '@ppt/domain';
@@ -68,5 +68,19 @@ describe('system-language UI localization',()=>{
     expect(packageJson.build.nsis.license).toBeUndefined();
     expect(installer).toContain('LangString AymFinishTitle ${AYM_LANG_ENGLISH}');
     expect(installer).toContain('LangString AymFinishTitle ${AYM_LANG_TURKISH}');
+  });
+
+  it('keeps the full English application closure bound to all renderer evidence waves',()=>{
+    const policy=JSON.parse(readFileSync(resolve(root,'config/kullanici-arayuzu-dil-politikasi.json'),'utf8')) as {
+      coverage:{fullFeaturePanelTranslationStatus:string;countsAsFullApplicationEnglishPass:boolean;openSurface:null;openReason:null;
+        completionEvidence:{featurePanelRenderTestWaves:number;applicationShellRenderTestWaves:number;englishVisibleTurkishTextCount:number}}
+    };
+    const tests=readdirSync(resolve(root,'apps/desktop/tests'));
+    expect(tests.filter((name)=>/^feature-panel-localization-wave-.+\.test\.ts$/u.test(name))).toHaveLength(18);
+    expect(tests.filter((name)=>/^app-shell-localization-wave-.+\.test\.ts$/u.test(name))).toHaveLength(18);
+    expect(policy.coverage).toMatchObject({
+      fullFeaturePanelTranslationStatus:'COMPLETE',countsAsFullApplicationEnglishPass:true,openSurface:null,openReason:null,
+      completionEvidence:{featurePanelRenderTestWaves:18,applicationShellRenderTestWaves:18,englishVisibleTurkishTextCount:0}
+    });
   });
 });

@@ -329,7 +329,7 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - `DEC-252` — DEC-252 — Tarihsel kayıtların gelecek içerik denetimlerinden çıkarılması — ACTIVE — `docs/decisions/DEC-252-freeze-historical-records-from-future-content-review.md`
 - `DEC-253` — DEC-253 — Animasyonlu kurulum, yenilenmiş anlatım ve Silver sesli Yardım Merkezi — ACTIVE — `docs/decisions/DEC-253-animated-installer-narration-and-silver-help-center.md`
 - `DEC-254` — DEC-254 — ParsYuva marka kimliği ve kurumsallaşma yol haritası — ACTIVE / PARTIAL_EXTERNAL_ACTION — `docs/decisions/DEC-254-parsyuva-brand-and-institutionalization-roadmap.md`
-- `DEC-255` — DEC-255 — Sistem Dili ve İngilizce Arayüz Altyapısı — KAYITLI — `docs/decisions/DEC-255-sistem-dili-ve-ingilizce-arayuz-altyapisi.md`
+- `DEC-255` — DEC-255 — Sistem Dili ve İngilizce Arayüz Altyapısı — ACTIVE / LOCAL_IMPLEMENTATION_COMPLETE — `docs/decisions/DEC-255-sistem-dili-ve-ingilizce-arayuz-altyapisi.md`
 - `DEC-256` — DEC-256 — Tek gerçek kurulum ilerlemesi ve yerel yüzde görünümü — ACTIVE — `docs/decisions/DEC-256-tek-gercek-kurulum-ilerlemesi.md`
 - `DEC-257` — DEC-257 — Başlıklarda ParsYuva AYM adının tekrarsız kullanımı — ACTIVE — `docs/decisions/DEC-257-parsyuva-aym-baslik-tekrar-yasagi.md`
 

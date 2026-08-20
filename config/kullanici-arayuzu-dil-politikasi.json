@@ -29,7 +29,7 @@
   "coverage": {
     "foundationStatus": "COMPLETE",
     "coreUserJourneyStatus": "COMPLETE",
-    "fullFeaturePanelTranslationStatus": "PARTIAL",
+    "fullFeaturePanelTranslationStatus": "COMPLETE",
     "completeSurfaces": [
       "first-run-introduction",
       "first-run-security",
@@ -150,9 +150,17 @@
     "translatedApplicationShellWaveSeventeenEnglishVisibleTurkishTextCount": 0,
     "translatedApplicationShellWaveEighteen": ["PermissionsScreen"],
     "translatedApplicationShellWaveEighteenEnglishVisibleTurkishTextCount": 0,
-    "openSurface": "remaining-feature-panel-copy",
-    "openReason": "İlk yirmi dört uzman panel ile ana pano, kişi kataloğu, aile, soy ağacı, zaman tüneli, önemli günler, birleşik yetkili arama, Doküman Merkezi, ilk kurulum/giriş, aile daveti, ilişki ekleme, dijital miras, AI izin merkezi, yönetilen taslak merkezi, Windows Hello, geçersiz menü hedefi, Veri Yaşam Döngüsü, Sistem/Bakım, Gizlilik/Sahiplik, aile olay/konum, Sağlık, Yaşam, Otomasyon, Raporlama, Veri Onarma, Oturum Kilidi, Hane/Üyelik, Kişi Yaşam Döngüsü, Profil Davetleri, Kimlik/Erişim Merkezi ve Bağlamsal Yetkiler yüzeyleri iki dillidir; ana uygulama kabuğunun kalan ekranlarındaki tarihsel görünür Türkçe metinlerin son taraması sürmektedir.",
-    "countsAsFullApplicationEnglishPass": false
+    "completionEvidence": {
+      "featurePanelRenderTestWaves": 18,
+      "applicationShellRenderTestWaves": 18,
+      "englishVisibleTurkishTextCount": 0,
+      "systemLanguageFallbackVerified": true,
+      "persistentUserPreferenceVerified": true,
+      "installerLanguagePairVerified": true
+    },
+    "openSurface": null,
+    "openReason": null,
+    "countsAsFullApplicationEnglishPass": true
   },
   "failClosed": true,
   "waiverAllowed": false

@@ -2143,7 +2143,7 @@
         "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
         "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md"
       ],
-      "workListImpact": "Sistem dili çözümleyicisi, İngilizce güvenli varsayılan, ana süreçte kalıcı system|tr|en kullanıcı tercihi, Ayarlar seçicisi, ana süreç/preload/renderer zinciri, ilk kurulum-giriş-ana kabuk-sesli yardım ve iki dilli NSIS tamamlandı; bütün özellik panellerinin İngilizce metin kapsamı PARTIAL ve sonraki dil paketinde açık kalır",
+      "workListImpact": "Sistem dili çözümleyicisi, İngilizce güvenli varsayılan, ana süreçte kalıcı system|tr|en kullanıcı tercihi, Ayarlar seçicisi, ana süreç/preload/renderer zinciri, ilk kurulum-giriş-ana kabuk-sesli yardım ve iki dilli NSIS tamamlandı; 18 uzman panel ve 18 ana kabuk render dalgasıyla tam uygulama İngilizcesi yerel otomatik kanıtla COMPLETE durumundadır",
       "syncStatus": "SYNCHRONIZED",
       "requirements": [],
       "codeAreas": [
@@ -2160,6 +2160,10 @@
       "evidence": [
         "packages/domain/tests/ui-localization.test.ts",
         "apps/desktop/tests/ui-system-localization.test.ts",
+        "apps/desktop/tests/feature-panel-localization-wave-one.test.ts",
+        "apps/desktop/tests/feature-panel-localization-wave-eighteen.test.ts",
+        "apps/desktop/tests/app-shell-localization-wave-nineteen.test.ts",
+        "apps/desktop/tests/app-shell-localization-wave-thirty-six.test.ts",
         "apps/desktop/tests/installer-narration-experience.test.ts"
       ]
     },
