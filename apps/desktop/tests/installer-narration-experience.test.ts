@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
 
 const installerUrl = new URL('../build/installer.nsh', import.meta.url);
+const extractorUrl = new URL('../build/extractAppPackage.nsh', import.meta.url);
 const appUrl = new URL('../src/renderer/App.tsx', import.meta.url);
 const accessibilityUrl = new URL('../src/renderer/accessibility.ts', import.meta.url);
 const localizationUrl = new URL('../src/renderer/localization.tsx', import.meta.url);
@@ -11,7 +12,7 @@ const packageUrl = new URL('../package.json', import.meta.url);
 
 describe('installer progress, narration and Silver help experience', () => {
   it('keeps pre-install pages static and reserves progress for real file installation', async () => {
-    const [source,rawPackage]=await Promise.all([readFile(installerUrl,'utf8'),readFile(packageUrl,'utf8')]);
+    const [source,extractor,rawPackage]=await Promise.all([readFile(installerUrl,'utf8'),readFile(extractorUrl,'utf8'),readFile(packageUrl,'utf8')]);
     const packageJson=JSON.parse(rawPackage) as {build:{win?:{artifactName?:string};artifactName?:string;nsis?:{shortcutName?:string;multiLanguageInstaller?:boolean;installerLanguages?:string[]}}};
     for (const marker of [
       '!macro customWelcomePage','!macro customPageAfterChangeDir',
@@ -29,14 +30,18 @@ describe('installer progress, narration and Silver help experience', () => {
       'CreateFont $1 "Segoe UI" 11 400','CreateFont $2 "Segoe UI" 10 600',
       'ParsYuva AYM kullanıma hazır','ParsYuva AYM is ready',
       'F1 Sesli Yardım Merkezinden yeniden dinleyebilirsiniz','F1 Narrated Help Center',
-      'Function AymInstallProgressTick','${PBM_GETPOS}',
       'GetDlgItem $AymInstallProgress $0 1004',
-      'GetDlgItem $AymInstallPercentText $0 1006',
+      'GetDlgItem $AymInstallStatusText $0 1006',
+      'Function AymInstallPayloadStageBegin',
+      'ShowWindow $AymInstallProgress ${SW_HIDE}',
+      'Function AymInstallPayloadStageEnd',
+      'SendMessage $AymInstallProgress ${PBM_SETPOS} 0 0',
+      'ShowWindow $AymInstallProgress ${SW_SHOW}',
       '!define MUI_PAGE_CUSTOMFUNCTION_SHOW AymInstallFilesShow',
       '!define MUI_PAGE_CUSTOMFUNCTION_LEAVE AymInstallFilesLeave',
       '!define AYM_LANG_ENGLISH 1033','!define AYM_LANG_TURKISH 1055',
-      'LangString AymInstallingPercent ${AYM_LANG_TURKISH} "Yükleniyor:"',
-      'LangString AymInstallCompletePercent ${AYM_LANG_TURKISH} "Yükleme tamamlandı: 100%"'
+      'LangString AymInstallingDetail ${AYM_LANG_TURKISH} "Yükleniyor: %s"',
+      'LangString AymInstallComplete ${AYM_LANG_TURKISH} "Yükleme tamamlandı: 100%"'
     ]) expect(source).toContain(marker);
     expect(source).not.toContain('Function AymWelcomeAnimate');
     expect(source).not.toContain('${NSD_CreateTimer} AymWelcomeAnimate');
@@ -46,7 +51,13 @@ describe('installer progress, narration and Silver help experience', () => {
     expect(source).not.toContain('${NSD_CreateProgressBar} 0 121u 100% 8u ""');
     expect(source).not.toContain('ParsYuva AYM Aile Yaşam Merkezi');
     expect(source).not.toContain('ParsYuva AYM Family Life Center');
-    expect(source.match(/\$\{PBM_GETPOS\}/gu)).toHaveLength(1);
+    expect(source).not.toContain('Function AymInstallProgressTick');
+    expect(source).not.toContain('${PBM_GETPOS}');
+    expect(source).not.toContain('${NSD_CreateTimer}');
+    expect(extractor.match(/Nsis7z::ExtractWithDetails "\$\{FILE\}" "\$\(AymInstallingDetail\)"/gu)).toHaveLength(2);
+    expect(extractor.match(/Call AymInstallPayloadStageBegin/gu)).toHaveLength(3);
+    expect(extractor.match(/Call AymInstallPayloadStageEnd/gu)).toHaveLength(3);
+    expect(extractor).not.toContain('Nsis7z::Extract "${FILE}"');
     expect(packageJson.build.nsis?.shortcutName).toBe('ParsYuva AYM');
     expect(packageJson.build.nsis).toMatchObject({multiLanguageInstaller:true,installerLanguages:['en_US','tr_TR']});
     expect(source).not.toMatch(/SetCtlColors \$AymWelcomePulseLabel "\$\{PPT_INSTALLER_CHANNEL_COLOR\}" transparent/u);

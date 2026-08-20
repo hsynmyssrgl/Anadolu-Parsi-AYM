@@ -42,7 +42,7 @@ describe('33-Q local governed OCR renderer surface', () => {
       "kalıcı iş günlüğünden otomatik ve aynı işlem kimliğiyle sürdürülür",
       "Sıradaki veya çalışan iş iptal edilebilir",
       "!['queued', 'running'].includes(selectedJob.status)",
-      "selectedJob.status === 'running' ? 'Çalışan işi iptal et'",
+      "selectedJob.status === 'running' ? text('Çalışan işi iptal et','Cancel running job')",
       "Sıradaki işi iptal et",
       "Türetilmiş sonucu silmek kaynak belgeyi silmez"
     ]) expect(panel).toContain(truth);
@@ -53,10 +53,10 @@ describe('33-Q local governed OCR renderer surface', () => {
   it('binds source eligibility, async states, explicit result reveal and accessible layout', () => {
     expect(panel).toContain("new Set(['image/png', 'image/jpeg'])");
     expect(panel).toContain('MAX_INPUT_BYTES = 16 * 1_024 * 1_024');
-    expect(panel).toContain('AsyncStatePanel state="loading" title="Yerel OCR merkezi yükleniyor"');
-    expect(panel).toContain('AsyncStatePanel state="error" title="Yerel OCR merkezi yüklenemedi"');
+    expect(panel).toContain("AsyncStatePanel state=\"loading\" title={text('Yerel OCR merkezi yükleniyor','Loading local OCR center')}");
+    expect(panel).toContain("AsyncStatePanel state=\"error\" title={text('Yerel OCR merkezi yüklenemedi','The local OCR center could not be loaded')}");
     expect(panel).toContain('Sonucu açıkça görüntüle');
-    expect(panel).toContain('aria-label="OCR sonucu düzeltme metni"');
+    expect(panel).toContain("aria-label={text('OCR sonucu düzeltme metni','OCR result correction text')}");
     expect(panel).toContain('id="local-ocr-search-query"');
     expect(panel).toContain('searchLocalGovernedOcr({ query: searchQuery, limit: 10 })');
     expect(panel).toContain('renderer sonucunda yankılanmaz');

@@ -11,7 +11,7 @@ describe('33-V places travel asset and pet renderer surface',()=>{
     for(const area of ['places','moving','pet_care','travel'])expect(panel).toContain(`value:'${area}'`);
     for(const kind of ['stored_place','moving_inventory','pet_care_record','travel_plan','reservation','travel_document',
       'travel_budget','shared_expense','packing_item','travel_requirement','offline_travel_pack','language_pack','travel_album','expense_settlement'])
-      expect(panel).toContain(`'${kind}'`);expect(panel).toContain('aria-label="Yer ve seyahat alanları"');
+      expect(panel).toContain(`'${kind}'`);expect(panel).toContain("aria-label={text('Yer ve seyahat alanları','Places and travel areas')}");
   });
   it('uses only four safe bridge methods with stable retry identity',()=>{
     for(const method of ['getPlacesTravelCenter','createPlacesTravelItem','updatePlacesTravelItem','deletePlacesTravelItem'])expect(panel).toContain(`.${method}(`);
@@ -26,8 +26,8 @@ describe('33-V places travel asset and pet renderer surface',()=>{
     expect(panel).toContain("useState<PlacesTravelVisibility>('private')");expect(panel).toContain('selected_members');
   });
   it('renders meaningful local summaries for coordinates dates participants budgets and workflow state',()=>{
-    for(const marker of ['itemSummary(item)','Koordinat','Geçerlilik','katılımcı','item.amountMinor/100','Evcil hayvan akışı',
-      'Gereksinim:','Sağlayıcı etiketi:'])expect(panel).toContain(marker);
+    for(const marker of ['itemSummary(item,text)','Koordinat','Geçerlilik','katılımcı','item.amountMinor/100','Evcil hayvan akışı',
+      "text('Gereksinim','Requirement')+': '","text('Sağlayıcı etiketi','Provider label')+': '"])expect(panel).toContain(marker);
     expect(panel).toContain("['travel_plan','reservation','shared_expense','expense_settlement']");
     expect(panel).toContain("['travel_plan','reservation','travel_budget']");
   });

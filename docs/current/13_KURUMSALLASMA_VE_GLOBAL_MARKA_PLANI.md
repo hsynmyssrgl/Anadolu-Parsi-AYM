@@ -3,7 +3,7 @@
 - Belge sürümü: `KURUMSAL-2026-08-18-V1`
 - Ürün: **ParsYuva AYM**
 - Açıklayıcı ad: **ParsYuva Aile Yaşam Merkezi**
-- Görünür sürüm: **Bronze 19.08.2026.34**
+- Görünür sürüm: **Bronze 20.08.2026.35**
 - Yetki kararı: `DEC-254`
 - Durum: **ACTIVE_PLAN / EXTERNAL_ACTION_NOT_RUN**
 - Dış kurumsallaşma kabulü: `countsAsRequirementPass=false`

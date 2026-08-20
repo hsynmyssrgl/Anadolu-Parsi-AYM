@@ -43,7 +43,7 @@ describe('33-W family AI assistant renderer surface',()=>{
   });
 
   it('provides responsive accessible presentation',()=>{
-    expect(panel).toContain('aria-labelledby="family-ai-assistant-title"');expect(panel).toContain('aria-label="Aile asistanı doğruluk sınırları"');
+    expect(panel).toContain('aria-labelledby="family-ai-assistant-title"');expect(panel).toContain("aria-label={text('Aile asistanı doğruluk sınırları','Family assistant truth boundaries')}");
     expect(panel).toContain('aria-labelledby="family-ai-model-title"');expect(panel).toContain('aria-live="polite"');
     expect(styles).toContain('.family-ai-assistant');expect(styles).toContain('@media(max-width:800px)');
   });

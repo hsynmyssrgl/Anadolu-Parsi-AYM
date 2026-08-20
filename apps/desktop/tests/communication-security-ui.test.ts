@@ -38,7 +38,7 @@ describe('34-A communication policy and MLS foundation renderer surface', () => 
       'explicit snapshot kararı bu foundation içinde içerik paylaşmaz',
       'Kapsamlı kaynak yetkilendirmesi henüz uygulanmadı',
       'otomatik retention ve kapasite kurtarma yoktur',
-      '0</strong> gönderilmiş mesaj'
+      "<strong>0</strong> {text('gönderilmiş mesaj','sent messages')}"
     ]) expect(panel).toContain(marker);
     expect(panel).toContain('disabled={Boolean(busy)||!providerReady');
     expect(panel).not.toMatch(/RFC 9420 uyumludur|ileri gizlilik sağlanır|relay içeriği göremez|mesaj teslim edildi/iu);
@@ -49,10 +49,10 @@ describe('34-A communication policy and MLS foundation renderer surface', () => 
       expect(panel).toContain(`${roomType}:`);
     }
     for (const marker of [
-      'aria-labelledby="communication-security-title"', 'role="note"', 'aria-label="İletişim odası oluşturma"',
-      'aria-label="Oda adı"', 'maxLength={160}', 'aria-label="Oda türü"',
-      'aria-label="Oda sahibi cihaz kimliği"', 'aria-label="Üye kişi kimliği"',
-      'aria-label="Üye cihaz kimliği"'
+      'aria-labelledby="communication-security-title"', 'role="note"', "aria-label={text('İletişim odası oluşturma','Create communication room')}",
+      "aria-label={text('Oda adı','Room name')}", 'maxLength={160}', "aria-label={text('Oda türü','Room type')}",
+      "aria-label={text('Oda sahibi cihaz kimliği','Room owner device credential')}", "aria-label={text('Üye kişi kimliği','Member person ID')}",
+      "aria-label={text('Üye cihaz kimliği','Member device credential')}"
     ]) expect(panel).toContain(marker);
     for (const marker of [
       'center.storageCapacity.deviceCredentials', 'center.storageCapacity.rooms', 'center.storageCapacity.mutations',

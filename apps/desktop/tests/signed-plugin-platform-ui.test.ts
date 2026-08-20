@@ -30,7 +30,7 @@ describe('33-Z signed plugin platform renderer surface', () => {
     for (const marker of [
       'Bu ekran eklenti kodu çalıştırmaz', 'Production imza güveni', 'gerçek sandbox/ağ izolasyonu',
       'banka, okul, Matter, FHIR, OneDrive, harita, OCR, AI veya tarayıcı bağlantısı doğrulanmadı',
-      '0</strong> çalıştırılmış eklenti', 'Otomatik retention kurtarma yok', 'Minimum uygulama'
+      "<strong>0</strong> {text('çalıştırılmış eklenti','executed plugins')}", 'Otomatik retention kurtarma yok', 'Minimum uygulama'
     ]) expect(panel).toContain(marker);
     expect(panel).not.toMatch(/eklenti kodunu çalıştırır|production için uygundur|sağlayıcı bağlantısı hazırdır/iu);
   });

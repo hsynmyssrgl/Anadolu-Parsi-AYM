@@ -55,10 +55,12 @@ LangString AymReadyStep3 ${AYM_LANG_ENGLISH} "3 · First launch and voice introd
 LangString AymReadyStep3 ${AYM_LANG_TURKISH} "3 · İlk açılış ve sesli tanıtım hazırlanacak"
 LangString AymNarrationHelp ${AYM_LANG_ENGLISH} "After setup, you can mute or slow the voice introduction, or listen to it later from the F1 Narrated Help Center."
 LangString AymNarrationHelp ${AYM_LANG_TURKISH} "Kurulumdan sonra uygulama açıldığında sesli anlatımı kapatabilir, yavaşlatabilir veya daha sonra F1 Sesli Yardım Merkezinden yeniden dinleyebilirsiniz."
-LangString AymInstallingPercent ${AYM_LANG_ENGLISH} "Installing:"
-LangString AymInstallingPercent ${AYM_LANG_TURKISH} "Yükleniyor:"
-LangString AymInstallCompletePercent ${AYM_LANG_ENGLISH} "Installation complete: 100%"
-LangString AymInstallCompletePercent ${AYM_LANG_TURKISH} "Yükleme tamamlandı: 100%"
+LangString AymInstallPreparing ${AYM_LANG_ENGLISH} "Preparing the verified installation package..."
+LangString AymInstallPreparing ${AYM_LANG_TURKISH} "Doğrulanmış kurulum paketi hazırlanıyor..."
+LangString AymInstallingDetail ${AYM_LANG_ENGLISH} "Installing: %s"
+LangString AymInstallingDetail ${AYM_LANG_TURKISH} "Yükleniyor: %s"
+LangString AymInstallComplete ${AYM_LANG_ENGLISH} "Installation complete: 100%"
+LangString AymInstallComplete ${AYM_LANG_TURKISH} "Yükleme tamamlandı: 100%"
 LangString AymUninstallChoice ${AYM_LANG_ENGLISH} "Choose what to do with your personal data.$\r$\n$\r$\nYes: Back up encrypted data to Documents and installed sync folders, then delete application data from this computer.$\r$\n$\r$\nNo: Completely delete application data from this computer without creating a backup.$\r$\n$\r$\nCancel: Stop uninstalling."
 LangString AymUninstallChoice ${AYM_LANG_TURKISH} "Kişisel verileriniz için bir seçim yapın.$\r$\n$\r$\nEvet: Şifreli verileri Belgeler'e ve kurulu eşitleme klasörlerine yedekle, ardından bu bilgisayardaki uygulama verilerini sil.$\r$\n$\r$\nHayır: Yedek oluşturmadan bu bilgisayardaki uygulama verilerini tamamen sil.$\r$\n$\r$\nİptal: Kaldırmayı durdur."
 LangString AymBackupFailed ${AYM_LANG_ENGLISH} "A verified uninstall backup was not completed. Personal data was not deleted and uninstalling was stopped. Fully close the application from the system tray and try again."
@@ -101,29 +103,37 @@ Var AymWelcomeDialog
 Var AymWelcomePulseLabel
 Var AymReadyDialog
 Var AymInstallProgress
-Var AymInstallPercentText
-
-Function AymInstallProgressTick
-  SendMessage $AymInstallProgress ${PBM_GETPOS} 0 0 $0
-  ${If} $0 < 0
-    StrCpy $0 0
-  ${ElseIf} $0 > 100
-    StrCpy $0 100
-  ${EndIf}
-  ${NSD_SetText} $AymInstallPercentText "$(AymInstallingPercent) $0%"
-FunctionEnd
+Var AymInstallStatusText
 
 Function AymInstallFilesShow
   FindWindow $0 "#32770" "" $HWNDPARENT
   GetDlgItem $AymInstallProgress $0 1004
-  GetDlgItem $AymInstallPercentText $0 1006
-  Call AymInstallProgressTick
-  ${NSD_CreateTimer} AymInstallProgressTick 120
+  GetDlgItem $AymInstallStatusText $0 1006
+  ${NSD_SetText} $AymInstallStatusText "$(AymInstallPreparing)"
+FunctionEnd
+
+; The embedded application archive must first be staged in the NSIS plug-in
+; directory. That copy is not the user-visible install progress and would make
+; the native bar appear to run twice, so keep the bar hidden during staging.
+Function AymInstallPayloadStageBegin
+  ${IfNot} ${Silent}
+    ShowWindow $AymInstallProgress ${SW_HIDE}
+    ${NSD_SetText} $AymInstallStatusText "$(AymInstallPreparing)"
+  ${EndIf}
+FunctionEnd
+
+; Nsis7z::ExtractWithDetails owns the single visible 0..100 progression. It
+; updates both the native bar and the status text from the same real byte
+; counts, so the label can never drift from the bar as the old timer did.
+Function AymInstallPayloadStageEnd
+  ${IfNot} ${Silent}
+    SendMessage $AymInstallProgress ${PBM_SETPOS} 0 0
+    ShowWindow $AymInstallProgress ${SW_SHOW}
+  ${EndIf}
 FunctionEnd
 
 Function AymInstallFilesLeave
-  ${NSD_KillTimer} AymInstallProgressTick
-  ${NSD_SetText} $AymInstallPercentText "$(AymInstallCompletePercent)"
+  ${NSD_SetText} $AymInstallStatusText "$(AymInstallComplete)"
 FunctionEnd
 
 Function AymWelcomePageCreate

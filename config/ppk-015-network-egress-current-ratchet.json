@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "requirement": "PPK-015",
   "status": "CURRENT_RATCHET",
-  "recordedAt": "2026-08-18",
+  "recordedAt": "2026-08-20",
   "historicalClosure": {
     "step": "32-K",
     "decisionId": "DEC-196",
@@ -17,7 +17,7 @@
   "currentBoundary": {
     "productionSourceZones": 18,
     "scannedFiles": 585,
-    "sourceInventorySha256": "0c7907ed784d24fd03879de89c08e960512246c8055de3d5681fc61fcf341478",
+    "sourceInventorySha256": "fe5a30690fbb583cfb27458aeb6732e29d612fb3b8be188226fd78b1c50d35fb",
     "maliciousSelfTests": 7,
     "findings": 0,
     "authorizedAdapterCount": 2,

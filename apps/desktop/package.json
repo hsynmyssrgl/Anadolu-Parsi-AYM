@@ -1,25 +1,25 @@
 {
   "name": "@ppt/desktop",
-  "version": "19.8.2026-34",
+  "version": "20.8.2026-35",
   "private": true,
   "type": "module",
   "main": "dist/main/main.mjs",
   "dependencies": {
-    "@ppt/application": "19.8.2026-34",
-    "@ppt/config": "19.8.2026-34",
-    "@ppt/contracts": "19.8.2026-34",
-    "@ppt/core": "19.8.2026-34",
-    "@ppt/core-service-client": "19.8.2026-34",
-    "@ppt/core-service-contracts": "19.8.2026-34",
-    "@ppt/database": "19.8.2026-34",
-    "@ppt/domain": "19.8.2026-34",
-    "@ppt/events": "19.8.2026-34",
-    "@ppt/infrastructure": "19.8.2026-34",
-    "@ppt/logging": "19.8.2026-34",
-    "@ppt/platform-policy": "19.8.2026-34",
-    "@ppt/repositories": "19.8.2026-34",
-    "@ppt/repository-contracts": "19.8.2026-34",
-    "@ppt/security": "19.8.2026-34",
+    "@ppt/application": "20.8.2026-35",
+    "@ppt/config": "20.8.2026-35",
+    "@ppt/contracts": "20.8.2026-35",
+    "@ppt/core": "20.8.2026-35",
+    "@ppt/core-service-client": "20.8.2026-35",
+    "@ppt/core-service-contracts": "20.8.2026-35",
+    "@ppt/database": "20.8.2026-35",
+    "@ppt/domain": "20.8.2026-35",
+    "@ppt/events": "20.8.2026-35",
+    "@ppt/infrastructure": "20.8.2026-35",
+    "@ppt/logging": "20.8.2026-35",
+    "@ppt/platform-policy": "20.8.2026-35",
+    "@ppt/repositories": "20.8.2026-35",
+    "@ppt/repository-contracts": "20.8.2026-35",
+    "@ppt/security": "20.8.2026-35",
     "maplibre-gl": "6.4.1",
     "pmtiles": "4.5.0",
     "react": "19.2.7",
@@ -39,6 +39,7 @@
     "typecheck": "tsc -p tsconfig.electron.json --noEmit && tsc -p tsconfig.renderer.json --noEmit",
     "dev": "node scripts/dev.mjs",
     "package:win": "node scripts/build-signed-windows-release.mjs",
+    "package:win:local-test": "npm run verify:license-sync && npm run build && npm run verify:installer --workspace @ppt/desktop && node scripts/run-electron-builder.mjs --local-unsigned",
     "package:win:dir": "npm run verify:license-sync && npm run build && npm run verify:installer --workspace @ppt/desktop && node scripts/run-electron-builder.mjs --dir",
     "verify:installer": "node scripts/verify-installer.mjs",
     "verify:freeze": "node scripts/verify-release-freeze.mjs",
@@ -66,7 +67,7 @@
       "target": [
         "nsis"
       ],
-      "artifactName": "ParsYuva-AYM-Bronze-19.08.2026.34-${arch}-Kurulum.${ext}",
+      "artifactName": "ParsYuva-AYM-Bronze-20.08.2026.35-${arch}-Kurulum.${ext}",
       "icon": "build/icon.ico",
       "requestedExecutionLevel": "asInvoker"
     },
@@ -90,7 +91,7 @@
       "uninstallerIcon": "build/icon.ico"
     },
     "copyright": "Copyright © 2026 ParsYuva",
-    "artifactName": "ParsYuva-AYM-Bronze-19.08.2026.34-${arch}-Kurulum.${ext}"
+    "artifactName": "ParsYuva-AYM-Bronze-20.08.2026.35-${arch}-Kurulum.${ext}"
   },
   "description": "ParsYuva AYM yerel öncelikli aile yaşam, güvenlik ve dijital hafıza merkezi.",
   "author": {

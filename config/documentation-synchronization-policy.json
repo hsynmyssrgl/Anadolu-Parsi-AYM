@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "PPT-SYNCHRONOUS-DECISION-DOCUMENTATION-POLICY-V1",
-  "release": "Bronze 19.08.2026.34",
+  "release": "Bronze 20.08.2026.35",
   "effectiveFromDecision": "DEC-251",
   "decision": "DEC-251",
   "failClosed": true,

@@ -4,7 +4,7 @@ import { renderLicenseRtf } from './license-rtf-lib.mjs';
 
 const desktopRoot = resolve(import.meta.dirname, '..');
 const source = await readFile(resolve(desktopRoot, 'docs/LISANS_TR_KAYNAK.txt'), 'utf8');
-const expected = renderLicenseRtf(source);
+const expected = renderLicenseRtf(source).trim();
 const bytes = await readFile(resolve(desktopRoot, 'build/LICENSE_TR.rtf'));
 const failures = [];
 if ([...bytes].some((byte) => byte > 0x7f)) failures.push('LICENSE_TR.rtf ASCII dışı ham bayt içeriyor.');

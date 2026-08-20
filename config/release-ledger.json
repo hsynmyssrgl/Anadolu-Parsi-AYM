@@ -4,15 +4,15 @@
   "counterPolicy": "MONTHLY_RESET_CONTINUE_FROM_HISTORICAL_COUNT",
   "current": {
     "channel": "Bronze",
-    "date": "2026-08-19",
-    "displayDate": "19.08.2026",
-    "monthlySequence": 34,
-    "version": "19.08.2026.34",
-    "visibleRelease": "Bronze 19.08.2026.34",
-    "packageVersion": "19.8.2026-34",
-    "releaseId": "bronze-2026-08-19-r34",
+    "date": "2026-08-20",
+    "displayDate": "20.08.2026",
+    "monthlySequence": 35,
+    "version": "20.08.2026.35",
+    "visibleRelease": "Bronze 20.08.2026.35",
+    "packageVersion": "20.8.2026-35",
+    "releaseId": "bronze-2026-08-20-r35",
     "status": "IN_PROGRESS",
-    "parentRelease": "Bronze 19.08.2026.33",
+    "parentRelease": "Bronze 19.08.2026.34",
     "summary": "Resmî derleme numarası yalnız paketleme yetkisi tarafından ayrıldı.",
     "parentSourceSha256": "d65e908bf8157d2eff111dcdbbae2762cb48a527021b97c3df26f463e993dea4"
   },
@@ -104,6 +104,16 @@
       "version": "19.08.2026.34",
       "packageVersion": "19.8.2026-34",
       "releaseId": "bronze-2026-08-19-r34",
+      "status": "IN_PROGRESS",
+      "summary": "Resmî derleme numarası yalnız paketleme yetkisi tarafından ayrıldı."
+    },
+    {
+      "channel": "Bronze",
+      "date": "2026-08-20",
+      "monthlySequence": 35,
+      "version": "20.08.2026.35",
+      "packageVersion": "20.8.2026-35",
+      "releaseId": "bronze-2026-08-20-r35",
       "status": "IN_PROGRESS",
       "summary": "Resmî derleme numarası yalnız paketleme yetkisi tarafından ayrıldı."
     }

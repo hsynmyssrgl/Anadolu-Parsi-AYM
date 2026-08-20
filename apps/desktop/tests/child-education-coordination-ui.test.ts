@@ -19,7 +19,7 @@ describe('33-U child education coordination renderer surface',()=>{
       'school','class','timetable','homework','exam','school_event','transport_plan','pickup_authority',
       'course','sport','certificate','book','allowance_budget','education_goal'
     ])expect(panel).toContain(`'${kind}'`);
-    expect(panel).toContain('aria-label="Çocuk eğitim alanları"');
+    expect(panel).toContain("aria-label={text('Çocuk eğitim alanları','Child education areas')}");
   });
 
   it('uses only the four safe bridge methods and stable retry identities',()=>{
@@ -42,8 +42,8 @@ describe('33-U child education coordination renderer surface',()=>{
     expect(panel).toContain("kind!=='class'||classLabel.trim().length>0");
     expect(panel).toContain("!scheduleRequired||Boolean(isoOrUndefined(scheduledAt))");
     expect(panel).toContain("!dueRequired||Boolean(isoOrUndefined(dueAt))");
-    expect(panel).toContain("entry.dueAt?`son tarih ${new Date(entry.dueAt).toLocaleString('tr-TR')}`");
-    expect(panel).toContain("entry.progressBasisPoints!==undefined?`ilerleme %${entry.progressBasisPoints/100}`");
+    expect(panel).toContain("entry.dueAt?`${text('son tarih','due')} ${new Date(entry.dueAt).toLocaleString(locale)}`");
+    expect(panel).toContain("entry.progressBasisPoints!==undefined?`${text('ilerleme','progress')} %${entry.progressBasisPoints/100}`");
   });
 
   it('states local-only boundaries and provides responsive accessible presentation',()=>{

@@ -15,5 +15,5 @@ export const encodeLicenseRtfBody = (value) => [...value].map((character) => {
 
 export const renderLicenseRtf = (source) => {
   const normalized = normalizeLicenseSource(source);
-  return `{\\rtf1\\ansi\\ansicpg1254\\deff0{\\fonttbl{\\f0\\fswiss Segoe UI;}}\\viewkind4\\uc1\\pard\\f0\\fs18\n${encodeLicenseRtfBody(normalized)}\\par\n}`;
+  return `{\\rtf1\\ansi\\ansicpg1254\\deff0{\\fonttbl{\\f0\\fswiss Segoe UI;}}\\viewkind4\\uc1\\pard\\f0\\fs18\n${encodeLicenseRtfBody(normalized)}\\par\n}\n`;
 };

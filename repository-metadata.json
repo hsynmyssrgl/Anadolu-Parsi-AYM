@@ -1,15 +1,15 @@
 {
   "product": "ParsYuva AYM",
-  "repositoryVersion": "19.08.2026.34",
-  "applicationVersion": "19.08.2026.34",
-  "visibleRelease": "Bronze 19.08.2026.34",
-  "packageVersion": "19.8.2026-34",
+  "repositoryVersion": "20.08.2026.35",
+  "applicationVersion": "20.08.2026.35",
+  "visibleRelease": "Bronze 20.08.2026.35",
+  "packageVersion": "20.8.2026-35",
   "edition": "Bronze",
   "owner": "ParsYuva",
-  "releaseId": "bronze-2026-08-19-r34",
-  "revision": "20260819-34",
-  "monthlySequence": 34,
-  "releaseDate": "2026-08-19",
+  "releaseId": "bronze-2026-08-20-r35",
+  "revision": "20260820-35",
+  "monthlySequence": 35,
+  "releaseDate": "2026-08-20",
   "parentSource": {
     "version": "02.08.2026.228",
     "sha256": "0d67125e80bfddd52292aa3db6f17c9d68e115fa6c35c0671e3bd191ecdf1328"
@@ -25,5 +25,5 @@
   "acceptedScopeRegistry": "config/accepted-scope-registry.json",
   "policyVersion": "PPT-PLATFORM-POLICY-2026-08-04-V1",
   "sourceInventoryFileCount": 2227,
-  "generatedDate": "2026-08-19"
+  "generatedDate": "2026-08-20"
 }

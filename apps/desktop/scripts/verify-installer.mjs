@@ -14,6 +14,7 @@ const required = [
   ['build/installer-bronze-sidebar.bmp', 10000],
   ['build/installer-silver-sidebar.bmp', 10000],
   ['build/installer-gold-sidebar.bmp', 10000],
+  ['build/extractAppPackage.nsh', 3000],
   ['docs/LISANS_TR_KAYNAK.txt', 100],
   ['build/LICENSE_TR.rtf', 200],
   ['build/LICENSE_en.rtf', 200],
@@ -87,14 +88,18 @@ try {
     'LangString AymFinishTitle ${AYM_LANG_ENGLISH} "ParsYuva AYM is ready"',
     'LangString AymFinishTitle ${AYM_LANG_TURKISH} "ParsYuva AYM kullanıma hazır"',
     '!define MUI_FINISHPAGE_TITLE "$(AymFinishTitle)"',
-    'Function AymInstallProgressTick',
-    '${PBM_GETPOS}',
     'GetDlgItem $AymInstallProgress $0 1004',
-    'GetDlgItem $AymInstallPercentText $0 1006',
+    'GetDlgItem $AymInstallStatusText $0 1006',
+    'Function AymInstallPayloadStageBegin',
+    'ShowWindow $AymInstallProgress ${SW_HIDE}',
+    'Function AymInstallPayloadStageEnd',
+    'SendMessage $AymInstallProgress ${PBM_SETPOS} 0 0',
+    'ShowWindow $AymInstallProgress ${SW_SHOW}',
     '!define MUI_PAGE_CUSTOMFUNCTION_SHOW AymInstallFilesShow',
     '!define MUI_PAGE_CUSTOMFUNCTION_LEAVE AymInstallFilesLeave',
-    'LangString AymInstallingPercent ${AYM_LANG_TURKISH} "Yükleniyor:"',
-    'LangString AymInstallCompletePercent ${AYM_LANG_TURKISH} "Yükleme tamamlandı: 100%"'
+    'LangString AymInstallPreparing ${AYM_LANG_TURKISH} "Doğrulanmış kurulum paketi hazırlanıyor..."',
+    'LangString AymInstallingDetail ${AYM_LANG_TURKISH} "Yükleniyor: %s"',
+    'LangString AymInstallComplete ${AYM_LANG_TURKISH} "Yükleme tamamlandı: 100%"'
   ];
   for (const marker of requiredInstallerExperience) {
     if (!installerInclude.includes(marker)) failures.push(`NSIS deneyim/metin sözleşmesi eksik: ${marker}`);
@@ -106,8 +111,11 @@ try {
     || installerInclude.includes('${NSD_CreateProgressBar}')) {
     failures.push('Kurulum öncesi sayfalar sahte hareketli ilerleme göstergesi kullanmamalı; tek ilerleme yerel NSIS dosya kurulum sayfası olmalı.');
   }
-  if ((installerInclude.match(/\$\{PBM_GETPOS\}/gu) ?? []).length !== 1) {
-    failures.push('Yerel NSIS kurulum ilerlemesi yüzde metnine tam bir kez bağlanmalı.');
+  if (installerInclude.includes('${PBM_GETPOS}')
+    || installerInclude.includes('AymInstallProgressTick')
+    || installerInclude.includes('${NSD_CreateTimer}')
+    || installerInclude.includes('${NSD_KillTimer}')) {
+    failures.push('Kurulum yüzdesi ana NSIS iş parçacığındaki zamanlayıcıyla tahmin edilemez; gerçek Nsis7z ilerlemesi kullanılmalı.');
   }
   if (installerInclude.includes('ParsYuva AYM Aile Yaşam Merkezi')
     || installerInclude.includes('ParsYuva AYM Family Life Center')) {
@@ -133,9 +141,37 @@ try {
   failures.push(`NSIS kurulum dizini include dosyası okunamadı: ${error.message}`);
 }
 try {
+  const extractorOverride = await readFile(resolve(desktopRoot, 'build/extractAppPackage.nsh'), 'utf8');
+  const requiredExtractorMarkers = [
+    '!macro extractEmbeddedAppPackage',
+    '!macro extractUsing7za FILE',
+    'Call AymInstallPayloadStageBegin',
+    'Call AymInstallPayloadStageEnd',
+    'Nsis7z::ExtractWithDetails "${FILE}" "$(AymInstallingDetail)"'
+  ];
+  for (const marker of requiredExtractorMarkers) {
+    if (!extractorOverride.includes(marker)) failures.push(`Gerçek NSIS ilerleme çıkarıcısı eksik: ${marker}`);
+  }
+  if ((extractorOverride.match(/Nsis7z::ExtractWithDetails/gu) ?? []).length !== 2
+    || extractorOverride.includes('Nsis7z::Extract "${FILE}"')) {
+    failures.push('Normal ve kurtarma çıkarma yollarının ikisi de gerçek yüzde/byte ayrıntısını aynı NSIS kontrolüne vermeli.');
+  }
+  if ((extractorOverride.match(/File \/oname=\$PLUGINSDIR\\app-/gu) ?? []).length !== 3) {
+    failures.push('Yerel çıkarıcı x64, ia32 ve arm64 arşiv hazırlama sözleşmesini korumalı.');
+  }
+} catch (error) {
+  failures.push(`Gerçek NSIS ilerleme çıkarıcısı okunamadı: ${error.message}`);
+}
+try {
   const builderRunner = await readFile(resolve(desktopRoot, 'scripts/run-electron-builder.mjs'), 'utf8');
   if (!builderRunner.includes("['--win', 'dir', '--config.forceCodeSigning=false']")
-    || !builderRunner.includes("['--win', 'nsis']")) {
+    || !builderRunner.includes("['--win', 'nsis']")
+    || !builderRunner.includes("process.argv.includes('--local-unsigned')")
+    || !builderRunner.includes("'-IMZASIZ-YEREL-TEST-${arch}-Kurulum.${ext}'")
+    || !builderRunner.includes("'parsyuva-nsis-template-'")
+    || !builderRunner.includes("nsisUtil.nsisTemplatesDir = governedRoot")
+    || !builderRunner.includes("copyFile(governedExtractorPath, resolve(temporaryNsisRoot, 'include/extractAppPackage.nsh'))")
+    || !builderRunner.includes("renderLicenseRtf(licenseSource)")) {
     failures.push('İmzasız dizin provası ile imzalı NSIS release yolları kesin ayrılmamış.');
   }
 } catch (error) {
@@ -143,7 +179,7 @@ try {
 }
 try {
   const sourceLicense = await readFile(resolve(desktopRoot, 'docs/LISANS_TR_KAYNAK.txt'), 'utf8');
-  const expectedRtf = renderLicenseRtf(sourceLicense);
+  const expectedRtf = renderLicenseRtf(sourceLicense).trim();
   const licenseBytes = await readFile(resolve(desktopRoot, 'build/LICENSE_TR.rtf'));
   if ([...licenseBytes].some((byte) => byte > 0x7f)) {
     failures.push('NSIS lisans RTF dosyası ASCII dışı ham bayt içeriyor.');

@@ -22,7 +22,7 @@ describe('33-T household operations renderer surface',()=>{
       'bill','subscription','shared_expense','delivery','guest_access','pet_care'
     ]) expect(panel).toContain(`'${kind}'`);
     expect(panel).toContain('Hane operasyonları merkezi');
-    expect(panel).toContain('aria-label="Hane operasyonu alanları"');
+    expect(panel).toContain("aria-label={text('Hane operasyonu alanları','Household operation areas')}");
   });
 
   it('uses only four renderer-safe bridge methods and retains stable retry identities',()=>{
@@ -51,7 +51,7 @@ describe('33-T household operations renderer surface',()=>{
     expect(panel).toContain("!['chore','routine'].includes(kind)||Boolean(assignedPersonId)");
     expect(panel).toContain("!['bill','subscription'].includes(kind)||Boolean(isoOrUndefined(dueAt))");
     expect(panel).toContain("kind!=='pet_care'||petReference.trim().length>0&&Boolean(isoOrUndefined(dueAt))");
-    expect(panel).toContain('son kullanım ${formatDate(entry.expiresAt)}');
+    expect(panel).toContain("`${text('son kullanım','expiry')} ${formatDate(entry.expiresAt,locale,text('Tarih yok','No date'))}");
   });
 
   it('states external-action limits and provides responsive accessible presentation',()=>{

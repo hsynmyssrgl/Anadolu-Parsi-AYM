@@ -1,6 +1,6 @@
 # Kanonik Kural Sicili
 
-- Görünür sürüm: **Bronze 19.08.2026.34**
+- Görünür sürüm: **Bronze 20.08.2026.35**
 - Sicil kimliği: `PPT-CANONICAL-RULE-REGISTRY-V13`
 - Toplam kural: **217**
 - Aktif kural: **197**

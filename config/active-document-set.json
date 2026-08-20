@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "release": "Bronze 19.08.2026.34",
+  "release": "Bronze 20.08.2026.35",
   "authorityOrder": [
     "config/canonical-rule-registry.json",
     "config/project-constitution.json",
