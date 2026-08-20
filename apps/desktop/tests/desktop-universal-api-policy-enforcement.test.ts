@@ -106,7 +106,14 @@ const createHarness = (writable = true, trusted = true) => {
     }),
     clock: () => NOW
   });
-  for (const channel of ['dashboard:getOverview', 'family:createMember', 'auth:login']) {
+  for (const channel of [
+    'dashboard:getOverview',
+    'family:createMember',
+    'auth:login',
+    'app:getInfo',
+    'app:getLocalizationBootstrap',
+    'app:setLanguagePreference'
+  ]) {
     enforcement.registerClientApplicationServiceChannel(channel);
   }
   return { enforcement, records, repositoryPolicyScope };
@@ -117,6 +124,8 @@ describe('31-U universal Desktop API policy enforcement', () => {
     expect(resolveDesktopUniversalApiIntent('dashboard:getOverview', correlationId)).toMatchObject({ action: 'read', capability: 'family.read' });
     expect(resolveDesktopUniversalApiIntent('family:createMember', correlationId)).toMatchObject({ action: 'update', capability: 'family.write' });
     expect(isDesktopPolicyBootstrapChannel('auth:login')).toBe(true);
+    expect(isDesktopPolicyBootstrapChannel('app:getLocalizationBootstrap')).toBe(true);
+    expect(isDesktopPolicyBootstrapChannel('app:setLanguagePreference')).toBe(true);
     expect(isDesktopPolicyBootstrapChannel('auth:reauthorizeCurrentDeviceAfterRecovery')).toBe(false);
     expect(isDesktopPolicyBootstrapChannel('family:createMember')).toBe(false);
   });
@@ -156,6 +165,9 @@ describe('31-U universal Desktop API policy enforcement', () => {
   it('limits the receiptless path to the explicit bootstrap registry', async () => {
     const { enforcement, records } = createHarness();
     await expect(enforcement.execute({ channel: 'auth:login', correlationId, operation: () => 'bootstrap' })).resolves.toBe('bootstrap');
+    await expect(enforcement.execute({ channel: 'app:getInfo', correlationId, operation: () => 'info' })).resolves.toBe('info');
+    await expect(enforcement.execute({ channel: 'app:getLocalizationBootstrap', correlationId, operation: () => 'tr' })).resolves.toBe('tr');
+    await expect(enforcement.execute({ channel: 'app:setLanguagePreference', correlationId, operation: () => 'tr' })).resolves.toBe('tr');
     expect(records).toHaveLength(0);
   });
 

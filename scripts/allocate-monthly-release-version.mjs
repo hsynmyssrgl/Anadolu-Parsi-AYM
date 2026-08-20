@@ -124,6 +124,10 @@ try {
     constitution.effectiveRelease = release.visibleRelease;
     planned.set('config/project-constitution.json', jsonText(constitution));
 
+    const activeDocumentSet = await readJson('config/active-document-set.json');
+    activeDocumentSet.release = release.visibleRelease;
+    planned.set('config/active-document-set.json', jsonText(activeDocumentSet));
+
     for (const path of [
       'config/32-u-ppk-025-signing-trust-policy.json',
       'config/32-u-ppk-025-software-supply-chain-inventory.json',

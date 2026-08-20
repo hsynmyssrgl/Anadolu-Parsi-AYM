@@ -148,6 +148,17 @@ const validateProbe = (probe, expectedSentinelState) => {
     throw new Error('Startup diagnostic classification does not match launch mode.');
   }
   const windowsSecurity = probe.windowsSecurityEvidence;
+  const localization = probe.uiLocalizationBootstrap;
+  const rendererLocalization = probe.rendererLocalization;
+  if (!localization || !['tr', 'en'].includes(localization.language)
+    || !['tr-TR', 'en-US'].includes(localization.locale)
+    || localization.locale !== (localization.language === 'tr' ? 'tr-TR' : 'en-US')
+    || !rendererLocalization?.bridgePresent
+    || !rendererLocalization?.localizationBootstrapMethodPresent
+    || rendererLocalization.documentLanguage !== localization.locale
+    || rendererLocalization.dataLanguage !== localization.language) {
+    throw new Error(`Renderer localization/preload bridge probe failed: ${JSON.stringify({ localization, rendererLocalization })}`);
+  }
   const expectedBuild = Number(probe.applicationVersion?.split('.').at(-1));
   if (!Number.isInteger(expectedBuild) || !windowsSecurity || windowsSecurity.status !== 'PASS' || windowsSecurity.build !== expectedBuild) {
     throw new Error(`Windows security evidence probe failed or missing: ${JSON.stringify(windowsSecurity)}`);

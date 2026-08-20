@@ -5,7 +5,7 @@
   "status": "IN_PROGRESS",
   "completionClaimed": false,
   "release": {
-    "releaseVersion": "20.8.2026-37",
+    "releaseVersion": "20.8.2026-40",
     "channel": "Bronze",
     "productionReleaseEligible": false,
     "blockingState": "EXTERNAL_SIGNING_PENDING"

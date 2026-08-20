@@ -2380,6 +2380,40 @@ const healthCareExactRecord = (value: unknown, keys: readonly string[]): value i
     return Boolean(descriptor && !descriptor.get && !descriptor.set && 'value' in descriptor);
   });
 };
+
+const appInfoResult = (result: unknown): boolean => healthCareExactRecord(result, [
+  'name', 'releaseLabel', 'channel', 'stage'
+])
+  && healthCareText(result.name, 2, 160)
+  && healthCareText(result.releaseLabel, 2, 120)
+  && (result.channel === 'Bronze' || result.channel === 'Silver' || result.channel === 'Gold')
+  && healthCareText(result.stage, 2, 160);
+
+const appLocalizationResult = (result: unknown): boolean => {
+  if (!healthCareExactRecord(result, [
+    'source', 'preference', 'systemLocale', 'language', 'locale', 'fallbackUsed', 'supportedLanguages'
+  ])
+    || (result.preference !== 'system' && result.preference !== 'tr' && result.preference !== 'en')
+    || (result.source !== 'system' && result.source !== 'user')
+    || !boundedString(result.systemLocale, 128)
+    || (result.language !== 'tr' && result.language !== 'en')
+    || (result.locale !== 'tr-TR' && result.locale !== 'en-US')
+    || typeof result.fallbackUsed !== 'boolean'
+    || !Array.isArray(result.supportedLanguages)
+    || Object.getPrototypeOf(result.supportedLanguages) !== Array.prototype
+    || result.supportedLanguages.length !== 2
+    || result.supportedLanguages[0] !== 'tr'
+    || result.supportedLanguages[1] !== 'en') return false;
+
+  if (result.source !== (result.preference === 'system' ? 'system' : 'user')) return false;
+  if (result.locale !== (result.language === 'tr' ? 'tr-TR' : 'en-US')) return false;
+  if (result.preference !== 'system') {
+    return result.language === result.preference && result.fallbackUsed === false;
+  }
+  const primaryLanguage = String(result.systemLocale).split('-')[0]?.toLocaleLowerCase('en-US') ?? '';
+  return result.language === (primaryLanguage === 'tr' ? 'tr' : 'en')
+    && result.fallbackUsed === (primaryLanguage !== 'tr' && primaryLanguage !== 'en');
+};
 const healthCareCanonicalValues = (
   value: unknown,
   allowed: ReadonlySet<unknown>,
@@ -5589,6 +5623,13 @@ const policyServiceAvailabilityResult = (
 };
 
 export const evaluateIpcIntegrationResultPolicy = (channel: string, result: unknown): IpcIntegrationPolicyDecision => {
+  if (channel === 'app:getInfo') {
+    return appInfoResult(result) ? accepted() : rejected('APP_INFO_RESULT_INVALID', '$result');
+  }
+  if (channel === 'app:getLocalizationBootstrap' || channel === 'app:setLanguagePreference') {
+    return appLocalizationResult(result) ? accepted() : rejected('APP_LOCALIZATION_RESULT_INVALID', '$result');
+  }
+  if (channel.startsWith('app:')) return rejected('UNKNOWN_IPC_CHANNEL', '$result');
   if (channel === UNIFIED_AUTHORIZED_SEARCH_IPC_CHANNEL) return unifiedAuthorizedSearchResult(result);
   if (familyAiAssistantChannels.has(channel)) return familyAiResult(channel,result);
   if (channel.startsWith('familyAiAssistant:')) return rejected('UNKNOWN_IPC_CHANNEL','$result');
@@ -5655,6 +5696,13 @@ export const evaluateIpcIntegrationResultPolicy = (channel: string, result: unkn
 };
 
 export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unknown[]): IpcIntegrationPolicyDecision => {
+  if (channel === 'app:getInfo' || channel === 'app:getLocalizationBootstrap') return zeroArguments(args);
+  if (channel === 'app:setLanguagePreference') {
+    return args.length === 1 && (args[0] === 'system' || args[0] === 'tr' || args[0] === 'en')
+      ? accepted()
+      : rejected('APP_LANGUAGE_PREFERENCE_INVALID', '$[0]');
+  }
+  if (channel.startsWith('app:')) return rejected('UNKNOWN_IPC_CHANNEL', '$');
   if (channel === UNIFIED_AUTHORIZED_SEARCH_IPC_CHANNEL) return unifiedAuthorizedSearchInput(args);
   if (familyAiAssistantChannels.has(channel)) return familyAiInput(channel,args);
   if (channel.startsWith('familyAiAssistant:')) return rejected('UNKNOWN_IPC_CHANNEL','$');

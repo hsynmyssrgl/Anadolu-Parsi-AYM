@@ -17,11 +17,11 @@ export type PersistedProductName = (typeof ACCEPTED_PERSISTED_PRODUCT_NAMES)[num
 export const APP_META = Object.freeze({
   name: CURRENT_PRODUCT_NAME,
   edition: 'Bronze',
-  version: '20.08.2026.37',
-  packageVersion: '20.8.2026-37',
-  releaseLabel: 'Bronze 20.08.2026.37',
-  releaseId: 'bronze-2026-08-20-r37',
-  monthlySequence: 37,
+  version: '20.08.2026.40',
+  packageVersion: '20.8.2026-40',
+  releaseLabel: 'Bronze 20.08.2026.40',
+  releaseId: 'bronze-2026-08-20-r40',
+  monthlySequence: 40,
   stage: 'Bronze · Aktif Geliştirme'
 });
 export type AppMeta = typeof APP_META;

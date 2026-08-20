@@ -41,6 +41,8 @@ const READ_VERBS = new Set([
 
 const BOOTSTRAP_CHANNELS = new Set([
   'app:getInfo',
+  'app:getLocalizationBootstrap',
+  'app:setLanguagePreference',
   'auth:getExternalIdentityProviders',
   'auth:getState',
   'auth:getSessionLockState',

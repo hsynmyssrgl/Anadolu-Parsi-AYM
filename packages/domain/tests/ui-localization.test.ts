@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_UI_LOCALIZATION,
-  resolveUiLocalization
+  resolveUiLocalization,
+  selectOperatingSystemUiLanguage
 } from '../src/ui-localization.js';
 
 describe('UI localization system-language boundary', () => {
@@ -50,5 +51,12 @@ describe('UI localization system-language boundary', () => {
   it('lets an explicit user preference override the detected system language',()=>{
     expect(resolveUiLocalization('tr-TR','en')).toMatchObject({source:'user',preference:'en',systemLocale:'tr-TR',language:'en',locale:'en-US',fallbackUsed:false});
     expect(resolveUiLocalization('de-DE','tr')).toMatchObject({source:'user',preference:'tr',systemLocale:'de-DE',language:'tr',locale:'tr-TR',fallbackUsed:false});
+  });
+
+  it('uses the Windows display locale before content-language preferences',()=>{
+    expect(selectOperatingSystemUiLanguage('tr-TR',['en-US','tr-TR'])).toBe('tr-TR');
+    expect(selectOperatingSystemUiLanguage('tr_TR',['en-US'])).toBe('tr-TR');
+    expect(selectOperatingSystemUiLanguage('', ['en-US','tr-TR'])).toBe('en-US');
+    expect(selectOperatingSystemUiLanguage(undefined, ['  ','tr_TR'])).toBe('tr-TR');
   });
 });

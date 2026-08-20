@@ -191,6 +191,8 @@ describe('32-E PPK-009 Core Service policy decision re-evaluation', () => {
 
   it('keeps receiptless execution limited to the explicit unauthenticated bootstrap set', () => {
     expect(isDesktopPolicyBootstrapChannel('auth:login')).toBe(true);
+    expect(isDesktopPolicyBootstrapChannel('app:getLocalizationBootstrap')).toBe(true);
+    expect(isDesktopPolicyBootstrapChannel('app:setLanguagePreference')).toBe(true);
     expect(isDesktopPolicyBootstrapChannel('auth:logout')).toBe(false);
     expect(isDesktopPolicyBootstrapChannel('family:updateMember')).toBe(false);
   });

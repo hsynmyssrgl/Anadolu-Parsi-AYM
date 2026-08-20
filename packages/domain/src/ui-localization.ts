@@ -16,6 +16,18 @@ export interface UiLocalizationBootstrapView {
 const normalizeSystemLocale = (value: string | undefined): string =>
   (value ?? '').trim().replaceAll('_', '-');
 
+export const selectOperatingSystemUiLanguage = (
+  systemLocale: string | undefined,
+  preferredSystemLanguages: readonly string[] = []
+): string => {
+  const displayLocale = normalizeSystemLocale(systemLocale);
+  if (displayLocale.length > 0) return displayLocale;
+
+  return preferredSystemLanguages
+    .map((value) => normalizeSystemLocale(value))
+    .find((value) => value.length > 0) ?? '';
+};
+
 export const resolveUiLocalization = (
   systemLocale: string | undefined,
   preference: UiLanguagePreference = 'system'

@@ -12,7 +12,7 @@
     "statement": "All written project rules, including the reconciled 18 August supplemental decisions, the exact ParsYuva Aile Yaşam Merkezi product name without the AYM abbreviation on current user surfaces, C:\\Program Files\\PPT\\ParsYuva installation, ParsYuva.exe, ParsYuva shortcuts, the ParsYuva-<Channel>-DD.MM.YYYY.NN.exe delivery name, channel palettes, password visibility, trial and Gold activation, uninstall/reset, tray lifecycle, update compatibility, system-language detection, English fallback, and one native real installer progress indicator, are binding and non-skippable. Every ACTIVE rule must be fail-closed enforced or explicitly BLOCKED/NOT_RUN until evidence exists."
   },
   "sourceFingerprint": {
-    "sha256": "d26f7fd424fc58e86e42c7bde324122aef14223526605cfef9e372c53e92929f",
+    "sha256": "b49eb0860532a55aa4dfe653cab21603fd109ed56ea3219c2cff51832cb7782b",
     "fileCount": 2689
   },
   "status": "PASS",
@@ -99,7 +99,7 @@
       "script": "scripts/verify-core-service-local-admin-runtime-wrapper.mjs",
       "exitCode": 0,
       "stdout": "Core Service Local Admin Runtime: PASS (50 checks).",
-      "stderr": "(node:24860) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+      "stderr": "(node:13532) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
     },
     {
       "script": "scripts/verify-desktop-core-service-startup-contract.mjs",
@@ -111,7 +111,7 @@
       "script": "scripts/verify-desktop-core-service-startup-runtime-wrapper.mjs",
       "exitCode": 0,
       "stdout": "Desktop Core Service Startup Runtime: PASS (51 checks).",
-      "stderr": "(node:19180) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+      "stderr": "(node:26784) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
     },
     {
       "script": "scripts/verify-system-health-core-service-ipc-contract.mjs",
@@ -123,7 +123,7 @@
       "script": "scripts/verify-system-health-core-service-ipc-runtime-wrapper.mjs",
       "exitCode": 0,
       "stdout": "System Health Core Service IPC Runtime: PASS (10 checks).",
-      "stderr": "(node:5500) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+      "stderr": "(node:24892) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
     },
     {
       "script": "scripts/generate-project-artifact-index-v2.mjs",
@@ -138,5 +138,5 @@
       "stderr": ""
     }
   ],
-  "generatedAt": "2026-08-20T16:46:13.552Z"
+  "generatedAt": "2026-08-20T18:31:18.950Z"
 }

@@ -2,6 +2,7 @@ import { spawnSync } from 'node:child_process';
 import { copyFile, mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { build as buildVite } from 'vite';
 
 const desktopRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const repositoryRoot = resolve(desktopRoot, '../..');
@@ -121,10 +122,41 @@ try {
     '--sourceMap'
   ]);
 
+  // Electron's sandboxed preload environment only permits a very small
+  // built-in require surface. Bundle every local preload dependency into one
+  // CommonJS file so contextBridge is available without weakening sandboxing.
+  await buildVite({
+    configFile: false,
+    logLevel: 'warn',
+    build: {
+      outDir: outputDirectory,
+      emptyOutDir: false,
+      target: 'es2022',
+      minify: false,
+      sourcemap: true,
+      lib: {
+        entry: resolve(mainSourceRoot, 'preload.ts'),
+        formats: ['cjs'],
+        fileName: () => 'preload.cjs'
+      },
+      rollupOptions: {
+        external: ['electron']
+      }
+    }
+  });
+
+  const bundledPreload = await readFile(resolve(outputDirectory, 'preload.cjs'), 'utf8');
+  const preloadRequires = [...bundledPreload.matchAll(/\brequire\((['"])([^'"]+)\1\)/gu)]
+    .map((match) => match[2]);
+  if (preloadRequires.some((specifier) => specifier !== 'electron')
+    || !bundledPreload.includes('contextBridge.exposeInMainWorld("pardus"')) {
+    throw new Error(`Sandbox preload bundle is unsafe or incomplete: ${JSON.stringify(preloadRequires)}.`);
+  }
+
   await rm(resolve(outputDirectory, 'preload.js'), { force: true });
   await rm(resolve(outputDirectory, 'preload.js.map'), { force: true });
 } finally {
   await rm(temporaryDirectory, { recursive: true, force: true });
 }
 
-console.log('Electron main and preload compiled with the workspace TypeScript compiler.');
+console.log('Electron main compiled and sandbox preload bundled as one self-contained CommonJS file.');

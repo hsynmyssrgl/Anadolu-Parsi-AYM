@@ -36,6 +36,8 @@ export interface DesktopRepositoryPolicyBoundaryInput {
 
 const REPOSITORY_BOOTSTRAP_BOUNDARIES = new Set([
   'app:getInfo',
+  'app:getLocalizationBootstrap',
+  'app:setLanguagePreference',
   'auth:getExternalIdentityProviders',
   'auth:getState',
   'auth:getSessionLockState',

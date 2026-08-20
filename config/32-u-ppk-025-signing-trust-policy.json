@@ -4,7 +4,7 @@
   "requirement": "PPK-025",
   "status": "EXTERNAL_SIGNING_PENDING",
   "defaultDecision": "DENY",
-  "releaseVersion": "20.8.2026-37",
+  "releaseVersion": "20.8.2026-40",
   "releaseChannel": "Bronze",
   "publisher": "Panthera pardus tulliana",
   "publisherCertificateSha256": null,

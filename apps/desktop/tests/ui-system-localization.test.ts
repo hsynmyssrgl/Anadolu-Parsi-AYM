@@ -1,7 +1,12 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { resolveUiLocalization } from '@ppt/domain';
+import { resolveUiLocalization, USER_VISIBLE_APP_INFO } from '@ppt/domain';
+import {
+  evaluateIpcIntegrationPolicy,
+  evaluateIpcIntegrationResultPolicy
+} from '../src/main/ipc-integration-policy';
+import { isDesktopPolicyBootstrapChannel } from '../src/main/desktop-universal-api-policy-enforcement';
 import {
   configureUiLocalization,
   getActiveUiLocale,
@@ -26,6 +31,27 @@ describe('system-language UI localization',()=>{
     for(const unsupported of ['de-DE','fr-FR','ar-SA','ja-JP','']){
       expect(resolveUiLocalization(unsupported)).toMatchObject({language:'en',locale:'en-US',fallbackUsed:true});
     }
+  });
+
+  it('admits only safe localization bootstrap IPC before authentication',()=>{
+    const turkish=resolveUiLocalization('tr-TR');
+    expect(evaluateIpcIntegrationPolicy('app:getInfo',[])).toEqual({accepted:true});
+    expect(evaluateIpcIntegrationPolicy('app:getLocalizationBootstrap',[])).toEqual({accepted:true});
+    expect(evaluateIpcIntegrationPolicy('app:setLanguagePreference',['tr'])).toEqual({accepted:true});
+    expect(evaluateIpcIntegrationPolicy('app:setLanguagePreference',['de'])).toMatchObject({accepted:false});
+    expect(evaluateIpcIntegrationPolicy('app:getLocalizationBootstrap',['unexpected'])).toMatchObject({accepted:false});
+    expect(evaluateIpcIntegrationPolicy('app:future',[])).toMatchObject({accepted:false});
+    expect(evaluateIpcIntegrationResultPolicy('app:getInfo',USER_VISIBLE_APP_INFO)).toEqual({accepted:true});
+    expect(evaluateIpcIntegrationResultPolicy('app:getLocalizationBootstrap',turkish)).toEqual({accepted:true});
+    expect(evaluateIpcIntegrationResultPolicy('app:getLocalizationBootstrap',{...turkish,token:'secret'})).toMatchObject({accepted:false});
+    expect(evaluateIpcIntegrationResultPolicy('app:setLanguagePreference',{...turkish,locale:'en-US'})).toMatchObject({accepted:false});
+    expect(isDesktopPolicyBootstrapChannel('app:getInfo')).toBe(true);
+    expect(isDesktopPolicyBootstrapChannel('app:getLocalizationBootstrap')).toBe(true);
+    expect(isDesktopPolicyBootstrapChannel('app:setLanguagePreference')).toBe(true);
+    const repositoryScope = readFileSync(resolve(root,'apps/desktop/src/main/desktop-repository-policy-scope.ts'),'utf8');
+    expect(repositoryScope).toContain("'app:getInfo'");
+    expect(repositoryScope).toContain("'app:getLocalizationBootstrap'");
+    expect(repositoryScope).toContain("'app:setLanguagePreference'");
   });
 
   it('provides an English core shell, navigation and help catalog from one bootstrap',()=>{
@@ -55,10 +81,13 @@ describe('system-language UI localization',()=>{
     const main=readFileSync(resolve(root,'apps/desktop/src/main/main.ts'),'utf8');
     const preload=readFileSync(resolve(root,'apps/desktop/src/main/preload.ts'),'utf8');
     const rendererMain=readFileSync(resolve(root,'apps/desktop/src/renderer/main.tsx'),'utf8');
+    const electronBuild=readFileSync(resolve(root,'apps/desktop/scripts/build-electron.mjs'),'utf8');
+    const windowsLaunch=readFileSync(resolve(root,'scripts/windows-real-launch-test.mjs'),'utf8');
     const installer=readFileSync(resolve(root,'apps/desktop/build/installer.nsh'),'utf8');
     const packageJson=JSON.parse(readFileSync(resolve(root,'apps/desktop/package.json'),'utf8')) as {build:{nsis:{installerLanguages:string[];multiLanguageInstaller:boolean;license?:string}}};
+    expect(main).toContain('selectOperatingSystemUiLanguage(\n  app.getSystemLocale(),\n  app.getPreferredSystemLanguages()');
     expect(main).toContain('app.getPreferredSystemLanguages()');
-    expect(main).toContain('app.getSystemLocale().trim()');
+    expect(main).toContain('app.getSystemLocale()');
     expect(main).toContain('resolveUiLocalization(operatingSystemUiLanguage(),preference)');
     expect(main).not.toContain('resolveUiLocalization(app.getLocale()');
     expect(main).toContain("registerIpcHandler('app:getLocalizationBootstrap'");
@@ -67,6 +96,11 @@ describe('system-language UI localization',()=>{
     expect(preload).toContain("setLanguagePreference: (preference:UiLanguagePreference):Promise<UiLocalizationBootstrapView> => invoke('app:setLanguagePreference',preference)");
     expect(rendererMain).toContain('DEFAULT_UI_LOCALIZATION');
     expect(rendererMain).toContain('document.documentElement.lang = localization.locale');
+    expect(electronBuild).toContain("external: ['electron']");
+    expect(electronBuild).toContain("specifier !== 'electron'");
+    expect(electronBuild).toContain("bundledPreload.includes('contextBridge.exposeInMainWorld");
+    expect(windowsLaunch).toContain('rendererLocalization?.localizationBootstrapMethodPresent');
+    expect(windowsLaunch).toContain('rendererLocalization.documentLanguage !== localization.locale');
     expect(packageJson.build.nsis).toMatchObject({multiLanguageInstaller:true,installerLanguages:['en_US','tr_TR']});
     expect(packageJson.build.nsis.license).toBeUndefined();
     expect(installer).toContain('LangString AymFinishTitle ${AYM_LANG_ENGLISH}');

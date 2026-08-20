@@ -8,7 +8,7 @@ import { performance } from 'node:perf_hooks';
 import { asCorrelationId, asIsoDateTime, createAppError, err, ERROR_CODES, ok, type AppError, type Result } from '@ppt/core';
 import { createWebAuthnChallenge, encryptPortableEmergencyPack, sha256Hex, validateOidcProviderConfiguration, verifyPortableEmergencyPackReadback, type OidcProviderConfiguration, type WebAuthnAssertionInput, type WebAuthnRegistrationInput } from '@ppt/security';
 import { writeContentFreeConsoleEvent } from '@ppt/logging';
-import { APP_META, USER_VISIBLE_APP_INFO, resolveUiLocalization, type UiLocalizationBootstrapView, type CreateArchiveItemInput, CreateFamilyEventInput, UpdateFamilyEventInput, SetFamilyEventArchivedInput, UpdateEventParticipantsInput, UpdateEventInvitationInput, UpdateEventNotesInput, AcknowledgeFamilyNotificationInput, CreateFamilyLocationInput, CreateFamilyMemberInput, CreateFamilyRelationInput, LoginInput, SetupAdminInput, ChangePasswordInput, EnableTwoFactorInput, DisableTwoFactorInput, TrustCurrentDeviceInput, ReauthorizeCurrentDeviceInput, CreateFamilyInvitationInput, InspectFamilyInvitationInput, ResendFamilyInvitationInput, AcceptFamilyInvitationInput, UpsertObjectPermissionInput, UpdateFamilyAccountInput, CreateFinanceRecordInput, CreateBankAccountInput, ValidateIbanInput, CreatePaymentCardInput, CreateHealthRecordInput, CreateMedicationPlanInput, CreateFamilyHealthHistoryInput, CreateFinanceValuationInput, CreateLifeRecordInput, CreateAutomationRuleInput, CreateArchiveCategoryInput, UpdateArchiveClassificationInput, UpsertAiConsentInput, AiConsentPurpose, UpsertSensitiveDataConsentInput, SensitiveExportPreviewInput, RunAutomationInput, UpsertDigitalLegacyPlanInput, UpsertLegacyGrantInput, ExecuteLegacyPlanInput, ApproveLegacyExecutionInput, CancelLegacyExecutionInput, ArchiveSearchInput, CreateArchiveRetentionPolicyInput, AssignArchiveRetentionPolicyInput, UpsertBackupTargetInput, MaintenanceResultView, BackupSchedulerResultView, AdaptiveResourceStateView, EnqueueTaskInput, UpsertMaintenancePolicyInput, DiagnosticFilterInput, DiagnosticArchiveSearchInput, MaintenanceHistoryFilterInput, CreateDataRetentionPolicyInput, ArchiveDataResourceInput, RestoreDataResourceInput, RequestDataPurgeInput, CancelDataPurgeInput, ExecuteDataPurgeInput, SetDataLegalHoldInput, UpdateBackupQuarantinePolicyInput, SetBackupQuarantineLegalHoldInput, DestroyBackupQuarantineBatchInput, RegisterExternalBackupCopyInput, ReviewExternalBackupCopyInput, SetExternalBackupCopyLegalHoldInput, AttestExternalBackupCopyDestroyedInput, RegisterExternalBackupEvidenceIssuerInput, RotateExternalBackupEvidenceIssuerInput, RevokeExternalBackupEvidenceIssuerInput, ApplyExternalBackupEvidenceRevocationListInput, UpsertExternalBackupRevocationEndpointInput, PendingRevocationSyncListView, ApplyPendingRevocationSyncInput, RevocationSyncEndpointStateView, RevocationSyncRunResultView, VerifyExternalBackupDestructionEvidenceInput, ApplyFamilyDataImportInput, RollbackFamilyDataImportInput, GenealogyTreePageInput, TimelinePageInput, ArchivePageInput, PersonCatalogPageInput, EventCatalogPageInput, EntityCatalogLookupInput, FamilySnapshotSectionsInput, IpcAdaptiveBudgetMaintenanceOperation, IpcAdaptiveBudgetMaintenanceAuthorizationInput, IpcAdaptiveBudgetMaintenanceReauthenticationInput, IpcAdaptiveBudgetMaintenanceRecoveryInput, UpdateBackupCleanRewritePolicyInput } from '@ppt/domain';
+import { APP_META, USER_VISIBLE_APP_INFO, resolveUiLocalization, selectOperatingSystemUiLanguage, type UiLocalizationBootstrapView, type CreateArchiveItemInput, CreateFamilyEventInput, UpdateFamilyEventInput, SetFamilyEventArchivedInput, UpdateEventParticipantsInput, UpdateEventInvitationInput, UpdateEventNotesInput, AcknowledgeFamilyNotificationInput, CreateFamilyLocationInput, CreateFamilyMemberInput, CreateFamilyRelationInput, LoginInput, SetupAdminInput, ChangePasswordInput, EnableTwoFactorInput, DisableTwoFactorInput, TrustCurrentDeviceInput, ReauthorizeCurrentDeviceInput, CreateFamilyInvitationInput, InspectFamilyInvitationInput, ResendFamilyInvitationInput, AcceptFamilyInvitationInput, UpsertObjectPermissionInput, UpdateFamilyAccountInput, CreateFinanceRecordInput, CreateBankAccountInput, ValidateIbanInput, CreatePaymentCardInput, CreateHealthRecordInput, CreateMedicationPlanInput, CreateFamilyHealthHistoryInput, CreateFinanceValuationInput, CreateLifeRecordInput, CreateAutomationRuleInput, CreateArchiveCategoryInput, UpdateArchiveClassificationInput, UpsertAiConsentInput, AiConsentPurpose, UpsertSensitiveDataConsentInput, SensitiveExportPreviewInput, RunAutomationInput, UpsertDigitalLegacyPlanInput, UpsertLegacyGrantInput, ExecuteLegacyPlanInput, ApproveLegacyExecutionInput, CancelLegacyExecutionInput, ArchiveSearchInput, CreateArchiveRetentionPolicyInput, AssignArchiveRetentionPolicyInput, UpsertBackupTargetInput, MaintenanceResultView, BackupSchedulerResultView, AdaptiveResourceStateView, EnqueueTaskInput, UpsertMaintenancePolicyInput, DiagnosticFilterInput, DiagnosticArchiveSearchInput, MaintenanceHistoryFilterInput, CreateDataRetentionPolicyInput, ArchiveDataResourceInput, RestoreDataResourceInput, RequestDataPurgeInput, CancelDataPurgeInput, ExecuteDataPurgeInput, SetDataLegalHoldInput, UpdateBackupQuarantinePolicyInput, SetBackupQuarantineLegalHoldInput, DestroyBackupQuarantineBatchInput, RegisterExternalBackupCopyInput, ReviewExternalBackupCopyInput, SetExternalBackupCopyLegalHoldInput, AttestExternalBackupCopyDestroyedInput, RegisterExternalBackupEvidenceIssuerInput, RotateExternalBackupEvidenceIssuerInput, RevokeExternalBackupEvidenceIssuerInput, ApplyExternalBackupEvidenceRevocationListInput, UpsertExternalBackupRevocationEndpointInput, PendingRevocationSyncListView, ApplyPendingRevocationSyncInput, RevocationSyncEndpointStateView, RevocationSyncRunResultView, VerifyExternalBackupDestructionEvidenceInput, ApplyFamilyDataImportInput, RollbackFamilyDataImportInput, GenealogyTreePageInput, TimelinePageInput, ArchivePageInput, PersonCatalogPageInput, EventCatalogPageInput, EntityCatalogLookupInput, FamilySnapshotSectionsInput, IpcAdaptiveBudgetMaintenanceOperation, IpcAdaptiveBudgetMaintenanceAuthorizationInput, IpcAdaptiveBudgetMaintenanceReauthenticationInput, IpcAdaptiveBudgetMaintenanceRecoveryInput, UpdateBackupCleanRewritePolicyInput } from '@ppt/domain';
 import type { AddArchiveItemVersionInput, AddArchiveRelationEvidenceInput, RemoveArchiveRelationEvidenceInput } from '@ppt/domain';
 import { STABLE_USER_DATA_DIRECTORY_NAME } from '@ppt/domain';
 import type { UiLanguagePreference } from '@ppt/domain';
@@ -397,12 +397,10 @@ const getProductSurfaceGovernanceUseCase = new GetProductSurfaceGovernanceUseCas
 const currentProductName = APP_META.name;
 let uiLocalizationBootstrap: Readonly<UiLocalizationBootstrapView> = resolveUiLocalization(undefined);
 const uiLanguagePreferencePath=():string=>join(app.getPath('userData'),'preferences','ui-language.json');
-const operatingSystemUiLanguage = (): string => {
-  const preferredLanguage = app.getPreferredSystemLanguages()
-    .map((value) => value.trim())
-    .find((value) => value.length > 0);
-  return preferredLanguage ?? app.getSystemLocale().trim();
-};
+const operatingSystemUiLanguage = (): string => selectOperatingSystemUiLanguage(
+  app.getSystemLocale(),
+  app.getPreferredSystemLanguages()
+);
 const resolveMainUiLocalization = (preference:UiLanguagePreference):Readonly<UiLocalizationBootstrapView> =>
   resolveUiLocalization(operatingSystemUiLanguage(),preference);
 const mainText = (turkish: string, english: string): string =>
@@ -3379,12 +3377,34 @@ function createWindow(): void {
     if (trustedRenderer?.webContentsId === primaryWebContentsId) trustedRenderer = undefined;
   });
   window.once('ready-to-show', () => window.show());
-  window.webContents.once('did-finish-load', () => {
+  window.webContents.once('did-finish-load', async () => {
     const probePath = process.env.PPT_WINDOWS_LAUNCH_PROBE_PATH;
     if (probePath) {
+      const rendererLocalization = await window.webContents.executeJavaScript(`new Promise((resolve, reject) => {
+        const deadline = Date.now() + 10000;
+        const inspect = () => {
+          const value = {
+            bridgePresent: typeof window.pardus === 'object' && window.pardus !== null,
+            localizationBootstrapMethodPresent: typeof window.pardus?.getLocalizationBootstrap === 'function',
+            documentLanguage: document.documentElement.lang,
+            dataLanguage: document.documentElement.dataset.uiLanguage ?? ''
+          };
+          if (value.localizationBootstrapMethodPresent && value.dataLanguage.length > 0) resolve(value);
+          else if (Date.now() >= deadline) reject(new Error('Renderer localization bootstrap timed out.'));
+          else setTimeout(inspect, 25);
+        };
+        inspect();
+      })`, true) as {
+        readonly bridgePresent: boolean;
+        readonly localizationBootstrapMethodPresent: boolean;
+        readonly documentLanguage: string;
+        readonly dataLanguage: string;
+      };
       writeFileSync(probePath, `${JSON.stringify({
         status: 'PASS',
         applicationVersion: APP_META.version,
+        uiLocalizationBootstrap,
+        rendererLocalization,
         rendererDocumentUrl,
         webContentsId: window.webContents.id,
         startupSecurity: startupSecurityReport,
