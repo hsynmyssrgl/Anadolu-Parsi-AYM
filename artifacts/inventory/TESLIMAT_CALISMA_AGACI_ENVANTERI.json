@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "34-L-TESLIMAT-CALISMA-AGACI-ENVANTERI",
+  "sourceBaseHead": "06a9f53c3cf770ffdabacfe710f05a8f49e92c55",
+  "status": "CLEAN",
+  "snapshotSha256": "082eb2407347ad1e13043501705e0646ce4a14438bd51361e4d12f58ed87b0c0",
+  "deterministicSnapshot": true,
+  "authorOrOwnerAttributionMade": false,
+  "finalCommitBindingEstablished": false,
+  "installerProducedByThisOperation": false,
+  "destructiveActionPerformed": false,
+  "excludedSelfGeneratedPaths": [
+    "artifacts/inventory/TESLIMAT_CALISMA_AGACI_ENVANTERI.json",
+    "docs/current/13_TESLIMAT_CALISMA_AGACI_ENVANTERI.md",
+    "artifacts/validation/34-L-bronze-final-local-closure-boundary.json",
+    "artifacts/validation/34-L-bronze-final-local-closure-contract.json",
+    "artifacts/validation/34-L-bronze-final-local-closure-runtime.json"
+  ],
+  "counts": {
+    "total": 0,
+    "trackedChanged": 0,
+    "untracked": 0,
+    "staged": 0,
+    "worktreeChanged": 0,
+    "deleted": 0,
+    "binary": 0,
+    "groups": {}
+  },
+  "entries": []
+}
