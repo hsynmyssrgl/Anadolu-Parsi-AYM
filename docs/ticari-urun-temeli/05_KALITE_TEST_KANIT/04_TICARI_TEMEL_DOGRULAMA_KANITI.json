@@ -11,7 +11,7 @@
   "workItemCount": 49,
   "fileCount": 87,
   "sourceFileCount": 86,
-  "sourceFingerprintSha256": "adedcbb8f7a80ce02b4c45559cf9fb4849c4d89ee224447a8845242079b3eb54",
+  "sourceFingerprintSha256": "1a5cf67255af21943c666d829af826b9c6025692c8dcdb465643cc81cfce2c5b",
   "checks": 1026,
   "status": "PASS",
   "commercialReleaseEligible": false,
@@ -125,8 +125,8 @@
     },
     {
       "path": "05_KALITE_TEST_KANIT/05_GIT_YEDEK_DOGRULAMA_KANITI.json",
-      "bytes": 818,
-      "sha256": "163b03a9e65af2cda93f63222c4b4577abd1186b4ebfe58a563ccc8253a53f27"
+      "bytes": 814,
+      "sha256": "f1f794646fcb62972102e8341d42f421621d88f6fc2d7d3a8941063ab097e222"
     },
     {
       "path": "05_KALITE_TEST_KANIT/06_TAM_REGRESYON_KANITI.json",
@@ -449,5 +449,5 @@
       "sha256": "25c93181914f7e81377e4e7ac626947d330d120e37fadc5702a01d645bbd1f3b"
     }
   ],
-  "generatedAt": "2026-08-20T16:44:18.605Z"
+  "generatedAt": "2026-08-20T16:45:58.189Z"
 }

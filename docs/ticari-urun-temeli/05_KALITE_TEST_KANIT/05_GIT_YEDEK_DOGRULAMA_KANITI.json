@@ -1,21 +1,21 @@
 {
   "schemaVersion": 1,
-  "id": "PARSYUVA-AYM-GIT-YEDEK-DOGRULAMA-20260819-01",
-  "verifiedAt": "2026-08-19T13:48:04+03:00",
+  "id": "PARSYUVA-GIT-YEDEK-DOGRULAMA-20260820-01",
+  "verifiedAt": "2026-08-20T19:45:27+03:00",
   "repository": "C:/PPT/AYM/06_KOD/app",
   "branch": "main",
-  "commit": "3b39d46e057edf0bf2a305f01efa184bc1347420",
+  "commit": "7c45784578c918522d3fb029739d4e1e9a7b6fb9",
   "github": {
     "remote": "github",
     "ref": "github/main",
-    "commit": "3b39d46e057edf0bf2a305f01efa184bc1347420",
+    "commit": "7c45784578c918522d3fb029739d4e1e9a7b6fb9",
     "status": "PASS"
   },
   "localBackup": {
     "remote": "backup",
     "path": "D:/GitYedekleri/Anadolu-Parsi-AYM.git",
     "ref": "backup/main",
-    "commit": "3b39d46e057edf0bf2a305f01efa184bc1347420",
+    "commit": "7c45784578c918522d3fb029739d4e1e9a7b6fb9",
     "status": "PASS"
   },
   "compatibilityPath": {
