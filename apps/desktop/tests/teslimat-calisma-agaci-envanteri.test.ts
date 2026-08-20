@@ -13,6 +13,8 @@ describe('34-L teslimat calisma agaci envanteri', () => {
     )) as {
       sourceBaseHead: string;
       snapshotSha256: string;
+      status: 'CLEAN' | 'DIRTY_REQUIRES_PARTITION';
+      counts: { total: number };
       entries: Array<{ path: string; sha256: string | null; group: string }>;
       authorOrOwnerAttributionMade: boolean;
       finalCommitBindingEstablished: boolean;
@@ -20,7 +22,8 @@ describe('34-L teslimat calisma agaci envanteri', () => {
       destructiveActionPerformed: boolean;
       excludedSelfGeneratedPaths: string[];
     };
-    expect(inventory.entries.length).toBeGreaterThan(0);
+    expect(inventory.counts.total).toBe(inventory.entries.length);
+    expect(inventory.status).toBe(inventory.entries.length === 0 ? 'CLEAN' : 'DIRTY_REQUIRES_PARTITION');
     expect(inventory.entries.every((entry) => entry.path.length > 0 && entry.group.length > 0
       && (entry.sha256 === null || /^[0-9a-f]{64}$/u.test(entry.sha256)))).toBe(true);
     expect(inventory.authorOrOwnerAttributionMade).toBe(false);

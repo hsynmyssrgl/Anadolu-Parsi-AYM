@@ -10,6 +10,8 @@ export const SELF_INDEX_PATHS = new Set([
   'artifacts/manifests/ALL_DOCUMENTS_INDEX.csv',
   'artifacts/manifests/ALL_DOCUMENTS_INDEX.md',
   'docs/current/08_TUM_BELGELER_DIZINI.md',
+  'artifacts/inventory/TESLIMAT_CALISMA_AGACI_ENVANTERI.json',
+  'docs/current/13_TESLIMAT_CALISMA_AGACI_ENVANTERI.md',
   'manifest.json',
   'SHA256SUMS.txt'
 ]);

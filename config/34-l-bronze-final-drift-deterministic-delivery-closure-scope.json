@@ -14,6 +14,7 @@
     "singleCurrentDocumentationIndexRegenerationModeled":true,
     "deterministicSourceManifestArchiveReceiptModeled":true,
     "worktreeChangeInventoryGenerated":true,
+    "localPartitionCommitsCreated":true,
     "finalCommitBindingEstablished":false,
     "allRoadmapPackagesAccepted":false,
     "allExternalEvidenceAvailable":false,
@@ -31,7 +32,7 @@
     "fullRegression":{"status":"PASS","files":350,"tests":2187},
     "rootTypecheck":"PASS",
     "productionBuilds":{"status":"PASS","workspaces":18},
-    "artifactIndex":{"status":"PASS","checks":19979,"files":6186,"documents":3782}
+    "artifactIndex":{"status":"PASS","checks":19981,"files":6186,"documents":3782}
   },
   "persistentReceiptStatus":"VERSIONED_LOCAL_RECEIPT_SUPPORTED",
   "persistentReceiptPathPattern":"artifacts/validation/34-L-bronze-local-closure-receipts/<source-head>-<evidence-digest>.json",

@@ -18,9 +18,9 @@ Bu kayıt yerel kodlama kapsamını izler; ürün/sertifikasyon kapanışı değ
 - Teslimat çalışma ağacı envanteri hedef testi: `1/1` dosya ve `1/1` test `PASS`.
 - Son tam Vitest regresyonu: teslimat envanteri testi dahil `350/350` test dosyası ve `2187/2187` test `PASS`.
 - Kök typecheck ve 18 workspace production build'i `PASS`.
-- Belge/kod indeksi: `6186` dosya, `3782` belge ve `19979` doğrulama kontrolü `PASS`.
+- Belge/kod indeksi: `6186` dosya, `3782` belge ve `19981` doğrulama kontrolü `PASS`.
 - Persistent receipt: `artifacts/validation/34-L-bronze-local-closure-receipts/<source-head>-<evidence-digest>.json`; no-overwrite versioned rollover desteklenir. Eski sabit receipt tarihsel kalır ve güncel kaynak kanıtı sayılmaz.
-- Kirli çalışma ağacı teslimat envanteri: `docs/current/13_TESLIMAT_CALISMA_AGACI_ENVANTERI.md` ve `artifacts/inventory/TESLIMAT_CALISMA_AGACI_ENVANTERI.json`. Her değişiklik Git durumu, teslimat kümesi, bayt sayısı ve SHA-256 ile kayıtlıdır; dosya yazarlığı/sahipliği varsayılmaz ve otomatik commit yapılmaz.
+- Kaynak, yönetişim ve üretilmiş kanıt değişiklikleri yerel teslimat branch'inde ayrı commit kümelerine ayrıldı. Son temiz çalışma ağacı envanteri `docs/current/13_TESLIMAT_CALISMA_AGACI_ENVANTERI.md` ve `artifacts/inventory/TESLIMAT_CALISMA_AGACI_ENVANTERI.json` dosyalarında tutulur. Envanter üreticisi dosya yazarlığı/sahipliği varsaymaz, commit veya push yapmaz; kalıcı receipt ve dış kaynak eşitliği henüz kurulmadığından gereksinim kabulü yine `false` kalır.
 
 ## Açık kalan kabul kanıtları
 

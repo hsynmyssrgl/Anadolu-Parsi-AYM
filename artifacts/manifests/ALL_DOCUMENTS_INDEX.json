@@ -2,9 +2,10 @@
   "schemaVersion": 1,
   "release": "Bronze 20.08.2026.35",
   "releaseId": "bronze-2026-08-20-r35",
-  "generatedAt": "2026-08-20T14:09:50.435Z",
+  "generatedAt": "2026-08-20T14:19:12.934Z",
   "selfIndexedPaths": [
     "SHA256SUMS.txt",
+    "artifacts/inventory/TESLIMAT_CALISMA_AGACI_ENVANTERI.json",
     "artifacts/manifests/ALL_DOCUMENTS_INDEX.csv",
     "artifacts/manifests/ALL_DOCUMENTS_INDEX.json",
     "artifacts/manifests/ALL_DOCUMENTS_INDEX.md",
@@ -12,6 +13,7 @@
     "artifacts/manifests/PROJECT_ARTIFACT_INDEX.json",
     "artifacts/manifests/PROJECT_ARTIFACT_INDEX.md",
     "docs/current/08_TUM_BELGELER_DIZINI.md",
+    "docs/current/13_TESLIMAT_CALISMA_AGACI_ENVANTERI.md",
     "manifest.json"
   ],
   "documentCount": 3782,
@@ -5098,8 +5100,8 @@
     },
     {
       "path": "artifacts/inventory/TESLIMAT_CALISMA_AGACI_ENVANTERI.json",
-      "bytes": 130782,
-      "sha256": "d7ed77290282d51e08ae55ca42c500e7d2caf1ef47ad20645281a3bef6656489",
+      "bytes": null,
+      "sha256": "SELF_GENERATED_AFTER_INVENTORY",
       "extension": ".json",
       "classification": "GENERATED",
       "isDocument": true
@@ -22162,16 +22164,16 @@
     },
     {
       "path": "config/34-l-bronze-final-drift-deterministic-delivery-closure-inventory.json",
-      "bytes": 1673,
-      "sha256": "091964c005fefb34a9f8a56442a31cbae7a4df074b277cbf1288d827ff339500",
+      "bytes": 1680,
+      "sha256": "11f02d9a30b00fe504d0ef82ae47f53f5fdb608fdc5aa715da9eb6d9f6b40d96",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
     },
     {
       "path": "config/34-l-bronze-final-drift-deterministic-delivery-closure-scope.json",
-      "bytes": 1935,
-      "sha256": "ed7b77be86339c7ab524e2324655641be652551d95e0a163177e505143fd0092",
+      "bytes": 1976,
+      "sha256": "e1c4669ea4897b8813a2b74f957c1012a8b8540d0a28a5267419fdab0f1ba82a",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -24474,8 +24476,8 @@
     },
     {
       "path": "docs/audit/34-L_BRONZE_FINAL_LOCAL_CLOSURE_AUDIT.md",
-      "bytes": 2897,
-      "sha256": "86ee94564fe54e61b2cd2618a75469e9134d06a8092ef59e259d551508f01c3a",
+      "bytes": 3067,
+      "sha256": "4deaffd576d1c022a226825102fd83340c018e8c351f8aa96c1c905cb80c8ffe",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -24770,10 +24772,10 @@
     },
     {
       "path": "docs/current/13_TESLIMAT_CALISMA_AGACI_ENVANTERI.md",
-      "bytes": 54446,
-      "sha256": "0fd4085b0002014c1bc4c0e7bd09056c2e8cb92d24954ff664b5fbb4e9d2a594",
+      "bytes": null,
+      "sha256": "SELF_GENERATED_AFTER_INVENTORY",
       "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
+      "classification": "GENERATED",
       "isDocument": true
     },
     {

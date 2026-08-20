@@ -134,7 +134,7 @@ async function buildInventory() {
 function renderMarkdown(inventory) {
   const groups = Object.entries(inventory.counts.groups)
     .map(([group, count]) => `| ${group} | ${count} |`)
-    .join('\n');
+    .join('\n') || '| TEMIZ_CALISMA_AGACI | 0 |';
   const rows = inventory.entries.map((entry) => {
     const escapedPath = entry.path.replaceAll('|', '\\|');
     return `| ${entry.gitStatus.replaceAll(' ', '&nbsp;')} | ${escapedPath} | ${entry.group} | ${entry.bytes} | ${entry.sha256 ?? '-'} |`;

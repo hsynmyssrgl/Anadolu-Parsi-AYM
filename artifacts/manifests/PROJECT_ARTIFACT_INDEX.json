@@ -2,9 +2,10 @@
   "schemaVersion": 2,
   "release": "Bronze 20.08.2026.35",
   "releaseId": "bronze-2026-08-20-r35",
-  "generatedAt": "2026-08-20T14:09:50.435Z",
+  "generatedAt": "2026-08-20T14:19:12.934Z",
   "selfIndexedPaths": [
     "SHA256SUMS.txt",
+    "artifacts/inventory/TESLIMAT_CALISMA_AGACI_ENVANTERI.json",
     "artifacts/manifests/ALL_DOCUMENTS_INDEX.csv",
     "artifacts/manifests/ALL_DOCUMENTS_INDEX.json",
     "artifacts/manifests/ALL_DOCUMENTS_INDEX.md",
@@ -12,6 +13,7 @@
     "artifacts/manifests/PROJECT_ARTIFACT_INDEX.json",
     "artifacts/manifests/PROJECT_ARTIFACT_INDEX.md",
     "docs/current/08_TUM_BELGELER_DIZINI.md",
+    "docs/current/13_TESLIMAT_CALISMA_AGACI_ENVANTERI.md",
     "manifest.json"
   ],
   "summary": {
@@ -19,9 +21,9 @@
     "totalDocuments": 3782,
     "classifications": {
       "ACTIVE_AUTHORITY": 30,
-      "ACTIVE_REFERENCE": 865,
+      "ACTIVE_REFERENCE": 864,
       "EVIDENCE": 1413,
-      "GENERATED": 657,
+      "GENERATED": 658,
       "HISTORICAL": 1578,
       "SOURCE_CODE": 623,
       "TEST_OR_GATE": 1020
@@ -4190,8 +4192,8 @@
     },
     {
       "path": "apps/desktop/tests/teslimat-calisma-agaci-envanteri.test.ts",
-      "bytes": 2097,
-      "sha256": "127256939f843cbe399c1fdfff211f61dca467fd2aad2bc125e17f64f15dc120",
+      "bytes": 2298,
+      "sha256": "ba8858a60e48a2a5f73eef476a5278dff05ad2cc4bfce2bda48fefcc8801c274",
       "extension": ".ts",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -9710,8 +9712,8 @@
     },
     {
       "path": "artifacts/inventory/TESLIMAT_CALISMA_AGACI_ENVANTERI.json",
-      "bytes": 130782,
-      "sha256": "d7ed77290282d51e08ae55ca42c500e7d2caf1ef47ad20645281a3bef6656489",
+      "bytes": null,
+      "sha256": "SELF_GENERATED_AFTER_INVENTORY",
       "extension": ".json",
       "classification": "GENERATED",
       "isDocument": true
@@ -28478,16 +28480,16 @@
     },
     {
       "path": "config/34-l-bronze-final-drift-deterministic-delivery-closure-inventory.json",
-      "bytes": 1673,
-      "sha256": "091964c005fefb34a9f8a56442a31cbae7a4df074b277cbf1288d827ff339500",
+      "bytes": 1680,
+      "sha256": "11f02d9a30b00fe504d0ef82ae47f53f5fdb608fdc5aa715da9eb6d9f6b40d96",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
     },
     {
       "path": "config/34-l-bronze-final-drift-deterministic-delivery-closure-scope.json",
-      "bytes": 1935,
-      "sha256": "ed7b77be86339c7ab524e2324655641be652551d95e0a163177e505143fd0092",
+      "bytes": 1976,
+      "sha256": "e1c4669ea4897b8813a2b74f957c1012a8b8540d0a28a5267419fdab0f1ba82a",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -30942,8 +30944,8 @@
     },
     {
       "path": "docs/audit/34-L_BRONZE_FINAL_LOCAL_CLOSURE_AUDIT.md",
-      "bytes": 2897,
-      "sha256": "86ee94564fe54e61b2cd2618a75469e9134d06a8092ef59e259d551508f01c3a",
+      "bytes": 3067,
+      "sha256": "4deaffd576d1c022a226825102fd83340c018e8c351f8aa96c1c905cb80c8ffe",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -31238,10 +31240,10 @@
     },
     {
       "path": "docs/current/13_TESLIMAT_CALISMA_AGACI_ENVANTERI.md",
-      "bytes": 54446,
-      "sha256": "0fd4085b0002014c1bc4c0e7bd09056c2e8cb92d24954ff664b5fbb4e9d2a594",
+      "bytes": null,
+      "sha256": "SELF_GENERATED_AFTER_INVENTORY",
       "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
+      "classification": "GENERATED",
       "isDocument": true
     },
     {
@@ -41942,8 +41944,8 @@
     },
     {
       "path": "scripts/lib/governance-utils.mjs",
-      "bytes": 4615,
-      "sha256": "790e3132583ea302dfa053c01f3a835c516c220f598fff770fd5f9ef61bdd3c1",
+      "bytes": 4735,
+      "sha256": "6aacd960e40d4e075bc41f67189cf2bada56c15ef003794373a4223414c5af1a",
       "extension": ".mjs",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -42110,8 +42112,8 @@
     },
     {
       "path": "scripts/olustur-34-l-teslimat-calisma-agaci-envanteri.mjs",
-      "bytes": 9804,
-      "sha256": "0680ff767cdb1b710e2ded2b895c8f8d20d7880003bcdf567b0bd7cf32b094be",
+      "bytes": 11018,
+      "sha256": "ab60168807b49a0291ac12f82f419c9a4574c6e1ab309ebd4372ca719974ea1f",
       "extension": ".mjs",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -45174,8 +45176,8 @@
     },
     {
       "path": "scripts/verify-34-l-bronze-final-local-closure.mjs",
-      "bytes": 11734,
-      "sha256": "518375a2adfe761004f07829b9c12e3cb99c8a7b7eb862ffd595f9b51cb898dd",
+      "bytes": 11803,
+      "sha256": "8dce4ed0220ef796f2449d579e976bcfd256995b3539ac43ce92746d4813eef3",
       "extension": ".mjs",
       "classification": "TEST_OR_GATE",
       "isDocument": false

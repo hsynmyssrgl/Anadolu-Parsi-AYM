@@ -68,9 +68,10 @@ if (mode === 'contract' || mode === 'runtime') {
     && scope.status === 'PLANNED_FINAL' && inventory.status === 'PLANNED_FINAL');
   check('acceptance remains fail-honest', scope.truth?.requirementsClosed === false
     && scope.truth?.countsAsRequirementPass === false && inventory.countsAsRequirementPass === false);
-  check('dirty worktree partition remains explicit and non-accepting', scope.truth?.worktreeChangeInventoryGenerated === true
+  check('local worktree partition is committed and remains non-accepting', scope.truth?.worktreeChangeInventoryGenerated === true
+    && scope.truth?.localPartitionCommitsCreated === true
     && scope.truth?.finalCommitBindingEstablished === false
-    && inventory.deliveryWorktreeInventoryStatus === 'DIRTY_REQUIRES_PARTITION'
+    && inventory.deliveryWorktreeInventoryStatus === 'CLEAN_LOCAL_COMMITS_PARTITIONED'
     && inventory.finalCommitBindingEstablished === false);
   check('current local validation evidence is exact and remains non-accepting', scope.validation?.localPackageBoundaries?.checks === 52
     && scope.validation?.localPackageContracts?.checks === 30
@@ -80,7 +81,7 @@ if (mode === 'contract' || mode === 'runtime') {
     && scope.validation?.fullRegression?.status === 'PASS' && scope.validation?.fullRegression?.files === 350
     && scope.validation?.fullRegression?.tests === 2187 && scope.validation?.rootTypecheck === 'PASS'
     && scope.validation?.productionBuilds?.status === 'PASS' && scope.validation?.productionBuilds?.workspaces === 18
-    && scope.validation?.artifactIndex?.checks === 19979 && scope.validation?.artifactIndex?.files === 6186
+    && scope.validation?.artifactIndex?.checks === 19981 && scope.validation?.artifactIndex?.files === 6186
     && scope.validation?.artifactIndex?.documents === 3782 && inventory.localEvidence?.fullRegressionStatus === 'PASS'
     && inventory.localEvidence?.fullRegressionFiles === 350 && inventory.localEvidence?.fullRegressionTests === 2187
     && audit.includes('350/350') && audit.includes('2187/2187'));
