@@ -37,15 +37,18 @@ const governanceFiles = [
   'docs/security/THREAT_MODEL_34_L_BRONZE_FINAL_LOCAL_CLOSURE.md',
   'docs/audit/34-L_BRONZE_FINAL_LOCAL_CLOSURE_AUDIT.md',
   'scripts/verify-remaining-package-local-foundation.mjs',
-  'scripts/create-34-l-bronze-local-closure-receipt.mjs'
+  'scripts/create-34-l-bronze-local-closure-receipt.mjs',
+  'scripts/olustur-34-l-teslimat-calisma-agaci-envanteri.mjs',
+  'apps/desktop/tests/teslimat-calisma-agaci-envanteri.test.ts'
 ];
 const localSteps = ['34-G', '34-H', '34-I', '34-J', '34-K'];
 
 if (mode === 'boundary' || mode === 'runtime') {
   check('34-L governance and automation files exist', governanceFiles.every((path) => existsSync(resolve(root, path))));
   const packageJson = json('package.json');
-  const commands = ['boundary', 'contract', 'runtime', 'receipt'];
+  const commands = ['boundary', 'contract', 'runtime', 'receipt', 'delivery-worktree-inventory'];
   check('34-L package commands are wired', commands.every((command) => typeof packageJson.scripts?.[`verify:34-l:${command}`] === 'string'));
+  run('34-L delivery worktree inventory', ['scripts/olustur-34-l-teslimat-calisma-agaci-envanteri.mjs', '--verify']);
   for (const step of localSteps) {
     run(`${step} boundary`, ['scripts/verify-remaining-package-local-foundation.mjs', step, 'boundary', '--no-write']);
   }
@@ -65,17 +68,22 @@ if (mode === 'contract' || mode === 'runtime') {
     && scope.status === 'PLANNED_FINAL' && inventory.status === 'PLANNED_FINAL');
   check('acceptance remains fail-honest', scope.truth?.requirementsClosed === false
     && scope.truth?.countsAsRequirementPass === false && inventory.countsAsRequirementPass === false);
+  check('dirty worktree partition remains explicit and non-accepting', scope.truth?.worktreeChangeInventoryGenerated === true
+    && scope.truth?.finalCommitBindingEstablished === false
+    && inventory.deliveryWorktreeInventoryStatus === 'DIRTY_REQUIRES_PARTITION'
+    && inventory.finalCommitBindingEstablished === false);
   check('current local validation evidence is exact and remains non-accepting', scope.validation?.localPackageBoundaries?.checks === 52
     && scope.validation?.localPackageContracts?.checks === 30
-    && scope.validation?.localPackageRuntimes?.checks === 172
+    && scope.validation?.localPackageRuntimes?.checks === 182
     && scope.validation?.targeted?.files === 12 && scope.validation?.targeted?.tests === 50
-    && scope.validation?.fullRegression?.status === 'PASS' && scope.validation?.fullRegression?.files === 306
-    && scope.validation?.fullRegression?.tests === 2047 && scope.validation?.rootTypecheck === 'PASS'
+    && scope.validation?.worktreeInventoryTargeted?.files === 1 && scope.validation?.worktreeInventoryTargeted?.tests === 1
+    && scope.validation?.fullRegression?.status === 'PASS' && scope.validation?.fullRegression?.files === 350
+    && scope.validation?.fullRegression?.tests === 2187 && scope.validation?.rootTypecheck === 'PASS'
     && scope.validation?.productionBuilds?.status === 'PASS' && scope.validation?.productionBuilds?.workspaces === 18
-    && scope.validation?.artifactIndex?.checks === 19394 && scope.validation?.artifactIndex?.files === 5993
-    && scope.validation?.artifactIndex?.documents === 3683 && inventory.localEvidence?.fullRegressionStatus === 'PASS'
-    && inventory.localEvidence?.fullRegressionFiles === 306 && inventory.localEvidence?.fullRegressionTests === 2047
-    && audit.includes('306/306') && audit.includes('2047/2047'));
+    && scope.validation?.artifactIndex?.checks === 19979 && scope.validation?.artifactIndex?.files === 6186
+    && scope.validation?.artifactIndex?.documents === 3782 && inventory.localEvidence?.fullRegressionStatus === 'PASS'
+    && inventory.localEvidence?.fullRegressionFiles === 350 && inventory.localEvidence?.fullRegressionTests === 2187
+    && audit.includes('350/350') && audit.includes('2187/2187'));
   check('versioned local receipt rollover is supported while manual and external evidence remain NOT_RUN', Object.values(scope.manualEvidence ?? {}).every((value) => value === 'NOT_RUN')
     && scope.persistentReceiptStatus === 'VERSIONED_LOCAL_RECEIPT_SUPPORTED'
     && scope.persistentReceiptPathPattern === 'artifacts/validation/34-L-bronze-local-closure-receipts/<source-head>-<evidence-digest>.json'

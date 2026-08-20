@@ -16,6 +16,7 @@ const AUTHORIZED_EGRESS_USE_CASE = 'apps/desktop/src/main/governed-network-egres
 const AUTHORIZED_EGRESS_CALLER = 'apps/desktop/src/main/secure-revocation-sync-service.ts';
 const LOCAL_TRANSPORT_FILES = new Set([
   'apps/core-service/src/local-admin-server.ts',
+  'apps/core-service/src/windows-service-control-server.ts',
   'packages/core-service-client/src/local-admin-client.ts',
   'apps/desktop/src/main/local-family-ai-model-adapter.ts'
 ]);

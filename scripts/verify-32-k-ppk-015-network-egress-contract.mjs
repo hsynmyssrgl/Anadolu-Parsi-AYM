@@ -171,7 +171,7 @@ check('targeted OIDC tests cover pins scope DNS TLS redirect abort and zeroizati
   'pin rotation sets', 'unknown or escalated scope', 'mixed DNS', 'TLS downgrade', 'midstream abort', 'bounded deadline'
 ]));
 check('current note explicitly separates historical closure from successor truth', includesAll(sources.currentNote, [
-  'DEC-196', 'migration 76', 'migration 77', 'migration 115', '2 adapter', '3 purpose', 'historical', 'current ratchet'
+  'DEC-196', 'migration 76', 'migration 77', 'migration 117', '2 adapter', '3 purpose', 'historical', 'current ratchet'
 ]));
 check('accepted registry remains complete without claiming a new closure decision', requirement?.status === 'COMPLETE'
   && Object.values(requirement.chain ?? {}).every((value) => value === true));

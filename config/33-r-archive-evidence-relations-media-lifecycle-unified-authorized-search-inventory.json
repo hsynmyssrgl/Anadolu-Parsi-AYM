@@ -4,7 +4,7 @@
   "decision": "DEC-229",
   "requirements": ["B3-01", "B3-03", "B3-05"],
   "status": "PLANNED",
-  "implementationStatus": "PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
+  "implementationStatus": "LOCAL_FEATURE_COMPLETE_EXTERNAL_ACCEPTANCE_INCOMPLETE",
   "countsAsRequirementPass": false,
   "registryReconciliation": {
     "registryMutationPerformed": false,
@@ -70,18 +70,18 @@
     "dataStoreSmokeChecks": 14,
     "ppk021": {
       "status": "PASS",
-      "files": 568,
-      "surfaces": 889,
-      "sha256": "3a297f74d43d4675090a709d4359af9245c2971a7fc338afef2fb87b1c8608dd",
+      "files": 588,
+      "surfaces": 895,
+      "sha256": "fad3ceeb9485bffc9d6f9878f7bb486f56a73b4aa5d045580471c70a49e59da6",
       "targeted": 17,
       "contract": 84,
       "runtime": 20
     },
     "ppk022": {
       "status": "PASS",
-      "files": 568,
-      "surfaces": 428,
-      "sha256": "1bf21d23c862afbccb9611083c093f9ced703adadf7a170c29f53479d21397b1",
+      "files": 588,
+      "surfaces": 447,
+      "sha256": "2ac32190c1b40c455093841eb2456c06a168c9aaf519068a14f570705b8a177a",
       "targeted": 19,
       "contract": 110,
       "runtime": 24

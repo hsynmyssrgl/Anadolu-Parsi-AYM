@@ -16,7 +16,7 @@ const results = [];
 const check = (id, condition) => results.push({ id, status: condition ? 'PASS' : 'FAIL' });
 
 check('preload-node-crypto-removed', !files.preload.includes("from 'node:crypto'") && !files.preload.includes('require("node:crypto")'));
-check('preload-webcrypto-randomuuid', files.preload.includes('globalThis.crypto') && files.preload.includes('rendererCrypto.randomUUID()'));
+check('preload-webcrypto-randomuuid', files.preload.includes('globalThis.crypto') && files.preload.includes('rendererCrypto.randomUUID()') && files.preload.includes('rendererCrypto.getRandomValues(new Uint8Array(16))'));
 check('renderer-sandbox-preserved', files.policy.includes('sandbox: true') && files.policy.includes('contextIsolation: true') && files.policy.includes('nodeIntegration: false'));
 check('windows-current-user-dpapi-provider', files.protector.includes('ProtectedData]::Protect') && files.protector.includes('DataProtectionScope]::CurrentUser'));
 check('dpapi-secrets-use-stdin', files.protector.includes('[Console]::In.ReadToEnd()') && files.protector.includes('input: JSON.stringify({ operation, value: valueBase64 })'));

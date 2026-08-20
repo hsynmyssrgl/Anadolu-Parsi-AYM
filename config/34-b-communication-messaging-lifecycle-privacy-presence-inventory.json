@@ -9,7 +9,7 @@
     "domain": ["packages/domain/src/communication-messaging.ts"],
     "application": ["packages/application/src/communication-messaging-use-cases.ts"],
     "repositoryContract": ["packages/repository-contracts/src/communication-messaging-repository.ts"],
-    "migration": ["packages/database/src/family-database-migrations.ts#106"],
+    "migration": ["packages/database/src/family-database-migrations.ts#106", "packages/database/src/family-database-migrations.ts#117"],
     "repository": ["packages/repositories/src/communication-messaging-repository.ts"],
     "protectedPayload": ["apps/desktop/src/main/communication-message-payload-vault.ts"],
     "policyAndComposition": [
@@ -63,12 +63,12 @@
   ],
   "validation": {
     "targetedTestFileRatchet": 5,
-    "targetedTestRatchet": 29,
-    "migrationVersion": 106,
-    "migrationSha256": "5b088bb6d759403044f84ad9f2a82be1823e33a17334d7122beed92af56cce50",
-    "ppk015": {"status":"PASS","files":568,"sourceSha256":"8ef8bf331b1c484c595c2639b9da313d8ae6e0cd5e8751fa921bef2fdcccee64","findings":0},
-    "ppk021": {"status":"PASS","files":568,"surfaces":889,"sha256":"3a297f74d43d4675090a709d4359af9245c2971a7fc338afef2fb87b1c8608dd","targeted":17,"contract":84,"runtime":20},
-    "ppk022": {"status":"PASS","files":568,"surfaces":428,"sha256":"1bf21d23c862afbccb9611083c093f9ced703adadf7a170c29f53479d21397b1","targeted":19,"contract":111,"runtime":24},
+    "targetedTestRatchet": 30,
+    "migrationVersion": 117,
+    "migrationSha256": "9602df3d935441f033eb45d89d7403e09d8dbed3849873cfe68a098ff754dde3",
+    "ppk015": {"status":"PASS","files":588,"sourceSha256":"b2d792abf2d52dc9cfeecff6bd068ea05b6d69c2a6485640ef81ca97bb25ac8d","findings":0},
+    "ppk021": {"status":"PASS","files":588,"surfaces":895,"sha256":"fad3ceeb9485bffc9d6f9878f7bb486f56a73b4aa5d045580471c70a49e59da6","targeted":17,"contract":84,"runtime":20},
+    "ppk022": {"status":"PASS","files":588,"surfaces":447,"sha256":"2ac32190c1b40c455093841eb2456c06a168c9aaf519068a14f570705b8a177a","targeted":19,"contract":111,"runtime":24},
     "countsAsRequirementPass": false
   },
   "externalAndManualEvidence": "NOT_RUN",

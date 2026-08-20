@@ -6,7 +6,7 @@
   "title": "Archive evidence relations media lifecycle and unified authorized search",
   "status": "PLANNED",
   "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
-  "localImplementationStatus": "PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
+  "localImplementationStatus": "LOCAL_FEATURE_COMPLETE_EXTERNAL_ACCEPTANCE_INCOMPLETE",
   "requirements": [
     "B3-01",
     "B3-03",
@@ -118,18 +118,18 @@
     "dataStoreSmokeChecks": 14,
     "ppk021": {
       "status": "PASS",
-      "scannedProductionFiles": 568,
-      "exactPrivilegedSurfaceCount": 889,
-      "exactAllowlistSha256": "3a297f74d43d4675090a709d4359af9245c2971a7fc338afef2fb87b1c8608dd",
+      "scannedProductionFiles": 588,
+      "exactPrivilegedSurfaceCount": 895,
+      "exactAllowlistSha256": "fad3ceeb9485bffc9d6f9878f7bb486f56a73b4aa5d045580471c70a49e59da6",
       "targetedTests": 17,
       "contractChecks": 84,
       "runtimeChecks": 20
     },
     "ppk022": {
       "status": "PASS",
-      "scannedProductionFiles": 568,
-      "exactCapabilitySurfaceCount": 428,
-      "exactCapabilityManifestSha256": "1bf21d23c862afbccb9611083c093f9ced703adadf7a170c29f53479d21397b1",
+      "scannedProductionFiles": 588,
+      "exactCapabilitySurfaceCount": 447,
+      "exactCapabilityManifestSha256": "2ac32190c1b40c455093841eb2456c06a168c9aaf519068a14f570705b8a177a",
       "targetedTests": 19,
       "contractChecks": 110,
       "runtimeChecks": 24

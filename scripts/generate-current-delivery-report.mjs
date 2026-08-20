@@ -386,7 +386,7 @@ const report = {
   id: `DELIVERY-STATUS-${release.current.version}`,
   generatedAt: new Date().toISOString(),
   visibleRelease: release.current.visibleRelease,
-  userVisibleDeliveryFileName: `ParsYuva_AYM_${release.current.visibleRelease.replaceAll(' ', '_')}.json`,
+  userVisibleDeliveryFileName: `ParsYuva_Aile_Yasam_Merkezi_${release.current.visibleRelease.replaceAll(' ', '_')}.json`,
   releaseStatus: 'IN_PROGRESS',
   workCompleted: [
     'DEC-152 single authoritative source, local receipt and incremental governance binding',

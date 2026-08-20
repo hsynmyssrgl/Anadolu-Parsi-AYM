@@ -64,7 +64,7 @@ const checks=[
   ['implemented local capabilities and remaining no-claims stay exact',scope.truth?.fullContentSearchImplemented===true
     &&scope.truth?.rendererMediaAttachmentSelectionImplemented===true&&scope.truth?.automaticPresenceExpiryExecutionImplemented===true
     &&scope.truth?.automaticRetentionExecutionImplemented===true&&scope.truth?.payloadOrphanSweepImplemented===true
-    &&scope.truth?.reminderExecutionImplemented===false
+    &&scope.truth?.reminderExecutionImplemented===true
     &&scope.truth?.remoteRelayDeliveryImplemented===false&&scope.truth?.realMessageExchangePerformed===false
     &&scope.truth?.multiDevicePresenceAggregationImplemented===false&&scope.truth?.selectedPeopleAudienceEnforcementImplemented===false
     &&scope.truth?.physicalSecureEraseGuaranteed===false&&scope.truth?.backupDeletionPropagationGuaranteed===false
@@ -74,14 +74,14 @@ const checks=[
     &&scope.truth?.requirementsClosed===false&&scope.truth?.countsAsRequirementPass===false
     &&inventory.countsAsRequirementPass===false],
   ['local ratchet is exact without granting requirement pass',scope.validation?.targetedTestFileRatchet===5
-    &&scope.validation?.targetedTestRatchet===29&&scope.validation?.migrationVersion===106
-    &&scope.validation?.migrationSha256==='5b088bb6d759403044f84ad9f2a82be1823e33a17334d7122beed92af56cce50'
-    &&scope.validation?.ppk015?.status==='PASS'&&scope.validation?.ppk015?.files===568
-    &&scope.validation?.ppk015?.sourceSha256==='8ef8bf331b1c484c595c2639b9da313d8ae6e0cd5e8751fa921bef2fdcccee64'
-    &&scope.validation?.ppk021?.status==='PASS'&&scope.validation?.ppk021?.surfaces===889
-    &&scope.validation?.ppk021?.sha256==='3a297f74d43d4675090a709d4359af9245c2971a7fc338afef2fb87b1c8608dd'
-    &&scope.validation?.ppk022?.status==='PASS'&&scope.validation?.ppk022?.surfaces===428
-    &&scope.validation?.ppk022?.sha256==='1bf21d23c862afbccb9611083c093f9ced703adadf7a170c29f53479d21397b1'
+    &&scope.validation?.targetedTestRatchet===30&&scope.validation?.migrationVersion===117
+    &&scope.validation?.migrationSha256==='9602df3d935441f033eb45d89d7403e09d8dbed3849873cfe68a098ff754dde3'
+    &&scope.validation?.ppk015?.status==='PASS'&&scope.validation?.ppk015?.files===588
+    &&scope.validation?.ppk015?.sourceSha256==='b2d792abf2d52dc9cfeecff6bd068ea05b6d69c2a6485640ef81ca97bb25ac8d'
+    &&scope.validation?.ppk021?.status==='PASS'&&scope.validation?.ppk021?.surfaces===895
+    &&scope.validation?.ppk021?.sha256==='fad3ceeb9485bffc9d6f9878f7bb486f56a73b4aa5d045580471c70a49e59da6'
+    &&scope.validation?.ppk022?.status==='PASS'&&scope.validation?.ppk022?.surfaces===447
+    &&scope.validation?.ppk022?.sha256==='2ac32190c1b40c455093841eb2456c06a168c9aaf519068a14f570705b8a177a'
     &&scope.validation?.countsAsRequirementPass===false&&inventory.validation?.countsAsRequirementPass===false]
 ];
 const results=checks.map(([name,passed])=>({name,status:passed?'PASS':'FAIL'}));const failures=results.filter(item=>item.status==='FAIL');

@@ -18,7 +18,7 @@
   "signedManifestRuntimeCheckRequired": true,
   "buildManifestAloneGrantsRuntimeAuthority": false,
   "productionSourceZoneCount": 18,
-  "scannedProductionFiles": 585,
+  "scannedProductionFiles": 586,
   "protectedCapabilityFamilies": [
     "camera",
     "microphone",
@@ -34,11 +34,11 @@
     "FILE_IMPORT": 376,
     "MICROPHONE_API": 1,
     "NETWORK_API": 3,
-    "NETWORK_IMPORT": 14,
+    "NETWORK_IMPORT": 17,
     "OCR_API": 6,
     "OCR_IMPORT": 41
   },
-  "exactCapabilitySurfaceCount": 444,
+  "exactCapabilitySurfaceCount": 447,
   "applicationRuntimeCapabilities": {
     "windows-desktop": [
       "camera.access",
@@ -3136,6 +3136,30 @@
     },
     {
       "key": "NETWORK_IMPORT|apps/core-service/src/local-admin-server.ts|node:net:Socket",
+      "applicationIds": [
+        "windows-core-service"
+      ],
+      "capability": "network.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "NETWORK_IMPORT|apps/core-service/src/windows-service-control-server.ts|node:net:createServer",
+      "applicationIds": [
+        "windows-core-service"
+      ],
+      "capability": "network.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "NETWORK_IMPORT|apps/core-service/src/windows-service-control-server.ts|node:net:Server",
+      "applicationIds": [
+        "windows-core-service"
+      ],
+      "capability": "network.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "NETWORK_IMPORT|apps/core-service/src/windows-service-control-server.ts|node:net:Socket",
       "applicationIds": [
         "windows-core-service"
       ],

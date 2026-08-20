@@ -30,6 +30,8 @@
 ## 3. Kapsam ve kural özeti
 
 - Gereksinim: **358** — COMPLETE 109, PARTIAL 25, FOUNDATION_STARTED 1, NOT_IMPLEMENTED 223.
+- Katı kapanışta kalan **249** madde yeni hata sayısı değildir: **24** madde yerel özellikleri tamamlanmış olup yalnız dış/manüel kabul bekler; **169** maddede yerel bileşenler kurulmuş, üretim entegrasyonu ve dış kabul birlikte açıktır; **53** maddede yerel teknik temel ile dış kabul birlikte geliştirilmektedir; **3** madde son kapanış otomasyonuna aittir.
+- Bu ayrım bundan sonra `docs/current/12_KALAN_IS_SINIFLANDIRMA.md` ve `artifacts/inventory/KALAN_IS_SINIFLANDIRMA.json` üzerinden otomatik üretilir; sınıflar yeniden tek “eksik” toplamında karıştırılmaz.
 - Kural sicili: **PPT-CANONICAL-RULE-REGISTRY-V13**, toplam 217, aktif 197, superseded 20, SHA-256 `5b83854fb2d21e978ffe1dc79cfbcf180547f42d06cd32a8ba7918a58cf1a0ed`.
 - Kullanıcı karar defteri: **86** açık kullanıcı kararı.
 

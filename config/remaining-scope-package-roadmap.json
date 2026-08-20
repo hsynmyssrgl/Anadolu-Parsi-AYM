@@ -223,7 +223,7 @@
       "leverage": "Builds on governed OCR indexes, archive versions, permissions and central read-policy filtering.",
       "status": "PLANNED",
       "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
-      "localImplementationStatus": "PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
+      "localImplementationStatus": "LOCAL_FEATURE_COMPLETE_EXTERNAL_ACCEPTANCE_INCOMPLETE",
       "countsAsRequirementPass": false,
       "openReason": "Gerçek büyük arşiv, medya yaşam döngüsü, arama doğruluğu/performansı ve kullanıcı UAT kanıtları tamamlanmadı.",
       "missingEvidence": [
@@ -304,7 +304,7 @@
       "leverage": "One assigned-task/list/schedule ledger supports shopping, inventory, meals, chores, expenses, deliveries, guests and pet care.",
       "status": "PLANNED",
       "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
-      "localImplementationStatus": "PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
+      "localImplementationStatus": "LOCAL_FEATURE_COMPLETE_EXTERNAL_ACCEPTANCE_INCOMPLETE",
       "countsAsRequirementPass": false,
       "openReason": "Gerçek hane verisi, uzun süreli görev/teslimat akışı ve farklı kullanıcı profilleriyle UAT tamamlanmadı.",
       "missingEvidence": [
@@ -342,7 +342,7 @@
       "leverage": "Reuses schedules, tasks, credentials, finance planning and child-specific privacy obligations.",
       "status": "PLANNED",
       "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
-      "localImplementationStatus": "PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
+      "localImplementationStatus": "LOCAL_FEATURE_COMPLETE_EXTERNAL_ACCEPTANCE_INCOMPLETE",
       "countsAsRequirementPass": false,
       "openReason": "Çocuk/veli mahremiyeti, okul/servis sağlayıcısı, yaşa uygun açıklama ve hukuk-gizlilik/UAT kanıtı tamamlanmadı.",
       "missingEvidence": [

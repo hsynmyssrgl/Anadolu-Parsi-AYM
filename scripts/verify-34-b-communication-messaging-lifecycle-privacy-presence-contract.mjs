@@ -23,18 +23,18 @@ const [scope,inventory,decision,threat,migrations,domain,contract,application,re
   text('apps/desktop/src/renderer/CommunicationMessagingPanel.tsx')
 ]);
 const requirements=['COM-003','COM-004','COM-005','COM-006','COM-007','COM-008','COM-009','COM-010','PRS-001','PRS-002','PRS-003','PRS-004','PRS-005','PRS-006'];
-const migration=migrations.migrationVersions?.find(item=>item.version===106);
+const migration=migrations.migrationVersions?.find(item=>item.version===117);
 const testFiles=scope.validation?.targetedTestFiles??[];
 const checks=[
   ['contract identity requirements and dependency order are exact',scope.step==='34-B'&&scope.decision==='DEC-239'
     &&exact(scope.requirements,requirements)&&exact(inventory.requirements,requirements)&&exact(scope.dependsOn,['34-A','33-N'])],
   ['decision states expanded local implementation and exact no-claims',has(decision,['`LOCAL_IMPLEMENTATION_STARTED`','`countsAsRequirementPass=false`',
     'aynı sahip, aynı oda, `ready_local`, temiz tarama kanıtı','yalnız main-process kasasında yetkili metin/konum araması',
-    'hatırlatma yürütücüsü yoktur','fiziksel secure erase'])],
+    'yerel hatırlatma yürütücüsü','fiziksel secure erase'])],
   ['threat model covers renderer owner replay payload presence and retention threats',has(threat,['Renderer güvenilir payload',
     'Başka aile/kişi mesajına erişim','Replay veya revision atlama','DB\'de plaintext sızıntısı','Presence ile aktif cihaz',
     'Retent' ,'Fail-closed ve no-claim sınırları'])],
-  ['migration manifest pins exact version and checksum',migration?.name==='communication_messaging_lifecycle_privacy_presence'
+  ['migration manifest pins exact version and checksum',migration?.name==='communication_scheduled_message_release'
     &&migration?.checksum===scope.validation?.migrationSha256&&migration?.checksum===inventory.validation?.migrationSha256],
   ['domain contract exports safe center content receipt and truth views',has(domain,['CommunicationMessageView','CommunicationMessageContentView',
     'CommunicationPresenceView','CommunicationRetentionPolicyView','CommunicationMessagingTruthView',
@@ -60,10 +60,10 @@ const checks=[
   ['renderer requires explicit reveal and retains operation identity',has(panel,['operations.current.get(key)','operations.current.delete(key)',
     'İçeriği açıkça göster','Aynı işlem kimliğiyle yeniden deneyebilirsiniz.'])],
   ['validation ratchet and manual no-claim state are exact',scope.validation?.targetedTestFileRatchet===5
-    &&scope.validation?.targetedTestRatchet===29&&scope.validation?.migrationVersion===106
-    &&scope.validation?.ppk015?.status==='PASS'&&scope.validation?.ppk015?.files===568
-    &&scope.validation?.ppk021?.status==='PASS'&&scope.validation?.ppk021?.surfaces===889&&scope.validation?.ppk021?.runtime===20
-    &&scope.validation?.ppk022?.status==='PASS'&&scope.validation?.ppk022?.surfaces===428&&scope.validation?.ppk022?.runtime===24
+    &&scope.validation?.targetedTestRatchet===30&&scope.validation?.migrationVersion===117
+    &&scope.validation?.ppk015?.status==='PASS'&&scope.validation?.ppk015?.files===588
+    &&scope.validation?.ppk021?.status==='PASS'&&scope.validation?.ppk021?.surfaces===895&&scope.validation?.ppk021?.runtime===20
+    &&scope.validation?.ppk022?.status==='PASS'&&scope.validation?.ppk022?.surfaces===447&&scope.validation?.ppk022?.runtime===24
     &&Object.entries(scope.manualEvidence??{}).filter(([key])=>key!=='certificationClaimed').every(([,value])=>value==='NOT_RUN')
     &&scope.manualEvidence?.certificationClaimed===false&&scope.persistentReceiptStatus==='NOT_RUN'],
   ['governance cannot count as requirement pass',scope.status==='PLANNED'&&inventory.status==='PLANNED'

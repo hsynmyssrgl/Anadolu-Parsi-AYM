@@ -8,4 +8,4 @@
 - Restore sonucu backup kanıtı olmadan `verified` olamaz.
 - Local replica kanıtı remote replication veya offsite backup iddiasına yükseltilemez.
 
-Residual risk: üretim iletişim akışlarından audit event producer kancaları henüz bağlanmamıştır. Gerçek restore tatbikatı, remote replication ve bağımsız dış yedek doğrulaması `NOT_RUN` durumundadır. Yerel read API bu eksikleri kapatmış sayılmaz.
+Residual risk: üretim iletişim akışları ile audit ledger iki ayrı dayanıklı transaction kullanır; ana işlemden sonra audit yazımı kesilirse aynı client operation tekrarı deterministic audit kimliğiyle onarım yapar, fakat bu iki kayıt arasında tek transaction atomikliği iddia edilmez. Gerçek restore tatbikatı, remote replication ve bağımsız dış yedek doğrulaması `NOT_RUN` durumundadır. Yerel producer/read API bu dış kanıtları kapatmış sayılmaz.

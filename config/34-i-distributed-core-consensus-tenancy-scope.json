@@ -33,6 +33,11 @@
     "automaticFailoverTopologyModeled": true,
     "automaticFailoverOperationallyVerified": false,
     "appendOnlyMutationAndSnapshotSqlGuardsImplemented": true,
+    "windowsServiceHostImplemented": true,
+    "windowsServiceHostControlAuthenticated": true,
+    "windowsServiceHostConfigurationDpapiLocalMachineProtected": true,
+    "windowsServiceHostBoundedRestartImplemented": true,
+    "windowsServiceHostActualScmInstallationPerformed": false,
     "networkUsedByCurrentProductionImplementation": false,
     "realMultiNodeQuorumVerified": false,
     "windowsServiceHostVerified": false,
@@ -40,12 +45,12 @@
     "requirementsClosed": false,
     "countsAsRequirementPass": false
   },
-  "targetedValidation": {"testFiles": 3, "tests": 10, "status": "PASS"},
+  "targetedValidation": {"testFiles": 4, "tests": 14, "status": "PASS"},
   "validation": {
     "migration113Sha256": "3f7b7e02e462744f704ced2255b75d712b90930c807889f13f8dd1d4d2f6e596",
-    "ppk015": {"status": "PASS", "scannedFiles": 568, "sourceInventorySha256": "8ef8bf331b1c484c595c2639b9da313d8ae6e0cd5e8751fa921bef2fdcccee64"},
-    "ppk021": {"status": "PASS", "scannedFiles": 568, "exactSurfaces": 889, "sha256": "3a297f74d43d4675090a709d4359af9245c2971a7fc338afef2fb87b1c8608dd"},
-    "ppk022": {"status": "PASS", "scannedFiles": 568, "exactSurfaces": 428, "sha256": "1bf21d23c862afbccb9611083c093f9ced703adadf7a170c29f53479d21397b1"}
+    "ppk015": {"status": "PASS", "scannedFiles": 588, "sourceInventorySha256": "b2d792abf2d52dc9cfeecff6bd068ea05b6d69c2a6485640ef81ca97bb25ac8d"},
+    "ppk021": {"status": "PASS", "scannedFiles": 588, "exactSurfaces": 895, "sha256": "fad3ceeb9485bffc9d6f9878f7bb486f56a73b4aa5d045580471c70a49e59da6"},
+    "ppk022": {"status": "PASS", "scannedFiles": 588, "exactSurfaces": 447, "sha256": "2ac32190c1b40c455093841eb2456c06a168c9aaf519068a14f570705b8a177a"}
   },
   "manualEvidence": {
     "realThreeNodeQuorum": "NOT_RUN",

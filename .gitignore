@@ -15,6 +15,10 @@ release/
 artifacts/*
 !artifacts/manifests/
 !artifacts/manifests/**
+!artifacts/inventory/
+artifacts/inventory/**
+!artifacts/inventory/TESLIMAT_CALISMA_AGACI_ENVANTERI.json
+native/windows-core-service-host/bin/
 *.sqlite
 *.sqlite-wal
 *.sqlite-shm

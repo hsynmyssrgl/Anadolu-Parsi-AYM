@@ -35,7 +35,7 @@ try {
     ...policyOptions
   });
   assert.ok(migrationSummary, 'Migration özeti üretilmedi.');
-  assert.deepEqual(migrationSummary.appliedVersions, Array.from({ length: 115 }, (_unused, index) => index + 1));
+  assert.deepEqual(migrationSummary.appliedVersions, Array.from({ length: 117 }, (_unused, index) => index + 1));
   assert.equal(migrationSummary.schemaAfter.tableCount, 218);
 
   const initialState = store.getAuthState();
@@ -74,7 +74,7 @@ try {
   const probe = new DatabaseSync(databasePath, { readOnly: true });
   try {
     const migrations = probe.prepare('SELECT version,success FROM schema_migrations ORDER BY version').all();
-    assert.equal(migrations.length, 115, 'Migration kayıtları eksik.');
+    assert.equal(migrations.length, 117, 'Migration kayıtları eksik.');
     assert.equal(migrations.every((row) => Number(row.success) === 1), true, 'Başarısız migration kaydı bulundu.');
     assert.equal(Boolean(probe.prepare("SELECT 1 AS present FROM sqlite_master WHERE type='table' AND name='database_metadata'").get()), true);
     assert.equal(Boolean(probe.prepare("SELECT 1 AS present FROM sqlite_master WHERE type='table' AND name='local_governed_ocr_source_deletion_recovery_intents'").get()), true);

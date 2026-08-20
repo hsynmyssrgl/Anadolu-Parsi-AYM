@@ -122,8 +122,8 @@ const definitions = [
       && registryItems.every((item) => item?.status === 'NOT_IMPLEMENTED' && item.chain?.evidence === false)],
   ['implemented targeted inventory is the exact 20-file local snapshot',
     allTestsExist && exact(inventory.implementedTargetedTests, testFiles)
-      && scope.validation?.targetedTestFileRatchet === 20 && scope.validation?.targetedTestRatchet === 147
-      && inventory.validation?.targetedTestFileRatchet === 20 && inventory.validation?.targetedTestRatchet === 147],
+      && scope.validation?.targetedTestFileRatchet === 20 && scope.validation?.targetedTestRatchet === 148
+      && inventory.validation?.targetedTestFileRatchet === 20 && inventory.validation?.targetedTestRatchet === 148],
   ['domain and application contracts bind limits local execution and no low-privilege overclaim',
     has('domain', 'LOCAL_GOVERNED_OCR_MAX_SOURCE_BYTES = 16 * 1_024 * 1_024',
       'LOCAL_GOVERNED_OCR_MAX_RESULT_CHARACTERS = 250_000', 'LOCAL_GOVERNED_OCR_MAX_PAGES = 50',
@@ -297,7 +297,7 @@ const report = {
   countsAsRequirementPass: false,
   activePredecessor: '33-P',
   localTargetedTestFiles: testFiles,
-  targetedTestRatchet: { files: 20, tests: 147 },
+  targetedTestRatchet: { files: 20, tests: 148 },
   migration94Sha256,
   migration95Sha256,
   checksPassed: checks.length - failures.length,

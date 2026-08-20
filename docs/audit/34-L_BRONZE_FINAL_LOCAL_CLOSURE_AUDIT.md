@@ -13,12 +13,14 @@ Bu kayıt yerel kodlama kapsamını izler; ürün/sertifikasyon kapanışı değ
 ## Yerel doğrulama sonucu
 
 - 34-G–34-K boundary kapıları: `52/52 PASS`; contract kapıları: `30/30 PASS`.
-- 34-G–34-K runtime kapıları: `172/172 PASS`; bütün paketlerde gereksinim kabulü `false`.
+- 34-G–34-K runtime kapıları: `182/182 PASS`; bütün paketlerde gereksinim kabulü `false`.
 - Birleşik hedefli matris: `12/12` dosya, `50/50` test `PASS`.
-- Tam Vitest regresyonu: `306/306` test dosyası, `2047/2047` test `PASS`.
+- Teslimat çalışma ağacı envanteri hedef testi: `1/1` dosya ve `1/1` test `PASS`.
+- Son tam Vitest regresyonu: teslimat envanteri testi dahil `350/350` test dosyası ve `2187/2187` test `PASS`.
 - Kök typecheck ve 18 workspace production build'i `PASS`.
-- Belge/kod indeksi: `5969` dosya, `3671` belge ve `19320` doğrulama kontrolü `PASS`.
+- Belge/kod indeksi: `6186` dosya, `3782` belge ve `19979` doğrulama kontrolü `PASS`.
 - Persistent receipt: `artifacts/validation/34-L-bronze-local-closure-receipts/<source-head>-<evidence-digest>.json`; no-overwrite versioned rollover desteklenir. Eski sabit receipt tarihsel kalır ve güncel kaynak kanıtı sayılmaz.
+- Kirli çalışma ağacı teslimat envanteri: `docs/current/13_TESLIMAT_CALISMA_AGACI_ENVANTERI.md` ve `artifacts/inventory/TESLIMAT_CALISMA_AGACI_ENVANTERI.json`. Her değişiklik Git durumu, teslimat kümesi, bayt sayısı ve SHA-256 ile kayıtlıdır; dosya yazarlığı/sahipliği varsayılmaz ve otomatik commit yapılmaz.
 
 ## Açık kalan kabul kanıtları
 

@@ -6,17 +6,17 @@
   "title": "Communication audit and archive integrity",
   "status": "PLANNED",
   "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
-  "localImplementationStatus": "LOCAL_PRODUCTION_QUERY_COMPOSED_ACCEPTANCE_INCOMPLETE",
+  "localImplementationStatus": "LOCAL_PRODUCTION_COMPOSITION_ACCEPTANCE_INCOMPLETE",
   "requirements": ["AUD-COM-001","AUD-COM-002","AUD-COM-003","AUD-COM-005"],
   "dependsOn": ["34-B","34-C","34-D","34-G"],
   "migrationVersion": 112,
-  "truth": {"appendOnlyContentFreeHashChain":true,"archiveIntegrityCheckpointModeled":true,"durablePepReceiptFenceImplemented":true,"safeRendererProjectionImplemented":true,"productionQueryApiComposed":true,"productionEventProducerHooksComposed":false,"rendererMutationAuthorityExposed":false,"externalBackupProviderVerified":false,"remoteReplicationVerified":false,"realRestoreDrillPerformed":false,"requirementsClosed":false,"countsAsRequirementPass":false},
+  "truth": {"appendOnlyContentFreeHashChain":true,"archiveIntegrityCheckpointModeled":true,"durablePepReceiptFenceImplemented":true,"safeRendererProjectionImplemented":true,"productionQueryApiComposed":true,"productionEventProducerHooksComposed":true,"rendererMutationAuthorityExposed":false,"externalBackupProviderVerified":false,"remoteReplicationVerified":false,"realRestoreDrillPerformed":false,"requirementsClosed":false,"countsAsRequirementPass":false},
   "targetedValidation": {"testFiles":5,"tests":10,"status":"PASS"},
   "validation": {
     "migration112Sha256":"876cfb55675e5c567c156932c4ddbfd672c87e547f672ebae798e03d69287fba",
-    "ppk015":{"status":"PASS","scannedFiles":568,"sourceInventorySha256":"8ef8bf331b1c484c595c2639b9da313d8ae6e0cd5e8751fa921bef2fdcccee64"},
-    "ppk021":{"status":"PASS","scannedFiles":568,"exactSurfaces":889,"sha256":"3a297f74d43d4675090a709d4359af9245c2971a7fc338afef2fb87b1c8608dd"},
-    "ppk022":{"status":"PASS","scannedFiles":568,"exactSurfaces":428,"sha256":"1bf21d23c862afbccb9611083c093f9ced703adadf7a170c29f53479d21397b1"}
+    "ppk015":{"status":"PASS","scannedFiles":588,"sourceInventorySha256":"b2d792abf2d52dc9cfeecff6bd068ea05b6d69c2a6485640ef81ca97bb25ac8d"},
+    "ppk021":{"status":"PASS","scannedFiles":588,"exactSurfaces":895,"sha256":"fad3ceeb9485bffc9d6f9878f7bb486f56a73b4aa5d045580471c70a49e59da6"},
+    "ppk022":{"status":"PASS","scannedFiles":588,"exactSurfaces":447,"sha256":"2ac32190c1b40c455093841eb2456c06a168c9aaf519068a14f570705b8a177a"}
   },
   "manualEvidence": {"realRestoreDrill":"NOT_RUN","remoteReplicationUat":"NOT_RUN","externalBackupReview":"NOT_RUN","securityReview":"NOT_RUN"},
   "persistentReceiptStatus": "NOT_RUN"

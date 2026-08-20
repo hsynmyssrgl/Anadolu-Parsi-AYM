@@ -89,10 +89,10 @@ const ppk022Tail = ppk022Gate?.outputTail ?? '';
 
 const definitions = [
   ['exact 20-file local Vitest process exits successfully', run.status === 0],
-  ['local test result meets the exact 20/147 ratchet',
-    run.status === 0 && filesPassed === 20 && testsPassed === 147
-      && scope.validation?.targetedTestFileRatchet === 20 && scope.validation?.targetedTestRatchet === 147
-      && inventory.validation?.targetedTestFileRatchet === 20 && inventory.validation?.targetedTestRatchet === 147
+  ['local test result meets the exact 20/148 ratchet',
+    run.status === 0 && filesPassed === 20 && testsPassed === 148
+      && scope.validation?.targetedTestFileRatchet === 20 && scope.validation?.targetedTestRatchet === 148
+      && inventory.validation?.targetedTestFileRatchet === 20 && inventory.validation?.targetedTestRatchet === 148
       && exact(inventory.implementedTargetedTests, testFiles)],
   ['migration 94 and 95 manifests and canonical source hashes remain exact',
     migration94?.name === 'local_governed_ocr' && migration94?.checksum === migration94Sha256
@@ -191,7 +191,7 @@ const report = {
   targetedTestFilesPassed: filesPassed,
   targetedTestsPassed: testsPassed,
   targetedTestFileRatchet: 20,
-  targetedTestRatchet: 147,
+  targetedTestRatchet: 148,
   testFiles,
   migration94Sha256,
   migration95Sha256,
@@ -227,8 +227,9 @@ if (!noWrite) {
   await mkdir(dirname(resolve(root, output)), { recursive: true });
   await writeFile(resolve(root, output), `${JSON.stringify(report, null, 2)}\n`, 'utf8');
 }
-console.log(`33-Q runtime starter: ${report.status} (${report.checksPassed}/${checks.length}; ${filesPassed}/20 files; ${testsPassed}/147 tests; requirement PASS=false; write=${!noWrite}).`);
+console.log(`33-Q runtime starter: ${report.status} (${report.checksPassed}/${checks.length}; ${filesPassed}/20 files; ${testsPassed}/148 tests; requirement PASS=false; write=${!noWrite}).`);
 if (failures.length) {
+  console.error(`Failed checks: ${failures.map((item) => item.name).join('; ')}`);
   console.error(combined.slice(-4000));
   process.exitCode = 1;
 }

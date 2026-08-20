@@ -70,9 +70,9 @@ const checks=[
   ['local ratchet is exact without granting requirement pass',scope.validation?.targetedTestFileRatchet===6
     &&scope.validation?.targetedTestRatchet===26&&scope.validation?.migrationVersion===107
     &&scope.validation?.migrationSha256==='299024d7bd040343717abceb2ada6e543a95bea921c7ee6c7d34a10cf2b6515b'
-    &&scope.validation?.ppk015?.files===568&&scope.validation?.ppk015?.sourceSha256==='8ef8bf331b1c484c595c2639b9da313d8ae6e0cd5e8751fa921bef2fdcccee64'
-    &&scope.validation?.ppk021?.surfaces===889&&scope.validation?.ppk021?.sha256==='3a297f74d43d4675090a709d4359af9245c2971a7fc338afef2fb87b1c8608dd'
-    &&scope.validation?.ppk022?.surfaces===428&&scope.validation?.ppk022?.sha256==='1bf21d23c862afbccb9611083c093f9ced703adadf7a170c29f53479d21397b1'
+    &&scope.validation?.ppk015?.files===588&&scope.validation?.ppk015?.sourceSha256==='b2d792abf2d52dc9cfeecff6bd068ea05b6d69c2a6485640ef81ca97bb25ac8d'
+    &&scope.validation?.ppk021?.surfaces===895&&scope.validation?.ppk021?.sha256==='fad3ceeb9485bffc9d6f9878f7bb486f56a73b4aa5d045580471c70a49e59da6'
+    &&scope.validation?.ppk022?.surfaces===447&&scope.validation?.ppk022?.sha256==='2ac32190c1b40c455093841eb2456c06a168c9aaf519068a14f570705b8a177a'
     &&scope.validation?.countsAsRequirementPass===false&&inventory.validation?.countsAsRequirementPass===false]
 ];
 const results=checks.map(([name,passed])=>({name,status:passed?'PASS':'FAIL'}));

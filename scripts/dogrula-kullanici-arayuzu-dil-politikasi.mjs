@@ -177,7 +177,8 @@ check(rendererApp.includes('export function PermissionsScreen')&&rendererApp.inc
   &&permissionsLocalization.includes("'Bağlamsal Yetkiler':'Contextual Permissions'")
   &&permissionsLocalization.includes("'Sahiplik oranı':'Ownership share'"),'permissions localization binding missing');
 check(domain.includes("primaryLanguage === 'tr' ? 'tr' : 'en'")&&domain.includes("resolveUiLocalization('en-US')"),'domain fallback resolver missing');
-check(main.includes('resolveUiLocalization(app.getLocale(),readUiLanguagePreference(uiLanguagePreferencePath()))')
+check(main.includes('app.getPreferredSystemLanguages()')&&main.includes('app.getSystemLocale().trim()')
+  &&main.includes('resolveUiLocalization(operatingSystemUiLanguage(),preference)')
   &&main.includes("registerIpcHandler('app:getLocalizationBootstrap'")&&main.includes("registerIpcHandler('app:setLanguagePreference'"),'main locale and persistent preference authority missing');
 check(preload.includes("invoke('app:getLocalizationBootstrap')")&&preload.includes("invoke('app:setLanguagePreference',preference)")
   &&globalTypes.includes('getLocalizationBootstrap()')&&globalTypes.includes('setLanguagePreference(preference:UiLanguagePreference)'),'preload/global localization bridge missing');

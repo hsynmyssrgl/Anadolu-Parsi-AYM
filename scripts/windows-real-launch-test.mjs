@@ -20,7 +20,7 @@ const explicitExecutableArgument = process.argv.find((argument) =>
 );
 const packagedExecutable = explicitExecutableArgument
   ? resolve(explicitExecutableArgument.slice('--executable='.length))
-  : resolve(appRoot, 'release/win-unpacked/Anadolu Parsı Aile Yaşam Merkezi.exe');
+  : resolve(appRoot, 'release/win-unpacked/ParsYuva Aile Yaşam Merkezi.exe');
 const packaged = process.argv.includes('--packaged') || Boolean(explicitExecutableArgument);
 const diagnosticSingleProcess = process.argv.includes('--diagnostic-single-process');
 const diagnosticNoSandbox = process.argv.includes('--diagnostic-no-sandbox');
@@ -279,7 +279,7 @@ const run = async () => {
     });
     const evidence = {
       schemaVersion: 2,
-      product: 'Anadolu Parsı Aile Yaşam Merkezi',
+      product: 'ParsYuva Aile Yaşam Merkezi',
       applicationVersion: secondRun.applicationVersion,
       mode: packaged ? 'packaged' : 'development',
       status: diagnosticMode ? 'DIAGNOSTIC_PASS' : 'PASS',
@@ -320,7 +320,7 @@ run().catch((error) => {
   mkdirSync(validationDirectory, { recursive: true });
   writeFileSync(evidencePath, `${JSON.stringify({
     schemaVersion: 2,
-    product: 'Anadolu Parsı Aile Yaşam Merkezi',
+    product: 'ParsYuva Aile Yaşam Merkezi',
     mode: packaged ? 'packaged' : 'development',
     status: diagnosticMode ? 'DIAGNOSTIC_FAIL' : 'FAIL',
     diagnosticMode,

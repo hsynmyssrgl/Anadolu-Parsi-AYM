@@ -51,8 +51,8 @@
     "targetedTestRatchet": 28,
     "migrationVersion": 102,
     "migrationSha256": "0a3313d1e74c92a22202051ccd2032a4b8a62e7079e93083a6f0d1aa706ac04e",
-    "ppk021": {"status":"PASS","files":568,"surfaces":889,"sha256":"3a297f74d43d4675090a709d4359af9245c2971a7fc338afef2fb87b1c8608dd","targeted":17,"contract":84,"runtime":20},
-    "ppk022": {"status":"PASS","files":568,"surfaces":428,"sha256":"1bf21d23c862afbccb9611083c093f9ced703adadf7a170c29f53479d21397b1","targeted":19,"contract":111,"runtime":24},
+    "ppk021": {"status":"PASS","files":588,"surfaces":895,"sha256":"fad3ceeb9485bffc9d6f9878f7bb486f56a73b4aa5d045580471c70a49e59da6","targeted":17,"contract":84,"runtime":20},
+    "ppk022": {"status":"PASS","files":588,"surfaces":447,"sha256":"2ac32190c1b40c455093841eb2456c06a168c9aaf519068a14f570705b8a177a","targeted":19,"contract":111,"runtime":24},
     "countsAsRequirementPass": false
   },
   "externalAndManualEvidence": "NOT_RUN",
