@@ -97,7 +97,7 @@ if (
 await run({ executable: node, args: [resolve(import.meta.dirname, 'run-electron-builder.mjs')], cwd: resolve(root, 'apps/desktop') });
 const releaseRoot = resolve(root, 'apps/desktop/release');
 const activeRelease = JSON.parse(await readFile(resolve(root, 'config/release-ledger.json'), 'utf8')).current;
-const installerName = `ParsYuva-AYM-${activeRelease.channel}-${activeRelease.version}-x64-Kurulum.exe`;
+const installerName = `ParsYuva-${activeRelease.channel}-${activeRelease.version}.exe`;
 const installerPath = resolve(releaseRoot, installerName);
 if (!existsSync(installerPath)) throw new Error('Signed installer output is missing after electron-builder.');
 const signatureVerifierPath = resolve(root, 'scripts/verify-ppk025-windows-package-signature.ps1');
@@ -114,8 +114,10 @@ await run({
 const desktopPackage = JSON.parse(await readFile(resolve(root, 'apps/desktop/package.json'), 'utf8'));
 const productName = desktopPackage.build?.productName;
 if (typeof productName !== 'string' || productName.trim() === '') throw new Error('Desktop productName is missing.');
+const executableName = desktopPackage.build?.executableName;
+if (typeof executableName !== 'string' || executableName.trim() === '') throw new Error('Desktop executableName is missing.');
 const installRoot = await mkdtemp(join(tmpdir(), 'aym-ppk025-install-'));
-const installedExecutablePath = resolve(installRoot, `${productName}.exe`);
+const installedExecutablePath = resolve(installRoot, `${executableName}.exe`);
 const uninstallPath = resolve(installRoot, `Uninstall ${productName}.exe`);
 try {
   await run({ executable: installerPath, args: ['/S', `/D=${installRoot}`], cwd: root });

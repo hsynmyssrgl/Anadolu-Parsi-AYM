@@ -43,7 +43,7 @@ const html = (channel) => `<!doctype html>
   </aside>
   <section class="main-area"><header class="topbar"><div class="breadcrumb"><span>⌂</span>Genel görünüm</div><div class="topbar-center">${channel.label} palet doğrulaması</div><div class="topbar-actions"><button class="button">Yardım</button><button class="button primary">Yeni kayıt</button></div></header>
   <main class="page-content"><header class="page-header"><div><span class="eyebrow">YEREL VE ÖZEL</span><h1>${channel.label} arayüz paleti${channel.textScalePercent === 200 ? ' · %200 metin' : ''}</h1><p>Metin, kontrol, odak, kart ve saydam yüzey tokenları etkin sürüm kanalından gelir.</p></div></header>
-    <article class="welcome-panel panel"><div class="welcome-copy"><span class="eyebrow">PARSYUVA AYM</span><h2>Ailenizin hikâyesi, tek ve güvenli bir yerde.</h2><p>Bu ekran yalnız görsel regresyon içindir; kişisel veya örnek kullanıcı verisi içermez.</p><div class="welcome-actions"><button class="button primary">Ana eylem</button><button class="button">İkincil eylem</button></div></div><div class="welcome-mark"><span>◆</span><i></i><span>◇</span></div></article>
+    <article class="welcome-panel panel"><div class="welcome-copy"><span class="eyebrow">PARSYUVA AİLE YAŞAM MERKEZİ</span><h2>Ailenizin hikâyesi, tek ve güvenli bir yerde.</h2><p>Bu ekran yalnız görsel regresyon içindir; kişisel veya örnek kullanıcı verisi içermez.</p><div class="welcome-actions"><button class="button primary">Ana eylem</button><button class="button">İkincil eylem</button></div></div><div class="welcome-mark"><span>◆</span><i></i><span>◇</span></div></article>
     <section class="metric-grid"><article class="metric-card"><span class="metric-icon green">✓</span><div><small>Kontrast</small><strong>AA</strong><p>Metin ve kontroller</p></div></article><article class="metric-card"><span class="metric-icon amber">◉</span><div><small>Kanal</small><strong>${channel.label}</strong><p>Tek merkezi token zinciri</p></div></article><article class="metric-card"><span class="metric-icon blue">⌨</span><div><small>Odak</small><strong>3:1</strong><p>Klavye görünürlüğü</p></div></article><article class="metric-card"><span class="metric-icon red">⊘</span><div><small>Ağ</small><strong>Kapalı</strong><p>Yerel yakalama</p></div></article></section>
   </main></section>
 </div></body></html>`;
@@ -127,7 +127,7 @@ try {
 
 const output = Object.freeze({
   schemaVersion: 1,
-  id: 'PARSYUVA-AYM-SURUM-PALET-EKRAN-GORUNTULERI-V1',
+  id: 'PARSYUVA-AILE-YASAM-MERKEZI-SURUM-PALET-EKRAN-GORUNTULERI-V2',
   renderer: 'electron-capturePage',
   platform: process.platform,
   electronVersion: process.versions.electron,

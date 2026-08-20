@@ -45,7 +45,7 @@ Paketleme `afterPack` aşamasında tüm dokuz fuse'u
 imzalamadan önce gerçekleşir.
 
 Windows kurulum paketi tüm kullanıcılar için yükseltilmiş NSIS modunda çalışır
-ve uygulamayı sabit olarak `C:\Program Files\PPT\AYM` dizinine kurar.
+ve uygulamayı sabit olarak `C:\Program Files\PPT\ParsYuva` dizinine kurar. Kurulu ana dosya `ParsYuva.exe`, masaüstü ve Başlat menüsü kısayolu `ParsYuva` adını taşır.
 
 ## Kanıtlar
 

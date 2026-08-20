@@ -5,7 +5,7 @@ import { renderLicenseRtf } from './license-rtf-lib.mjs';
 const desktopRoot = resolve(process.cwd());
 const packageJson = JSON.parse(await readFile(resolve(desktopRoot, 'package.json'), 'utf8'));
 const build = packageJson.build ?? {};
-const expectedInstallDirectory = '$PROGRAMFILES64\\PPT\\AYM';
+const expectedInstallDirectory = '$PROGRAMFILES64\\PPT\\ParsYuva';
 const artifactTemplate = build.win?.artifactName ?? build.artifactName ?? '';
 const artifactChannel = /-(Bronze|Silver|Gold)-/u.exec(artifactTemplate)?.[1];
 const failures = [];
@@ -34,18 +34,19 @@ if (build.win?.icon !== 'build/icon.ico') failures.push('Windows simgesi tanıml
 if (build.nsis?.oneClick !== false) failures.push('NSIS yardımcı kurulum modu etkin değil.');
 if (build.nsis?.allowToChangeInstallationDirectory !== false) failures.push('Kurulum dizini kullanıcı tarafından değiştirilemez olmalı.');
 if (build.nsis?.perMachine !== true) failures.push('Kurulum tüm kullanıcılar için yönetici yetkisiyle yapılmalı.');
-if (build.nsis?.include !== 'build/installer.nsh') failures.push('Sabit AYM kurulum dizini NSIS include dosyası bağlı değil.');
+if (build.nsis?.include !== 'build/installer.nsh') failures.push('Sabit ParsYuva kurulum dizini NSIS include dosyası bağlı değil.');
 if (build.nsis?.license !== undefined) failures.push('NSIS tek-dilli sabit lisans yolu tanımlanmamalı.');
 if (build.nsis?.multiLanguageInstaller !== true
   || JSON.stringify(build.nsis?.installerLanguages) !== JSON.stringify(['en_US','tr_TR'])) {
   failures.push('NSIS sistem dili seçimi İngilizce varsayılan ve Türkçe destekli değil.');
 }
-if (build.nsis?.shortcutName !== 'ParsYuva Aile Yaşam Merkezi') failures.push('Masaüstü ve Başlat menüsü kısayolu tam ürün adını taşımalı.');
+if (build.executableName !== 'ParsYuva') failures.push('Kurulu ana program dosyası ParsYuva.exe olmalı.');
+if (build.nsis?.shortcutName !== 'ParsYuva') failures.push('Masaüstü ve Başlat menüsü kısayolu ParsYuva olmalı.');
 if (/[çğıöşüÇĞİÖŞÜ]/u.test(artifactTemplate) || !/^[A-Za-z0-9_.$\{\}-]+$/u.test(artifactTemplate)) {
   failures.push('Kurulum dosyası adı Türkçe anlamlı ASCII karakterlerle sınırlandırılmalı.');
 }
-if (!artifactTemplate.startsWith('ParsYuva-Aile-Yasam-Merkezi-') || !artifactTemplate.endsWith('-Kurulum.${ext}')) {
-  failures.push('Kurulum dosyası adı ürün, sürüm kanalı ve Kurulum amacını açıkça taşımalı.');
+if (!/^ParsYuva-(?:Bronze|Silver|Gold)-\d{2}\.\d{2}\.\d{4}\.\d+\.\$\{ext\}$/u.test(artifactTemplate)) {
+  failures.push('Kurulum dosyası adı yalnız ParsYuva, sürüm kanalı ve görünür sürüm numarasını taşımalı.');
 }
 try {
   const installerInclude = await readFile(resolve(desktopRoot, 'build/installer.nsh'), 'utf8');
@@ -58,7 +59,7 @@ try {
     failures.push(`NSIS varsayılan kurulum dizini ${expectedInstallDirectory} değil.`);
   }
   if (installerInclude.includes('GetDParameter')) {
-    failures.push('NSIS kurulum dizini /D varsayılanıyla gölgelenemez; sabit AYM hedefi koşulsuz uygulanmalı.');
+    failures.push('NSIS kurulum dizini /D varsayılanıyla gölgelenemez; sabit ParsYuva hedefi koşulsuz uygulanmalı.');
   }
   if (!installerInclude.includes('!ifndef BUILD_UNINSTALLER')) {
     failures.push('Animasyonlu kurulum sayfaları uninstaller derlemesinde dışlanmalı; kullanılmayan fonksiyon uyarıları fail-closed kalmalı.');
@@ -80,7 +81,7 @@ try {
     'ParsYuva Aile Yaşam Merkezi',
     'Kuruluma hazır',
     'Sesli Yardım Merkezi',
-    'C:\\Program Files\\PPT\\AYM',
+    'C:\\Program Files\\PPT\\ParsYuva',
     'CreateFont $1 "Segoe UI" 11 400',
     'CreateFont $2 "Segoe UI" 10 600',
     '!define AYM_LANG_ENGLISH 1033',
@@ -88,6 +89,8 @@ try {
     'LangString AymFinishTitle ${AYM_LANG_ENGLISH} "ParsYuva Family Life Center is ready"',
     'LangString AymFinishTitle ${AYM_LANG_TURKISH} "ParsYuva Aile Yaşam Merkezi kullanıma hazır"',
     "System::Call 'kernel32::GetUserDefaultUILanguage() i .r0'",
+    'Function un.AymApplySystemUiLanguage',
+    'Call un.AymApplySystemUiLanguage',
     'StrCpy $LANGUAGE ${AYM_LANG_TURKISH}',
     'StrCpy $LANGUAGE ${AYM_LANG_ENGLISH}',
     '!define MUI_FINISHPAGE_TITLE "$(AymFinishTitle)"',
@@ -130,7 +133,7 @@ try {
   if (/https?:|Exec(?:Shell)?|nsExec|inetc|download/iu.test(installerOnly)) {
     failures.push('NSIS karşılama/animasyon kodu ağ veya haricî süreç yetkisi içeremez.');
   }
-  const expectedUninstallHelper = 'ExecWait \'"$INSTDIR\\ParsYuva Aile Yaşam Merkezi.exe" --uninstall-backup-assistant\' $0';
+  const expectedUninstallHelper = 'ExecWait \'"$INSTDIR\\ParsYuva.exe" --uninstall-backup-assistant\' $0';
   if (!uninstallerOnly.includes(expectedUninstallHelper)) {
     failures.push('Kaldırıcı yalnız doğrulanmış yerel yedek yardımcısını tam sabit komutla çağırmalı.');
   }
@@ -169,7 +172,7 @@ try {
   if (!builderRunner.includes("['--win', 'dir', '--config.forceCodeSigning=false']")
     || !builderRunner.includes("['--win', 'nsis']")
     || !builderRunner.includes("process.argv.includes('--local-unsigned')")
-    || !builderRunner.includes("'-IMZASIZ-YEREL-TEST-${arch}-Kurulum.${ext}'")
+    || !builderRunner.includes('const localUnsignedArtifactTemplate = releaseArtifactTemplate')
     || !builderRunner.includes("'parsyuva-nsis-template-'")
     || !builderRunner.includes("nsisUtil.nsisTemplatesDir = governedRoot")
     || !builderRunner.includes("copyFile(governedExtractorPath, resolve(temporaryNsisRoot, 'include/extractAppPackage.nsh'))")

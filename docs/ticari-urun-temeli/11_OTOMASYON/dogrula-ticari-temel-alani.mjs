@@ -131,9 +131,9 @@ fileInventory.sort((left, right) => left.path.localeCompare(right.path, 'en'));
 const sourceFingerprintSha256 = sha256(fileInventory.map((item) => `${item.path}|${item.bytes}|${item.sha256}`).join('\n'));
 
 const manifest = await readJson(resolve(ROOT, '00_TEMEL_SURUM_MANIFESTOSU.json'));
-check(manifest.id === 'PARSYUVA-AYM-TICARI-TEMEL-20260819-01', 'manifesto kimligi degisti');
-check(manifest.baselineDate === '2026-08-19', 'temel tarihi degisti');
-check(manifest.product === 'ParsYuva AYM', 'urun adi ParsYuva AYM olmali');
+check(manifest.id === 'PARSYUVA-AILE-YASAM-MERKEZI-TICARI-TEMEL-20260820-03', 'manifesto kimligi degisti');
+check(manifest.baselineDate === '2026-08-20', 'temel tarihi degisti');
+check(manifest.product === 'ParsYuva Aile Yaşam Merkezi', 'urun adi tam ParsYuva Aile Yaşam Merkezi olmali');
 check(manifest.commercialReleaseEligible === false, 'ticari yayin uygunlugu kanitsiz true olamaz');
 check(manifest.evidenceRequiredForCompletion === true, 'tamamlama icin kanit zorunlu olmali');
 check(manifest.externalEvidenceDefaultsToNotRun === true, 'dis kanit varsayilani NOT_RUN olmali');
@@ -177,14 +177,29 @@ for (const schemaFile of [
 
 const decisionLedger = await readJson(resolve(REPO, 'config', 'user-decision-ledger.json'));
 const decision259 = decisionLedger.decisions.find((decision) => decision.id === 'DEC-259');
+const decision260 = decisionLedger.decisions.find((decision) => decision.id === 'DEC-260');
+const decision261 = decisionLedger.decisions.find((decision) => decision.id === 'DEC-261');
+const decision262 = decisionLedger.decisions.find((decision) => decision.id === 'DEC-262');
 check(decisionLedger.decisionCount === decisionLedger.decisions.length, 'karar defteri sayisi uyusmuyor');
 check(decision259?.status === 'ACTIVE', 'DEC-259 aktif karar defterinde yok');
 check(decision259?.syncStatus === 'SYNCHRONIZED', 'DEC-259 senkron degil');
+check(decision260?.status === 'ACTIVE', 'DEC-260 aktif karar defterinde yok');
+check(decision260?.syncStatus === 'SYNCHRONIZED', 'DEC-260 senkron degil');
+check(decision261?.status === 'ACTIVE', 'DEC-261 aktif karar defterinde yok');
+check(decision261?.syncStatus === 'SYNCHRONIZED', 'DEC-261 senkron degil');
+check(decision262?.status === 'ACTIVE', 'DEC-262 aktif karar defterinde yok');
+check(decision262?.syncStatus === 'SYNCHRONIZED', 'DEC-262 senkron degil');
 const currentDecisionSummary = await readText(resolve(REPO, 'docs', 'current', '09_KULLANICI_KARARLARI_KAYDI.md'));
 const currentMaster = await readText(resolve(REPO, 'docs', 'current', '11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md'));
 const currentCommercial = await readText(resolve(REPO, 'docs', 'current', '14_TICARI_URUN_TEMEL_SURUMU.md'));
 check(currentDecisionSummary.includes('DEC-259'), 'DEC-259 kullanici kararlari kaydinda yok');
 check(currentMaster.includes('DEC-259'), 'DEC-259 guncel ana sicilde yok');
+check(currentDecisionSummary.includes('DEC-260'), 'DEC-260 kullanici kararlari kaydinda yok');
+check(currentMaster.includes('DEC-260'), 'DEC-260 guncel ana sicilde yok');
+check(currentDecisionSummary.includes('DEC-261'), 'DEC-261 kullanici kararlari kaydinda yok');
+check(currentMaster.includes('DEC-261'), 'DEC-261 guncel ana sicilde yok');
+check(currentDecisionSummary.includes('DEC-262'), 'DEC-262 kullanici kararlari kaydinda yok');
+check(currentMaster.includes('DEC-262'), 'DEC-262 guncel ana sicilde yok');
 check(currentCommercial.includes('verify:commercial-baseline'), 'ticari aktif belge dogrulama komutunu gostermiyor');
 
 const workRegistry = await readJson(resolve(ROOT, '08_IS_LISTESI', '03_ANA_IS_SICILI.json'));
@@ -245,7 +260,8 @@ check(packageJson.scripts?.['verify:commercial-baseline'] === 'node docs/ticari-
 check(preflightSource.includes('docs/ticari-urun-temeli/11_OTOMASYON/dogrula-ticari-temel-alani.mjs'), 'governed preflight ticari temel kapisini calistirmiyor');
 
 const rootReadme = await readText(resolve(ROOT, '00_OKU_BENI.md'));
-check(rootReadme.startsWith('# ParsYuva AYM Ticari Urun Temel Surumu'), 'ana baslik marka kuralina uymuyor');
+check(rootReadme.startsWith('# ParsYuva Aile Yasam Merkezi Ticari Urun Temel Surumu'), 'ana baslik tam marka kuralina uymuyor');
+check(!rootReadme.includes('ParsYuva AYM'), 'aktif ana belgede kaldirilan AYM urun kisaltmasi bulunuyor');
 check(rootReadme.includes('Tarihsel belge aktif gereksinim kaynagi olarak kullanilamaz'), 'tarihsel belge siniri eksik');
 const history = await readText(resolve(ROOT, '09_TARIHCE', '01_PROJE_TARIHCESI.md'));
 check(history.includes('20.07.2026'), 'proje baslangic tarihi tarihcede yok');
@@ -253,7 +269,7 @@ check(history.includes('19.08.2026 ticari temel surumu'), 'ticari temel tarihce 
 
 const report = {
   schemaVersion: 1,
-  id: 'PARSYUVA-AYM-TICARI-TEMEL-DOGRULAMA-V1',
+  id: 'PARSYUVA-AILE-YASAM-MERKEZI-TICARI-TEMEL-DOGRULAMA-V2',
   product: manifest.product,
   baselineDate: manifest.baselineDate,
   documentSetVersion: manifest.documentSetVersion,

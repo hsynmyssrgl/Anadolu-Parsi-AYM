@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://parsyuva.local/schemas/ticari-kural-v1.json",
-  "title": "ParsYuva AYM Ticari Kural Kaydi",
+  "title": "ParsYuva Aile Yasam Merkezi Ticari Kural Kaydi",
   "type": "object",
   "additionalProperties": false,
   "required": [

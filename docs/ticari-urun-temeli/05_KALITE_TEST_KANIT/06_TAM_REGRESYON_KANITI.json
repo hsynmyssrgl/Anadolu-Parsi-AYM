@@ -1,24 +1,31 @@
 {
   "schemaVersion": 1,
-  "id": "PARSYUVA-AYM-TAM-REGRESYON-20260819-01",
-  "executedAt": "2026-08-19T14:59:51+03:00",
-  "completedAt": "2026-08-19T15:09:16+03:00",
-  "repositoryBaseCommitAtExecution": "a866764a3a8bbac00aecfc834387adc44dbe08eb",
+  "id": "PARSYUVA-AILE-YASAM-MERKEZI-TAM-REGRESYON-20260820-01",
+  "executedAt": "2026-08-20T19:29:03+03:00",
+  "completedAt": "2026-08-20T19:38:13+03:00",
+  "repositoryBaseCommitAtExecution": "19a5c84d02ad0700315bc67873a19d5e1fed9945",
   "workStep": "33-P",
-  "command": "PPT_WORK_STEP=33-P npm test",
+  "command": "PPT_WORK_STEP=33-P npm test -- --run",
   "preconditions": {
     "governedPreflightFresh": true,
     "activeWorkStep": "PASS"
   },
   "result": {
     "status": "PASS",
-    "testFilesPassed": 307,
-    "testFilesTotal": 307,
-    "testsPassed": 2053,
-    "testsTotal": 2053,
-    "durationSeconds": 564.52
+    "testFilesPassed": 350,
+    "testFilesTotal": 350,
+    "testsPassed": 2187,
+    "testsTotal": 2187,
+    "durationSeconds": 549.58
   },
   "typecheck": "PASS",
+  "workspaceBuild": "PASS",
+  "migrationVerification": {
+    "status": "PASS",
+    "checks": 9,
+    "migrationCount": 117,
+    "latestChecksum": "9602df3d935441f033eb45d89d7403e09d8db3849873cfe68a098ff754dde3"
+  },
   "commercialReleaseEligible": false,
-  "note": "Bu kanit yerel tam regresyonu dogrular; gercek cihaz, imzali installer veya dis saglayici UAT kaniti degildir."
+  "note": "Bu kanit yerel tam regresyonu, TypeScript denetimini, workspace derlemesini ve migration dogrulamasini kanitlar; uretim imzali installer, temiz harici makine veya gercek saglayici UAT kaniti degildir."
 }

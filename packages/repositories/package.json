@@ -1,6 +1,6 @@
 {
   "name": "@ppt/repositories",
-  "version": "20.8.2026-35",
+  "version": "20.8.2026-37",
   "private": true,
   "type": "module",
   "main": "dist/index.js",
@@ -9,14 +9,14 @@
     ".": "./dist/index.js"
   },
   "dependencies": {
-    "@ppt/contracts": "20.8.2026-35",
-    "@ppt/core": "20.8.2026-35",
-    "@ppt/database": "20.8.2026-35",
-    "@ppt/domain": "20.8.2026-35",
-    "@ppt/events": "20.8.2026-35",
-    "@ppt/platform-policy": "20.8.2026-35",
-    "@ppt/repository-contracts": "20.8.2026-35",
-    "@ppt/security": "20.8.2026-35"
+    "@ppt/contracts": "20.8.2026-37",
+    "@ppt/core": "20.8.2026-37",
+    "@ppt/database": "20.8.2026-37",
+    "@ppt/domain": "20.8.2026-37",
+    "@ppt/events": "20.8.2026-37",
+    "@ppt/platform-policy": "20.8.2026-37",
+    "@ppt/repository-contracts": "20.8.2026-37",
+    "@ppt/security": "20.8.2026-37"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

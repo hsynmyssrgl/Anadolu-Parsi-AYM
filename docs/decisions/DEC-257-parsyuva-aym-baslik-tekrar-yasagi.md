@@ -2,8 +2,10 @@
 
 - Tarih: 19.08.2026
 - Kabul zamanı: 2026-08-19T00:47:00+03:00
-- Durum: ACTIVE
+- Durum: SUPERSEDED_BY_DEC_261
 - Etkin sürüm: Bronze 19.08.2026.33
+
+> 20.08.2026: Bu kararın güncel ürün adı bölümü DEC-261 ile değiştirilmiştir. Aşağıdaki özgün karar metni tarihsel kanıt olarak korunur; güncel kullanıcı yüzeylerinde yalnız `ParsYuva Aile Yaşam Merkezi` tam adı kullanılır.
 
 ## Karar
 

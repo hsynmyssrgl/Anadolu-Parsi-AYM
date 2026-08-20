@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
-  "release": "Bronze 20.08.2026.35",
-  "decisionCount": 88,
+  "release": "Bronze 20.08.2026.37",
+  "decisionCount": 91,
   "decisions": [
     {
       "id": "DEC-121",
@@ -2197,7 +2197,7 @@
       "date": "2026-08-19",
       "acceptedAt": "2026-08-19T00:47:00+03:00",
       "title": "Başlıklarda ParsYuva AYM adının tekrarsız kullanımı",
-      "status": "ACTIVE",
+      "status": "SUPERSEDED",
       "source": "Açık kullanıcı kararı: ParsYuva AYM zaten Aile Yaşam Merkezi demektir; kısaltma ile uzun ad aynı başlıkta birlikte yazılmamalıdır",
       "document": "docs/decisions/DEC-257-parsyuva-aym-baslik-tekrar-yasagi.md",
       "documents": [
@@ -2206,7 +2206,8 @@
         "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
         "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md"
       ],
-      "workListImpact": "Yeni aktif Word/PDF kapağı ve kurulum bitiş başlığı yalnız ParsYuva AYM kullanır; açık uzun ad yalnız ayrı açıklayıcı bağlamlarda korunur.",
+      "workListImpact": "Bu adlandırma kararı DEC-261 ile değiştirilmiştir; güncel yüzeyler artık yalnız tam ParsYuva Aile Yaşam Merkezi adını kullanır.",
+      "supersededBy": "DEC-261",
       "syncStatus": "SYNCHRONIZED",
       "requirements": [],
       "codeAreas": [
@@ -2265,6 +2266,106 @@
       ],
       "evidence": [
         "docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json"
+      ]
+    },
+    {
+      "id": "DEC-260",
+      "date": "2026-08-20",
+      "acceptedAt": "2026-08-20T17:30:00+03:00",
+      "title": "Ek kuralların ana sicillere birleştirilmesi ve doğrulanmış Git teslimi",
+      "status": "ACTIVE",
+      "source": "Açık kullanıcı kararı: kenarda tutulan son kararları asıl dosyalara işle, tüm kodu yeniden incele, bozulmaları gider, kurulum dosyası üret ve Git'i güncel tut",
+      "document": "docs/decisions/DEC-260-ek-kural-toplu-birlestirme-ve-dogrulanmis-git-teslimi.md",
+      "documents": [
+        "docs/current/06_KANONIK_KURAL_SICILI.md",
+        "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
+        "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
+        "docs/current/15_EK_KURAL_TOPLU_BIRLESTIRME_SICILI.md",
+        "docs/ticari-urun-temeli/00_OKU_BENI.md",
+        "docs/ticari-urun-temeli/01_YONETIM/04_AKTIF_KURAL_SICILI.json",
+        "docs/ticari-urun-temeli/01_YONETIM/05_DEGISIKLIK_SICILI.json",
+        "docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md"
+      ],
+      "workListImpact": "EK-001–EK-019 karar tamponu PR-218–PR-227 ve daha yeni marka/dil/kurulum kararlarıyla çatışma denetiminden geçirilerek ana sicillere bağlanır. Tam regresyon, typecheck, build, kurulum paketi ve gerçek açılış-kapanış kanıtı olmadan teslim tamamlanmış sayılmaz. Authenticode, temiz makine ve dış/hukuki kanıtlar ayrıca açık kalır.",
+      "syncStatus": "SYNCHRONIZED",
+      "requirements": [],
+      "codeAreas": [
+        "config/canonical-rule-registry.json",
+        "config/rule-enforcement-registry.json",
+        "scripts/verify-canonical-rule-registry.mjs",
+        "apps/desktop/build/installer.nsh",
+        "apps/desktop/scripts/verify-installer.mjs"
+      ],
+      "evidence": [
+        "docs/current/15_EK_KURAL_TOPLU_BIRLESTIRME_SICILI.md",
+        "artifacts/validation/governed-preflight.json",
+        "artifacts/manifests/PROJECT_ARTIFACT_INDEX.json",
+        "apps/desktop/release"
+      ]
+    },
+    {
+      "id": "DEC-261",
+      "date": "2026-08-20",
+      "acceptedAt": "2026-08-20T18:20:00+03:00",
+      "title": "AYM kısaltmasının güncel ürün yüzeylerinden kaldırılması",
+      "status": "ACTIVE",
+      "source": "Açık kullanıcı kararı: AYM kullanmıyoruz",
+      "document": "docs/decisions/DEC-261-aym-kisaltmasinin-guncel-urun-yuzeylerinden-kaldirilmasi.md",
+      "documents": [
+        "config/canonical-rule-registry.json",
+        "docs/current/06_KANONIK_KURAL_SICILI.md",
+        "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
+        "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
+        "docs/current/15_EK_KURAL_TOPLU_BIRLESTIRME_SICILI.md",
+        "docs/ticari-urun-temeli/00_OKU_BENI.md",
+        "docs/ticari-urun-temeli/04_URUN_TASARIMI/01_UX_ERISILEBILIRLIK_VE_MARKA.md"
+      ],
+      "workListImpact": "Güncel kullanıcı yüzeyleri, kurulum dosyası, kısayol, yardım, sesli anlatım ve aktif belge başlıkları tam ParsYuva Aile Yaşam Merkezi adına geçirilir. AYM yalnız tarihsel kayıtlar ile geriye dönük uyumluluk için değiştirilemeyen çalışma yolu, appId ve veri dizini gibi teknik kimliklerde korunur; güncel marka sayılmaz.",
+      "syncStatus": "SYNCHRONIZED",
+      "requirements": [],
+      "codeAreas": [
+        "packages/domain/src/app-meta.ts",
+        "apps/desktop/package.json",
+        "apps/desktop/build/installer.nsh",
+        "apps/desktop/scripts/build-signed-windows-release.mjs",
+        "packages/application/src/family-ai-assistant-use-cases.ts",
+        "packages/application/src/windows-hello-use-cases.ts"
+      ],
+      "evidence": [
+        "scripts/verify-product-brand-identity.mjs",
+        "apps/desktop/tests/product-brand-identity.test.ts",
+        "apps/desktop/scripts/verify-installer.mjs"
+      ]
+    },
+    {
+      "id": "DEC-262",
+      "date": "2026-08-20",
+      "acceptedAt": "2026-08-20T18:48:00+03:00",
+      "title": "ParsYuva kurulum yolu, program dosyasi ve kisa teslim adi",
+      "status": "ACTIVE",
+      "source": "Acik kullanici karari: kurulum yolu Program Files/PPT/ParsYuva, ana EXE ve kisayol ParsYuva, paket adi yalniz ParsYuva kanal ve surum olacak",
+      "document": "docs/decisions/DEC-262-parsyuva-kurulum-yolu-program-dosyasi-ve-kisa-teslim-adi.md",
+      "documents": [
+        "config/canonical-rule-registry.json",
+        "docs/current/06_KANONIK_KURAL_SICILI.md",
+        "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
+        "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
+        "docs/ticari-urun-temeli/03_MIMARI/04_PLATFORM_VE_DAGITIM_MIMARISI.md",
+        "docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md"
+      ],
+      "workListImpact": "Yeni paketler C:/Program Files/PPT/ParsYuva hedefini, ParsYuva.exe ana program dosyasini, ParsYuva kisayolunu ve ParsYuva-<Kanal>-GG.AA.YYYY.NN.exe teslim adini kullanir. Uzun tam urun adi uygulama icinde korunur; appId ve eski veri dizini migration uyumlulugu icin degismez.",
+      "syncStatus": "SYNCHRONIZED",
+      "requirements": [],
+      "codeAreas": [
+        "apps/desktop/package.json",
+        "apps/desktop/build/installer.nsh",
+        "apps/desktop/scripts/verify-installer.mjs",
+        "scripts/lib/monthly-release-version.mjs"
+      ],
+      "evidence": [
+        "apps/desktop/tests/installer-narration-experience.test.ts",
+        "apps/desktop/tests/monthly-release-version.test.ts",
+        "scripts/verify-product-brand-identity.mjs"
       ]
     }
   ]

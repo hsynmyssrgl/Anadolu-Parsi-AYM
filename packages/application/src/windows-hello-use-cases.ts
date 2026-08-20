@@ -62,7 +62,7 @@ export interface WindowsHelloPlatformPort {
 export type WindowsHelloApplicationContext = AuthApplicationContext;
 
 const principalHashPattern = /^[a-f0-9]{64}$/u;
-export const WINDOWS_HELLO_VERIFICATION_MESSAGE = 'ParsYuva AYM için kimliğinizi doğrulayın.';
+export const WINDOWS_HELLO_VERIFICATION_MESSAGE = 'ParsYuva Aile Yaşam Merkezi için kimliğinizi doğrulayın.';
 
 const authError = (
   correlationId: CorrelationId,

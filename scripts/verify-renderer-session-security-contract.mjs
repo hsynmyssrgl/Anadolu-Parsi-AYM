@@ -128,7 +128,7 @@ verify(!mainSource.includes("window.webContents.on('will-navigate'"), 'legacy st
 
 const report = {
   schemaVersion: 1,
-  product: 'ParsYuva AYM',
+  product: 'ParsYuva Aile Yaşam Merkezi',
   applicationVersion: '19.8.2026-33',
   packageVersion: '19.8.2026-33',
   stage: 'Bronze Active Development',

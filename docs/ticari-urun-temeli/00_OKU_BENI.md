@@ -1,12 +1,12 @@
-# ParsYuva AYM Ticari Urun Temel Surumu
+# ParsYuva Aile Yasam Merkezi Ticari Urun Temel Surumu
 
-- Belge temel tarihi: 19.08.2026
-- Belge seti surumu: 1.0.0-belge.20260819.1
-- Kaynak urun surumu: Bronze 19.08.2026.33
+- Belge temel tarihi: 20.08.2026
+- Belge seti surumu: 1.1.0-belge.20260820.1
+- Kaynak urun surumu: Bronze 20.08.2026.37
 - Durum: AKTIF_CALISMA / TICARI_YAYIN_HAZIR_DEGIL
 - Dil: Turkce; dosya adlari Turkce anlamli ve ASCII karakterlidir.
 
-Bu klasor ParsYuva AYM icin bugun baslatilan ilk temiz ticari urun belge temelidir. Eski karar, test ve teslim belgeleri silinmez; tarihsel kanit olarak mevcut `00_PROJE` ile `11_FUTURE_PATCHES` arasindaki alanlarda kalir. Bu klasordeki belgeler yeni calismalar icin tek aktif yonlendirme katmanidir.
+Bu klasor ParsYuva Aile Yasam Merkezi icin bugun baslatilan ilk temiz ticari urun belge temelidir. Eski karar, test ve teslim belgeleri silinmez; tarihsel kanit olarak mevcut `00_PROJE` ile `11_FUTURE_PATCHES` arasindaki alanlarda kalir. Bu klasordeki belgeler yeni calismalar icin tek aktif yonlendirme katmanidir.
 
 ## Zorunlu ilkeler
 
@@ -36,7 +36,7 @@ Bu klasor ParsYuva AYM icin bugun baslatilan ilk temiz ticari urun belge temelid
 
 ## Kaynak gercekligi
 
-19.08.2026 tarihinde kanonik kural sicilinde 217 kural ve `5b83854fb2d21e978ffe1dc79cfbcf180547f42d06cd32a8ba7918a58cf1a0ed` SHA-256 ozeti bulunmaktadir. `GOVERNED_PREFLIGHT` ayni tarihte PASS olmustur. Calisma agaci temiz degildir; bu nedenle yeni teslim, kurulum veya uretim imzasi kaniti uretilmeden once degisiklikler kapsamli regresyondan gecmelidir.
+20.08.2026 tarihinde kanonik kural sicili V16 olarak 228 kurala genisletildi; SHA-256 ozeti `c7cd9a0b82e58d3bf9dbc3aca7cf38d452b73b7e5bc361690e84d94821a7b25d` oldu. EK-001–EK-019 karar tamponu `DEC-260` ile asil sicillere baglandi; `DEC-261` guncel urun adini tam `ParsYuva Aile Yasam Merkezi` olarak kesinlestirdi ve AYM kisaltmasini guncel kullanici yuzeylerinden kaldirdi. `DEC-262` Windows kurulum hedefini `C:\Program Files\PPT\ParsYuva`, kurulu program ve kisayol adini `ParsYuva`, teslim EXE adini `ParsYuva-<Kanal>-GG.AA.YYYY.NN.exe` olarak sabitledi. `GOVERNED_PREFLIGHT`, tam regresyon, kurulum paketi ve Git readback kanitlari ayni kaynak anlik goruntusunde yeniden uretilmeden yeni teslim tamamlanmis sayilmaz.
 
 Kanonik ticari belge koku kaynak kodla birlikte `C:\PPT\AYM\06_KOD\app\docs\ticari-urun-temeli` altinda Git tarafindan izlenir. `C:\PPT\AYM\12_TICARI_URUN_TEMEL_SURUMU` yalniz ayni klasore baglanan kullanici uyumluluk yoludur. GitHub ve `D:\GitYedekleri` bare remote readback kaniti `05_KALITE_TEST_KANIT/05_GIT_YEDEK_DOGRULAMA_KANITI.json` dosyasinda tutulur.
 
@@ -59,4 +59,4 @@ Kaynak repo kokunde:
 npm run verify:commercial-baseline
 ```
 
-Bu kapi kural SHA bagini, `DEC-259` karar senkronunu, 49 is kaydini, JSON semalarini, dis kanit durumlarini ve yeni dosya adlarini fail-closed denetler. Ayni kapi `GOVERNED_PREFLIGHT` icinde zorunludur.
+Bu kapi kural SHA bagini, `DEC-259`, `DEC-260`, `DEC-261` ve `DEC-262` karar senkronunu, 49 is kaydini, JSON semalarini, dis kanit durumlarini ve yeni dosya adlarini fail-closed denetler. Ayni kapi `GOVERNED_PREFLIGHT` icinde zorunludur.

@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "id": "PPT-RULE-ENFORCEMENT-REGISTRY-V1",
-  "release": "Bronze 19.08.2026.33",
-  "canonicalRulesSha256": "5b83854fb2d21e978ffe1dc79cfbcf180547f42d06cd32a8ba7918a58cf1a0ed",
-  "activeRuleCount": 197,
+  "release": "Bronze 20.08.2026.37",
+  "canonicalRulesSha256": "c7cd9a0b82e58d3bf9dbc3aca7cf38d452b73b7e5bc361690e84d94821a7b25d",
+  "activeRuleCount": 207,
   "defaultPolicy": "FAIL_CLOSED_NO_WAIVER",
   "entries": [
     {
@@ -2757,6 +2757,116 @@
       "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
       "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
       "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-218",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": ["apps/desktop/scripts/verify-installer.mjs", "docs/ticari-urun-temeli/11_OTOMASYON/dogrula-ticari-temel-alani.mjs"],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "docs/ticari-urun-temeli/04_URUN_TASARIMI/02_SURUM_RENK_PALETLERI.md"
+    },
+    {
+      "ruleId": "PR-219",
+      "mode": "SECURITY_BOUNDARY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": ["scripts/verify-desktop-security-boundary.mjs", "docs/ticari-urun-temeli/11_OTOMASYON/dogrula-ticari-temel-alani.mjs"],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-228",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": ["apps/desktop/scripts/verify-installer.mjs", "scripts/verify-product-brand-identity.mjs"],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "apps/desktop/package.json"
+    },
+    {
+      "ruleId": "PR-221",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": ["scripts/verify-software-supply-chain-boundary.mjs", "apps/desktop/scripts/verify-installer.mjs"],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-222",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": ["scripts/verify-monthly-release-contract.mjs", "scripts/verify-active-release-contract-v2.mjs"],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/release-ledger.json"
+    },
+    {
+      "ruleId": "PR-223",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": ["scripts/verify-feature-reality-gate.mjs", "docs/ticari-urun-temeli/11_OTOMASYON/dogrula-ticari-temel-alani.mjs"],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "docs/ticari-urun-temeli/07_TICARI_HAZIRLIK/02_LISANS_AKTIVASYON_VE_DENEME.md"
+    },
+    {
+      "ruleId": "PR-224",
+      "mode": "SECURITY_BOUNDARY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": ["scripts/verify-desktop-security-boundary.mjs", "scripts/verify-feature-reality-gate.mjs"],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "docs/ticari-urun-temeli/02_IS_ANALIZI/02_KULLANICI_AKISLARI.md"
+    },
+    {
+      "ruleId": "PR-225",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": ["apps/desktop/scripts/verify-installer.mjs", "scripts/verify-desktop-security-boundary.mjs"],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-226",
+      "mode": "DATA_INTEGRITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": ["scripts/verify-database-migrations.mjs", "scripts/verify-feature-reality-gate.mjs"],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "docs/ticari-urun-temeli/03_MIMARI/02_VERI_MIMARISI.md"
+    },
+    {
+      "ruleId": "PR-227",
+      "mode": "GOVERNANCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": ["scripts/verify-documentation-synchronization-policy.mjs", "scripts/verify-project-artifact-index-v2.mjs", "docs/ticari-urun-temeli/11_OTOMASYON/dogrula-ticari-temel-alani.mjs"],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "docs/current/15_EK_KURAL_TOPLU_BIRLESTIRME_SICILI.md"
     }
   ]
 }

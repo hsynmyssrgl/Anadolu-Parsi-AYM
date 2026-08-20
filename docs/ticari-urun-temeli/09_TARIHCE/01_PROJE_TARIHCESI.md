@@ -20,6 +20,10 @@ Gizlilik/veri haklari, passkey/federated kimlik, yerel OCR, AI asistani, harita,
 
 Daginik aktif belgeler yerine, gecmisi silmeden Git deposu icinde yeni `docs/ticari-urun-temeli` alani olusturuldu. `C:\PPT\AYM\12_TICARI_URUN_TEMEL_SURUMU` kullanici uyumluluk yolu ayni dizine baglandi. Bu alan ilk temiz ticari belge temeli, asilamaz kurallar, ayrintili is analizi, mimari, lisans envanteri ve tek ana is listesi olarak kabul edildi.
 
+## 20.08.2026 ek karar birlestirme ve teslim denetimi
+
+18.08.2026 tarihli EK-001–EK-019 karar tamponu silinmeden tarihsel kaynak olarak korundu. Kanal renkleri, parola gorunurlugu, installer adlandirma ve yasam dongusu, aylik derleme numarasi, 30 gunluk kullanim/Gold aktivasyon, kaldirma-yedek-sifirlama, tepsiye kucultme ve veri koruyan guncelleme kurallari PR-218–PR-227 ile V14 kanonik sicile baglandi. Daha yeni ParsYuva, dil ve kurulum kararlarinin eski Anadolu adlandirmalarina ustun oldugu acikca kaydedildi. Tam regresyon, installer ve Git iki-uzak-depo readback zinciri `DEC-260` ile teslim kosulu yapildi.
+
 ## Gelecek donem
 
 1. Temiz kaynak ve Silver dogrulama.

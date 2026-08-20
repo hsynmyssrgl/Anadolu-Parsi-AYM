@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "release": "Bronze 20.08.2026.35",
+  "release": "Bronze 20.08.2026.37",
   "authorityOrder": [
     "config/canonical-rule-registry.json",
     "config/project-constitution.json",
@@ -30,16 +30,17 @@
     "docs/current/12_TUM_BELGE_TURLERI_DENETIMI.md",
     "docs/current/13_KURUMSALLASMA_VE_GLOBAL_MARKA_PLANI.md",
     "docs/current/14_TICARI_URUN_TEMEL_SURUMU.md",
-    "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_19.08.2026_V3.docx",
-    "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_19.08.2026_V3.pdf"
+    "docs/current/15_EK_KURAL_TOPLU_BIRLESTIRME_SICILI.md",
+    "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_20.08.2026_V4.docx",
+    "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_20.08.2026_V4.pdf"
   ],
   "currentMasterDocumentation": {
-    "version": "GUNCEL-2026-08-19-V3",
+    "version": "GUNCEL-2026-08-20-V4",
     "status": "ACTIVE_WORKING_REFERENCE_NOT_BUILD_CLOSURE",
     "source": "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
-    "docx": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_19.08.2026_V3.docx",
-    "pdf": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_19.08.2026_V3.pdf",
-    "asOf": "2026-08-19",
+    "docx": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_20.08.2026_V4.docx",
+    "pdf": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_20.08.2026_V4.pdf",
+    "asOf": "2026-08-20",
     "historicalBuildArtifactsImmutable": true
   },
   "supersededActiveReferences": [
@@ -48,7 +49,9 @@
     "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_17.08.2026_V1.docx",
     "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_17.08.2026_V1.pdf",
     "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_18.08.2026_V2.docx",
-    "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_18.08.2026_V2.pdf"
+    "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_18.08.2026_V2.pdf",
+    "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_19.08.2026_V3.docx",
+    "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_19.08.2026_V3.pdf"
   ],
   "historicalDocuments": "HISTORY_ONLY_DO_NOT_OVERRIDE_ACTIVE_DOCUMENTS",
   "exhaustiveInventory": "artifacts/manifests/ALL_DOCUMENTS_INDEX.json"

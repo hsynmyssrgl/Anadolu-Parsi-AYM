@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "PPT-KULLANICI-ARAYUZU-DIL-POLITIKASI-V1",
-  "release": "Bronze 20.08.2026.35",
+  "release": "Bronze 20.08.2026.37",
   "ruleId": "PR-215",
   "decisionId": "DEC-255",
   "systemLanguageAuthority": "electron.app.getLocale",

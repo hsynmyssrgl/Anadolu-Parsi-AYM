@@ -1,6 +1,6 @@
 {
   "name": "@ppt/repository-contracts",
-  "version": "20.8.2026-35",
+  "version": "20.8.2026-37",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -15,11 +15,11 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@ppt/contracts": "20.8.2026-35",
-    "@ppt/core": "20.8.2026-35",
-    "@ppt/domain": "20.8.2026-35",
-    "@ppt/events": "20.8.2026-35",
-    "@ppt/platform-policy": "20.8.2026-35"
+    "@ppt/contracts": "20.8.2026-37",
+    "@ppt/core": "20.8.2026-37",
+    "@ppt/domain": "20.8.2026-37",
+    "@ppt/events": "20.8.2026-37",
+    "@ppt/platform-policy": "20.8.2026-37"
   },
   "private": true
 }

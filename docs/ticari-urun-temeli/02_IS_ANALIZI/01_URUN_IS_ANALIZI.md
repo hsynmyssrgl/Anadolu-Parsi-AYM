@@ -1,8 +1,8 @@
-# ParsYuva AYM Urun Is Analizi
+# ParsYuva Aile Yasam Merkezi Urun Is Analizi
 
 ## Urun tanimi
 
-ParsYuva AYM; aile bireyleri, aile hafizasi, belgeler, finans, saglik, yasam kayitlari, guvenlik, iletisim ve yerel yapay zeka islevlerini tek aile kapsaminda yoneten local-first masaustu platformudur.
+ParsYuva Aile Yasam Merkezi; aile bireyleri, aile hafizasi, belgeler, finans, saglik, yasam kayitlari, guvenlik, iletisim ve yerel yapay zeka islevlerini tek aile kapsaminda yoneten local-first masaustu platformudur.
 
 ## Is hedefleri
 
@@ -75,4 +75,3 @@ Aktivasyon altyapisi kod, guvenlik, lisans hukuku ve destek surecleri tamamlanma
 - Cevrimdisi harita motoru vardir; Turkiye PMTiles veri paketi dis kaynak olarak saglanmalidir.
 - OCR motoru vardir; Defender baglantisi, PDF ve dusuk ayricalikli sandbox farkli olgunluk duzeylerindedir.
 - Uretim sertifikasi, gercek saglayici UAT ve ticari hukuk/gizlilik onaylari yoktur.
-

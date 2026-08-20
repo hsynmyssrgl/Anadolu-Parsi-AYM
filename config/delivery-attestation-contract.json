@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "product": "ParsYuva AYM",
+  "product": "ParsYuva Aile Yaşam Merkezi",
   "stage": "Bronze RC2 Active Development",
   "attestationFileNameTemplate": "Anadolu_Parsi_Aile_Yasam_Merkezi_Bronze_RC2_Build{build}_Teslim_Kanit_Tasdiki_{version}.json",
   "evidence": [

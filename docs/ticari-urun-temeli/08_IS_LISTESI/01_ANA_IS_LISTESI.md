@@ -16,7 +16,7 @@ Durumlar: `TAMAMLANDI`, `DEVAM`, `ACIK`, `BLOCKED`, `NOT_RUN`.
 
 | ID | Is | Sorumlu | Durum | Kabul |
 |---|---|---|---|---|
-| IS-0101 | ParsYuva AYM marka tutarliligi | Codex | TAMAMLANDI | Pencere/installer/yardim/rapor ayni ad |
+| IS-0101 | ParsYuva Aile Yasam Merkezi marka tutarliligi | Codex | TAMAMLANDI | Pencere/installer/yardim/rapor ayni tam ad; AYM yok |
 | IS-0102 | Bronze/Silver/Gold merkezi tema tokenlari | Codex | TAMAMLANDI | Token, kontrast, build ve sabit DPI ekran goruntusu matrisi PASS |
 | IS-0103 | Acik beyaz zemin ve saydamlik sistemi | Codex | TAMAMLANDI | Normal cam ve opak reduced-motion/transparency Electron matrisi PASS |
 | IS-0104 | Sol/alt/sag tipografi orani | Codex | TAMAMLANDI | %200 metin olceginde yatay tasma ve kesilen metin 0 |
@@ -28,10 +28,10 @@ Durumlar: `TAMAMLANDI`, `DEVAM`, `ACIK`, `BLOCKED`, `NOT_RUN`.
 
 | ID | Is | Sorumlu | Durum | Kabul |
 |---|---|---|---|---|
-| IS-0201 | Tek gercek installer ilerlemesi | Codex | DEVAM | Tek bar, gercek yuzde, simulasyon yok |
-| IS-0202 | Kurulum metni/DPI/ust uste binme | Codex | DEVAM | 100-200% DPI screenshot PASS |
-| IS-0203 | Temiz kurulum hedefi ve kisayol | Codex | DEVAM | Program Files + ParsYuva AYM |
-| IS-0204 | Acilis, kilit, tepsiye kucultme, tam kapanis | Codex | DEVAM | Kapanista EPERM/JS hatasi yok |
+| IS-0201 | Tek gercek installer ilerlemesi | Codex | DEVAM | NSIS ve installer kapilari PASS; temiz Windows gercek-yuzde UAT acik |
+| IS-0202 | Kurulum metni/DPI/ust uste binme | Codex | DEVAM | Installer derlendi; 100-200% temiz makine DPI matrisi acik |
+| IS-0203 | Temiz kurulum hedefi ve kisayol | Codex | DEVAM | Tam adli paket hazir; yukseltilmis kurulum exit 2, temiz makine UAT acik |
+| IS-0204 | Acilis, kilit, tepsiye kucultme, tam kapanis | Codex | DEVAM | Iki paketli acilis PASS; kurulu binary tam kapanis insan UAT acik |
 | IS-0205 | Guncellemede veri koruma | Codex | ACIK | N-1 migration ve rollback PASS |
 | IS-0206 | Kaldirmada yedekle/tam sil secimi | Codex | DEVAM | Gercek hedef ve receipt testleri |
 | IS-0207 | Fabrika ayarina donus | Codex | DEVAM | Yeniden kimlik, inventory, silme kaniti |

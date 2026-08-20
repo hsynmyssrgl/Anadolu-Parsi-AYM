@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "product": "Panthera pardus tulliana",
-  "version": "20.08.2026.35",
-  "milestone": "Bronze 20.08.2026.35",
+  "version": "20.08.2026.37",
+  "milestone": "Bronze 20.08.2026.37",
   "status": "passed",
   "checkCount": 9,
   "checks": [
@@ -604,5 +604,5 @@
       "checksum": "9602df3d935441f033eb45d89d7403e09d8dbed3849873cfe68a098ff754dde3"
     }
   ],
-  "generatedAt": "2026-08-20T13:25:47.008Z"
+  "generatedAt": "2026-08-20T16:24:38.978Z"
 }

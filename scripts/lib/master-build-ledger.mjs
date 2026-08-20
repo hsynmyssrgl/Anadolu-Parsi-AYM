@@ -37,7 +37,7 @@ export const validateLedger = (ledger, policy, options = {}) => {
   const check = (condition, message) => { if (!condition) failures.push(message); };
   check(ledger?.schemaVersion === 1, `ledger schemaVersion=${ledger?.schemaVersion}`);
   check(ledger?.policyId === policy?.policyId, `ledger policyId=${ledger?.policyId}`);
-  check(ledger?.product === 'ParsYuva AYM', `ledger product=${ledger?.product}`);
+  check(ledger?.product === 'ParsYuva Aile Yaşam Merkezi', `ledger product=${ledger?.product}`);
   check(Number.isInteger(ledger?.currentBuild) && ledger.currentBuild > 0, `invalid currentBuild=${ledger?.currentBuild}`);
   check(/^\d{2}\.\d{2}\.\d{4}\.\d+$/.test(ledger?.currentVersion ?? ''), `invalid currentVersion=${ledger?.currentVersion}`);
   check(Array.isArray(ledger?.builds) && ledger.builds.length > 0, 'builds must be a non-empty array');

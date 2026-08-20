@@ -49,7 +49,7 @@ export const createNextMonthlyRelease = ({ ledger, now = new Date(), channel = l
 };
 
 export const installerArtifactTemplate = (release) =>
-  `ParsYuva-AYM-${release.channel}-${release.version}-\${arch}-Kurulum.\${ext}`;
+  `ParsYuva-${release.channel}-${release.version}.\${ext}`;
 
-export const installerFileName = (release, arch = 'x64', extension = 'exe') =>
-  `ParsYuva-AYM-${release.channel}-${release.version}-${arch}-Kurulum.${extension}`;
+export const installerFileName = (release, _arch = 'x64', extension = 'exe') =>
+  `ParsYuva-${release.channel}-${release.version}.${extension}`;

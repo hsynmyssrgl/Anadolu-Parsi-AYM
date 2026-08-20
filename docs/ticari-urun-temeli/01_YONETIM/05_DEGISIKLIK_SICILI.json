@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "id": "PARSYUVA-AYM-TICARI-DEGISIKLIK-SICILI-V1",
+  "id": "PARSYUVA-AILE-YASAM-MERKEZI-TICARI-DEGISIKLIK-SICILI-V2",
   "temelTarihi": "2026-08-19",
-  "sonKayit": "TICARI-001",
+  "sonKayit": "TICARI-003",
   "kayitlar": [
     {
       "id": "TICARI-001",
@@ -16,6 +16,38 @@
         "06_KOD/app/scripts/run-governed-preflight.mjs"
       ],
       "isListesiEtkisi": "IS-0001 ve IS-0005 icin belge ve otomasyon temeli olusturuldu; teknik dogrulama tamamlanana kadar durum DEVAM kalir.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-002",
+      "tarih": "2026-08-20",
+      "baslik": "Ek kurallarin ana sicillere birlestirilmesi ve V14 kanonik bag",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-260 ve 18.08.2026 tarihli EK-001–EK-019 karar tamponu",
+      "etkilenenAlanlar": [
+        "config/canonical-rule-registry.json",
+        "config/rule-enforcement-registry.json",
+        "docs/current/15_EK_KURAL_TOPLU_BIRLESTIRME_SICILI.md",
+        "docs/ticari-urun-temeli"
+      ],
+      "isListesiEtkisi": "Surum paleti, parola gorunurlugu, installer yasam dongusu, deneme/Gold aktivasyon, kaldirma-yedek-sifirlama, tepsiye kucultme ve migration/rollback kararlarinin asilamaz kapilara bagi tamamlandi; dis kanit gerektiren maddeler acik kalir.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-003",
+      "tarih": "2026-08-20",
+      "baslik": "Tam urun adi ve AYM kisaltmasinin guncel yuzeylerden kaldirilmasi",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-261 ve acik kullanici karari: AYM kullanmiyoruz",
+      "etkilenenAlanlar": [
+        "config/canonical-rule-registry.json",
+        "packages/domain/src/app-meta.ts",
+        "apps/desktop/package.json",
+        "apps/desktop/build/installer.nsh",
+        "docs/current",
+        "docs/ticari-urun-temeli"
+      ],
+      "isListesiEtkisi": "Guncel kullanici yuzeyleri ve kurulum dosyasi tam ParsYuva Aile Yasam Merkezi adina gecirildi; AYM yalniz tarihsel veya zorunlu teknik uyumluluk kimliklerinde korunur.",
       "senkronDurumu": "SYNCHRONIZED"
     }
   ]

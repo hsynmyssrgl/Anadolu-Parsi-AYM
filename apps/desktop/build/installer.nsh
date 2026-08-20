@@ -41,8 +41,8 @@ LangString AymProductName ${AYM_LANG_ENGLISH} "ParsYuva Family Life Center"
 LangString AymProductName ${AYM_LANG_TURKISH} "ParsYuva Aile Yaşam Merkezi"
 LangString AymWelcomeLead ${AYM_LANG_ENGLISH} "One calm, secure and local center for your family's documents, memories and daily life."
 LangString AymWelcomeLead ${AYM_LANG_TURKISH} "Ailenizin belgeleri, anıları ve günlük yaşamı için sakin, güvenli ve yerel bir merkez."
-LangString AymWelcomeBody ${AYM_LANG_ENGLISH} "The application will be installed in C:\Program Files\PPT\AYM. Setup does not create family records, sign in to an online account or transmit personal data."
-LangString AymWelcomeBody ${AYM_LANG_TURKISH} "Uygulama C:\Program Files\PPT\AYM klasörüne kurulacak. Kurulum aile kaydı oluşturmaz, çevrimiçi hesaba giriş yapmaz ve kişisel veri aktarmaz."
+LangString AymWelcomeBody ${AYM_LANG_ENGLISH} "The application will be installed in C:\Program Files\PPT\ParsYuva. Setup does not create family records, sign in to an online account or transmit personal data."
+LangString AymWelcomeBody ${AYM_LANG_TURKISH} "Uygulama C:\Program Files\PPT\ParsYuva klasörüne kurulacak. Kurulum aile kaydı oluşturmaz, çevrimiçi hesaba giriş yapmaz ve kişisel veri aktarmaz."
 LangString AymReadyTitle ${AYM_LANG_ENGLISH} "Ready to install"
 LangString AymReadyTitle ${AYM_LANG_TURKISH} "Kuruluma hazır"
 LangString AymReadyBody ${AYM_LANG_ENGLISH} "Everything is ready. Continuing will place the verified application files and create Desktop and Start menu shortcuts for all users."
@@ -221,6 +221,7 @@ FunctionEnd
 
 !endif
 
+!ifndef BUILD_UNINSTALLER
 Function AymApplySystemUiLanguage
   ; Follow the Windows display language exactly. Turkish is supported; every
   ; other display language uses the complete English fallback.
@@ -234,18 +235,32 @@ FunctionEnd
 
 !macro customInit
   Call AymApplySystemUiLanguage
-  StrCpy $INSTDIR "$PROGRAMFILES64\PPT\AYM"
+  StrCpy $INSTDIR "$PROGRAMFILES64\PPT\ParsYuva"
 !macroend
+!endif
+
+!ifdef BUILD_UNINSTALLER
+Function un.AymApplySystemUiLanguage
+  ; NSIS requires uninstall callbacks to call an `un.`-prefixed function.
+  ; Keep the same Turkish-or-English system-language rule on removal screens.
+  System::Call 'kernel32::GetUserDefaultUILanguage() i .r0'
+  ${If} $0 == ${AYM_LANG_TURKISH}
+    StrCpy $LANGUAGE ${AYM_LANG_TURKISH}
+  ${Else}
+    StrCpy $LANGUAGE ${AYM_LANG_ENGLISH}
+  ${EndIf}
+FunctionEnd
 
 !macro customUnInit
-  Call AymApplySystemUiLanguage
+  Call un.AymApplySystemUiLanguage
 !macroend
+!endif
 
 !macro customUnInstall
   MessageBox MB_YESNOCANCEL|MB_ICONQUESTION "$(AymUninstallChoice)" IDYES aym_uninstall_backup IDNO aym_uninstall_delete
   Goto aym_uninstall_cancel
 aym_uninstall_backup:
-  ExecWait '"$INSTDIR\ParsYuva Aile Yaşam Merkezi.exe" --uninstall-backup-assistant' $0
+  ExecWait '"$INSTDIR\ParsYuva.exe" --uninstall-backup-assistant' $0
   ${If} $0 != 0
     MessageBox MB_OK|MB_ICONSTOP "$(AymBackupFailed)"
     Abort

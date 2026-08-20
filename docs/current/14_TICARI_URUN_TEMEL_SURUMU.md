@@ -2,7 +2,7 @@
 
 - Karar: `DEC-259`
 - Baslangic tarihi: 19.08.2026
-- Urun: ParsYuva AYM
+- Urun: ParsYuva Aile Yasam Merkezi
 - Durum: `ACTIVE_WORKING_BASELINE`
 - Ticari yayin uygunlugu: `false`
 

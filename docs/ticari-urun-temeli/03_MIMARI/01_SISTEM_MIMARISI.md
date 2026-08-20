@@ -2,7 +2,7 @@
 
 ## Mimari hedef
 
-ParsYuva AYM local-first, policy-first ve kanitlanabilir bir masaustu uygulamasidir. Renderer hicbir zaman dosya sistemi, veritabani, gizli anahtar, saglayici tokeni veya yetki receipt'i sahibi olmaz.
+ParsYuva Aile Yasam Merkezi local-first, policy-first ve kanitlanabilir bir masaustu uygulamasidir. Renderer hicbir zaman dosya sistemi, veritabani, gizli anahtar, saglayici tokeni veya yetki receipt'i sahibi olmaz.
 
 ```mermaid
 flowchart LR
@@ -55,4 +55,3 @@ Kimlik, aile, arsiv, finans, saglik, yasam, konum, OCR, AI, iletisim, yedekleme,
 - OneDrive/Google Drive gercek OAuth adapterleri.
 - Gercek Apple istemcileri ve cihazlar arasi production senkronizasyon.
 - Uretim kod imzalama ve provenance guveni.
-

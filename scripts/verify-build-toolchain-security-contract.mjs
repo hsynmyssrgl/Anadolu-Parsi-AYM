@@ -123,7 +123,7 @@ verify(appBuilder?.dependencies?.ejs === '^3.1.8', 'Upstream EJS range changed; 
 
 const report = {
   schemaVersion: 1,
-  product: 'ParsYuva AYM',
+  product: 'ParsYuva Aile Yaşam Merkezi',
   applicationVersion: versionLedger.entries?.at(-1)?.version ?? null,
   packageVersion: rootPackage.version,
   stage: 'Bronze Active Development',

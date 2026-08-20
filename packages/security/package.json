@@ -1,6 +1,6 @@
 {
   "name": "@ppt/security",
-  "version": "20.8.2026-35",
+  "version": "20.8.2026-37",
   "private": true,
   "type": "module",
   "main": "dist/index.js",
@@ -13,7 +13,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@ppt/core": "20.8.2026-35",
-    "@ppt/domain": "20.8.2026-35"
+    "@ppt/core": "20.8.2026-37",
+    "@ppt/domain": "20.8.2026-37"
   }
 }

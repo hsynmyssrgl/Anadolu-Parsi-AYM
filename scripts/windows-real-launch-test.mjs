@@ -20,7 +20,7 @@ const explicitExecutableArgument = process.argv.find((argument) =>
 );
 const packagedExecutable = explicitExecutableArgument
   ? resolve(explicitExecutableArgument.slice('--executable='.length))
-  : resolve(appRoot, 'release/win-unpacked/ParsYuva Aile Yaşam Merkezi.exe');
+  : resolve(appRoot, 'release/win-unpacked/ParsYuva.exe');
 const packaged = process.argv.includes('--packaged') || Boolean(explicitExecutableArgument);
 const diagnosticSingleProcess = process.argv.includes('--diagnostic-single-process');
 const diagnosticNoSandbox = process.argv.includes('--diagnostic-no-sandbox');

@@ -93,7 +93,7 @@ const definitions = [
     'Production `CommunicationMlsFoundationPort`', 'NOT_RUN']) && has(threat, ['Sahte sağlayıcı kanıtı', 'Renderer anahtar veya mesaj otoritesi',
     'İptal edilmiş cihazla epoch ilerletme', 'NOT_RUN'])],
   ['PPK-015 021 and 022 ratchets are exact PASS', p15.status === 'PASS' && p15.files === 588
-    && p15.sourceSha256 === 'b2d792abf2d52dc9cfeecff6bd068ea05b6d69c2a6485640ef81ca97bb25ac8d' && p15.findings === 0
+    && p15.sourceSha256 === 'e83ccc2f1c9eaec4848ce47135f666c17cad167e51c7d678006ab93972c34a21' && p15.findings === 0
     && p21.status === 'PASS' && p21.files === 588 && p21.surfaces === 895 && p21.sha256 === 'fad3ceeb9485bffc9d6f9878f7bb486f56a73b4aa5d045580471c70a49e59da6'
     && p22.status === 'PASS' && p22.files === 588 && p22.surfaces === 447 && p22.sha256 === '2ac32190c1b40c455093841eb2456c06a168c9aaf519068a14f570705b8a177a'],
   ['production provider conformance delivery and requirement acceptance remain closed', scope.truth?.rfc9420ProviderConfigured === false

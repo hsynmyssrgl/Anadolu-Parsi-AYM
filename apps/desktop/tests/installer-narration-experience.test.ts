@@ -13,7 +13,7 @@ const packageUrl = new URL('../package.json', import.meta.url);
 describe('installer progress, narration and Silver help experience', () => {
   it('keeps pre-install pages static and reserves progress for real file installation', async () => {
     const [source,extractor,rawPackage]=await Promise.all([readFile(installerUrl,'utf8'),readFile(extractorUrl,'utf8'),readFile(packageUrl,'utf8')]);
-    const packageJson=JSON.parse(rawPackage) as {build:{win?:{artifactName?:string};artifactName?:string;nsis?:{shortcutName?:string;multiLanguageInstaller?:boolean;installerLanguages?:string[]}}};
+    const packageJson=JSON.parse(rawPackage) as {build:{executableName?:string;win?:{artifactName?:string};artifactName?:string;nsis?:{shortcutName?:string;multiLanguageInstaller?:boolean;installerLanguages?:string[]}}};
     for (const marker of [
       '!macro customWelcomePage','!macro customPageAfterChangeDir',
       '!define MUI_FONT "Segoe UI"','!define MUI_FONTSIZE 10',
@@ -26,7 +26,7 @@ describe('installer progress, narration and Silver help experience', () => {
       '!define PPT_INSTALLER_CHANNEL_BITMAP "installer-gold-sidebar.bmp"',
       '!define MUI_WELCOMEFINISHPAGE_BITMAP "${__FILEDIR__}\\${PPT_INSTALLER_CHANNEL_BITMAP}"',
       'SetCtlColors $AymWelcomePulseLabel "${PPT_INSTALLER_CHANNEL_COLOR}" "F0F0F0"',
-      'kişisel veri aktarmaz','C:\\Program Files\\PPT\\AYM',
+      'kişisel veri aktarmaz','C:\\Program Files\\PPT\\ParsYuva',
       'CreateFont $1 "Segoe UI" 11 400','CreateFont $2 "Segoe UI" 10 600',
       'ParsYuva Aile Yaşam Merkezi kullanıma hazır','ParsYuva Family Life Center is ready',
       'F1 Sesli Yardım Merkezinden yeniden dinleyebilirsiniz','F1 Narrated Help Center',
@@ -57,20 +57,21 @@ describe('installer progress, narration and Silver help experience', () => {
     expect(extractor.match(/Call AymInstallPayloadStageBegin/gu)).toHaveLength(3);
     expect(extractor.match(/Call AymInstallPayloadStageEnd/gu)).toHaveLength(3);
     expect(extractor).not.toContain('Nsis7z::Extract "${FILE}"');
-    expect(packageJson.build.nsis?.shortcutName).toBe('ParsYuva Aile Yaşam Merkezi');
+    expect(packageJson.build.executableName).toBe('ParsYuva');
+    expect(packageJson.build.nsis?.shortcutName).toBe('ParsYuva');
     expect(packageJson.build.nsis).toMatchObject({multiLanguageInstaller:true,installerLanguages:['en_US','tr_TR']});
     expect(source).not.toMatch(/SetCtlColors \$AymWelcomePulseLabel "\$\{PPT_INSTALLER_CHANNEL_COLOR\}" transparent/u);
     const [installerSource, uninstallerSource = ''] = source.split('!macro customUnInstall');
     expect(installerSource).not.toMatch(/https?:|Exec(?:Shell)?|nsExec|inetc|download/iu);
     expect(uninstallerSource).toContain(
-      'ExecWait \'"$INSTDIR\\ParsYuva Aile Yaşam Merkezi.exe" --uninstall-backup-assistant\' $0'
+      'ExecWait \'"$INSTDIR\\ParsYuva.exe" --uninstall-backup-assistant\' $0'
     );
     expect(uninstallerSource).toMatch(/MessageBox MB_YESNOCANCEL\|MB_ICONQUESTION [^\r\n]+ IDYES aym_uninstall_backup IDNO aym_uninstall_delete\r?\n\s+Goto aym_uninstall_cancel/u);
     expect(uninstallerSource).not.toContain('IDCANCEL aym_uninstall_cancel');
     expect(uninstallerSource.match(/\bExec(?:Wait|Shell)?\b/gu)).toEqual(['ExecWait']);
     expect(uninstallerSource).not.toMatch(/https?:|nsExec|inetc|download/iu);
     const artifactTemplate=packageJson.build.win?.artifactName??packageJson.build.artifactName??'';
-    expect(artifactTemplate).toMatch(/^ParsYuva-Aile-Yasam-Merkezi-(?:Bronze|Silver|Gold)-[A-Za-z0-9_.${}-]+-Kurulum\.\$\{ext\}$/u);
+    expect(artifactTemplate).toMatch(/^ParsYuva-(?:Bronze|Silver|Gold)-\d{2}\.\d{2}\.\d{4}\.\d+\.\$\{ext\}$/u);
     expect(artifactTemplate).not.toMatch(/[çğıöşüÇĞİÖŞÜ]/u);
     const artifactChannel=/-(Bronze|Silver|Gold)-/u.exec(artifactTemplate)?.[1];
     const installerChannel=/!define PPT_INSTALLER_RELEASE_CHANNEL "(Bronze|Silver|Gold)"/u.exec(source)?.[1];

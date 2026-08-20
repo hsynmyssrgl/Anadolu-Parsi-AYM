@@ -1,6 +1,6 @@
 {
   "name": "@ppt/platform-policy",
-  "version": "20.8.2026-35",
+  "version": "20.8.2026-37",
   "private": true,
   "type": "module",
   "main": "dist/index.js",

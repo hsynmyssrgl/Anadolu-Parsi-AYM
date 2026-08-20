@@ -90,7 +90,7 @@ check('announcement includes section name', () => assert.equal(accessibilityAnno
 
 const evidence = {
   schemaVersion: 1,
-  product: 'ParsYuva AYM',
+  product: 'ParsYuva Aile Yaşam Merkezi',
   applicationVersion: activeDisplayVersion,
   packageVersion: rootPackage.version,
   checks: checks.length,

@@ -1,8 +1,8 @@
 # Kullanıcı Kararları Kaydı
 
-- Görünür sürüm: **Bronze 20.08.2026.35**
+- Görünür sürüm: **Bronze 20.08.2026.37**
 - Makine okunur defter: `config/user-decision-ledger.json`
-- Aktif karar sayısı: **86**
+- Aktif karar sayısı: **91**
 
 Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağlayıcı kullanıcı kararlarını karar düzeyinde, etkilediği kural/belge/kod alanlarıyla saklar. Ham konuşma erişimi olmadan “tam transcript” iddiası yapılmaz.
 
@@ -65,12 +65,15 @@ Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağ
 - `DEC-251` — Karar anında eşzamanlı belge ve iş listesi güncellemesi; eksik senkronizasyon fail-closed
 - `DEC-252` — Tarihsel kayıtların son temel sonrasında gelecek içerik denetimlerinden çıkarılması
 - `DEC-253` — Animasyonlu kurulum ekranları, yenilenmiş üç adımlı anlatım ve Silver doğrulamasına hazırlanmış F1 sesli Yardım Merkezi
-- `DEC-254` — ParsYuva AYM marka kimliği, güncelleme uyumluluğu ve kurumsallaşma/global marka yol haritası
+- `DEC-254` — ParsYuva marka kimliği, güncelleme uyumluluğu ve kurumsallaşma/global marka yol haritası
 - `DEC-255` — İlk açılışta makinenin sistem dilinden Türkçe/İngilizce arayüz seçimi; desteklenmeyen dilde İngilizce güvenli varsayılan; sonrasında Ayarlar üzerinden kalıcı `system|tr|en` kullanıcı tercihi ve iki dilli kurulum altyapısı
 - `DEC-256` — Kurulum öncesi sahte hareketli ilerlemenin kaldırılması; tek yerel NSIS ilerleme çubuğu ve gerçek yüzde görünümü
-- `DEC-257` — Ürün ve belge başlıklarında yalnız ParsYuva AYM kullanılması; AYM ile Aile Yaşam Merkezi ifadesinin aynı başlıkta tekrarlanmasının yasaklanması
+- `DEC-257` — Önceki kısaltılmış ürün adı kararı; `DEC-261` ile SUPERSEDED
 - `DEC-258` — MapLibre GL JS ve PMTiles tabanlı çevrimdışı aile haritası; üretim harita paketi ayrı lisans, atıf ve bütünlük kanıtına bağlıdır
 - `DEC-259` — Ticari temel çalışma alanı; aşılamaz kural bağı, makine şemaları, tek ana iş listesi ve governed preflight belge kapısı
+- `DEC-260` — EK-001–EK-019 karar tamponunun çatışma denetimiyle ana sicillere birleştirilmesi; tam regresyon, kurulum yaşam döngüsü ve iki Git uzak deposunda aynı commit teslimi
+- `DEC-261` — Güncel ürün, kurulum, kısayol, yardım, sesli anlatım ve belge başlıklarında yalnız tam `ParsYuva Aile Yaşam Merkezi` adı; `AYM` yalnız tarihsel veya zorunlu teknik uyumluluk kimliği
+- `DEC-262` — Windows kurulum hedefi `C:\Program Files\PPT\ParsYuva`; kurulu ana dosya ve masaüstü/Başlat kısayolu `ParsYuva`; teslim EXE adı yalnız `ParsYuva-<Kanal>-GG.AA.YYYY.NN.exe`
 
 ## Bundan sonraki kararlar için zorunlu eşzamanlılık kuralı
 
@@ -78,4 +81,4 @@ Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağ
 
 `DEC-252` gereği bu yenilemedeki kapsamlı tarihsel tarama son temeldir. Bundan sonra eski build, arşiv ve checkpoint belgelerinin içeriği yeniden denetlenmez veya güncel karar kaynağı sayılmaz; yalnız değişmez `HISTORICAL` kayıt olarak korunur. Yeni denetimler aktif ve yeni belgelere uygulanır.
 
-Makine defteri yalnız açık kullanıcı kararlarını tutar. Türetilmiş paket/mimari kararlarının eksiksiz DEC-090–DEC-257 dizini ve dosya yolları `docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md` içindedir.
+Makine defteri yalnız açık kullanıcı kararlarını tutar. Türetilmiş paket/mimari kararlarının eksiksiz DEC-090–DEC-262 dizini ve dosya yolları `docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md` içindedir.

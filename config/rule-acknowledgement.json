@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "release": "Bronze 19.08.2026.33",
+  "release": "Bronze 20.08.2026.37",
   "ruleRegistry": "config/canonical-rule-registry.json",
-  "rulesSha256": "5b83854fb2d21e978ffe1dc79cfbcf180547f42d06cd32a8ba7918a58cf1a0ed",
-  "acknowledgedAt": "2026-08-19T00:47:00+03:00",
+  "rulesSha256": "c7cd9a0b82e58d3bf9dbc3aca7cf38d452b73b7e5bc361690e84d94821a7b25d",
+  "acknowledgedAt": "2026-08-20T20:20:00+03:00",
   "authority": "Explicit user instruction in current conversation",
-  "statement": "All written project rules, including ParsYuva AYM title non-repetition, brand compatibility, corporate no-claim gates, topic/platform document structure, system-language detection, English fallback, and one native real installer progress indicator, are binding and non-skippable. Every ACTIVE rule must be fail-closed enforced or explicitly BLOCKED/NOT_RUN until evidence exists."
+  "statement": "All written project rules, including the reconciled 18 August supplemental decisions, the exact ParsYuva Aile Yaşam Merkezi product name without the AYM abbreviation on current user surfaces, C:\\Program Files\\PPT\\ParsYuva installation, ParsYuva.exe, ParsYuva shortcuts, the ParsYuva-<Channel>-DD.MM.YYYY.NN.exe delivery name, channel palettes, password visibility, trial and Gold activation, uninstall/reset, tray lifecycle, update compatibility, system-language detection, English fallback, and one native real installer progress indicator, are binding and non-skippable. Every ACTIVE rule must be fail-closed enforced or explicitly BLOCKED/NOT_RUN until evidence exists."
 }

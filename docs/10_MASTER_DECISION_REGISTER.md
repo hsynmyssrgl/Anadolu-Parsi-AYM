@@ -1403,3 +1403,11 @@ Build228 governance-only kapanış buildidir. `OPEN-021 = CLOSED` ve `OPEN-022 =
 ## DEC-178 — End-to-end security evidence aggregator detached non-submittable boundary
 
 31-Q, yedi kanonik güvenlik kontrolü için tam biçimli, doğrulayıcıya bağlı, global olarak benzersiz ve değiştirilemez sentetik gözlemleri toplayan saf bir birleştirici tanımlar. Her kontrol yalnız bir kez kaydedilir; başarısız gözlem PASS ile değiştirilemez. Candidate yalnız yedi kontrolün tamamı PASS olduğunda ve sabit kontrol sırasıyla üretilebilir. Üretim `gateId` taşımaz ve gerçek `END_TO_END_SECURITY_VALIDATION` kanıtı olarak sunulamaz. Birleştirici güvenlik tatbikatlarını çalıştırmaz, bağımsız süreç kanıtını doğrulamaz ve runtime, gerçek veri, SQLite veya cutover yetkisi eklemez. DEC-171 blocked kalır; DEC-172–DEC-177 zayıflatılmaz. DEC-178 bağlayıcıdır.
+
+## DEC-260 — Ek kural toplu birleştirme ve doğrulanmış Git teslimi
+
+20.08.2026 tarihinde 18.08.2026 ek karar tamponundaki EK-001–EK-019 kayıtları silinmeden tarihsel kaynak olarak korunmuş, çatışma ve daha yeni karar denetimiyle PR-218–PR-227 kanonik kurallarına ve aktif belge/iş listelerine bağlanmıştır. ParsYuva AYM marka kararı eski Anadolu Parsı kısayolunu superseded eder. Tam regresyon, typecheck, üretim derlemeleri, installer doğrulaması, yerel paket açılış-kapanış yaşam döngüsü ve GitHub + yerel yedek uzak depolarında aynı commit okunmadan teslim tamamlanmış sayılamaz. Authenticode, temiz makine, Gold üretim anahtarı ve hukuk/gizlilik/vergi/sağlayıcı UAT kanıtları dış kaynak olarak fail-closed açık kalır. DEC-260 bağlayıcıdır.
+
+## DEC-261 — AYM kısaltmasının güncel ürün yüzeylerinden kaldırılması
+
+20.08.2026 tarihinde güncel ürün adı `ParsYuva Aile Yaşam Merkezi` olarak kesinleştirilmiştir. `AYM` kısaltması ürün, pencere, kısayol, kurulum dosyası, yardım, sesli anlatım, aktif belge başlığı ve yeni kullanıcıya dönük metadata içinde kullanılamaz. Önceki `ParsYuva AYM` kararının güncel marka kısmı superseded edilmiştir. `C:\PPT\AYM` çalışma kökü, kararlı appId, eski kullanıcı veri dizini, tarihsel karar/kanıt kimlikleri ve özgün tarihsel içerik yalnız geriye dönük uyumluluk ile kanıt bütünlüğü için korunur ve güncel marka sayılmaz. DEC-261 bağlayıcıdır.

@@ -410,7 +410,7 @@ const mainText = (turkish: string, english: string): string =>
 const uninstallBackupAssistantRequested = process.argv.includes('--uninstall-backup-assistant');
 assertPinnedBootstrapRuntimeCapability('windows-desktop', 'file.access');
 assertPinnedBootstrapRuntimeCapability('windows-desktop', 'network.access');
-const volatileRuntimeBase = join(app.getPath('temp'), 'ParsYuva-AYM');
+const volatileRuntimeBase = join(app.getPath('temp'), 'ParsYuva-Aile-Yasam-Merkezi');
 const volatileRuntimeCleanupMarker = join(volatileRuntimeBase, 'last-runtime-root.txt');
 const volatileRuntimeRoot = join(
   volatileRuntimeBase,

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "PARSYUVA-AYM-TICARI-KANIT-SICILI-V1",
+  "id": "PARSYUVA-AILE-YASAM-MERKEZI-TICARI-KANIT-SICILI-V2",
   "kayitlar": [
     {
       "id": "KANIT-0001",
@@ -66,17 +66,17 @@
     {
       "id": "KANIT-0007",
       "tur": "TEST",
-      "kapsam": "Tum yerel Vitest ve TypeScript regresyonu",
+      "kapsam": "Tum yerel Vitest, TypeScript, build ve migration regresyonu",
       "durum": "PASS",
       "kaynak": "05_KALITE_TEST_KANIT/06_TAM_REGRESYON_KANITI.json",
-      "uretimZamani": "2026-08-19T15:09:16+03:00",
+      "uretimZamani": "2026-08-20T15:17:15+03:00",
       "disKaynak": false,
-      "not": "307/307 test dosyasi, 2053/2053 test ve root typecheck PASS."
+      "not": "350/350 test dosyasi, 2187/2187 test, root typecheck/build ve 117 migration icin 9/9 dogrulama PASS."
     },
     {
       "id": "KANIT-0008",
       "tur": "TEST",
-      "kapsam": "ParsYuva AYM marka kimligi ve yuzey tutarliligi",
+      "kapsam": "ParsYuva Aile Yasam Merkezi marka kimligi ve yuzey tutarliligi",
       "durum": "PASS",
       "kaynak": "05_KALITE_TEST_KANIT/07_MARKA_KIMLIGI_DOGRULAMA_KANITI.json",
       "uretimZamani": "2026-08-19T14:05:00+03:00",
@@ -542,6 +542,16 @@
       "uretimZamani": "2026-08-19T19:47:51+03:00",
       "disKaynak": false,
       "not": "Ilk acilista sistem dili, bilinmeyen dilde English fallback ve Ayarlar uzerinden main-process dogrulamali kalici system/tr/en tercihi PASS."
+    },
+    {
+      "id": "KANIT-0055",
+      "tur": "PAKET_VE_WINDOWS_TESTI",
+      "kapsam": "Bronze 20.08.2026.37 imzasiz yerel installer, kisa teslim adi ve iki ardicil paketli Windows acilisi",
+      "durum": "PASS_WITH_INSTALLED_LIFECYCLE_OPEN",
+      "kaynak": "05_KALITE_TEST_KANIT/54_20_08_2026_KURULUM_VE_PAKETLI_ACILIS_KANITI.json",
+      "uretimZamani": "2026-08-20T19:02:00+03:00",
+      "disKaynak": false,
+      "not": "ParsYuva-Bronze-20.08.2026.37.exe, win-unpacked/ParsYuva.exe ve iki ardicil paketli acilis PASS; Authenticode ve yukseltilmis gercek kurulum kaniti olmadigi icin ticari dagitim ile kurulu yasam dongusu acik."
     }
   ]
 }

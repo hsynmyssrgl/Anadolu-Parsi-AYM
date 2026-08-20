@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AILE-YASAM-MERKEZI-KURULUM-VE-PAKETLI-ACILIS-20260820-01",
+  "verifiedAt": "2026-08-20T19:02:00+03:00",
+  "product": "ParsYuva Aile Yasam Merkezi",
+  "release": {
+    "channel": "Bronze",
+    "displayVersion": "20.08.2026.37",
+    "packageVersion": "20.8.2026-37"
+  },
+  "installer": {
+    "path": "apps/desktop/release/ParsYuva-Bronze-20.08.2026.37.exe",
+    "sizeBytes": 116122856,
+    "sha256": "7F77D09364ACCDF9B4DC548A7AB25BF806E51DAA7588B1491B855900BB575EB5",
+    "authenticodeStatus": "NOT_SIGNED",
+    "classification": "IMZASIZ_YEREL_TEST",
+    "installerVerification": "PASS",
+    "nsisCompilation": "PASS"
+  },
+  "packagedLaunch": {
+    "status": "PASS",
+    "evidence": "artifacts/validation/windows-packaged-launch-probe.json",
+    "runs": 2,
+    "applicationVersion": "20.08.2026.37",
+    "dpapiCrossProcessPersistence": "PASS",
+    "rendererSandboxPolicy": "PASS",
+    "windowsEfsRuntime": "PASS",
+    "protectedSideArtifactWindowsRuntime": "PASS",
+    "uncaughtMainProcessErrorObserved": false
+  },
+  "installedLifecycle": {
+    "targetPath": "C:/Program Files/PPT/ParsYuva",
+    "installedExecutable": "ParsYuva.exe",
+    "shortcutName": "ParsYuva",
+    "status": "NOT_RUN",
+    "reason": "Bu teslimde paketli uygulama gercek Windows surecinde iki kez dogrulandi; yonetici onayi gerektiren kurulu yasam dongusu otomatik olarak PASS sayilmadi."
+  },
+  "productionDistribution": {
+    "status": "BLOCKED",
+    "requiredExternalEvidence": [
+      "production Authenticode certificate and trusted timestamp",
+      "clean external Windows installation lifecycle",
+      "real provider and device UAT where applicable"
+    ]
+  },
+  "commercialReleaseEligible": false
+}

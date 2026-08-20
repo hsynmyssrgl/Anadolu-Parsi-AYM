@@ -16,7 +16,7 @@ export const validateDeliveryAttestationContract = (contract) => {
   const failures = [];
   if (!contract || typeof contract !== 'object') return ['Contract must be an object.'];
   if (contract.schemaVersion !== 1) failures.push(`Unsupported schemaVersion=${contract.schemaVersion}`);
-  if (contract.product !== 'ParsYuva AYM') failures.push(`Unexpected product=${contract.product}`);
+  if (contract.product !== 'ParsYuva Aile Yaşam Merkezi') failures.push(`Unexpected product=${contract.product}`);
   if (contract.stage !== 'Bronze RC2 Active Development') failures.push(`Unexpected stage=${contract.stage}`);
   if (typeof contract.attestationFileNameTemplate !== 'string' || !contract.attestationFileNameTemplate.includes('{build}') || !contract.attestationFileNameTemplate.includes('{version}')) failures.push('Attestation file name template must contain {build} and {version}.');
   const ids = new Set();

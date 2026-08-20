@@ -3,8 +3,9 @@
 ## Marka
 
 - Ana marka: ParsYuva.
-- Urun: ParsYuva AYM.
-- Uzun aciklama: ParsYuva Aile Yasam Merkezi; `ParsYuva AYM Aile Yasam Merkezi` biciminde tekrar kullanilmaz.
+- Urun: ParsYuva Aile Yasam Merkezi.
+- `AYM` kısaltmasi guncel kullanici yuzeylerinde, kurulumda, kisayolda, yardimda, sesli anlatimda ve aktif belge basliklarinda kullanilmaz.
+- Eski teknik kimlikler ve tarihsel kayitlar yalniz geriye donuk uyumluluk ve kanit butunlugu icin korunur; guncel marka sayilmaz.
 - Logo: Anadolu parsini sicak, guvenilir ve modern bicimde temsil eder.
 
 ## Tipografi

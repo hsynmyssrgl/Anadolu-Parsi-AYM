@@ -37,11 +37,11 @@ from reportlab.platypus import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
-AS_OF = "19.08.2026"
-VERSION = "GUNCEL-2026-08-19-V3"
+AS_OF = "20.08.2026"
+VERSION = "GUNCEL-2026-08-20-V4"
 SOURCE = ROOT / "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md"
-DOCX_OUT = ROOT / "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_19.08.2026_V3.docx"
-PDF_OUT = ROOT / "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_19.08.2026_V3.pdf"
+DOCX_OUT = ROOT / "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_20.08.2026_V4.docx"
+PDF_OUT = ROOT / "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_20.08.2026_V4.pdf"
 LOGO = ROOT / "apps/desktop/src/renderer/assets/brand-mark.png"
 
 BRONZE = "7C4D20"
@@ -170,7 +170,7 @@ INFRASTRUCTURE = [
     ("Dağıtık platform", "Mutation/consensus/tenancy, distributed clients/operations/DR ve Windows resilience için local hardened foundation."),
     ("Görsel sistem", "Onaylı sıcak-nötr açık tema, exact release colors, 512 px sıcak-bronz logo, merkezi typography/accessibility tokenları."),
     ("Belge yönetişimi", "DEC-251 eşzamanlı karar-belge-iş listesi kapısı; tüm belge türü hash/okunabilirlik denetimi; tarihsel kayıtların değişmezliği."),
-    ("Marka ve kurumsallaşma", "DEC-254 ile ana marka ParsYuva, ürün ParsYuva AYM; eski appId ve veri dizini güncelleme uyumluluğu için korunur. Şirket, marka, alan adı, hukuk/vergi/gizlilik ve mağaza kanıtları NOT_RUN iken tamamlanmış gösterilmez."),
+    ("Marka ve kurumsallaşma", "DEC-261 ile ana marka ParsYuva, görünür ürün ParsYuva Aile Yaşam Merkezi; AYM yalnız tarihsel ve zorunlu teknik uyumluluk kimliklerinde korunur. Şirket, marka, alan adı, hukuk/vergi/gizlilik ve mağaza kanıtları NOT_RUN iken tamamlanmış gösterilmez."),
 ]
 
 
@@ -196,7 +196,11 @@ DRIFT_FIXES = [
     "Word/PDF dışındaki RTF, Markdown, JSON/YAML, TXT, CSV ve HTML kayıtları da kök klasör düzeyinde hash ve okunabilirlik denetimine alındı; Excel/PowerPoint bulunmadığı açıkça kaydedildi.",
     "Her yeni kararın DEC, makine defteri, etkilenen belgeler ve açık/kapalı iş gerekçeleriyle aynı değişiklikte güncellenmesi fail-closed kurala bağlandı.",
     "Bu kapsamlı tarama tarihsel kayıtların son içerik temelidir; DEC-252 gereği gelecekte eski build/arşiv/checkpoint içeriği yeniden denetlenmeyecek, yalnız değişmez HISTORICAL kayıt olarak korunacaktır.",
-    "Core Service companion ASAR paketine bağlandı; 292/292 dosya ve 1986/1986 test, root build ve aynı profilde iki ardışık normal win-unpacked açılışı PASS verdi. Production Authenticode sertifikası bulunmadığından signed installer/kurulu yaşam döngüsü açık bırakıldı.",
+    "Core Service companion ASAR paketine bağlandı; güncel tam regresyonda 350/350 test dosyası ve 2187/2187 test, root typecheck/build ve aynı profilde iki ardışık normal win-unpacked açılışı PASS verdi. Production Authenticode sertifikası bulunmadığından signed installer/kurulu yaşam döngüsü açık bırakıldı.",
+    "EK-001–EK-019 tarihsel karar tamponu DEC-260 ile ana sicillere bağlandı; daha yeni ParsYuva, dil ve kurulum kararları çatışmada üstün tutuldu.",
+    "Kanonik kural sicili V16/228/207 durumuna yükseltildi; tam ParsYuva Aile Yaşam Merkezi adı, sürüm paleti, parola görünürlüğü, installer yaşam döngüsü, aylık build, deneme/Gold, kaldırma-sıfırlama, tepsi ve migration/rollback kararları fail-closed kapılara bağlandı.",
+    "DEC-261 ile AYM kısaltması güncel kullanıcı yüzeylerinden kaldırıldı; yalnız tarihsel kayıtlar ve değiştirilemeyen teknik uyumluluk yolları güncel marka olmadığı açıkça belirtilerek korunur.",
+    "DEC-262 ile Windows kurulum hedefi C:\\Program Files\\PPT\\ParsYuva, ana program ve kısayol adı ParsYuva, teslim adı ParsYuva-<Kanal>-GG.AA.YYYY.NN.exe olarak sabitlendi.",
 ]
 
 
@@ -213,14 +217,14 @@ def package_status_reason(item: dict) -> str:
 
 def build_markdown() -> str:
     lines = [
-        "# ParsYuva AYM — Güncel Karar, Kural ve İş Akışı Sicili",
+        "# ParsYuva Aile Yaşam Merkezi — Güncel Karar, Kural ve İş Akışı Sicili",
         "",
         f"- Belge sürümü: **{VERSION}**",
         f"- Tarih: **{AS_OF}**",
         f"- Görünür ürün sürümü: **{ledger['release']}**",
         f"- Kaynak HEAD: `{git_head()}`",
         "- Statü: **ACTIVE_WORKING_REFERENCE_NOT_BUILD_CLOSURE**",
-        "- Kararlar: **DEC-250, DEC-251, DEC-252, DEC-253, DEC-254**",
+        "- Kararlar: **DEC-250–DEC-262**",
         "",
         "> Bu sürüm geçmiş PDF/DOCX ve build kapanış belgelerinin üzerine yazmaz. Yerel PASS ile dış kabul kanıtını ayırır; NOT_RUN/PARTIAL/BLOCKED sonuçlarını tamamlanmış göstermez.",
         "",
@@ -268,7 +272,7 @@ def build_markdown() -> str:
         f"- Full regression: {closure['validation']['fullRegression']['status']} / {closure['validation']['fullRegression']['files']} dosya / {closure['validation']['fullRegression']['tests']} test.",
         f"- Production build: {closure['validation']['productionBuilds']['status']} / {closure['validation']['productionBuilds']['workspaces']} workspace.",
         f"- Güncel Core Service companion: {windows_scope['validation']['currentCoreServiceCompanionEvidence']['status']} / {windows_scope['validation']['currentCoreServiceCompanionEvidence']['fullRegression']['files']} dosya / {windows_scope['validation']['currentCoreServiceCompanionEvidence']['fullRegression']['tests']} test / {windows_scope['validation']['currentCoreServiceCompanionEvidence']['packagedLaunches']} normal paket açılışı.",
-        f"- Güncel dağıtım imzası: {windows_scope['validation']['currentCoreServiceCompanionEvidence']['executableSignature']}; production sertifikası sağlanmadığı için signed installer ve kurulu uygulama yaşam döngüsü NOT_RUN.",
+        f"- Güncel dağıtım imzası: {windows_scope['validation']['currentCoreServiceCompanionEvidence']['executableSignature']}; yerel imzasız ParsYuva-Bronze-20.08.2026.37.exe üretildi ve aynı win-unpacked paketinin iki ardışık açılışı PASS verdi. Production sertifikası ve yükseltilmiş kurulu yaşam döngüsü PASS olmadığı için ticari dağıtım hazır sayılmaz.",
         "- Buna rağmen allRoadmapPackagesAccepted=false, requirementsClosed=false ve countsAsRequirementPass=false.",
         "",
         "## 7. Dış bağımlılıklar ve neden açık",
@@ -466,7 +470,7 @@ def build_docx():
 
     header = section.header.paragraphs[0]
     header.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    set_run_font(header.add_run("PARSYUVA AYM  •  GÜNCEL MASTER DOKÜMANTASYON"), size=8, color=MUTED, bold=True)
+    set_run_font(header.add_run("PARSYUVA AİLE YAŞAM MERKEZİ  •  GÜNCEL MASTER DOKÜMANTASYON"), size=8, color=MUTED, bold=True)
     footer = section.footer.paragraphs[0]
     footer.alignment = WD_ALIGN_PARAGRAPH.CENTER
     set_run_font(footer.add_run(f"{VERSION}  •  Sayfa "), size=8, color=MUTED)
@@ -483,7 +487,7 @@ def build_docx():
     title = doc.add_paragraph()
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
     title.paragraph_format.space_after = Pt(4)
-    set_run_font(title.add_run("PARSYUVA AYM"), size=28, color=BRONZE, bold=True)
+    set_run_font(title.add_run("PARSYUVA AİLE YAŞAM MERKEZİ"), size=24, color=BRONZE, bold=True)
     sub2 = doc.add_paragraph()
     sub2.alignment = WD_ALIGN_PARAGRAPH.CENTER
     sub2.paragraph_format.space_after = Pt(16)
@@ -563,7 +567,7 @@ def build_docx():
         add_doc_paragraph(doc, detail)
 
     add_doc_heading(doc, "9. Installer ve çalıştırma gerçeği", 1)
-    add_doc_paragraph(doc, "Kurulum hedefi C:\\Program Files\\PPT\\AYM olarak yapılandırılmıştır. Yerel kaynak/typecheck/build ve installer doğrulama kodları tek başına kurulu uygulamanın bu makinede açıldığı anlamına gelmez. Önceki kurulum denemesinde uygulama açılışı başarısız olmuştur; korumalı authority/Core Service hazırlığı ve gerçek kurulu yaşam döngüsü yeniden PASS olmadan 'kullanıma hazır' iddiası kurulmaz.")
+    add_doc_paragraph(doc, "Kurulum hedefi C:\\Program Files\\PPT\\ParsYuva, kurulu program ve kısayol adı ParsYuva, teslim EXE adı ParsYuva-<Kanal>-GG.AA.YYYY.NN.exe biçimindedir; kullanıcıya görünen tam ürün adı ParsYuva Aile Yaşam Merkezidir. ParsYuva-Bronze-20.08.2026.37.exe yerel test installerı üretildi; SHA-256 7F77D09364ACCDF9B4DC548A7AB25BF806E51DAA7588B1491B855900BB575EB5 ve aynı win-unpacked paketinin iki ardışık Windows açılışı PASS'tir. Yükseltilmiş gerçek kurulum yaşam döngüsü PASS olmadıkça ve Production Authenticode sertifikası ile temiz harici Windows makinesi kanıtı tamamlanmadıkça 'ticari dağıtıma hazır' iddiası kurulmaz.")
 
     add_doc_heading(doc, "10. Görsel kimlik ve erişilebilirlik", 1)
     palette_rows = [[channel, value["text"], value["strong"], value["icon"], value["edge"]] for channel, value in visual["releaseChannelNavigationColors"].items()]
@@ -598,10 +602,10 @@ def build_docx():
     add_doc_table(doc, ["Dosya", "Tür", "Bayt", "Sayfa", "Okuma"], audit_rows, [5000, 800, 1300, 850, 1410], 7.0)
     add_doc_paragraph(doc, "Yeni sürüm, tarihsel dosyaların yerine geçmez; yalnız aktif çalışma gerçeğini tek yerde toplar.")
 
-    doc.core_properties.title = "ParsYuva AYM Güncel Master Dokümantasyon"
+    doc.core_properties.title = "ParsYuva Aile Yaşam Merkezi Güncel Master Dokümantasyon"
     doc.core_properties.subject = "Karar, kural, mimari, iş akışı, açık iş ve kanıt sicili"
     doc.core_properties.author = "ParsYuva"
-    doc.core_properties.keywords = "ParsYuva AYM, governance, güvenlik, kurumsallaşma, iş akışı, karar, kural"
+    doc.core_properties.keywords = "ParsYuva Aile Yaşam Merkezi, governance, güvenlik, kurumsallaşma, iş akışı, karar, kural"
     DOCX_OUT.parent.mkdir(parents=True, exist_ok=True)
     doc.save(DOCX_OUT)
 
@@ -631,7 +635,7 @@ def build_pdf():
         canvas.saveState()
         canvas.setFont(font, 7)
         canvas.setFillColor(colors.HexColor(f"#{MUTED}"))
-        canvas.drawString(0.65 * inch, 0.36 * inch, f"ParsYuva AYM • {VERSION}")
+        canvas.drawString(0.65 * inch, 0.36 * inch, f"ParsYuva Aile Yaşam Merkezi • {VERSION}")
         canvas.drawRightString(7.85 * inch, 0.36 * inch, f"Sayfa {doc.page}")
         canvas.restoreState()
 
@@ -662,7 +666,7 @@ def build_pdf():
         story += [logo, Spacer(1, 6)]
     story += [
         Paragraph("GÜNCEL ÇALIŞMA REFERANSI", ParagraphStyle("Kicker", parent=body, alignment=TA_CENTER, fontName=bold, fontSize=9, textColor=colors.HexColor(f"#{GOLD}"))),
-        Paragraph("PARSYUVA AYM", title_style),
+        Paragraph("PARSYUVA AİLE YAŞAM MERKEZİ", title_style),
         Paragraph("Karar • Kural • Mimari • İş Akışı • Açık İş • Kanıt Sicili", subtitle_style),
         pdf_table(["Alan", "Güncel değer"], [
             ["Belge sürümü", VERSION], ["Tarih", AS_OF], ["Ürün sürümü", ledger["release"]], ["Kaynak HEAD", git_head()],
@@ -699,7 +703,7 @@ def build_pdf():
     story += [Paragraph("7. Yerel doğrulama ve kabul sınırı", h1), pdf_table(["Kapı", "Sonuç", "Kanıt"], validation_rows, [1.6*inch, 1.1*inch, 4.3*inch], 7.6), Paragraph("8. Dış bağımlılıklar ve neden açık", h1)]
     for title_text, detail in EXTERNAL_DEPENDENCIES:
         story += [Paragraph(pdf_escape(title_text), h2), p(detail)]
-    story += [Paragraph("9. Installer ve çalıştırma gerçeği", h1), p("Kurulum hedefi C:\\Program Files\\PPT\\AYM olarak yapılandırılmıştır. Önceki kurulum denemesinde uygulama açılışı başarısız olmuştur; korumalı authority/Core Service hazırlığı ve gerçek kurulu yaşam döngüsü yeniden PASS olmadan kullanıma hazır iddiası kurulmaz."), Paragraph("10. Görsel kimlik ve erişilebilirlik", h1), pdf_table(["Kanal", "Text", "Strong", "Icon", "Edge"], [[c, v['text'], v['strong'], v['icon'], v['edge']] for c, v in visual['releaseChannelNavigationColors'].items()], [1.0*inch,1.5*inch,1.5*inch,1.5*inch,1.5*inch],7.5), p(f"Logo {visual['brandMark']['width']}×{visual['brandMark']['height']} şeffaf PNG; SHA-256 {visual['brandMark']['sha256']}. Body {visual['typography']['bodyPx']} px, control {visual['typography']['controlPx']} px, minimum {visual['typography']['minimumPx']} px.")]
+    story += [Paragraph("9. Installer ve çalıştırma gerçeği", h1), p("Kurulum hedefi C:\\Program Files\\PPT\\ParsYuva, kurulu program ve kısayol adı ParsYuva, teslim EXE adı ParsYuva-<Kanal>-GG.AA.YYYY.NN.exe biçimindedir; kullanıcıya görünen tam ürün adı ParsYuva Aile Yaşam Merkezidir. ParsYuva-Bronze-20.08.2026.37.exe yerel test installerı üretildi; SHA-256 7F77D09364ACCDF9B4DC548A7AB25BF806E51DAA7588B1491B855900BB575EB5 ve aynı win-unpacked paketinin iki ardışık Windows açılışı PASS'tir. Yükseltilmiş gerçek kurulum yaşam döngüsü PASS olmadıkça ve Production Authenticode sertifikası ile temiz harici Windows makinesi kanıtı tamamlanmadıkça ticari dağıtım hazır sayılmaz."), Paragraph("10. Görsel kimlik ve erişilebilirlik", h1), pdf_table(["Kanal", "Text", "Strong", "Icon", "Edge"], [[c, v['text'], v['strong'], v['icon'], v['edge']] for c, v in visual['releaseChannelNavigationColors'].items()], [1.0*inch,1.5*inch,1.5*inch,1.5*inch,1.5*inch],7.5), p(f"Logo {visual['brandMark']['width']}×{visual['brandMark']['height']} şeffaf PNG; SHA-256 {visual['brandMark']['sha256']}. Body {visual['typography']['bodyPx']} px, control {visual['typography']['controlPx']} px, minimum {visual['typography']['minimumPx']} px.")]
     story += [Paragraph("11. Belge sapmaları ve düzeltmeler", h1)] + [p(f"• {item}") for item in DRIFT_FIXES]
     story += [Paragraph("12. Tüm belge türü denetimi", h1), pdf_table(["Uzantı", "Dosya"], [[extension, str(count)] for extension, count in full_document_audit["extensionCounts"].items()], [2.0*inch,5.0*inch], 8.0), p(f"Kök taramada {full_document_audit['documentFileCount']} belge/config/metin dosyası bulundu; {full_document_audit['readableCount']} okunabilir, {full_document_audit['unreadableCount']} sorunlu. Tam yol ve SHA-256 listesi artifacts/manifests/ALL_PROJECT_DOCUMENT_FORMAT_AUDIT.json içindedir.")]
     decision_rows = [[f"DEC-{decision_number(path):03d}", first_heading(path), status_from_markdown(path), path.relative_to(ROOT).as_posix()] for path in decision_files]
@@ -711,7 +715,7 @@ def build_pdf():
     audit_rows = [[row["name"], row["type"].upper(), str(row["bytes"]), str(row.get("pages", "-")), "OK" if row["readable"] else "HATA"] for row in word_pdf_scan]
     story += [PageBreak(), Paragraph("16. Aktif repo Word/PDF tarihsel envanter denetimi", h1), pdf_table(["Dosya", "Tür", "Bayt", "Sayfa", "Okuma"], audit_rows, [4.1*inch,0.55*inch,0.8*inch,0.6*inch,0.95*inch], 6.1), p("Yeni sürüm tarihsel dosyaların yerine geçmez; yalnız aktif çalışma gerçeğini tek yerde toplar.")]
     PDF_OUT.parent.mkdir(parents=True, exist_ok=True)
-    document = SimpleDocTemplate(str(PDF_OUT), pagesize=letter, leftMargin=0.65*inch, rightMargin=0.65*inch, topMargin=0.6*inch, bottomMargin=0.58*inch, title="ParsYuva AYM Güncel Master Dokümantasyon", author="ParsYuva")
+    document = SimpleDocTemplate(str(PDF_OUT), pagesize=letter, leftMargin=0.65*inch, rightMargin=0.65*inch, topMargin=0.6*inch, bottomMargin=0.58*inch, title="ParsYuva Aile Yaşam Merkezi Güncel Master Dokümantasyon", author="ParsYuva")
     document.build(story, onFirstPage=footer, onLaterPages=footer)
 
 

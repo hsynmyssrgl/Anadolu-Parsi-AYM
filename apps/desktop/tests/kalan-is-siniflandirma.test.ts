@@ -23,7 +23,7 @@ describe('kalan iş sınıflandırması', () => {
     };
     expect(report).toMatchObject({
       requirementCount: 358,
-      activeRelease: 'Bronze 20.08.2026.35',
+      activeRelease: 'Bronze 20.08.2026.37',
       scopeBaselineRelease: 'Bronze 04.08.2026.29',
       strictCompleteCount: 109,
       strictRemainingCount: 249,

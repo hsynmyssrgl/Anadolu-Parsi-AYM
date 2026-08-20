@@ -1,9 +1,9 @@
 # ParsYuva Kurumsallasma ve Global Marka Plani
 
 - Belge sürümü: `KURUMSAL-2026-08-18-V1`
-- Ürün: **ParsYuva AYM**
+- Ürün: **ParsYuva Aile Yaşam Merkezi**
 - Açıklayıcı ad: **ParsYuva Aile Yaşam Merkezi**
-- Görünür sürüm: **Bronze 20.08.2026.35**
+- Görünür sürüm: **Bronze 20.08.2026.37**
 - Yetki kararı: `DEC-254`
 - Durum: **ACTIVE_PLAN / EXTERNAL_ACTION_NOT_RUN**
 - Dış kurumsallaşma kabulü: `countsAsRequirementPass=false`
@@ -13,7 +13,7 @@
 | Katman | Kabul edilen ad | Kullanım |
 |---|---|---|
 | Ana marka | ParsYuva | Web, iletişim, ürün ailesi |
-| Masaüstü ürün | ParsYuva AYM | Kurulum, kısayol, pencere, uygulama içi kimlik |
+| Masaüstü ürün | ParsYuva Aile Yaşam Merkezi | Kurulum, kısayol, pencere, uygulama içi kimlik |
 | Açıklayıcı ürün adı | ParsYuva Aile Yaşam Merkezi | Tanıtım ve uzun açıklamalar |
 | Şirket unvanı adayı | ParsYuva Dijital Yaşam Teknolojileri Anonim Şirketi | Tescil edilmeden resmî unvan gibi kullanılmaz |
 | İngilizce pazarlama biçimi | ParsYuva Digital Life Technologies Inc. | Türkiye'deki resmî unvanın yerine geçmez |
@@ -58,7 +58,7 @@ Kurumsal klasör görünümü `C:\PPT\AYM\03_TASARIM\02_PLATFORM_VE_CIHAZ` ve `C
 
 | İş | Yerel durum | Açık kalma nedeni | Eksik dış kanıt | requirement PASS |
 |---|---|---|---|---|
-| ParsYuva AYM kod ve kurulum kimliği | IMPLEMENTED | Test ve paket kapıları çalıştırılıyor | Yok | Hayır, build kapanışı bekleniyor |
+| ParsYuva Aile Yaşam Merkezi kod ve kurulum kimliği | IMPLEMENTED | Test ve paket kapıları çalıştırılıyor | Yok | Hayır, build kapanışı bekleniyor |
 | Şirket kuruluşu | NOT_RUN | Yetkili başvuru yapılmadı | MERSİS, noter/sicil, mali müşavir | Hayır |
 | Marka tescili | NOT_RUN | Resmî araştırma/başvuru yok | TÜRKPATENT | Hayır |
 | Alan adı ve sosyal hesaplar | NOT_RUN | Satın alma yetkisi kullanılmadı | Kayıt operatörü makbuzu | Hayır |

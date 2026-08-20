@@ -99,7 +99,7 @@ verify(!styles.includes('outline: none !important'), 'focus indicators are globa
 
 const report = {
   schemaVersion: 1,
-  product: 'ParsYuva AYM',
+  product: 'ParsYuva Aile Yaşam Merkezi',
   featureBuild: 134,
   applicationVersion: activeDisplayVersion,
   packageVersion: activePackageVersion,

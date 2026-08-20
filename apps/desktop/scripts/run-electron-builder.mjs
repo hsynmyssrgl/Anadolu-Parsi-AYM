@@ -29,14 +29,10 @@ if (typeof releaseArtifactTemplate !== 'string') {
   console.error('Windows artifact template is missing.');
   process.exit(1);
 }
-const localUnsignedArtifactTemplate = releaseArtifactTemplate.replace(
-  '-${arch}-Kurulum.${ext}',
-  '-IMZASIZ-YEREL-TEST-${arch}-Kurulum.${ext}'
-);
-if (localUnsignedArtifactTemplate === releaseArtifactTemplate) {
-  console.error('Local unsigned installer name could not be derived from the governed release artifact template.');
-  process.exit(1);
-}
+// The governed public filename is intentionally identical in signed and local
+// build modes. Trust classification comes from Authenticode/evidence, never
+// from a filename suffix that can be forged or become stale.
+const localUnsignedArtifactTemplate = releaseArtifactTemplate;
 const localUnsignedMode = [
   '--win',
   'nsis',

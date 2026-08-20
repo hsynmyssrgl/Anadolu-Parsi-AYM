@@ -1,22 +1,26 @@
 # Kanonik Kural Sicili
 
-- Görünür sürüm: **Bronze 20.08.2026.35**
-- Sicil kimliği: `PPT-CANONICAL-RULE-REGISTRY-V13`
-- Toplam kural: **217**
-- Aktif kural: **197**
-- Açıkça superseded tarihsel kural: **20**
-- Kural SHA-256: `5b83854fb2d21e978ffe1dc79cfbcf180547f42d06cd32a8ba7918a58cf1a0ed`
+- Görünür sürüm: **Bronze 20.08.2026.37**
+- Sicil kimliği: `PPT-CANONICAL-RULE-REGISTRY-V16`
+- Toplam kural: **228**
+- Aktif kural: **207**
+- Açıkça superseded tarihsel kural: **21**
+- Kural SHA-256: `c7cd9a0b82e58d3bf9dbc3aca7cf38d452b73b7e5bc361690e84d94821a7b25d`
 - Makine okunur tek aktif kaynak: `config/canonical-rule-registry.json`
 
 `PR-186` her bağlayıcı kararın aynı sürümde DEC ve makine defterine kaydını, `PR-187` bilinen belge/kod/kural driftinde kapanış yasağını getirir. `DEC-251` ve `config/documentation-synchronization-policy.json` bu iki kuralı karar anında DEC + etkilenen belge + iş listesi açık/kapalı/neden güncellemesi olarak fail-closed uygular.
 
-`PR-209`–`PR-214`; ParsYuva AYM marka ve teknik uyumluluk sınırını, dış kurumsallaşma no-claim kapısını, aktif metadata'yı, yeni kalıcı kütüphane dalını, platform/cihaz ayrımını ve konu bazlı kurumsal belge yapısını bağlar.
+`PR-209`–`PR-214`; ParsYuva Aile Yaşam Merkezi tam ürün adı ve teknik uyumluluk sınırını, dış kurumsallaşma no-claim kapısını, aktif metadata'yı, yeni kalıcı kütüphane dalını, platform/cihaz ayrımını ve konu bazlı kurumsal belge yapısını bağlar.
 
 `PR-215`; ilk açılışta sistem dilinin Electron ana sürecinde belirlenmesini, yalnız Türkçe ve İngilizce desteğini, desteklenmeyen/çözülemeyen dilde İngilizcenin güvenli varsayılan olmasını ve kullanıcının sonraki açılışlar için ana süreçte saklanan `system|tr|en` tercihini Ayarlar üzerinden değiştirebilmesini bağlar.
 
 `PR-216`; kurulum öncesi sayfalarda hareketli sahte ilerlemeyi yasaklar ve yalnız yerel NSIS dosya kurulum ilerlemesinden okunan tek yüzde görünümüne izin verir.
 
-`PR-217`; ürün ve belge başlıklarında yalnız `ParsYuva AYM` kullanılmasını bağlar. `AYM` kısaltması ile `Aile Yaşam Merkezi` aynı başlıkta tekrar edilemez; açık uzun ad yalnız ayrı açıklama veya hukuk metninde kullanılabilir.
+`PR-217`; güncel ürün ve belge başlıklarında yalnız `ParsYuva Aile Yaşam Merkezi` tam adının kullanılmasını bağlar. `AYM` kısaltması kullanıcı yüzeylerinde yasaktır; yalnız değiştirilemeyen tarihsel kayıtlar ve geriye dönük uyumluluk için zorunlu teknik kimliklerde korunabilir.
+
+`PR-218`–`PR-228`; sürüm kanalı renk/saydamlık sistemini, güvenli parola görünürlüğünü, kurulum adlandırma ve yaşam döngüsü kanıtını, atomik sürüm numarasını, 30 günlük deneme/Gold etkinleştirmeyi, kaldırma-yedek-sıfırlama sınırını, tepsiye küçülmeyi, veri koruyan migration/rollback sözleşmesini, ek kararların ana sicillere/Git teslimine bağlanmasını ve Windows kurulum yoluyla kısa teslim adını düzenler.
+
+`PR-220` dosya adı bölümü `PR-228` ile değiştirilmiştir. Güncel teknik teslim kuralı: `C:\Program Files\PPT\ParsYuva`, `ParsYuva.exe`, `ParsYuva` kısayolu ve `ParsYuva-<Kanal>-GG.AA.YYYY.NN.exe` dosya adıdır.
 
 ## Aşılmaz uygulama
 

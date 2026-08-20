@@ -5,8 +5,8 @@
 - Birincil: Windows x64 Electron masaustu.
 - Kurulum: NSIS tabanli tek gercek dosya ilerleme cubugu.
 - Kalici teknik kimlik: veri uyumlulugu icin mevcut Windows appId ve eski user-data dizini korunur.
-- Gorunur kimlik: ParsYuva AYM.
-- Kısayol: ParsYuva AYM.
+- Gorunur kimlik: ParsYuva Aile Yasam Merkezi.
+- Kisayol: ParsYuva Aile Yasam Merkezi.
 - Varsayilan kurulum hedefi: urun politikasinda belirlenen sabit Program Files hedefi.
 
 ## Gelecek platformlar
@@ -41,4 +41,3 @@ flowchart LR
 ## Guncelleme uyumlulugu
 
 Paket ismi, gorunur marka veya renk kanali degisebilir; veri dizini ve appId migration plani olmadan degismez. Her guncelleme mevcut kullanici verisini korur ve gerekirse yeni semaya donusturur.
-

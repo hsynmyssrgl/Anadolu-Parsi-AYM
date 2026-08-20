@@ -1,22 +1,22 @@
-# ParsYuva AYM — Güncel Karar, Kural ve İş Akışı Sicili
+# ParsYuva Aile Yaşam Merkezi — Güncel Karar, Kural ve İş Akışı Sicili
 
-- Belge sürümü: **GUNCEL-2026-08-19-V3**
-- Tarih: **19.08.2026**
-- Görünür ürün sürümü: **Bronze 20.08.2026.35**
-- Kaynak HEAD: `9274e5c9b77415c4add209b963870eac4b721c84`
+- Belge sürümü: **GUNCEL-2026-08-20-V4**
+- Tarih: **20.08.2026**
+- Görünür ürün sürümü: **Bronze 20.08.2026.37**
+- Kaynak HEAD: `19a5c84d02ad0700315bc67873a19d5e1fed9945`
 - Statü: **ACTIVE_WORKING_REFERENCE_NOT_BUILD_CLOSURE**
-- Kararlar: **DEC-250, DEC-251, DEC-252, DEC-253, DEC-254**
+- Kararlar: **DEC-250–DEC-262**
 
 > Bu sürüm geçmiş PDF/DOCX ve build kapanış belgelerinin üzerine yazmaz. Yerel PASS ile dış kabul kanıtını ayırır; NOT_RUN/PARTIAL/BLOCKED sonuçlarını tamamlanmış göstermez.
 
 ## 1. Denetim sonucu
 
-- Aktif repo Word/PDF tarihsel taraması: **46 dosya / 23 çift / 46 okunabilir**.
-- `C:\PPT\AYM` tüm belge türü taraması: **30151 dosya / 30151 okunabilir / 0 sorun**.
-- Office/RTF/PDF: **704**; benzersiz içerik hash'i: **5201**; tekrar kopya: **24950**.
+- Aktif repo Word/PDF tarihsel taraması: **48 dosya / 24 çift / 48 okunabilir**.
+- `C:\PPT\AYM` tüm belge türü taraması: **30412 dosya / 30412 okunabilir / 0 sorun**.
+- Office/RTF/PDF: **716**; benzersiz içerik hash'i: **5401**; tekrar kopya: **25011**.
 - Build209–228 master çiftleri ve eski Bronze aktif referans çifti tarihsel olarak korunmuştur.
-- Karar dosyası: **166**; ADR: **106**; security/threat belgesi: **72**.
-- Mevcut tam belge/config/kanıt envanteri: **3682** (yeni sürümden önceki indeks).
+- Karar dosyası: **171**; ADR: **106**; security/threat belgesi: **72**.
+- Mevcut tam belge/config/kanıt envanteri: **3789** (yeni sürümden önceki indeks).
 
 ## 2. Yetki ve öncelik
 
@@ -30,10 +30,8 @@
 ## 3. Kapsam ve kural özeti
 
 - Gereksinim: **358** — COMPLETE 109, PARTIAL 25, FOUNDATION_STARTED 1, NOT_IMPLEMENTED 223.
-- Katı kapanışta kalan **249** madde yeni hata sayısı değildir: **24** madde yerel özellikleri tamamlanmış olup yalnız dış/manüel kabul bekler; **169** maddede yerel bileşenler kurulmuş, üretim entegrasyonu ve dış kabul birlikte açıktır; **53** maddede yerel teknik temel ile dış kabul birlikte geliştirilmektedir; **3** madde son kapanış otomasyonuna aittir.
-- Bu ayrım bundan sonra `docs/current/12_KALAN_IS_SINIFLANDIRMA.md` ve `artifacts/inventory/KALAN_IS_SINIFLANDIRMA.json` üzerinden otomatik üretilir; sınıflar yeniden tek “eksik” toplamında karıştırılmaz.
-- Kural sicili: **PPT-CANONICAL-RULE-REGISTRY-V13**, toplam 217, aktif 197, superseded 20, SHA-256 `5b83854fb2d21e978ffe1dc79cfbcf180547f42d06cd32a8ba7918a58cf1a0ed`.
-- Kullanıcı karar defteri: **86** açık kullanıcı kararı.
+- Kural sicili: **PPT-CANONICAL-RULE-REGISTRY-V16**, toplam 228, aktif 207, superseded 21, SHA-256 `c7cd9a0b82e58d3bf9dbc3aca7cf38d452b73b7e5bc361690e84d94821a7b25d`.
+- Kullanıcı karar defteri: **91** açık kullanıcı kararı.
 
 ## 4. İş akışları
 
@@ -86,10 +84,10 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 | 33-O | COMPLETED | ACCEPTED_COMPLETED_WITH_PERSISTENT_RECEIPT | EVET | Kapalı: gizlilik, sahiplik, veri hakları ve yerel olay kontrol paketi için yerel zincir, doğrulama ve kalıcı kabul receipti tamamlandı. | Yok/yerel tamamlandı |
 | 33-P | IN_PROGRESS | IMPLEMENTED_LOCAL_AUTOMATED | HAYIR | Gerçek passkey/authenticator, canlı ve güvenilen federated kimlik sağlayıcısı, cross-device doğrulama, insan UAT ile gizlilik/kimlik incelemeleri tamamlanmadı. | liveProviderAccountTest, realAuthenticatorDevice, crossDeviceSync, credentialVerifierUat, humanUat, privacyReview, legalReview, identityReview |
 | 33-Q | PLANNED | PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE | HAYIR | Varsayılan gerçek malware/PDF sağlayıcısı, doğrulanmış düşük-yetkili worker ve işletim sistemi ağ izolasyonu, gerçek Windows/Apple cihaz kabulü, denetlenmiş offline fallback ile haricî ve insan UAT kanıtları tamamlanmadı. Yerel eşzamanlı iptal, kaynak silme crash auto-resume, retention purge ve owner-bound zamanlanmış orphan sweep testleri PASS durumundadır. | realWindowsLocalOcr, realAppleVisionOcr, offlineFallback, maliciousDocumentMatrix, multilingualAndHandwriting, lowQualityAndAccessibility, crossDevice, legacyArchiveOwnershipReattestation (+5) |
-| 33-R | PLANNED | PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE | HAYIR | Gerçek büyük arşiv, medya yaşam döngüsü, arama doğruluğu/performansı ve kullanıcı UAT kanıtları tamamlanmadı. | realUserArchiveEvidenceUat, realMediaVersionRecoveryUat, largeFamilyUnifiedSearchUat, accessibilityReview, privacyReview, legalReview, securityReview |
+| 33-R | PLANNED | LOCAL_FEATURE_COMPLETE_EXTERNAL_ACCEPTANCE_INCOMPLETE | HAYIR | Gerçek büyük arşiv, medya yaşam döngüsü, arama doğruluğu/performansı ve kullanıcı UAT kanıtları tamamlanmadı. | realUserArchiveEvidenceUat, realMediaVersionRecoveryUat, largeFamilyUnifiedSearchUat, accessibilityReview, privacyReview, legalReview, securityReview |
 | 33-S | PLANNED | PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE | HAYIR | Gerçek sağlık/bakım sağlayıcıları, cihaz akışları, klinik doğruluk ve hukuk-gizlilik incelemesi tamamlanmadı. | realCaregiverUat, realElderlyUserUat, medicalProfessionalReview, sensorAdapterUat, emergencyContactDeliveryUat, accessibilityReview, privacyReview, legalReview (+1) |
-| 33-T | PLANNED | PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE | HAYIR | Gerçek hane verisi, uzun süreli görev/teslimat akışı ve farklı kullanıcı profilleriyle UAT tamamlanmadı. | realFamilyHouseholdUat, realShoppingInventoryMealUat, realExpenseDeliveryGuestPetUat, nutritionAllergyReview, financialReview, accessibilityReview, privacyReview, legalReview (+1) |
-| 33-U | PLANNED | PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE | HAYIR | Çocuk/veli mahremiyeti, okul/servis sağlayıcısı, yaşa uygun açıklama ve hukuk-gizlilik/UAT kanıtı tamamlanmadı. | realFamilyUat, childAndGuardianPrivacyReview, adolescentSafetyReview, legalPrivacyReview, realSchoolWorkflowUat, realCredentialPickupUat |
+| 33-T | PLANNED | LOCAL_FEATURE_COMPLETE_EXTERNAL_ACCEPTANCE_INCOMPLETE | HAYIR | Gerçek hane verisi, uzun süreli görev/teslimat akışı ve farklı kullanıcı profilleriyle UAT tamamlanmadı. | realFamilyHouseholdUat, realShoppingInventoryMealUat, realExpenseDeliveryGuestPetUat, nutritionAllergyReview, financialReview, accessibilityReview, privacyReview, legalReview (+1) |
+| 33-U | PLANNED | LOCAL_FEATURE_COMPLETE_EXTERNAL_ACCEPTANCE_INCOMPLETE | HAYIR | Çocuk/veli mahremiyeti, okul/servis sağlayıcısı, yaşa uygun açıklama ve hukuk-gizlilik/UAT kanıtı tamamlanmadı. | realFamilyUat, childAndGuardianPrivacyReview, adolescentSafetyReview, legalPrivacyReview, realSchoolWorkflowUat, realCredentialPickupUat |
 | 33-V | PLANNED | PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE | HAYIR | Gerçek harita, seyahat, araç/evcil hayvan sağlayıcıları, çevrimdışı saha akışı ve UAT tamamlanmadı. | realFamilyUat, realMapAndOfflineFallbackUat, realMovingInventoryUat, realPetWorkflowReview, realTravelWorkflowUat, legalPrivacyReview |
 | 33-W | PLANNED | PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE | HAYIR | Gerçek AI sağlayıcısı, model/veri sözleşmesi, maliyet-mahremiyet sınırı, güvenlik değerlendirmesi ve insan UAT tamamlanmadı. | realFamilyUat, realProviderAndModelUat, speechAndTranslationUat, ocrClassificationUat, financialMedicalSafetyReview, privacyLegalReview |
 | 33-X | PLANNED | PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE | HAYIR | Gerçek ses/transkript, yüz gruplama, basılı çıktı, zaman kapsülü rıza akışı ve insan UAT tamamlanmadı. | realFamilyMemoryUat, realMediaTranscriptionUat, realFaceGroupingUat, photoDuplicateDetectionUat, documentaryBookAndPrintUat, timeCapsuleReleaseAndRecoveryUat, multiAccountApprovalDiscoveryUat, terminalRetentionAndCapacityRecoveryReview (+1) |
@@ -112,11 +110,11 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 
 - Boundary: PASS / 52 kontrol.
 - Contract: PASS / 30 kontrol.
-- Runtime: PASS / 172 kontrol.
-- Full regression: PASS / 301 dosya / 2018 test.
+- Runtime: PASS / 182 kontrol.
+- Full regression: PASS / 350 dosya / 2187 test.
 - Production build: PASS / 18 workspace.
 - Güncel Core Service companion: PASS_LOCAL_NOT_INSTALLER_ACCEPTANCE / 292 dosya / 1986 test / 2 normal paket açılışı.
-- Güncel dağıtım imzası: NotSigned; production sertifikası sağlanmadığı için signed installer ve kurulu uygulama yaşam döngüsü NOT_RUN.
+- Güncel dağıtım imzası: NotSigned; yerel imzasız ParsYuva-Bronze-20.08.2026.37.exe üretildi ve aynı win-unpacked paketinin iki ardışık açılışı PASS verdi. Production sertifikası ve yükseltilmiş kurulu yaşam döngüsü PASS olmadığı için ticari dağıtım hazır sayılmaz.
 - Buna rağmen allRoadmapPackagesAccepted=false, requirementsClosed=false ve countsAsRequirementPass=false.
 
 ## 7. Dış bağımlılıklar ve neden açık
@@ -141,7 +139,11 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - Word/PDF dışındaki RTF, Markdown, JSON/YAML, TXT, CSV ve HTML kayıtları da kök klasör düzeyinde hash ve okunabilirlik denetimine alındı; Excel/PowerPoint bulunmadığı açıkça kaydedildi.
 - Her yeni kararın DEC, makine defteri, etkilenen belgeler ve açık/kapalı iş gerekçeleriyle aynı değişiklikte güncellenmesi fail-closed kurala bağlandı.
 - Bu kapsamlı tarama tarihsel kayıtların son içerik temelidir; DEC-252 gereği gelecekte eski build/arşiv/checkpoint içeriği yeniden denetlenmeyecek, yalnız değişmez HISTORICAL kayıt olarak korunacaktır.
-- Core Service companion ASAR paketine bağlandı; 292/292 dosya ve 1986/1986 test, root build ve aynı profilde iki ardışık normal win-unpacked açılışı PASS verdi. Production Authenticode sertifikası bulunmadığından signed installer/kurulu yaşam döngüsü açık bırakıldı.
+- Core Service companion ASAR paketine bağlandı; güncel tam regresyonda 350/350 test dosyası ve 2187/2187 test, root typecheck/build ve aynı profilde iki ardışık normal win-unpacked açılışı PASS verdi. Production Authenticode sertifikası bulunmadığından signed installer/kurulu yaşam döngüsü açık bırakıldı.
+- EK-001–EK-019 tarihsel karar tamponu DEC-260 ile ana sicillere bağlandı; daha yeni ParsYuva, dil ve kurulum kararları çatışmada üstün tutuldu.
+- Kanonik kural sicili V16/228/207 durumuna yükseltildi; tam ParsYuva Aile Yaşam Merkezi adı, sürüm paleti, parola görünürlüğü, installer yaşam döngüsü, aylık build, deneme/Gold, kaldırma-sıfırlama, tepsi ve migration/rollback kararları fail-closed kapılara bağlandı.
+- DEC-261 ile AYM kısaltması güncel kullanıcı yüzeylerinden kaldırıldı; yalnız tarihsel kayıtlar ve değiştirilemeyen teknik uyumluluk yolları güncel marka olmadığı açıkça belirtilerek korunur.
+- DEC-262 ile Windows kurulum hedefi C:\Program Files\PPT\ParsYuva, ana program ve kısayol adı ParsYuva, teslim adı ParsYuva-<Kanal>-GG.AA.YYYY.NN.exe olarak sabitlendi.
 
 ## 9. Görsel kimlik ve erişilebilirlik
 
@@ -154,13 +156,13 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 ## 10. Tüm belge türü denetimi
 
 - `.csv`: 118
-- `.docx`: 341
-- `.html`: 14
-- `.json`: 11512
-- `.md`: 17405
-- `.pdf`: 349
-- `.rtf`: 14
-- `.txt`: 358
+- `.docx`: 345
+- `.html`: 15
+- `.json`: 11653
+- `.md`: 17509
+- `.pdf`: 356
+- `.rtf`: 15
+- `.txt`: 361
 - `.yaml`: 12
 - `.yml`: 28
 - Bulunmayan Office türleri: .doc, .odp, .ods, .odt, .ppt, .pptx, .xls, .xlsx.
@@ -331,9 +333,14 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - `DEC-252` — DEC-252 — Tarihsel kayıtların gelecek içerik denetimlerinden çıkarılması — ACTIVE — `docs/decisions/DEC-252-freeze-historical-records-from-future-content-review.md`
 - `DEC-253` — DEC-253 — Animasyonlu kurulum, yenilenmiş anlatım ve Silver sesli Yardım Merkezi — ACTIVE — `docs/decisions/DEC-253-animated-installer-narration-and-silver-help-center.md`
 - `DEC-254` — DEC-254 — ParsYuva marka kimliği ve kurumsallaşma yol haritası — ACTIVE / PARTIAL_EXTERNAL_ACTION — `docs/decisions/DEC-254-parsyuva-brand-and-institutionalization-roadmap.md`
-- `DEC-255` — DEC-255 — Sistem Dili ve İngilizce Arayüz Altyapısı — ACTIVE / LOCAL_IMPLEMENTATION_COMPLETE — `docs/decisions/DEC-255-sistem-dili-ve-ingilizce-arayuz-altyapisi.md`
+- `DEC-255` — DEC-255 — Sistem Dili ve İngilizce Arayüz Altyapısı — KAYITLI — `docs/decisions/DEC-255-sistem-dili-ve-ingilizce-arayuz-altyapisi.md`
 - `DEC-256` — DEC-256 — Tek gerçek kurulum ilerlemesi ve yerel yüzde görünümü — ACTIVE — `docs/decisions/DEC-256-tek-gercek-kurulum-ilerlemesi.md`
-- `DEC-257` — DEC-257 — Başlıklarda ParsYuva AYM adının tekrarsız kullanımı — ACTIVE — `docs/decisions/DEC-257-parsyuva-aym-baslik-tekrar-yasagi.md`
+- `DEC-257` — DEC-257 — Başlıklarda ParsYuva AYM adının tekrarsız kullanımı — SUPERSEDED_BY_DEC_261 — `docs/decisions/DEC-257-parsyuva-aym-baslik-tekrar-yasagi.md`
+- `DEC-258` — DEC-258 — Çevrimdışı aile haritası altyapısı — UYGULANDI — YEREL HARİTA PAKETİ OPSİYONEL — `docs/decisions/DEC-258-cevrimdisi-aile-haritasi-altyapisi.md`
+- `DEC-259` — DEC-259 — Ticari Temel Alani ve Asilamaz Belge Kapisi — ACTIVE — `docs/decisions/DEC-259-ticari-temel-alani-ve-asilamaz-belge-kapisi.md`
+- `DEC-260` — DEC-260 — Ek kural toplu birleştirme ve doğrulanmış Git teslimi — ACTIVE — `docs/decisions/DEC-260-ek-kural-toplu-birlestirme-ve-dogrulanmis-git-teslimi.md`
+- `DEC-261` — DEC-261 — AYM Kısaltmasının Güncel Ürün Yüzeylerinden Kaldırılması — ACTIVE — `docs/decisions/DEC-261-aym-kisaltmasinin-guncel-urun-yuzeylerinden-kaldirilmasi.md`
+- `DEC-262` — DEC-262 — ParsYuva kurulum yolu, program dosyası ve kısa teslim adı — ACTIVE — `docs/decisions/DEC-262-parsyuva-kurulum-yolu-program-dosyasi-ve-kisa-teslim-adi.md`
 
 ## 12. ADR dizini
 
@@ -654,15 +661,26 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - **PR-206 [ACTIVE]** — ACTIVE bir kuralın metni, durumu, enforcement sınıfı veya kapısı ancak açık kullanıcı kararı, yeni DEC kaydı ve yeni görünür sürümle değiştirilebilir. Sessiz kural silme, daraltma veya enforcement düşürme fail-closed ihlaldir.
 - **PR-207 [ACTIVE]** — Universal Rule Enforcement Gate hem GOVERNED_PREFLIGHT hem GOVERNED_POSTFLIGHT içinde zorunlu ilk sınıf kapıdır; registry kapsamı, gate dosyaları, evidence yolları ve waiver yasağı doğrulanmadan sürüm kapanamaz.
 - **PR-208 [ACTIVE]** — Büyük iş adımlarının kalıcı checkpoint kanıtı zorunlu Library dalında tutulur. Geçici /mnt/data sonucu, sohbet mesajı veya yalnız yerel dosya kalıcı checkpoint yerine geçmez; persistent receipt yoksa sonraki adım BLOCKED kalır.
-- **PR-209 [ACTIVE]** — Marka mimarisi zorunludur: ana marka ParsYuva, kullanıcıya görünen masaüstü ürün ve kısayol adı ParsYuva AYM, açıklayıcı uzun ad ParsYuva Aile Yaşam Merkezi'dir. Eski Windows appId ve Anadolu Parsı Aile Yaşam Merkezi kullanıcı veri dizini yalnız geriye dönük güncelleme/veri uyumluluğu için değişmez teknik kimlik olarak korunur; yeni kullanıcı yüzeylerinde eski marka gösterilemez.
+- **PR-209 [ACTIVE]** — Marka mimarisi zorunludur: ana marka ParsYuva; kullanıcıya görünen masaüstü ürün, pencere, kısayol ve kurulum adı eksiksiz ParsYuva Aile Yaşam Merkezi'dir. AYM kısaltması yeni kullanıcı yüzeylerinde kullanılamaz. Eski Windows appId, çalışma kökü ve Anadolu Parsı Aile Yaşam Merkezi kullanıcı veri dizini yalnız geriye dönük güncelleme/veri uyumluluğu için değişmez teknik kimlik olarak korunur; bunlar güncel ürün adı değildir.
 - **PR-210 [ACTIVE]** — ParsYuva şirket unvanı, marka, alan adı, sosyal hesap, mağaza hesabı ve hukuk-vergi-gizlilik hazırlığı ancak yetkili güncel dış kanıtla tamamlanmış sayılır. Aday unvan, ön araştırma veya yerel kodlama resmî kuruluş, tescil, rezervasyon, uygunluk, yatırım ya da halka arz kanıtı değildir; eksik kanıt fail-closed NOT_RUN veya BLOCKED_EXTERNAL kalır.
-- **PR-211 [ACTIVE]** — Aktif geliştirici, üretici, owner, author ve copyright metadata'sı doğal kişi kimliği taşıyamaz; marka ve ürün metadata'sı ParsYuva ve ParsYuva AYM kimlikleriyle tutulur. Tarihsel kanıtların özgün eski metadata'sı değiştirilmez.
-- **PR-212 [ACTIVE]** — ParsYuva sonrası yeni kalıcı belge, kaynak, görsel, hash ve teslim kanıtlarının kurumsal kütüphane yolu /ParsYuva/ParsYuva AYM/<Görünür Sürüm> şeklindedir. Önceki /Panthera pardus tulliana/Anadolu Parsı Aile Yaşam Merkezi kayıtları tarihsel ve değişmez kalır; yeni ürün dalına otomatik taşınmaz, güncel kaynak veya tamamlanma kanıtı sayılmaz.
+- **PR-211 [ACTIVE]** — Aktif geliştirici, üretici, owner, author ve copyright metadata'sı doğal kişi kimliği taşıyamaz; marka metadata'sı ParsYuva, kullanıcıya dönük ürün metadata'sı ParsYuva Aile Yaşam Merkezi kimliğiyle tutulur. AYM yeni metadata'da ürün kısaltması olarak kullanılamaz; tarihsel kanıtların özgün eski metadata'sı değiştirilmez.
+- **PR-212 [ACTIVE]** — ParsYuva sonrası yeni kalıcı belge, kaynak, görsel, hash ve teslim kanıtlarının kurumsal kütüphane yolu /ParsYuva/ParsYuva Aile Yasam Merkezi/<Görünür Sürüm> şeklindedir; dosya ve klasör adları Türkçe anlamlı fakat ASCII karakterli olur. Önceki /ParsYuva/ParsYuva AYM ve /Panthera pardus tulliana/Anadolu Parsı Aile Yaşam Merkezi kayıtları tarihsel ve değişmez kalır; yeni ürün dalına otomatik taşınmaz, güncel kaynak veya tamamlanma kanıtı sayılmaz.
 - **PR-213 [ACTIVE]** — Platform ve cihaz çalışma alanları Microsoft/Windows, Apple/macOS/iOS, ortak cihaz sözleşmeleri ve gelecek Android kapsamı olarak ayrı tutulur. Bir platformun kodu veya kanıtı diğer platformun gerçek cihaz, mağaza, imza ya da UAT kanıtı sayılamaz.
 - **PR-214 [ACTIVE]** — Güncel ana belgeler yapı, karar, kural, kurumsallaşma, platform ve cihaz, test ve kanıt, kullanıcı belgeleri konularına göre kurumsal klasörlerde sınıflandırılır. Dosya adları Türkçe anlamlı ve ASCII karakterli olur; tarihsel kayıtların adı, içeriği ve konumu yeniden yazılmaz.
-- **PR-215 [ACTIVE]** — Uygulama ve kurulum sihirbazı ilk açılış dilini kurulduğu makinenin işletim sistemi dilinden belirler. Türkçe ve İngilizce desteklenir; bilinmeyen dilde İngilizce güvenli varsayılandır. Kullanıcı Ayarlar üzerinden sistem, Türkçe veya İngilizce tercihini değiştirebilir; tercih ana süreçte doğrulanıp kalıcı saklanır ve sonraki açılışlarda uygulanır. Renderer dili doğrudan seçemez ve İngilizce sözlük Türkçeye sessizce düşemez.
+- **PR-215 [ACTIVE]** — Uygulama ve kurulum sihirbazı ilk açılış dilini kurulduğu makinenin işletim sistemi dilinden belirler. Türkçe ve İngilizce desteklenir; sistem dili desteklenmiyorsa veya güvenilir biçimde çözülemiyorsa kullanıcı verisi açılmadan önce İngilizce güvenli varsayılan olarak seçilir. Kullanıcı Ayarlar üzerinden sistem, Türkçe veya İngilizce tercihini değiştirebilir; tercih ana süreçte doğrulanıp kalıcı saklanır ve sonraki açılışlarda sistem dilinin önüne geçer. Renderer dili doğrudan seçemez; yalnız doğrulanmış tercih isteği gönderir ve doğrulanmış dil/locale görünümünü alır. İngilizce sözlük eksik anahtarları Türkçeye sessizce düşüremez.
 - **PR-216 [ACTIVE]** — Kurulum öncesi karşılama ve hazır sayfaları işlem yapmıyorsa hareketli ilerleme göstergesi kullanamaz. Kurulum boyunca yalnız gerçek dosya kurulumunu izleyen tek ilerleme çubuğu gösterilir; yüzde değeri NSIS'in yerel kurulum ilerlemesinden okunur ve dekoratif veya simüle ilerleme yasaktır.
-- **PR-217 [ACTIVE]** — Ürün ve belge başlıklarında yalnız ParsYuva AYM kullanılır. AYM kısaltması Aile Yaşam Merkezi anlamını zaten taşıdığı için aynı başlıkta ParsYuva AYM ile Aile Yaşam Merkezi birlikte tekrar edilemez. Açık uzun ad yalnız kısaltmanın açıklanması gereken ayrı tanıtım veya hukuk metninde kullanılabilir.
+- **PR-217 [ACTIVE]** — Güncel ürün ve belge başlıklarında yalnız ParsYuva Aile Yaşam Merkezi tam adı kullanılır. AYM kısaltması ürün adı, kısayol, kurulum dosyası, başlık, yardım, sesli anlatım veya yeni kullanıcıya dönük metadata içinde kullanılamaz. AYM yalnız değiştirilemeyen tarihsel kayıtta ya da geriye dönük uyumluluk için zorunlu teknik yol ve kimliklerde, güncel marka olmadığı açıkça belirtilerek korunabilir.
+- **PR-218 [ACTIVE]** — Bronze, Silver ve Gold kanal paletleri ile saydamlık, blur, kenarlık, gölge ve opak erişilebilirlik fallback değerleri tek merkezi tema sicilinde tutulur. Uygulama ve kurulum güvenilir derleme kanalından aynı paleti seçer; kanal kullanıcı ayarı veya dosya adından türetilemez, yüksek kontrast ve hareket azaltma tercihleri görsel efektlerden önce gelir.
+- **PR-219 [ACTIVE]** — İlk aile kurulumu ve yerel girişte parola varsayılan olarak gizlidir. Erişilebilir Göster/Gizle denetimi parolayı yalnız kullanıcının geçici isteğiyle görünür yapar; görünürlük tercihi kalıcılaştırılamaz ve parola değeri log, telemetry veya kanıta yazılamaz.
+- **PR-220 [SUPERSEDED]** — Kullanıcıya sunulan Windows kurulum dosyası ParsYuva-Aile-Yasam-Merkezi tam ürün adını, güvenilir kanal kimliğini, GG.AA.YYYY.NN sürümünü, mimariyi ve Kurulum amacını Türkçe anlamlı ASCII dosya adıyla taşır. Kurulum yüzeylerinde yalnız ParsYuva Aile Yaşam Merkezi tam adı kullanılır; metin, denetim ve düğmeler yüzde 100-200 DPI aralığında üst üste binemez veya kesilemez.
+- **PR-221 [ACTIVE]** — Kurulum paketi teslim edilmeden önce paketlenmiş uygulamanın gerçek Windows sürecinde açılışı, tek-instance davranışı, pencereyi tepsiye gizleme ve onaylı tamamen kapatma yolu sınanır. JavaScript hata penceresi, sıfır dışı normal çıkış veya yeni Windows Application hata olayı bulunan paket teslim kanıtı sayılamaz.
+- **PR-222 [ACTIVE]** — Her yeni kaynak, belge veya paket derlemesi GG.AA.YYYY.NN biçiminde benzersiz sürüm kullanır. NN aynı takvim ayındaki kalıcı defterden atomik olarak ayrılır; uygulama, paket manifestleri, installer metadata, dosya adı ve aktif belgeler aynı sürümü taşır, aynı numara ikinci bir farklı paket için kullanılamaz.
+- **PR-223 [ACTIVE]** — Bronze, Silver ve aktivasyonsuz Gold ilk güvenilir kullanımdan itibaren 30 gün çalışır. Bronze ve Silver süre sonunda kilitlenir; Gold yalnız cihaz-bağlı doğrulanmış imzalı aktivasyonla süresiz olur. Aktivasyon özel anahtarı son kullanıcı uygulamasına giremez; yeniden kurulum, saat geri alma veya kişisel veri sıfırlama deneme süresini yenileyemez.
+- **PR-224 [ACTIVE]** — Kaldırma akışı şifreli ve geri-okumayla doğrulanmış çoklu hedef yedeği, kişisel veriyi kalıcı silerek kaldırma veya vazgeçme seçeneklerini açıkça sunar. İlk kurulum anına dön işlemi güçlü yeniden doğrulama ve iki aşamalı geri döndürülemez onay ister, yeni yedek oluşturmaz ve erişilebilen uygulama-yapımı yedekleri siler; erişilemeyen bulut fiziksel kopyaları için garanti verilemez.
+- **PR-225 [ACTIVE]** — Ana pencerenin X düğmesi ve Alt+F4 normal kullanımda uygulamayı sonlandırmaz; hassas ekranı gizleyip sistem tepsisine taşır. Tepsi Aç, Kilitle ve onaylı Tamamen kapat eylemlerini sunar; Windows kapanışı, güvenli güncelleme ve kaldırma kontrollü gerçek çıkış yapabilir.
+- **PR-226 [ACTIVE]** — Her güncelleme mevcut kişisel veriyi, ayarı, arşivi ve yedek bağlarını korur. Şema veya altyapı değişimi doğrulanmış şifreli geri dönüş yedeği, atomik migration, başarısızlıkta rollback ve kayıt sayısı, hash, sahiplik ile şifreleme bağı doğrulaması olmadan tamamlanamaz; dönüştürülemeyen kayıt açıkça raporlanır.
+- **PR-227 [ACTIVE]** — Geçici ek-kural dosyasında tutulan kararlar toplu birleştirmede tek tek kanonik kurala, karara, iş listesine, kaynak/test kanıtına veya açık dış bağımlılık nedenine eşlenir. Daha yeni kararla değişen eski metin yeniden etkinleştirilemez; birleştirme kaydı korunur ve GitHub/yerel yedek eşitliği canlı commit kanıtı olmadan güncel gösterilemez.
+- **PR-228 [ACTIVE]** — Windows kurulum hedefi C:\Program Files\PPT\ParsYuva, kurulu ana program dosyası ParsYuva.exe ve masaüstü ile Başlat menüsü kısayolu ParsYuva olur. Dağıtım EXE dosya adı yalnız ParsYuva, güvenilir sürüm kanalı ve GG.AA.YYYY.NN sürümünü ParsYuva-<Kanal>-GG.AA.YYYY.NN.exe biçiminde taşır; mimari, Kurulum, AYM, tam uzun ürün adı veya yerel test eki dosya adına eklenmez. Uygulama içindeki görünür tam ürün adı ParsYuva Aile Yaşam Merkezi olarak kalır; kararlı appId ve eski kullanıcı-veri dizini yalnız yükseltme uyumluluğu için korunur.
 
 ## 14. Aktif repo Word/PDF tarihsel denetim envanteri
 
@@ -672,6 +690,8 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - `MASTER_PROJE_DOKUMANTASYONU_GUNCEL_17.08.2026_V1.pdf` — PDF — 478084 bayt, 21 sayfa — OKUNABİLİR
 - `MASTER_PROJE_DOKUMANTASYONU_GUNCEL_18.08.2026_V2.docx` — DOCX — 348987 bayt, 1 sayfa — OKUNABİLİR
 - `MASTER_PROJE_DOKUMANTASYONU_GUNCEL_18.08.2026_V2.pdf` — PDF — 479923 bayt, 21 sayfa — OKUNABİLİR
+- `MASTER_PROJE_DOKUMANTASYONU_GUNCEL_19.08.2026_V3.docx` — DOCX — 349713 bayt, 1 sayfa — OKUNABİLİR
+- `MASTER_PROJE_DOKUMANTASYONU_GUNCEL_19.08.2026_V3.pdf` — PDF — 481003 bayt, 21 sayfa — OKUNABİLİR
 - `MASTER_PROJECT_DOCUMENTATION_BUILD209.docx` — DOCX — 295186 bayt, 1 sayfa — OKUNABİLİR
 - `MASTER_PROJECT_DOCUMENTATION_BUILD209.pdf` — PDF — 391597 bayt, 11 sayfa — OKUNABİLİR
 - `MASTER_PROJECT_DOCUMENTATION_BUILD210.docx` — DOCX — 295232 bayt, 1 sayfa — OKUNABİLİR
@@ -716,18 +736,3 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 ## 15. Kapanış sınırı
 
 Bu belge canlı kaynak gerçeğini toplar; build kapanışı, kanal terfisi, sertifika, hukuk görüşü veya gerçek cihaz/sağlayıcı UAT belgesi değildir. Tarihsel kanıtlar değişmeden kalır.
-
-## 16. DEC-258 çevrimdışı aile haritası
-
-- `DEC-258` — MapLibre GL JS ve PMTiles tabanlı çevrimdışı aile haritası kullanılır.
-- Yerel paket bulunmadığında koordinat ızgarası ve erişilebilir metin listesi çalışır; genel internet karo servisi kullanılmaz.
-- Üretim Türkiye harita paketi kaynak, atıf, lisans, SHA-256 ve güncelleme kanıtı olmadan ticari pakete alınmaz.
-
-## 17. DEC-259 ticari temel çalışma alanı
-
-- `DEC-259` — Git içindeki `docs/ticari-urun-temeli` kanonik ticari çalışma köküdür; `C:\PPT\AYM\12_TICARI_URUN_TEMEL_SURUMU` uyumluluk bağlantısıdır.
-- Kanonik kural otoritesi değişmez: `config/canonical-rule-registry.json` ve `config/active-governance-ledger.json`.
-- Yeni ticari alan ikinci kural kaynağı değildir; kanonik kimlik, sayı ve SHA-256 değerini doğrulanmış bağ olarak taşır.
-- Yeni karar, değişiklik sicili, etkilenen aktif belge ve ana iş listesi aynı değişiklikte güncellenir.
-- `00_PROJE`–`11_FUTURE_PATCHES` tarihsel kayıttır; yeni aktif kaynak olarak yeniden taranmaz.
-- Ticari temel kapısı PASS olmadan governed preflight ve ticari belge teslimi PASS olamaz.

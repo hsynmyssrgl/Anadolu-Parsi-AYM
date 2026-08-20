@@ -1,17 +1,17 @@
 {
   "schemaVersion": 1,
-  "id": "PPT-CANONICAL-RULE-REGISTRY-V13",
-  "product": "ParsYuva AYM",
+  "id": "PPT-CANONICAL-RULE-REGISTRY-V16",
+  "product": "ParsYuva Aile Yaşam Merkezi",
   "upperBrand": "ParsYuva",
-  "effectiveRelease": "Bronze 19.08.2026.33",
+  "effectiveRelease": "Bronze 20.08.2026.37",
   "exceptionless": true,
   "previousRuleSet": {
     "version": "PROJECT-RULES-2026-08-02-V6",
     "sha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
   },
-  "ruleCount": 217,
-  "activeRuleCount": 197,
-  "supersededRuleCount": 20,
+  "ruleCount": 228,
+  "activeRuleCount": 207,
+  "supersededRuleCount": 21,
   "rules": [
     {
       "id": "PR-001",
@@ -1491,10 +1491,10 @@
     },
     {
       "id": "PR-209",
-      "text": "Marka mimarisi zorunludur: ana marka ParsYuva, kullanıcıya görünen masaüstü ürün ve kısayol adı ParsYuva AYM, açıklayıcı uzun ad ParsYuva Aile Yaşam Merkezi'dir. Eski Windows appId ve Anadolu Parsı Aile Yaşam Merkezi kullanıcı veri dizini yalnız geriye dönük güncelleme/veri uyumluluğu için değişmez teknik kimlik olarak korunur; yeni kullanıcı yüzeylerinde eski marka gösterilemez.",
+      "text": "Marka mimarisi zorunludur: ana marka ParsYuva; kullanıcıya görünen masaüstü ürün, pencere, kısayol ve kurulum adı eksiksiz ParsYuva Aile Yaşam Merkezi'dir. AYM kısaltması yeni kullanıcı yüzeylerinde kullanılamaz. Eski Windows appId, çalışma kökü ve Anadolu Parsı Aile Yaşam Merkezi kullanıcı veri dizini yalnız geriye dönük güncelleme/veri uyumluluğu için değişmez teknik kimlik olarak korunur; bunlar güncel ürün adı değildir.",
       "state": "ACTIVE",
-      "source": "USER_DECISION_DEC-254",
-      "effectiveRelease": "Bronze 18.08.2026.31"
+      "source": "USER_DECISION_DEC-261",
+      "effectiveRelease": "Bronze 20.08.2026.36"
     },
     {
       "id": "PR-210",
@@ -1505,17 +1505,17 @@
     },
     {
       "id": "PR-211",
-      "text": "Aktif geliştirici, üretici, owner, author ve copyright metadata'sı doğal kişi kimliği taşıyamaz; marka ve ürün metadata'sı ParsYuva ve ParsYuva AYM kimlikleriyle tutulur. Tarihsel kanıtların özgün eski metadata'sı değiştirilmez.",
+      "text": "Aktif geliştirici, üretici, owner, author ve copyright metadata'sı doğal kişi kimliği taşıyamaz; marka metadata'sı ParsYuva, kullanıcıya dönük ürün metadata'sı ParsYuva Aile Yaşam Merkezi kimliğiyle tutulur. AYM yeni metadata'da ürün kısaltması olarak kullanılamaz; tarihsel kanıtların özgün eski metadata'sı değiştirilmez.",
       "state": "ACTIVE",
-      "source": "USER_DECISION_DEC-254",
-      "effectiveRelease": "Bronze 18.08.2026.31"
+      "source": "USER_DECISION_DEC-261",
+      "effectiveRelease": "Bronze 20.08.2026.36"
     },
     {
       "id": "PR-212",
-      "text": "ParsYuva sonrası yeni kalıcı belge, kaynak, görsel, hash ve teslim kanıtlarının kurumsal kütüphane yolu /ParsYuva/ParsYuva AYM/<Görünür Sürüm> şeklindedir. Önceki /Panthera pardus tulliana/Anadolu Parsı Aile Yaşam Merkezi kayıtları tarihsel ve değişmez kalır; yeni ürün dalına otomatik taşınmaz, güncel kaynak veya tamamlanma kanıtı sayılmaz.",
+      "text": "ParsYuva sonrası yeni kalıcı belge, kaynak, görsel, hash ve teslim kanıtlarının kurumsal kütüphane yolu /ParsYuva/ParsYuva Aile Yasam Merkezi/<Görünür Sürüm> şeklindedir; dosya ve klasör adları Türkçe anlamlı fakat ASCII karakterli olur. Önceki /ParsYuva/ParsYuva AYM ve /Panthera pardus tulliana/Anadolu Parsı Aile Yaşam Merkezi kayıtları tarihsel ve değişmez kalır; yeni ürün dalına otomatik taşınmaz, güncel kaynak veya tamamlanma kanıtı sayılmaz.",
       "state": "ACTIVE",
-      "source": "USER_DECISION_DEC-254",
-      "effectiveRelease": "Bronze 18.08.2026.31"
+      "source": "USER_DECISION_DEC-261",
+      "effectiveRelease": "Bronze 20.08.2026.36"
     },
     {
       "id": "PR-213",
@@ -1547,11 +1547,89 @@
     },
     {
       "id": "PR-217",
-      "text": "Ürün ve belge başlıklarında yalnız ParsYuva AYM kullanılır. AYM kısaltması Aile Yaşam Merkezi anlamını zaten taşıdığı için aynı başlıkta ParsYuva AYM ile Aile Yaşam Merkezi birlikte tekrar edilemez. Açık uzun ad yalnız kısaltmanın açıklanması gereken ayrı tanıtım veya hukuk metninde kullanılabilir.",
+      "text": "Güncel ürün ve belge başlıklarında yalnız ParsYuva Aile Yaşam Merkezi tam adı kullanılır. AYM kısaltması ürün adı, kısayol, kurulum dosyası, başlık, yardım, sesli anlatım veya yeni kullanıcıya dönük metadata içinde kullanılamaz. AYM yalnız değiştirilemeyen tarihsel kayıtta ya da geriye dönük uyumluluk için zorunlu teknik yol ve kimliklerde, güncel marka olmadığı açıkça belirtilerek korunabilir.",
       "state": "ACTIVE",
-      "source": "USER_DECISION_DEC-257",
-      "effectiveRelease": "Bronze 19.08.2026.33"
+      "source": "USER_DECISION_DEC-261",
+      "effectiveRelease": "Bronze 20.08.2026.36"
+    },
+    {
+      "id": "PR-218",
+      "text": "Bronze, Silver ve Gold kanal paletleri ile saydamlık, blur, kenarlık, gölge ve opak erişilebilirlik fallback değerleri tek merkezi tema sicilinde tutulur. Uygulama ve kurulum güvenilir derleme kanalından aynı paleti seçer; kanal kullanıcı ayarı veya dosya adından türetilemez, yüksek kontrast ve hareket azaltma tercihleri görsel efektlerden önce gelir.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-260",
+      "effectiveRelease": "Bronze 20.08.2026.36"
+    },
+    {
+      "id": "PR-219",
+      "text": "İlk aile kurulumu ve yerel girişte parola varsayılan olarak gizlidir. Erişilebilir Göster/Gizle denetimi parolayı yalnız kullanıcının geçici isteğiyle görünür yapar; görünürlük tercihi kalıcılaştırılamaz ve parola değeri log, telemetry veya kanıta yazılamaz.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-260",
+      "effectiveRelease": "Bronze 20.08.2026.36"
+    },
+    {
+      "id": "PR-220",
+      "text": "Kullanıcıya sunulan Windows kurulum dosyası ParsYuva-Aile-Yasam-Merkezi tam ürün adını, güvenilir kanal kimliğini, GG.AA.YYYY.NN sürümünü, mimariyi ve Kurulum amacını Türkçe anlamlı ASCII dosya adıyla taşır. Kurulum yüzeylerinde yalnız ParsYuva Aile Yaşam Merkezi tam adı kullanılır; metin, denetim ve düğmeler yüzde 100-200 DPI aralığında üst üste binemez veya kesilemez.",
+      "state": "SUPERSEDED",
+      "source": "USER_DECISION_DEC-261",
+      "effectiveRelease": "Bronze 20.08.2026.36",
+      "replacedBy": "PR-228"
+    },
+    {
+      "id": "PR-221",
+      "text": "Kurulum paketi teslim edilmeden önce paketlenmiş uygulamanın gerçek Windows sürecinde açılışı, tek-instance davranışı, pencereyi tepsiye gizleme ve onaylı tamamen kapatma yolu sınanır. JavaScript hata penceresi, sıfır dışı normal çıkış veya yeni Windows Application hata olayı bulunan paket teslim kanıtı sayılamaz.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-260",
+      "effectiveRelease": "Bronze 20.08.2026.36"
+    },
+    {
+      "id": "PR-222",
+      "text": "Her yeni kaynak, belge veya paket derlemesi GG.AA.YYYY.NN biçiminde benzersiz sürüm kullanır. NN aynı takvim ayındaki kalıcı defterden atomik olarak ayrılır; uygulama, paket manifestleri, installer metadata, dosya adı ve aktif belgeler aynı sürümü taşır, aynı numara ikinci bir farklı paket için kullanılamaz.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-260",
+      "effectiveRelease": "Bronze 20.08.2026.36"
+    },
+    {
+      "id": "PR-223",
+      "text": "Bronze, Silver ve aktivasyonsuz Gold ilk güvenilir kullanımdan itibaren 30 gün çalışır. Bronze ve Silver süre sonunda kilitlenir; Gold yalnız cihaz-bağlı doğrulanmış imzalı aktivasyonla süresiz olur. Aktivasyon özel anahtarı son kullanıcı uygulamasına giremez; yeniden kurulum, saat geri alma veya kişisel veri sıfırlama deneme süresini yenileyemez.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-260",
+      "effectiveRelease": "Bronze 20.08.2026.36"
+    },
+    {
+      "id": "PR-224",
+      "text": "Kaldırma akışı şifreli ve geri-okumayla doğrulanmış çoklu hedef yedeği, kişisel veriyi kalıcı silerek kaldırma veya vazgeçme seçeneklerini açıkça sunar. İlk kurulum anına dön işlemi güçlü yeniden doğrulama ve iki aşamalı geri döndürülemez onay ister, yeni yedek oluşturmaz ve erişilebilen uygulama-yapımı yedekleri siler; erişilemeyen bulut fiziksel kopyaları için garanti verilemez.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-260",
+      "effectiveRelease": "Bronze 20.08.2026.36"
+    },
+    {
+      "id": "PR-225",
+      "text": "Ana pencerenin X düğmesi ve Alt+F4 normal kullanımda uygulamayı sonlandırmaz; hassas ekranı gizleyip sistem tepsisine taşır. Tepsi Aç, Kilitle ve onaylı Tamamen kapat eylemlerini sunar; Windows kapanışı, güvenli güncelleme ve kaldırma kontrollü gerçek çıkış yapabilir.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-260",
+      "effectiveRelease": "Bronze 20.08.2026.36"
+    },
+    {
+      "id": "PR-226",
+      "text": "Her güncelleme mevcut kişisel veriyi, ayarı, arşivi ve yedek bağlarını korur. Şema veya altyapı değişimi doğrulanmış şifreli geri dönüş yedeği, atomik migration, başarısızlıkta rollback ve kayıt sayısı, hash, sahiplik ile şifreleme bağı doğrulaması olmadan tamamlanamaz; dönüştürülemeyen kayıt açıkça raporlanır.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-260",
+      "effectiveRelease": "Bronze 20.08.2026.36"
+    },
+    {
+      "id": "PR-227",
+      "text": "Geçici ek-kural dosyasında tutulan kararlar toplu birleştirmede tek tek kanonik kurala, karara, iş listesine, kaynak/test kanıtına veya açık dış bağımlılık nedenine eşlenir. Daha yeni kararla değişen eski metin yeniden etkinleştirilemez; birleştirme kaydı korunur ve GitHub/yerel yedek eşitliği canlı commit kanıtı olmadan güncel gösterilemez.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-260",
+      "effectiveRelease": "Bronze 20.08.2026.36"
+    },
+    {
+      "id": "PR-228",
+      "text": "Windows kurulum hedefi C:\\Program Files\\PPT\\ParsYuva, kurulu ana program dosyası ParsYuva.exe ve masaüstü ile Başlat menüsü kısayolu ParsYuva olur. Dağıtım EXE dosya adı yalnız ParsYuva, güvenilir sürüm kanalı ve GG.AA.YYYY.NN sürümünü ParsYuva-<Kanal>-GG.AA.YYYY.NN.exe biçiminde taşır; mimari, Kurulum, AYM, tam uzun ürün adı veya yerel test eki dosya adına eklenmez. Uygulama içindeki görünür tam ürün adı ParsYuva Aile Yaşam Merkezi olarak kalır; kararlı appId ve eski kullanıcı-veri dizini yalnız yükseltme uyumluluğu için korunur.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-262",
+      "effectiveRelease": "Bronze 20.08.2026.37"
     }
   ],
-  "rulesSha256": "5b83854fb2d21e978ffe1dc79cfbcf180547f42d06cd32a8ba7918a58cf1a0ed"
+  "rulesSha256": "c7cd9a0b82e58d3bf9dbc3aca7cf38d452b73b7e5bc361690e84d94821a7b25d"
 }
