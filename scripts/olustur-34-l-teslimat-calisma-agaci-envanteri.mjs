@@ -139,6 +139,7 @@ function renderMarkdown(inventory) {
     const escapedPath = entry.path.replaceAll('|', '\\|');
     return `| ${entry.gitStatus.replaceAll(' ', '&nbsp;')} | ${escapedPath} | ${entry.group} | ${entry.bytes} | ${entry.sha256 ?? '-'} |`;
   }).join('\n');
+  const fileRows = rows || '| - | Çalışma ağacı temiz; listelenecek değişiklik yok. | TEMIZ_CALISMA_AGACI | 0 | - |';
   return `# 34-L Teslimat Çalışma Ağacı Envanteri
 
 Bu belge çalışma ağacındaki değişiklikleri silmeden ve yazarlık/sahiplik iddiası kurmadan teslimat kümelerine ayırır. Otomatik commit, push, kurulum paketi veya gereksinim kabul kanıtı değildir.
@@ -178,7 +179,7 @@ ${groups}
 
 | Git | Yol | Küme | Bayt | SHA-256 |
 | --- | --- | --- | ---: | --- |
-${rows}
+${fileRows}
 `;
 }
 
