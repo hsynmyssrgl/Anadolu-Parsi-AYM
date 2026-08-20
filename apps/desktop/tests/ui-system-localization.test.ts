@@ -57,7 +57,10 @@ describe('system-language UI localization',()=>{
     const rendererMain=readFileSync(resolve(root,'apps/desktop/src/renderer/main.tsx'),'utf8');
     const installer=readFileSync(resolve(root,'apps/desktop/build/installer.nsh'),'utf8');
     const packageJson=JSON.parse(readFileSync(resolve(root,'apps/desktop/package.json'),'utf8')) as {build:{nsis:{installerLanguages:string[];multiLanguageInstaller:boolean;license?:string}}};
-    expect(main).toContain('resolveUiLocalization(app.getLocale(),readUiLanguagePreference(uiLanguagePreferencePath()))');
+    expect(main).toContain('app.getPreferredSystemLanguages()');
+    expect(main).toContain('app.getSystemLocale().trim()');
+    expect(main).toContain('resolveUiLocalization(operatingSystemUiLanguage(),preference)');
+    expect(main).not.toContain('resolveUiLocalization(app.getLocale()');
     expect(main).toContain("registerIpcHandler('app:getLocalizationBootstrap'");
     expect(main).toContain("registerIpcHandler('app:setLanguagePreference'");
     expect(preload).toContain("getLocalizationBootstrap: (): Promise<UiLocalizationBootstrapView> => invoke('app:getLocalizationBootstrap')");
@@ -68,6 +71,8 @@ describe('system-language UI localization',()=>{
     expect(packageJson.build.nsis.license).toBeUndefined();
     expect(installer).toContain('LangString AymFinishTitle ${AYM_LANG_ENGLISH}');
     expect(installer).toContain('LangString AymFinishTitle ${AYM_LANG_TURKISH}');
+    expect(installer).toContain("System::Call 'kernel32::GetUserDefaultUILanguage() i .r0'");
+    expect(installer).toContain('StrCpy $LANGUAGE ${AYM_LANG_ENGLISH}');
   });
 
   it('keeps the full English application closure bound to all renderer evidence waves',()=>{

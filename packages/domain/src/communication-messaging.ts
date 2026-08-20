@@ -124,7 +124,7 @@ export interface CommunicationMessagingTruthView {
   readonly effectivePresenceExpiryEnforced: true;
   readonly automaticRetentionExecutionImplemented: true;
   readonly payloadOrphanSweepImplemented: true;
-  readonly reminderExecutionImplemented: false;
+  readonly reminderExecutionImplemented: true;
   readonly multiDevicePresenceAggregationImplemented: false;
   readonly selectedPeopleAudienceEnforcementImplemented: false;
   readonly relayDeliveryImplemented: false;
@@ -243,6 +243,7 @@ export interface SearchCommunicationMessagesInput {
 }
 
 export interface CommunicationMessagingMaintenanceView {
+  readonly scheduledMessagesReleased: number;
   readonly expiredMessagesDeleted: number;
   readonly expiredPresenceProfilesHidden: number;
   readonly scannedPayloadFiles: number;
@@ -306,7 +307,7 @@ export const communicationMessagingTruth = Object.freeze({
   effectivePresenceExpiryEnforced: true as const,
   automaticRetentionExecutionImplemented: true as const,
   payloadOrphanSweepImplemented: true as const,
-  reminderExecutionImplemented: false as const,
+  reminderExecutionImplemented: true as const,
   multiDevicePresenceAggregationImplemented: false as const,
   selectedPeopleAudienceEnforcementImplemented: false as const,
   relayDeliveryImplemented: false as const,

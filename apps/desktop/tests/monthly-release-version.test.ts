@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { ACTIVE_BUILD_META } from '../../../scripts/lib/active-build-meta.mjs';
 import { createNextMonthlyRelease, installerArtifactTemplate, installerFileName } from '../../../scripts/lib/monthly-release-version.mjs';
 
 const ledger = {
@@ -32,5 +33,11 @@ describe('resmî aylık derleme sürümü', () => {
 
   it('tanımsız sürüm kanalını reddeder', () => {
     expect(() => createNextMonthlyRelease({ ledger, channel: 'Platinum' })).toThrow(/Desteklenmeyen/u);
+  });
+
+  it('aktif rapor metadata değerlerinde tanımsız build veya milestone üretmez', () => {
+    expect(ACTIVE_BUILD_META.build).toBe(Number(ACTIVE_BUILD_META.applicationVersion.split('.').at(-1)));
+    expect(ACTIVE_BUILD_META.milestone).toContain(ACTIVE_BUILD_META.applicationVersion);
+    expect(ACTIVE_BUILD_META.milestone).not.toMatch(/undefined|\bRC2?\b|\bMVP\b|\bBuild\b/iu);
   });
 });

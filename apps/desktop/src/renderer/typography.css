@@ -234,6 +234,7 @@ body .app-shell .sidebar-toggle {
 /* DEC-224 — governed accessibility scale. No visible copy drops below 16 px. */
 body .app-shell {
   --accessibility-text-scale: 1;
+  --minimum-readable-copy: 16px;
   --font-size-large-title: calc(34px * var(--accessibility-text-scale));
   --line-height-large-title: calc(41px * var(--accessibility-text-scale));
   --font-size-title-1: calc(28px * var(--accessibility-text-scale));
@@ -256,4 +257,69 @@ body .app-shell {
   --line-height-caption-1: calc(23px * var(--accessibility-text-scale));
   --font-size-caption-2: calc(16px * var(--accessibility-text-scale));
   --line-height-caption-2: calc(23px * var(--accessibility-text-scale));
+}
+
+/* ParsYuva customer-experience typography layer.
+   Component-local legacy sizes cannot reduce readable copy below the governed scale. */
+body .app-shell :is(p, li, dd, dt, blockquote, .body-copy) {
+  font-size: var(--font-size-body) !important;
+  line-height: var(--line-height-body) !important;
+}
+
+body .app-shell :is(label, input, select, textarea, button, .button, .text-button, .search-box, .breadcrumb, .topbar-control) {
+  font-size: var(--font-size-subheadline) !important;
+  line-height: var(--line-height-subheadline) !important;
+}
+
+body .app-shell :is(small, time, kbd, legend, output, .footnote, .muted-copy, .timeline-meta, .event-milestones, .popover-empty) {
+  font-size: var(--font-size-footnote) !important;
+  line-height: var(--line-height-footnote) !important;
+}
+
+body .app-shell :is(
+  .eyebrow,
+  .caption,
+  .tag,
+  .status-badge,
+  .status-pill,
+  .nav-group-label,
+  .topbar-center,
+  .edition-line,
+  .event-location,
+  .tree-toolbar,
+  .prompt-card,
+  .notes-card,
+  .status-message,
+  .form-error,
+  .loading-screen,
+  .privacy-inventory-summary,
+  .family-location-map-state,
+  .family-location-map-truth
+) {
+  font-size: var(--font-size-footnote) !important;
+  line-height: var(--line-height-footnote) !important;
+}
+
+body .app-shell :is(
+  .evidence-cards span,
+  .participant-chips span,
+  .attachment-overview span,
+  .summary-stats span,
+  .identity-truth-strip span,
+  .family-location-map-canvas .maplibregl-popup-content span,
+  .managed-home-inventory-row b,
+  .managed-home-inventory-row > span,
+  .family-emergency-plan-card > header b,
+  .family-emergency-plan-card > header span
+) {
+  font-size: var(--font-size-footnote) !important;
+  line-height: var(--line-height-footnote) !important;
+}
+
+body .app-shell :is(input, select) {
+  min-height: 48px !important;
+}
+
+body .app-shell :is(button, .button, .icon-button, .notification, .sidebar-toggle) {
+  min-height: 44px !important;
 }

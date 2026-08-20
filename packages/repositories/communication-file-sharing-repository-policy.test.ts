@@ -10,7 +10,7 @@ import {
   asUserId,
   type Clock
 } from '@ppt/core';
-import { FAMILY_DATABASE_MIGRATIONS } from '@ppt/database';
+import { FAMILY_DATABASE_MIGRATIONS, FAMILY_DATABASE_SCHEMA_GENERATION } from '@ppt/database';
 import { communicationFileSharingTruth } from '@ppt/domain';
 import { PlatformPolicyEnforcementPoint, PlatformPolicyKernel } from '@ppt/platform-policy';
 import type {
@@ -113,7 +113,7 @@ describe('34-G communication file sharing repository and migration boundary',()=
   it('owns migration 111 with exact current state and an immutable receipt ledger',()=>{
     const runtime=open();
     expect(runtime.database.prepare("SELECT value FROM database_metadata WHERE key='schema_generation'").get())
-      .toEqual({value:'REVISION-34-K-WINDOWS-RESILIENCE-UNIVERSAL-UX'});
+      .toEqual({value:FAMILY_DATABASE_SCHEMA_GENERATION});
     expect(FAMILY_DATABASE_MIGRATIONS.find((migration)=>migration.version===111)).toMatchObject({version:111,
       name:'communication_file_sharing_remaining_ux',checksum:'7d87d405a85196a2f76a765899adf7b734858f7dc2b1715c59577d0048838700'});
     const tables=(runtime.database.prepare(`SELECT name FROM sqlite_master WHERE type='table'

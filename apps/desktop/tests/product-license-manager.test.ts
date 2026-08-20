@@ -14,7 +14,14 @@ class FixtureProtector implements DeviceSecretProtector {
 }
 
 const roots: string[] = [];
-afterEach(async () => { await Promise.all(roots.splice(0).map((root) => rm(root, { recursive: true, force: true }))); });
+afterEach(async () => {
+  await Promise.all(roots.splice(0).map((root) => rm(root, {
+    recursive: true,
+    force: true,
+    maxRetries: 5,
+    retryDelay: 50
+  })));
+});
 const paths = async () => {
   const root = await mkdtemp(join(tmpdir(), 'aym-license-')); roots.push(root);
   return { primaryPath: join(root, 'local', 'license.pptlicense'), anchorPath: join(root, 'anchor', 'license.pptlicense') };

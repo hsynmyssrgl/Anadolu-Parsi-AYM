@@ -32,7 +32,11 @@ describe('app shell English localization wave twenty-three', () => {
     const html = `${auth('en-US', uninitialized)} ${auth('en-US', initialized)}`;
     expect(html).toContain('Let’s create your family');
     expect(html).toContain('I have an invitation code');
-    expect(html).not.toMatch(/[ÇĞİÖŞÜçğıöşü]/u);
+    expect(html).toContain('ParsYuva Aile Yaşam Merkezi');
+    const copyWithoutProperProductName = html
+      .replaceAll('ParsYuva Aile Yaşam Merkezi', '')
+      .replaceAll('Aile Yaşam Merkezi', '');
+    expect(copyWithoutProperProductName).not.toMatch(/[ÇĞİÖŞÜçğıöşü]/u);
   });
 
   it('renders the expanded invitation entry in English', () => {

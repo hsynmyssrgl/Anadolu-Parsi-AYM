@@ -4,7 +4,7 @@ import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'no
 import { createHmac } from 'node:crypto';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { FAMILY_DATABASE_MIGRATIONS } from '@ppt/database';
+import { FAMILY_DATABASE_MIGRATIONS, FAMILY_DATABASE_SCHEMA_GENERATION } from '@ppt/database';
 import {
   PlatformPolicyKernel,
   type PlatformPolicyAuthorizationProvider,
@@ -1377,7 +1377,7 @@ describe('FamilyDataStore', () => {
     ]));
     expect(database.prepare('SELECT COUNT(*) AS total FROM finance_planning_ledger').get()).toEqual({ total: 11 });
     expect(database.prepare('SELECT value FROM database_metadata WHERE key=?').get('schema_generation')).toEqual({
-      value: 'REVISION-34-K-WINDOWS-RESILIENCE-UNIVERSAL-UX'
+      value: FAMILY_DATABASE_SCHEMA_GENERATION
     });
     const payloads = database.prepare("SELECT payload_json FROM event_outbox WHERE event_type='finance.planning.item_recorded'").all() as Array<{payload_json:string}>;
     const parsedPayloads = payloads.map(({ payload_json }) => JSON.parse(payload_json) as Record<string, unknown>);
@@ -1477,7 +1477,7 @@ describe('FamilyDataStore', () => {
     const outbox = database.prepare("SELECT payload_json FROM event_outbox WHERE event_type='finance.import.batch_committed'").all();
     expect(JSON.stringify(outbox)).not.toMatch(/Market|İade|125\.5|row-expense/u);
     expect(database.prepare('SELECT value FROM database_metadata WHERE key=?').get('schema_generation')).toEqual({
-      value: 'REVISION-34-K-WINDOWS-RESILIENCE-UNIVERSAL-UX'
+      value: FAMILY_DATABASE_SCHEMA_GENERATION
     });
     database.close();
     expect(store.listAudit(400).some((entry) => entry.action === 'finance.import.batch_committed')).toBe(true);

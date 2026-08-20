@@ -20,10 +20,10 @@ const protector: DeviceSecretProtector = {
   unprotect: (value) => Buffer.from(value, 'base64').toString('utf8')
 };
 
-describe('ParsYuva AYM product identity', () => {
+describe('ParsYuva Aile Yaşam Merkezi product identity', () => {
   it('publishes the new brand while retaining stable Windows data identity', () => {
-    expect(APP_META.name).toBe('ParsYuva AYM');
-    expect(CURRENT_PRODUCT_NAME).toBe('ParsYuva AYM');
+    expect(APP_META.name).toBe('ParsYuva Aile Yaşam Merkezi');
+    expect(CURRENT_PRODUCT_NAME).toBe('ParsYuva Aile Yaşam Merkezi');
     expect(STABLE_APPLICATION_ID).toBe('tr.anadoluparsi.aileyasammerkezi');
     expect(STABLE_USER_DATA_DIRECTORY_NAME).toBe(LEGACY_PRODUCT_NAME);
   });

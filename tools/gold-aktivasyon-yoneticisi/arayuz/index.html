@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ParsYuva Gold Aktivasyon Merkezi</title>
+  <link rel="stylesheet" href="./stiller.css" />
+</head>
+<body>
+  <main class="uygulama-kabugu">
+    <aside class="marka-alani">
+      <div class="marka-kilidi">
+        <img src="../../../apps/desktop/src/renderer/assets/brand-mark.png" alt="ParsYuva logosu" />
+        <div><strong>ParsYuva</strong><span>Aile Yaşam Merkezi</span></div>
+      </div>
+      <div class="marka-mesaji">
+        <span class="surum-etiketi">GOLD · YÖNETİCİ ARACI</span>
+        <h1>Her Gold lisansı,<br />yalnız ait olduğu<br />cihazda çalışır.</h1>
+        <p>Özel imza anahtarı bu bilgisayardan ve ana süreçten çıkmaz. Üretilen aktivasyon ana uygulamanın sabitlenmiş açık anahtarıyla doğrulanır.</p>
+      </div>
+      <div class="guven-notu"><span aria-hidden="true">✓</span><div><strong>Yerel ve çevrimdışı</strong><small>Ağ bağlantısı, bulut hesabı veya haricî lisans sunucusu kullanılmaz.</small></div></div>
+    </aside>
+    <section class="islem-alani">
+      <header>
+        <div><span class="eyebrow">YETKİLİ KULLANIM</span><h2>Gold seri numarası üret</h2><p>Dört doğrulanmış adım sonunda cihaza bağlı, süresiz Gold aktivasyon dosyası oluşur.</p></div>
+        <span id="genelDurum" class="durum-rozeti">Denetleniyor</span>
+      </header>
+
+      <ol class="adimlar" aria-label="Gold aktivasyon adımları">
+        <li class="adim-karti" id="kasaAdimi">
+          <span class="adim-numarasi">1</span>
+          <div class="adim-icerigi"><h3>İmza kasası</h3><p>Ed25519 özel anahtarı Windows kullanıcı korumasıyla şifrelenir.</p><small id="kasaBilgisi">Henüz denetlenmedi.</small></div>
+          <button id="kasaHazirla" type="button">Kasayı hazırla</button>
+        </li>
+        <li class="adim-karti" id="guvenAdimi">
+          <span class="adim-numarasi">2</span>
+          <div class="adim-icerigi"><h3>Ana uygulama güveni</h3><p>Yalnız açık anahtar Gold paket yapılandırmasına yazılır.</p><small id="guvenBilgisi">Henüz eşleştirilmedi.</small></div>
+          <button id="guvenYapilandir" type="button">Güveni eşleştir</button>
+        </li>
+        <li class="adim-karti" id="cihazAdimi">
+          <span class="adim-numarasi">3</span>
+          <div class="adim-icerigi"><h3>Hedef Gold cihazı</h3><p>Kurulu Gold uygulamasından tek yönlü SHA-256 cihaz bağı alınır.</p><small id="cihazBilgisi">Gold uygulaması seçilmedi.</small></div>
+          <button id="cihazSec" type="button">Gold uygulamasını seç</button>
+        </li>
+      </ol>
+
+      <form id="aktivasyonFormu" class="aktivasyon-formu">
+        <label for="lisansKimligi">Lisans kimliği</label>
+        <div class="girdi-satiri">
+          <input id="lisansKimligi" name="lisansKimligi" required minlength="8" maxlength="64" pattern="[A-Za-z0-9_-]{8,64}" autocomplete="off" spellcheck="false" placeholder="Örn. PARSYUVA_GOLD_0001" />
+          <button class="birincil" id="kodUret" type="submit">Aktivasyon dosyası üret</button>
+        </div>
+        <small>Türkçe anlamlı kimlik kullanabilirsiniz; teknik uyumluluk için Türkçe karakter, boşluk ve noktalama yerine <code>_</code> veya <code>-</code> kullanın.</small>
+      </form>
+
+      <div id="sonuc" class="sonuc-paneli" hidden role="status" aria-live="polite">
+        <div><span class="basari-isareti">✓</span><div><strong>Gold aktivasyonu doğrulandı</strong><p id="sonucMetni"></p></div></div>
+        <button id="aktivasyonuKur" type="button">Hedef cihaza kur</button>
+      </div>
+      <p id="hata" class="hata" hidden role="alert"></p>
+      <footer>ParsYuva Gold Aktivasyon Merkezi · Özel anahtar ana uygulamaya, dosyaya veya loga aktarılmaz.</footer>
+    </section>
+  </main>
+  <script src="./uygulama.js"></script>
+</body>
+</html>

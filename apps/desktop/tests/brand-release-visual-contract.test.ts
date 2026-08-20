@@ -28,6 +28,18 @@ const contrastRatio = (left: string, right: string): number => {
 };
 
 describe('approved brand and release-channel visual contract', () => {
+  it('enforces one readable and proportional typography rhythm across the complete application shell', async () => {
+    const [styles, typography] = await Promise.all([readFile(stylesUrl, 'utf8'), readFile(typographyUrl, 'utf8')]);
+    expect(typography).toContain('--minimum-readable-copy: 16px');
+    expect(typography).toContain('font-size: var(--font-size-body) !important;');
+    expect(typography).toContain('font-size: var(--font-size-subheadline) !important;');
+    expect(typography).toContain('font-size: var(--font-size-footnote) !important;');
+    expect(typography).toContain('min-height: 48px !important;');
+    expect(typography).toContain('min-height: 44px !important;');
+    expect(styles).toContain('.app-shell .main-area { grid-template-rows: minmax(72px, auto) minmax(0, 1fr); }');
+    expect(styles).toContain('.app-shell .page-content { padding:28px 32px 40px; }');
+  });
+
   it('keeps renderer runtime imports on browser-safe package surfaces', async () => {
     const [app, routeState, familyAiPanel, memoryStudioPanel, rendererDomain] = await Promise.all([
       readFile(appUrl, 'utf8'),
@@ -395,7 +407,7 @@ describe('approved brand and release-channel visual contract', () => {
       'border-color:var(--release-border);',
       'border-color:var(--release-focus);',
       'background:linear-gradient(145deg,var(--release-accent-soft),var(--release-accent-edge));',
-      '.auth-brand>img { width:58px;height:58px;',
+      '.auth-brand>img { width:96px;height:96px;',
       '.first-run-actions .button,',
       '.first-run-skip { min-height: 44px; }'
     ]) expect(styles).toContain(marker);
@@ -412,7 +424,7 @@ describe('approved brand and release-channel visual contract', () => {
       'aria-invalid={familyNameInvalid}',
       'aria-invalid={displayNameInvalid}',
       'aria-invalid={passwordInvalid}',
-      "if(!window.pardus)throw new Error('Güvenli kurulum bağlantısı başlatılamadı. Uygulamayı kapatıp yeniden açın.')"
+      "Güvenli kurulum bağlantısı başlatılamadı. Uygulamayı tamamen kapatıp yeniden açın."
     ]) expect(app).toContain(marker);
     for (const marker of [
       '.auth-trust strong{font-size:16px}',

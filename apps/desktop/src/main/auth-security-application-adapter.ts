@@ -48,7 +48,7 @@ export class NodePasswordService implements PasswordService {
 }
 
 export class NodeSecondFactorService implements SecondFactorService {
-  public constructor(private readonly issuer = 'ParsYuva AYM') {}
+  public constructor(private readonly issuer = 'ParsYuva Aile Yaşam Merkezi') {}
 
   public createSetup(accountEmail: string): SecondFactorSetupMaterial {
     const material = createTotpSetupMaterial();

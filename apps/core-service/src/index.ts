@@ -18,3 +18,4 @@ export * from './distributed-operations-runtime.js';
 export * from './versioned-core-service-api-use-case.js';
 export * from './core-service-method-dispatcher.js';
 export * from './local-admin-server.js';
+export * from './windows-service-control-server.js';

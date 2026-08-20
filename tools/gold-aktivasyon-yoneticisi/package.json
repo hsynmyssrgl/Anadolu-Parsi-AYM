@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "main": "uygulama.mjs",
   "description": "Gold cihaz aktivasyon anahtarını uygulamadan ayrı yöneten yerel yönetici aracı.",
   "scripts": {
-    "calistir": "node yonetici.mjs"
+    "calistir": "node yonetici.mjs",
+    "uygulama": "electron ."
   }
 }

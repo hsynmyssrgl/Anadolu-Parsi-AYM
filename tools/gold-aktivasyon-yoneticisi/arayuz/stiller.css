@@ -1,0 +1,67 @@
+:root {
+  color-scheme: light;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI", sans-serif;
+  color: #332f28;
+  background: #fbf8f1;
+  font-synthesis: none;
+  --gold-900: #6f4815;
+  --gold-700: #946324;
+  --gold-600: #ad792f;
+  --gold-500: #c8933d;
+  --gold-300: #e4c27d;
+  --gold-100: #f7edd5;
+  --green: #39745a;
+  --line: rgba(111, 72, 21, .18);
+  --shadow: 0 26px 70px rgba(83, 56, 19, .13);
+}
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 980px; min-height: 680px; overflow: hidden; }
+button, input { font: inherit; }
+button { border: 1px solid var(--line); border-radius: 12px; padding: 11px 16px; background: rgba(255,255,255,.82); color: var(--gold-900); font-weight: 700; cursor: pointer; transition: transform .16s ease, box-shadow .16s ease, background .16s ease; }
+button:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(83,56,19,.11); background: #fff; }
+button:disabled { opacity: .48; cursor: not-allowed; }
+button:focus-visible, input:focus-visible { outline: 3px solid rgba(200,147,61,.3); outline-offset: 2px; }
+.uygulama-kabugu { min-height: 100vh; display: grid; grid-template-columns: minmax(350px, .82fr) minmax(630px, 1.48fr); background: #fff; }
+.marka-alani { position: relative; display: flex; flex-direction: column; justify-content: space-between; padding: 42px 46px; overflow: hidden; background: radial-gradient(circle at 20% 4%, rgba(228,194,125,.42), transparent 32%), linear-gradient(145deg, #fffdf8 0%, #f8efdd 65%, #ead09a 100%); border-right: 1px solid var(--line); }
+.marka-alani::after { content: ""; position: absolute; width: 420px; height: 420px; border: 1px solid rgba(148,99,36,.18); border-radius: 50%; left: -180px; bottom: -245px; box-shadow: 0 0 0 24px rgba(148,99,36,.05), 0 0 0 72px rgba(148,99,36,.035); }
+.marka-kilidi { display: flex; align-items: center; gap: 15px; position: relative; z-index: 1; }
+.marka-kilidi img { width: 66px; height: 66px; object-fit: contain; filter: drop-shadow(0 8px 16px rgba(111,72,21,.16)); }
+.marka-kilidi div { display: grid; line-height: 1.16; text-align: center; }
+.marka-kilidi strong { font-size: 22px; letter-spacing: -.03em; }
+.marka-kilidi span { color: #746c60; font-size: 14px; margin-top: 5px; }
+.marka-mesaji { position: relative; z-index: 1; max-width: 460px; }
+.surum-etiketi, .eyebrow { color: var(--gold-700); font-size: 12px; font-weight: 800; letter-spacing: .13em; }
+.marka-mesaji h1 { margin: 18px 0 20px; font-size: clamp(42px, 4.4vw, 65px); line-height: .99; letter-spacing: -.055em; }
+.marka-mesaji p { margin: 0; max-width: 430px; color: #6e675d; font-size: 17px; line-height: 1.65; }
+.guven-notu { position: relative; z-index: 1; display: flex; gap: 14px; align-items: center; max-width: 400px; padding: 18px 20px; border: 1px solid rgba(255,255,255,.7); background: rgba(255,255,255,.68); backdrop-filter: blur(18px); border-radius: 18px; box-shadow: var(--shadow); }
+.guven-notu > span { display: grid; place-items: center; flex: 0 0 42px; height: 42px; border-radius: 50%; color: var(--green); background: rgba(57,116,90,.11); font-size: 22px; }
+.guven-notu div { display: grid; gap: 5px; }
+.guven-notu small { color: #777066; line-height: 1.4; }
+.islem-alani { padding: 56px clamp(44px, 6vw, 86px) 30px; background: radial-gradient(circle at 100% 0%, rgba(247,237,213,.55), transparent 35%), #fff; overflow: auto; }
+.islem-alani header { display: flex; justify-content: space-between; gap: 24px; align-items: flex-start; margin-bottom: 32px; }
+.islem-alani h2 { margin: 7px 0 5px; font-size: 36px; letter-spacing: -.045em; }
+.islem-alani header p { margin: 0; color: #777066; font-size: 16px; }
+.durum-rozeti { border: 1px solid var(--line); border-radius: 999px; padding: 9px 13px; color: var(--gold-700); background: var(--gold-100); font-size: 12px; font-weight: 800; white-space: nowrap; }
+.durum-rozeti.ready { color: var(--green); background: rgba(57,116,90,.08); border-color: rgba(57,116,90,.24); }
+.adimlar { list-style: none; display: grid; gap: 12px; margin: 0; padding: 0; }
+.adim-karti { display: grid; grid-template-columns: 42px 1fr auto; align-items: center; gap: 15px; min-height: 94px; padding: 16px 18px; border: 1px solid #e8e1d4; border-radius: 18px; background: rgba(255,255,255,.9); box-shadow: 0 10px 34px rgba(75,58,31,.055); }
+.adim-karti.tamam { border-color: rgba(57,116,90,.26); background: rgba(248,253,250,.9); }
+.adim-numarasi { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 12px; color: var(--gold-700); background: var(--gold-100); font-weight: 900; }
+.adim-karti.tamam .adim-numarasi { color: #fff; background: var(--green); }
+.adim-icerigi h3 { margin: 0 0 4px; font-size: 17px; }
+.adim-icerigi p { margin: 0 0 5px; color: #777066; font-size: 13px; }
+.adim-icerigi small { color: var(--gold-700); }
+.aktivasyon-formu { margin-top: 20px; padding: 21px; border: 1px solid var(--line); border-radius: 19px; background: linear-gradient(135deg, rgba(247,237,213,.75), rgba(255,255,255,.84)); }
+.aktivasyon-formu label { display: block; margin-bottom: 9px; font-weight: 750; }
+.girdi-satiri { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+input { min-width: 0; height: 48px; border: 1px solid #d9cebd; border-radius: 12px; padding: 0 15px; color: #332f28; background: #fff; }
+.birincil { border-color: var(--gold-700); background: linear-gradient(180deg, #bd8733, #936022); color: #fff; box-shadow: 0 8px 18px rgba(148,99,36,.2); }
+.aktivasyon-formu > small { display: block; margin-top: 9px; color: #777066; }
+code { color: var(--gold-900); font-weight: 700; }
+.sonuc-paneli { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 16px; padding: 17px 20px; border: 1px solid rgba(57,116,90,.26); border-radius: 17px; background: rgba(239,249,243,.92); }
+.sonuc-paneli > div { display: flex; align-items: center; gap: 13px; }
+.sonuc-paneli p { margin: 3px 0 0; color: #5f6d65; font-size: 13px; }
+.basari-isareti { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; color: #fff; background: var(--green); font-weight: 900; }
+.hata { margin: 15px 0 0; padding: 13px 15px; border: 1px solid rgba(153,53,37,.22); border-radius: 12px; color: #8d2f22; background: #fff4f1; }
+footer { margin-top: 22px; color: #9a9287; font-size: 12px; text-align: center; }
+@media (prefers-reduced-motion: reduce) { button { transition: none; } }

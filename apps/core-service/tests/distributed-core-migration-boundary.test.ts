@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach,describe,expect,it } from 'vitest';
 import { asIsoDateTime,type Clock } from '@ppt/core';
-import { FAMILY_DATABASE_MIGRATIONS } from '@ppt/database';
+import { FAMILY_DATABASE_MIGRATIONS, FAMILY_DATABASE_SCHEMA_GENERATION } from '@ppt/database';
 import { SqliteFamilyDatabaseRuntime } from '../../desktop/src/main/family-database-runtime.js';
 
 const clock:Clock={now:()=>asIsoDateTime('2026-08-16T01:40:00.000Z')};
@@ -27,7 +27,7 @@ describe('34-I distributed core migration boundary',()=>{
     expect(FAMILY_DATABASE_MIGRATIONS.find((migration)=>migration.version===113))
       .toMatchObject({version:113,name:'distributed_core_consensus_tenancy'});
     expect(runtime.database.prepare("SELECT value FROM database_metadata WHERE key='schema_generation'").get())
-      .toEqual({value:'REVISION-34-K-WINDOWS-RESILIENCE-UNIVERSAL-UX'});
+      .toEqual({value:FAMILY_DATABASE_SCHEMA_GENERATION});
     const tables=runtime.database.prepare(
       "SELECT name,strict FROM pragma_table_list WHERE name IN ('distributed_cluster_nodes','distributed_mutation_log','distributed_cluster_snapshots') ORDER BY name"
     ).all() as Array<{name:string;strict:number}>;

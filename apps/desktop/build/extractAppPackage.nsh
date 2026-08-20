@@ -1,4 +1,4 @@
-; ParsYuva AYM override of electron-builder 26.15.6's
+; ParsYuva Aile Yaşam Merkezi override of electron-builder 26.15.6's
 ; templates/nsis/include/extractAppPackage.nsh.
 ;
 ; The build-resources include directory precedes electron-builder's template

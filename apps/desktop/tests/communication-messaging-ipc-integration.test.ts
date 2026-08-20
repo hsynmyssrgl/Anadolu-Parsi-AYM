@@ -32,7 +32,7 @@ const truth={
   exactActivityDisclosureDefaultDenied:true,contentSearchImplemented:true,
   rendererMediaAttachmentSelectionImplemented:true,effectivePresenceExpiryEnforced:true,
   automaticRetentionExecutionImplemented:true,payloadOrphanSweepImplemented:true,
-  reminderExecutionImplemented:false,multiDevicePresenceAggregationImplemented:false,
+  reminderExecutionImplemented:true,multiDevicePresenceAggregationImplemented:false,
   selectedPeopleAudienceEnforcementImplemented:false,relayDeliveryImplemented:false,
   deliveryReceiptFromRemoteImplemented:false,messageSignatureVerificationImplemented:false,
   automaticPhysicalSecureEraseGuaranteed:false,backupDeletionPropagationGuaranteed:false,

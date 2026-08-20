@@ -4017,7 +4017,7 @@ const communicationMessagingTruthResult=(value:unknown):boolean=>isObject(value)
   &&value.exactActivityDisclosureDefaultDenied===true&&value.contentSearchImplemented===true
   &&value.rendererMediaAttachmentSelectionImplemented===true&&value.effectivePresenceExpiryEnforced===true
   &&value.automaticRetentionExecutionImplemented===true&&value.payloadOrphanSweepImplemented===true
-  &&value.reminderExecutionImplemented===false&&value.multiDevicePresenceAggregationImplemented===false
+  &&value.reminderExecutionImplemented===true&&value.multiDevicePresenceAggregationImplemented===false
   &&value.selectedPeopleAudienceEnforcementImplemented===false
   &&value.relayDeliveryImplemented===false&&value.deliveryReceiptFromRemoteImplemented===false
   &&value.messageSignatureVerificationImplemented===false&&value.automaticPhysicalSecureEraseGuaranteed===false
@@ -4324,7 +4324,7 @@ const communicationAuditTruthResult=(value:unknown):boolean=>isObject(value)&&he
   &&value.vaultDatabaseBackupRestoreCheckpointModeled===true&&value.mutationAndCheckpointDeleteBlocked===true
   &&value.productionRemoteReplicationConfigured===false&&value.externalBackupProviderVerified===false
   &&value.realRestoreDrillPerformed===false&&value.networkUsedByCurrentImplementation===false
-  &&value.productionQueryApiComposed===true&&value.productionEventProducerHooksComposed===false
+  &&value.productionQueryApiComposed===true&&value.productionEventProducerHooksComposed===true
   &&value.rendererAuditMutationAuthorityExposed===false;
 const communicationAuditArchiveResult=(channel:string,result:unknown):IpcIntegrationPolicyDecision=>{
   const valid=channel===COMMUNICATION_AUDIT_ARCHIVE_IPC_CHANNELS.getCenter&&isObject(result)

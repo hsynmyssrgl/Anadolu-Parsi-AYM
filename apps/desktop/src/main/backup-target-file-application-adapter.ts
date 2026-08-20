@@ -45,7 +45,7 @@ export class FileSystemBackupTargetFilePort implements BackupTargetFilePort {
   ): ReturnType<BackupTargetFilePort['createArtifactPath']> {
     try {
       const timestamp = new Date(input.createdAt).toISOString().replace(/[:.]/g, '-');
-      return ok(join(input.targetPath, `ParsYuva_AYM_${timestamp}_${input.attempt}.pptbackup`));
+      return ok(join(input.targetPath, `ParsYuva_Aile_Yasam_Merkezi_${timestamp}_${input.attempt}.pptbackup`));
     } catch (error) {
       return err(this.#error(correlationId, 'Yedek dosyası yolu oluşturulamadı.', error));
     }

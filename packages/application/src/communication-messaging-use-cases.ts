@@ -504,6 +504,9 @@ export class UpdateCommunicationDeliveryUseCase extends MessageMutationUseCase<U
     return this.executeMutation(input.context, input.command, 'delivery_update', 'update', 'delivery_changed', false,
       (scope, current, id, occurredAt) => {
         if (current.state === 'deleted') return err(conflict(input.context, 'Silinmiş mesaj teslim kuyruğuna alınamaz.'));
+        const releasesScheduledMessage = input.command.action === 'mark_ready_local' && current.state === 'scheduled';
+        if (releasesScheduledMessage && (!current.scheduledAt || Date.parse(current.scheduledAt) > Date.parse(occurredAt)))
+          return err(conflict(input.context, 'Zamanlanmış mesaj, belirlenen zamandan önce yerel kuyruğa alınamaz.'));
         const currentQueue = scope.findDeliveryQueue(current.id); if (!currentQueue.ok) return currentQueue;
         if (!currentQueue.value) return err(missing(input.context, 'Mesaj teslim kuyruğu bulunamadı.'));
         const state = input.command.action === 'queue_offline' ? 'queued_offline'
@@ -516,6 +519,7 @@ export class UpdateCommunicationDeliveryUseCase extends MessageMutationUseCase<U
           revision: nextRevision, lastMutationId: id, createdAt: currentQueue.value.createdAt, updatedAt: occurredAt,
           ...(input.command.action === 'retry' ? { nextAttemptAt: occurredAt } : {}) });
         const base: Omit<CommunicationMessageRow, 'stateFingerprint'> = Object.freeze({ ...current,
+          state: releasesScheduledMessage ? 'sealed_local' : current.state,
           deliveryState: state, revision: nextRevision, lastMutationId: id, updatedAt: occurredAt });
         return ok(Object.freeze({ ...base, stateFingerprint: messageFingerprint(base) }));
       }, (scope, next, mutation) => nextQueue

@@ -397,6 +397,14 @@ const getProductSurfaceGovernanceUseCase = new GetProductSurfaceGovernanceUseCas
 const currentProductName = APP_META.name;
 let uiLocalizationBootstrap: Readonly<UiLocalizationBootstrapView> = resolveUiLocalization(undefined);
 const uiLanguagePreferencePath=():string=>join(app.getPath('userData'),'preferences','ui-language.json');
+const operatingSystemUiLanguage = (): string => {
+  const preferredLanguage = app.getPreferredSystemLanguages()
+    .map((value) => value.trim())
+    .find((value) => value.length > 0);
+  return preferredLanguage ?? app.getSystemLocale().trim();
+};
+const resolveMainUiLocalization = (preference:UiLanguagePreference):Readonly<UiLocalizationBootstrapView> =>
+  resolveUiLocalization(operatingSystemUiLanguage(),preference);
 const mainText = (turkish: string, english: string): string =>
   uiLocalizationBootstrap.language === 'tr' ? turkish : english;
 const uninstallBackupAssistantRequested = process.argv.includes('--uninstall-backup-assistant');
@@ -1481,10 +1489,10 @@ function registerIpc(): void {
   registerIpcHandler('app:getLocalizationBootstrap', () => uiLocalizationBootstrap);
   registerIpcHandler('app:setLanguagePreference', (_event, preference:UiLanguagePreference) => {
     writeUiLanguagePreference(uiLanguagePreferencePath(),preference);
-    uiLocalizationBootstrap=resolveUiLocalization(app.getLocale(),preference);
+    uiLocalizationBootstrap=resolveMainUiLocalization(preference);
     return uiLocalizationBootstrap;
   });
-  registerIpcHandler('auth:getExternalIdentityProviders', () => (oidcDeepLinkProtocolRegistered?oidcFederatedIdentity?.listVisibleConfiguredProviders()??[]:[]).map(({provider})=>({id:provider,label:provider==='apple'?'Apple ile devam et':provider==='google'?'Google ile devam et':'Microsoft ile devam et',configured:true,productionReady:false})));
+  registerIpcHandler('auth:getExternalIdentityProviders', () => (oidcDeepLinkProtocolRegistered?oidcFederatedIdentity?.listVisibleConfiguredProviders()??[]:[]).map(({provider})=>({id:provider,label:provider==='apple'?mainText('Apple ile devam et','Continue with Apple'):provider==='google'?mainText('Google ile devam et','Continue with Google'):mainText('Microsoft ile devam et','Continue with Microsoft'),configured:true,productionReady:false})));
   registerIpcHandler('auth:getState', () => dataStore ? dataStore.getAuthState() : lockedAuthState());
   registerIpcHandler('auth:getSessionLockState', () => {
     const state = store().getSessionLockState();
@@ -1938,20 +1946,20 @@ function registerIpc(): void {
   registerIpcHandler('system:listHealthHistory', (_event,limit?:number) => store().listSystemHealthHistory(limit));
   registerIpcHandler('system:getHealthTrend', (_event,days?:number) => store().getSystemHealthTrend(days));
   registerIpcHandler('system:listDiagnosticArchives', (_event,limit?:number) => store().listDiagnosticArchives(limit));
-  registerIpcHandler('system:archiveDiagnostics', async (_event,before?:string) => { const cutoff=before??new Date(Date.now()-30*86_400_000).toISOString(); const result=await dialog.showSaveDialog({title:'Tanılama olay arşivini kaydet',defaultPath:`ParsYuva_AYM_Tanilama_Arsivi_${new Date().toISOString().slice(0,10)}.pptdiag`,filters:[{name:'Korumalı Tanılama',extensions:['pptdiag']}]}); if(result.canceled||!result.filePath)return {canceled:true}; return {canceled:false,archive:store().archiveDiagnostics(cutoff,result.filePath)}; });
+  registerIpcHandler('system:archiveDiagnostics', async (_event,before?:string) => { const cutoff=before??new Date(Date.now()-30*86_400_000).toISOString(); const result=await dialog.showSaveDialog({title:'Tanılama olay arşivini kaydet',defaultPath:`ParsYuva_Aile_Yasam_Merkezi_Tanilama_Arsivi_${new Date().toISOString().slice(0,10)}.pptdiag`,filters:[{name:'Korumalı Tanılama',extensions:['pptdiag']}]}); if(result.canceled||!result.filePath)return {canceled:true}; return {canceled:false,archive:store().archiveDiagnostics(cutoff,result.filePath)}; });
   registerIpcHandler('system:verifyDiagnosticArchive', (_event,id:string) => store().verifyDiagnosticArchive(id));
   registerIpcHandler('system:readDiagnosticReport', (_event,id:string) => store().readDiagnosticReport(id));
   registerIpcHandler('system:verifyDiagnosticReport', (_event,id:string) => store().verifyDiagnosticReport(id));
   registerIpcHandler('system:compareDiagnosticReports', (_event,leftId:string,rightId:string) => store().compareDiagnosticReports(leftId,rightId));
   registerIpcHandler('system:readDiagnosticArchive', (_event,id:string) => store().readDiagnosticArchive(id));
   registerIpcHandler('system:searchDiagnosticArchive', (_event,id:string,input:DiagnosticArchiveSearchInput) => store().searchDiagnosticArchive(id,input));
-  registerIpcHandler('system:exportDiagnosticArchiveEntries', async (_event,id:string,input:DiagnosticArchiveSearchInput,format:'json'|'csv') => { const result=await dialog.showSaveDialog({title:'Arşiv olaylarını dışa aktar',defaultPath:`ParsYuva_AYM_Arsiv_Olaylari_${new Date().toISOString().slice(0,10)}.pptdiag`,filters:[{name:'Korumalı Tanılama',extensions:['pptdiag']}]}); if(result.canceled||!result.filePath)return {canceled:true}; return {canceled:false,export:store().exportDiagnosticArchiveEntries(id,input,format,result.filePath)}; });
+  registerIpcHandler('system:exportDiagnosticArchiveEntries', async (_event,id:string,input:DiagnosticArchiveSearchInput,format:'json'|'csv') => { const result=await dialog.showSaveDialog({title:'Arşiv olaylarını dışa aktar',defaultPath:`ParsYuva_Aile_Yasam_Merkezi_Arsiv_Olaylari_${new Date().toISOString().slice(0,10)}.pptdiag`,filters:[{name:'Korumalı Tanılama',extensions:['pptdiag']}]}); if(result.canceled||!result.filePath)return {canceled:true}; return {canceled:false,export:store().exportDiagnosticArchiveEntries(id,input,format,result.filePath)}; });
   registerIpcHandler('system:listMaintenanceHistory', (_event,limit?:number) => store().listMaintenanceHistory(limit));
 
   registerIpcHandler('system:searchMaintenanceHistory', (_event,input:MaintenanceHistoryFilterInput) => store().searchMaintenanceHistory(input));
-  registerIpcHandler('system:exportMaintenanceHistory', async (_event,input:MaintenanceHistoryFilterInput,format:'json'|'csv') => { const result=await dialog.showSaveDialog({title:'Bakım geçmişini dışa aktar',defaultPath:`ParsYuva_AYM_Bakim_Gecmisi_${new Date().toISOString().slice(0,10)}.pptdiag`,filters:[{name:'Korumalı Tanılama',extensions:['pptdiag']}]}); if(result.canceled||!result.filePath)return {canceled:true}; return {canceled:false,export:store().exportMaintenanceHistory(input,format,result.filePath)}; });
+  registerIpcHandler('system:exportMaintenanceHistory', async (_event,input:MaintenanceHistoryFilterInput,format:'json'|'csv') => { const result=await dialog.showSaveDialog({title:'Bakım geçmişini dışa aktar',defaultPath:`ParsYuva_Aile_Yasam_Merkezi_Bakim_Gecmisi_${new Date().toISOString().slice(0,10)}.pptdiag`,filters:[{name:'Korumalı Tanılama',extensions:['pptdiag']}]}); if(result.canceled||!result.filePath)return {canceled:true}; return {canceled:false,export:store().exportMaintenanceHistory(input,format,result.filePath)}; });
   registerIpcHandler('system:searchAllDiagnosticArchives', (_event,input:DiagnosticArchiveSearchInput) => store().searchAllDiagnosticArchives(input));
-  registerIpcHandler('system:exportSystemPdf', async () => { const report=store().getDiagnosticReport(); const result=await dialog.showSaveDialog({title:'Sistem sağlık raporunu PDF olarak kaydet',defaultPath:`ParsYuva_AYM_Sistem_Raporu_${new Date().toISOString().slice(0,10)}.pptreport`,filters:[{name:'Korumalı Sistem Raporu',extensions:['pptreport']}]}); if(result.canceled||!result.filePath)return {canceled:true}; const win=new BrowserWindow({show:false,webPreferences:{sandbox:true}}); const esc=(v:unknown)=>String(v).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]!)); const html=`<!doctype html><html><head><meta charset="utf-8"><style>body{font-family:Arial,sans-serif;padding:32px;color:#1d2433}h1{font-size:24px}h2{font-size:16px;margin-top:24px}.score{font-size:42px;font-weight:700}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.card{border:1px solid #ddd;border-radius:10px;padding:14px}small{color:#667}</style></head><body><h1>ParsYuva AYM — Sistem Sağlık Raporu</h1><p>${esc(report.generatedAt)}</p><div class="score">${report.healthScore.score}/100</div><p>${esc(report.healthScore.grade)} · ${esc(report.system.status)}</p><div class="grid"><div class="card"><h2>Donanım</h2><p>${esc(report.system.cpuModel)}</p><p>CPU çekirdeği: ${report.system.cpuCores}</p><p>Bellek: ${report.system.memoryUsagePercent.toFixed(1)}%</p></div><div class="card"><h2>Depolama</h2><p>Veritabanı: ${report.system.databaseBytes} bayt</p><p>Arşiv: ${report.system.archiveBytes} bayt</p><p>Bütünlük: ${report.system.integrityOk?'Başarılı':'Başarısız'}</p></div></div><h2>Kesintiler</h2><ul>${report.healthScore.deductions.map(d=>`<li>${esc(d.message)} (-${d.points})</li>`).join('')||'<li>Kesinti yok</li>'}</ul><h2>Son tanılama olayları</h2><ul>${report.diagnostics.slice(0,20).map(d=>`<li>${esc(d.occurredAt)} — ${esc(d.code)} — ${esc(d.message)}</li>`).join('')}</ul></body></html>`; await win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`); const buffer=await win.webContents.printToPDF({printBackground:true,pageSize:'A4'}); const protectedReport=runtime().protectedArtifacts.writeBuffer(result.filePath,'system-health-report-pdf',buffer); buffer.fill(0); win.destroy(); store().recordExportArtifact('system_pdf','pdf',protectedReport.filePath,protectedReport.sha256,protectedReport.sizeBytes); return {canceled:false,...protectedReport}; });
+  registerIpcHandler('system:exportSystemPdf', async () => { const report=store().getDiagnosticReport(); const result=await dialog.showSaveDialog({title:'Sistem sağlık raporunu PDF olarak kaydet',defaultPath:`ParsYuva_Aile_Yasam_Merkezi_Sistem_Raporu_${new Date().toISOString().slice(0,10)}.pptreport`,filters:[{name:'Korumalı Sistem Raporu',extensions:['pptreport']}]}); if(result.canceled||!result.filePath)return {canceled:true}; const win=new BrowserWindow({show:false,webPreferences:{sandbox:true}}); const esc=(v:unknown)=>String(v).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]!)); const html=`<!doctype html><html><head><meta charset="utf-8"><style>body{font-family:Arial,sans-serif;padding:32px;color:#1d2433}h1{font-size:24px}h2{font-size:16px;margin-top:24px}.score{font-size:42px;font-weight:700}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.card{border:1px solid #ddd;border-radius:10px;padding:14px}small{color:#667}</style></head><body><h1>ParsYuva Aile Yaşam Merkezi — Sistem Sağlık Raporu</h1><p>${esc(report.generatedAt)}</p><div class="score">${report.healthScore.score}/100</div><p>${esc(report.healthScore.grade)} · ${esc(report.system.status)}</p><div class="grid"><div class="card"><h2>Donanım</h2><p>${esc(report.system.cpuModel)}</p><p>CPU çekirdeği: ${report.system.cpuCores}</p><p>Bellek: ${report.system.memoryUsagePercent.toFixed(1)}%</p></div><div class="card"><h2>Depolama</h2><p>Veritabanı: ${report.system.databaseBytes} bayt</p><p>Arşiv: ${report.system.archiveBytes} bayt</p><p>Bütünlük: ${report.system.integrityOk?'Başarılı':'Başarısız'}</p></div></div><h2>Kesintiler</h2><ul>${report.healthScore.deductions.map(d=>`<li>${esc(d.message)} (-${d.points})</li>`).join('')||'<li>Kesinti yok</li>'}</ul><h2>Son tanılama olayları</h2><ul>${report.diagnostics.slice(0,20).map(d=>`<li>${esc(d.occurredAt)} — ${esc(d.code)} — ${esc(d.message)}</li>`).join('')}</ul></body></html>`; await win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`); const buffer=await win.webContents.printToPDF({printBackground:true,pageSize:'A4'}); const protectedReport=runtime().protectedArtifacts.writeBuffer(result.filePath,'system-health-report-pdf',buffer); buffer.fill(0); win.destroy(); store().recordExportArtifact('system_pdf','pdf',protectedReport.filePath,protectedReport.sha256,protectedReport.sizeBytes); return {canceled:false,...protectedReport}; });
 
   registerIpcHandler('system:getPerformanceAnomalies', (_event,hours?:number) => store().getPerformanceAnomalies(hours));
   registerIpcHandler('system:getIpcAdaptiveBudgetMaintenanceAuthority', () => adaptiveMaintenanceAuthSnapshot().authority);
@@ -2160,7 +2168,7 @@ function registerIpc(): void {
     const maintenanceSessionFingerprint = consumeAdaptiveMaintenanceSession(event.sender.id, authorization, 'diagnostics-export');
     const result = await dialog.showSaveDialog({
       title: 'Adaptif IPC tanı paketini kaydet',
-      defaultPath: `ParsYuva_AYM_IPC_Adaptif_Tani_${new Date().toISOString().slice(0, 10)}.pptdiag`,
+      defaultPath: `ParsYuva_Aile_Yasam_Merkezi_IPC_Adaptif_Tani_${new Date().toISOString().slice(0, 10)}.pptdiag`,
       filters: [{ name: 'Korumalı Tanı Paketi', extensions: ['pptdiag'] }]
     });
     if (result.canceled || !result.filePath) return Object.freeze({ canceled: true, maintenanceSessionFingerprint });
@@ -2196,7 +2204,7 @@ function registerIpc(): void {
   registerIpcHandler('system:getDiagnosticReport', () => store().getDiagnosticReport());
   registerIpcHandler('system:listExportArtifacts', (_event,limit?:number) => store().listExportArtifacts(limit));
   registerIpcHandler('system:verifyExportArtifact', (_event,id:string) => store().verifyExportArtifact(id));
-  registerIpcHandler('system:exportDiagnosticReport', async () => { const result=await dialog.showSaveDialog({title:'Tanılama raporunu kaydet',defaultPath:`ParsYuva_AYM_Tanilama_${new Date().toISOString().slice(0,10)}.pptdiag`,filters:[{name:'Korumalı Tanılama Raporu',extensions:['pptdiag']}]}); if(result.canceled||!result.filePath)return {canceled:true}; store().exportDiagnosticReport(result.filePath); return {canceled:false,filePath:result.filePath}; });
+  registerIpcHandler('system:exportDiagnosticReport', async () => { const result=await dialog.showSaveDialog({title:'Tanılama raporunu kaydet',defaultPath:`ParsYuva_Aile_Yasam_Merkezi_Tanilama_${new Date().toISOString().slice(0,10)}.pptdiag`,filters:[{name:'Korumalı Tanılama Raporu',extensions:['pptdiag']}]}); if(result.canceled||!result.filePath)return {canceled:true}; store().exportDiagnosticReport(result.filePath); return {canceled:false,filePath:result.filePath}; });
   registerIpcHandler('data:getSnapshot', () => store().getSnapshot());
   registerIpcHandler('data:getSnapshotSections', (_event, input:FamilySnapshotSectionsInput) => store().getSnapshotSections(input));
   registerIpcHandler('dashboard:getOverview', () => store().getDashboardOverview());
@@ -2543,8 +2551,8 @@ function registerIpc(): void {
   registerIpcHandler('privacyOwnership:exportEncrypted', async (_event, input:EncryptedPrivacyDataExportRendererInput) => {
     const selected = await dialog.showSaveDialog({
       title: 'Şifreli gizlilik verisi dışa aktarımını kaydet',
-      defaultPath: `ParsYuva_AYM_Gizlilik_Verileri_${new Date().toISOString().slice(0, 10)}.pptprivacy`,
-      filters: [{ name: 'ParsYuva AYM Şifreli Gizlilik Verisi', extensions: ['pptprivacy'] }],
+      defaultPath: `ParsYuva_Aile_Yasam_Merkezi_Gizlilik_Verileri_${new Date().toISOString().slice(0, 10)}.pptprivacy`,
+      filters: [{ name: 'ParsYuva Aile Yaşam Merkezi Şifreli Gizlilik Verisi', extensions: ['pptprivacy'] }],
       properties: ['createDirectory']
     });
     if (selected.canceled || !selected.filePath) throw new PrivacyExportCancelledError();
@@ -2876,7 +2884,7 @@ function registerIpc(): void {
     const result = await dialog.showOpenDialog({
       title: 'Aile verisi JSON dosyasını ön izle',
       properties: ['openFile'],
-      filters: [{ name: 'ParsYuva AYM Aile Verisi', extensions: ['json'] }]
+      filters: [{ name: 'ParsYuva Aile Yaşam Merkezi Aile Verisi', extensions: ['json'] }]
     });
     if (result.canceled || !result.filePaths[0]) return { canceled: true };
     return { canceled: false, preview: store().previewFamilyDataImport(result.filePaths[0]) };
@@ -2989,18 +2997,18 @@ function registerIpc(): void {
     return store().importArchiveFile(result.filePaths[0], input);
   });
   registerIpcHandler('backup:exportFull', async (_event, input: { readonly password: string }) => {
-    const result=await dialog.showSaveDialog({title:'Parola korumalı tam yedeği kaydet',defaultPath:`ParsYuva_AYM_Aile_${new Date().toISOString().slice(0,10)}.pptbackup`,filters:[{name:'ParsYuva AYM Tam Yedek',extensions:['pptbackup']}]});
+    const result=await dialog.showSaveDialog({title:'Parola korumalı tam yedeği kaydet',defaultPath:`ParsYuva_Aile_Yasam_Merkezi_${new Date().toISOString().slice(0,10)}.pptbackup`,filters:[{name:'ParsYuva Aile Yaşam Merkezi Tam Yedek',extensions:['pptbackup']}]});
     if(result.canceled||!result.filePath) return {canceled:true};
     store().exportFullBackup(result.filePath,input.password);
     return {canceled:false,filePath:result.filePath};
   });
   registerIpcHandler('backup:inspectFull', async (_event, input: { readonly password?: string }) => {
-    const result=await dialog.showOpenDialog({title:'Tam yedeği güvenli biçimde incele',properties:['openFile'],filters:[{name:'ParsYuva AYM Tam Yedek',extensions:['pptbackup']}]});
+    const result=await dialog.showOpenDialog({title:'Tam yedeği güvenli biçimde incele',properties:['openFile'],filters:[{name:'ParsYuva Aile Yaşam Merkezi Tam Yedek',extensions:['pptbackup']}]});
     if(result.canceled||!result.filePaths[0]) return {canceled:true};
     return {canceled:false,filePath:result.filePaths[0],inspection:store().inspectFullBackup(result.filePaths[0],input.password)};
   });
   registerIpcHandler('backup:restoreFull', async (_event, input: { readonly password?: string }) => {
-    const result=await dialog.showOpenDialog({title:'Tam yedekten geri yükle',properties:['openFile'],filters:[{name:'ParsYuva AYM Tam Yedek',extensions:['pptbackup']}]});
+    const result=await dialog.showOpenDialog({title:'Tam yedekten geri yükle',properties:['openFile'],filters:[{name:'ParsYuva Aile Yaşam Merkezi Tam Yedek',extensions:['pptbackup']}]});
     if(result.canceled||!result.filePaths[0]) return {canceled:true};
     const safetyDir=join(app.getPath('userData'),'safety-backups');
     const safetyPath=join(safetyDir,`Geri_Yukleme_Oncesi_${new Date().toISOString().replace(/[:.]/g,'-')}.pptbackup`);
@@ -3029,8 +3037,8 @@ function registerIpc(): void {
   registerIpcHandler('backup:export', async () => {
     const result = await dialog.showSaveDialog({
       title: 'Cihaz korumalı tam yedeği kaydet',
-      defaultPath: `ParsYuva_AYM_Aile_Yedek_${new Date().toISOString().slice(0, 10)}.pptbackup`,
-      filters: [{ name: 'ParsYuva AYM Korumalı Yedek', extensions: ['pptbackup'] }]
+      defaultPath: `ParsYuva_Aile_Yasam_Merkezi_Aile_Yedek_${new Date().toISOString().slice(0, 10)}.pptbackup`,
+      filters: [{ name: 'ParsYuva Aile Yaşam Merkezi Korumalı Yedek', extensions: ['pptbackup'] }]
     });
     if (result.canceled || !result.filePath) return { canceled: true };
     store().exportBackup(result.filePath);
@@ -3217,7 +3225,7 @@ async function openArchiveInSecurePreview(itemId: string, operationId: string): 
   const preview = new BrowserWindow({
     width: 1080,
     height: 780,
-    title: 'ParsYuva AYM - Güvenli Belge Önizleme',
+    title: 'ParsYuva Aile Yaşam Merkezi - Güvenli Belge Önizleme',
     autoHideMenuBar: true,
     webPreferences: { sandbox: true, contextIsolation: true, nodeIntegration: false, webSecurity: true }
   });
@@ -3412,7 +3420,7 @@ app.on('second-instance', (_event,commandLine) => {
 app.on('open-url',(event,url)=>{event.preventDefault();captureOidcDeepLinkArguments([url]);});
 
 app.whenReady().then(async () => {
-  uiLocalizationBootstrap = resolveUiLocalization(app.getLocale(),readUiLanguagePreference(uiLanguagePreferencePath()));
+  uiLocalizationBootstrap = resolveMainUiLocalization(readUiLanguagePreference(uiLanguagePreferencePath()));
   if (uninstallBackupAssistantRequested) {
     const targets = await discoverUninstallBackupTargets({
       documentsPath: app.getPath('documents'), homePath: app.getPath('home'), environment: process.env

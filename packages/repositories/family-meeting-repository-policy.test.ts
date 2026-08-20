@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import { asIsoDateTime, type Clock } from '@ppt/core';
-import { FAMILY_DATABASE_MIGRATIONS } from '@ppt/database';
+import { FAMILY_DATABASE_MIGRATIONS, FAMILY_DATABASE_SCHEMA_GENERATION } from '@ppt/database';
 import { SqliteFamilyDatabaseRuntime } from '../../apps/desktop/src/main/family-database-runtime.js';
 
 const NOW = asIsoDateTime('2026-08-15T18:00:00.000Z');
@@ -34,7 +34,7 @@ describe('34-F family meeting repository and migration boundary', () => {
       'family_meeting_polls', 'family_meeting_tasks', 'family_meeting_votes', 'family_meetings'
     ]);
     expect(runtime.database.prepare("SELECT value FROM database_metadata WHERE key='schema_generation'").get())
-      .toEqual({ value: 'REVISION-34-K-WINDOWS-RESILIENCE-UNIVERSAL-UX' });
+      .toEqual({ value: FAMILY_DATABASE_SCHEMA_GENERATION });
     expect(FAMILY_DATABASE_MIGRATIONS.find((migration) => migration.version === 110)).toMatchObject({ version: 110,
       name: 'family_meetings_decisions_consent_minutes', checksum: '8bcc5777aa80794122742bcfd73be036234488f5861adbcd34956c56e6d0d6ac' });
   });

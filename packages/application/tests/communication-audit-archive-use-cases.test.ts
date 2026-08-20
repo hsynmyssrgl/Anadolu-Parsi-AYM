@@ -73,7 +73,7 @@ describe('34-H communication audit and archive integrity use cases',()=>{
     const center=communicationAuditArchiveCenter(unit.state.events,unit.state.checkpoints,NOW);
     expect(center).toMatchObject({chainValid:true,truth:{contentExcludedFromAuditByConstruction:true,
       productionRemoteReplicationConfigured:false,realRestoreDrillPerformed:false,productionQueryApiComposed:true,
-      productionEventProducerHooksComposed:false,rendererAuditMutationAuthorityExposed:false}});
+      productionEventProducerHooksComposed:true,rendererAuditMutationAuthorityExposed:false}});
     const safe=communicationAuditArchiveSafeCenter(center);
     expect(safe).toMatchObject({eventCount:0,checkpointCount:1,networkUsed:false,cloudUsed:false,
       recentCheckpoints:[{archiveGeneration:1,externalBackupProviderVerified:false,remoteReplicationVerified:false}]});

@@ -31,7 +31,7 @@ const html = (channel) => `<!doctype html>
 <meta name="color-scheme" content="light"><style>${styles}\n${typography}</style></head>
 <body><div class="app-shell" data-theme="light" data-release-channel="${channel.key}" data-text-scale="${channel.textScalePercent === 200 ? 'extra-large' : 'standard'}" data-high-contrast="${channel.highContrast}" data-reduce-motion="${channel.reduceMotion}" style="--accessibility-text-scale:${channel.textScalePercent / 100}">
   <aside class="sidebar">
-    <div class="window-brand"><div class="brand-icon"><img src="data:image/png;base64,${logoData}" alt=""></div><div class="brand-copy"><strong>ParsYuva AYM</strong><small>${channel.label} kanal</small></div><button class="sidebar-toggle" aria-label="Menüyü daralt">‹</button></div>
+    <div class="window-brand"><div class="brand-icon"><img src="data:image/png;base64,${logoData}" alt=""></div><div class="brand-copy"><strong>ParsYuva</strong><small>Aile Yaşam Merkezi</small></div><button class="sidebar-toggle" aria-label="Menüyü daralt">‹</button></div>
     <button class="family-switcher"><span class="family-icon">⌂</span><span class="family-copy"><small>YEREL AİLE ALANI</small><strong>Örnek içermeyen güvenli görünüm</strong></span><span class="disclosure">⌄</span></button>
     <nav aria-label="Örnek gezinme">
       <button class="active"><span>⌂</span>Genel görünüm<i></i></button>

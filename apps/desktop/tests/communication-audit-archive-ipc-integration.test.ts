@@ -20,7 +20,7 @@ recentEventsTruncated:false,recentCheckpointsTruncated:false,chainValid:true,tru
   contentExcludedFromAuditByConstruction:true,identityHashAndVersionMetadataOnly:true,
   vaultDatabaseBackupRestoreCheckpointModeled:true,mutationAndCheckpointDeleteBlocked:true,
   productionRemoteReplicationConfigured:false,externalBackupProviderVerified:false,realRestoreDrillPerformed:false,
-  networkUsedByCurrentImplementation:false,productionQueryApiComposed:true,productionEventProducerHooksComposed:false,
+  networkUsedByCurrentImplementation:false,productionQueryApiComposed:true,productionEventProducerHooksComposed:true,
   rendererAuditMutationAuthorityExposed:false}),generatedAt:'2026-08-16T02:00:00.000Z',networkUsed:false,cloudUsed:false});
 
 describe('34-H communication audit archive IPC boundary',()=>{

@@ -1,6 +1,7 @@
 export const CURRENT_BRAND_NAME = 'ParsYuva' as const;
-export const CURRENT_PRODUCT_NAME = 'ParsYuva AYM' as const;
 export const CURRENT_PRODUCT_LONG_NAME = 'ParsYuva Aile Yaşam Merkezi' as const;
+export const PREVIOUS_PRODUCT_SHORT_NAME = 'ParsYuva AYM' as const;
+export const CURRENT_PRODUCT_NAME = CURRENT_PRODUCT_LONG_NAME;
 export const LEGACY_PRODUCT_NAME = 'Anadolu Parsı Aile Yaşam Merkezi' as const;
 export const STABLE_APPLICATION_ID = 'tr.anadoluparsi.aileyasammerkezi' as const;
 // The user-data directory remains stable across the public brand transition so
@@ -8,6 +9,7 @@ export const STABLE_APPLICATION_ID = 'tr.anadoluparsi.aileyasammerkezi' as const
 export const STABLE_USER_DATA_DIRECTORY_NAME = LEGACY_PRODUCT_NAME;
 export const ACCEPTED_PERSISTED_PRODUCT_NAMES = Object.freeze([
   CURRENT_PRODUCT_NAME,
+  PREVIOUS_PRODUCT_SHORT_NAME,
   LEGACY_PRODUCT_NAME
 ] as const);
 export type PersistedProductName = (typeof ACCEPTED_PERSISTED_PRODUCT_NAMES)[number];

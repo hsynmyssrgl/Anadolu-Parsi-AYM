@@ -24,13 +24,13 @@ export const FIRST_RUN_NARRATION_STEPS = Object.freeze([
   'İkinci adım: Güçlü parolanızı belirleyin ve kurtarma kodlarınızı uygulamanın dışında güvenli bir yerde saklayın.',
   'Üçüncü adım: Yazı boyutu, kontrast, hareket ve ses tercihlerinizi seçin.'
 ]);
-export const FIRST_RUN_NARRATION_TEXT = `ParsYuva AYM'ye hoş geldiniz. Bu kısa tanıtımda üç adımı birlikte tamamlayacağız. ${FIRST_RUN_NARRATION_STEPS.join(' ')} Kişisel verileriniz siz giriş yapmadan açılmaz. Kurulum sırasında aile veriniz uzak bir sağlayıcıya gönderilmez.`;
+export const FIRST_RUN_NARRATION_TEXT = `ParsYuva Aile Yaşam Merkezi'ne hoş geldiniz. Bu kısa tanıtımda üç adımı birlikte tamamlayacağız. ${FIRST_RUN_NARRATION_STEPS.join(' ')} Kişisel verileriniz siz giriş yapmadan açılmaz. Kurulum sırasında aile veriniz uzak bir sağlayıcıya gönderilmez.`;
 export const FIRST_RUN_NARRATION_STEPS_EN = Object.freeze([
   'Step one: Create the local family space on this computer.',
   'Step two: Set a strong password and keep your recovery codes in a safe place outside the application.',
   'Step three: Choose your text size, contrast, motion and audio preferences.'
 ]);
-export const FIRST_RUN_NARRATION_TEXT_EN = `Welcome to ParsYuva AYM. We will complete three steps together in this short introduction. ${FIRST_RUN_NARRATION_STEPS_EN.join(' ')} Your personal data does not open before you sign in. Family data is not sent to a remote provider during setup.`;
+export const FIRST_RUN_NARRATION_TEXT_EN = `Welcome to ParsYuva Family Life Center. We will complete three steps together in this short introduction. ${FIRST_RUN_NARRATION_STEPS_EN.join(' ')} Your personal data does not open before you sign in. Family data is not sent to a remote provider during setup.`;
 
 export const firstRunNarrationContent = (language: 'tr' | 'en') => language === 'tr'
   ? { steps:FIRST_RUN_NARRATION_STEPS, text:FIRST_RUN_NARRATION_TEXT, locale:'tr-TR' as const }

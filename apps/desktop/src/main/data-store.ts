@@ -254,6 +254,7 @@ import {
   MaintainCommunicationFilePayloadVaultUseCase,
   PrepareCommunicationFileUseCase,
   GetCommunicationAuditArchiveSafeCenterUseCase,
+  AppendCommunicationAuditEventUseCase,
   type CommunicationFilePayloadPort,
   type CommunicationCallPreflightPort,
   ListLifeRecordsUseCase,
@@ -443,6 +444,8 @@ import type {
 } from '@ppt/domain';
 import type {
   CommunicationAuditArchiveSafeCenterView,
+  CommunicationAuditEventKind,
+  CommunicationAuditResourceType,
   CommunicationFileSharingCenterView,
   CommunicationFileSharingCommand,
   CommunicationFileSharingMutationReceiptView,
@@ -591,7 +594,8 @@ import {
   RepositoryBackedCommunicationMessagingUnitOfWork
 } from './communication-messaging-application-adapter.js';
 import {
-  RepositoryBackedCommunicationAuditArchiveQueryPort
+  RepositoryBackedCommunicationAuditArchiveQueryPort,
+  RepositoryBackedCommunicationAuditArchiveUnitOfWork
 } from './communication-audit-archive-application-adapter.js';
 import {
   RepositoryBackedCommunicationFileSharingQueryPort,
@@ -1707,6 +1711,7 @@ export class FamilyDataStore {
   readonly #maintainCommunicationMessagePayloadVaultUseCase:MaintainCommunicationMessagePayloadVaultUseCase;
   readonly #getCommunicationFileSharingCenterUseCase:GetCommunicationFileSharingCenterUseCase;
   readonly #getCommunicationAuditArchiveSafeCenterUseCase:GetCommunicationAuditArchiveSafeCenterUseCase;
+  readonly #appendCommunicationAuditEventUseCase:AppendCommunicationAuditEventUseCase;
   readonly #getCommunicationFileSafePreviewUseCase:GetCommunicationFileSafePreviewUseCase;
   readonly #maintainCommunicationFilePayloadVaultUseCase:MaintainCommunicationFilePayloadVaultUseCase;
   readonly #prepareCommunicationFileUseCase:PrepareCommunicationFileUseCase;
@@ -3164,6 +3169,9 @@ export class FamilyDataStore {
       communicationAuditArchiveDependencies,lifePolicyTransactionRunner);
     this.#getCommunicationAuditArchiveSafeCenterUseCase=new GetCommunicationAuditArchiveSafeCenterUseCase(
       communicationAuditArchiveQuery);
+    this.#appendCommunicationAuditEventUseCase=new AppendCommunicationAuditEventUseCase(
+      new RepositoryBackedCommunicationAuditArchiveUnitOfWork(
+        communicationAuditArchiveDependencies,lifePolicyTransactionRunner));
     const communicationRealtimeCallingDependencies={...lifeApplicationDependencies,
       communicationRealtimeCallingRepository:this.#repositories.communicationRealtimeCallingRepository,
       communicationRealtimeCallingPolicyResourceRepository:this.#repositories.communicationRealtimeCallingRepository} as const;
@@ -6881,6 +6889,27 @@ export class FamilyDataStore {
     if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
   }
 
+  async #appendCommunicationProductionAudit(input:{readonly sourceClientOperationId:string;
+    readonly eventKind:CommunicationAuditEventKind;readonly resourceType:CommunicationAuditResourceType;
+    readonly resourceId:string;readonly resourceVersion:number;readonly occurredAt:string;readonly mutationKind:string}):Promise<void>{
+    const material=[input.sourceClientOperationId,input.eventKind,input.resourceType,input.resourceId,
+      String(input.resourceVersion),input.occurredAt,input.mutationKind].join('\0');
+    const digest=createHash('sha256').update(material,'utf8').digest('hex');
+    const base=this.#lifeApplicationContext('communication-audit-producer');
+    const context:LifeApplicationContext=Object.freeze({...base,
+      // A retry must acquire a fresh durable PEP receipt while the operation
+      // identity below remains stable and is replayed from the audit ledger.
+      correlationId:asCorrelationId(`communication-audit-${randomUUID()}`)});
+    const result=await this.#appendCommunicationAuditEventUseCase.execute({context,command:Object.freeze({
+      clientOperationId:`comm-audit-${digest.slice(0,52)}`,
+      actorDeviceId:this.#deviceIdentityProvider.snapshot().deviceId,
+      eventKind:input.eventKind,resourceType:input.resourceType,resourceId:input.resourceId,
+      resourceVersion:input.resourceVersion,resourceFingerprint:createHash('sha256').update(
+        `communication-resource\0${input.resourceType}\0${input.resourceId}\0${input.resourceVersion}\0${input.mutationKind}\0${input.occurredAt}`,
+        'utf8').digest('hex')})});
+    if(!result.ok)throw new Error(`[${result.error.code}] İletişim işlemi tamamlandı ancak denetim zinciri kaydı kurulamadı: ${result.error.message}`);
+  }
+
   public async getCommunicationSecurityCenter():Promise<CommunicationSecurityCenterView>{
     const result=await this.#getCommunicationSecurityCenterUseCase.execute(
       this.#lifeApplicationContext('communication-security-center'));
@@ -6914,14 +6943,20 @@ export class FamilyDataStore {
   public async addCommunicationRoomMember(input:AddCommunicationRoomMemberInput):Promise<CommunicationSecurityMutationReceiptView>{
     const result=await this.#addCommunicationRoomMemberUseCase.execute({
       context:this.#lifeApplicationContext('communication-room-member-add'),command:input});
-    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    await this.#appendCommunicationProductionAudit({sourceClientOperationId:input.clientOperationId,eventKind:'room_joined',
+      resourceType:'communication_room',resourceId:input.roomId,resourceVersion:result.value.revision,
+      occurredAt:result.value.occurredAt,mutationKind:result.value.mutationKind});return result.value;
   }
 
   public async removeCommunicationRoomMember(input:RemoveCommunicationRoomMemberInput)
   :Promise<CommunicationSecurityMutationReceiptView>{
     const result=await this.#removeCommunicationRoomMemberUseCase.execute({
       context:this.#lifeApplicationContext('communication-room-member-remove'),command:input});
-    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    await this.#appendCommunicationProductionAudit({sourceClientOperationId:input.clientOperationId,eventKind:'room_left',
+      resourceType:'communication_room',resourceId:input.roomId,resourceVersion:result.value.revision,
+      occurredAt:result.value.occurredAt,mutationKind:result.value.mutationKind});return result.value;
   }
 
   public async rekeyCommunicationRoomAfterDeviceRevocation(input:RekeyCommunicationRoomAfterDeviceRevocationInput)
@@ -6935,13 +6970,19 @@ export class FamilyDataStore {
   :Promise<CommunicationSecurityMutationReceiptView>{
     const result=await this.#setCommunicationHistoryAccessUseCase.execute({
       context:this.#lifeApplicationContext('communication-room-history-policy'),command:input});
-    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    await this.#appendCommunicationProductionAudit({sourceClientOperationId:input.clientOperationId,eventKind:'permission_changed',
+      resourceType:'communication_permission',resourceId:input.roomId,resourceVersion:result.value.revision,
+      occurredAt:result.value.occurredAt,mutationKind:result.value.mutationKind});return result.value;
   }
 
   public async freezeCommunicationRoom(input:FreezeCommunicationRoomInput):Promise<CommunicationSecurityMutationReceiptView>{
     const result=await this.#freezeCommunicationRoomUseCase.execute({
       context:this.#lifeApplicationContext('communication-room-freeze'),command:input});
-    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    await this.#appendCommunicationProductionAudit({sourceClientOperationId:input.clientOperationId,eventKind:'permission_changed',
+      resourceType:'communication_permission',resourceId:input.roomId,resourceVersion:result.value.revision,
+      occurredAt:result.value.occurredAt,mutationKind:result.value.mutationKind});return result.value;
   }
 
   public async getCommunicationMessagingCenter():Promise<CommunicationMessagingCenterView>{
@@ -6965,7 +7006,10 @@ export class FamilyDataStore {
   public async createCommunicationMessage(input:CreateCommunicationMessageInput):Promise<CommunicationMessagingMutationReceiptView>{
     const result=await this.#createCommunicationMessageUseCase.execute({
       context:this.#lifeApplicationContext('communication-message-create'),command:input});
-    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    await this.#appendCommunicationProductionAudit({sourceClientOperationId:input.clientOperationId,eventKind:'message_created',
+      resourceType:'communication_message',resourceId:result.value.resourceId,resourceVersion:result.value.revision,
+      occurredAt:result.value.occurredAt,mutationKind:result.value.mutationKind});return result.value;
   }
 
   public async editCommunicationMessage(input:EditCommunicationMessageInput):Promise<CommunicationMessagingMutationReceiptView>{
@@ -6978,7 +7022,11 @@ export class FamilyDataStore {
   :Promise<CommunicationMessagingMutationReceiptView>{
     const result=await this.#setCommunicationMessageLifecycleUseCase.execute({
       context:this.#lifeApplicationContext('communication-message-lifecycle'),command:input});
-    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    if(input.action==='delete')await this.#appendCommunicationProductionAudit({sourceClientOperationId:input.clientOperationId,
+      eventKind:'message_deleted',resourceType:'communication_message',resourceId:result.value.resourceId,
+      resourceVersion:result.value.revision,occurredAt:result.value.occurredAt,mutationKind:result.value.mutationKind});
+    return result.value;
   }
 
   public async annotateCommunicationMessage(input:AnnotateCommunicationMessageInput):Promise<CommunicationMessagingMutationReceiptView>{
@@ -7009,9 +7057,20 @@ export class FamilyDataStore {
   /** Main-only scheduled maintenance; renderer code has no channel for this authority. */
   public async maintainCommunicationMessagingLifecycle():Promise<CommunicationMessagingMaintenanceView>{
     const center=await this.getCommunicationMessagingCenter();const nowMs=Date.parse(center.generatedAt);
-    let expiredMessagesDeleted=0;let expiredPresenceProfilesHidden=0;let failedOperations=0;
+    let scheduledMessagesReleased=0;let expiredMessagesDeleted=0;let expiredPresenceProfilesHidden=0;let failedOperations=0;
     const retentionByRoom=new Map(center.retentionPolicies.map(policy=>[policy.roomId,policy] as const));
     for(const message of center.messages){
+      if(message.state==='scheduled'&&message.scheduledAt&&Date.parse(message.scheduledAt)<=nowMs){
+        const digest=createHash('sha256').update(`communication-schedule\0${message.id}\0${message.scheduledAt}`,'utf8').digest('hex');
+        try{
+          await this.updateCommunicationDelivery({clientOperationId:`comm-schedule-${digest.slice(0,49)}`,
+            expectedRevision:message.revision,messageId:message.id,action:'mark_ready_local'});
+          scheduledMessagesReleased+=1;
+          // The successful transition advances the revision. Do not evaluate
+          // retention against the stale pre-transition row in this cycle.
+          continue;
+        }catch{failedOperations+=1;continue;}
+      }
       const policy=retentionByRoom.get(message.roomId);
       if(message.deleted||policy?.mode==='legal_hold'||policy?.mode==='permanent')continue;
       const effectiveExpiresAt=policy&&['duration','auto_delete'].includes(policy.mode)&&policy.durationDays
@@ -7039,7 +7098,7 @@ export class FamilyDataStore {
     const swept=await this.#maintainCommunicationMessagePayloadVaultUseCase.execute(
       this.#lifeApplicationContext('communication-message-payload-maintenance'));
     if(!swept.ok)throw new Error(`[${swept.error.code}] ${swept.error.message}`);
-    return Object.freeze({expiredMessagesDeleted,expiredPresenceProfilesHidden,
+    return Object.freeze({scheduledMessagesReleased,expiredMessagesDeleted,expiredPresenceProfilesHidden,
       scannedPayloadFiles:swept.value.scannedFiles,deletedOrphanPayloadFiles:swept.value.deletedFiles,
       rejectedPayloadFiles:swept.value.rejectedFiles,failedOperations,completedAt:swept.value.completedAt,
       physicalSecureEraseGuaranteed:false,backupPropagationGuaranteed:false,networkUsed:false,cloudUsed:false});
@@ -7081,6 +7140,9 @@ export class FamilyDataStore {
     const result=await this.#prepareCommunicationFileUseCase.execute({
       context:this.#lifeApplicationContext('communication-file-sharing-prepare'),...input});
     if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    await this.#appendCommunicationProductionAudit({sourceClientOperationId:input.clientOperationId,eventKind:'file_shared',
+      resourceType:'communication_file_sharing',resourceId:result.value.resourceId,resourceVersion:result.value.revision,
+      occurredAt:result.value.occurredAt,mutationKind:result.value.commandKind});
     return projectCommunicationFileSharingReceipt(result.value);
   }
 
@@ -7103,7 +7165,10 @@ export class FamilyDataStore {
   public async createCommunicationCall(input:CreateCommunicationCallInput):Promise<CommunicationRealtimeCallingMutationReceiptView>{
     const result=await this.#createCommunicationCallUseCase.execute(
       this.#lifeApplicationContext('communication-call-create'),input);
-    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    await this.#appendCommunicationProductionAudit({sourceClientOperationId:input.clientOperationId,eventKind:'call_started',
+      resourceType:'communication_call_session',resourceId:result.value.resourceId,resourceVersion:result.value.revision,
+      occurredAt:result.value.occurredAt,mutationKind:result.value.mutationKind});return result.value;
   }
 
   public async runCommunicationCallPreflight(input:RunCommunicationCallPreflightInput)
@@ -7124,7 +7189,11 @@ export class FamilyDataStore {
   :Promise<CommunicationRealtimeCallingMutationReceiptView>{
     const result=await this.#advanceCommunicationCallUseCase.execute(
       this.#lifeApplicationContext('communication-call-lifecycle'),input);
-    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    if(input.action==='end'||input.action==='cancel')await this.#appendCommunicationProductionAudit({
+      sourceClientOperationId:input.clientOperationId,eventKind:'call_ended',resourceType:'communication_call_session',
+      resourceId:result.value.resourceId,resourceVersion:result.value.revision,occurredAt:result.value.occurredAt,
+      mutationKind:result.value.mutationKind});return result.value;
   }
 
   public async setCommunicationCallPreferences(input:SetCommunicationCallPreferencesInput)
@@ -7147,17 +7216,26 @@ export class FamilyDataStore {
   public async decideCommunicationRecordingConsent(input:DecideCommunicationRecordingConsentInput):Promise<CommunicationRecordingMutationReceiptView>{
     const result=await this.#decideCommunicationRecordingConsentUseCase.execute(
       this.#lifeApplicationContext('communication-recording-consent'),input);
-    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    await this.#appendCommunicationProductionAudit({sourceClientOperationId:input.clientOperationId,
+      eventKind:'recording_consent_changed',resourceType:'communication_recording_request',resourceId:input.requestId,
+      resourceVersion:result.value.revision,occurredAt:result.value.occurredAt,mutationKind:result.value.mutationKind});return result.value;
   }
   public async withdrawCommunicationRecordingConsent(input:WithdrawCommunicationRecordingConsentInput):Promise<CommunicationRecordingMutationReceiptView>{
     const result=await this.#withdrawCommunicationRecordingConsentUseCase.execute(
       this.#lifeApplicationContext('communication-recording-withdraw'),input);
-    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    await this.#appendCommunicationProductionAudit({sourceClientOperationId:input.clientOperationId,
+      eventKind:'recording_consent_changed',resourceType:'communication_recording_request',resourceId:input.requestId,
+      resourceVersion:result.value.revision,occurredAt:result.value.occurredAt,mutationKind:result.value.mutationKind});return result.value;
   }
   public async addCommunicationRecordingLateJoiner(input:AddCommunicationRecordingLateJoinerInput):Promise<CommunicationRecordingMutationReceiptView>{
     const result=await this.#addCommunicationRecordingLateJoinerUseCase.execute(
       this.#lifeApplicationContext('communication-recording-late-joiner'),input);
-    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    await this.#appendCommunicationProductionAudit({sourceClientOperationId:input.clientOperationId,
+      eventKind:'recording_consent_changed',resourceType:'communication_recording_request',resourceId:input.requestId,
+      resourceVersion:result.value.revision,occurredAt:result.value.occurredAt,mutationKind:result.value.mutationKind});return result.value;
   }
   public async setCommunicationRecordingSegment(input:SetCommunicationRecordingSegmentInput):Promise<CommunicationRecordingMutationReceiptView>{
     const result=await this.#setCommunicationRecordingSegmentUseCase.execute(

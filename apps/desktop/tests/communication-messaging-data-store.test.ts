@@ -214,6 +214,32 @@ describe('34-B communication messaging DataStore production composition', () => 
     }finally{database.close();}
   });
 
+  it('releases a scheduled message exactly once after its due time and rejects an early release',async()=>{
+    let now=asIsoDateTime('2026-08-15T12:00:00.000Z');const clock:Clock={now:()=>now};
+    const {store,accountId,databasePath}=makeStore({governed:true,protectedPayloads:true,clock});allow(store,accountId);
+    const room=await createRoom(store);
+    const created=await store.createCommunicationMessage({clientOperationId:'scheduled-message-create',expectedRevision:0,
+      roomId:room.resourceId,contentKind:'text',contentMime:'text/plain',text:'Zamanı gelince açılacak yerel mesaj',
+      scheduledAt:'2026-08-15T13:00:00.000Z'});
+    await expect(store.updateCommunicationDelivery({clientOperationId:'scheduled-message-early',expectedRevision:1,
+      messageId:created.resourceId,action:'mark_ready_local'})).rejects.toThrow(/belirlenen zamandan önce/i);
+    now=asIsoDateTime('2026-08-15T13:01:00.000Z');
+    expect(store.login({email:'communication-34b@example.test',password:PASSWORD}).authenticated).toBe(true);
+    expect(await store.maintainCommunicationMessagingLifecycle()).toMatchObject({scheduledMessagesReleased:1,
+      expiredMessagesDeleted:0,failedOperations:0,networkUsed:false,cloudUsed:false});
+    expect(await store.maintainCommunicationMessagingLifecycle()).toMatchObject({scheduledMessagesReleased:0,failedOperations:0});
+    expect((await store.getCommunicationMessagingCenter()).messages).toEqual(expect.arrayContaining([
+      expect.objectContaining({id:created.resourceId,state:'sealed_local',deliveryState:'ready_local',
+        scheduledAt:'2026-08-15T13:00:00.000Z',revision:2})]));
+    expect(await store.getCommunicationAuditArchiveCenter()).toMatchObject({eventCount:1,chainValid:true,
+      recentEvents:[{eventKind:'message_created',resourceType:'communication_message',resourceVersion:1}],
+      truth:{productionEventProducerHooksComposed:true},networkUsed:false,cloudUsed:false});
+    const database=new DatabaseSync(databasePath,{readOnly:true});try{
+      expect(database.prepare('SELECT state,delivery_state,revision FROM communication_messages WHERE id=?').get(created.resourceId))
+        .toEqual({state:'sealed_local',delivery_state:'ready_local',revision:2});
+    }finally{database.close();}
+  });
+
   it('accepts only a clean same-room protected media attachment and persists no media bytes',async()=>{
     const {store,accountId,databasePath}=makeStore({governed:true,protectedPayloads:true,cleanFileScanner:true});allow(store,accountId);
     const room=await createRoom(store);

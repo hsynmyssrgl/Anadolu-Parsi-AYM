@@ -38,7 +38,7 @@ describe('desktop user-visible release boundary', () => {
     const generator = await readSource('scripts/generate-current-delivery-report.mjs');
     expect(generator).toContain('userVisibleDeliveryFileName');
     expect(generator).toContain("'artifacts', 'deliveries'");
-    expect(generator).toContain('ParsYuva_AYM_');
+    expect(generator).toContain('ParsYuva_Aile_Yasam_Merkezi_');
     expect(generator).toContain('RC2?|MVP|Build');
   });
 });

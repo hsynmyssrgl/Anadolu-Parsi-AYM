@@ -39,7 +39,7 @@ export function CommunicationAuditArchivePanel(){
     <StatusMessage tone={center.chainValid?'success':'warning'}>{center.chainValid
       ?text('Yerel içeriksiz hash zinciri geçerli.','The local content-free hash chain is valid.'):text('Yerel hash zinciri doğrulanamadı; kayıtlar güvenilir kabul edilmemelidir.','The local hash chain could not be verified; records must not be considered trustworthy.')}</StatusMessage>
     <div className="communication-audit-archive-grid"><section><h3>{text('Son denetim olayları','Recent audit events')}</h3>
-      {center.recentEvents.length===0?<EmptyState title={text('Olay yok','No events')} body={text('Üretim olay üretici kancaları henüz bağlı değildir.','Production event-producer hooks are not connected yet.')}/>:
+      {center.recentEvents.length===0?<EmptyState title={text('Olay yok','No events')} body={text('Henüz denetim olayına dönüşen bir iletişim değişikliği yapılmadı.','No communication change has produced an audit event yet.')}/>:
         <ol className="communication-audit-event-list">{center.recentEvents.map((event)=><li key={`${event.sequence}-${event.occurredAt}`}>
           <strong>{label(event.eventKind)}</strong><span>{event.resourceType} · {text('sürüm','revision')} {event.resourceVersion}</span>
           <small>{text('Sıra','Sequence')} {event.sequence} · {time(event.occurredAt)}</small></li>)}</ol>}

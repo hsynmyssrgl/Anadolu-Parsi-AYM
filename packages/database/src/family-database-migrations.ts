@@ -18174,6 +18174,64 @@ UPDATE database_metadata SET value='REVISION-34-K-WINDOWS-RESILIENCE-UNIVERSAL-U
   updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
 `;
 
+export const FAMILY_DATABASE_SCHEMA_GENERATION = 'REVISION-34-B-SCHEDULED-MESSAGE-RELEASE' as const;
+
+const bankingCatalog2026RefreshSql = `
+CREATE TABLE b4_banking_catalog_refresh_guard(
+  value INTEGER NOT NULL CHECK(value=1)
+) STRICT;
+INSERT INTO b4_banking_catalog_refresh_guard(value)
+SELECT CASE WHEN
+  (SELECT COUNT(*) FROM bank_institutions WHERE country_code='TR' AND status='active')=71
+  AND (SELECT COUNT(*) FROM bank_institutions WHERE country_code='TR' AND status='active' AND supports_customer_accounts=1)=69
+  AND (SELECT COUNT(*) FROM bank_institutions WHERE institution_code='0137' AND iban_provider_code='00137')=1
+THEN 1 ELSE 0 END;
+UPDATE bank_institutions
+SET official_name='HEPSİ BANK A.Ş.',
+    source_url='https://www.tcmb.gov.tr/wps/wcm/connect/9fa62a85-5b6d-46c5-9b01-eb461d43723d/TCMB%20%C3%96deme%20Sistemleri%20Kat%C4%B1l%C4%B1mc%C4%B1lar%C4%B1%20%282025%29.pdf?MOD=AJPERES',
+    source_retrieved_at='2026-08-20T00:00:00.000Z'
+WHERE institution_code='0137';
+UPDATE bank_institutions
+SET source_url='https://www.tcmb.gov.tr/wps/wcm/connect/9fa62a85-5b6d-46c5-9b01-eb461d43723d/TCMB%20%C3%96deme%20Sistemleri%20Kat%C4%B1l%C4%B1mc%C4%B1lar%C4%B1%20%282025%29.pdf?MOD=AJPERES',
+    source_retrieved_at='2026-08-20T00:00:00.000Z'
+WHERE country_code='TR' AND status='active';
+DELETE FROM b4_banking_catalog_refresh_guard;
+INSERT INTO b4_banking_catalog_refresh_guard(value)
+SELECT CASE WHEN
+  (SELECT official_name FROM bank_institutions WHERE institution_code='0137')='HEPSİ BANK A.Ş.'
+  AND (SELECT COUNT(*) FROM bank_institutions WHERE source_retrieved_at='2026-08-20T00:00:00.000Z')=71
+THEN 1 ELSE 0 END;
+DROP TABLE b4_banking_catalog_refresh_guard;
+UPDATE database_metadata SET value='REVISION-B4-BANKING-CATALOG-2026-REFRESH',
+  updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
+`;
+
+const communicationScheduledMessageReleaseSql = `
+DROP TRIGGER trg_34b_message_update;
+CREATE TRIGGER trg_34b_message_update
+BEFORE UPDATE ON communication_messages
+WHEN NEW.id<>OLD.id OR NEW.family_id<>OLD.family_id OR NEW.owner_person_id<>OLD.owner_person_id OR NEW.room_id<>OLD.room_id
+  OR NEW.sender_account_id<>OLD.sender_account_id OR NEW.sender_person_id<>OLD.sender_person_id OR NEW.created_at<>OLD.created_at
+  OR NOT EXISTS(
+    SELECT 1 FROM communication_messaging_mutations mutation
+    WHERE mutation.id=NEW.last_mutation_id AND mutation.resource_type='communication_message' AND mutation.resource_id=NEW.id
+      AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+      AND mutation.expected_revision=OLD.revision AND mutation.revision=NEW.revision
+      AND NEW.revision=OLD.revision+1 AND mutation.resource_state_fingerprint=NEW.state_fingerprint
+      AND mutation.occurred_at=NEW.updated_at AND mutation.policy_receipt_hash=NEW.policy_receipt_hash
+      AND ((mutation.mutation_kind='message_delete' AND OLD.state<>'deleted' AND NEW.state='deleted' AND NEW.deleted_at=NEW.updated_at)
+        OR (mutation.mutation_kind='message_restore' AND OLD.state='deleted' AND NEW.state='sealed_local' AND NEW.deleted_at IS NULL)
+        OR (mutation.mutation_kind='message_edit' AND OLD.state<>'deleted' AND NEW.state=OLD.state AND NEW.edit_count=OLD.edit_count+1)
+        OR (mutation.mutation_kind='message_annotate' AND OLD.state<>'deleted' AND NEW.state=OLD.state)
+        OR (mutation.mutation_kind='delivery_update' AND OLD.state<>'deleted' AND
+          (NEW.state=OLD.state OR (OLD.state='scheduled' AND NEW.state='sealed_local' AND OLD.scheduled_at IS NOT NULL
+            AND NEW.scheduled_at=OLD.scheduled_at AND julianday(NEW.updated_at)>=julianday(OLD.scheduled_at)))))
+  )
+BEGIN SELECT RAISE(ABORT,'34-B message update requires exact immutable identity, transition and mutation'); END;
+UPDATE database_metadata SET value='${FAMILY_DATABASE_SCHEMA_GENERATION}',
+  updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -18289,7 +18347,9 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(112, 'communication_audit_archive_integrity', communicationAuditArchiveSql),
   createMigrationDefinition(113, 'distributed_core_consensus_tenancy', distributedCoreConsensusTenancySql),
   createMigrationDefinition(114, 'distributed_clients_operations_disaster_recovery', distributedClientOperationsSql),
-  createMigrationDefinition(115, 'windows_resilience_universal_ux', windowsResilienceUniversalUxSql)
+  createMigrationDefinition(115, 'windows_resilience_universal_ux', windowsResilienceUniversalUxSql),
+  createMigrationDefinition(116, 'b4_banking_catalog_2026_refresh', bankingCatalog2026RefreshSql),
+  createMigrationDefinition(117, 'communication_scheduled_message_release', communicationScheduledMessageReleaseSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

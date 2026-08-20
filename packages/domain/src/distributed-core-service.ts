@@ -35,6 +35,7 @@ export interface DistributedCoreTruthView {
   readonly zeroTrustLanRequired:true;readonly nodeRolesModeled:true;readonly readConsistencyClassesModeled:true;
   readonly explicitConflictResolutionRequired:true;readonly healthAndWatchdogModeled:true;
   readonly familyClusterTenancyIsolationRequired:true;readonly productionRaftProviderConfigured:false;
+  readonly windowsServiceHostImplemented:true;
   readonly realMultiNodeQuorumVerified:false;readonly windowsServiceHostVerified:false;
   readonly productionMtlsCertificateIssued:false;readonly networkUsedByCurrentImplementation:false;
 }
@@ -50,6 +51,7 @@ export const distributedCoreTruth=Object.freeze({headlessCoreServiceImplemented:
   deviceMtlsAndRevocationRequired:true as const,zeroTrustLanRequired:true as const,nodeRolesModeled:true as const,
   readConsistencyClassesModeled:true as const,explicitConflictResolutionRequired:true as const,
   healthAndWatchdogModeled:true as const,familyClusterTenancyIsolationRequired:true as const,
+  windowsServiceHostImplemented:true as const,
   productionRaftProviderConfigured:false as const,realMultiNodeQuorumVerified:false as const,
   windowsServiceHostVerified:false as const,productionMtlsCertificateIssued:false as const,
   networkUsedByCurrentImplementation:false as const});

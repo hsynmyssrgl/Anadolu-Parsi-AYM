@@ -40,11 +40,11 @@ if (build.nsis?.multiLanguageInstaller !== true
   || JSON.stringify(build.nsis?.installerLanguages) !== JSON.stringify(['en_US','tr_TR'])) {
   failures.push('NSIS sistem dili seçimi İngilizce varsayılan ve Türkçe destekli değil.');
 }
-if (build.nsis?.shortcutName !== 'ParsYuva AYM') failures.push('Masaüstü ve Başlat menüsü kısayolu ParsYuva AYM olmalı.');
+if (build.nsis?.shortcutName !== 'ParsYuva Aile Yaşam Merkezi') failures.push('Masaüstü ve Başlat menüsü kısayolu tam ürün adını taşımalı.');
 if (/[çğıöşüÇĞİÖŞÜ]/u.test(artifactTemplate) || !/^[A-Za-z0-9_.$\{\}-]+$/u.test(artifactTemplate)) {
   failures.push('Kurulum dosyası adı Türkçe anlamlı ASCII karakterlerle sınırlandırılmalı.');
 }
-if (!artifactTemplate.startsWith('ParsYuva-AYM-') || !artifactTemplate.endsWith('-Kurulum.${ext}')) {
+if (!artifactTemplate.startsWith('ParsYuva-Aile-Yasam-Merkezi-') || !artifactTemplate.endsWith('-Kurulum.${ext}')) {
   failures.push('Kurulum dosyası adı ürün, sürüm kanalı ve Kurulum amacını açıkça taşımalı.');
 }
 try {
@@ -77,7 +77,7 @@ try {
     '!define PPT_INSTALLER_CHANNEL_BITMAP "installer-gold-sidebar.bmp"',
     '!define MUI_WELCOMEFINISHPAGE_BITMAP "${__FILEDIR__}\\${PPT_INSTALLER_CHANNEL_BITMAP}"',
     'SetCtlColors $AymWelcomePulseLabel "${PPT_INSTALLER_CHANNEL_COLOR}" "F0F0F0"',
-    'ParsYuva AYM',
+    'ParsYuva Aile Yaşam Merkezi',
     'Kuruluma hazır',
     'Sesli Yardım Merkezi',
     'C:\\Program Files\\PPT\\AYM',
@@ -85,8 +85,11 @@ try {
     'CreateFont $2 "Segoe UI" 10 600',
     '!define AYM_LANG_ENGLISH 1033',
     '!define AYM_LANG_TURKISH 1055',
-    'LangString AymFinishTitle ${AYM_LANG_ENGLISH} "ParsYuva AYM is ready"',
-    'LangString AymFinishTitle ${AYM_LANG_TURKISH} "ParsYuva AYM kullanıma hazır"',
+    'LangString AymFinishTitle ${AYM_LANG_ENGLISH} "ParsYuva Family Life Center is ready"',
+    'LangString AymFinishTitle ${AYM_LANG_TURKISH} "ParsYuva Aile Yaşam Merkezi kullanıma hazır"',
+    "System::Call 'kernel32::GetUserDefaultUILanguage() i .r0'",
+    'StrCpy $LANGUAGE ${AYM_LANG_TURKISH}',
+    'StrCpy $LANGUAGE ${AYM_LANG_ENGLISH}',
     '!define MUI_FINISHPAGE_TITLE "$(AymFinishTitle)"',
     'GetDlgItem $AymInstallProgress $0 1004',
     'GetDlgItem $AymInstallStatusText $0 1006',
@@ -117,9 +120,8 @@ try {
     || installerInclude.includes('${NSD_KillTimer}')) {
     failures.push('Kurulum yüzdesi ana NSIS iş parçacığındaki zamanlayıcıyla tahmin edilemez; gerçek Nsis7z ilerlemesi kullanılmalı.');
   }
-  if (installerInclude.includes('ParsYuva AYM Aile Yaşam Merkezi')
-    || installerInclude.includes('ParsYuva AYM Family Life Center')) {
-    failures.push('Ürün başlığı AYM kısaltmasıyla uzun adı aynı anda tekrar edemez.');
+  if (installerInclude.includes('ParsYuva AYM')) {
+    failures.push('Kurulum yüzeyinde kaldırılan AYM kısaltması kullanılamaz.');
   }
   if (/SetCtlColors \$AymWelcomePulseLabel "\$\{PPT_INSTALLER_CHANNEL_COLOR\}" transparent/u.test(installerInclude)) {
     failures.push('Animasyonlu kurulum yazısı şeffaf arka planla üst üste çizilemez.');
@@ -128,7 +130,7 @@ try {
   if (/https?:|Exec(?:Shell)?|nsExec|inetc|download/iu.test(installerOnly)) {
     failures.push('NSIS karşılama/animasyon kodu ağ veya haricî süreç yetkisi içeremez.');
   }
-  const expectedUninstallHelper = 'ExecWait \'"$INSTDIR\\ParsYuva AYM.exe" --uninstall-backup-assistant\' $0';
+  const expectedUninstallHelper = 'ExecWait \'"$INSTDIR\\ParsYuva Aile Yaşam Merkezi.exe" --uninstall-backup-assistant\' $0';
   if (!uninstallerOnly.includes(expectedUninstallHelper)) {
     failures.push('Kaldırıcı yalnız doğrulanmış yerel yedek yardımcısını tam sabit komutla çağırmalı.');
   }

@@ -12,10 +12,10 @@
   },
   "networkUsed": false,
   "userOrDemoDataIncluded": false,
-  "sourceStylesCssSha256": "68a6d052fb9672ffcc174ed8308718429b93aee82914f6fdbea435650f84519a",
-  "sourceTypographyCssSha256": "87411509e13f85f101d9182b53167442db9e54b851502e13169e69141809ff2d",
-  "combinedCssSha256": "1240d3398d549dd96809e74977b616b06f671d8d2e7cd59be11e5aee9a1416a2",
-  "visualManifestSha256": "192a1b147054d7467fd65435c019635b102026ccd8c3146ed7f05c2a471ae1ab",
+  "sourceStylesCssSha256": "8e1146b4ca90cac71b9c76a737be3152fb2a95cac7cf42460b80ffef78ea90fa",
+  "sourceTypographyCssSha256": "29988b66afb8a1097db65948da7d5710de0d2232b6bc05b5b0c86918d522d5f5",
+  "combinedCssSha256": "32c24a31d59f2c485be9989a74f7a45dc0f495f73011a8c50a748e1164d5cf51",
+  "visualManifestSha256": "e82d75bc15c66b7f0e7488c22c3dd4bf1734051e75b36bbbbcb474e588239db9",
   "entries": [
     {
       "captureId": "Bronze",
@@ -24,10 +24,10 @@
       "highContrast": false,
       "reduceMotion": false,
       "path": "apps/desktop/tests/fixtures/surum-paletleri/bronze-palet-ekran-goruntusu.png",
-      "sha256": "ec0748ac640881c5c764cdada3d3247b76c4b542b95ed4058cd5a32eae4d7c9e",
+      "sha256": "4051600948d9dd629e476d0307a8c8af7bdb1bc2e8a2e997383c4568897c9322",
       "width": 1280,
       "height": 800,
-      "bytes": 287948,
+      "bytes": 302353,
       "computedTokens": {
         "background": "#F4F3F0",
         "panel": "#FDFDFC",
@@ -64,15 +64,15 @@
           ".window-brand": {
             "clientWidth": 277,
             "scrollWidth": 277,
-            "clientHeight": 53,
-            "scrollHeight": 53,
+            "clientHeight": 71,
+            "scrollHeight": 71,
             "horizontalOverflow": 0
           },
           ".family-switcher": {
             "clientWidth": 251,
             "scrollWidth": 251,
-            "clientHeight": 69,
-            "scrollHeight": 69,
+            "clientHeight": 93,
+            "scrollHeight": 93,
             "horizontalOverflow": 0
           },
           ".sidebar nav": {
@@ -85,46 +85,40 @@
           ".sidebar-footer": {
             "clientWidth": 253,
             "scrollWidth": 253,
-            "clientHeight": 127,
-            "scrollHeight": 127,
+            "clientHeight": 124,
+            "scrollHeight": 124,
             "horizontalOverflow": 0
           },
           ".topbar": {
             "clientWidth": 1002,
             "scrollWidth": 1002,
-            "clientHeight": 63,
-            "scrollHeight": 63,
+            "clientHeight": 71,
+            "scrollHeight": 71,
             "horizontalOverflow": 0
           },
           ".page-content": {
             "clientWidth": 1002,
             "scrollWidth": 1002,
-            "clientHeight": 768,
-            "scrollHeight": 768,
+            "clientHeight": 754,
+            "scrollHeight": 754,
             "horizontalOverflow": 0
           },
           ".welcome-panel": {
-            "clientWidth": 944,
-            "scrollWidth": 944,
+            "clientWidth": 936,
+            "scrollWidth": 936,
             "clientHeight": 259,
             "scrollHeight": 259,
             "horizontalOverflow": 0
           },
           ".metric-grid": {
-            "clientWidth": 946,
-            "scrollWidth": 946,
-            "clientHeight": 256,
-            "scrollHeight": 256,
+            "clientWidth": 938,
+            "scrollWidth": 938,
+            "clientHeight": 262,
+            "scrollHeight": 262,
             "horizontalOverflow": 0
           }
         },
-        "clippedText": [
-          {
-            "tag": "STRONG",
-            "className": "",
-            "text": "Örnek içermeyen güvenli görünüm"
-          }
-        ]
+        "clippedText": []
       },
       "visualEffects": {
         ".sidebar": {
@@ -168,10 +162,10 @@
       "highContrast": false,
       "reduceMotion": false,
       "path": "apps/desktop/tests/fixtures/surum-paletleri/silver-palet-ekran-goruntusu.png",
-      "sha256": "f3ab7b2e088f0c29e2d1063a7a593d253146967d65f0c0aa6c30ad6aae3e8e3a",
+      "sha256": "4b84c6cebfd79741532744510a36c89c255972e2fe785d3df871f57b0629d778",
       "width": 1280,
       "height": 800,
-      "bytes": 288270,
+      "bytes": 302578,
       "computedTokens": {
         "background": "#F2F4F5",
         "panel": "#FCFDFD",
@@ -208,15 +202,15 @@
           ".window-brand": {
             "clientWidth": 277,
             "scrollWidth": 277,
-            "clientHeight": 53,
-            "scrollHeight": 53,
+            "clientHeight": 71,
+            "scrollHeight": 71,
             "horizontalOverflow": 0
           },
           ".family-switcher": {
             "clientWidth": 251,
             "scrollWidth": 251,
-            "clientHeight": 69,
-            "scrollHeight": 69,
+            "clientHeight": 93,
+            "scrollHeight": 93,
             "horizontalOverflow": 0
           },
           ".sidebar nav": {
@@ -229,46 +223,40 @@
           ".sidebar-footer": {
             "clientWidth": 253,
             "scrollWidth": 253,
-            "clientHeight": 127,
-            "scrollHeight": 127,
+            "clientHeight": 124,
+            "scrollHeight": 124,
             "horizontalOverflow": 0
           },
           ".topbar": {
             "clientWidth": 1002,
             "scrollWidth": 1002,
-            "clientHeight": 63,
-            "scrollHeight": 63,
+            "clientHeight": 71,
+            "scrollHeight": 71,
             "horizontalOverflow": 0
           },
           ".page-content": {
             "clientWidth": 1002,
             "scrollWidth": 1002,
-            "clientHeight": 768,
-            "scrollHeight": 768,
+            "clientHeight": 754,
+            "scrollHeight": 754,
             "horizontalOverflow": 0
           },
           ".welcome-panel": {
-            "clientWidth": 944,
-            "scrollWidth": 944,
+            "clientWidth": 936,
+            "scrollWidth": 936,
             "clientHeight": 259,
             "scrollHeight": 259,
             "horizontalOverflow": 0
           },
           ".metric-grid": {
-            "clientWidth": 946,
-            "scrollWidth": 946,
-            "clientHeight": 256,
-            "scrollHeight": 256,
+            "clientWidth": 938,
+            "scrollWidth": 938,
+            "clientHeight": 262,
+            "scrollHeight": 262,
             "horizontalOverflow": 0
           }
         },
-        "clippedText": [
-          {
-            "tag": "STRONG",
-            "className": "",
-            "text": "Örnek içermeyen güvenli görünüm"
-          }
-        ]
+        "clippedText": []
       },
       "visualEffects": {
         ".sidebar": {
@@ -312,10 +300,10 @@
       "highContrast": false,
       "reduceMotion": false,
       "path": "apps/desktop/tests/fixtures/surum-paletleri/gold-palet-ekran-goruntusu.png",
-      "sha256": "6745e07d767272be8612aac606cc89ed2ca1a2f59cc71a0c79dcd02446ca22bb",
+      "sha256": "841e4230a3609634f3bd556113131c32818595bd05d9c23702259635dcb98fde",
       "width": 1280,
       "height": 800,
-      "bytes": 289644,
+      "bytes": 304191,
       "computedTokens": {
         "background": "#F7F3E8",
         "panel": "#FFFDF6",
@@ -352,15 +340,15 @@
           ".window-brand": {
             "clientWidth": 277,
             "scrollWidth": 277,
-            "clientHeight": 53,
-            "scrollHeight": 53,
+            "clientHeight": 71,
+            "scrollHeight": 71,
             "horizontalOverflow": 0
           },
           ".family-switcher": {
             "clientWidth": 251,
             "scrollWidth": 251,
-            "clientHeight": 69,
-            "scrollHeight": 69,
+            "clientHeight": 93,
+            "scrollHeight": 93,
             "horizontalOverflow": 0
           },
           ".sidebar nav": {
@@ -373,46 +361,40 @@
           ".sidebar-footer": {
             "clientWidth": 253,
             "scrollWidth": 253,
-            "clientHeight": 127,
-            "scrollHeight": 127,
+            "clientHeight": 124,
+            "scrollHeight": 124,
             "horizontalOverflow": 0
           },
           ".topbar": {
             "clientWidth": 1002,
             "scrollWidth": 1002,
-            "clientHeight": 63,
-            "scrollHeight": 63,
+            "clientHeight": 71,
+            "scrollHeight": 71,
             "horizontalOverflow": 0
           },
           ".page-content": {
             "clientWidth": 1002,
             "scrollWidth": 1002,
-            "clientHeight": 768,
-            "scrollHeight": 768,
+            "clientHeight": 754,
+            "scrollHeight": 754,
             "horizontalOverflow": 0
           },
           ".welcome-panel": {
-            "clientWidth": 944,
-            "scrollWidth": 944,
+            "clientWidth": 936,
+            "scrollWidth": 936,
             "clientHeight": 259,
             "scrollHeight": 259,
             "horizontalOverflow": 0
           },
           ".metric-grid": {
-            "clientWidth": 946,
-            "scrollWidth": 946,
-            "clientHeight": 256,
-            "scrollHeight": 256,
+            "clientWidth": 938,
+            "scrollWidth": 938,
+            "clientHeight": 262,
+            "scrollHeight": 262,
             "horizontalOverflow": 0
           }
         },
-        "clippedText": [
-          {
-            "tag": "STRONG",
-            "className": "",
-            "text": "Örnek içermeyen güvenli görünüm"
-          }
-        ]
+        "clippedText": []
       },
       "visualEffects": {
         ".sidebar": {
@@ -456,10 +438,10 @@
       "highContrast": false,
       "reduceMotion": true,
       "path": "apps/desktop/tests/fixtures/surum-paletleri/bronze-200-yuzde-tipografi-ekran-goruntusu.png",
-      "sha256": "535bd6872425e1311a7767019254b79b1c7d37271853adb8405f57812aa6d189",
+      "sha256": "1e3b114564e8559680ed5b8c42f5de581b9957076791cad83980c6f2ce843509",
       "width": 1280,
       "height": 800,
-      "bytes": 345003,
+      "bytes": 335510,
       "computedTokens": {
         "background": "#F4F3F0",
         "panel": "#FDFDFC",
@@ -517,36 +499,36 @@
           ".sidebar-footer": {
             "clientWidth": 359,
             "scrollWidth": 359,
-            "clientHeight": 113,
-            "scrollHeight": 113,
+            "clientHeight": 106,
+            "scrollHeight": 106,
             "horizontalOverflow": 0
           },
           ".topbar": {
             "clientWidth": 896,
             "scrollWidth": 896,
-            "clientHeight": 63,
-            "scrollHeight": 63,
+            "clientHeight": 71,
+            "scrollHeight": 71,
             "horizontalOverflow": 0
           },
           ".page-content": {
             "clientWidth": 886,
             "scrollWidth": 886,
-            "clientHeight": 768,
-            "scrollHeight": 824,
+            "clientHeight": 754,
+            "scrollHeight": 848,
             "horizontalOverflow": 0
           },
           ".welcome-panel": {
-            "clientWidth": 828,
-            "scrollWidth": 828,
+            "clientWidth": 820,
+            "scrollWidth": 820,
             "clientHeight": 318,
             "scrollHeight": 318,
             "horizontalOverflow": 0
           },
           ".metric-grid": {
-            "clientWidth": 830,
-            "scrollWidth": 830,
-            "clientHeight": 276,
-            "scrollHeight": 276,
+            "clientWidth": 822,
+            "scrollWidth": 822,
+            "clientHeight": 290,
+            "scrollHeight": 290,
             "horizontalOverflow": 0
           }
         },
@@ -594,10 +576,10 @@
       "highContrast": true,
       "reduceMotion": true,
       "path": "apps/desktop/tests/fixtures/surum-paletleri/bronze-opak-erisilebilirlik-ekran-goruntusu.png",
-      "sha256": "7d51e0959ac00f8bb5221d69340f39971b1f74750da54c428655d095146a4c09",
+      "sha256": "48c937d880d50c18f55ff7e826c1a6d63c7d416e8a4f0f65168ca80868023f75",
       "width": 1280,
       "height": 800,
-      "bytes": 208468,
+      "bytes": 217375,
       "computedTokens": {
         "background": "#F4F3F0",
         "panel": "#FDFDFC",
@@ -634,15 +616,15 @@
           ".window-brand": {
             "clientWidth": 277,
             "scrollWidth": 277,
-            "clientHeight": 53,
-            "scrollHeight": 53,
+            "clientHeight": 71,
+            "scrollHeight": 71,
             "horizontalOverflow": 0
           },
           ".family-switcher": {
             "clientWidth": 251,
             "scrollWidth": 251,
-            "clientHeight": 69,
-            "scrollHeight": 69,
+            "clientHeight": 93,
+            "scrollHeight": 93,
             "horizontalOverflow": 0
           },
           ".sidebar nav": {
@@ -655,46 +637,40 @@
           ".sidebar-footer": {
             "clientWidth": 253,
             "scrollWidth": 253,
-            "clientHeight": 127,
-            "scrollHeight": 127,
+            "clientHeight": 124,
+            "scrollHeight": 124,
             "horizontalOverflow": 0
           },
           ".topbar": {
             "clientWidth": 1002,
             "scrollWidth": 1002,
-            "clientHeight": 63,
-            "scrollHeight": 63,
+            "clientHeight": 71,
+            "scrollHeight": 71,
             "horizontalOverflow": 0
           },
           ".page-content": {
             "clientWidth": 1002,
             "scrollWidth": 1002,
-            "clientHeight": 768,
-            "scrollHeight": 768,
+            "clientHeight": 754,
+            "scrollHeight": 754,
             "horizontalOverflow": 0
           },
           ".welcome-panel": {
-            "clientWidth": 942,
-            "scrollWidth": 942,
+            "clientWidth": 934,
+            "scrollWidth": 934,
             "clientHeight": 259,
             "scrollHeight": 259,
             "horizontalOverflow": 0
           },
           ".metric-grid": {
-            "clientWidth": 946,
-            "scrollWidth": 946,
-            "clientHeight": 256,
-            "scrollHeight": 256,
+            "clientWidth": 938,
+            "scrollWidth": 938,
+            "clientHeight": 262,
+            "scrollHeight": 262,
             "horizontalOverflow": 0
           }
         },
-        "clippedText": [
-          {
-            "tag": "STRONG",
-            "className": "",
-            "text": "Örnek içermeyen güvenli görünüm"
-          }
-        ]
+        "clippedText": []
       },
       "visualEffects": {
         ".sidebar": {

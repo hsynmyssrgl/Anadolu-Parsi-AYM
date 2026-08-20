@@ -67,7 +67,7 @@ export interface CommunicationAuditArchiveTruthView {
   readonly realRestoreDrillPerformed: false;
   readonly networkUsedByCurrentImplementation: false;
   readonly productionQueryApiComposed: true;
-  readonly productionEventProducerHooksComposed: false;
+  readonly productionEventProducerHooksComposed: true;
   readonly rendererAuditMutationAuthorityExposed: false;
 }
 
@@ -150,6 +150,6 @@ export const communicationAuditArchiveTruth = Object.freeze({
   realRestoreDrillPerformed: false as const,
   networkUsedByCurrentImplementation: false as const,
   productionQueryApiComposed: true as const,
-  productionEventProducerHooksComposed: false as const,
+  productionEventProducerHooksComposed: true as const,
   rendererAuditMutationAuthorityExposed: false as const
 });

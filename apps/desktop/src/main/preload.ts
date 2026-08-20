@@ -261,10 +261,17 @@ type EmergencyCardExportIpcResult =
 export type AppInfo = UserVisibleAppInfo;
 
 const rendererCrypto = globalThis.crypto;
-if (!rendererCrypto || typeof rendererCrypto.randomUUID !== 'function') {
-  throw new Error('Sandbox preload Web Crypto randomUUID kullanılamıyor.');
-}
-const randomUUID = (): string => rendererCrypto.randomUUID();
+const randomUUID = (): string => {
+  if (typeof rendererCrypto?.randomUUID === 'function') return rendererCrypto.randomUUID();
+  if (!rendererCrypto || typeof rendererCrypto.getRandomValues !== 'function') {
+    throw new Error('Sandbox preload Web Crypto güvenli rastgele sayı üretemiyor.');
+  }
+  const bytes = rendererCrypto.getRandomValues(new Uint8Array(16));
+  bytes[6] = ((bytes[6] ?? 0) & 0x0f) | 0x40;
+  bytes[8] = ((bytes[8] ?? 0) & 0x3f) | 0x80;
+  const hex = [...bytes].map((value) => value.toString(16).padStart(2,'0')).join('');
+  return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
+};
 const ARCHIVE_OPERATION_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/u;
 const rawInvoke = ipcRenderer.invoke.bind(ipcRenderer);
 const rendererSessionId = randomUUID();

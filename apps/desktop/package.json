@@ -49,7 +49,7 @@
   },
   "build": {
     "appId": "tr.anadoluparsi.aileyasammerkezi",
-    "productName": "ParsYuva AYM",
+    "productName": "ParsYuva Aile Yaşam Merkezi",
     "asar": true,
     "afterPack": "scripts/apply-electron-fuses.mjs",
     "forceCodeSigning": true,
@@ -67,7 +67,7 @@
       "target": [
         "nsis"
       ],
-      "artifactName": "ParsYuva-AYM-Bronze-20.08.2026.35-${arch}-Kurulum.${ext}",
+      "artifactName": "ParsYuva-Aile-Yasam-Merkezi-Bronze-20.08.2026.35-${arch}-Kurulum.${ext}",
       "icon": "build/icon.ico",
       "requestedExecutionLevel": "asInvoker"
     },
@@ -84,16 +84,16 @@
       "include": "build/installer.nsh",
       "createDesktopShortcut": "always",
       "createStartMenuShortcut": true,
-      "shortcutName": "ParsYuva AYM",
+      "shortcutName": "ParsYuva Aile Yaşam Merkezi",
       "runAfterFinish": true,
       "deleteAppDataOnUninstall": false,
       "installerIcon": "build/icon.ico",
       "uninstallerIcon": "build/icon.ico"
     },
     "copyright": "Copyright © 2026 ParsYuva",
-    "artifactName": "ParsYuva-AYM-Bronze-20.08.2026.35-${arch}-Kurulum.${ext}"
+    "artifactName": "ParsYuva-Aile-Yasam-Merkezi-Bronze-20.08.2026.35-${arch}-Kurulum.${ext}"
   },
-  "description": "ParsYuva AYM yerel öncelikli aile yaşam, güvenlik ve dijital hafıza merkezi.",
+  "description": "ParsYuva Aile Yaşam Merkezi yerel öncelikli aile yaşam, güvenlik ve dijital hafıza merkezi.",
   "author": {
     "name": "ParsYuva"
   }

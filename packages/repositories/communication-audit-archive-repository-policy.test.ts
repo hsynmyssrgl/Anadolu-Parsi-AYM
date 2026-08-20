@@ -1,6 +1,6 @@
 import { mkdtempSync,rmSync } from 'node:fs';import { tmpdir } from 'node:os';import { join } from 'node:path';
 import { afterEach,describe,expect,it } from 'vitest';import { asIsoDateTime,type Clock } from '@ppt/core';
-import { FAMILY_DATABASE_MIGRATIONS } from '@ppt/database';import { SqliteFamilyDatabaseRuntime } from '../../apps/desktop/src/main/family-database-runtime.js';
+import { FAMILY_DATABASE_MIGRATIONS,FAMILY_DATABASE_SCHEMA_GENERATION } from '@ppt/database';import { SqliteFamilyDatabaseRuntime } from '../../apps/desktop/src/main/family-database-runtime.js';
 const clock:Clock={now:()=>asIsoDateTime('2026-08-16T01:10:00.000Z')};const runtimes:SqliteFamilyDatabaseRuntime[]=[];const directories:string[]=[];
 afterEach(()=>{for(const runtime of runtimes.splice(0))runtime.close();for(const directory of directories.splice(0))rmSync(directory,{recursive:true,force:true});});
 const open=()=>{const directory=mkdtempSync(join(tmpdir(),'ppt-34h-repository-'));directories.push(directory);const runtime=new SqliteFamilyDatabaseRuntime({
@@ -10,7 +10,7 @@ describe('34-H communication audit archive migration boundary',()=>{
   it('owns migration 112 and immutable content-free audit/checkpoint ledgers',()=>{const runtime=open();
     expect(FAMILY_DATABASE_MIGRATIONS.find((migration)=>migration.version===112)).toMatchObject({version:112,name:'communication_audit_archive_integrity'});
     expect(runtime.database.prepare("SELECT value FROM database_metadata WHERE key='schema_generation'").get())
-      .toEqual({value:'REVISION-34-K-WINDOWS-RESILIENCE-UNIVERSAL-UX'});
+      .toEqual({value:FAMILY_DATABASE_SCHEMA_GENERATION});
     const tables=(runtime.database.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND
       name IN ('communication_audit_operations','communication_audit_events','communication_archive_integrity_checkpoints') ORDER BY name`).all() as Array<{name:string}>).map(row=>row.name);
     expect(tables).toEqual(['communication_archive_integrity_checkpoints','communication_audit_events','communication_audit_operations']);

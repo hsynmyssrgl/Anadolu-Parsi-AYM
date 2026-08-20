@@ -3,7 +3,7 @@ describe('34-G/H/I/J fail-honest renderer surfaces',()=>{it('exposes local contr
   const sources=['CommunicationFileSharingPanel.tsx','CommunicationAuditArchivePanel.tsx','DistributedOperationsPanel.tsx']
     .map(file=>readFileSync(`apps/desktop/src/renderer/${file}`,'utf8')).join('\n');
   for(const marker of ['Üretim dosya aktarımı ve zararlı dosya tarayıcısı yapılandırılmamıştır','acil servis değildir',
-    'Audit olayları mesaj, dosya, görüşme veya tutanak içeriğini kopyalayamaz','Üretim olay üretici kancaları henüz bağlı değildir.',
+    'Audit olayları mesaj, dosya, görüşme veya tutanak içeriğini kopyalayamaz','Henüz denetim olayına dönüşen bir iletişim değişikliği yapılmadı.',
     'Olgun Raft, mTLS sertifika otoritesi, mDNS, relay, Windows Service Host ve Apple istemcileri yapılandırılmamıştır',
     'özel consensus algoritması yazılmamıştır','gerçek Windows node matrisi `NOT_RUN` kalır'])expect(sources).toContain(marker);
   expect(sources).toContain('Güvenli düz metin önizleme');

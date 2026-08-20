@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import { asIsoDateTime, type Clock } from '@ppt/core';
-import { FAMILY_DATABASE_MIGRATIONS } from '@ppt/database';
+import { FAMILY_DATABASE_MIGRATIONS, FAMILY_DATABASE_SCHEMA_GENERATION } from '@ppt/database';
 import { SqliteFamilyDatabaseRuntime } from '../../apps/desktop/src/main/family-database-runtime.js';
 
 const NOW = asIsoDateTime('2026-08-16T02:40:00.000Z');
@@ -42,11 +42,11 @@ const seedOwner = (runtime: SqliteFamilyDatabaseRuntime): void => {
 describe('34-K resilience universal UX migration boundary', () => {
   it('owns strict migration 115 with exact receipt and provider evidence columns', () => {
     const runtime = open();
-    const migration = FAMILY_DATABASE_MIGRATIONS.at(-1);
+    const migration = FAMILY_DATABASE_MIGRATIONS.find((item) => item.version === 115);
     expect(migration).toMatchObject({version: 115, name: 'windows_resilience_universal_ux',
       checksum: 'e9e67d7ef5c3097f4e39ea3a01aca76a7f9b64fe5b54de8da4de8cfbfc42e5cc'});
     expect(runtime.database.prepare("SELECT value FROM database_metadata WHERE key='schema_generation'").get())
-      .toEqual({value: 'REVISION-34-K-WINDOWS-RESILIENCE-UNIVERSAL-UX'});
+      .toEqual({value: FAMILY_DATABASE_SCHEMA_GENERATION});
     const tableRows = runtime.database.prepare(`SELECT name,sql FROM sqlite_master WHERE type='table' AND name IN
       ('universal_ux_operations','universal_ux_preferences','policy_weakening_proposals','windows_resilience_evidence')
       ORDER BY name`).all() as Array<{name: string; sql: string}>;

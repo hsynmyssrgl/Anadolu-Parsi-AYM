@@ -9,6 +9,7 @@ import { AsyncStatePanel, ValidationSummary, canUndoGovernedDraft, useGovernedDr
 import { resolveRouteAsyncState } from './route-async-state';
 import { DEVICE_REAUTHORIZATION_CONFIRMATION, SECURITY_CENTER_LABEL, SECURITY_CENTER_ROUTE, canSubmitDeviceReauthorization, securityCenterNeedsAttention } from './security-center-navigation';
 import { FinancePlanningPanel } from './FinancePlanningPanel';
+import { BankaKurumIsareti } from './BankaKurumIsareti';
 import { LongTermPortfolioPanel } from './LongTermPortfolioPanel';
 import { ManagedLifePanel } from './ManagedLifePanel';
 import { HouseholdOperationsPanel } from './HouseholdOperationsPanel';
@@ -25,6 +26,8 @@ import { CommunicationRealtimeCallingPanel } from './CommunicationRealtimeCallin
 import { CommunicationRecordingRetentionPanel } from './CommunicationRecordingRetentionPanel';
 import { LocalTranslationLanguagePanel } from './LocalTranslationLanguagePanel';
 import { NarratedHelpCenter } from './NarratedHelpCenter';
+import { markMenuFirstVisitNarrated, menuFirstVisitNarrationText, shouldNarrateMenuFirstVisit, startMenuFirstVisitNarration } from './menu-first-visit-narration';
+import type { SilverHelpNarrationStatus } from './NarratedHelpCenter';
 import { localizeArchiveCenterNode, translateArchiveCenterCopy } from './ArsivMerkeziYerellestirme';
 import { localizeDigitalLegacyNode, translateDigitalLegacyCopy } from './DijitalMirasYerellestirme';
 import { localizeAiGovernanceNode, translateAiGovernanceCopy } from './YapayZekaYonetisimiYerellestirme';
@@ -200,6 +203,7 @@ const rendererAccessibilityPreferences = (
 });
 
 const shellPreviewMode = import.meta.env.DEV && new URLSearchParams(globalThis.location?.search ?? '').has('shell-preview');
+const menuNarrationPreviewMode = import.meta.env.DEV && new URLSearchParams(globalThis.location?.search ?? '').has('menu-narration-preview');
 
 const fallbackSnapshot: FamilyAppSnapshot = {
   family: { id: 'family-main', name: 'Ailem' },
@@ -714,7 +718,7 @@ function FirstRunIntroduction({audioMuted,onAudioMutedChange,onComplete}:{audioM
   const complete=()=>{cancelNarration();persistFirstRunIntroductionComplete(browserPreferenceStorage());playParsBrandSound();onComplete();};
   const speaking=narrationStatus==='speaking';
   const narrationStatusText=audioMuted?t('intro.audioMuted'):narrationStatus==='unavailable'?t('intro.audioUnavailable'):narrationStatus==='error'?t('intro.audioError'):speaking?t('intro.audioPlaying'):t('intro.audioReady');
-  return <main className="first-run-shell"><section className="first-run-card"><div className="first-run-brand"><img src={brandMarkUrl} alt=""/><span className="eyebrow">{t('intro.eyebrow')}</span><h1>ParsYuva AYM<br/><small>{t('brand.subtitle')}</small></h1></div><p className="first-run-lead">{t('intro.lead')}</p><ol className="first-run-steps">{narration.steps.map((step,index)=><li key={step}><span>{index+1}</span><p>{step.replace(/^(?:(?:Birinci|İkinci|Üçüncü) adım|Step (?:one|two|three)):\s*/u,'')}</p></li>)}</ol><div className="first-run-caption" aria-live="polite"><strong>{t('intro.caption')}</strong><p>{narration.text}</p><small role="status">{narrationStatusText} · {narrationRate==='slow'?t('intro.slowSpeed'):t('intro.normalSpeed')}</small></div><div className="first-run-actions"><Button onClick={toggleMuted}>{audioMuted?t('intro.unmute'):t('intro.mute')}</Button><Button onClick={()=>{if(speaking){cancelNarration();setNarrationStatus('idle');}else speak(false);}} disabled={audioMuted||narrationStatus==='unavailable'}>{speaking?t('intro.stop'):t('intro.restart')}</Button><Button onClick={()=>{cancelNarration();setNarrationStatus('idle');setNarrationRate(value=>value==='normal'?'slow':'normal');}}>{narrationRate==='slow'?t('intro.normal'):t('intro.slower')}</Button><Button tone="primary" onClick={complete}>{t('intro.start')}</Button></div><button className="first-run-skip" type="button" onClick={complete}>{t('intro.skip')}</button></section></main>;
+  return <main className="first-run-shell"><section className="first-run-card"><div className="first-run-brand"><img src={brandMarkUrl} alt=""/><span className="eyebrow">{t('intro.eyebrow')}</span><h1><span>ParsYuva</span><small>Aile Yaşam Merkezi</small></h1></div><p className="first-run-lead">{t('intro.lead')}</p><ol className="first-run-steps">{narration.steps.map((step,index)=><li key={step}><span>{index+1}</span><p>{step.replace(/^(?:(?:Birinci|İkinci|Üçüncü) adım|Step (?:one|two|three)):\s*/u,'')}</p></li>)}</ol><div className="first-run-caption" aria-live="polite"><strong>{t('intro.caption')}</strong><p>{narration.text}</p><small role="status">{narrationStatusText} · {narrationRate==='slow'?t('intro.slowSpeed'):t('intro.normalSpeed')}</small></div><div className="first-run-actions"><Button onClick={toggleMuted}>{audioMuted?t('intro.unmute'):t('intro.mute')}</Button><Button onClick={()=>{if(speaking){cancelNarration();setNarrationStatus('idle');}else speak(false);}} disabled={audioMuted||narrationStatus==='unavailable'}>{speaking?t('intro.stop'):t('intro.restart')}</Button><Button onClick={()=>{cancelNarration();setNarrationStatus('idle');setNarrationRate(value=>value==='normal'?'slow':'normal');}}>{narrationRate==='slow'?t('intro.normal'):t('intro.slower')}</Button><Button tone="primary" onClick={complete}>{t('intro.start')}</Button></div><button className="first-run-skip" type="button" onClick={complete}>{t('intro.skip')}</button></section></main>;
 }
 
 
@@ -726,7 +730,7 @@ function FirstRunSecuritySetup({onComplete}:{onComplete:(state:AuthStateView)=>v
   const [message,setMessage]=useState('');
   const begin=async()=>{try{if(!window.pardus)return;setSetup(await window.pardus.beginTwoFactorSetup());setMessage(language==='tr'?'Authenticator uygulamanıza anahtarı ekleyin ve kurtarma kodlarını güvenli yerde saklayın.':'Add the key to your authenticator application and keep the recovery codes in a safe place.');}catch(error){setMessage(error instanceof Error?error.message:language==='tr'?'Güvenlik kurulumu başlatılamadı.':'Security setup could not be started.');}};
   const finish=async()=>{try{if(!window.pardus||!setup||!saved||code.trim().length<6)return;const state=await window.pardus.enableTwoFactor({code:code.trim()});onComplete(state);playParsBrandSound();}catch(error){setMessage(error instanceof Error?error.message:language==='tr'?'Doğrulama kodu kabul edilmedi.':'The verification code was not accepted.');}};
-  return <main className="first-run-security-shell"><section className="first-run-card panel"><img src={brandMarkUrl} alt="ParsYuva AYM"/><span className="eyebrow">{t('security.eyebrow')}</span><h1>{t('security.title')}</h1><p>{t('security.body')}</p>{!setup?<Button tone="primary" onClick={()=>void begin()}>{t('security.start')}</Button>:<><div className="notes-card"><strong>{t('security.authenticator')}</strong><small>{t('security.key')}: {setup.secret}</small><small>{t('security.uri')}: {setup.otpauthUri}</small><strong>{t('security.recoveryCodes')}</strong><small>{setup.recoveryCodes.join(' · ')}</small><Button onClick={()=>void navigator.clipboard.writeText(setup.recoveryCodes.join('\n'))}>{t('security.copy')}</Button></div><label>{t('security.code')}<input inputMode="numeric" autoComplete="one-time-code" value={code} onChange={event=>setCode(event.target.value.replace(/\s+/g,''))}/></label><label className="check-label"><input type="checkbox" checked={saved} onChange={event=>setSaved(event.target.checked)}/>{t('security.saved')}</label><Button tone="primary" disabled={!saved||code.trim().length<6} onClick={()=>void finish()}>{t('security.finish')}</Button></>}{message&&<StatusMessage tone="info">{message}</StatusMessage>}</section></main>;
+  return <main className="first-run-security-shell"><section className="first-run-card panel"><img src={brandMarkUrl} alt="ParsYuva Aile Yaşam Merkezi"/><span className="eyebrow">{t('security.eyebrow')}</span><h1>{t('security.title')}</h1><p>{t('security.body')}</p>{!setup?<Button tone="primary" onClick={()=>void begin()}>{t('security.start')}</Button>:<><div className="notes-card"><strong>{t('security.authenticator')}</strong><small>{t('security.key')}: {setup.secret}</small><small>{t('security.uri')}: {setup.otpauthUri}</small><strong>{t('security.recoveryCodes')}</strong><small>{setup.recoveryCodes.join(' · ')}</small><Button onClick={()=>void navigator.clipboard.writeText(setup.recoveryCodes.join('\n'))}>{t('security.copy')}</Button></div><label>{t('security.code')}<input inputMode="numeric" autoComplete="one-time-code" value={code} onChange={event=>setCode(event.target.value.replace(/\s+/g,''))}/></label><label className="check-label"><input type="checkbox" checked={saved} onChange={event=>setSaved(event.target.checked)}/>{t('security.saved')}</label><Button tone="primary" disabled={!saved||code.trim().length<6} onClick={()=>void finish()}>{t('security.finish')}</Button></>}{message&&<StatusMessage tone="info">{message}</StatusMessage>}</section></main>;
 }
 
 export function InvitationAcceptancePanel({onAccepted,initiallyExpanded=false}:{onAccepted:(state:AuthStateView)=>Promise<void>;initiallyExpanded?:boolean}){
@@ -861,8 +865,8 @@ export function AuthScreen({ auth, onSetup, onLogin, onWindowsHelloLogin, onInvi
     finally{setBusy(false)}
   };
   return <main className="auth-shell">
-    <section className="auth-story" aria-label="ParsYuva AYM">
-      <div className="auth-brand"><img src={brandMarkUrl} alt=""/><div><strong>ParsYuva AYM</strong><small>{t('brand.subtitle')}</small></div></div>
+    <section className="auth-story" aria-label="ParsYuva Aile Yaşam Merkezi">
+      <div className="auth-brand"><img src={brandMarkUrl} alt=""/><div><strong>ParsYuva</strong><small>Aile Yaşam Merkezi</small></div></div>
       <div className="auth-story-copy"><span className="eyebrow">{t('auth.private')}</span><h1>{t('auth.story').split('\n').map((line,index)=><span key={line}>{line}{index===0&&<br/>}</span>)}</h1><p>{t('auth.storyBody')}</p></div>
       <div className="auth-trust"><span>✓</span><div><strong>{t('auth.localData')}</strong><small>{t('auth.noOnlineAccount')}</small></div></div>
     </section>
@@ -1572,7 +1576,7 @@ const createPasskeyRegistrationResponse=async(challenge:PasskeyChallengeView,cen
   if(!globalThis.navigator?.credentials)throw new Error('Bu cihazda WebAuthn kullanılamıyor; hiçbir passkey kaydı oluşturulmadı.');
   const credential=await globalThis.navigator.credentials.create({publicKey:{
     challenge:base64urlToBytes(challenge.challenge),
-    rp:{id:challenge.relyingPartyId,name:'ParsYuva AYM'},
+    rp:{id:challenge.relyingPartyId,name:'ParsYuva Aile Yaşam Merkezi'},
     user:{id:new TextEncoder().encode(String(center.key.accountId)),name:String(center.key.accountId),displayName:'Yerel aile hesabı'},
     pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
     timeout:passkeyTimeout(challenge.expiresAt),attestation:'none',
@@ -2510,6 +2514,9 @@ function FinanceOverviewScreen({people,records,valuations,institutions,bankAccou
   const [loanOwnerPersonId,setLoanOwner]=useState(people[0]?.id??''); const [loanInstitutionCode,setLoanInstitutionCode]=useState(''); const [loanTitle,setLoanTitle]=useState(''); const [loanKind,setLoanKind]=useState<LoanAccountView['kind']>('consumer'); const [loanRateType,setLoanRateType]=useState<LoanAccountView['rateType']>('fixed'); const [loanAnnualRate,setLoanAnnualRate]=useState(''); const [loanTermMonths,setLoanTermMonths]=useState(''); const [loanCurrency,setLoanCurrency]=useState('TRY'); const [loanOriginalPrincipal,setLoanOriginalPrincipal]=useState(''); const [loanInstallmentAmount,setLoanInstallmentAmount]=useState(''); const [loanRemainingPrincipal,setLoanRemainingPrincipal]=useState(''); const [loanDisbursedAt,setLoanDisbursedAt]=useState(''); const [loanFirstPaymentAt,setLoanFirstPaymentAt]=useState(''); const [loanEarlySettlementAmount,setLoanEarlySettlementAmount]=useState('0'); const [loanEarlySettlementQuotedAt,setLoanEarlySettlementQuotedAt]=useState(''); const [loanOverdueCount,setLoanOverdueCount]=useState('0'); const [loanOverdueAmount,setLoanOverdueAmount]=useState('0'); const [loanDaysPastDue,setLoanDaysPastDue]=useState('0'); const [loanInsuranceStatus,setLoanInsuranceStatus]=useState<LoanAccountView['insuranceStatus']>('none'); const [loanInsuranceProvider,setLoanInsuranceProvider]=useState(''); const [loanInsuranceReference,setLoanInsuranceReference]=useState(''); const [loanInsurancePremium,setLoanInsurancePremium]=useState('0'); const [loanInsuranceEndsAt,setLoanInsuranceEndsAt]=useState(''); const [loanCollateralType,setLoanCollateralType]=useState<LoanAccountView['collateralType']>('none'); const [loanCollateralDescription,setLoanCollateralDescription]=useState(''); const [loanCollateralValue,setLoanCollateralValue]=useState('0'); const [loanStatus,setLoanStatus]=useState<LoanAccountView['status']>('active'); const [loanPrivacy,setLoanPrivacy]=useState<LoanAccountView['privacy']>('private'); const [loanMessage,setLoanMessage]=useState('');
   const [paymentLoanId,setPaymentLoanId]=useState(''); const [loanPaymentAt,setLoanPaymentAt]=useState(''); const [loanPaymentSequence,setLoanPaymentSequence]=useState(''); const [loanPaymentPrincipal,setLoanPaymentPrincipal]=useState(''); const [loanPaymentInterest,setLoanPaymentInterest]=useState('0'); const [loanPaymentLateFee,setLoanPaymentLateFee]=useState('0'); const [loanPaymentNotes,setLoanPaymentNotes]=useState(''); const [loanPaymentMessage,setLoanPaymentMessage]=useState('');
   const customerInstitutions=institutions.filter((institution)=>institution.supportsCustomerAccounts);
+  const selectedBankInstitution=customerInstitutions.find((institution)=>institution.institutionCode===institutionCode);
+  const selectedCardInstitution=customerInstitutions.find((institution)=>institution.institutionCode===cardInstitutionCode);
+  const selectedLoanInstitution=customerInstitutions.find((institution)=>institution.institutionCode===loanInstitutionCode);
   useEffect(()=>{if(!institutionCode&&customerInstitutions[0])setInstitutionCode(customerInstitutions[0].institutionCode);},[institutionCode,customerInstitutions]);
   useEffect(()=>{if(!cardInstitutionCode&&customerInstitutions[0])setCardInstitutionCode(customerInstitutions[0].institutionCode);},[cardInstitutionCode,customerInstitutions]);
   useEffect(()=>{if(!loanInstitutionCode&&customerInstitutions[0])setLoanInstitutionCode(customerInstitutions[0].institutionCode);},[loanInstitutionCode,customerInstitutions]);
@@ -2533,7 +2540,7 @@ function FinanceOverviewScreen({people,records,valuations,institutions,bankAccou
     <section className="workspace-grid">
       <Surface className="workspace-form"><SectionHeader eyebrow="B4 güvenli veri sözleşmesi" title="Yeni banka hesabı"/>
         <label>Kayıt sahibi<select value={bankOwnerPersonId} onChange={event=>setBankOwner(event.target.value)}>{people.map(person=><option key={person.id} value={person.id}>{person.displayName}</option>)}</select></label>
-        <label>Banka / kurum<select value={institutionCode} onChange={event=>setInstitutionCode(event.target.value)}><option value="">Seçin</option>{customerInstitutions.map(institution=><option key={institution.institutionCode} value={institution.institutionCode}>{institution.institutionCode} · {institution.officialName}</option>)}</select></label>
+        <label className="bank-institution-picker"><span>Banka / kurum</span><span className="bank-institution-picker-control">{selectedBankInstitution&&<BankaKurumIsareti institution={selectedBankInstitution} compact/>}<select value={institutionCode} onChange={event=>setInstitutionCode(event.target.value)}><option value="">Seçin</option>{customerInstitutions.map(institution=><option key={institution.institutionCode} value={institution.institutionCode}>{institution.institutionCode} · {institution.officialName}</option>)}</select></span></label>
         <label>Hesap adı<input maxLength={100} value={bankAlias} onChange={event=>setBankAlias(event.target.value)} placeholder="Örn. Aile bütçesi"/></label>
         <label>IBAN<input autoComplete="off" spellCheck={false} maxLength={64} value={iban} onChange={event=>setIban(event.target.value)} placeholder="TRxx xxxx xxxx xxxx xxxx xxxx xx"/></label>
         <div className="notes-card" aria-live="polite"><strong>IBAN yapısal kontrolü: {ibanValidation?(ibanValidation.structurallyValid?'Geçerli':'Geçersiz'):'Bekleniyor'}</strong><small>Ülke/uzunluk {ibanValidation?.lengthValid?'✓':'—'} · MOD 97-10 {ibanValidation?.checksumValid?'✓':'—'} · TCMB kod eşleşmesi {ibanValidation?.institutionMatched?'✓':'—'}</small><small>Gerçek hesap doğrulaması: Yapılmadı · Sahiplik doğrulaması: Yapılmadı</small></div>
@@ -2547,12 +2554,12 @@ function FinanceOverviewScreen({people,records,valuations,institutions,bankAccou
         <Button tone="primary" onClick={()=>void createBankAccount()} disabled={!bankOwnerPersonId||!institutionCode||bankAlias.trim().length<2||!ibanValidation?.structurallyValid||ibanValidation.institutionCode!==institutionCode}>Banka hesabını kaydet</Button>{bankMessage&&<small>{bankMessage}</small>}
       </Surface>
       <Surface className="workspace-summary"><SectionHeader eyebrow={`${institutions.length} yerel katalog kaydı`} title={`${bankAccounts.length} banka hesabı`}/>
-        {bankAccounts.length===0?<EmptyState title="Banka hesabı yok" body="İlk hesabı eklediğinizde yalnız maskeli IBAN burada görünür."/>:bankAccounts.map(account=><div className="context-stat" key={account.id}><strong>{account.alias} · {account.ibanMasked}</strong><span>{account.institutionCode} · {account.institutionOfficialName} · {typeLabels[account.accountType]} · {account.currency} · %{(account.ownershipBasisPoints/100).toLocaleString('tr-TR',{maximumFractionDigits:2})}</span><small>IBAN yapısal olarak geçerli · Gerçek hesap doğrulanmadı · Sahiplik doğrulanmadı</small></div>)}
-        <div className="notes-card"><strong>Güvenli ikon kaynağı: yerel harf simgesi</strong><small>Uzak logo indirilmez. Katalog, TCMB Ödeme Sistemleri Katılımcıları 2026 listesine kaynak bağlıdır.</small></div>
+        {bankAccounts.length===0?<EmptyState title="Banka hesabı yok" body="İlk hesabı eklediğinizde yalnız maskeli IBAN burada görünür."/>:bankAccounts.map(account=><div className="context-stat bank-institution-summary" key={account.id}><BankaKurumIsareti institution={{institutionCode:account.institutionCode,officialName:account.institutionOfficialName}}/><div><strong>{account.alias} · {account.ibanMasked}</strong><span>{account.institutionCode} · {account.institutionOfficialName} · {typeLabels[account.accountType]} · {account.currency} · %{(account.ownershipBasisPoints/100).toLocaleString('tr-TR',{maximumFractionDigits:2})}</span><small>IBAN yapısal olarak geçerli · Gerçek hesap doğrulanmadı · Sahiplik doğrulanmadı</small></div></div>)}
+        <div className="notes-card"><strong>69 seçilebilir kurum için çevrimdışı yerel kurum işareti</strong><small>Güvenli ikon kaynağı: yerel harf simgesi tabanlı kurum işareti. İşaretler tanıma kolaylığı sağlar; resmî marka logosu veya banka desteği iddiası değildir. Katalog, güncel TCMB Ödeme Sistemleri Katılımcıları 2026 listesine kaynak bağlıdır.</small></div>
       </Surface>
       <Surface className="workspace-form"><SectionHeader eyebrow="B4-05 + B4-06 · yalnız son dört hane" title="Yeni kart profili"/>
         <label>Kart sahibi<select value={cardOwnerPersonId} onChange={event=>setCardOwner(event.target.value)}>{people.map(person=><option key={person.id} value={person.id}>{person.displayName}</option>)}</select></label>
-        <label>Banka / kurum<select value={cardInstitutionCode} onChange={event=>setCardInstitutionCode(event.target.value)}><option value="">Seçin</option>{customerInstitutions.map(institution=><option key={institution.institutionCode} value={institution.institutionCode}>{institution.institutionCode} · {institution.officialName}</option>)}</select></label>
+        <label className="bank-institution-picker"><span>Banka / kurum</span><span className="bank-institution-picker-control">{selectedCardInstitution&&<BankaKurumIsareti institution={selectedCardInstitution} compact/>}<select value={cardInstitutionCode} onChange={event=>setCardInstitutionCode(event.target.value)}><option value="">Seçin</option>{customerInstitutions.map(institution=><option key={institution.institutionCode} value={institution.institutionCode}>{institution.institutionCode} · {institution.officialName}</option>)}</select></span></label>
         <label>Ürün adı<input maxLength={120} value={cardProductName} onChange={event=>setCardProductName(event.target.value)} placeholder="Örn. Aile kredi kartı"/></label>
         <label>Son dört hane<input inputMode="numeric" autoComplete="off" maxLength={4} value={cardLast4} onChange={event=>setCardLast4(event.target.value.replace(/\D/gu,'').slice(0,4))} placeholder="1234"/></label>
         <label>Kart türü<select value={cardKind} onChange={event=>setCardKind(event.target.value as PaymentCardView['kind'])}><option value="credit">Kredi kartı</option><option value="debit">Banka kartı</option><option value="prepaid">Ön ödemeli</option></select></label>
@@ -2585,7 +2592,7 @@ function FinanceOverviewScreen({people,records,valuations,institutions,bankAccou
       </Surface>
       <Surface className="workspace-form"><SectionHeader eyebrow="B4-08 + B4-09 · manuel ve doğrulanmamış" title="Yeni kredi profili"/>
         <label>Kredi sahibi<select value={loanOwnerPersonId} onChange={event=>setLoanOwner(event.target.value)}>{people.map(person=><option key={person.id} value={person.id}>{person.displayName}</option>)}</select></label>
-        <label>Banka / kurum<select value={loanInstitutionCode} onChange={event=>setLoanInstitutionCode(event.target.value)}><option value="">Seçin</option>{customerInstitutions.map(institution=><option key={institution.institutionCode} value={institution.institutionCode}>{institution.institutionCode} · {institution.officialName}</option>)}</select></label>
+        <label className="bank-institution-picker"><span>Banka / kurum</span><span className="bank-institution-picker-control">{selectedLoanInstitution&&<BankaKurumIsareti institution={selectedLoanInstitution} compact/>}<select value={loanInstitutionCode} onChange={event=>setLoanInstitutionCode(event.target.value)}><option value="">Seçin</option>{customerInstitutions.map(institution=><option key={institution.institutionCode} value={institution.institutionCode}>{institution.institutionCode} · {institution.officialName}</option>)}</select></span></label>
         <label>Kredi adı<input maxLength={120} value={loanTitle} onChange={event=>setLoanTitle(event.target.value)} placeholder="Örn. Konut kredisi"/></label>
         <label>Kredi türü<select value={loanKind} onChange={event=>setLoanKind(event.target.value as LoanAccountView['kind'])}>{Object.entries(loanKindLabels).map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></label>
         <label>Oran türü<select value={loanRateType} onChange={event=>{const next=event.target.value as LoanAccountView['rateType'];setLoanRateType(next);if(next==='interest_free')setLoanAnnualRate('0');}}>{Object.entries(loanRateLabels).map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></label>
@@ -2808,6 +2815,8 @@ export function App() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(readSidebarState);
   const [searchOpen, setSearchOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [menuNarrationStatus,setMenuNarrationStatus]=useState<SilverHelpNarrationStatus>(menuNarrationPreviewMode?'speaking':'idle');
+  const [menuNarrationLabel,setMenuNarrationLabel]=useState(menuNarrationPreviewMode?(language==='tr'?'Gösterge Paneli':'Dashboard'):'');
   const [searchQuery, setSearchQuery] = useState('');
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -3196,7 +3205,7 @@ export function App() {
     else{const target=archivedEvents.find((event)=>event.id===eventId);if(target){const {archivedAt:_archivedAt,...restored}=target;setArchivedEvents((current)=>current.filter((event)=>event.id!==eventId));setSnapshot((current)=>({...current,events:[restored,...current.events],lastUpdatedAt:new Date().toISOString()}));}}
   };
 
-  const setupAdmin=async(input:SetupAdminInput)=>{if(!window.pardus)throw new Error('Güvenli kurulum bağlantısı başlatılamadı. Uygulamayı kapatıp yeniden açın.');const ticket=asyncWriteGuardRef.current.start('auth-transition');const state=await window.pardus.setupAdmin(input);if(!asyncWriteGuardRef.current.commit(ticket,()=>setAuth(state)))return;await bootstrapAuthenticatedSession();};
+  const setupAdmin=async(input:SetupAdminInput)=>{if(!window.pardus)throw new Error(language==='tr'?'Güvenli kurulum bağlantısı başlatılamadı. Uygulamayı tamamen kapatıp yeniden açın.':'The secure setup connection could not start. Quit the application completely, then reopen it.');const ticket=asyncWriteGuardRef.current.start('auth-transition');const state=await window.pardus.setupAdmin(input);if(!asyncWriteGuardRef.current.commit(ticket,()=>setAuth(state)))return;await bootstrapAuthenticatedSession();};
   const login=async(input:LoginInput)=>{if(window.pardus){const ticket=asyncWriteGuardRef.current.start('auth-transition');const state=await window.pardus.login(input);if(!asyncWriteGuardRef.current.commit(ticket,()=>setAuth(state)))return;await bootstrapAuthenticatedSession();}};
   const loginWithWindowsHello=async(input:LoginWithWindowsHelloInput)=>{if(window.pardus){const ticket=asyncWriteGuardRef.current.start('auth-transition');const result=await window.pardus.loginWithWindowsHello(input);if(!result.authenticated)throw new Error(windowsHelloOutcomeMessage(result.outcome));const state=await window.pardus.getAuthState();if(!asyncWriteGuardRef.current.commit(ticket,()=>setAuth(state)))return;await bootstrapAuthenticatedSession();}};
   const completeInvitationAcceptance=async(state:AuthStateView)=>{const ticket=asyncWriteGuardRef.current.start('auth-transition');if(!asyncWriteGuardRef.current.commit(ticket,()=>setAuth(state)))return;await bootstrapAuthenticatedSession();};
@@ -3225,6 +3234,27 @@ export function App() {
   const sessionOverlay=sessionOverlayVisible&&sessionLock
     ? <SessionLockOverlay state={sessionLock} twoFactorEnabled={Boolean(auth.twoFactorEnabled)} onContinue={continueSession} onLockNow={lockSessionNow} onUnlock={unlockSession}/>
     : null;
+
+  useEffect(()=>{
+    if(menuNarrationPreviewMode||!firstRunIntroCompleted||loading||!auth.authenticated||sessionOverlayVisible||accessibility.audioMuted)return;
+    const storage=browserPreferenceStorage();
+    if(!shouldNarrateMenuFirstVisit(storage,language,active))return;
+    markMenuFirstVisitNarrated(storage,language,active);
+    const text=menuFirstVisitNarrationText(active,activeItem.label,language);
+    setMenuNarrationLabel(activeItem.label);
+    const synthesis=browserSpeechSynthesis();
+    startMenuFirstVisitNarration({
+      text,language,synthesis,
+      createUtterance:typeof globalThis.SpeechSynthesisUtterance==='undefined'?undefined:(value)=>new globalThis.SpeechSynthesisUtterance(value),
+      onStatus:setMenuNarrationStatus
+    });
+    return()=>{try{synthesis?.cancel();}catch{/* Menü geçişi ses hatasıyla engellenmez. */}};
+  },[active,activeItem.label,accessibility.audioMuted,auth.authenticated,firstRunIntroCompleted,language,loading,sessionOverlayVisible]);
+
+  const stopMenuNarration=()=>{
+    try{browserSpeechSynthesis()?.cancel();}catch{/* Metin ve gezinme kullanılabilir kalır. */}
+    setMenuNarrationStatus('idle');
+  };
 
   if(!firstRunIntroCompleted) return auth.authenticated&&sessionOverlay
     ? sessionOverlay
@@ -3281,7 +3311,7 @@ export function App() {
       <aside className="sidebar">
         <div className="window-brand">
           <div className="brand-icon"><img src={brandMarkUrl} alt=""/></div>
-          <div className="brand-copy"><strong>ParsYuva AYM</strong><small>{t('brand.subtitle')}</small></div>
+          <div className="brand-copy"><strong>ParsYuva</strong><small>Aile Yaşam Merkezi</small></div>
           <button type="button" className="sidebar-toggle" aria-label={sidebarCollapsed ? t('shell.expand') : t('shell.collapse')} onClick={()=>setSidebarCollapsed((value)=>!value)}>{sidebarCollapsed ? '›' : '‹'}</button>
         </div>
         <div className="family-control">
@@ -3371,6 +3401,7 @@ export function App() {
         </section>
       </div>}
       {helpOpen&&<NarratedHelpCenter activeScreenLabel={activeItem.label} audioMuted={accessibility.audioMuted} onAudioMutedChange={(audioMuted)=>updateAccessibility({...accessibility,audioMuted})} onClose={()=>setHelpOpen(false)}/>}
+      {menuNarrationStatus==='speaking'&&<aside className="menu-first-narration" role="status" aria-live="polite"><span aria-hidden="true">◖</span><div><strong>{language==='tr'?`${menuNarrationLabel} sesli tanıtımı`:`${menuNarrationLabel} voice introduction`}</strong><small>{language==='tr'?'Bu bölüm ilk kez anlatılıyor.':'This section is being introduced for the first time.'}</small></div><Button onClick={stopMenuNarration}>{language==='tr'?'Durdur':'Stop'}</Button></aside>}
       {memberModal && <AddMemberModal fallbackPeople={snapshot.people} onClose={() => setMemberModal(false)} onSave={createMember} />}
       {locationModal && <AddLocationModal onClose={() => setLocationModal(false)} onSave={createLocation} />}
       {relationModal && <AddRelationModal fallbackPeople={snapshot.people} onClose={()=>setRelationModal(false)} onSave={createRelation} />}

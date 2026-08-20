@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import { asIsoDateTime, type Clock } from '@ppt/core';
+import { FAMILY_DATABASE_SCHEMA_GENERATION } from '@ppt/database';
 import { SqliteFamilyDatabaseRuntime } from '../../apps/desktop/src/main/family-database-runtime.js';
 
 const NOW=asIsoDateTime('2026-08-15T16:00:00.000Z');const clock:Clock={now:()=>NOW};
@@ -21,7 +22,7 @@ describe('34-D recording repository and migration boundary',()=>{
     expect(tables).toEqual(['communication_recording_consents','communication_recording_events','communication_recording_mutations',
       'communication_recording_requests','communication_recording_retention','communication_recording_segments']);
     expect(runtime.database.prepare("SELECT value FROM database_metadata WHERE key='schema_generation'").get())
-      .toEqual({value:'REVISION-34-K-WINDOWS-RESILIENCE-UNIVERSAL-UX'});
+      .toEqual({value:FAMILY_DATABASE_SCHEMA_GENERATION});
   });
 
   it('stores consent and retention metadata without media bytes, paths, keys, tokens or transcript text',()=>{

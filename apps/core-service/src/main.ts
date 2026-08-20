@@ -17,6 +17,10 @@ import {
 import { CoreServiceLocalAdminServer } from './local-admin-server.js';
 import { CoreServiceRuntime } from './core-service-runtime.js';
 import { CoreServicePolicyJournalMonotonicAuthority } from './policy-journal-monotonic-authority.js';
+import {
+  CoreServiceWindowsServiceControlServer,
+  readWindowsServiceControlConfiguration
+} from './windows-service-control-server.js';
 
 const LOCAL_ADMIN_ENDPOINT_ENV = 'PPT_CORE_SERVICE_LOCAL_ADMIN_ENDPOINT';
 const LOCAL_ADMIN_TOKEN_ENV = 'PPT_CORE_SERVICE_LOCAL_ADMIN_TOKEN';
@@ -243,6 +247,8 @@ export const createCoreServiceProcessHost = (
 
 export const runCoreServiceProcess = async (): Promise<void> => {
   const host = createCoreServiceProcessHost();
+  const serviceControlConfiguration = readWindowsServiceControlConfiguration();
+  let serviceControlServer: CoreServiceWindowsServiceControlServer | undefined;
   const instanceId = randomBytes(8).toString('hex');
   interface CoreServiceLogMetadata {
     readonly signal?: string;
@@ -291,7 +297,7 @@ export const runCoreServiceProcess = async (): Promise<void> => {
   };
   let shutdownPromise: Promise<void> | undefined;
 
-  const requestShutdown = (signal: 'SIGINT' | 'SIGTERM'): void => {
+  const requestShutdown = (signal: 'SIGINT' | 'SIGTERM' | 'HOST_CONTROL'): void => {
     if (shutdownPromise) return;
     process.removeListener('SIGINT', onSigint);
     process.removeListener('SIGTERM', onSigterm);
@@ -299,6 +305,7 @@ export const runCoreServiceProcess = async (): Promise<void> => {
       const stopping = host.stop();
       logProcessResult('info', 'core-service.stopping', { signal, ...healthMetadata() });
       await stopping;
+      await serviceControlServer?.stop();
       logProcessResult('info', 'core-service.stopped', healthMetadata());
       process.exitCode = 0;
     })().catch(() => {
@@ -313,6 +320,13 @@ export const runCoreServiceProcess = async (): Promise<void> => {
   process.once('SIGTERM', onSigterm);
   try {
     await host.start();
+    if (serviceControlConfiguration) {
+      serviceControlServer = new CoreServiceWindowsServiceControlServer({
+        ...serviceControlConfiguration,
+        requestShutdown: () => requestShutdown('HOST_CONTROL')
+      });
+      await serviceControlServer.start();
+    }
     if (!shutdownPromise) {
       logProcessResult('info', 'core-service.ready', healthMetadata());
     } else {
@@ -321,6 +335,7 @@ export const runCoreServiceProcess = async (): Promise<void> => {
   } catch (error) {
     process.removeListener('SIGINT', onSigint);
     process.removeListener('SIGTERM', onSigterm);
+    await serviceControlServer?.stop().catch(() => undefined);
     await host.stop().catch(() => undefined);
     throw error;
   }
