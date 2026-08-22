@@ -40,6 +40,10 @@
   --glass-surface:color-mix(in srgb,var(--release-panel) 86%,transparent);
   --glass-border:color-mix(in srgb,var(--release-accent-edge) 26%,var(--release-border));
   --glass-shadow:0 22px 64px rgba(55,35,18,.16);
+  --radius-control:14px;
+  --radius-action:12px;
+  --radius-surface:18px;
+  --radius-dialog:24px;
 }
 
 .household-operations-panel{grid-column:1/-1;display:grid;gap:18px;overflow:hidden}.household-operations-truth{display:grid;gap:5px;padding:14px 16px;border:1px solid color-mix(in srgb,var(--accent) 24%,var(--border));border-radius:16px;background:color-mix(in srgb,var(--accent) 7%,var(--surface));line-height:1.45}.household-operations-truth span{color:var(--muted);font-size:.9rem}.household-area-tabs{display:grid;grid-template-columns:repeat(8,minmax(105px,1fr));gap:7px;overflow-x:auto;padding:2px}.household-area-tabs button{display:flex;min-width:105px;align-items:center;justify-content:space-between;gap:8px;padding:10px 11px;border:1px solid var(--border);border-radius:13px;background:var(--surface);color:var(--text);font:inherit;cursor:pointer}.household-area-tabs button strong{display:grid;min-width:24px;height:24px;place-items:center;border-radius:999px;background:var(--surface-strong);font-size:.78rem}.household-area-tabs button.is-active{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--surface));box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 12%,transparent)}.household-operations-layout{display:grid;grid-template-columns:minmax(280px,.85fr) minmax(380px,1.15fr);gap:16px}.household-operation-form,.household-operation-list{display:grid;align-content:start;gap:14px;padding:16px;border:1px solid var(--border);border-radius:18px;background:color-mix(in srgb,var(--surface) 92%,transparent)}.household-operation-form h3,.household-operation-list h3{margin:0}.household-operation-form .form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.household-list-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}.household-operation-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid var(--border)}.household-operation-row:last-child{border-bottom:0}.household-operation-row>div:first-child{display:grid;gap:4px;min-width:0}.household-operation-row small{color:var(--muted);overflow-wrap:anywhere}.household-row-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}@media(max-width:1100px){.household-area-tabs{grid-template-columns:repeat(4,minmax(130px,1fr))}.household-operations-layout{grid-template-columns:1fr}}@media(max-width:680px){.household-area-tabs{grid-template-columns:repeat(2,minmax(125px,1fr))}.household-operation-form .form-grid{grid-template-columns:1fr}.household-operation-form .span-2{grid-column:auto}.household-operation-row{grid-template-columns:1fr}.household-row-actions{justify-content:flex-start}}
@@ -1406,6 +1410,11 @@ body:has(.app-shell[data-high-contrast="true"]) :is(.modal-backdrop,.narrated-he
 .first-run-security-shell{min-height:100vh;display:grid;place-items:center;padding:32px;background:var(--app-background,#f5f1e8)}
 .first-run-security-shell .first-run-card{width:min(760px,100%);display:grid;gap:18px}
 .first-run-security-shell .first-run-card>img{width:88px;height:88px;object-fit:contain}
+.first-run-security-form{display:grid;gap:16px;min-width:0}
+.first-run-security-field{display:grid;gap:8px;min-width:0;color:var(--release-text);font-size:16px;font-weight:700}
+.first-run-security-field input{width:100%;min-width:0;min-height:52px;padding:12px 16px;border:1px solid var(--release-border);border-radius:var(--radius-control);font-size:17px;line-height:24px}
+.first-run-security-form>.button.primary{width:100%;min-height:52px;border-radius:var(--radius-control)}
+.first-run-security-form .notes-card{min-width:0;overflow-wrap:anywhere;border-radius:var(--radius-surface)}
 .first-run-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:28px 0 0;padding:0;list-style:none;counter-reset:none}.first-run-steps li{display:grid;grid-template-columns:38px 1fr;gap:10px;align-items:start;padding:18px;border:1px solid rgba(255,255,255,.09);border-radius:18px;background:rgba(255,255,255,.045);animation:first-run-step-arrive .5s ease both}.first-run-steps li:nth-child(2){animation-delay:.12s}.first-run-steps li:nth-child(3){animation-delay:.24s}.first-run-steps li>span{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:linear-gradient(145deg,#f0c47f,#a5672f);color:#14212a;font-weight:900;box-shadow:0 8px 20px rgba(0,0,0,.25)}.first-run-steps p{margin:2px 0 0;color:#dce4e9;line-height:1.55}.first-run-brand img{animation:first-run-brand-breathe 3.4s ease-in-out infinite}.first-run-card{animation:first-run-card-arrive .6s cubic-bezier(.2,.75,.25,1) both}@keyframes first-run-card-arrive{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:none}}@keyframes first-run-step-arrive{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}@keyframes first-run-brand-breathe{0%,100%{filter:drop-shadow(0 0 0 rgba(228,168,95,0));transform:scale(1)}50%{filter:drop-shadow(0 0 14px rgba(228,168,95,.38));transform:scale(1.035)}}
 
 /* Silver hazırlığı — uygulama içi metin eşliğinde Türkçe sesli yardım. */
@@ -2082,6 +2091,23 @@ body:has(.app-shell[data-high-contrast="true"]) :is(.modal-backdrop,.narrated-he
 .app-shell :is(.panel,.metric-card,.onboarding-card,.notes-card,.status-message) { border-radius:16px; }
 .app-shell:not(.sidebar-collapsed) .family-switcher { min-height:76px;height:auto; }
 .app-shell:not(.sidebar-collapsed) .family-switcher strong { white-space:normal;overflow:visible;text-overflow:clip; }
+
+/* Ortak kontrol geometrisi: tum modullerde yumusak, olceklenebilir ve tutarli. */
+.app-shell :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),select,textarea),
+.modal :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),select,textarea){
+  min-width:0;
+  border-radius:var(--radius-control);
+}
+.app-shell label>:is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),select,textarea),
+.modal label>:is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),select,textarea){width:100%}
+.app-shell .button,.modal .button{border-radius:var(--radius-action)}
+.app-shell :is(.panel,.surface,.metric-card,.onboarding-card,.notes-card,.status-message){border-radius:var(--radius-surface)}
+.modal{border-radius:var(--radius-dialog)}
+@media(max-width:720px){
+  .first-run-security-shell{padding:16px}
+  .first-run-security-shell .first-run-card{padding:24px 20px;border-radius:var(--radius-dialog)}
+  .first-run-security-field input,.first-run-security-form>.button.primary{min-height:50px}
+}
 
 /* Finans kurum seçimi: çevrimdışı, erişilebilir ve her katalog girdisi için görünür işaret. */
 .bank-institution-picker{display:grid;gap:7px}.bank-institution-picker-control{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:10px}.bank-institution-picker-control select{width:100%;min-width:0}.bank-institution-mark{--bank-mark-background:#4f5d75;--bank-mark-foreground:#fff;display:inline-grid;place-items:center;flex:0 0 auto;width:46px;height:46px;padding:4px;border:1px solid color-mix(in srgb,var(--bank-mark-background) 76%,#fff);border-radius:14px;background:linear-gradient(145deg,color-mix(in srgb,var(--bank-mark-background) 88%,#fff),var(--bank-mark-background));color:var(--bank-mark-foreground);font-size:13px;font-weight:850;letter-spacing:-.025em;line-height:1;text-align:center;box-shadow:0 7px 16px color-mix(in srgb,var(--bank-mark-background) 24%,transparent)}.bank-institution-mark.is-compact{width:38px;height:38px;border-radius:11px;font-size:11px}.bank-institution-summary{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:start;gap:12px}.bank-institution-summary>div{display:grid;gap:3px;min-width:0}

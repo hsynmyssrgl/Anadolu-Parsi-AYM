@@ -11,6 +11,7 @@ import {
   type RepositoryExecutionContext
 } from '@ppt/repository-contracts';
 import type { RepositoryExecutionPolicyGuard } from '@ppt/repositories';
+import { resolveIpcRequestAdmissionPolicy } from './ipc-request-lifecycle.js';
 
 type RepositoryPolicyScope =
   | {
@@ -32,6 +33,14 @@ type RepositoryPolicyScope =
 export interface DesktopRepositoryPolicyBoundaryInput {
   readonly correlationId: CorrelationId;
   readonly boundary: string;
+}
+
+interface PendingExclusiveOperation {
+  readonly priorityWeight: number;
+  readonly sequence: number;
+  readonly operation: () => Promise<unknown>;
+  readonly resolve: (value: unknown) => void;
+  readonly reject: (reason: unknown) => void;
 }
 
 const REPOSITORY_BOOTSTRAP_BOUNDARIES = new Set([
@@ -71,7 +80,9 @@ const hasPolicyAuthorization = (
  */
 export class DesktopRepositoryPolicyScope {
   readonly #storage = new AsyncLocalStorage<RepositoryPolicyScope>();
-  #exclusiveTail: Promise<void> = Promise.resolve();
+  readonly #exclusiveQueue: PendingExclusiveOperation[] = [];
+  #exclusiveActive = false;
+  #exclusiveSequence = 0;
 
   public readonly guard: RepositoryExecutionPolicyGuard = Object.freeze({
     assert: (context: RepositoryExecutionContext): void => this.#assert(context)
@@ -110,7 +121,10 @@ export class DesktopRepositoryPolicyScope {
     input: DesktopRepositoryPolicyBoundaryInput,
     operation: () => T | Promise<T>
   ): Promise<T> {
-    return this.#runExclusive(async () => await this.runBootstrap(input, operation));
+    return this.#runExclusive(
+      Number.MAX_SAFE_INTEGER,
+      async () => await this.runBootstrap(input, operation)
+    );
   }
 
   public runPolicyResolution<T>(
@@ -134,13 +148,43 @@ export class DesktopRepositoryPolicyScope {
     input: DesktopRepositoryPolicyBoundaryInput,
     operation: () => T | Promise<T>
   ): Promise<T> {
-    return this.#runExclusive(async () => await this.runPolicyResolution(input, operation));
+    return this.#runExclusive(
+      resolveIpcRequestAdmissionPolicy(input.boundary).priorityWeight,
+      async () => await this.runPolicyResolution(input, operation)
+    );
   }
 
-  #runExclusive<T>(operation: () => Promise<T>): Promise<T> {
-    const scheduled = this.#exclusiveTail.then(operation, operation);
-    this.#exclusiveTail = scheduled.then(() => undefined, () => undefined);
-    return scheduled;
+  #runExclusive<T>(priorityWeight: number, operation: () => Promise<T>): Promise<T> {
+    return new Promise<T>((resolve, reject) => {
+      const sequence = this.#exclusiveSequence;
+      this.#exclusiveSequence += 1;
+      this.#exclusiveQueue.push({
+        priorityWeight,
+        sequence,
+        operation,
+        resolve: (value) => resolve(value as T),
+        reject
+      });
+      this.#exclusiveQueue.sort((left, right) =>
+        right.priorityWeight - left.priorityWeight || left.sequence - right.sequence
+      );
+      void this.#drainExclusiveQueue();
+    });
+  }
+
+  async #drainExclusiveQueue(): Promise<void> {
+    if (this.#exclusiveActive) return;
+    const pending = this.#exclusiveQueue.shift();
+    if (!pending) return;
+    this.#exclusiveActive = true;
+    try {
+      pending.resolve(await pending.operation());
+    } catch (error) {
+      pending.reject(error);
+    } finally {
+      this.#exclusiveActive = false;
+      void this.#drainExclusiveQueue();
+    }
   }
 
   #assert(context: RepositoryExecutionContext): void {

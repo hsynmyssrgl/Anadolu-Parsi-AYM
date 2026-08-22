@@ -109,6 +109,7 @@ const createHarness = (writable = true, trusted = true) => {
   });
   for (const channel of [
     'dashboard:getOverview',
+    'formDraft:getWorkspace',
     'family:createMember',
     'auth:login',
     'auth:beginTwoFactorSetup',
@@ -251,6 +252,50 @@ describe('31-U universal Desktop API policy enforcement', () => {
     expect(secondEntered).toBe(false);
     releaseFirst();
     await expect(Promise.all([first, second])).resolves.toEqual(['first', 'second']);
+    expect(maximumActive).toBe(1);
+  });
+
+  it('lets queued interactive work overtake standard work without concurrent SQLite access', async () => {
+    const { enforcement } = createHarness();
+    let releaseActive!: () => void;
+    const activeGate = new Promise<void>((resolve) => { releaseActive = resolve; });
+    const order: string[] = [];
+    let activeEntered = false;
+    let active = 0;
+    let maximumActive = 0;
+    const enter = (name: string): void => {
+      order.push(name);
+      active += 1;
+      maximumActive = Math.max(maximumActive, active);
+    };
+    const leave = (): void => { active -= 1; };
+    const first = enforcement.execute({
+      channel: 'dashboard:getOverview',
+      correlationId,
+      operation: async () => {
+        enter('active');
+        activeEntered = true;
+        await activeGate;
+        leave();
+        return 'active';
+      }
+    });
+    while (!activeEntered) await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    const standard = enforcement.execute({
+      channel: 'family:createMember',
+      correlationId,
+      operation: () => { enter('standard'); leave(); return 'standard'; }
+    });
+    const interactive = enforcement.execute({
+      channel: 'formDraft:getWorkspace',
+      correlationId,
+      operation: () => { enter('interactive'); leave(); return 'interactive'; }
+    });
+    await new Promise<void>((resolve) => setTimeout(resolve, 10));
+    expect(order).toEqual(['active']);
+    releaseActive();
+    await expect(Promise.all([first, standard, interactive])).resolves.toEqual(['active', 'standard', 'interactive']);
+    expect(order).toEqual(['active', 'interactive', 'standard']);
     expect(maximumActive).toBe(1);
   });
 
