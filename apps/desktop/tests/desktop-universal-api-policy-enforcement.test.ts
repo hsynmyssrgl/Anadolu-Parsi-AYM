@@ -459,7 +459,7 @@ describe('31-U universal Desktop API policy enforcement', () => {
     ];
 
     await expect(enforcement.execute({
-      channel: 'data:getSnapshotSections',
+      channel: 'dashboard:getOverview',
       correlationId,
       operation: () => allowedSuffixes.map((suffix) => repository.probe(
         repositoryContext(asCorrelationId(`${correlationId}:${suffix}`))
@@ -467,7 +467,7 @@ describe('31-U universal Desktop API policy enforcement', () => {
     })).resolves.toHaveLength(allowedSuffixes.length);
 
     await expect(enforcement.execute({
-      channel: 'data:getSnapshotSections',
+      channel: 'dashboard:getOverview',
       correlationId,
       operation: () => repository.probe(
         repositoryContext(asCorrelationId(`${correlationId}:unregistered-child`))
@@ -475,7 +475,7 @@ describe('31-U universal Desktop API policy enforcement', () => {
     })).rejects.toMatchObject({ code: 'TRANSACTION_CONTEXT_MISMATCH' });
 
     await expect(enforcement.execute({
-      channel: 'data:getSnapshotSections',
+      channel: 'dashboard:getOverview',
       correlationId,
       operation: () => repository.probe(
         repositoryContext(asCorrelationId(`${correlationId}:timeline-location-collection:nested`))
