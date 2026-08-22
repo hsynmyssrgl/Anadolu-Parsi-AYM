@@ -108,9 +108,9 @@ export class DesktopRepositoryPolicyScope {
 
   public runBootstrapExclusive<T>(
     input: DesktopRepositoryPolicyBoundaryInput,
-    operation: () => T
-  ): Promise<Awaited<T>> {
-    return this.#runExclusive(() => this.runBootstrap(input, operation));
+    operation: () => T | Promise<T>
+  ): Promise<T> {
+    return this.#runExclusive(async () => await this.runBootstrap(input, operation));
   }
 
   public runPolicyResolution<T>(
@@ -132,12 +132,12 @@ export class DesktopRepositoryPolicyScope {
 
   public runPolicyResolutionExclusive<T>(
     input: DesktopRepositoryPolicyBoundaryInput,
-    operation: () => T
-  ): Promise<Awaited<T>> {
-    return this.#runExclusive(() => this.runPolicyResolution(input, operation));
+    operation: () => T | Promise<T>
+  ): Promise<T> {
+    return this.#runExclusive(async () => await this.runPolicyResolution(input, operation));
   }
 
-  #runExclusive<T>(operation: () => T): Promise<Awaited<T>> {
+  #runExclusive<T>(operation: () => Promise<T>): Promise<T> {
     const scheduled = this.#exclusiveTail.then(operation, operation);
     this.#exclusiveTail = scheduled.then(() => undefined, () => undefined);
     return scheduled;
