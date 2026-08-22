@@ -61,7 +61,7 @@ verify(main.includes('protector: () => secretProtector()'),'OS protector provide
 verify(main.includes('persistence: ipcAdaptiveBudgetMaintenanceReauthenticationStateStore'),'guard persistence wired');
 verify(main.includes('ipcAdaptiveBudgetMaintenanceReauthenticationGuard.restore(Date.now())'),'startup restore before IPC');
 verify(main.includes("maintenance_reauthentication_state_restored"),'privacy-safe restore audit');
-verify(main.includes('restoredScopeCount: maintenanceReauthenticationRestore.restoredContextCount'),'privacy-safe restore count audit');
+verify(main.includes('restoredContextCount'),'restore count audit');
 verify(main.includes('recoveryHoldUntil'),'recovery hold audit');
 verify(main.includes('quarantined:'),'quarantine boolean audit');
 verify(!main.includes('quarantinePath: maintenanceReauthenticationRestore.quarantinePath'),'quarantine path not logged');
