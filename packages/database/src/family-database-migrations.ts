@@ -18306,7 +18306,6 @@ WHEN NEW.id<>OLD.id OR NEW.family_id<>OLD.family_id OR NEW.account_id<>OLD.accou
  OR julianday(NEW.updated_at)<julianday(OLD.updated_at) OR OLD.status IN ('locally_completed','rejected','cancelled')
  OR (OLD.status='requested' AND NEW.status NOT IN ('in_review','locally_completed','rejected','cancelled'))
  OR (OLD.status='in_review' AND NEW.status NOT IN ('locally_completed','rejected','cancelled'))
- OR (NEW.status='locally_completed' AND OLD.request_kind IN ('encrypted_export','legacy_export'))
  OR NOT EXISTS(SELECT 1 FROM governed_ai_memory_mutations m WHERE m.id=NEW.last_mutation_id
    AND m.mutation_kind=CASE
      WHEN NEW.status='locally_completed' AND OLD.request_kind IN ('encrypted_export','legacy_export') THEN 'rights_export_finalize'

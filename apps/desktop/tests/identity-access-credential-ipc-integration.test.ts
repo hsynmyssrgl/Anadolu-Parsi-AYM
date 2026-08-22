@@ -347,7 +347,10 @@ describe('33-P identity access credential IPC boundary', () => {
         maxQueuedPerSender: 4, queueTimeoutMs: 2_500
       });
       if (reads.has(channel)) {
-        expect(resolveIpcRequestLifecyclePolicy(channel)).toEqual({ cancellable: true, latestWins: true, timeoutMs: 10_000 });
+        const expectedLifecycle = channel === 'identityAccess:getCenter'
+          ? { cancellable: true, latestWins: false, timeoutMs: 30_000 }
+          : { cancellable: true, latestWins: true, timeoutMs: 10_000 };
+        expect(resolveIpcRequestLifecyclePolicy(channel)).toEqual(expectedLifecycle);
         expect(resolveIpcRequestRatePolicy(channel)).toEqual({ enabled: true, maxRequestsPerWindow: 120, windowMs: 60_000 });
       } else {
         expect(resolveIpcRequestLifecyclePolicy(channel)).toEqual({ cancellable: false, latestWins: false, timeoutMs: 0 });
