@@ -3545,7 +3545,7 @@ app.whenReady().then(async () => {
     return;
   }
   const rendererRoot = resolve(currentDir, '../renderer');
-  const rendererMediaTypes=Object.freeze(new Map<string,string>([['.html','text/html; charset=utf-8'],['.js','text/javascript; charset=utf-8'],['.css','text/css; charset=utf-8'],['.json','application/json; charset=utf-8'],['.svg','image/svg+xml'],['.png','image/png'],['.ico','image/x-icon'],['.woff2','font/woff2'],['.wasm','application/wasm']]));
+  const rendererMediaTypes=Object.freeze(new Map<string,string>([['.html','text/html; charset=utf-8'],['.js','text/javascript; charset=utf-8'],['.mjs','text/javascript; charset=utf-8'],['.css','text/css; charset=utf-8'],['.json','application/json; charset=utf-8'],['.svg','image/svg+xml'],['.png','image/png'],['.ico','image/x-icon'],['.woff2','font/woff2'],['.wasm','application/wasm']]));
   protocol.handle(PRIMARY_RENDERER_SCHEME, async (request) => {
     const offlineMapResponse = respondToOfflineFamilyMapRequest(request, app.getPath('userData'));
     if (offlineMapResponse) return offlineMapResponse;
