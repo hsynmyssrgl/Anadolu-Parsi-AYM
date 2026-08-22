@@ -111,6 +111,7 @@ export interface EntityCatalogServiceDependencies {
   readonly transactionExecutor: TransactionExecutor;
   readonly repository: EntityCatalogRepositoryPort;
   readonly currentAccountId: () => string;
+  readonly currentCorrelationId?: () => CorrelationId | undefined;
   readonly canReadEvent: (eventId: string) => boolean;
 }
 
@@ -121,6 +122,11 @@ export class EntityCatalogService {
     return { transaction: transaction.transaction, actor: { userId: asUserId(accountId), roles: ['reader'] }, correlationId, occurredAt: transaction.occurredAt };
   }
 
+  #correlationId(prefix: string): CorrelationId {
+    return this.dependencies.currentCorrelationId?.()
+      ?? asCorrelationId(`${prefix}-${randomUUID()}`);
+  }
+
   public listPeople(input: PersonCatalogPageInput = {}): PersonCatalogPageView {
     const limit = pageSize(input.limit);
     const query = boundedText(input.query, 'Kişi katalog araması').toLocaleLowerCase('tr-TR');
@@ -128,7 +134,7 @@ export class EntityCatalogService {
     const scope = scopeHash('person', accountId, { query });
     const decoded = decodeCursor(input.cursor, 'person', scope) as Extract<CursorEnvelope, { kind: 'person' }> | undefined;
     const cursor: PersonCatalogCursor | undefined = decoded ? { displayName: decoded.displayName, id: decoded.id } : undefined;
-    const correlationId = asCorrelationId(`person-catalog-${randomUUID()}`);
+    const correlationId = this.#correlationId('person-catalog');
     const started = performance.now();
     const result = this.dependencies.transactionExecutor.execute(correlationId, (transaction) => this.dependencies.repository.listPeoplePage(
       this.#context(correlationId, transaction, accountId),
@@ -157,7 +163,7 @@ export class EntityCatalogService {
     const scope = scopeHash('event', accountId, { query, personId: personIdText, kind, archiveMode });
     const decoded = decodeCursor(input.cursor, 'event', scope) as Extract<CursorEnvelope, { kind: 'event' }> | undefined;
     const cursor: EventCatalogCursor | undefined = decoded ? { startAt: decoded.startAt, id: decoded.id } : undefined;
-    const correlationId = asCorrelationId(`event-catalog-${randomUUID()}`);
+    const correlationId = this.#correlationId('event-catalog');
     const started = performance.now();
     const result = this.dependencies.transactionExecutor.execute(correlationId, (transaction) => this.dependencies.repository.listEventsPage(
       this.#context(correlationId, transaction, accountId),
@@ -184,7 +190,7 @@ export class EntityCatalogService {
     const personIds = uniqueIds(input.personIds, 'Kişi kimlikleri');
     const eventIds = uniqueIds(input.eventIds, 'Olay kimlikleri');
     const accountId = this.dependencies.currentAccountId();
-    const correlationId = asCorrelationId(`entity-catalog-lookup-${randomUUID()}`);
+    const correlationId = this.#correlationId('entity-catalog-lookup');
     const result = this.dependencies.transactionExecutor.execute(correlationId, (transaction) => {
       const context = this.#context(correlationId, transaction, accountId);
       const people = this.dependencies.repository.findPeopleByIds(context, asFamilyId('family-main'), personIds.map(asPersonId));

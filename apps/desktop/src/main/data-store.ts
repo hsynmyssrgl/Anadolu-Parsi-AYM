@@ -2203,6 +2203,7 @@ export class FamilyDataStore {
       transactionExecutor: this.#transactionExecutor,
       repository: this.#repositories.entityCatalogRepository,
       currentAccountId: () => this.#requireAuth(),
+      currentCorrelationId: () => this.#correlation?.current()?.correlationId,
       canReadEvent: (eventId) => this.#hasObjectPermission(this.#requireAuth(), 'event', eventId, 'read')
     });
     this.#listDataRetentionPoliciesUseCase = new ListDataRetentionPoliciesUseCase(dataLifecycleQuery);
