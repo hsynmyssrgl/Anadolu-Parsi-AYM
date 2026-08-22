@@ -267,9 +267,15 @@ const secureStartupReadChannels = new Set<string>([
   'auth:getState'
 ]);
 const destructiveSystemChannels = new Set<string>(['system:factoryReset']);
+const isRefreshSafeSingletonReadChannel = (channel: string): boolean =>
+  channel.endsWith(':getCenter')
+  || channel.endsWith(':getWorkspace')
+  || channel.endsWith(':getLocalModelStatus')
+  || channel === 'data-repair:workspace';
 
 export const resolveIpcRequestLifecyclePolicy = (channel: string): IpcRequestLifecyclePolicy => {
   if (destructiveSystemChannels.has(channel)) return Object.freeze({ cancellable: false, latestWins: false, timeoutMs: 0 });
+  if (isRefreshSafeSingletonReadChannel(channel)) return Object.freeze({ cancellable: true, latestWins: false, timeoutMs: 10_000 });
   if (secureStartupReadChannels.has(channel)) return Object.freeze({ cancellable: true, latestWins: true, timeoutMs: 10_000 });
   if(communicationAuditArchiveReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
   if(familyMeetingReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});

@@ -53,7 +53,10 @@ export const createRuntimeCorrelationId = (scope: 'ipc' | 'job' | 'startup' | 'm
 export const toIpcRendererError = (error: unknown): Error => {
   if (error instanceof Error) return error;
   if (isAppError(error)) {
-    const rendererError = new Error(`[${error.code}] ${error.message}`);
+    const reason = typeof error.details?.reason === 'string' ? error.details.reason : undefined;
+    const protocolMessage = typeof error.details?.protocolMessage === 'string' ? error.details.protocolMessage : undefined;
+    const diagnostic = [reason, protocolMessage].filter((value): value is string => Boolean(value)).join(' · ');
+    const rendererError = new Error(`[${error.code}] ${error.message}${diagnostic ? ` (${diagnostic})` : ''}`);
     rendererError.name = 'AppError';
     return rendererError;
   }
@@ -144,6 +147,7 @@ export const registerCorrelatedIpcHandler = <TArguments extends unknown[], TResu
         requestContext = input.transportSessions.accept(event.sender?.id ?? -1, input.channel, rawArguments[0]);
       } catch (error) {
         const reason = error instanceof IpcTransportProtocolError ? error.code : 'INVALID_REQUEST_CONTEXT';
+        const protocolMessage = error instanceof Error ? error.message : undefined;
         input.runtime.logger.warn({
           timestamp: input.runtime.clock.now(),
           service: 'desktop-main',
@@ -163,7 +167,7 @@ export const registerCorrelatedIpcHandler = <TArguments extends unknown[], TResu
           message: 'IPC taşıma bağlamı geçersiz veya artık güncel değil.',
           category: 'security',
           correlationId,
-          details: { channel: input.channel, reason }
+          details: { channel: input.channel, reason, ...(protocolMessage ? { protocolMessage } : {}) }
         });
       }
       const handlerArguments = rawArguments.slice(1);
