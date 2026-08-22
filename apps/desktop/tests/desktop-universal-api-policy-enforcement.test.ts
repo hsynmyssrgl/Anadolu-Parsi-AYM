@@ -215,6 +215,45 @@ describe('31-U universal Desktop API policy enforcement', () => {
     })).resolves.toMatchObject({ ok: true, value: 'repository-ok' });
   });
 
+  it('serializes protected application-service operations on the single SQLite authority boundary', async () => {
+    const { enforcement } = createHarness();
+    let releaseFirst!: () => void;
+    const firstGate = new Promise<void>((resolve) => { releaseFirst = resolve; });
+    let firstEntered = false;
+    let secondEntered = false;
+    let active = 0;
+    let maximumActive = 0;
+    const first = enforcement.execute({
+      channel: 'dashboard:getOverview',
+      correlationId,
+      operation: async () => {
+        firstEntered = true;
+        active += 1;
+        maximumActive = Math.max(maximumActive, active);
+        await firstGate;
+        active -= 1;
+        return 'first';
+      }
+    });
+    while (!firstEntered) await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    const second = enforcement.execute({
+      channel: 'family:createMember',
+      correlationId,
+      operation: () => {
+        secondEntered = true;
+        active += 1;
+        maximumActive = Math.max(maximumActive, active);
+        active -= 1;
+        return 'second';
+      }
+    });
+    await new Promise<void>((resolve) => setTimeout(resolve, 10));
+    expect(secondEntered).toBe(false);
+    releaseFirst();
+    await expect(Promise.all([first, second])).resolves.toEqual(['first', 'second']);
+    expect(maximumActive).toBe(1);
+  });
+
   it('rejects an unregistered direct repository bootstrap scope', () => {
     const { repositoryPolicyScope } = createHarness();
     const repository = new GuardedProbeRepository({ executionPolicyGuard: repositoryPolicyScope.guard });

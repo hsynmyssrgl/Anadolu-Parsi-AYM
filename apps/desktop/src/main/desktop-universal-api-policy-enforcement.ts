@@ -193,14 +193,14 @@ export class DesktopUniversalApiPolicyEnforcement {
           transport: 'typed-electron-ipc',
           ...binding
         }),
-        operation: () => this.#repositoryPolicyScope.runBootstrap({
+        operation: () => this.#repositoryPolicyScope.runBootstrapExclusive({
           correlationId: input.correlationId,
           boundary: input.channel
         }, input.operation)
       });
     }
     const intent = resolveDesktopUniversalApiIntent(input.channel, input.correlationId);
-    return this.#repositoryPolicyScope.runPolicyResolution({
+    return this.#repositoryPolicyScope.runPolicyResolutionExclusive({
       correlationId: input.correlationId,
       boundary: input.channel
     }, () => this.#enforcementPoint.execute(intent, this.#clusterFence, async (authorization) => {

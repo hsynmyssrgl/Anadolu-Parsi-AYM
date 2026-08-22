@@ -71,6 +71,7 @@ const hasPolicyAuthorization = (
  */
 export class DesktopRepositoryPolicyScope {
   readonly #storage = new AsyncLocalStorage<RepositoryPolicyScope>();
+  #exclusiveTail: Promise<void> = Promise.resolve();
 
   public readonly guard: RepositoryExecutionPolicyGuard = Object.freeze({
     assert: (context: RepositoryExecutionContext): void => this.#assert(context)
@@ -105,6 +106,13 @@ export class DesktopRepositoryPolicyScope {
     }), operation);
   }
 
+  public runBootstrapExclusive<T>(
+    input: DesktopRepositoryPolicyBoundaryInput,
+    operation: () => T
+  ): Promise<Awaited<T>> {
+    return this.#runExclusive(() => this.runBootstrap(input, operation));
+  }
+
   public runPolicyResolution<T>(
     input: DesktopRepositoryPolicyBoundaryInput,
     operation: () => T
@@ -120,6 +128,19 @@ export class DesktopRepositoryPolicyScope {
       correlationId: input.correlationId,
       boundary: input.boundary
     }), operation);
+  }
+
+  public runPolicyResolutionExclusive<T>(
+    input: DesktopRepositoryPolicyBoundaryInput,
+    operation: () => T
+  ): Promise<Awaited<T>> {
+    return this.#runExclusive(() => this.runPolicyResolution(input, operation));
+  }
+
+  #runExclusive<T>(operation: () => T): Promise<Awaited<T>> {
+    const scheduled = this.#exclusiveTail.then(operation, operation);
+    this.#exclusiveTail = scheduled.then(() => undefined, () => undefined);
+    return scheduled;
   }
 
   #assert(context: RepositoryExecutionContext): void {
