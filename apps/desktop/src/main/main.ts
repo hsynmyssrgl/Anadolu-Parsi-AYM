@@ -409,7 +409,7 @@ let uiLocalizationBootstrap: Readonly<UiLocalizationBootstrapView> = resolveUiLo
 const uiLanguagePreferencePath=():string=>join(app.getPath('userData'),'preferences','ui-language.json');
 const firstRunExperiencePath=():string=>join(app.getPath('userData'),'preferences','first-run-experience.json');
 const operatingSystemUiLanguage = (): string => selectOperatingSystemUiLanguage(
-  app.getSystemLocale(),
+  app.getSystemLocale().trim(),
   app.getPreferredSystemLanguages()
 );
 const resolveMainUiLocalization = (preference:UiLanguagePreference):Readonly<UiLocalizationBootstrapView> =>

@@ -192,7 +192,7 @@ check(help.includes('SILVER_HELP_TOPICS_EN')&&help.includes("utterance.lang = in
 check(desktopPackage.build?.nsis?.multiLanguageInstaller===true&&JSON.stringify(desktopPackage.build?.nsis?.installerLanguages)===JSON.stringify(['en_US','tr_TR']),'installer language configuration mismatch');
 check(installer.includes('LangString AymFinishTitle ${AYM_LANG_ENGLISH}')&&installer.includes('LangString AymFinishTitle ${AYM_LANG_TURKISH}'),'installer localized copy missing');
 for(const [name,source,marker] of [
-  ['distributed operations',distributed,"text('Cluster ve cihaz merkezi','Cluster and device center')"],
+  ['distributed operations',distributed,"text('Küme ve cihaz merkezi','Cluster and device center')"],
   ['universal UX',universalUx,"text('Tek aile görünümü','Unified family view')"],
   ['signed plugin',signedPlugin,"text('Eklenti ve dış sağlayıcı platformu','Plugin and external provider platform')"]
 ]) check(source.includes("useLocalization()")&&source.includes(marker),`${name} English localization binding missing`);
