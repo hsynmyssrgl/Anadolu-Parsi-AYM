@@ -34,5 +34,7 @@ describe('unified rounded control visual contract', () => {
   it('keeps compact interactive controls on the shared rounded language', () => {
     expect(styles).toContain('.tree-toolbar button { width: 29px; height: 29px; border: 1px solid var(--border); border-radius: var(--radius-md, 12px);');
     expect(styles).toContain('.segmented button { min-width: 185px; height: 32px; border: 0; background: transparent; border-radius: var(--radius-md, 12px);');
+    expect(styles).toContain('.family-location-map-canvas .maplibregl-ctrl-group{overflow:hidden;border:1px solid var(--release-border);border-radius:var(--radius-action,12px);');
+    expect(styles).toContain('.family-location-map-canvas .maplibregl-ctrl-group button{border-radius:var(--radius-action,12px);');
   });
 });
