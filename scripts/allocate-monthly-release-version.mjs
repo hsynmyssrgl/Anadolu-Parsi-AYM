@@ -25,6 +25,12 @@ const replaceRequired = (source, pattern, replacement, label) => {
   return source.replace(pattern, replacement);
 };
 
+const turkishReleaseStage = Object.freeze({
+  Bronze: 'Aktif Geliştirme',
+  Silver: 'Aktif Test',
+  Gold: 'Aktif Sürüm'
+});
+
 const updateReleaseJson = (value, release) => {
   const visit = (node, key = '') => {
     if (Array.isArray(node)) return node.map((item) => visit(item));
@@ -69,6 +75,11 @@ try {
       planned.set(path, jsonText(manifest));
     }
 
+    const windowsPackagerManifestPath = 'tools/windows-packager/package.json';
+    const windowsPackagerManifest = await readJson(windowsPackagerManifestPath);
+    windowsPackagerManifest.version = release.packageVersion;
+    planned.set(windowsPackagerManifestPath, jsonText(windowsPackagerManifest));
+
     const lockFile = await readJson('package-lock.json');
     lockFile.version = release.packageVersion;
     for (const [key, value] of Object.entries(lockFile.packages ?? {})) {
@@ -83,13 +94,21 @@ try {
     }
     planned.set('package-lock.json', jsonText(lockFile));
 
+    const windowsPackagerLockPath = 'tools/windows-packager/package-lock.json';
+    const windowsPackagerLock = await readJson(windowsPackagerLockPath);
+    windowsPackagerLock.version = release.packageVersion;
+    if (windowsPackagerLock.packages?.['']) windowsPackagerLock.packages[''].version = release.packageVersion;
+    planned.set(windowsPackagerLockPath, jsonText(windowsPackagerLock));
+
     const appMetaPath = 'packages/domain/src/app-meta.ts';
     let appMeta = await readFile(resolve(root, appMetaPath), 'utf8');
+    appMeta = replaceRequired(appMeta, /edition: '[^']+',/u, `edition: '${release.channel}',`, 'APP_META edition');
     appMeta = replaceRequired(appMeta, /version: '[^']+',/u, `version: '${release.version}',`, 'APP_META version');
     appMeta = replaceRequired(appMeta, /packageVersion: '[^']+',/u, `packageVersion: '${release.packageVersion}',`, 'APP_META packageVersion');
     appMeta = replaceRequired(appMeta, /releaseLabel: '[^']+',/u, `releaseLabel: '${release.visibleRelease}',`, 'APP_META releaseLabel');
     appMeta = replaceRequired(appMeta, /releaseId: '[^']+',/u, `releaseId: '${release.releaseId}',`, 'APP_META releaseId');
     appMeta = replaceRequired(appMeta, /monthlySequence: \d+,/u, `monthlySequence: ${release.monthlySequence},`, 'APP_META monthlySequence');
+    appMeta = replaceRequired(appMeta, /stage: '[^']+'/u, `stage: '${turkishReleaseStage[release.channel]}'`, 'APP_META stage');
     planned.set(appMetaPath, appMeta);
 
     ledger.current = { ...release, parentSourceSha256: ledger.current?.parentSourceSha256 ?? null };

@@ -3526,7 +3526,9 @@ export class FamilyDataStore {
             })))
       ]
     });
-    const auditBackfillCorrelationId = asCorrelationId(`audit-backfill-${randomUUID()}`);
+    const bootstrapCorrelationId = this.#correlation?.current()?.correlationId;
+    const auditBackfillCorrelationId = bootstrapCorrelationId
+      ?? asCorrelationId(`audit-backfill-${randomUUID()}`);
     const auditBackfillResult = this.#transactionExecutor.execute(auditBackfillCorrelationId, (transaction) =>
       this.#repositories.auditRepository.backfillMissingChain({
         transaction: transaction.transaction,
@@ -3536,10 +3538,12 @@ export class FamilyDataStore {
       })
     );
     if (!auditBackfillResult.ok) throw new Error(`[${auditBackfillResult.error.code}] ${auditBackfillResult.error.message}`);
-    const auditProtectionCorrelationId = asCorrelationId(`audit-storage-protection-${randomUUID()}`);
+    const auditProtectionCorrelationId = bootstrapCorrelationId
+      ?? asCorrelationId(`audit-storage-protection-${randomUUID()}`);
     const auditProtectionResult = this.#installAuditStorageProtectionUseCase.execute(auditProtectionCorrelationId);
     if (!auditProtectionResult.ok) throw new Error(`[${auditProtectionResult.error.code}] ${auditProtectionResult.error.message}`);
-    const ensureAdminCorrelationId = asCorrelationId(`ensure-family-admin-${randomUUID()}`);
+    const ensureAdminCorrelationId = bootstrapCorrelationId
+      ?? asCorrelationId(`ensure-family-admin-${randomUUID()}`);
     const ensureAdminResult = this.#transactionExecutor.execute(ensureAdminCorrelationId, (transaction) =>
       this.#repositories.accountRepository.ensureFamilyAdminExists({
         transaction: transaction.transaction,

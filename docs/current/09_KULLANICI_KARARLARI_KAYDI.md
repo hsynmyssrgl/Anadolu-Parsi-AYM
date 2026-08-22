@@ -1,8 +1,8 @@
 # Kullanıcı Kararları Kaydı
 
-- Görünür sürüm: **Bronze 20.08.2026.37**
+- Görünür sürüm: **Bronze 22.08.2026.45**
 - Makine okunur defter: `config/user-decision-ledger.json`
-- Aktif karar sayısı: **91**
+- Aktif karar sayısı: **95**
 
 Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağlayıcı kullanıcı kararlarını karar düzeyinde, etkilediği kural/belge/kod alanlarıyla saklar. Ham konuşma erişimi olmadan “tam transcript” iddiası yapılmaz.
 
@@ -74,6 +74,10 @@ Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağ
 - `DEC-260` — EK-001–EK-019 karar tamponunun çatışma denetimiyle ana sicillere birleştirilmesi; tam regresyon, kurulum yaşam döngüsü ve iki Git uzak deposunda aynı commit teslimi
 - `DEC-261` — Güncel ürün, kurulum, kısayol, yardım, sesli anlatım ve belge başlıklarında yalnız tam `ParsYuva Aile Yaşam Merkezi` adı; `AYM` yalnız tarihsel veya zorunlu teknik uyumluluk kimliği
 - `DEC-262` — Windows kurulum hedefi `C:\Program Files\PPT\ParsYuva`; kurulu ana dosya ve masaüstü/Başlat kısayolu `ParsYuva`; teslim EXE adı yalnız `ParsYuva-<Kanal>-GG.AA.YYYY.NN.exe`
+- `DEC-263` — Kod veya Windows paketleme değişikliğinde önceki ParsYuva installer EXE, blockmap ve SHA-256 dosyaları yeni build öncesinde silinir; release klasöründe yalnız güncel sürüm seti kalabilir
+- `DEC-264` — Bronze, Silver ve Gold görünür sürüm satırlarında kanal adı yalnız bir kez gösterilir; `stage` kanal adını yineleyemez
+- `DEC-265` — Her durum değiştiren işlemden önce güncel kural sicili, hash, kullanıcı onayı ve enforcement bağı doğrulanır; PASS olmadan işlem başlayamaz
+- `DEC-266` — Özel kurulum, ölçekli üç pars ilk aile ekranı, aynı dilde kadın ses önceliği/erkek ses yedeği, atomik SQLite başlangıcı, veri koruyan yükseltme, temiz tam derleme, paketli runtime kanıtı ve GitHub + haricî Git + haricî kaynak arşivi tek kabul zinciridir
 
 ## Bundan sonraki kararlar için zorunlu eşzamanlılık kuralı
 
@@ -81,4 +85,4 @@ Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağ
 
 `DEC-252` gereği bu yenilemedeki kapsamlı tarihsel tarama son temeldir. Bundan sonra eski build, arşiv ve checkpoint belgelerinin içeriği yeniden denetlenmez veya güncel karar kaynağı sayılmaz; yalnız değişmez `HISTORICAL` kayıt olarak korunur. Yeni denetimler aktif ve yeni belgelere uygulanır.
 
-Makine defteri yalnız açık kullanıcı kararlarını tutar. Türetilmiş paket/mimari kararlarının eksiksiz DEC-090–DEC-262 dizini ve dosya yolları `docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md` içindedir.
+Makine defteri yalnız açık kullanıcı kararlarını tutar. Türetilmiş paket/mimari kararlarının eksiksiz DEC-090–DEC-266 dizini ve dosya yolları `docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md` içindedir.

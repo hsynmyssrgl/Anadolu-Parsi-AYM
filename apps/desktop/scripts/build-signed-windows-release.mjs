@@ -53,6 +53,7 @@ if (activeDownloadOverrides.length > 0) {
   process.exit(1);
 }
 
+await script('scripts/clean-stale-windows-installers.mjs');
 await script('scripts/allocate-monthly-release-version.mjs');
 await script('scripts/run-governed-preflight.mjs');
 await npm('run', 'pretypecheck');

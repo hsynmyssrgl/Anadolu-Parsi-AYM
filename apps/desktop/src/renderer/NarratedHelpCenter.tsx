@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocalization } from './localization';
+import {waitForPreferredNarrationVoice,type NarrationVoice} from './accessibility';
 
 export type SilverHelpTopicId = 'getting-started' | 'current-screen' | 'privacy' | 'accessibility' | 'troubleshooting';
 export type SilverHelpNarrationStatus = 'idle' | 'speaking' | 'ready' | 'unavailable' | 'error';
@@ -56,10 +57,13 @@ interface HelpNarrationUtterance {
   lang: string;
   rate: number;
   pitch: number;
+  volume?:number;
+  voice?:NarrationVoice|null;
 }
 
 interface HelpNarrationSynthesis<TUtterance extends HelpNarrationUtterance> {
   cancel(): void;
+  resume?():void;
   speak(utterance: TUtterance): void;
 }
 
@@ -74,18 +78,24 @@ export const startSilverHelpNarration = <TUtterance extends HelpNarrationUtteran
   rate: 'normal' | 'slow';
   synthesis: HelpNarrationSynthesis<TUtterance> | undefined;
   createUtterance: ((text: string) => TUtterance) | undefined;
+  preferredVoice?:NarrationVoice|null;
+  requirePreferredVoice?:boolean;
   onStatus: (status: SilverHelpNarrationStatus) => void;
 }): SilverHelpNarrationStatus => {
   if (!input.synthesis || !input.createUtterance) {
     input.onStatus('unavailable');
     return 'unavailable';
   }
+  if(input.requirePreferredVoice&&!input.preferredVoice){input.onStatus('unavailable');return'unavailable';}
   try {
     input.synthesis.cancel();
+    input.synthesis.resume?.();
     const utterance = input.createUtterance(input.text);
     utterance.lang = input.language === 'en' ? 'en-US' : 'tr-TR';
     utterance.rate = input.rate === 'slow' ? 0.72 : 0.88;
     utterance.pitch = 0.95;
+    utterance.volume = 1;
+    if(input.preferredVoice)utterance.voice=input.preferredVoice;
     Object.assign(utterance, {
       onstart: () => input.onStatus('speaking'),
       onend: () => input.onStatus('ready'),
@@ -115,11 +125,13 @@ export function NarratedHelpCenter({
   activeScreenLabel,
   audioMuted,
   onAudioMutedChange,
+  onReplayIntroduction,
   onClose
 }: {
   activeScreenLabel: string;
   audioMuted: boolean;
   onAudioMutedChange: (muted: boolean) => void;
+  onReplayIntroduction:()=>void;
   onClose: () => void;
 }) {
   const {language}=useLocalization();
@@ -128,21 +140,29 @@ export function NarratedHelpCenter({
   const [status, setStatus] = useState<SilverHelpNarrationStatus>('idle');
   const dialogRef = useRef<HTMLElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
+  const narrationAttemptRef=useRef(0);
   const topics=language==='tr'?SILVER_HELP_TOPICS:SILVER_HELP_TOPICS_EN;
   const selected = topics.find((topic) => topic.id === selectedId) ?? topics[0]!;
   const text = useMemo(() => silverHelpNarrationText(selected, activeScreenLabel,language), [activeScreenLabel,language,selected]);
 
   const stop = () => {
+    narrationAttemptRef.current+=1;
     try { speechSynthesis()?.cancel(); } catch { /* Metin her durumda görünür kalır. */ }
     setStatus('idle');
   };
-  const speak = () => {
+  const speak = async() => {
     if (audioMuted) onAudioMutedChange(false);
+    const synthesis=speechSynthesis();
+    const attempt=++narrationAttemptRef.current;
+    const preferredVoice=await waitForPreferredNarrationVoice(synthesis,language);
+    if(attempt!==narrationAttemptRef.current)return;
     startSilverHelpNarration({
       text,
       language,
       rate,
-      synthesis: speechSynthesis(),
+      synthesis,
+      ...(preferredVoice?{preferredVoice}:{}),
+      requirePreferredVoice:true,
       createUtterance: typeof globalThis.SpeechSynthesisUtterance === 'undefined'
         ? undefined
         : (value) => new globalThis.SpeechSynthesisUtterance(value),
@@ -197,10 +217,11 @@ export function NarratedHelpCenter({
           <h3>{selected.id === 'current-screen' ? language==='tr'?`${activeScreenLabel} bölümü`:`${activeScreenLabel} section` : selected.title}</h3>
           <p>{text}</p>
           <div className="narrated-help-controls">
-            <button type="button" className="primary" onClick={speak}>{status === 'speaking' ? (language==='tr'?'Baştan anlat':'Play again') : audioMuted ? (language==='tr'?'Sesi aç ve anlat':'Turn on audio and narrate') : (language==='tr'?'Sesli anlat':'Narrate')}</button>
+            <button type="button" className="primary" onClick={()=>void speak()}>{status === 'speaking' ? (language==='tr'?'Baştan anlat':'Play again') : audioMuted ? (language==='tr'?'Sesi aç ve anlat':'Turn on audio and narrate') : (language==='tr'?'Sesli anlat':'Narrate')}</button>
             <button type="button" disabled={status !== 'speaking'} onClick={stop}>{language==='tr'?'Durdur':'Stop'}</button>
             <button type="button" aria-pressed={rate === 'slow'} onClick={() => { stop(); setRate((value) => value === 'normal' ? 'slow' : 'normal'); }}>{rate === 'slow' ? (language==='tr'?'Normal hız':'Normal speed') : (language==='tr'?'Daha yavaş':'Slower')}</button>
             <button type="button" aria-pressed={audioMuted} onClick={() => { stop(); onAudioMutedChange(!audioMuted); }}>{audioMuted ? (language==='tr'?'Sesi aç':'Turn sound on') : (language==='tr'?'Sesi kapat':'Turn sound off')}</button>
+            <button type="button" onClick={()=>{stop();onReplayIntroduction();}}>{language==='tr'?'Uygulama tanıtımını yeniden aç':'Replay application introduction'}</button>
           </div>
           <small role="status">{language==='tr'?narrationStatusText[status]:({idle:'Select a topic to listen.',speaking:'Voice narration is playing.',ready:'Narration completed.',unavailable:'Voice narration is unavailable on this device; you can read the text on screen.',error:'Voice narration could not be started; the text remains visible.'} as const)[status]}</small>
         </article>

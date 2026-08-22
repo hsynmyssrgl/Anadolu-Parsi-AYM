@@ -75,8 +75,12 @@ try {
     resolve(outputDirectory, 'main.mjs')
   );
   await copyFile(
-    resolve(desktopRoot, 'src/renderer/assets/brand-mark.png'),
+    resolve(desktopRoot, 'build/tray-icon.png'),
     resolve(outputDirectory, 'tray-icon.png')
+  );
+  await copyFile(
+    resolve(desktopRoot, 'build/icon.ico'),
+    resolve(outputDirectory, 'window-icon.ico')
   );
   await copyFile(
     resolve(repositoryRoot, 'config/gold-activation-trust.json'),

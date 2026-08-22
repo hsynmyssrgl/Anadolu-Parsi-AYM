@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PARSYUVA-AILE-YASAM-MERKEZI-TICARI-DEGISIKLIK-SICILI-V2",
   "temelTarihi": "2026-08-19",
-  "sonKayit": "TICARI-003",
+  "sonKayit": "TICARI-007",
   "kayitlar": [
     {
       "id": "TICARI-001",
@@ -48,6 +48,72 @@
         "docs/ticari-urun-temeli"
       ],
       "isListesiEtkisi": "Guncel kullanici yuzeyleri ve kurulum dosyasi tam ParsYuva Aile Yasam Merkezi adina gecirildi; AYM yalniz tarihsel veya zorunlu teknik uyumluluk kimliklerinde korunur.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-004",
+      "tarih": "2026-08-22",
+      "baslik": "Kod degisikliginde eski Windows installer artefaktlarinin temizlenmesi",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-263 ve acik kullanici karari",
+      "etkilenenAlanlar": [
+        "config/canonical-rule-registry.json",
+        "config/rule-enforcement-registry.json",
+        "scripts/clean-stale-windows-installers.mjs",
+        "scripts/verify-windows-installer-retention-policy.mjs",
+        "apps/desktop/release"
+      ],
+      "isListesiEtkisi": "IS-0208 eklendi; prebuild ve Windows paketleme komutlari onceki installer setlerini otomatik temizler, governed preflight yalniz guncel surum setini kabul eder.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-005",
+      "tarih": "2026-08-22",
+      "baslik": "Gorunur surum kanalinin tekillestirilmesi",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-264 ve acik kullanici karari",
+      "etkilenenAlanlar": [
+        "packages/domain/src/app-meta.ts",
+        "apps/desktop/src/renderer/App.tsx",
+        "scripts/verify-user-visible-release-display-policy.mjs",
+        "config/canonical-rule-registry.json"
+      ],
+      "isListesiEtkisi": "IS-0108 eklendi; Bronze Silver ve Gold surum satirlarinda kanal adi yalniz bir kez gosterilir.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-006",
+      "tarih": "2026-08-22",
+      "baslik": "Her islem oncesi zorunlu kural kontrolu",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-265 ve acik kullanici karari",
+      "etkilenenAlanlar": [
+        "C:/PPT/AYM/AGENTS.md",
+        "scripts/verify-operation-rule-check.mjs",
+        "scripts/run-governed-preflight.mjs",
+        "package.json",
+        "config/canonical-rule-registry.json"
+      ],
+      "isListesiEtkisi": "IS-0006 eklendi; her durum degistiren islemden once guncel kural kontrolu PASS olmadan islem baslayamaz.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-007",
+      "tarih": "2026-08-22",
+      "baslik": "Ozel ilk aile ve temiz cift yedek teslim zinciri",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-266, PR-232 ve acik kullanici karari",
+      "etkilenenAlanlar": [
+        "config/canonical-rule-registry.json",
+        "config/rule-enforcement-registry.json",
+        "apps/desktop/build/installer.nsh",
+        "apps/desktop/src/renderer",
+        "apps/desktop/src/main",
+        "packages/application/src/auth-use-cases.ts",
+        "scripts/protect-authoritative-source-external.mjs",
+        "docs/ticari-urun-temeli"
+      ],
+      "isListesiEtkisi": "IS-0109 ve IS-0209 eklendi; ozel installer ve ilk aile UX'i temiz tam rebuild, paketli runtime ve GitHub harici Git ile D kaynak readback teslim kanitlarina baglandi.",
       "senkronDurumu": "SYNCHRONIZED"
     }
   ]

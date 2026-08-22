@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "id": "PPT-CANONICAL-RULE-REGISTRY-V16",
+  "id": "PPT-CANONICAL-RULE-REGISTRY-V20",
   "product": "ParsYuva Aile Yaşam Merkezi",
   "upperBrand": "ParsYuva",
-  "effectiveRelease": "Bronze 20.08.2026.37",
+  "effectiveRelease": "Bronze 22.08.2026.45",
   "exceptionless": true,
   "previousRuleSet": {
     "version": "PROJECT-RULES-2026-08-02-V6",
     "sha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
   },
-  "ruleCount": 228,
-  "activeRuleCount": 207,
+  "ruleCount": 232,
+  "activeRuleCount": 211,
   "supersededRuleCount": 21,
   "rules": [
     {
@@ -1629,7 +1629,35 @@
       "state": "ACTIVE",
       "source": "USER_DECISION_DEC-262",
       "effectiveRelease": "Bronze 20.08.2026.37"
+    },
+    {
+      "id": "PR-229",
+      "text": "Kaynak kodda veya Windows paketleme davranışında değişiklik yapıldığında apps/desktop/release altındaki önceki kurulum artefaktları geçersiz olur ve yeni derleme başlamadan önce silinir. Temizlik ParsYuva kurulum EXE dosyalarını ve bunlara bağlı .blockmap ile .sha256 yan dosyalarını kapsar; paketleme sonrasında klasörde yalnız güncel görünür sürüme ait en fazla bir kurulum seti kalabilir. Kullanıcı verisi, kurulu uygulama, kaynak arşivi ve tarihsel yönetişim kanıtları bu temizliğin dışındadır.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-263",
+      "effectiveRelease": "Bronze 22.08.2026.43"
+    },
+    {
+      "id": "PR-230",
+      "text": "Kullanıcıya görünür sürüm satırlarında Bronze, Silver veya Gold kanal adı tam bir kez gösterilir. Kanal adı yalnız kanonik releaseLabel alanında bulunur; kanal-bağımsız yaşam döngüsü durumu olan stage alanı kanal adı içeremez. İlk kurulum, güvenli başlangıç, ana uygulama, Türkçe ve İngilizce yüzeyler kanal ile kanal içeren sürüm etiketini yeniden birleştiremez.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-264",
+      "effectiveRelease": "Bronze 22.08.2026.43"
+    },
+    {
+      "id": "PR-231",
+      "text": "Her durum değiştiren işlem başlamadan önce güncel kanonik kural sicili, yeniden hesaplanan kural hash'i, kullanıcı onayı, Proje Anayasası bağı ve tüm aktif kuralların fail-closed enforcement kayıtları doğrulanır. Kod, dosya, yapılandırma, belge, test, derleme, paketleme, kurulum, silme, yayımlama veya dış sisteme yazma işlemi kontrol PASS olmadan başlayamaz. Salt okunur inceleme yalnız uygulanacak kuralları belirleyebilir; kural veya hash değişirse sonraki mutasyondan önce kontrol yeniden çalışır. Waiver, sessiz atlama ve eski makbuz kullanımı yasaktır.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-265",
+      "effectiveRelease": "Bronze 22.08.2026.43"
+    },
+    {
+      "id": "PR-232",
+      "text": "Özel Windows kurulum karşılama yüzeyi, ilk aile oluşturma ekranı ve temiz paket teslim zinciri tek bağlayıcı kabul kapsamıdır. Kurulum sayfası ParsYuva marka/paletini kullanır; dekoratif hareket gerçek ilerleme gibi gösterilemez. İlk aile ekranı 900x640 görünümde yatay taşmadan çalışır, üç pars ailesi hareket azaltma tercihine uyar, pencere ve tepsi simgeleri küçük yüzeyde seçilir. Türkçe ve İngilizce anlatımda aynı dilde kadın sesi önceliklidir; bulunamazsa aynı dilde erkek ses yedeği kullanılır ve ses çıkışı doğrulanmadan duyuldu iddiası kurulamaz. Güncelleme kişisel veriyi korur ve yıkıcı kaldırma seçimini açmaz. Teslimden önce tüm çalışma alanları sıfırdan derlenir, eski installer artefaktları silinir, paketlenmiş gerçek uygulama sürümü ve açılışı sınanır, SHA-256 ile imza durumu kaydedilir; kesin kaynak commit’i GitHub ve haricî Git yedeğine gönderilip haricî disk kaynak arşivi geri-okumayla doğrulanmadan paket teslimi tamamlanmış sayılamaz.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-266",
+      "effectiveRelease": "Bronze 22.08.2026.45"
     }
   ],
-  "rulesSha256": "c7cd9a0b82e58d3bf9dbc3aca7cf38d452b73b7e5bc361690e84d94821a7b25d"
+  "rulesSha256": "a11d80649bc74759371fe68f7f5b8c0ab12c1cd6a9e77e09c7e96a9a3a7e068b"
 }

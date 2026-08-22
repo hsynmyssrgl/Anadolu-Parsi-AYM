@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "id": "PARSYUVA-AILE-YASAM-MERKEZI-TICARI-KURAL-BAGI-V2",
+  "id": "PARSYUVA-AILE-YASAM-MERKEZI-TICARI-KURAL-BAGI-V4",
   "durum": "ACTIVE",
   "istisnaIzinli": false,
   "anaKuralKaynagi": "../06_KOD/app/config/canonical-rule-registry.json",
-  "anaKuralSiciliId": "PPT-CANONICAL-RULE-REGISTRY-V16",
-  "anaKuralSayisi": 228,
-  "aktifKuralSayisi": 207,
+  "anaKuralSiciliId": "PPT-CANONICAL-RULE-REGISTRY-V20",
+  "anaKuralSayisi": 232,
+  "aktifKuralSayisi": 211,
   "degistirilmisKuralSayisi": 21,
-  "anaKuralSha256": "c7cd9a0b82e58d3bf9dbc3aca7cf38d452b73b7e5bc361690e84d94821a7b25d",
+  "anaKuralSha256": "a11d80649bc74759371fe68f7f5b8c0ab12c1cd6a9e77e09c7e96a9a3a7e068b",
   "yurutmeKapisi": "../06_KOD/app/scripts/run-governed-preflight.mjs",
   "temelAlanDogrulamaKapisi": "11_OTOMASYON/dogrula-ticari-temel-alani.mjs",
   "kurallar": [
@@ -63,6 +63,42 @@
       "metin": "Kirli veya paylasilan calisma agaci temiz kabul edilmez; kullanici degisiklikleri silinmez ve teslim kaniti yeniden uretilir.",
       "durum": "ACTIVE",
       "kaynak": "PR-187 ve ticari temel manifestosu",
+      "yurutme": "FAIL_CLOSED",
+      "kanitZorunlu": true
+    },
+    {
+      "id": "TK-007",
+      "baslik": "Eski installer artefakti tutulmaz",
+      "metin": "Kod veya Windows paketleme davranisi degistiginde onceki ParsYuva installer EXE, blockmap ve SHA-256 dosyalari yeni build oncesinde silinir; yalniz guncel surum seti kalabilir.",
+      "durum": "ACTIVE",
+      "kaynak": "PR-229 ve DEC-263",
+      "yurutme": "FAIL_CLOSED",
+      "kanitZorunlu": true
+    },
+    {
+      "id": "TK-008",
+      "baslik": "Gorunur surum kanali yinelenmez",
+      "metin": "Bronze Silver ve Gold gorunur surum satirlarinda kanal adi yalniz releaseLabel icinde ve tam bir kez gosterilir; stage kanal adi iceremez.",
+      "durum": "ACTIVE",
+      "kaynak": "PR-230 ve DEC-264",
+      "yurutme": "FAIL_CLOSED",
+      "kanitZorunlu": true
+    },
+    {
+      "id": "TK-009",
+      "baslik": "Her islemden once kural kontrolu",
+      "metin": "Her durum degistiren islemden once guncel kural sicili hash onay ve tum aktif enforcement baglari PASS olmali; kural degisirse kontrol yenilenir ve atlanamaz.",
+      "durum": "ACTIVE",
+      "kaynak": "PR-231 ve DEC-265",
+      "yurutme": "FAIL_CLOSED",
+      "kanitZorunlu": true
+    },
+    {
+      "id": "TK-010",
+      "baslik": "Ozel ilk aile ve temiz teslim zinciri ayrilamaz",
+      "metin": "Ozel installer, olcekli uc pars ilk aile ekrani, ayni dilde kadin ses onceligi ve erkek ses yedegi, atomik SQLite baslangici, veri koruyan yukseltme, temiz tam derleme, paketli runtime kaniti ve GitHub harici Git ile harici kaynak arsivi yedegi tek fail-closed kabul zinciridir.",
+      "durum": "ACTIVE",
+      "kaynak": "PR-232 ve DEC-266",
       "yurutme": "FAIL_CLOSED",
       "kanitZorunlu": true
     }

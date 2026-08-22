@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "id": "PPT-RULE-ENFORCEMENT-REGISTRY-V1",
-  "release": "Bronze 20.08.2026.37",
-  "canonicalRulesSha256": "c7cd9a0b82e58d3bf9dbc3aca7cf38d452b73b7e5bc361690e84d94821a7b25d",
-  "activeRuleCount": 207,
+  "release": "Bronze 22.08.2026.45",
+  "canonicalRulesSha256": "a11d80649bc74759371fe68f7f5b8c0ab12c1cd6a9e77e09c7e96a9a3a7e068b",
+  "activeRuleCount": 211,
   "defaultPolicy": "FAIL_CLOSED_NO_WAIVER",
   "entries": [
     {
@@ -2867,6 +2867,61 @@
       "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
       "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
       "trackedIn": "docs/current/15_EK_KURAL_TOPLU_BIRLESTIRME_SICILI.md"
+    },
+    {
+      "ruleId": "PR-229",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-windows-installer-retention-policy.mjs",
+        "scripts/clean-stale-windows-installers.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "apps/desktop/release"
+    },
+    {
+      "ruleId": "PR-230",
+      "mode": "PRODUCT_SURFACE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-user-visible-release-display-policy.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "packages/domain/src/app-meta.ts"
+    },
+    {
+      "ruleId": "PR-231",
+      "mode": "OPERATION_PREFLIGHT_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-operation-rule-check.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "AGENTS.md"
+    },
+    {
+      "ruleId": "PR-232",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-first-family-clean-release-policy.mjs",
+        "scripts/verify-windows-installer-retention-policy.mjs",
+        "apps/desktop/scripts/verify-installer.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "docs/decisions/DEC-266-ozel-kurulum-ilk-aile-temiz-paket-ve-cift-yedek-kabul-zinciri.md"
     }
   ]
 }

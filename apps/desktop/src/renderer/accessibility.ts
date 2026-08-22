@@ -47,10 +47,66 @@ export interface FirstRunNarrationUtterance {
   lang: string;
   rate: number;
   pitch: number;
+  volume?: number;
+  voice?:NarrationVoice|null;
 }
+
+export interface NarrationVoice {readonly name:string;readonly lang:string;}
+const FEMALE_VOICE_HINTS=['emel','gülay','gulay','eda','ayşe','ayse','seda','selin','aylin','filiz','zeynep','zira','aria','jenny','hazel','susan','samantha','victoria','karen','moira','fiona','tessa','female','woman','kadın'] as const;
+export const selectPreferredFemaleNarrationVoice=<TVoice extends NarrationVoice>(voices:readonly TVoice[],language:'tr'|'en'):TVoice|undefined=>{
+  const localePrefix=language==='tr'?'tr':'en';
+  const female=(voice:NarrationVoice)=>FEMALE_VOICE_HINTS.some((hint)=>voice.name.toLocaleLowerCase('tr-TR').includes(hint));
+  return voices.find((voice)=>voice.lang.toLocaleLowerCase('en-US').startsWith(localePrefix)&&female(voice));
+};
+
+export const selectPreferredNarrationVoice=<TVoice extends NarrationVoice>(
+  voices:readonly TVoice[],
+  language:'tr'|'en'
+):TVoice|undefined=>{
+  const localePrefix=language==='tr'?'tr':'en';
+  const languageVoices=voices.filter((voice)=>voice.lang.toLocaleLowerCase('en-US').startsWith(localePrefix));
+  return selectPreferredFemaleNarrationVoice(languageVoices,language)??languageVoices[0];
+};
+
+export interface NarrationVoiceProvider<TVoice extends NarrationVoice> {
+  getVoices(): readonly TVoice[];
+  addEventListener(type:'voiceschanged',listener:()=>void):void;
+  removeEventListener(type:'voiceschanged',listener:()=>void):void;
+}
+
+export const waitForPreferredNarrationVoice=<TVoice extends NarrationVoice>(
+  synthesis:NarrationVoiceProvider<TVoice>|undefined,
+  language:'tr'|'en',
+  timeoutMs=1_600
+):Promise<TVoice|undefined>=>{
+  if(!synthesis)return Promise.resolve(undefined);
+  const immediate=selectPreferredNarrationVoice(synthesis.getVoices(),language);
+  if(immediate)return Promise.resolve(immediate);
+  return new Promise((resolve)=>{
+    let settled=false;
+    let timer:ReturnType<typeof setTimeout>|undefined;
+    const finish=(voice:TVoice|undefined)=>{
+      if(settled)return;
+      settled=true;
+      if(timer!==undefined)globalThis.clearTimeout(timer);
+      synthesis.removeEventListener('voiceschanged',onVoicesChanged);
+      resolve(voice);
+    };
+    const onVoicesChanged=()=>{
+      const voice=selectPreferredNarrationVoice(synthesis.getVoices(),language);
+      if(voice)finish(voice);
+    };
+    synthesis.addEventListener('voiceschanged',onVoicesChanged);
+    timer=globalThis.setTimeout(
+      ()=>finish(selectPreferredNarrationVoice(synthesis.getVoices(),language)),
+      Math.max(0,timeoutMs)
+    );
+  });
+};
 
 export interface FirstRunNarrationSynthesis<TUtterance extends FirstRunNarrationUtterance> {
   cancel(): void;
+  resume?():void;
   speak(utterance: TUtterance): void;
 }
 
@@ -116,6 +172,8 @@ export const startFirstRunNarration = <TUtterance extends FirstRunNarrationUtter
   rate?: 'normal' | 'slow';
   synthesis: FirstRunNarrationSynthesis<TUtterance> | undefined;
   createUtterance: ((text: string) => TUtterance) | undefined;
+  preferredVoice?:NarrationVoice|null;
+  requirePreferredVoice?:boolean;
   onStatus: (status: FirstRunNarrationStatus) => void;
 }): FirstRunNarrationStatus => {
   if (input.muted) {
@@ -126,13 +184,17 @@ export const startFirstRunNarration = <TUtterance extends FirstRunNarrationUtter
     input.onStatus('unavailable');
     return 'unavailable';
   }
+  if(input.requirePreferredVoice&&!input.preferredVoice){input.onStatus('unavailable');return'unavailable';}
   try {
     const narration = firstRunNarrationContent(input.language ?? 'tr');
     input.synthesis.cancel();
+    input.synthesis.resume?.();
     const utterance = input.createUtterance(narration.text);
     utterance.lang = narration.locale;
     utterance.rate = input.rate === 'slow' ? 0.72 : 0.88;
     utterance.pitch = 0.95;
+    utterance.volume = 1;
+    if(input.preferredVoice)utterance.voice=input.preferredVoice;
     Object.assign(utterance, {
       onstart:() => input.onStatus('speaking'),
       onend:() => input.onStatus('ready'),

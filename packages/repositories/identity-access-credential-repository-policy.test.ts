@@ -124,8 +124,9 @@ describe('33-P identity access credential repository policy', () => {
     insertMutation(database,{id:'mutation-old-own',kind:'passkey_register',resourceId:'unreferenced-own',receiptHash:ownReceipt,occurredAt:oldAt});
     const foreignReceipt=seedReceipt(database,'passkey_credential','unreferenced-foreign','create',{accountId:'account-foreign',personId:'person-foreign',occurredAt:oldAt});
     insertMutation(database,{id:'mutation-old-foreign',kind:'passkey_register',resourceId:'unreferenced-foreign',receiptHash:foreignReceipt,occurredAt:oldAt,accountId:'account-foreign',personId:'person-foreign'});
-    const recentReceipt=seedReceipt(database,'passkey_credential','unreferenced-recent','create');
-    insertMutation(database,{id:'mutation-recent-own',kind:'passkey_register',resourceId:'unreferenced-recent',receiptHash:recentReceipt});
+    const recentAt=new Date().toISOString();
+    const recentReceipt=seedReceipt(database,'passkey_credential','unreferenced-recent','create',{occurredAt:recentAt});
+    insertMutation(database,{id:'mutation-recent-own',kind:'passkey_register',resourceId:'unreferenced-recent',receiptHash:recentReceipt,occurredAt:recentAt});
     const repository=new SqliteIdentityAccessCredentialRepository();
     const context={transaction:database,actor:{userId:ACCOUNT_ID,roles:['owner'],personId:PERSON_ID},correlationId:asCorrelationId('33-p-retention-owner'),occurredAt:asIsoDateTime(NOW)} as unknown as RepositoryExecutionContext;
     const before=Number((database.prepare(`SELECT count(*) AS count FROM identity_access_mutations`).get() as {count:number}).count);

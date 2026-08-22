@@ -7,8 +7,11 @@ export {
   USER_VISIBLE_APP_INFO,
   USER_VISIBLE_DELIVERY_FILE_NAME,
   createUserVisibleDeliveryFileName,
+  formatUserVisibleReleaseSummary,
+  releaseStageForChannel,
   type UserVisibleAppInfo,
-  type UserVisibleReleaseChannel
+  type UserVisibleReleaseChannel,
+  type UserVisibleReleaseLanguage
 } from './app-meta.js';
 export {
   DEFAULT_UI_LOCALIZATION,

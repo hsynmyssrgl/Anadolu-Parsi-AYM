@@ -2414,6 +2414,11 @@ const appLocalizationResult = (result: unknown): boolean => {
   return result.language === (primaryLanguage === 'tr' ? 'tr' : 'en')
     && result.fallbackUsed === (primaryLanguage !== 'tr' && primaryLanguage !== 'en');
 };
+const firstRunExperienceResult = (result: unknown): boolean =>
+  healthCareExactRecord(result, ['introductionCompleted', 'narrationOffered'])
+  && typeof result.introductionCompleted === 'boolean'
+  && typeof result.narrationOffered === 'boolean'
+  && (!result.introductionCompleted || result.narrationOffered === true);
 const healthCareCanonicalValues = (
   value: unknown,
   allowed: ReadonlySet<unknown>,
@@ -5629,6 +5634,9 @@ export const evaluateIpcIntegrationResultPolicy = (channel: string, result: unkn
   if (channel === 'app:getLocalizationBootstrap' || channel === 'app:setLanguagePreference') {
     return appLocalizationResult(result) ? accepted() : rejected('APP_LOCALIZATION_RESULT_INVALID', '$result');
   }
+  if (channel === 'app:getFirstRunExperience' || channel === 'app:markFirstRunNarrationOffered' || channel === 'app:completeFirstRunIntroduction') {
+    return firstRunExperienceResult(result) ? accepted() : rejected('APP_FIRST_RUN_EXPERIENCE_RESULT_INVALID', '$result');
+  }
   if (channel.startsWith('app:')) return rejected('UNKNOWN_IPC_CHANNEL', '$result');
   if (channel === UNIFIED_AUTHORIZED_SEARCH_IPC_CHANNEL) return unifiedAuthorizedSearchResult(result);
   if (familyAiAssistantChannels.has(channel)) return familyAiResult(channel,result);
@@ -5696,7 +5704,9 @@ export const evaluateIpcIntegrationResultPolicy = (channel: string, result: unkn
 };
 
 export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unknown[]): IpcIntegrationPolicyDecision => {
-  if (channel === 'app:getInfo' || channel === 'app:getLocalizationBootstrap') return zeroArguments(args);
+  if (channel === 'app:getInfo' || channel === 'app:getLocalizationBootstrap'
+    || channel === 'app:getFirstRunExperience' || channel === 'app:markFirstRunNarrationOffered'
+    || channel === 'app:completeFirstRunIntroduction') return zeroArguments(args);
   if (channel === 'app:setLanguagePreference') {
     return args.length === 1 && (args[0] === 'system' || args[0] === 'tr' || args[0] === 'en')
       ? accepted()
@@ -5808,11 +5818,58 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
       return liveLocationConsentInput(args);
     case 'privacyControl:shutdownLostDevice':
       return lostDeviceShutdownInput(args);
+    case 'auth:getExternalIdentityProviders':
+    case 'auth:getState':
+    case 'auth:logout':
+    case 'auth:beginTwoFactorSetup':
+    case 'auth:listTrustedDevices':
     case 'auth:getSessionLockState':
     case 'auth:recordSessionActivity':
     case 'auth:lockSession':
     case 'auth:getWindowsHelloState':
       return zeroArguments(args);
+    case 'auth:setup':
+      return exactObject(args, ['familyName', 'displayName', 'password', 'email'], (value) =>
+        optionalBoundedString(value.familyName, 160)
+        && boundedString(value.displayName, 120)
+        && boundedString(value.password, 1_024)
+        && optionalBoundedString(value.email, 320));
+    case 'auth:login':
+      return exactObject(args, ['accountId', 'password', 'secondFactorCode', 'email'], (value) =>
+        optionalBoundedString(value.accountId, 128)
+        && boundedString(value.password, 1_024)
+        && optionalBoundedString(value.secondFactorCode, 256)
+        && optionalBoundedString(value.email, 320));
+    case 'auth:changePassword':
+      return exactObject(args, ['currentPassword', 'newPassword'], (value) =>
+        boundedString(value.currentPassword, 1_024)
+        && boundedString(value.newPassword, 1_024));
+    case 'auth:enableTwoFactor':
+      return exactObject(args, ['code'], (value) => boundedString(value.code, 256));
+    case 'auth:disableTwoFactor':
+      return exactObject(args, ['password', 'code'], (value) =>
+        boundedString(value.password, 1_024) && boundedString(value.code, 256));
+    case 'auth:trustCurrentDevice':
+      return exactObject(args, ['password', 'code', 'displayName'], (value) =>
+        boundedString(value.password, 1_024)
+        && boundedString(value.code, 256)
+        && optionalBoundedString(value.displayName, 120));
+    case 'auth:reauthorizeCurrentDeviceAfterRecovery':
+      return exactObject(args, ['password', 'code', 'confirmation', 'displayName'], (value) =>
+        boundedString(value.password, 1_024)
+        && boundedString(value.code, 256)
+        && value.confirmation === 'GÜVENLİ CİHAZI YENİDEN YETKİLENDİR'
+        && optionalBoundedString(value.displayName, 120));
+    case 'auth:listSecurityEventReceipts':
+      return optionalLimit(args, 500);
+    case 'auth:verifySecurityEventReceipt':
+      return args.length === 1 && boundedString(args[0], 1_048_576)
+        ? accepted()
+        : rejected('ARGUMENTS_INVALID', '$');
+    case 'auth:revokeTrustedDevice':
+      return args.length === 1 && boundedString(args[0], 128)
+        ? accepted()
+        : rejected('IDENTIFIER_INVALID', '$[0]');
     case 'auth:unlockSession':
       return exactObject(args, ['password', 'secondFactorCode'], (value) =>
         boundedString(value.password, 1024)
@@ -5823,8 +5880,8 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
         && optionalBoundedString(value.secondFactorCode, 256)
         && optionalBoundedString(value.displayName, 120));
     case 'auth:loginWithWindowsHello':
-      return exactObject(args, ['accountId'], (value) =>
-        value.accountId === undefined || boundedString(value.accountId, 128));
+      return exactObject(args, ['accountId', 'fallback'], (value) =>
+        optionalBoundedString(value.accountId, 128) && optionalWindowsHelloFallback(value.fallback));
     case 'auth:reauthenticateWithWindowsHello':
       return exactObject(args, ['fallback'], (value) => optionalWindowsHelloFallback(value.fallback));
     case 'system:getCoreServiceHealth':

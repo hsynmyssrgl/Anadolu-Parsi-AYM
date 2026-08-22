@@ -258,10 +258,16 @@ const cancellableInteractiveAuthenticationChannels = new Set<string>([
   'auth:loginWithWindowsHello',
   'auth:reauthenticateWithWindowsHello'
 ]);
+const secureStartupReadChannels = new Set<string>([
+  'app:getInfo',
+  'app:getFirstRunExperience',
+  'auth:getState'
+]);
 const destructiveSystemChannels = new Set<string>(['system:factoryReset']);
 
 export const resolveIpcRequestLifecyclePolicy = (channel: string): IpcRequestLifecyclePolicy => {
   if (destructiveSystemChannels.has(channel)) return Object.freeze({ cancellable: false, latestWins: false, timeoutMs: 0 });
+  if (secureStartupReadChannels.has(channel)) return Object.freeze({ cancellable: true, latestWins: true, timeoutMs: 10_000 });
   if(communicationAuditArchiveReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
   if(familyMeetingReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
   if(familyMeetingWriteChannels.has(channel))return Object.freeze({cancellable:false,latestWins:false,timeoutMs:0});

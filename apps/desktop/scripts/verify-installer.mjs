@@ -77,7 +77,11 @@ try {
     '!define PPT_INSTALLER_CHANNEL_COLOR "A57E17"',
     '!define PPT_INSTALLER_CHANNEL_BITMAP "installer-gold-sidebar.bmp"',
     '!define MUI_WELCOMEFINISHPAGE_BITMAP "${__FILEDIR__}\\${PPT_INSTALLER_CHANNEL_BITMAP}"',
-    'SetCtlColors $AymWelcomePulseLabel "${PPT_INSTALLER_CHANNEL_COLOR}" "F0F0F0"',
+    '!define MUI_WELCOMEPAGE_TITLE_3LINES',
+    '!define MUI_WELCOMEPAGE_TITLE "$(AymWelcomeTitle)"',
+    '!define MUI_WELCOMEPAGE_TEXT "$(AymProductName)',
+    '!insertmacro MUI_PAGE_WELCOME',
+    'Ailenizin hikâyesi, tek ve güvenli bir yerde.',
     'ParsYuva Aile Yaşam Merkezi',
     'Kuruluma hazır',
     'Sesli Yardım Merkezi',
@@ -117,6 +121,10 @@ try {
     || installerInclude.includes('${NSD_CreateProgressBar}')) {
     failures.push('Kurulum öncesi sayfalar sahte hareketli ilerleme göstergesi kullanmamalı; tek ilerleme yerel NSIS dosya kurulum sayfası olmalı.');
   }
+  if (installerInclude.includes('Page custom AymWelcomePageCreate')
+    || installerInclude.includes('Var AymWelcomePulseLabel')) {
+    failures.push('Özel karşılama sayfası tam boy MUI marka panelini örten eski metin-only child dialog kullanmamalı.');
+  }
   if (installerInclude.includes('${PBM_GETPOS}')
     || installerInclude.includes('AymInstallProgressTick')
     || installerInclude.includes('${NSD_CreateTimer}')
@@ -126,14 +134,19 @@ try {
   if (installerInclude.includes('ParsYuva AYM')) {
     failures.push('Kurulum yüzeyinde kaldırılan AYM kısaltması kullanılamaz.');
   }
-  if (/SetCtlColors \$AymWelcomePulseLabel "\$\{PPT_INSTALLER_CHANNEL_COLOR\}" transparent/u.test(installerInclude)) {
-    failures.push('Animasyonlu kurulum yazısı şeffaf arka planla üst üste çizilemez.');
-  }
   const [installerOnly, uninstallerOnly = ''] = installerInclude.split('!macro customUnInstall');
   if (/https?:|Exec(?:Shell)?|nsExec|inetc|download/iu.test(installerOnly)) {
     failures.push('NSIS karşılama/animasyon kodu ağ veya haricî süreç yetkisi içeremez.');
   }
   const expectedUninstallHelper = 'ExecWait \'"$INSTDIR\\ParsYuva.exe" --uninstall-backup-assistant\' $0';
+  const upgradeGuardIndex = uninstallerOnly.indexOf('${If} ${isUpdated}');
+  const silentGuardIndex = uninstallerOnly.indexOf('${OrIf} ${Silent}');
+  const dataChoiceIndex = uninstallerOnly.indexOf('$(AymUninstallChoice)');
+  const preserveJumpIndex = uninstallerOnly.indexOf('Goto aym_uninstall_done');
+  if (upgradeGuardIndex < 0 || silentGuardIndex < upgradeGuardIndex
+    || preserveJumpIndex < silentGuardIndex || dataChoiceIndex < preserveJumpIndex) {
+    failures.push('Yükseltme ve sessiz bakım eski uygulama dosyalarını kaldırırken kullanıcı verisi seçim akışını atlamalı.');
+  }
   if (!uninstallerOnly.includes(expectedUninstallHelper)) {
     failures.push('Kaldırıcı yalnız doğrulanmış yerel yedek yardımcısını tam sabit komutla çağırmalı.');
   }
@@ -168,7 +181,10 @@ try {
   failures.push(`Gerçek NSIS ilerleme çıkarıcısı okunamadı: ${error.message}`);
 }
 try {
-  const builderRunner = await readFile(resolve(desktopRoot, 'scripts/run-electron-builder.mjs'), 'utf8');
+  const [builderRunner, legacyUpgradeGuard] = await Promise.all([
+    readFile(resolve(desktopRoot, 'scripts/run-electron-builder.mjs'), 'utf8'),
+    readFile(resolve(desktopRoot, 'scripts/legacy-upgrade-data-preservation.mjs'), 'utf8'),
+  ]);
   if (!builderRunner.includes("['--win', 'dir', '--config.forceCodeSigning=false']")
     || !builderRunner.includes("['--win', 'nsis']")
     || !builderRunner.includes("process.argv.includes('--local-unsigned')")
@@ -176,7 +192,15 @@ try {
     || !builderRunner.includes("'parsyuva-nsis-template-'")
     || !builderRunner.includes("nsisUtil.nsisTemplatesDir = governedRoot")
     || !builderRunner.includes("copyFile(governedExtractorPath, resolve(temporaryNsisRoot, 'include/extractAppPackage.nsh'))")
-    || !builderRunner.includes("renderLicenseRtf(licenseSource)")) {
+    || !builderRunner.includes('applyLegacyUpgradeDataPreservation(upstreamInstallUtil)')
+    || !builderRunner.includes("writeFile(resolve(temporaryNsisRoot, 'include/installUtil.nsh'), governedInstallUtil, 'utf8')")
+    || !builderRunner.includes("renderLicenseRtf(licenseSource)")
+    || !legacyUpgradeGuard.includes('PARSYUVA_LEGACY_DATA_PROMPT_BYPASS')
+    || !legacyUpgradeGuard.includes("'22.8.2026-37'")
+    || !legacyUpgradeGuard.includes("'22.8.2026-44'")
+    || !legacyUpgradeGuard.includes('DisplayVersion')
+    || !legacyUpgradeGuard.includes('$installationDir != \"$PROGRAMFILES64\\\\PPT\\\\ParsYuva\"')
+    || !legacyUpgradeGuard.includes('RMDir /r \"$installationDir\"')) {
     failures.push('İmzasız dizin provası ile imzalı NSIS release yolları kesin ayrılmamış.');
   }
 } catch (error) {

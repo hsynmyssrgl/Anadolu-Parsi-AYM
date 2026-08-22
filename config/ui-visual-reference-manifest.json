@@ -113,15 +113,15 @@
     "channels": {
       "Bronze": {
         "path": "apps/desktop/tests/fixtures/surum-paletleri/bronze-palet-ekran-goruntusu.png",
-        "sha256": "4051600948d9dd629e476d0307a8c8af7bdb1bc2e8a2e997383c4568897c9322"
+        "sha256": "6f91a1292897fa3c24596a49dc50d157738e20e410553cc718f23d40ff02689e"
       },
       "Silver": {
         "path": "apps/desktop/tests/fixtures/surum-paletleri/silver-palet-ekran-goruntusu.png",
-        "sha256": "4b84c6cebfd79741532744510a36c89c255972e2fe785d3df871f57b0629d778"
+        "sha256": "0b9c820d326e81bfb07a6165391df6ed036e1ada9f784bd337165c28d6bfdc1c"
       },
       "Gold": {
         "path": "apps/desktop/tests/fixtures/surum-paletleri/gold-palet-ekran-goruntusu.png",
-        "sha256": "841e4230a3609634f3bd556113131c32818595bd05d9c23702259635dcb98fde"
+        "sha256": "cfd57d68200c7f2c76ebc2fc252d5122013e2dc2b211f700f9f8956a196bcb49"
       }
     },
     "typographyScaleBaseline": {
@@ -129,7 +129,7 @@
       "channel": "Bronze",
       "textScalePercent": 200,
       "path": "apps/desktop/tests/fixtures/surum-paletleri/bronze-200-yuzde-tipografi-ekran-goruntusu.png",
-      "sha256": "1e3b114564e8559680ed5b8c42f5de581b9957076791cad83980c6f2ce843509",
+      "sha256": "82a070e154366c6c77f7d121d94c5115892d44a787d8ec078e42fdac0adb1bda",
       "requiredSidebarWidthPx": 360,
       "maximumHorizontalOverflowPx": 0,
       "maximumClippedTextElements": 0,
@@ -141,7 +141,7 @@
       "highContrast": true,
       "reduceMotion": true,
       "path": "apps/desktop/tests/fixtures/surum-paletleri/bronze-opak-erisilebilirlik-ekran-goruntusu.png",
-      "sha256": "48c937d880d50c18f55ff7e826c1a6d63c7d416e8a4f0f65168ca80868023f75",
+      "sha256": "693c5f716e71bd511db6b0c79bdf904dd14d9b73dc62896b7a3be1a20400001d",
       "requiredOpaqueSelectors": [".sidebar", ".topbar", ".panel"],
       "expectedBackdropFilter": "none",
       "expectedAnimationDuration": "1e-06s",

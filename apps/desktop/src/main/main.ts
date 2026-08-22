@@ -211,7 +211,7 @@ import { PolicyServiceAvailabilityApplicationAdapter } from './policy-service-av
 import { ProductLicenseManager } from './product-license-manager.js';
 import { createVerifiedUninstallBackups, discoverUninstallBackupTargets } from './uninstall-backup-assistant.js';
 import { FACTORY_RESET_CONFIRMATION, FactoryResetManager } from './factory-reset-manager.js';
-import { readUiLanguagePreference, writeUiLanguagePreference } from './ui-language-preference-store.js';
+import { readFirstRunExperience, readUiLanguagePreference, writeFirstRunExperience, writeUiLanguagePreference } from './ui-language-preference-store.js';
 import { ApplicationSecurityProfilePolicy, DerivedDataInheritancePolicy, ImmutablePolicyDecisionAuditPolicy, NetworkEgressPolicy, PlatformCapabilityManifestPolicy, PlatformPolicyAstGatePolicy, PlatformPolicyConformanceSuite, PolicyServiceAvailabilityPolicy, SensitiveLogPolicy, SourceDeletionPropagationPolicy, assertPinnedBootstrapRuntimeCapability } from '@ppt/platform-policy';
 import type { ApplicationSecurityProfileGateBoundaryView, DerivedDataPolicyBoundaryView, NetworkEgressBoundaryView, PlatformCapabilityManifestGateBoundaryView, PlatformPolicyAstGateBoundaryView, PolicyConformanceSuiteBoundaryView, PolicyDecisionAuditBoundaryView, PolicyServiceAvailabilityBoundaryView, SensitiveLoggingBoundaryView, SourceDeletionPropagationBoundaryView } from '@ppt/domain';
 import { GetProductSurfaceGovernanceUseCase } from '@ppt/application';
@@ -397,6 +397,7 @@ const getProductSurfaceGovernanceUseCase = new GetProductSurfaceGovernanceUseCas
 const currentProductName = APP_META.name;
 let uiLocalizationBootstrap: Readonly<UiLocalizationBootstrapView> = resolveUiLocalization(undefined);
 const uiLanguagePreferencePath=():string=>join(app.getPath('userData'),'preferences','ui-language.json');
+const firstRunExperiencePath=():string=>join(app.getPath('userData'),'preferences','first-run-experience.json');
 const operatingSystemUiLanguage = (): string => selectOperatingSystemUiLanguage(
   app.getSystemLocale(),
   app.getPreferredSystemLanguages()
@@ -1490,6 +1491,13 @@ function registerIpc(): void {
     uiLocalizationBootstrap=resolveMainUiLocalization(preference);
     return uiLocalizationBootstrap;
   });
+  registerIpcHandler('app:getFirstRunExperience', () => readFirstRunExperience(firstRunExperiencePath()));
+  registerIpcHandler('app:markFirstRunNarrationOffered', () => {
+    const current=readFirstRunExperience(firstRunExperiencePath());
+    return writeFirstRunExperience(firstRunExperiencePath(),{...current,narrationOffered:true});
+  });
+  registerIpcHandler('app:completeFirstRunIntroduction', () =>
+    writeFirstRunExperience(firstRunExperiencePath(),{introductionCompleted:true,narrationOffered:true}));
   registerIpcHandler('auth:getExternalIdentityProviders', () => (oidcDeepLinkProtocolRegistered?oidcFederatedIdentity?.listVisibleConfiguredProviders()??[]:[]).map(({provider})=>({id:provider,label:provider==='apple'?mainText('Apple ile devam et','Continue with Apple'):provider==='google'?mainText('Google ile devam et','Continue with Google'):mainText('Microsoft ile devam et','Continue with Microsoft'),configured:true,productionReady:false})));
   registerIpcHandler('auth:getState', () => dataStore ? dataStore.getAuthState() : lockedAuthState());
   registerIpcHandler('auth:getSessionLockState', () => {
@@ -3310,8 +3318,16 @@ function createWindow(): void {
   const window = new BrowserWindow({
     width: 1600,
     height: 980,
-    minWidth: 1180,
-    minHeight: 760,
+    minWidth: 900,
+    minHeight: 640,
+    icon: join(currentDir, 'window-icon.ico'),
+    titleBarStyle: 'hidden',
+    titleBarOverlay: {
+      color: '#F7F3ED',
+      symbolColor: '#5B5148',
+      height: 42
+    },
+    roundedCorners: true,
     // Binding visual baseline: never flash the retired dark shell before the
     // renderer paints the warm-white Bronze onboarding surface.
     backgroundColor: '#FDFDFC',
@@ -3381,16 +3397,23 @@ function createWindow(): void {
     const probePath = process.env.PPT_WINDOWS_LAUNCH_PROBE_PATH;
     if (probePath) {
       const rendererLocalization = await window.webContents.executeJavaScript(`new Promise((resolve, reject) => {
-        const deadline = Date.now() + 10000;
+        const deadline = Date.now() + 15000;
         const inspect = () => {
+          const loadingVisible = document.querySelector('.secure-startup-card .loader') !== null;
+          const startupErrorVisible = document.querySelector('.secure-startup-error') !== null;
+          const readySurface = document.querySelector('.auth-shell,.first-run-steps,.first-run-security-shell,.app-shell');
           const value = {
             bridgePresent: typeof window.pardus === 'object' && window.pardus !== null,
             localizationBootstrapMethodPresent: typeof window.pardus?.getLocalizationBootstrap === 'function',
             documentLanguage: document.documentElement.lang,
-            dataLanguage: document.documentElement.dataset.uiLanguage ?? ''
+            dataLanguage: document.documentElement.dataset.uiLanguage ?? '',
+            loadingVisible,
+            startupErrorVisible,
+            secureStartupReady: Boolean(readySurface) && !loadingVisible && !startupErrorVisible,
+            readySurface: readySurface?.className ?? ''
           };
-          if (value.localizationBootstrapMethodPresent && value.dataLanguage.length > 0) resolve(value);
-          else if (Date.now() >= deadline) reject(new Error('Renderer localization bootstrap timed out.'));
+          if (value.localizationBootstrapMethodPresent && value.dataLanguage.length > 0 && value.secureStartupReady) resolve(value);
+          else if (Date.now() >= deadline) reject(new Error('Renderer secure startup timed out.'));
           else setTimeout(inspect, 25);
         };
         inspect();
@@ -3399,6 +3422,10 @@ function createWindow(): void {
         readonly localizationBootstrapMethodPresent: boolean;
         readonly documentLanguage: string;
         readonly dataLanguage: string;
+        readonly loadingVisible:boolean;
+        readonly startupErrorVisible:boolean;
+        readonly secureStartupReady:boolean;
+        readonly readySurface:string;
       };
       writeFileSync(probePath, `${JSON.stringify({
         status: 'PASS',
@@ -3414,6 +3441,10 @@ function createWindow(): void {
         windowsOpen022SideArtifactEvidence: windowsOpen022SideArtifactEvidenceReport,
         recordedAt: new Date().toISOString()
       }, null, 2)}\n`);
+      if(process.env.PPT_WINDOWS_LAUNCH_TEST==='1')globalThis.setTimeout(()=>{
+        explicitApplicationQuit=true;
+        app.quit();
+      },250);
     }
   });
   window.webContents.on('did-fail-load', (_event, errorCode, errorDescription, validatedUrl, isMainFrame) => {

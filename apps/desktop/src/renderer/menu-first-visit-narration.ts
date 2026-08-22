@@ -1,5 +1,6 @@
 import type { ProductScreenId } from '@ppt/domain/renderer';
 import { startSilverHelpNarration, type SilverHelpNarrationStatus } from './NarratedHelpCenter';
+import type {NarrationVoice} from './accessibility';
 
 export const MENU_FIRST_VISIT_NARRATION_VERSION = 'v1' as const;
 
@@ -70,5 +71,7 @@ export const startMenuFirstVisitNarration = <TUtterance extends { lang:string; r
   language:'tr'|'en';
   synthesis:{cancel():void;speak(utterance:TUtterance):void}|undefined;
   createUtterance:((text:string)=>TUtterance)|undefined;
+  preferredVoice?:NarrationVoice|null;
+  requirePreferredVoice?:boolean;
   onStatus:(status:SilverHelpNarrationStatus)=>void;
 }):SilverHelpNarrationStatus => startSilverHelpNarration({...input,rate:'normal'});

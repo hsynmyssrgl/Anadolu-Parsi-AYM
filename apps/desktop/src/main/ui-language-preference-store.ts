@@ -3,6 +3,15 @@ import {dirname,resolve} from 'node:path';
 import type {UiLanguagePreference} from '@ppt/domain';
 
 interface StoredUiLanguagePreference {readonly schemaVersion:1;readonly preference:UiLanguagePreference;}
+export interface FirstRunExperienceState {
+  readonly introductionCompleted:boolean;
+  readonly narrationOffered:boolean;
+}
+interface StoredFirstRunExperience extends FirstRunExperienceState {readonly schemaVersion:1;}
+export const DEFAULT_FIRST_RUN_EXPERIENCE:Readonly<FirstRunExperienceState>=Object.freeze({
+  introductionCompleted:false,
+  narrationOffered:false
+});
 const allowed=new Set<UiLanguagePreference>(['system','tr','en']);
 export const isUiLanguagePreference=(value:unknown):value is UiLanguagePreference=>typeof value==='string'&&allowed.has(value as UiLanguagePreference);
 export const readUiLanguagePreference=(filePath:string):UiLanguagePreference=>{
@@ -14,4 +23,26 @@ export const writeUiLanguagePreference=(filePath:string,preference:UiLanguagePre
   const target=resolve(filePath),directory=dirname(target),temporary=`${target}.${process.pid}.tmp`;mkdirSync(directory,{recursive:true,mode:0o700});rmSync(temporary,{force:true});
   const descriptor=openSync(temporary,'wx',0o600);try{writeFileSync(descriptor,`${JSON.stringify({schemaVersion:1,preference} satisfies StoredUiLanguagePreference,null,2)}\n`,'utf8');fsyncSync(descriptor);}finally{closeSync(descriptor);}
   try{renameSync(temporary,target);}catch(error){rmSync(temporary,{force:true});throw error;}
+};
+
+export const readFirstRunExperience=(filePath:string):FirstRunExperienceState=>{
+  const target=resolve(filePath);if(!existsSync(target))return{...DEFAULT_FIRST_RUN_EXPERIENCE};
+  try{
+    const parsed=JSON.parse(readFileSync(target,'utf8')) as Partial<StoredFirstRunExperience>;
+    return parsed.schemaVersion===1&&typeof parsed.introductionCompleted==='boolean'&&typeof parsed.narrationOffered==='boolean'
+      ?{introductionCompleted:parsed.introductionCompleted,narrationOffered:parsed.narrationOffered}
+      :{...DEFAULT_FIRST_RUN_EXPERIENCE};
+  }catch{return{...DEFAULT_FIRST_RUN_EXPERIENCE};}
+};
+
+export const writeFirstRunExperience=(filePath:string,state:FirstRunExperienceState):FirstRunExperienceState=>{
+  if(typeof state.introductionCompleted!=='boolean'||typeof state.narrationOffered!=='boolean')throw new Error('Geçersiz ilk kullanım deneyimi durumu.');
+  const normalized:FirstRunExperienceState={
+    introductionCompleted:state.introductionCompleted,
+    narrationOffered:state.narrationOffered||state.introductionCompleted
+  };
+  const target=resolve(filePath),directory=dirname(target),temporary=`${target}.${process.pid}.tmp`;mkdirSync(directory,{recursive:true,mode:0o700});rmSync(temporary,{force:true});
+  const descriptor=openSync(temporary,'wx',0o600);try{writeFileSync(descriptor,`${JSON.stringify({schemaVersion:1,...normalized} satisfies StoredFirstRunExperience,null,2)}\n`,'utf8');fsyncSync(descriptor);}finally{closeSync(descriptor);}
+  try{renameSync(temporary,target);}catch(error){rmSync(temporary,{force:true});throw error;}
+  return normalized;
 };

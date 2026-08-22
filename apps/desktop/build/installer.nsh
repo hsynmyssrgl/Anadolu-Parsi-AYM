@@ -39,6 +39,8 @@ LangString AymPressNext ${AYM_LANG_ENGLISH} "Press Next to begin"
 LangString AymPressNext ${AYM_LANG_TURKISH} "Başlamak için İleri düğmesine basın"
 LangString AymProductName ${AYM_LANG_ENGLISH} "ParsYuva Family Life Center"
 LangString AymProductName ${AYM_LANG_TURKISH} "ParsYuva Aile Yaşam Merkezi"
+LangString AymWelcomeTitle ${AYM_LANG_ENGLISH} "Your family's story, in one secure place."
+LangString AymWelcomeTitle ${AYM_LANG_TURKISH} "Ailenizin hikâyesi, tek ve güvenli bir yerde."
 LangString AymWelcomeLead ${AYM_LANG_ENGLISH} "One calm, secure and local center for your family's documents, memories and daily life."
 LangString AymWelcomeLead ${AYM_LANG_TURKISH} "Ailenizin belgeleri, anıları ve günlük yaşamı için sakin, güvenli ve yerel bir merkez."
 LangString AymWelcomeBody ${AYM_LANG_ENGLISH} "The application will be installed in C:\Program Files\PPT\ParsYuva. Setup does not create family records, sign in to an online account or transmit personal data."
@@ -89,6 +91,9 @@ LangString AymDeleteFailed ${AYM_LANG_TURKISH} "Kişisel veri klasörü tamamen 
   !undef MUI_WELCOMEFINISHPAGE_BITMAP
 !endif
 !define MUI_WELCOMEFINISHPAGE_BITMAP "${__FILEDIR__}\${PPT_INSTALLER_CHANNEL_BITMAP}"
+!define MUI_WELCOMEPAGE_TITLE_3LINES
+!define MUI_WELCOMEPAGE_TITLE "$(AymWelcomeTitle)"
+!define MUI_WELCOMEPAGE_TEXT "$(AymProductName)$\r$\n$\r$\n✓  $(AymWelcome1)$\r$\n✓  $(AymWelcome2)$\r$\n✓  $(AymWelcome3)$\r$\n$\r$\n$(AymWelcomeBody)$\r$\n$\r$\n$(AymPressNext)"
 
 !define MUI_INSTFILESPAGE_FINISHHEADER_TEXT "$(AymInstallFilesDone)"
 !define MUI_INSTFILESPAGE_FINISHHEADER_SUBTEXT "$(AymShortcutsReady)"
@@ -99,11 +104,91 @@ LangString AymDeleteFailed ${AYM_LANG_TURKISH} "Kişisel veri klasörü tamamen 
 
 !ifndef BUILD_UNINSTALLER
 
-Var AymWelcomeDialog
-Var AymWelcomePulseLabel
 Var AymReadyDialog
 Var AymInstallProgress
 Var AymInstallStatusText
+Var AymWelcomeDialog
+Var AymWelcomeBitmap
+Var AymWelcomeBitmapHandle
+Var AymWelcomePulse
+Var AymWelcomePulsePhase
+
+Function AymWelcomeAnimate
+  IntOp $AymWelcomePulsePhase $AymWelcomePulsePhase + 1
+  ${If} $AymWelcomePulsePhase > 3
+    StrCpy $AymWelcomePulsePhase 1
+  ${EndIf}
+  ${If} $AymWelcomePulsePhase == 1
+    ${NSD_SetText} $AymWelcomePulse "●  ○  ○"
+  ${ElseIf} $AymWelcomePulsePhase == 2
+    ${NSD_SetText} $AymWelcomePulse "○  ●  ○"
+  ${Else}
+    ${NSD_SetText} $AymWelcomePulse "○  ○  ●"
+  ${EndIf}
+FunctionEnd
+
+Function AymWelcomePageCreate
+  !insertmacro MUI_HEADER_TEXT "$(AymProductName)" "$(AymPressNext)"
+  nsDialogs::Create 1018
+  Pop $AymWelcomeDialog
+  ${If} $AymWelcomeDialog == error
+    Abort
+  ${EndIf}
+
+  ; Build the complete welcome surface inside one nsDialogs page. This keeps
+  ; the ParsYuva artwork, product promise and next action in a single calm
+  ; composition instead of falling back to the generic MUI welcome layout.
+  File /oname=$PLUGINSDIR\aym-welcome-sidebar.bmp "${__FILEDIR__}\${PPT_INSTALLER_CHANNEL_BITMAP}"
+  ${NSD_CreateBitmap} 0 0 108u 100% ""
+  Pop $AymWelcomeBitmap
+  ${NSD_SetImage} $AymWelcomeBitmap "$PLUGINSDIR\aym-welcome-sidebar.bmp" $AymWelcomeBitmapHandle
+
+  ${NSD_CreateLabel} 121u 5u 174u 18u "$(AymWelcome1)"
+  Pop $0
+  CreateFont $1 "Segoe UI" 10 700
+  SendMessage $0 ${WM_SETFONT} $1 1
+  SetCtlColors $0 "${PPT_INSTALLER_CHANNEL_COLOR}" "F0F0F0"
+
+  ${NSD_CreateLabel} 121u 25u 174u 43u "$(AymWelcomeTitle)"
+  Pop $0
+  CreateFont $1 "Segoe UI" 18 700
+  SendMessage $0 ${WM_SETFONT} $1 1
+  SetCtlColors $0 "333537" "F0F0F0"
+
+  ${NSD_CreateLabel} 121u 72u 174u 36u "$(AymWelcomeLead)"
+  Pop $0
+  CreateFont $1 "Segoe UI" 10 400
+  SendMessage $0 ${WM_SETFONT} $1 1
+  SetCtlColors $0 "676B6A" "F0F0F0"
+
+  ${NSD_CreateLabel} 121u 113u 174u 39u "✓  $(AymWelcome2)$\r$\n✓  $(AymWelcome3)"
+  Pop $0
+  CreateFont $1 "Segoe UI" 9 600
+  SendMessage $0 ${WM_SETFONT} $1 1
+  SetCtlColors $0 "467259" "F0F0F0"
+
+  ; A restrained three-point pulse gives the requested motion without looking
+  ; like installation progress; real progress remains exclusive to INSTFILES.
+  ${NSD_CreateLabel} 121u 157u 58u 15u "●  ○  ○"
+  Pop $AymWelcomePulse
+  CreateFont $1 "Segoe UI Symbol" 10 400
+  SendMessage $AymWelcomePulse ${WM_SETFONT} $1 1
+  SetCtlColors $AymWelcomePulse "${PPT_INSTALLER_CHANNEL_COLOR}" "F0F0F0"
+  ${NSD_CreateLabel} 174u 156u 121u 19u "$(AymPressNext)"
+  Pop $0
+  CreateFont $1 "Segoe UI" 9 600
+  SendMessage $0 ${WM_SETFONT} $1 1
+  SetCtlColors $0 "71441F" "F0F0F0"
+
+  StrCpy $AymWelcomePulsePhase 1
+  nsDialogs::CreateTimer AymWelcomeAnimate 680
+  nsDialogs::Show
+FunctionEnd
+
+Function AymWelcomePageLeave
+  nsDialogs::KillTimer AymWelcomeAnimate
+  ${NSD_FreeImage} $AymWelcomeBitmapHandle
+FunctionEnd
 
 Function AymInstallFilesShow
   FindWindow $0 "#32770" "" $HWNDPARENT
@@ -134,40 +219,6 @@ FunctionEnd
 
 Function AymInstallFilesLeave
   ${NSD_SetText} $AymInstallStatusText "$(AymInstallComplete)"
-FunctionEnd
-
-Function AymWelcomePageCreate
-  nsDialogs::Create 1018
-  Pop $AymWelcomeDialog
-  ${If} $AymWelcomeDialog == error
-    Abort
-  ${EndIf}
-  ${NSD_CreateLabel} 0 4u 100% 30u "$(AymProductName)"
-  Pop $0
-  CreateFont $1 "Segoe UI" 16 700
-  SendMessage $0 ${WM_SETFONT} $1 1
-  SetCtlColors $0 "${PPT_INSTALLER_CHANNEL_COLOR}" transparent
-  ${NSD_CreateLabel} 0 42u 100% 28u "$(AymWelcomeLead)"
-  Pop $0
-  CreateFont $1 "Segoe UI" 11 400
-  SendMessage $0 ${WM_SETFONT} $1 1
-  ${NSD_CreateLabel} 0 82u 100% 42u "$(AymWelcomeBody)"
-  Pop $0
-  SendMessage $0 ${WM_SETFONT} $1 1
-  ${NSD_CreateLabel} 0 126u 100% 16u "✓  $(AymWelcome1)"
-  Pop $AymWelcomePulseLabel
-  CreateFont $2 "Segoe UI" 10 600
-  SendMessage $AymWelcomePulseLabel ${WM_SETFONT} $2 1
-  SetCtlColors $AymWelcomePulseLabel "${PPT_INSTALLER_CHANNEL_COLOR}" "F0F0F0"
-  ${NSD_CreateLabel} 0 145u 100% 16u "✓  $(AymWelcome2)"
-  Pop $0
-  SendMessage $0 ${WM_SETFONT} $2 1
-  SetCtlColors $0 "${PPT_INSTALLER_CHANNEL_COLOR}" "F0F0F0"
-  ${NSD_CreateLabel} 0 164u 100% 16u "✓  $(AymWelcome3)"
-  Pop $0
-  SendMessage $0 ${WM_SETFONT} $2 1
-  SetCtlColors $0 "${PPT_INSTALLER_CHANNEL_COLOR}" "F0F0F0"
-  nsDialogs::Show
 FunctionEnd
 
 Function AymReadyPageCreate
@@ -208,7 +259,7 @@ Function AymReadyPageCreate
 FunctionEnd
 
 !macro customWelcomePage
-  Page custom AymWelcomePageCreate
+  Page custom AymWelcomePageCreate AymWelcomePageLeave
 !macroend
 
 !macro customPageAfterChangeDir
@@ -257,6 +308,15 @@ FunctionEnd
 !endif
 
 !macro customUnInstall
+  ; electron-builder calls the previous uninstaller with /S /KEEP_APP_DATA and
+  ; --updated while replacing application files. Never turn that maintenance
+  ; step into a personal-data removal flow. Silent administration also keeps
+  ; data fail-safe because it cannot collect an explicit destructive choice.
+  ${If} ${isUpdated}
+  ${OrIf} ${Silent}
+    DetailPrint "ParsYuva user data preserved during upgrade or silent maintenance."
+    Goto aym_uninstall_done
+  ${EndIf}
   MessageBox MB_YESNOCANCEL|MB_ICONQUESTION "$(AymUninstallChoice)" IDYES aym_uninstall_backup IDNO aym_uninstall_delete
   Goto aym_uninstall_cancel
 aym_uninstall_backup:

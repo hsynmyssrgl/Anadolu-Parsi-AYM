@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { DEFAULT_UI_LOCALIZATION, resolveUiLocalization, type UiLocalizationBootstrapView } from '@ppt/domain/renderer';
 import { App } from './App';
 import { LocalizationProvider, configureUiLocalization } from './localization';
+import brandMarkUrl from './assets/brand-mark.png';
 import './styles.css';
 import './typography.css';
 
@@ -25,7 +26,16 @@ const startRenderer = async (): Promise<void> => {
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
       <LocalizationProvider bootstrap={localization}>
-        <App />
+        <div className="desktop-window-frame">
+          <header className="desktop-titlebar" aria-hidden="true">
+            <img src={brandMarkUrl} alt="" />
+            <strong>ParsYuva</strong>
+            <span>Aile Yaşam Merkezi</span>
+          </header>
+          <div className="desktop-window-content">
+            <App />
+          </div>
+        </div>
       </LocalizationProvider>
     </StrictMode>
   );

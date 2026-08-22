@@ -20,6 +20,10 @@
 
 ## Dagitim zinciri
 
+Kaynak kod veya paketleme davranisi degistiginde onceki `ParsYuva-*.exe`, `.exe.blockmap` ve `.exe.sha256` artefaktlari build baslamadan temizlenir. Release klasoru bos olabilir; paket uretildiginde yalniz guncel gorunur surume ait tek set kabul edilir. Bu temizlik kurulu uygulamaya veya kullanici verisine dokunmaz.
+
+Temiz teslim zinciri tum workspace paketlerini yeniden derler; paketli uygulamanin gercek Windows surecinde acilisini ve surumunu sinar, installer SHA-256 ve imza durumunu kaydeder. Kesin kaynak commit'i GitHub ve harici Git uzak deposunda ayni olmali; ayrica D: harici diskte surum-bagli deterministik kaynak arsivi boyut ve SHA-256 geri-okumasiyla dogrulanmalidir.
+
 ```mermaid
 flowchart LR
   S[Temiz kaynak] --> G[Governed Preflight]
@@ -41,3 +45,5 @@ flowchart LR
 ## Guncelleme uyumlulugu
 
 Paket ismi, gorunur marka veya renk kanali degisebilir; veri dizini ve appId migration plani olmadan degismez. Her guncelleme mevcut kullanici verisini korur ve gerekirse yeni semaya donusturur.
+
+Yukseltme veya sessiz bakim onceki kaldiriciyi yikici veri secimine sokmaz. Acik kaldirma akisi ayridir. Ilk aile kurulumu aile, kisi, hesap, uyelik, cihaz, izin ve audit kayitlarini tek SQLite transaction sinirinda olusturur.

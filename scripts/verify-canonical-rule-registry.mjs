@@ -26,7 +26,7 @@ check(registry.supersededRuleCount===rules.filter(x=>x.state==='SUPERSEDED').len
 check(registry.rulesSha256===calculated,`rules hash mismatch ${registry.rulesSha256}/${calculated}`);
 check(constitution.canonicalRulesSha256===registry.rulesSha256,'constitution canonical hash mismatch');
 check(constitution.canonicalRuleRegistry==='config/canonical-rule-registry.json','constitution registry path mismatch');
-for (let n=173;n<=228;n+=1) {
+for (let n=173;n<=232;n+=1) {
   if (n === 180) check(rules.some(x=>x.id==='PR-180'&&x.state==='SUPERSEDED'&&x.replacedBy==='PR-212'),'PR-180 must be superseded by PR-212');
   else if (n === 220) check(rules.some(x=>x.id==='PR-220'&&x.state==='SUPERSEDED'&&x.replacedBy==='PR-228'),'PR-220 must be superseded by PR-228');
   else check(rules.some(x=>x.id===`PR-${n}`&&x.state==='ACTIVE'),`PR-${n} must be ACTIVE`);

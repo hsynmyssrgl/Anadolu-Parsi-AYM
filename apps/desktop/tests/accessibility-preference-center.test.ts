@@ -14,7 +14,8 @@ import {
   readBrandAudioMuted,
   resolveAccessibilityTheme,
   serializeAccessibilityPreferences,
-  startFirstRunNarration
+  startFirstRunNarration,
+  waitForPreferredNarrationVoice
 } from '../src/renderer/accessibility.js';
 
 describe('33-M accessibility preference center', () => {
@@ -106,7 +107,7 @@ describe('33-M accessibility preference center', () => {
     });
     expect(result).toBe('speaking');
     expect(cancelCount).toBe(1);
-    expect(spoken).toMatchObject({text:FIRST_RUN_NARRATION_TEXT,lang:'tr-TR',rate:0.88,pitch:0.95});
+    expect(spoken).toMatchObject({text:FIRST_RUN_NARRATION_TEXT,lang:'tr-TR',rate:0.88,pitch:0.95,volume:1});
     expect(statuses).toEqual(['speaking']);
     spoken?.onend?.();
     expect(statuses).toEqual(['speaking','ready']);
@@ -137,5 +138,18 @@ describe('33-M accessibility preference center', () => {
   it('treats narration cleanup failure as non-fatal', () => {
     expect(cancelFirstRunNarration(undefined)).toBe(false);
     expect(cancelFirstRunNarration({cancel:()=>{throw new Error('shutdown');},speak:()=>undefined})).toBe(false);
+  });
+
+  it('waits for the delayed Windows voice list and falls back to the same-language male voice',async()=>{
+    let voices:ReadonlyArray<{name:string;lang:string}>=[];
+    let listener:(()=>void)|undefined;
+    const waiting=waitForPreferredNarrationVoice({
+      getVoices:()=>voices,
+      addEventListener:(_type,next)=>{listener=next;},
+      removeEventListener:()=>{listener=undefined;}
+    },'tr',100);
+    voices=[{name:'Microsoft Tolga',lang:'tr-TR'},{name:'Microsoft Zira',lang:'en-US'}];
+    listener?.();
+    await expect(waiting).resolves.toMatchObject({name:'Microsoft Tolga',lang:'tr-TR'});
   });
 });

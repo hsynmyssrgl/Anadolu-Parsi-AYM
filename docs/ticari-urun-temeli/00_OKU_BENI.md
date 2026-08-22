@@ -2,7 +2,7 @@
 
 - Belge temel tarihi: 20.08.2026
 - Belge seti surumu: 1.1.0-belge.20260820.1
-- Kaynak urun surumu: Bronze 20.08.2026.37
+- Kaynak urun surumu: Bronze 22.08.2026.43
 - Durum: AKTIF_CALISMA / TICARI_YAYIN_HAZIR_DEGIL
 - Dil: Turkce; dosya adlari Turkce anlamli ve ASCII karakterlidir.
 
@@ -36,7 +36,7 @@ Bu klasor ParsYuva Aile Yasam Merkezi icin bugun baslatilan ilk temiz ticari uru
 
 ## Kaynak gercekligi
 
-20.08.2026 tarihinde kanonik kural sicili V16 olarak 228 kurala genisletildi; SHA-256 ozeti `c7cd9a0b82e58d3bf9dbc3aca7cf38d452b73b7e5bc361690e84d94821a7b25d` oldu. EK-001–EK-019 karar tamponu `DEC-260` ile asil sicillere baglandi; `DEC-261` guncel urun adini tam `ParsYuva Aile Yasam Merkezi` olarak kesinlestirdi ve AYM kisaltmasini guncel kullanici yuzeylerinden kaldirdi. `DEC-262` Windows kurulum hedefini `C:\Program Files\PPT\ParsYuva`, kurulu program ve kisayol adini `ParsYuva`, teslim EXE adini `ParsYuva-<Kanal>-GG.AA.YYYY.NN.exe` olarak sabitledi. `GOVERNED_PREFLIGHT`, tam regresyon, kurulum paketi ve Git readback kanitlari ayni kaynak anlik goruntusunde yeniden uretilmeden yeni teslim tamamlanmis sayilmaz.
+22.08.2026 tarihinde kanonik kural sicili V20 olarak 232 kurala genisletildi; SHA-256 ozeti `a11d80649bc74759371fe68f7f5b8c0ab12c1cd6a9e77e09c7e96a9a3a7e068b` oldu. EK-001–EK-019 karar tamponu `DEC-260` ile asil sicillere baglandi; `DEC-261` guncel urun adini tam `ParsYuva Aile Yasam Merkezi` olarak kesinlestirdi ve AYM kisaltmasini guncel kullanici yuzeylerinden kaldirdi. `DEC-262` Windows kurulum hedefini `C:\Program Files\PPT\ParsYuva`, kurulu program ve kisayol adini `ParsYuva`, teslim EXE adini `ParsYuva-<Kanal>-GG.AA.YYYY.NN.exe` olarak sabitledi. `DEC-263` kod veya Windows paketleme degisikliginde onceki installer EXE, blockmap ve SHA-256 dosyalarini yeni build oncesinde otomatik siler. `DEC-264` Bronze, Silver ve Gold gorunur surum satirlarinda kanal adini tekillestirir. `DEC-265` her durum degistiren islemden once guncel kural kontrolunu zorunlu kilar. `DEC-266` ozel installer, olcekli uc pars ilk aile ekrani, ayni dilde kadin ses onceligi/erkek yedegi, atomik SQLite ilk kurulum, veri koruyan yukseltme, temiz tam derleme, paketli runtime ve GitHub + harici Git + D kaynak arsivi readback kanitlarini tek kabul zincirine baglar. `GOVERNED_PREFLIGHT`, tam regresyon, kurulum paketi ve Git readback kanitlari ayni kaynak anlik goruntusunde yeniden uretilmeden yeni teslim tamamlanmis sayilmaz.
 
 Kanonik ticari belge koku kaynak kodla birlikte `C:\PPT\AYM\06_KOD\app\docs\ticari-urun-temeli` altinda Git tarafindan izlenir. `C:\PPT\AYM\12_TICARI_URUN_TEMEL_SURUMU` yalniz ayni klasore baglanan kullanici uyumluluk yoludur. GitHub ve `D:\GitYedekleri` bare remote readback kaniti `05_KALITE_TEST_KANIT/05_GIT_YEDEK_DOGRULAMA_KANITI.json` dosyasinda tutulur.
 
@@ -59,4 +59,4 @@ Kaynak repo kokunde:
 npm run verify:commercial-baseline
 ```
 
-Bu kapi kural SHA bagini, `DEC-259`, `DEC-260`, `DEC-261` ve `DEC-262` karar senkronunu, 49 is kaydini, JSON semalarini, dis kanit durumlarini ve yeni dosya adlarini fail-closed denetler. Ayni kapi `GOVERNED_PREFLIGHT` icinde zorunludur.
+Bu kapi kural SHA bagini, `DEC-259`, `DEC-260`, `DEC-261`, `DEC-262`, `DEC-263`, `DEC-264` ve `DEC-265` karar senkronunu, 52 is kaydini, JSON semalarini, dis kanit durumlarini, yeni dosya adlarini, eski installer temizligini, gorunur kanal tekillestirmesini ve her islem oncesi kural kontrolunu fail-closed denetler. Ayni kapi `GOVERNED_PREFLIGHT` icinde zorunludur.

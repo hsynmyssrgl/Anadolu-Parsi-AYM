@@ -25,8 +25,10 @@ describe('desktop user-visible release boundary', () => {
       readSource('apps/desktop/src/renderer/ui.tsx')
     ]);
 
-    expect(app).toContain('USER_VISIBLE_APP_INFO.releaseLabel');
     expect(app).toContain('appInfo.releaseLabel');
+    expect(app).toContain('formatUserVisibleReleaseSummary(USER_VISIBLE_APP_INFO');
+    expect(app).not.toContain("'Bronze · Active Development'");
+    expect(app).not.toContain("{appInfo.channel} · {t('shell.version')} {appInfo.releaseLabel}");
     expect(app).not.toContain('APP_META.version');
     expect(app).not.toContain('appInfo.version');
     expect(app).not.toContain('appInfo.edition');

@@ -4,6 +4,7 @@ import { copyFile, cp, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { renderLicenseRtf } from './license-rtf-lib.mjs';
+import { applyLegacyUpgradeDataPreservation } from './legacy-upgrade-data-preservation.mjs';
 
 const root = resolve(import.meta.dirname, '../../..');
 const cacheRoot = resolve(root, 'artifacts/validation/electron-cache');
@@ -56,10 +57,12 @@ if (!isDirectoryMode) {
   }
   const upstreamTemplateRoot = resolve(windowsPackagerRoot, 'node_modules/app-builder-lib/templates/nsis');
   const upstreamExtractorPath = resolve(upstreamTemplateRoot, 'include/extractAppPackage.nsh');
+  const upstreamInstallUtilPath = resolve(upstreamTemplateRoot, 'include/installUtil.nsh');
   const governedExtractorPath = resolve(root, 'apps/desktop/build/extractAppPackage.nsh');
-  const [upstreamExtractor, governedExtractor] = await Promise.all([
+  const [upstreamExtractor, governedExtractor, upstreamInstallUtil] = await Promise.all([
     readFile(upstreamExtractorPath, 'utf8'),
-    readFile(governedExtractorPath, 'utf8')
+    readFile(governedExtractorPath, 'utf8'),
+    readFile(upstreamInstallUtilPath, 'utf8')
   ]);
   if ((upstreamExtractor.match(/Nsis7z::Extract "\$\{FILE\}"/gu) ?? []).length !== 2
     || upstreamExtractor.includes('AymInstallPayloadStageBegin')
@@ -73,10 +76,20 @@ if (!isDirectoryMode) {
     console.error('The governed single-progress NSIS extraction template is incomplete.');
     process.exit(1);
   }
+  let governedInstallUtil;
+  try {
+    governedInstallUtil = applyLegacyUpgradeDataPreservation(upstreamInstallUtil);
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exit(1);
+  }
   temporaryTemplateRoot = await mkdtemp(join(tmpdir(), 'parsyuva-nsis-template-'));
   const temporaryNsisRoot = resolve(temporaryTemplateRoot, 'nsis');
   await cp(upstreamTemplateRoot, temporaryNsisRoot, { recursive: true, force: false, errorOnExist: true });
-  await copyFile(governedExtractorPath, resolve(temporaryNsisRoot, 'include/extractAppPackage.nsh'));
+  await Promise.all([
+    copyFile(governedExtractorPath, resolve(temporaryNsisRoot, 'include/extractAppPackage.nsh')),
+    writeFile(resolve(temporaryNsisRoot, 'include/installUtil.nsh'), governedInstallUtil, 'utf8')
+  ]);
 
   // Load electron-builder in a fresh child process, replace only its exported
   // template root, then run the normal CLI. No dependency file is modified.

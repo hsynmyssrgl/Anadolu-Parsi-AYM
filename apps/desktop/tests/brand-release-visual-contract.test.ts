@@ -400,6 +400,12 @@ describe('approved brand and release-channel visual contract', () => {
     });
     expect(manifest.minimumInteractionTargetPx).toBe(44);
     expect(main).toContain("backgroundColor: '#FDFDFC'");
+    expect(main).toContain('minWidth: 900');
+    expect(main).toContain('minHeight: 640');
+    expect(main).toContain("titleBarStyle: 'hidden'");
+    expect(main).toContain("color: '#F7F3ED'");
+    expect(main).toContain("symbolColor: '#5B5148'");
+    expect(main).toContain('roundedCorners: true');
     expect(main).not.toContain("backgroundColor: '#06111e'");
     for (const marker of [
       '/* Binding release-channel onboarding baseline — light, accessible and version-aware. */',
@@ -407,7 +413,12 @@ describe('approved brand and release-channel visual contract', () => {
       'border-color:var(--release-border);',
       'border-color:var(--release-focus);',
       'background:linear-gradient(145deg,var(--release-accent-soft),var(--release-accent-edge));',
-      '.auth-brand>img { width:96px;height:96px;',
+      '.desktop-titlebar img {',
+      'width:29px;',
+      '.auth-family-pars {',
+      '.auth-pars-adult-male {',
+      '.auth-pars-adult-female {',
+      '.auth-pars-child {',
       '.first-run-actions .button,',
       '.first-run-skip { min-height: 44px; }'
     ]) expect(styles).toContain(marker);
@@ -435,6 +446,26 @@ describe('approved brand and release-channel visual contract', () => {
       '.auth-fields input{width:100%;height:54px',
       '.auth-form>.button{height:54px;font-size:16px}',
       '.password-checklist { display: flex; flex-wrap: wrap; gap: 8px 13px; color: #9fb3c6; font-size: 13px;'
+    ]) expect(styles).toContain(marker);
+  });
+
+  it('scales the first-family surface without the old fixed body width and keeps calm family motion optional', async () => {
+    const [app, styles] = await Promise.all([readFile(appUrl, 'utf8'), readFile(stylesUrl, 'utf8')]);
+    for (const marker of [
+      'className="auth-family-pars" aria-hidden="true"',
+      'className="auth-pars auth-pars-adult-male"',
+      'className="auth-pars auth-pars-adult-female"',
+      'className="auth-pars auth-pars-child"',
+      "globalThis.addEventListener('pointerdown',retryAfterUserGesture,{capture:true,once:true})",
+      "globalThis.addEventListener('keydown',retryAfterUserGesture,{capture:true,once:true})"
+    ]) expect(app).toContain(marker);
+    for (const marker of [
+      'body {\n  min-width:0;\n  min-height:0;',
+      '.desktop-window-content {',
+      'height:calc(100vh - 42px);',
+      '.auth-shell {\n  grid-template-columns:minmax(340px,.98fr) minmax(470px,1.02fr);',
+      '@media(max-height:760px)',
+      '@media(prefers-reduced-motion:reduce) {\n  .auth-family-pars .auth-pars { animation:none!important;transition:none!important; }'
     ]) expect(styles).toContain(marker);
   });
 

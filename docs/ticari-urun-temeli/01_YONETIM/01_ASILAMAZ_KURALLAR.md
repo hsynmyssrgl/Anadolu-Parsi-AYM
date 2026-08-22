@@ -43,7 +43,9 @@ Eksik halka varsa durum `ACIK`, `BLOCKED`, `PARTIAL`, `NOT_RUN` veya `FAIL` olur
 - Bronze, Silver ve Gold paletleri ana kodda tanimlidir.
 - Acilista etkin kanal dogrulanir ve yalniz o kanal paleti uygulanir.
 - Kurulum, uygulama, yardim ve raporlar ayni etkin kanal kimligini gosterir.
+- Kod veya Windows paketleme davranisi degistiginde onceki installer EXE, blockmap ve SHA-256 dosyalari yeni build oncesinde silinir; release klasorunde yalniz guncel surum seti kalabilir.
 - Varsayilan ana zemin acik/beyazdir; saydamlik okunabilirlik ve erisilebilirlik sinirlarini asamaz.
+- Ozel installer, 900x640 olcekli ilk aile ekrani, uc pars, ayni dilde kadin ses onceligi/erkek ses yedegi ve belirgin pencere/tepsi simgeleri PR-232 kabul zincirinden ayrilamaz.
 
 ## 6. Veri kurali
 
@@ -52,6 +54,7 @@ Eksik halka varsa durum `ACIK`, `BLOCKED`, `PARTIAL`, `NOT_RUN` veya `FAIL` olur
 - Fabrika ayarina donus acik onay ister; kisinin verisi ile yonetilen yedekleri icin geri donussuz silme plani kanitlanmadan basarili sayilmaz.
 - Kaldirma akisi yedekleme veya tam silme tercihini aciklar; bulut hedefi kullanici oturumu ve saglayici izni olmadan acilmaz.
 - Hassas veri, receipt, gizli anahtar, token ve dosya yolu renderer'a sizdirilmaz.
+- Yukseltme ve sessiz bakim kisisel veri kaldirma secimini acmaz; ilk aile kurulumu tek SQLite unit-of-work icinde ya tamamen tamamlanir ya tamamen geri alinir.
 
 ## 7. Guvenlik kurali
 
@@ -86,3 +89,4 @@ Asagidakiler tamamlanmadan ticari yayin etiketi verilemez:
 
 Bu belge tek basina teknik kapı degildir. `11_OTOMASYON` altindaki dogrulayici; klasor, manifesto, zorunlu belge, kimlik, durum ve hash alanlarini denetler. Uygulama deposundaki governed preflight ile bag kurulmadan ticari teslim PASS sayilmaz.
 
+Her durum degistiren islemden once `scripts/verify-operation-rule-check.mjs` ile guncel kanonik kural, hash, kullanici onayi ve aktif enforcement baglari kontrol edilir. PASS olmayan kontrol sonrasinda kod, dosya, test, build, kurulum, silme veya yayin islemi baslatilamaz; waiver ve atlama yoktur.

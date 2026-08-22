@@ -1530,6 +1530,21 @@ body:has(.app-shell[data-high-contrast="true"]) :is(.modal-backdrop,.narrated-he
 .invitation-token-card{display:grid;gap:9px;min-height:0}.invitation-token-card code{display:block;overflow-wrap:anywhere;padding:10px;border-radius:8px;background:rgba(0,0,0,.22);font-size:11px}.invitation-lifecycle-row{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:13px;border:1px solid var(--line);background:rgba(255,255,255,.02)}.invitation-lifecycle-row>div:first-child{display:grid;gap:5px;min-width:0}.invitation-lifecycle-row small{color:var(--muted)}.invitation-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:7px}
 @media(max-width:620px){.invitation-token-row{grid-template-columns:1fr}.invitation-lifecycle-row{display:grid}.invitation-actions{justify-content:flex-start}}
 
+/* Ilk kullanim ve guvenli baslangic: dengeli kartlar, tek kolonlu adim anlatimi. */
+.first-run-steps li{display:flex;flex-direction:column;align-items:flex-start;gap:0;min-width:0}
+.first-run-steps p{width:100%;margin:11px 0 0;overflow-wrap:anywhere;word-break:normal}
+.first-run-caption{min-width:0;padding:18px 20px;border:1px solid color-mix(in srgb,var(--release-accent-edge) 58%,var(--release-border));border-radius:16px;background:color-mix(in srgb,var(--release-accent-soft) 30%,var(--release-panel-secondary));box-shadow:inset 0 1px rgba(255,255,255,.12)}
+.first-run-caption p{max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:normal;line-height:1.65}
+.secure-startup-card{display:grid;gap:24px;max-width:680px}
+.secure-startup-brand{display:flex;align-items:center;justify-content:center;gap:18px;text-align:left}
+.secure-startup-brand img{width:92px;height:92px;object-fit:contain;animation:first-run-brand-breathe 3.4s ease-in-out infinite}
+.secure-startup-brand>div{display:grid;gap:2px}.secure-startup-brand strong{font-size:clamp(28px,5vw,42px);line-height:1}.secure-startup-brand span{font-size:16px;color:var(--release-muted)}
+.secure-startup-card .loading-screen{min-height:250px}.secure-startup-card .loading-screen>strong{font-size:20px;color:var(--release-text)}
+.secure-startup-card .loading-screen>small{max-width:520px;text-align:center;line-height:1.6}
+.secure-startup-version{display:block;margin-top:10px;color:var(--release-accent-strong);font-size:13px;font-weight:750;letter-spacing:.02em}
+.secure-startup-error{display:grid;justify-items:center;gap:14px;text-align:center;padding:16px 0}.secure-startup-error h1{margin:0;font-size:clamp(25px,4vw,36px)}.secure-startup-error p{max-width:540px;margin:0;color:var(--release-muted);line-height:1.65}
+@media(max-width:720px){.secure-startup-brand img{width:76px;height:76px}.secure-startup-brand strong{font-size:30px}}
+
 /* Build 30-J — governed data repair center */
 .data-repair-workspace{grid-template-columns:minmax(0,1fr) minmax(320px,.9fr)}
 .data-repair-workspace>.data-repair-history{grid-column:1/-1}
@@ -2047,3 +2062,174 @@ body:has(.app-shell[data-high-contrast="true"]) :is(.modal-backdrop,.narrated-he
 
 /* Finans kurum seçimi: çevrimdışı, erişilebilir ve her katalog girdisi için görünür işaret. */
 .bank-institution-picker{display:grid;gap:7px}.bank-institution-picker-control{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:10px}.bank-institution-picker-control select{width:100%;min-width:0}.bank-institution-mark{--bank-mark-background:#4f5d75;--bank-mark-foreground:#fff;display:inline-grid;place-items:center;flex:0 0 auto;width:46px;height:46px;padding:4px;border:1px solid color-mix(in srgb,var(--bank-mark-background) 76%,#fff);border-radius:14px;background:linear-gradient(145deg,color-mix(in srgb,var(--bank-mark-background) 88%,#fff),var(--bank-mark-background));color:var(--bank-mark-foreground);font-size:13px;font-weight:850;letter-spacing:-.025em;line-height:1;text-align:center;box-shadow:0 7px 16px color-mix(in srgb,var(--bank-mark-background) 24%,transparent)}.bank-institution-mark.is-compact{width:38px;height:38px;border-radius:11px;font-size:11px}.bank-institution-summary{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:start;gap:12px}.bank-institution-summary>div{display:grid;gap:3px;min-width:0}
+
+/* ParsYuva desktop frame and scalable first-family surface. */
+html,
+body,
+#root {
+  width:100%;
+  height:100%;
+}
+body {
+  min-width:0;
+  min-height:0;
+}
+.desktop-window-frame {
+  width:100%;
+  height:100vh;
+  overflow:hidden;
+  background:var(--release-background);
+}
+.desktop-titlebar {
+  position:relative;
+  z-index:2000;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  height:42px;
+  padding:0 150px 0 14px;
+  overflow:hidden;
+  color:var(--release-text);
+  border-bottom:1px solid color-mix(in srgb,var(--release-border) 36%,transparent);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--release-panel) 96%,white),color-mix(in srgb,var(--release-panel-secondary) 86%,white));
+  box-shadow:0 5px 18px rgba(74,55,37,.07);
+  -webkit-app-region:drag;
+  user-select:none;
+}
+.desktop-titlebar img {
+  width:29px;
+  height:29px;
+  flex:0 0 29px;
+  object-fit:contain;
+  filter:drop-shadow(0 3px 7px rgba(132,77,31,.28));
+}
+.desktop-titlebar strong { font-size:14px;line-height:1; }
+.desktop-titlebar span { color:var(--release-muted);font-size:13px;line-height:1; }
+.desktop-window-content {
+  height:calc(100vh - 42px);
+  min-width:0;
+  min-height:0;
+  overflow:hidden;
+}
+.desktop-window-content>.app-shell,
+.desktop-window-content>.auth-shell,
+.desktop-window-content>.first-run-shell,
+.desktop-window-content>.first-run-security-shell {
+  height:100%;
+  min-height:0;
+}
+.desktop-window-content>.first-run-shell,
+.desktop-window-content>.first-run-security-shell { overflow:auto; }
+
+.auth-shell {
+  grid-template-columns:minmax(340px,.98fr) minmax(470px,1.02fr);
+  overflow:hidden;
+}
+.auth-story {
+  min-height:0;
+  padding:clamp(26px,3.4vw,54px);
+  overflow:auto;
+}
+.auth-entry {
+  min-height:0;
+  align-content:center;
+  padding:clamp(22px,3.4vw,52px);
+  background:
+    radial-gradient(circle at 88% 12%,color-mix(in srgb,var(--release-accent-soft) 42%,transparent),transparent 33%),
+    radial-gradient(circle at 14% 88%,color-mix(in srgb,var(--release-primary) 13%,transparent),transparent 38%),
+    linear-gradient(150deg,var(--release-panel-secondary),color-mix(in srgb,var(--release-panel) 94%,var(--release-accent-soft)) 54%,var(--release-background));
+}
+.auth-form {
+  width:min(590px,100%);
+  gap:clamp(15px,2.2vh,24px);
+  padding:clamp(24px,3vw,40px);
+  border:1px solid color-mix(in srgb,var(--release-border) 74%,var(--release-accent-edge));
+  border-radius:30px;
+  background:color-mix(in srgb,var(--release-panel) 91%,transparent);
+  box-shadow:0 24px 70px rgba(75,51,28,.13),inset 0 1px rgba(255,255,255,.96);
+  backdrop-filter:blur(28px) saturate(1.08);
+}
+.auth-brand { gap:22px; }
+.auth-family-pars {
+  position:relative;
+  width:184px;
+  height:112px;
+  flex:0 0 184px;
+}
+.auth-family-pars .auth-pars {
+  position:absolute;
+  display:block;
+  object-fit:contain;
+  transform-origin:50% 74%;
+  filter:drop-shadow(0 11px 22px rgba(155,91,34,.26));
+}
+.auth-pars-adult-male {
+  left:0;
+  bottom:5px;
+  width:92px;
+  height:92px;
+  animation:auth-pars-male-breathe 4.1s ease-in-out infinite;
+}
+.auth-pars-adult-female {
+  left:64px;
+  bottom:3px;
+  width:82px;
+  height:82px;
+  animation:auth-pars-female-breathe 4.1s .32s ease-in-out infinite;
+}
+.auth-pars-child {
+  right:0;
+  bottom:0;
+  width:58px;
+  height:58px;
+  animation:auth-pars-child-breathe 3.2s .58s ease-in-out infinite;
+}
+.auth-brand-copy { align-items:flex-start;text-align:left; }
+.auth-brand-copy strong { font-size:clamp(22px,2vw,27px);line-height:1.05; }
+.auth-brand-copy small { margin-top:7px;font-size:clamp(15px,1.25vw,18px); }
+@keyframes auth-pars-male-breathe {
+  0%,100%{transform:translateY(0) rotate(0)}
+  50%{transform:translateY(-4px) rotate(-1deg)}
+}
+@keyframes auth-pars-female-breathe {
+  0%,100%{transform:scaleX(-1) translateY(0) rotate(0)}
+  50%{transform:scaleX(-1) translateY(-3px) rotate(-1deg)}
+}
+@keyframes auth-pars-child-breathe {
+  0%,100%{transform:translateY(0) scale(1)}
+  50%{transform:translateY(-6px) scale(1.04)}
+}
+
+@media(max-width:1100px) {
+  .auth-shell { grid-template-columns:minmax(310px,.78fr) minmax(480px,1.22fr); }
+  .auth-story { padding:28px 32px; }
+  .auth-story-copy h1 { font-size:clamp(38px,4.7vw,52px); }
+  .auth-story-copy p { font-size:16px;line-height:1.55; }
+  .auth-family-pars { width:154px;height:96px;flex-basis:154px; }
+  .auth-pars-adult-male { width:78px;height:78px; }
+  .auth-pars-adult-female { left:54px;width:70px;height:70px; }
+  .auth-pars-child { width:50px;height:50px; }
+  .auth-brand { gap:16px; }
+}
+@media(max-height:760px) {
+  .auth-story { padding-block:22px; }
+  .auth-story-copy h1 { margin:8px 0 12px;font-size:clamp(34px,4vw,48px); }
+  .auth-story-copy p { font-size:15px;line-height:1.5; }
+  .auth-trust { padding:12px 15px; }
+  .auth-entry { align-content:start;padding-block:18px; }
+  .auth-form { gap:14px;padding:22px 26px; }
+  .auth-heading h2 { margin-block:5px;font-size:32px; }
+  .auth-heading p { font-size:14px;line-height:1.45; }
+  .auth-fields { gap:12px; }
+  .auth-fields label { gap:6px; }
+  .auth-fields input,.auth-form>.button { height:48px; }
+}
+@media(max-width:760px) {
+  .desktop-titlebar span { display:none; }
+  .auth-shell { grid-template-columns:1fr;overflow:auto; }
+  .auth-story { min-height:420px; }
+  .auth-entry { overflow:visible; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .auth-family-pars .auth-pars { animation:none!important;transition:none!important; }
+}

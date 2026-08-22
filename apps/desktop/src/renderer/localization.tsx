@@ -13,10 +13,10 @@ const englishMessages = {
   'intro.lead':'A secure local center for family memories, documents, health, finance and life records.',
   'intro.caption':'Narration transcript',
   'intro.audioMuted':'Audio is muted; the narration transcript remains visible.',
-  'intro.audioUnavailable':'Local voice narration is unavailable on this device; the transcript remains visible.',
+  'intro.audioUnavailable':'A voice for this language is unavailable on this device; the transcript remains visible and you can try again.',
   'intro.audioError':'Voice narration could not be started; the transcript remains visible.',
-  'intro.audioPlaying':'English narration is playing.',
-  'intro.audioReady':'English narration is ready.',
+  'intro.audioPlaying':'English narration is playing; a female voice is preferred when available.',
+  'intro.audioReady':'English narration is ready; a female voice will be preferred.',
   'intro.slowSpeed':'Slow speed',
   'intro.normalSpeed':'Normal speed',
   'intro.unmute':'Turn sound on',
@@ -27,6 +27,7 @@ const englishMessages = {
   'intro.slower':'Slower',
   'intro.start':'Start secure setup',
   'intro.skip':'Skip introduction for now',
+  'intro.closeReplay':'Return to the application',
   'security.eyebrow':'First setup · Security',
   'security.title':'Protect your account and recovery path',
   'security.body':'Two-factor authentication and recovery codes are created before the main application opens. User data does not enter normal use until this step is complete.',
@@ -96,6 +97,9 @@ const englishMessages = {
   'shell.logout':'Sign out of profile',
   'shell.loading':'Secure startup is being prepared…',
   'shell.loadingBody':'Family data and normal application screens stay closed until identity status is verified.',
+  'shell.startupError':'Secure startup could not be completed',
+  'shell.startupErrorBody':'The identity connection did not respond safely. Your data was not opened. Try again.',
+  'shell.version':'Version',
   'common.retry':'Try again'
 } as const;
 
@@ -107,10 +111,10 @@ const turkishMessages: Record<UiMessageKey, string> = {
   'intro.lead':'Aile hafızası, belgeler, sağlık, finans ve yaşam kayıtları için güvenli yerel merkez.',
   'intro.caption':'Sesli anlatım metni',
   'intro.audioMuted':'Ses kapalı; anlatım metni görünür.',
-  'intro.audioUnavailable':'Bu cihazda yerel sesli anlatım kullanılamıyor; metin görünür.',
+  'intro.audioUnavailable':'Bu cihazda bu dile uygun anlatım sesi bulunamadı; metin görünür ve yeniden deneyebilirsiniz.',
   'intro.audioError':'Sesli anlatım başlatılamadı; metin görünür.',
-  'intro.audioPlaying':'Türkçe anlatım oynatılıyor.',
-  'intro.audioReady':'Türkçe anlatım hazır.',
+  'intro.audioPlaying':'Türkçe anlatım oynatılıyor; varsa kadın sesi kullanılır.',
+  'intro.audioReady':'Türkçe anlatım hazır; varsa kadın sesi tercih edilir.',
   'intro.slowSpeed':'Yavaş hız',
   'intro.normalSpeed':'Normal hız',
   'intro.unmute':'Sesi aç',
@@ -121,6 +125,7 @@ const turkishMessages: Record<UiMessageKey, string> = {
   'intro.slower':'Daha yavaş',
   'intro.start':'Güvenli kuruluma başla',
   'intro.skip':'Tanıtımı şimdilik geç',
+  'intro.closeReplay':'Uygulamaya dön',
   'security.eyebrow':'İlk kurulum · Güvenlik',
   'security.title':'Hesabınızı ve kurtarma yolunu güvenceye alın',
   'security.body':'Ana uygulama açılmadan önce iki aşamalı doğrulama ve kurtarma kodları oluşturulur. Bu adım tamamlanmadan kullanıcı verisi oturumu normal kullanıma geçmez.',
@@ -190,6 +195,9 @@ const turkishMessages: Record<UiMessageKey, string> = {
   'shell.logout':'Profilden çıkış yap',
   'shell.loading':'Güvenli başlangıç hazırlanıyor…',
   'shell.loadingBody':'Kimlik durumu doğrulanmadan aile verileri ve normal uygulama ekranı açılmaz.',
+  'shell.startupError':'Güvenli başlangıç tamamlanamadı',
+  'shell.startupErrorBody':'Kimlik bağlantısı güvenli biçimde yanıt vermedi. Verileriniz açılmadı. Yeniden deneyin.',
+  'shell.version':'Sürüm',
   'common.retry':'Yeniden dene'
 };
 

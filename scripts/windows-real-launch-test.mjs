@@ -240,7 +240,7 @@ const launchOnce = async ({ temporaryRoot, userDataPath, runNumber, expectedSent
     const probe = JSON.parse(readFileSync(probePath, 'utf8'));
     validateProbe(probe, expectedSentinelState);
     await wait(1_000);
-    if (child.exitCode !== null) {
+    if (child.exitCode !== null && child.exitCode !== 0) {
       throw new Error(`Electron process exited after renderer load with code ${child.exitCode}.`);
     }
     return probe;

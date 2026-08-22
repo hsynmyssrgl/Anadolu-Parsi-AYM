@@ -1,14 +1,16 @@
 # Tüm Kurallar Aşılamaz Yürütme Sözleşmesi
 
-- Sürüm: **Bronze 20.08.2026.37**
+- Sürüm: **Bronze 22.08.2026.45**
 - Karar: **DEC-129**
-- Kanonik kural sayısı: **228**
-- Aktif kural: **207**
-- Kural SHA-256: `c7cd9a0b82e58d3bf9dbc3aca7cf38d452b73b7e5bc361690e84d94821a7b25d`
+- Kanonik kural sayısı: **232**
+- Aktif kural: **211**
+- Kural SHA-256: `a11d80649bc74759371fe68f7f5b8c0ab12c1cd6a9e77e09c7e96a9a3a7e068b`
 
 ## Değişmez çalışma ilkesi
 
 Her ACTIVE kural `config/rule-enforcement-registry.json` içinde tam bir enforcement kaydına sahiptir. `failClosed=true`, `waiverAllowed=false`, `skipAllowed=false` zorunludur. Makineyle doğrudan kanıtlanamayan bir kural PASS sayılmaz; kanıt gerektiren aşama BLOCKED kalır.
+
+Her durum değiştiren işlem öncesinde `scripts/verify-operation-rule-check.mjs` açık işlem türü ve açıklamasıyla çalıştırılır. Kural, hash, onay veya enforcement kontrolü PASS değilse kod, dosya, test, build, paketleme, kurulum, silme, yayımlama ya da dış yazma işlemi başlatılamaz.
 
 ## PR-171 adım kilidi
 

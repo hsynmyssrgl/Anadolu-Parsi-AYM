@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
-  "release": "Bronze 20.08.2026.37",
-  "decisionCount": 91,
+  "release": "Bronze 22.08.2026.45",
+  "decisionCount": 95,
   "decisions": [
     {
       "id": "DEC-121",
@@ -2366,6 +2366,143 @@
         "apps/desktop/tests/installer-narration-experience.test.ts",
         "apps/desktop/tests/monthly-release-version.test.ts",
         "scripts/verify-product-brand-identity.mjs"
+      ]
+    },
+    {
+      "id": "DEC-263",
+      "date": "2026-08-22",
+      "acceptedAt": "2026-08-22T01:40:00+03:00",
+      "title": "Kod degisikliginde eski Windows kurulum artefaktlarinin silinmesi",
+      "status": "ACTIVE",
+      "source": "Acik kullanici karari: kodlama yapilinca eski kurulum dosyalari her zaman silinecek ve bu davranis kurallara eklenecek",
+      "document": "docs/decisions/DEC-263-kod-degisikliginde-eski-windows-kurulum-artefaktlarinin-silinmesi.md",
+      "documents": [
+        "config/canonical-rule-registry.json",
+        "docs/current/06_KANONIK_KURAL_SICILI.md",
+        "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
+        "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
+        "docs/ticari-urun-temeli/01_YONETIM/01_ASILAMAZ_KURALLAR.md",
+        "docs/ticari-urun-temeli/03_MIMARI/04_PLATFORM_VE_DAGITIM_MIMARISI.md",
+        "docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md"
+      ],
+      "workListImpact": "Her kod veya Windows paketleme degisikliginde release klasorundeki onceki ParsYuva installer EXE, blockmap ve SHA-256 dosyalari yeni build oncesinde otomatik silinir; preflight yalniz guncel gorunur surume ait en fazla bir installer setine izin verir.",
+      "syncStatus": "SYNCHRONIZED",
+      "requirements": [],
+      "codeAreas": [
+        "package.json",
+        "apps/desktop/package.json",
+        "scripts/clean-stale-windows-installers.mjs",
+        "scripts/verify-windows-installer-retention-policy.mjs",
+        "scripts/lib/windows-installer-artifacts.mjs",
+        "scripts/run-governed-preflight.mjs"
+      ],
+      "evidence": [
+        "apps/desktop/tests/windows-installer-retention-policy.test.ts",
+        "artifacts/validation/windows-installer-retention-policy.json"
+      ]
+    },
+    {
+      "id": "DEC-264",
+      "date": "2026-08-22",
+      "acceptedAt": "2026-08-22T02:20:00+03:00",
+      "title": "Gorunur surum kanalinin tek kez gosterilmesi",
+      "status": "ACTIVE",
+      "source": "Acik kullanici karari: iki kez Bronze yazilmayacak ve kural tum surumlere uygulanacak",
+      "document": "docs/decisions/DEC-264-gorunur-surum-kanalinin-tek-kez-gosterilmesi.md",
+      "documents": [
+        "config/canonical-rule-registry.json",
+        "docs/current/06_KANONIK_KURAL_SICILI.md",
+        "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
+        "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md"
+      ],
+      "workListImpact": "Bronze, Silver ve Gold gorunur surum satirlarinda kanal adi yalniz releaseLabel icinde ve tam bir kez gosterilir; stage kanal adi tasiyamaz.",
+      "syncStatus": "SYNCHRONIZED",
+      "requirements": [],
+      "codeAreas": [
+        "packages/domain/src/app-meta.ts",
+        "apps/desktop/src/renderer/App.tsx",
+        "scripts/verify-user-visible-release-display-policy.mjs",
+        "scripts/run-governed-preflight.mjs"
+      ],
+      "evidence": [
+        "packages/domain/tests/user-visible-release.test.ts",
+        "apps/desktop/tests/user-visible-release-boundary-runtime.test.ts",
+        "artifacts/validation/user-visible-release-display-policy.json"
+      ]
+    },
+    {
+      "id": "DEC-265",
+      "date": "2026-08-22",
+      "acceptedAt": "2026-08-22T02:30:00+03:00",
+      "title": "Her islem oncesi zorunlu kural kontrolu",
+      "status": "ACTIVE",
+      "source": "Acik kullanici karari: bir islem yaparken kural kontrolu muhakkak yapilmali ve atlanmamali",
+      "document": "docs/decisions/DEC-265-her-islem-oncesi-zorunlu-kural-kontrolu.md",
+      "documents": [
+        "C:/PPT/AYM/AGENTS.md",
+        "AGENTS.md",
+        "config/canonical-rule-registry.json",
+        "config/rule-enforcement-registry.json",
+        "docs/current/06_KANONIK_KURAL_SICILI.md",
+        "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
+        "docs/current/10_TUM_KURALLAR_ASILAMAZ_YURUTME_SOZLESMESI.md",
+        "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md"
+      ],
+      "workListImpact": "Her durum degistiren islemden once kural hash, onay ve enforcement kontrolu PASS olmali; kural degisirse sonraki mutasyondan once kontrol yenilenir.",
+      "syncStatus": "SYNCHRONIZED",
+      "requirements": [],
+      "codeAreas": [
+        "AGENTS.md",
+        "scripts/verify-operation-rule-check.mjs",
+        "scripts/run-governed-preflight.mjs",
+        "package.json"
+      ],
+      "evidence": [
+        "apps/desktop/tests/operation-rule-check-policy.test.ts",
+        "artifacts/validation/operation-rule-check.json"
+      ]
+    },
+    {
+      "id": "DEC-266",
+      "date": "2026-08-22",
+      "acceptedAt": "2026-08-22T11:35:49+03:00",
+      "title": "Ozel kurulum ilk aile temiz paket ve cift yedek kabul zinciri",
+      "status": "ACTIVE",
+      "source": "Acik kullanici karari: tum degisiklikleri kurallara ve tum yapilara isle, tum kodu harici diske ve Git'e yedekle, temiz kurulum dosyasi olustur",
+      "document": "docs/decisions/DEC-266-ozel-kurulum-ilk-aile-temiz-paket-ve-cift-yedek-kabul-zinciri.md",
+      "documents": [
+        "config/canonical-rule-registry.json",
+        "config/rule-enforcement-registry.json",
+        "docs/current/06_KANONIK_KURAL_SICILI.md",
+        "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
+        "docs/current/10_TUM_KURALLAR_ASILAMAZ_YURUTME_SOZLESMESI.md",
+        "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
+        "docs/ticari-urun-temeli/01_YONETIM/01_ASILAMAZ_KURALLAR.md",
+        "docs/ticari-urun-temeli/03_MIMARI/04_PLATFORM_VE_DAGITIM_MIMARISI.md",
+        "docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md",
+        "docs/10_MASTER_DECISION_REGISTER.md"
+      ],
+      "workListImpact": "Ozel installer, olcekli ilk aile ekrani, uc pars, TR/EN kadin ses onceligi ve ayni dil erkek yedegi, belirgin simgeler, atomik SQLite kurulum, veri koruyan yukseltme, eski paket temizligi, tam workspace rebuild, paketli runtime probe ve GitHub + harici Git + harici kaynak arsivi tek kabul zinciridir.",
+      "syncStatus": "SYNCHRONIZED",
+      "requirements": [],
+      "codeAreas": [
+        "apps/desktop/build/installer.nsh",
+        "apps/desktop/src/renderer/App.tsx",
+        "apps/desktop/src/renderer/styles.css",
+        "apps/desktop/src/renderer/accessibility.ts",
+        "apps/desktop/src/main/main.ts",
+        "packages/application/src/auth-use-cases.ts",
+        "apps/desktop/src/main/data-store.ts",
+        "apps/desktop/package.json",
+        "scripts/protect-authoritative-source-external.mjs",
+        "scripts/verify-first-family-clean-release-policy.mjs"
+      ],
+      "evidence": [
+        "apps/desktop/tests/data-store.test.ts",
+        "apps/desktop/tests/installer-narration-experience.test.ts",
+        "apps/desktop/tests/first-run-narration-voice.test.ts",
+        "artifacts/validation/first-family-clean-release-policy.json",
+        "artifacts/validation/packaged-runtime-launch.json"
       ]
     }
   ]

@@ -11,6 +11,7 @@ Durumlar: `TAMAMLANDI`, `DEVAM`, `ACIK`, `BLOCKED`, `NOT_RUN`.
 | IS-0003 | Git dal/commit/tag/yedek politikasi | Codex + Kullanici | TAMAMLANDI | GitHub ve yerel backup ayni committe |
 | IS-0004 | Tarihsel belgeleri aktif taramadan ayir | Codex | TAMAMLANDI | Tek aktif belge indeksi |
 | IS-0005 | Her karar icin anlik sicil otomasyonu | Codex | TAMAMLANDI | Yeni karar testsiz kaydedilemez |
+| IS-0006 | Her islem oncesi zorunlu kural kontrolu | Codex | TAMAMLANDI | Kural/hash/onay/enforcement kontrolu, makine makbuzu ve otomatik giris kapilari PASS |
 
 ## 1. Marka, surum ve kullanici deneyimi
 
@@ -23,6 +24,8 @@ Durumlar: `TAMAMLANDI`, `DEVAM`, `ACIK`, `BLOCKED`, `NOT_RUN`.
 | IS-0105 | Tum menu-islev parite taramasi | Codex | TAMAMLANDI | Yetim menu/API sayisi 0 |
 | IS-0106 | Tam English uzman panel cevirisi | Codex | DEVAM | Ilk 24 uzman panel ile pano, katalog, aile, soy agaci, zaman tuneli, onemli gunler ve birlesik arama PASS; kalan ana kabuk ekranlarinda gorunur Turkce sabit metin 0 (English locale) |
 | IS-0107 | Ilk tanitim ve yardim sesli anlatim | Codex | DEVAM | TR/EN metin-ses, fallback ve erisilebilirlik PASS |
+| IS-0108 | Gorunur surum kanalini tek kez goster | Codex | TAMAMLANDI | Bronze/Silver/Gold, TR/EN ortak bicimlendirici ve preflight kapisi PASS |
+| IS-0109 | Ozel kurulum ve olcekli ilk aile kabul yuzeyi | Codex | DEVAM | 900x640 yatay tasma 0, uc pars/reduced-motion, TR/EN kadin ses onceligi ve erkek fallback, pencere/tepsi simge kapilari PASS; gercek ses insan UAT acik |
 
 ## 2. Kurulum, acilis ve yasam dongusu
 
@@ -35,6 +38,8 @@ Durumlar: `TAMAMLANDI`, `DEVAM`, `ACIK`, `BLOCKED`, `NOT_RUN`.
 | IS-0205 | Guncellemede veri koruma | Codex | ACIK | N-1 migration ve rollback PASS |
 | IS-0206 | Kaldirmada yedekle/tam sil secimi | Codex | DEVAM | Gercek hedef ve receipt testleri |
 | IS-0207 | Fabrika ayarina donus | Codex | DEVAM | Yeniden kimlik, inventory, silme kaniti |
+| IS-0208 | Eski Windows installer artefaktlarini otomatik temizle | Codex | TAMAMLANDI | Prebuild/package temizligi, guncel-surum kapisi ve hedef test PASS |
+| IS-0209 | Temiz paket, paketli runtime ve cift yedek kabul zinciri | Codex | DEVAM | Tum workspace rebuild, installer/runtime/surum/hash/imza kaniti, GitHub + harici Git commit esitligi ve D: kaynak readback PASS |
 
 ## 3. Kimlik, lisans ve ticari guven
 

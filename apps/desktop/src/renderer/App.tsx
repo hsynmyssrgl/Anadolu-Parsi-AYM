@@ -2,7 +2,7 @@ import { useEffect, useMemo, useReducer, useRef, useState, type CSSProperties, t
 import { Button, EmptyState, Modal, PageHeader, SectionHeader, StatRow, StatusMessage, Surface, VisuallyHidden } from './ui';
 import { navigationReducer, persistNavigationState, readNavigationState } from './navigation';
 import brandMarkUrl from './assets/brand-mark.png';
-import { accessibilityAnnouncement, applyAccessibilityProfile, cancelFirstRunNarration, firstRunNarrationContent, isFirstRunIntroductionComplete, nextRovingIndex, parseAccessibilityPreferences, persistBrandAudioMuted, persistFirstRunIntroductionComplete, readBootstrapPreference, readBrandAudioMuted, resolveAccessibilityTheme, serializeAccessibilityPreferences, startFirstRunNarration, writeBootstrapPreference, type AccessibilityAudienceProfile, type AccessibilityPreferences, type BootstrapPreferenceStorage, type FirstRunNarrationStatus } from './accessibility';
+import { accessibilityAnnouncement, applyAccessibilityProfile, cancelFirstRunNarration, firstRunNarrationContent, isFirstRunIntroductionComplete, nextRovingIndex, parseAccessibilityPreferences, persistBrandAudioMuted, persistFirstRunIntroductionComplete, readBootstrapPreference, readBrandAudioMuted, resolveAccessibilityTheme, serializeAccessibilityPreferences, startFirstRunNarration, waitForPreferredNarrationVoice, writeBootstrapPreference, type AccessibilityAudienceProfile, type AccessibilityPreferences, type BootstrapPreferenceStorage, type FirstRunNarrationStatus } from './accessibility';
 import { getActiveUiLocale, localizeNavigationGroup, localizeNavigationLabel, useLocalization } from './localization';
 import { AsyncWriteGuard, MutationRevisionWatermark } from './async-state-guard';
 import { AsyncStatePanel, ValidationSummary, canUndoGovernedDraft, useGovernedDraft, type ValidationIssue } from './form-ux';
@@ -60,6 +60,8 @@ import {
   archiveLegacyOwnershipReattestationConfirmation,
   asIsoDateTime,
   asUserId,
+  formatUserVisibleReleaseSummary,
+  releaseStageForChannel,
   getFamilyRelationship,
   type FamilyRelationshipCategory,
   type FamilyRelationshipCode,
@@ -694,11 +696,14 @@ function playParsBrandSound(): void {
   }
 }
 
-function FirstRunIntroduction({audioMuted,onAudioMutedChange,onComplete}:{audioMuted:boolean;onAudioMutedChange:(muted:boolean)=>void;onComplete:()=>void}){
+function FirstRunIntroduction({audioMuted,autoNarrate,mode,onAudioMutedChange,onNarrationOffered,onComplete}:{audioMuted:boolean;autoNarrate:boolean;mode:'first-run'|'replay';onAudioMutedChange:(muted:boolean)=>void;onNarrationOffered:()=>void|Promise<void>;onComplete:()=>void|Promise<void>}){
   const {language,t}=useLocalization();
   const narration=firstRunNarrationContent(language);
   const [narrationStatus,setNarrationStatus]=useState<FirstRunNarrationStatus>(audioMuted?'muted':'idle');
   const [narrationRate,setNarrationRate]=useState<'normal'|'slow'>('normal');
+  const [completionError,setCompletionError]=useState('');
+  const [completing,setCompleting]=useState(false);
+  const narrationAttemptRef=useRef(0);
   const narrationEnvironment=():{synthesis?:SpeechSynthesis;createUtterance?:(text:string)=>SpeechSynthesisUtterance}=>{
     try {
       const synthesis=globalThis.speechSynthesis;
@@ -708,17 +713,49 @@ function FirstRunIntroduction({audioMuted,onAudioMutedChange,onComplete}:{audioM
       return {};
     }
   };
-  const cancelNarration=()=>cancelFirstRunNarration(narrationEnvironment().synthesis);
-  const speak=(muted=audioMuted)=>{
+  const cancelNarration=()=>{narrationAttemptRef.current+=1;return cancelFirstRunNarration(narrationEnvironment().synthesis);};
+  const speak=async(muted=audioMuted)=>{
     const environment=narrationEnvironment();
-    return startFirstRunNarration({muted,language,rate:narrationRate,synthesis:environment.synthesis,createUtterance:environment.createUtterance,onStatus:setNarrationStatus});
+    if(muted)return startFirstRunNarration({muted,language,rate:narrationRate,synthesis:environment.synthesis,createUtterance:environment.createUtterance,onStatus:setNarrationStatus});
+    const attempt=++narrationAttemptRef.current;
+    const preferredVoice=await waitForPreferredNarrationVoice(environment.synthesis,language);
+    if(attempt!==narrationAttemptRef.current)return'idle' as const;
+    return startFirstRunNarration({muted,language,rate:narrationRate,synthesis:environment.synthesis,createUtterance:environment.createUtterance,...(preferredVoice?{preferredVoice}:{}),requirePreferredVoice:true,onStatus:setNarrationStatus});
   };
-  useEffect(()=>{if(audioMuted){cancelNarration();setNarrationStatus('muted');return;}speak(false);return()=>{cancelNarration();};},[audioMuted]);
+  useEffect(()=>{
+    if(audioMuted){cancelNarration();setNarrationStatus('muted');return;}
+    if(!autoNarrate)return;
+    let active=true;
+    void speak(false).then((result)=>{
+      if(active&&result==='speaking')return Promise.resolve(onNarrationOffered());
+      return undefined;
+    }).catch(()=>{if(active)setNarrationStatus('error');});
+    return()=>{active=false;cancelNarration();};
+  },[audioMuted,autoNarrate]);
+  useEffect(()=>{
+    if(audioMuted||!autoNarrate||!['idle','unavailable','error'].includes(narrationStatus))return;
+    let active=true;
+    const removeListeners=()=>{
+      globalThis.removeEventListener('pointerdown',retryAfterUserGesture,true);
+      globalThis.removeEventListener('keydown',retryAfterUserGesture,true);
+    };
+    const retryAfterUserGesture=()=>{
+      removeListeners();
+      if(!active)return;
+      void speak(false).then((result)=>{
+        if(active&&result==='speaking')return Promise.resolve(onNarrationOffered());
+        return undefined;
+      }).catch(()=>{if(active)setNarrationStatus('error');});
+    };
+    globalThis.addEventListener('pointerdown',retryAfterUserGesture,{capture:true,once:true});
+    globalThis.addEventListener('keydown',retryAfterUserGesture,{capture:true,once:true});
+    return()=>{active=false;removeListeners();};
+  },[audioMuted,autoNarrate,narrationStatus]);
   const toggleMuted=()=>{const next=!audioMuted;onAudioMutedChange(next);if(next){cancelNarration();setNarrationStatus('muted');}};
-  const complete=()=>{cancelNarration();persistFirstRunIntroductionComplete(browserPreferenceStorage());playParsBrandSound();onComplete();};
+  const complete=async()=>{cancelNarration();setCompleting(true);setCompletionError('');try{await onComplete();if(mode==='first-run')persistFirstRunIntroductionComplete(browserPreferenceStorage());playParsBrandSound();}catch{setCompletionError(language==='tr'?'Tanıtım durumu güvenle kaydedilemedi. Yeniden deneyin.':'The introduction state could not be stored safely. Try again.');}finally{setCompleting(false);}};
   const speaking=narrationStatus==='speaking';
   const narrationStatusText=audioMuted?t('intro.audioMuted'):narrationStatus==='unavailable'?t('intro.audioUnavailable'):narrationStatus==='error'?t('intro.audioError'):speaking?t('intro.audioPlaying'):t('intro.audioReady');
-  return <main className="first-run-shell"><section className="first-run-card"><div className="first-run-brand"><img src={brandMarkUrl} alt=""/><span className="eyebrow">{t('intro.eyebrow')}</span><h1><span>ParsYuva</span><small>Aile Yaşam Merkezi</small></h1></div><p className="first-run-lead">{t('intro.lead')}</p><ol className="first-run-steps">{narration.steps.map((step,index)=><li key={step}><span>{index+1}</span><p>{step.replace(/^(?:(?:Birinci|İkinci|Üçüncü) adım|Step (?:one|two|three)):\s*/u,'')}</p></li>)}</ol><div className="first-run-caption" aria-live="polite"><strong>{t('intro.caption')}</strong><p>{narration.text}</p><small role="status">{narrationStatusText} · {narrationRate==='slow'?t('intro.slowSpeed'):t('intro.normalSpeed')}</small></div><div className="first-run-actions"><Button onClick={toggleMuted}>{audioMuted?t('intro.unmute'):t('intro.mute')}</Button><Button onClick={()=>{if(speaking){cancelNarration();setNarrationStatus('idle');}else speak(false);}} disabled={audioMuted||narrationStatus==='unavailable'}>{speaking?t('intro.stop'):t('intro.restart')}</Button><Button onClick={()=>{cancelNarration();setNarrationStatus('idle');setNarrationRate(value=>value==='normal'?'slow':'normal');}}>{narrationRate==='slow'?t('intro.normal'):t('intro.slower')}</Button><Button tone="primary" onClick={complete}>{t('intro.start')}</Button></div><button className="first-run-skip" type="button" onClick={complete}>{t('intro.skip')}</button></section></main>;
+  return <main className="first-run-shell"><section className="first-run-card"><div className="first-run-brand"><img src={brandMarkUrl} alt=""/><span className="eyebrow">{t('intro.eyebrow')}</span><h1><span>ParsYuva</span><small>Aile Yaşam Merkezi</small></h1></div><p className="first-run-lead">{t('intro.lead')}</p><ol className="first-run-steps">{narration.steps.map((step,index)=><li key={step}><span>{index+1}</span><p>{step.replace(/^(?:(?:Birinci|İkinci|Üçüncü) adım|Step (?:one|two|three)):\s*/u,'')}</p></li>)}</ol><div className="first-run-caption" aria-live="polite"><strong>{t('intro.caption')}</strong><p>{narration.text}</p><small role="status">{narrationStatusText} · {narrationRate==='slow'?t('intro.slowSpeed'):t('intro.normalSpeed')}</small></div>{completionError&&<StatusMessage tone="danger">{completionError}</StatusMessage>}<div className="first-run-actions"><Button onClick={toggleMuted}>{audioMuted?t('intro.unmute'):t('intro.mute')}</Button><Button onClick={()=>{if(speaking){cancelNarration();setNarrationStatus('idle');}else void speak(false);}} disabled={audioMuted}>{speaking?t('intro.stop'):t('intro.restart')}</Button><Button onClick={()=>{cancelNarration();setNarrationStatus('idle');setNarrationRate(value=>value==='normal'?'slow':'normal');}}>{narrationRate==='slow'?t('intro.normal'):t('intro.slower')}</Button><Button tone="primary" disabled={completing} onClick={()=>void complete()}>{mode==='replay'?t('intro.closeReplay'):t('intro.start')}</Button></div>{mode==='first-run'&&<button className="first-run-skip" type="button" disabled={completing} onClick={()=>void complete()}>{t('intro.skip')}</button>}</section></main>;
 }
 
 
@@ -866,7 +903,14 @@ export function AuthScreen({ auth, onSetup, onLogin, onWindowsHelloLogin, onInvi
   };
   return <main className="auth-shell">
     <section className="auth-story" aria-label="ParsYuva Aile Yaşam Merkezi">
-      <div className="auth-brand"><img src={brandMarkUrl} alt=""/><div><strong>ParsYuva</strong><small>Aile Yaşam Merkezi</small></div></div>
+      <div className="auth-brand">
+        <div className="auth-family-pars" aria-hidden="true">
+          <img className="auth-pars auth-pars-adult-male" src={brandMarkUrl} alt=""/>
+          <img className="auth-pars auth-pars-adult-female" src={brandMarkUrl} alt=""/>
+          <img className="auth-pars auth-pars-child" src={brandMarkUrl} alt=""/>
+        </div>
+        <div className="auth-brand-copy"><strong>ParsYuva</strong><small>Aile Yaşam Merkezi</small></div>
+      </div>
       <div className="auth-story-copy"><span className="eyebrow">{t('auth.private')}</span><h1>{t('auth.story').split('\n').map((line,index)=><span key={line}>{line}{index===0&&<br/>}</span>)}</h1><p>{t('auth.storyBody')}</p></div>
       <div className="auth-trust"><span>✓</span><div><strong>{t('auth.localData')}</strong><small>{t('auth.noOnlineAccount')}</small></div></div>
     </section>
@@ -882,7 +926,7 @@ export function AuthScreen({ auth, onSetup, onLogin, onWindowsHelloLogin, onInvi
         {auth.initialized&&helloState?.enrolled&&helloState.availability!=='available'&&<StatusMessage tone="info">{windowsHelloOutcomeMessage(helloState.availability)}</StatusMessage>}
         <Button tone="primary" type="button" disabled={busy||helloBusy} aria-describedby="auth-submit-guidance" onClick={()=>void submit()}>{busy?t('auth.working'):auth.initialized?t('auth.login'):t('auth.create')}</Button>
         <p id="auth-submit-guidance" className="auth-submit-guidance" aria-live="polite">{busy?(language==='tr'?'Güvenli yerel alan hazırlanıyor; lütfen bekleyin.':'The secure local space is being prepared; please wait.'):auth.initialized?(language==='tr'?'Profil ve parola doğrulandıktan sonra aile alanınız açılır.':'Your family space opens after the profile and password are verified.'):(language==='tr'?'Düğmeye bastığınızda eksik alan gösterilir; bilgiler uygunsa güvenli kurulum başlar.':'Missing fields are highlighted when you press the button; secure setup starts when the information is valid.')}</p>
-        <small className="auth-footnote">{USER_VISIBLE_APP_INFO.releaseLabel} · {language==='tr'?USER_VISIBLE_APP_INFO.stage:'Bronze · Active Development'}</small>
+        <small className="auth-footnote">{formatUserVisibleReleaseSummary(USER_VISIBLE_APP_INFO,releaseStageForChannel(USER_VISIBLE_APP_INFO.channel,language))}</small>
       </form>
       {auth.initialized&&<InvitationAcceptancePanel onAccepted={onInvitationAccepted}/>}
     </section>
@@ -2770,6 +2814,10 @@ export function App() {
   const [screenLoadRevision,setScreenLoadRevision]=useState(0);
   const [loading, setLoading] = useState(!shellPreviewMode);
   const [firstRunIntroCompleted,setFirstRunIntroCompleted]=useState(shellPreviewMode||isFirstRunIntroductionComplete(browserPreferenceStorage()));
+  const [firstRunNarrationOffered,setFirstRunNarrationOffered]=useState(shellPreviewMode||isFirstRunIntroductionComplete(browserPreferenceStorage()));
+  const [introductionReplayOpen,setIntroductionReplayOpen]=useState(false);
+  const [startupError,setStartupError]=useState('');
+  const [startupLoadRevision,setStartupLoadRevision]=useState(0);
   const [auth, setAuth] = useState<AuthStateView>(shellPreviewMode
     ? {initialized:true,authenticated:true,displayName:'Yerel Kullanıcı',role:'family_admin',twoFactorEnabled:true}
     : {initialized:false,authenticated:false});
@@ -3087,16 +3135,23 @@ export function App() {
   useEffect(() => {
     const ticket=asyncWriteGuardRef.current.start('startup');
     const load = async () => {
-      if (window.pardus) {
-        const [info, authState] = await Promise.all([window.pardus.getAppInfo(), window.pardus.getAuthState()]);
-        if(!asyncWriteGuardRef.current.commit(ticket,()=>{setAppInfo(info);setAuth(authState);})){return;}
-        if(authState.authenticated){await bootstrapAuthenticatedSession();setLoading(false);return;}
+      try{
+        if (window.pardus) {
+          const [info,authState,firstRun]=await Promise.all([window.pardus.getAppInfo(),window.pardus.getAuthState(),window.pardus.getFirstRunExperience()]);
+          const legacyCompleted=isFirstRunIntroductionComplete(browserPreferenceStorage());
+          const completed=firstRun.introductionCompleted||legacyCompleted;
+          if(legacyCompleted&&!firstRun.introductionCompleted)void window.pardus.completeFirstRunIntroduction().catch(()=>undefined);
+          if(!asyncWriteGuardRef.current.commit(ticket,()=>{setAppInfo(info);setAuth(authState);setFirstRunIntroCompleted(completed);setFirstRunNarrationOffered(firstRun.narrationOffered||completed);setStartupError('');})){return;}
+          if(authState.authenticated)await bootstrapAuthenticatedSession();
+        }
+        asyncWriteGuardRef.current.commit(ticket,()=>setLoading(false));
+      }catch{
+        asyncWriteGuardRef.current.commit(ticket,()=>{setLoading(false);setStartupError(t('shell.startupErrorBody'));});
       }
-      asyncWriteGuardRef.current.commit(ticket,()=>setLoading(false));
     };
     void load();
     return()=>asyncWriteGuardRef.current.invalidate('startup');
-  }, []);
+  }, [startupLoadRevision]);
 
   useEffect(()=>{
     if(loading||!auth.authenticated||!window.pardus||active==='dashboard')return;
@@ -3239,16 +3294,21 @@ export function App() {
     if(menuNarrationPreviewMode||!firstRunIntroCompleted||loading||!auth.authenticated||sessionOverlayVisible||accessibility.audioMuted)return;
     const storage=browserPreferenceStorage();
     if(!shouldNarrateMenuFirstVisit(storage,language,active))return;
-    markMenuFirstVisitNarrated(storage,language,active);
     const text=menuFirstVisitNarrationText(active,activeItem.label,language);
     setMenuNarrationLabel(activeItem.label);
     const synthesis=browserSpeechSynthesis();
-    startMenuFirstVisitNarration({
-      text,language,synthesis,
-      createUtterance:typeof globalThis.SpeechSynthesisUtterance==='undefined'?undefined:(value)=>new globalThis.SpeechSynthesisUtterance(value),
-      onStatus:setMenuNarrationStatus
+    let activeAttempt=true;
+    void waitForPreferredNarrationVoice(synthesis,language).then((preferredVoice)=>{
+      if(!activeAttempt)return;
+      const result=startMenuFirstVisitNarration({
+        text,language,synthesis,
+        createUtterance:typeof globalThis.SpeechSynthesisUtterance==='undefined'?undefined:(value)=>new globalThis.SpeechSynthesisUtterance(value),
+        ...(preferredVoice?{preferredVoice}:{}),requirePreferredVoice:true,
+        onStatus:setMenuNarrationStatus
+      });
+      if(result==='speaking')markMenuFirstVisitNarrated(storage,language,active);
     });
-    return()=>{try{synthesis?.cancel();}catch{/* Menü geçişi ses hatasıyla engellenmez. */}};
+    return()=>{activeAttempt=false;try{synthesis?.cancel();}catch{/* Menü geçişi ses hatasıyla engellenmez. */}};
   },[active,activeItem.label,accessibility.audioMuted,auth.authenticated,firstRunIntroCompleted,language,loading,sessionOverlayVisible]);
 
   const stopMenuNarration=()=>{
@@ -3256,10 +3316,23 @@ export function App() {
     setMenuNarrationStatus('idle');
   };
 
+  const completeFirstRunIntroduction=async()=>{
+    if(window.pardus)await window.pardus.completeFirstRunIntroduction();
+    persistFirstRunIntroductionComplete(browserPreferenceStorage());
+    setFirstRunIntroCompleted(true);setFirstRunNarrationOffered(true);
+  };
+  const markFirstRunNarrationOffered=async()=>{
+    if(firstRunNarrationOffered)return;
+    if(window.pardus)await window.pardus.markFirstRunNarrationOffered();
+    setFirstRunNarrationOffered(true);
+  };
+
+  if(loading)return <main className="first-run-shell"><section className="first-run-card secure-startup-card"><div className="secure-startup-brand"><img src={brandMarkUrl} alt=""/><div><strong>ParsYuva</strong><span>{t('brand.subtitle')}</span></div></div><div className="loading-screen"><div className="loader"/><strong>{t('shell.loading')}</strong><small>{t('shell.loadingBody')}</small><span className="secure-startup-version">{t('shell.version')} {appInfo.releaseLabel}</span></div></section></main>;
+  if(startupError)return <main className="first-run-shell"><section className="first-run-card secure-startup-card"><div className="secure-startup-brand"><img src={brandMarkUrl} alt=""/><div><strong>ParsYuva</strong><span>{t('brand.subtitle')}</span></div></div><div className="secure-startup-error" role="alert"><h1>{t('shell.startupError')}</h1><p>{startupError}</p><Button tone="primary" onClick={()=>{setStartupError('');setLoading(true);setStartupLoadRevision(value=>value+1);}}>{t('common.retry')}</Button><span className="secure-startup-version">{t('shell.version')} {appInfo.releaseLabel}</span></div></section></main>;
+  if(introductionReplayOpen)return <FirstRunIntroduction audioMuted={accessibility.audioMuted} autoNarrate mode="replay" onAudioMutedChange={(audioMuted)=>updateAccessibility({...accessibility,audioMuted})} onNarrationOffered={()=>undefined} onComplete={()=>setIntroductionReplayOpen(false)}/>;
   if(!firstRunIntroCompleted) return auth.authenticated&&sessionOverlay
     ? sessionOverlay
-    : <FirstRunIntroduction audioMuted={accessibility.audioMuted} onAudioMutedChange={(audioMuted)=>updateAccessibility({...accessibility,audioMuted})} onComplete={()=>setFirstRunIntroCompleted(true)}/>;
-  if(loading)return <main className="first-run-shell"><section className="first-run-card"><div className="loading-screen"><div className="loader"/><strong>{t('shell.loading')}</strong><small>{t('shell.loadingBody')}</small></div></section></main>;
+    : <FirstRunIntroduction audioMuted={accessibility.audioMuted} autoNarrate={!firstRunNarrationOffered} mode="first-run" onAudioMutedChange={(audioMuted)=>updateAccessibility({...accessibility,audioMuted})} onNarrationOffered={markFirstRunNarrationOffered} onComplete={completeFirstRunIntroduction}/>;
   if(!auth.authenticated) return <AuthScreen auth={auth} onSetup={setupAdmin} onLogin={login} onWindowsHelloLogin={loginWithWindowsHello} onInvitationAccepted={completeInvitationAcceptance}/>;
   if(auth.authenticated && !auth.twoFactorEnabled) {
     const setup=<FirstRunSecuritySetup onComplete={(state)=>{setAuth(state);void bootstrapAuthenticatedSession();}}/>;
@@ -3334,7 +3407,7 @@ export function App() {
             })}
           </section>)}
         </nav>
-        <div className="sidebar-footer"><div className="sync-state"><span>◌</span><div><strong>{t('shell.localReady')}</strong><small>{formatDate(snapshot.lastUpdatedAt, { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' })}</small></div><i>✓</i></div><div className="edition-line"><span>{appInfo.releaseLabel}</span><small>{language==='tr'?appInfo.stage:'Bronze · Active Development'}</small></div></div>
+        <div className="sidebar-footer"><div className="sync-state"><span>◌</span><div><strong>{t('shell.localReady')}</strong><small>{formatDate(snapshot.lastUpdatedAt, { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' })}</small></div><i>✓</i></div><div className="edition-line"><span>{appInfo.releaseLabel}</span><small>{releaseStageForChannel(appInfo.channel,language)}</small></div></div>
       </aside>
       <main ref={mainContentRef} id="main-content" className="main-area" tabIndex={-1} aria-labelledby="current-section-title">
         <header className="topbar">
@@ -3400,7 +3473,7 @@ export function App() {
           <footer id="command-help"><span>↑↓ {language==='tr'?'Gezin':'Navigate'}</span><span>Enter {language==='tr'?'Aç':'Open'}</span><span>Esc {language==='tr'?'Kapat':'Close'}</span></footer>
         </section>
       </div>}
-      {helpOpen&&<NarratedHelpCenter activeScreenLabel={activeItem.label} audioMuted={accessibility.audioMuted} onAudioMutedChange={(audioMuted)=>updateAccessibility({...accessibility,audioMuted})} onClose={()=>setHelpOpen(false)}/>}
+      {helpOpen&&<NarratedHelpCenter activeScreenLabel={activeItem.label} audioMuted={accessibility.audioMuted} onAudioMutedChange={(audioMuted)=>updateAccessibility({...accessibility,audioMuted})} onReplayIntroduction={()=>{setHelpOpen(false);setIntroductionReplayOpen(true);}} onClose={()=>setHelpOpen(false)}/>}
       {menuNarrationStatus==='speaking'&&<aside className="menu-first-narration" role="status" aria-live="polite"><span aria-hidden="true">◖</span><div><strong>{language==='tr'?`${menuNarrationLabel} sesli tanıtımı`:`${menuNarrationLabel} voice introduction`}</strong><small>{language==='tr'?'Bu bölüm ilk kez anlatılıyor.':'This section is being introduced for the first time.'}</small></div><Button onClick={stopMenuNarration}>{language==='tr'?'Durdur':'Stop'}</Button></aside>}
       {memberModal && <AddMemberModal fallbackPeople={snapshot.people} onClose={() => setMemberModal(false)} onSave={createMember} />}
       {locationModal && <AddLocationModal onClose={() => setLocationModal(false)} onSave={createLocation} />}

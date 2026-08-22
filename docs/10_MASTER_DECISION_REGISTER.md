@@ -1411,3 +1411,19 @@ Build228 governance-only kapanış buildidir. `OPEN-021 = CLOSED` ve `OPEN-022 =
 ## DEC-261 — AYM kısaltmasının güncel ürün yüzeylerinden kaldırılması
 
 20.08.2026 tarihinde güncel ürün adı `ParsYuva Aile Yaşam Merkezi` olarak kesinleştirilmiştir. `AYM` kısaltması ürün, pencere, kısayol, kurulum dosyası, yardım, sesli anlatım, aktif belge başlığı ve yeni kullanıcıya dönük metadata içinde kullanılamaz. Önceki `ParsYuva AYM` kararının güncel marka kısmı superseded edilmiştir. `C:\PPT\AYM` çalışma kökü, kararlı appId, eski kullanıcı veri dizini, tarihsel karar/kanıt kimlikleri ve özgün tarihsel içerik yalnız geriye dönük uyumluluk ile kanıt bütünlüğü için korunur ve güncel marka sayılmaz. DEC-261 bağlayıcıdır.
+
+## DEC-263 — Kod değişikliğinde eski Windows kurulum artefaktlarının silinmesi
+
+22.08.2026 tarihinde kaynak kod veya Windows paketleme davranışı değiştiğinde `apps/desktop/release` altındaki önceki ParsYuva installer EXE, blockmap ve SHA-256 dosyalarının yeni build öncesinde silinmesi kararlaştırılmıştır. Paketleme sonrasında yalnız güncel görünür sürüme ait en fazla bir installer seti kalabilir. Temizlik kurulu uygulamayı, kullanıcı verisini, kaynak arşivlerini veya tarihsel yönetişim kanıtlarını kapsamaz. DEC-263 ve PR-229 bağlayıcıdır.
+
+## DEC-264 — Görünür sürüm kanalının tek kez gösterilmesi
+
+22.08.2026 tarihinde kullanıcıya görünür sürüm satırlarında Bronze, Silver veya Gold kanal adının yalnız bir kez gösterilmesi kararlaştırılmıştır. Kanal adı kanonik `releaseLabel` içinde kalır; `stage` kanal-bağımsız yaşam döngüsü durumunu taşır ve kanal adı içeremez. Türkçe, İngilizce, ilk kurulum, güvenli başlangıç ve ana uygulama yüzeyleri bu kurala uyar. DEC-264 ve PR-230 bağlayıcıdır.
+
+## DEC-265 — Her işlem öncesi zorunlu kural kontrolü
+
+22.08.2026 tarihinde kod, dosya, yapılandırma, belge, test, derleme, paketleme, kurulum, silme, yayımlama veya dış sisteme yazma gibi her durum değiştiren işlemden önce güncel kural sicili, hash, kullanıcı onayı ve evrensel fail-closed enforcement bağının doğrulanması kararlaştırılmıştır. Kontrol PASS olmadan işlem başlayamaz; kural değişirse sonraki mutasyondan önce kontrol yenilenir. Waiver ve atlama yoktur. DEC-265 ve PR-231 bağlayıcıdır.
+
+## DEC-266 — Özel kurulum, ilk aile, temiz paket ve çift yedek kabul zinciri
+
+22.08.2026 tarihinde özel ParsYuva installer yüzeyi, 900x640 ölçekli ve üç pars aile kompozisyonlu ilk aile ekranı, Türkçe/İngilizce aynı dilde kadın ses önceliği ile erkek ses yedeği, belirgin pencere/tepsi simgeleri, atomik SQLite başlangıcı, veri koruyan yükseltme, eski installer temizliği, tüm workspace paketlerinin sıfırdan derlenmesi, paketli gerçek uygulama açılışı/sürümü, SHA-256/imza durumu, GitHub + haricî Git eşitliği ve D: haricî kaynak arşivi geri-okuması tek fail-closed kabul zinciri olarak kararlaştırılmıştır. Yerel imzasız paket NotSigned olarak etiketlenir; gerçek ses, temiz makine DPI ve üretim Authenticode dış kanıtları ayrıca açık kalır. DEC-266 ve PR-232 bağlayıcıdır.

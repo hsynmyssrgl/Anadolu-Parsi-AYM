@@ -14,19 +14,28 @@ export const ACCEPTED_PERSISTED_PRODUCT_NAMES = Object.freeze([
 ] as const);
 export type PersistedProductName = (typeof ACCEPTED_PERSISTED_PRODUCT_NAMES)[number];
 
+export type UserVisibleReleaseChannel = 'Bronze' | 'Silver' | 'Gold';
+export type UserVisibleReleaseLanguage = 'tr' | 'en';
+
+const USER_VISIBLE_RELEASE_STAGES:Readonly<Record<UserVisibleReleaseLanguage,Readonly<Record<UserVisibleReleaseChannel,string>>>>=Object.freeze({
+  tr:Object.freeze({Bronze:'Aktif Geliştirme',Silver:'Aktif Test',Gold:'Aktif Sürüm'}),
+  en:Object.freeze({Bronze:'Active Development',Silver:'Active Testing',Gold:'Active Release'})
+});
+
+export const releaseStageForChannel=(channel:UserVisibleReleaseChannel,language:UserVisibleReleaseLanguage):string=>
+  USER_VISIBLE_RELEASE_STAGES[language][channel];
+
 export const APP_META = Object.freeze({
   name: CURRENT_PRODUCT_NAME,
   edition: 'Bronze',
-  version: '20.08.2026.40',
-  packageVersion: '20.8.2026-40',
-  releaseLabel: 'Bronze 20.08.2026.40',
-  releaseId: 'bronze-2026-08-20-r40',
-  monthlySequence: 40,
-  stage: 'Bronze · Aktif Geliştirme'
+  version: '22.08.2026.45',
+  packageVersion: '22.8.2026-45',
+  releaseLabel: 'Bronze 22.08.2026.45',
+  releaseId: 'bronze-2026-08-22-r45',
+  monthlySequence: 45,
+  stage: 'Aktif Geliştirme'
 });
 export type AppMeta = typeof APP_META;
-
-export type UserVisibleReleaseChannel = 'Bronze' | 'Silver' | 'Gold';
 
 export interface UserVisibleAppInfo {
   readonly name: string;
@@ -36,12 +45,15 @@ export interface UserVisibleAppInfo {
 }
 
 const USER_VISIBLE_RELEASE_PATTERN = /^(Bronze|Silver|Gold) \d{2}\.\d{2}\.\d{4}\.\d+$/u;
+const USER_VISIBLE_RELEASE_CHANNEL_TOKEN = /\b(?:Bronze|Silver|Gold)\b/iu;
 const FORBIDDEN_VISIBLE_RELEASE_TOKEN = /\b(?:RC2?|MVP|Build)\b/iu;
 
 export const toUserVisibleAppInfo = (metadata: AppMeta): Readonly<UserVisibleAppInfo> => {
   if (!USER_VISIBLE_RELEASE_PATTERN.test(metadata.releaseLabel)
     || metadata.releaseLabel !== `${metadata.edition} ${metadata.version}`
-    || FORBIDDEN_VISIBLE_RELEASE_TOKEN.test(metadata.releaseLabel)) {
+    || FORBIDDEN_VISIBLE_RELEASE_TOKEN.test(metadata.releaseLabel)
+    || USER_VISIBLE_RELEASE_CHANNEL_TOKEN.test(metadata.stage)
+    || metadata.stage!==releaseStageForChannel(metadata.edition as UserVisibleReleaseChannel,'tr')) {
     throw new Error('Kullanıcıya görünür sürüm etiketi geçersiz.');
   }
   return Object.freeze({
@@ -50,6 +62,17 @@ export const toUserVisibleAppInfo = (metadata: AppMeta): Readonly<UserVisibleApp
     channel: metadata.edition as UserVisibleReleaseChannel,
     stage: metadata.stage
   });
+};
+
+export const formatUserVisibleReleaseSummary = (
+  info: UserVisibleAppInfo,
+  localizedStage = info.stage
+): string => {
+  const stage = localizedStage.trim();
+  if (!stage || USER_VISIBLE_RELEASE_CHANNEL_TOKEN.test(stage)) {
+    throw new Error('Kullanıcıya görünür sürüm durumu kanal adını yineleyemez.');
+  }
+  return `${info.releaseLabel} · ${stage}`;
 };
 
 const asciiFileSegment = (value: string): string => value

@@ -259,6 +259,10 @@ type EmergencyCardExportIpcResult =
       readonly printerDispatchStatus?:'confirmed';
     };
 export type AppInfo = UserVisibleAppInfo;
+export interface FirstRunExperienceStateView {
+  readonly introductionCompleted:boolean;
+  readonly narrationOffered:boolean;
+}
 
 const rendererCrypto = globalThis.crypto;
 const randomUUID = (): string => {
@@ -571,6 +575,9 @@ contextBridge.exposeInMainWorld('pardus', {
   getAppInfo: (): Promise<AppInfo> => invoke('app:getInfo'),
   getLocalizationBootstrap: (): Promise<UiLocalizationBootstrapView> => invoke('app:getLocalizationBootstrap'),
   setLanguagePreference: (preference:UiLanguagePreference):Promise<UiLocalizationBootstrapView> => invoke('app:setLanguagePreference',preference),
+  getFirstRunExperience: ():Promise<FirstRunExperienceStateView>=>invoke('app:getFirstRunExperience'),
+  markFirstRunNarrationOffered: ():Promise<FirstRunExperienceStateView>=>invoke('app:markFirstRunNarrationOffered'),
+  completeFirstRunIntroduction: ():Promise<FirstRunExperienceStateView>=>invoke('app:completeFirstRunIntroduction'),
   getGenealogyInsights: ():Promise<GenealogyInsightView> => invoke('genealogy:insights'),
   listLargeGenealogyTree:(input:GenealogyTreePageInput={}):Promise<GenealogyTreePageView>=>invoke('largeData:tree',input),
   listLargeTimeline:(input:TimelinePageInput={}):Promise<TimelinePageView>=>invoke('largeData:timeline',input),

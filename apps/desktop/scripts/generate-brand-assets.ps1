@@ -10,27 +10,82 @@ $source = Join-Path $PSScriptRoot "..\src\renderer\assets\brand-mark.png"
 if (-not (Test-Path $source)) { throw "Anadolu parsı marka görseli bulunamadı: $source" }
 $image = [System.Drawing.Image]::FromFile($source)
 try {
-  $bitmap = [System.Drawing.Bitmap]::new(256,256)
-  $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
-  try {
-    $graphics.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::HighQuality
-    $graphics.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
-    $graphics.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
-    $graphics.Clear([System.Drawing.Color]::Transparent)
-    $graphics.DrawImage($image,0,0,256,256)
-  } finally { $graphics.Dispose() }
+  function Set-BrandDrawingQuality {
+    param([Parameter(Mandatory=$true)][System.Drawing.Graphics]$Graphics)
+    $Graphics.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::HighQuality
+    $Graphics.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+    $Graphics.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
+    $Graphics.CompositingQuality = [System.Drawing.Drawing2D.CompositingQuality]::HighQuality
+  }
+
+  function New-FullBrandBitmap {
+    param([Parameter(Mandatory=$true)][int]$Size)
+    $result = [System.Drawing.Bitmap]::new($Size,$Size,[System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
+    $canvas = [System.Drawing.Graphics]::FromImage($result)
+    try {
+      Set-BrandDrawingQuality -Graphics $canvas
+      $canvas.Clear([System.Drawing.Color]::Transparent)
+      $canvas.DrawImage($image,0,0,$Size,$Size)
+    } finally { $canvas.Dispose() }
+    return $result
+  }
+
+  function New-SmallBrandBadgeBitmap {
+    param([Parameter(Mandatory=$true)][int]$Size)
+    $result = [System.Drawing.Bitmap]::new($Size,$Size,[System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
+    $canvas = [System.Drawing.Graphics]::FromImage($result)
+    $scale = $Size / 64.0
+    $badgeBrush = [System.Drawing.SolidBrush]::new([System.Drawing.ColorTranslator]::FromHtml('#174D3B'))
+    $badgePen = [System.Drawing.Pen]::new([System.Drawing.ColorTranslator]::FromHtml('#F3B455'),[Math]::Max(1.0,2.0*$scale))
+    try {
+      Set-BrandDrawingQuality -Graphics $canvas
+      $canvas.Clear([System.Drawing.Color]::Transparent)
+      $badgeBounds = [System.Drawing.RectangleF]::new(1.5*$scale,1.5*$scale,61.0*$scale,61.0*$scale)
+      $canvas.FillEllipse($badgeBrush,$badgeBounds)
+      $canvas.DrawEllipse($badgePen,$badgeBounds)
+      # Küçük Windows yüzeylerinde bütün gövde yerine ayırt edici baş ve göz
+      # bölümünü büyüt; böylece 16 px başlık ve tepsi alanında benekler erimez.
+      $sourceBounds = [System.Drawing.RectangleF]::new(145,22,367,360)
+      $targetBounds = [System.Drawing.RectangleF]::new(4.0*$scale,2.0*$scale,59.0*$scale,59.0*$scale)
+      $canvas.DrawImage($image,$targetBounds,$sourceBounds,[System.Drawing.GraphicsUnit]::Pixel)
+    } finally {
+      $badgePen.Dispose(); $badgeBrush.Dispose(); $canvas.Dispose()
+    }
+    return $result
+  }
+
+  $bitmap = New-FullBrandBitmap -Size 256
   $pngPath = Join-Path $OutputDirectory "icon-256.png"
   $bitmap.Save($pngPath,[System.Drawing.Imaging.ImageFormat]::Png)
-  $pngBytes = [System.IO.File]::ReadAllBytes($pngPath)
+  $trayBitmap = New-SmallBrandBadgeBitmap -Size 64
+  try { $trayBitmap.Save((Join-Path $OutputDirectory "tray-icon.png"),[System.Drawing.Imaging.ImageFormat]::Png) }
+  finally { $trayBitmap.Dispose() }
+
+  $iconEntries = @()
+  foreach($size in @(16,20,24,32,48,64,128,256)) {
+    $entryBitmap = if($size -le 32) { New-SmallBrandBadgeBitmap -Size $size } else { New-FullBrandBitmap -Size $size }
+    $memory = [System.IO.MemoryStream]::new()
+    try {
+      $entryBitmap.Save($memory,[System.Drawing.Imaging.ImageFormat]::Png)
+      $iconEntries += [PSCustomObject]@{ Size=$size; Bytes=$memory.ToArray() }
+    } finally { $memory.Dispose(); $entryBitmap.Dispose() }
+  }
+
   $icoPath = Join-Path $OutputDirectory "icon.ico"
   $stream = [System.IO.File]::Create($icoPath)
   $writer = [System.IO.BinaryWriter]::new($stream)
   try {
-    $writer.Write([uint16]0); $writer.Write([uint16]1); $writer.Write([uint16]1)
-    $writer.Write([byte]0); $writer.Write([byte]0); $writer.Write([byte]0); $writer.Write([byte]0)
-    $writer.Write([uint16]1); $writer.Write([uint16]32)
-    $writer.Write([uint32]$pngBytes.Length); $writer.Write([uint32]22)
-    $writer.Write($pngBytes)
+    $writer.Write([uint16]0); $writer.Write([uint16]1); $writer.Write([uint16]$iconEntries.Count)
+    $offset = 6 + (16 * $iconEntries.Count)
+    foreach($entry in $iconEntries) {
+      $dimension = if($entry.Size -eq 256) { 0 } else { $entry.Size }
+      $writer.Write([byte]$dimension); $writer.Write([byte]$dimension)
+      $writer.Write([byte]0); $writer.Write([byte]0)
+      $writer.Write([uint16]1); $writer.Write([uint16]32)
+      $writer.Write([uint32]$entry.Bytes.Length); $writer.Write([uint32]$offset)
+      $offset += $entry.Bytes.Length
+    }
+    foreach($entry in $iconEntries) { $writer.Write([byte[]]$entry.Bytes) }
   } finally { $writer.Dispose(); $stream.Dispose() }
 
   function New-InstallerChannelSidebar {

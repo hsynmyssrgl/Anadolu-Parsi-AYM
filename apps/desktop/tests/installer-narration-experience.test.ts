@@ -11,7 +11,7 @@ const stylesUrl = new URL('../src/renderer/styles.css', import.meta.url);
 const packageUrl = new URL('../package.json', import.meta.url);
 
 describe('installer progress, narration and Silver help experience', () => {
-  it('keeps pre-install pages static and reserves progress for real file installation', async () => {
+  it('keeps decorative welcome motion separate and reserves progress for real file installation', async () => {
     const [source,extractor,rawPackage]=await Promise.all([readFile(installerUrl,'utf8'),readFile(extractorUrl,'utf8'),readFile(packageUrl,'utf8')]);
     const packageJson=JSON.parse(rawPackage) as {build:{executableName?:string;win?:{artifactName?:string};artifactName?:string;nsis?:{shortcutName?:string;multiLanguageInstaller?:boolean;installerLanguages?:string[]}}};
     for (const marker of [
@@ -25,7 +25,12 @@ describe('installer progress, narration and Silver help experience', () => {
       '!define PPT_INSTALLER_CHANNEL_COLOR "A57E17"',
       '!define PPT_INSTALLER_CHANNEL_BITMAP "installer-gold-sidebar.bmp"',
       '!define MUI_WELCOMEFINISHPAGE_BITMAP "${__FILEDIR__}\\${PPT_INSTALLER_CHANNEL_BITMAP}"',
-      'SetCtlColors $AymWelcomePulseLabel "${PPT_INSTALLER_CHANNEL_COLOR}" "F0F0F0"',
+      'Function AymWelcomePageCreate','Function AymWelcomePageLeave',
+      'Page custom AymWelcomePageCreate AymWelcomePageLeave',
+      '${NSD_CreateBitmap} 0 0 108u 100% ""',
+      'nsDialogs::CreateTimer AymWelcomeAnimate 680',
+      'nsDialogs::KillTimer AymWelcomeAnimate',
+      'Ailenizin hikâyesi, tek ve güvenli bir yerde.',
       'kişisel veri aktarmaz','C:\\Program Files\\PPT\\ParsYuva',
       'CreateFont $1 "Segoe UI" 11 400','CreateFont $2 "Segoe UI" 10 600',
       'ParsYuva Aile Yaşam Merkezi kullanıma hazır','ParsYuva Family Life Center is ready',
@@ -43,9 +48,9 @@ describe('installer progress, narration and Silver help experience', () => {
       'LangString AymInstallingDetail ${AYM_LANG_TURKISH} "Yükleniyor: %s"',
       'LangString AymInstallComplete ${AYM_LANG_TURKISH} "Yükleme tamamlandı: 100%"'
     ]) expect(source).toContain(marker);
-    expect(source).not.toContain('Function AymWelcomeAnimate');
-    expect(source).not.toContain('${NSD_CreateTimer} AymWelcomeAnimate');
+    expect(source).not.toContain('!insertmacro MUI_PAGE_WELCOME');
     expect(source).not.toContain('${NSD_CreateProgressBar}');
+    expect(source).not.toContain('Var AymWelcomePulseLabel');
     expect(source).not.toContain('Function AymReadyAnimate');
     expect(source).not.toContain('${NSD_CreateTimer} AymReadyAnimate');
     expect(source).not.toContain('${NSD_CreateProgressBar} 0 121u 100% 8u ""');
@@ -60,9 +65,14 @@ describe('installer progress, narration and Silver help experience', () => {
     expect(packageJson.build.executableName).toBe('ParsYuva');
     expect(packageJson.build.nsis?.shortcutName).toBe('ParsYuva');
     expect(packageJson.build.nsis).toMatchObject({multiLanguageInstaller:true,installerLanguages:['en_US','tr_TR']});
-    expect(source).not.toMatch(/SetCtlColors \$AymWelcomePulseLabel "\$\{PPT_INSTALLER_CHANNEL_COLOR\}" transparent/u);
     const [installerSource, uninstallerSource = ''] = source.split('!macro customUnInstall');
     expect(installerSource).not.toMatch(/https?:|Exec(?:Shell)?|nsExec|inetc|download/iu);
+    expect(uninstallerSource).toMatch(
+      /\$\{If\} \$\{isUpdated\}\r?\n\s+\$\{OrIf\} \$\{Silent\}[\s\S]*?Goto aym_uninstall_done[\s\S]*?MessageBox MB_YESNOCANCEL/u,
+    );
+    expect(uninstallerSource.indexOf('${If} ${isUpdated}')).toBeLessThan(
+      uninstallerSource.indexOf('$(AymUninstallChoice)'),
+    );
     expect(uninstallerSource).toContain(
       'ExecWait \'"$INSTDIR\\ParsYuva.exe" --uninstall-backup-assistant\' $0'
     );
