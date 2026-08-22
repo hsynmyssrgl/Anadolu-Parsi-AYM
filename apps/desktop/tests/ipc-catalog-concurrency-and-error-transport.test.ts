@@ -14,6 +14,14 @@ describe('IPC katalog eşzamanlılığı ve hata taşıma sözleşmesi', () => {
     expect(resolveIpcRequestLifecyclePolicy('catalog:lookup').latestWins).toBe(false);
   });
 
+  it('ilk yükleme sürerken yerel model durumu yenilendiğinde isteği iptal etmez', () => {
+    expect(resolveIpcRequestLifecyclePolicy('familyAiAssistant:getLocalModelStatus')).toEqual({
+      cancellable: true,
+      latestWins: false,
+      timeoutMs: 10_000
+    });
+  });
+
   it('AppError nesnesini Electron tarafında okunabilir gerçek Error olarak taşır', () => {
     const transported = toIpcRendererError(createAppError({
       code: ERROR_CODES.CORE_INVALID_ARGUMENT,
