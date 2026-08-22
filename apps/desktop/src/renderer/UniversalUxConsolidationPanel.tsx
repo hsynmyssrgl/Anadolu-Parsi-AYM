@@ -51,7 +51,7 @@ export function UniversalUxConsolidationPanel() {
   });
 
   return <section className="universal-ux panel" aria-labelledby="universal-ux-title">
-    <div className="panel-heading"><div><span className="eyebrow">{text('34-K · Windows dayanıklılık ve evrensel UX','34-K · Windows resilience and universal UX')}</span>
+    <div className="panel-heading"><div><span className="eyebrow">{text('Windows dayanıklılığı ve evrensel kullanım deneyimi','Windows resilience and universal UX')}</span>
       <h2 id="universal-ux-title">{text('Tek aile görünümü','Unified family view')}</h2></div></div>
     <div className="communication-recording-truth" role="note">
       <strong>{text('Bu yüzeydeki veri araması üretim kaynaklarının çağrı anındaki merkezi okuma yetkileriyle çalışır.','Search on this surface uses the centralized read permissions of production sources at call time.')}</strong>

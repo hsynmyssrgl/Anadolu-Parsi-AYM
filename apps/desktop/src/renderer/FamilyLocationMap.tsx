@@ -106,6 +106,11 @@ export function FamilyLocationMap({ locations }: { readonly locations: readonly 
         map = new maplibregl.Map({
           container,
           style: baseStyle(packageKind,language),
+          locale: language === 'tr' ? {
+            'NavigationControl.ZoomIn': 'Yakınlaştır',
+            'NavigationControl.ZoomOut': 'Uzaklaştır',
+            'AttributionControl.ToggleAttribution': 'Harita kaynaklarını göster'
+          } : undefined,
           center: DEFAULT_CENTER,
           zoom: 4.4,
           minZoom: 2.5,

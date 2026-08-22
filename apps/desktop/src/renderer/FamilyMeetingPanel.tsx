@@ -195,7 +195,7 @@ export function FamilyMeetingPanel({people}:FamilyMeetingPanelProps){
   if(!center)return <AsyncStatePanel state="empty" title={text('Aile toplantıları kullanılamıyor','Family meetings are unavailable')} message={text('Masaüstü yetki sınırı hazır değil.','The desktop authorization boundary is not ready.')}/>;
 
   return <section className="family-meeting panel" aria-labelledby="family-meeting-title" aria-busy={Boolean(busy)}>
-    <div className="panel-heading"><div><span className="eyebrow">{text('34-F · Karar ve tutanak merkezi','34-F · Decisions and minutes center')}</span><h2 id="family-meeting-title">{text('Aile toplantıları','Family meetings')}</h2>
+    <div className="panel-heading"><div><span className="eyebrow">{text('Karar ve tutanak merkezi','Decisions and minutes center')}</span><h2 id="family-meeting-title">{text('Aile toplantıları','Family meetings')}</h2>
       <p>{text('Plan, gündem, katılım, oy, karar, görev ve insan onaylı tutanak tek yerel yetki sınırında yönetilir.','Plans, agendas, attendance, votes, decisions, tasks, and human-approved minutes are managed within one local authorization boundary.')}</p></div>
       <Button onClick={()=>void refresh(false)} disabled={Boolean(busy)}>{text('Yenile','Refresh')}</Button></div>
     <div className="family-meeting-truth" role="note"><strong>{text('Tutanak yalnız katılımcılara açık ayrı bir yerel kasada şifrelenir.','Minutes are encrypted in a separate local vault available only to participants.')}</strong>

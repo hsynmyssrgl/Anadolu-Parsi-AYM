@@ -32,7 +32,7 @@ export function SignedPluginPlatformPanel(){
     await mutate(`rollback:${item.id}:${item.revision}:${item.previousVersion}`,clientOperationId=>window.pardus!.rollbackSignedPlugin({
       clientOperationId,pluginId:item.id,expectedRevision:item.revision,targetVersion:item.previousVersion!,confirmation:'ONCEKI SURUME DON'}));};
   return <section className="signed-plugin-platform panel" aria-labelledby="signed-plugin-platform-title">
-    <div className="panel-heading"><div><span className="eyebrow">{text('33-Z · İmzalı aday kayıt','33-Z · Signed candidate registry')}</span>
+    <div className="panel-heading"><div><span className="eyebrow">{text('İmzalı aday kaydı','Signed candidate registry')}</span>
       <h2 id="signed-plugin-platform-title">{text('Eklenti ve dış sağlayıcı platformu','Plugin and external provider platform')}</h2></div>
       <button type="button" onClick={()=>void refresh()} disabled={Boolean(busy)}>{text('Yenile','Refresh')}</button></div>
     <div className="signed-plugin-truth" role="note"><strong>{text('Bu ekran eklenti kodu çalıştırmaz.','This screen does not execute plugin code.')}</strong>

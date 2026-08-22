@@ -69,7 +69,7 @@ export function CommunicationSecurityPanel(){
     clientOperationId=>window.pardus!.freezeCommunicationRoom({clientOperationId,expectedRevision:room.revision,
       roomId:room.id,confirmation:'ILETISIM ODASINI DONDUR',reason:'Kullanıcı odayı yerel olarak dondurdu.'}));
   return <section className="communication-security panel" aria-labelledby="communication-security-title">
-    <div className="panel-heading"><div><span className="eyebrow">{text('34-A · İletişim politika çekirdeği','34-A · Communication policy core')}</span>
+    <div className="panel-heading"><div><span className="eyebrow">{text('İletişim güvenliği','Communication security')}</span>
       <h2 id="communication-security-title">{text('Oda, cihaz ve MLS dönem temeli','Room, device and MLS epoch foundation')}</h2></div>
       <button type="button" onClick={()=>void refresh()} disabled={Boolean(busy)}>{text('Yenile','Refresh')}</button></div>
     <div className="communication-security-truth" role="note"><strong>{text('Bu ekran mesaj göndermez ve anahtar yönetmez.','This screen does not send messages or manage keys.')}</strong>

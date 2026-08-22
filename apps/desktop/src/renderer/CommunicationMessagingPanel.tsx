@@ -142,7 +142,7 @@ export function CommunicationMessagingPanel(){
       ...selectedRoomId?{roomId:selectedRoomId}:{},limit:200}));
   }catch(caught){setError(caught instanceof Error?caught.message:text('Mesaj araması tamamlanamadı.','Message search could not be completed.'));}finally{setBusy('');}};
   return <section className="communication-messaging panel" aria-labelledby="communication-messaging-title">
-    <div className="panel-heading"><div><span className="eyebrow">{text('34-B · Mesaj yaşam döngüsü ve mahrem presence','34-B · Message lifecycle and private presence')}</span>
+    <div className="panel-heading"><div><span className="eyebrow">{text('Mesaj yaşam döngüsü ve mahremiyet','Message lifecycle and private presence')}</span>
       <h2 id="communication-messaging-title">{text('Yerel, mühürlü mesajlaşma çalışma alanı','Local sealed messaging workspace')}</h2></div>
       <button type="button" onClick={()=>void refresh()} disabled={Boolean(busy)}>{text('Yenile','Refresh')}</button></div>
     <div className="communication-messaging-truth" role="note"><strong>{text('Bu sürüm yalnız yerel ve ağsız çalışır.','This release works locally and without network access only.')}</strong>

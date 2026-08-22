@@ -103,7 +103,7 @@ export function CommunicationFileSharingPanel(){
   if(!center)return <AsyncStatePanel state="empty" title={text('Dosya paylaşımı kullanılamıyor','File sharing is unavailable')} message={text('Masaüstü yetki sınırı hazır değil.','The desktop authorization boundary is not ready.')}/>;
 
   return <section className="communication-file-sharing panel" aria-labelledby="communication-file-sharing-title" aria-busy={Boolean(busy)}>
-    <div className="panel-heading"><div><span className="eyebrow">{text('34-G · Yerel şifreli dosya ve iletişim UX','34-G · Local encrypted files and communication UX')}</span>
+    <div className="panel-heading"><div><span className="eyebrow">{text('Yerel şifreli dosya ve iletişim deneyimi','Local encrypted files and communication experience')}</span>
       <h2 id="communication-file-sharing-title">{text('Dosya paylaşımı ve aile iletişim araçları','File sharing and family communication tools')}</h2>
       <p>{text('Dosya baytları yalnız ana süreçte seçilir, 4 MiB parçalarla doğrulanır ve ayrı korumalı kasada şifrelenir.','File bytes are selected only in the main process, verified in 4 MiB chunks and encrypted in a separate protected vault.')}</p></div>
       <Button onClick={()=>void refresh()} disabled={Boolean(busy)}>{text('Yenile','Refresh')}</Button></div>

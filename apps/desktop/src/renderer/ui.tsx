@@ -2,8 +2,19 @@ import { useEffect, useId, useRef, type ButtonHTMLAttributes, type ReactNode } f
 import { USER_VISIBLE_APP_INFO } from '@ppt/domain/renderer';
 import { useLocalization } from './localization';
 
+const INTERNAL_RULE_TOKEN = /^(?:PPK-\d+|DEC-\d+|EXT-\d+|LTP-\d+(?:[–-]\d+)?|B\d+-\d+|\d{2}[-‑][A-Z](?:\/[A-Z])?)(?:\s*(?:\/|\+)\s*(?:PPK-\d+|DEC-\d+|EXT-\d+|LTP-\d+(?:[–-]\d+)?|B\d+-\d+|\d{2}[-‑][A-Z](?:\/[A-Z])?))*$/i;
+
+export function userFacingEyebrow(value?: string): string | undefined {
+  if (!value) return undefined;
+  const segments = value.split('·').map((segment) => segment.trim());
+  while (segments.length > 0 && INTERNAL_RULE_TOKEN.test(segments[0] ?? '')) segments.shift();
+  const cleaned = segments.join(' · ').replace(/^(?:PPK-\d+|DEC-\d+|EXT-\d+|LTP-\d+(?:[–-]\d+)?|B\d+-\d+|\d{2}[-‑][A-Z](?:\/[A-Z])?)\s+/i, '').trim();
+  return cleaned || undefined;
+}
+
 export function PageHeader({ eyebrow, title, description, actions }: { eyebrow?: string; title: string; description: string; actions?: ReactNode }) {
-  return <div className="page-header"><div>{eyebrow && <span className="eyebrow">{eyebrow}</span>}<h1>{title}</h1><p>{description}</p></div>{actions && <div className="header-actions">{actions}</div>}</div>;
+  const visibleEyebrow = userFacingEyebrow(eyebrow);
+  return <div className="page-header"><div>{visibleEyebrow && <span className="eyebrow">{visibleEyebrow}</span>}<h1>{title}</h1><p>{description}</p></div>{actions && <div className="header-actions">{actions}</div>}</div>;
 }
 
 export function Button({ children, tone = 'default', type, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { tone?: 'default' | 'primary' | 'danger' }) {
@@ -45,7 +56,8 @@ export function Surface({ children, className = '', as = 'article' }: { children
 }
 
 export function SectionHeader({ eyebrow, title, action }: { eyebrow?: string; title: string; action?: ReactNode }) {
-  return <div className="panel-heading"><div>{eyebrow && <span className="eyebrow">{eyebrow}</span>}<h2>{title}</h2></div>{action && <div className="header-actions">{action}</div>}</div>;
+  const visibleEyebrow = userFacingEyebrow(eyebrow);
+  return <div className="panel-heading"><div>{visibleEyebrow && <span className="eyebrow">{visibleEyebrow}</span>}<h2>{title}</h2></div>{action && <div className="header-actions">{action}</div>}</div>;
 }
 
 export function StatRow({ value, label, action }: { value: ReactNode; label: ReactNode; action?: ReactNode }) {

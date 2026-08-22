@@ -55,7 +55,7 @@ export function SmartHomeEnergyPanel(){
     await mutate(`processing:${center.settings.revision}:${enabled}`,id=>window.pardus!.setSmartHomeProcessing({clientOperationId:id,
       expectedRevision:center.settings.revision,enabled,reason:enabled?'Kullanıcı yerel sensör metadatası işlemeyi açtı.':'Kullanıcı yerel işlemeyi kapattı.'}));};
   return <section className="smart-home-energy panel" aria-labelledby="smart-home-energy-title">
-    <div className="panel-heading"><div><span className="eyebrow">{text('33‑Y · Yerel ve fail-closed','33-Y · Local and fail-closed')}</span><h2 id="smart-home-energy-title">{text('Akıllı ev ve enerji','Smart home and energy')}</h2></div>
+    <div className="panel-heading"><div><span className="eyebrow">{text('Yerel ve güvenli kapalı','Local and fail-closed')}</span><h2 id="smart-home-energy-title">{text('Akıllı ev ve enerji','Smart home and energy')}</h2></div>
       <button type="button" onClick={()=>void refresh()} disabled={busy}>{text('Yenile','Refresh')}</button></div>
     <div className="smart-home-truth" role="note"><strong>{text('Gizli gözetim yasaktır.','Hidden surveillance is prohibited.')}</strong><span>{text('Ham kamera/ses saklanmaz; kamera ve kapı zili erişimi görünür, varsayılan kapalı ve en çok 60 dakikadır.','Raw camera/audio is not stored; camera and doorbell access is visible, off by default and limited to 60 minutes.')}</span>
       <span>{text('Matter eşleme, canlı sağlayıcı bağlantısı, cihaz kontrolü, bulut ve haricî teslimat bu pakette yapılmadı.','Matter pairing, live provider connectivity, device control, cloud services and external delivery are not implemented in this package.')}</span></div>

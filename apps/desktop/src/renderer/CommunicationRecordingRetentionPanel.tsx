@@ -61,7 +61,7 @@ export function CommunicationRecordingRetentionPanel(){
     clientOperationId=>window.pardus!.requestCommunicationRecordingDeletion({clientOperationId,expectedRevision:request.revision,
       requestId:request.id,reason:'Yerel kayıt metadata saklama ihtiyacı sona erdi.'}));
   return <section className="communication-recording panel" aria-labelledby="communication-recording-title">
-    <div className="panel-heading"><div><span className="eyebrow">{text('34-D · Açık rıza ve saklama','34-D · Explicit consent and retention')}</span>
+    <div className="panel-heading"><div><span className="eyebrow">{text('Açık rıza ve saklama','Explicit consent and retention')}</span>
       <h2 id="communication-recording-title">{text('Görüşme kaydı rıza planı','Call recording consent plan')}</h2></div>
       <button type="button" onClick={()=>void refresh()} disabled={Boolean(busy)}>{text('Yenile','Refresh')}</button></div>
     <div className="communication-recording-truth" role="note"><strong>{text('Varsayılan kapalıdır; bu sürüm gerçek ses, video, transkript veya çeviri kaydı oluşturmaz.','It is off by default; this release does not create real audio, video, transcript or translation recordings.')}</strong>

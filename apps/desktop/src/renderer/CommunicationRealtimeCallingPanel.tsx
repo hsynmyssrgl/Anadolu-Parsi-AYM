@@ -68,7 +68,7 @@ export function CommunicationRealtimeCallingPanel(){
       keyboardShortcuts:true,automaticAudioFallbackEnabled:true,noiseReductionRequested:true,echoCancellationRequested:true,
       automaticGainControlRequested:true,backgroundEffect:'off'}));
   return <section className="communication-calling panel" aria-labelledby="communication-calling-title">
-    <div className="panel-heading"><div><span className="eyebrow">{text('34-C · Erişilebilir çağrı planı','34-C · Accessible call plan')}</span>
+    <div className="panel-heading"><div><span className="eyebrow">{text('Erişilebilir çağrı planı','Accessible call plan')}</span>
       <h2 id="communication-calling-title">{text('Gerçek zamanlı çağrı hazırlığı','Real-time call preparation')}</h2></div>
       <button type="button" onClick={()=>void refresh()} disabled={Boolean(busy)}>{text('Yenile','Refresh')}</button></div>
     <div className="communication-calling-truth" role="note"><strong>{text('Bu sürüm gerçek çağrı başlatmaz ve ağ kullanmaz.','This release does not start real calls or use the network.')}</strong>

@@ -68,7 +68,7 @@ export function LocalTranslationLanguagePanel(){
     clientOperationId=>window.pardus!.cancelLocalTranslationRequest({clientOperationId,expectedRevision,requestId,
       reason:'Bu çeviri hazırlık talebine artık ihtiyaç yok.'}));
   return <section className="local-translation panel" aria-labelledby="local-translation-title">
-    <div className="panel-heading"><div><span className="eyebrow">{text('34-E · Yerel öncelikli dil merkezi','34-E · Local-first language center')}</span>
+    <div className="panel-heading"><div><span className="eyebrow">{text('Yerel öncelikli dil merkezi','Local-first language center')}</span>
       <h2 id="local-translation-title">{text('Çeviri, altyazı ve kişisel sözlük','Translation, captions and personal dictionary')}</h2></div>
       <button type="button" onClick={()=>void refresh()} disabled={Boolean(busy)}>{text('Yenile','Refresh')}</button></div>
     <div className="local-translation-truth" role="note"><strong>{text('Bu sürüm gerçek çeviri veya konuşma çözümü çalıştırmaz.','This release does not run a real translation or speech solution.')}</strong>

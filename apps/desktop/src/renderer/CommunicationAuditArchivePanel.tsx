@@ -27,7 +27,7 @@ export function CommunicationAuditArchivePanel(){
   if(loadError&&!center)return <AsyncStatePanel state="error" title={text('Denetim zinciri yüklenemedi','Audit chain could not be loaded')} message={loadError} onRetry={async()=>refresh(true)}/>;
   if(!center)return <AsyncStatePanel state="empty" title={text('Denetim merkezi kullanılamıyor','Audit center is unavailable')} message={text('Masaüstü yetki sınırı hazır değil.','The desktop authorization boundary is not ready.')}/>;
   return <section className="communication-audit-archive panel" aria-labelledby="communication-audit-archive-title" aria-busy={loading}>
-    <div className="panel-heading"><div><span className="eyebrow">{text('34-H · İletişim audit ve arşiv bütünlüğü','34-H · Communication audit and archive integrity')}</span>
+    <div className="panel-heading"><div><span className="eyebrow">{text('İletişim denetimi ve arşiv bütünlüğü','Communication audit and archive integrity')}</span>
       <h2 id="communication-audit-archive-title">{text('İçerikten ayrı denetim zinciri','Content-separated audit chain')}</h2>
       <p>{center.eventCount} {text('olay','events')} · {center.checkpointCount} {text('arşiv checkpoint’i','archive checkpoints')} · {text('son doğrulama','last verification')} {time(center.generatedAt)}</p></div>
       <Button onClick={()=>void refresh()} disabled={loading}>{text('Yenile','Refresh')}</Button></div>
