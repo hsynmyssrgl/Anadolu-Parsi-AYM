@@ -6,12 +6,12 @@
   "documentSetVersion": "1.4.0-belge.20260822.2",
   "canonicalRuleRegistry": "PPT-CANONICAL-RULE-REGISTRY-V21",
   "canonicalRuleCount": 233,
-  "canonicalRuleSha256": "cb02fed18fb3ca097877ed3be73fbaacea60c8e291498fbeb21c28f9ad9e5a90",
+  "canonicalRuleSha256": "b57ed6bf996709e1522c71e6b61a835ec48df9f0c52b1671dca61f914fab7a5f",
   "decision": "DEC-259",
   "workItemCount": 54,
   "fileCount": 87,
   "sourceFileCount": 86,
-  "sourceFingerprintSha256": "12259000664de045b5038b306cea035249efb5cf2022f44d0387f6603c33c76a",
+  "sourceFingerprintSha256": "91a950168aaff27096603bb9492c387232ef3225bcb14c197183092f4d98859b",
   "checks": 1114,
   "status": "PASS",
   "commercialReleaseEligible": false,
@@ -20,13 +20,13 @@
   "fileInventory": [
     {
       "path": "00_OKU_BENI.md",
-      "bytes": 5323,
-      "sha256": "fd0974eb000ff4bd5ed1f776d661a6be1e2edb03ef560464a6423988c407cd58"
+      "bytes": 5347,
+      "sha256": "82d3d4f39ea74bde226ad9d634301e1c0c02dd804dc399d617b58db4ad26529f"
     },
     {
       "path": "00_TEMEL_SURUM_MANIFESTOSU.json",
       "bytes": 1130,
-      "sha256": "76fe00686cc9a4882cb0679424757a704378d442e8052bc5dee7f5d7128fe7ba"
+      "sha256": "bc028503526c663ba8c3b6945fe65fb4a10846919154a03923b346bc1a8c083c"
     },
     {
       "path": "01_YONETIM/01_ASILAMAZ_KURALLAR.md",
@@ -46,7 +46,7 @@
     {
       "path": "01_YONETIM/04_AKTIF_KURAL_SICILI.json",
       "bytes": 4719,
-      "sha256": "7fe621b12d79efcdd620523c360dff97dc3e9d2cb21d2773f5f9dbc98b26ccc9"
+      "sha256": "3480e0b15a562bba14443a037cbbb8482009b6b05a6b7b7ed5e181f7e686c577"
     },
     {
       "path": "01_YONETIM/05_DEGISIKLIK_SICILI.json",
@@ -410,8 +410,8 @@
     },
     {
       "path": "08_IS_LISTESI/03_ANA_IS_SICILI.json",
-      "bytes": 23854,
-      "sha256": "2af1812e57809daa263d0eb48ddda2d672b008997505164d79752c3c22e90f13"
+      "bytes": 23863,
+      "sha256": "ab3608f3a23625e71ec7d8b1db5e1cbb6f4195190b5e4ce369c436d528ff5452"
     },
     {
       "path": "08_IS_LISTESI/04_IS_YURUTME_SIRASI.md",
@@ -449,5 +449,5 @@
       "sha256": "08ad51265beb422e53d2b532934fa3a9a49967d40daaf146140a1f5b2659469f"
     }
   ],
-  "generatedAt": "2026-08-22T14:17:27.149Z"
+  "generatedAt": "2026-08-22T14:47:50.363Z"
 }

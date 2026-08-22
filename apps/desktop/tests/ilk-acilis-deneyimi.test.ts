@@ -53,16 +53,18 @@ describe('Ilk acilis deneyimi',()=>{
   });
 
   it('kilitli oturumda kasayi yeniden kimlik dogrulama icin acik tutar',()=>{
-    expect(resolveVaultSessionGuardAction('active',true)).toBe('checkpoint');
-    expect(resolveVaultSessionGuardAction('warning',true)).toBe('checkpoint');
-    expect(resolveVaultSessionGuardAction('locked',false)).toBe('defer_locked');
-    expect(resolveVaultSessionGuardAction('signed_out',false)).toBe('seal');
-    expect(resolveVaultSessionGuardAction('active',false)).toBe('seal');
+    expect(resolveVaultSessionGuardAction('active',true,true)).toBe('checkpoint');
+    expect(resolveVaultSessionGuardAction('warning',true,true)).toBe('checkpoint');
+    expect(resolveVaultSessionGuardAction('active',true,false)).toBe('defer_untrusted');
+    expect(resolveVaultSessionGuardAction('locked',false,false)).toBe('defer_locked');
+    expect(resolveVaultSessionGuardAction('signed_out',false,false)).toBe('seal');
+    expect(resolveVaultSessionGuardAction('active',false,false)).toBe('seal');
     const main=readFileSync(new URL('../src/main/main.ts',import.meta.url),'utf8');
     const guardStart=main.indexOf('function startVaultSessionGuard');
     const guard=main.slice(guardStart,guardStart+2_500);
-    expect(guard).toContain("if (guardAction === 'defer_locked') return;");
-    expect(guard.indexOf("if (guardAction === 'defer_locked') return;")).toBeLessThan(guard.indexOf('universalApiPolicyEnforcement().execute'));
+    expect(guard).toContain("guardAction === 'defer_untrusted'");
+    expect(guard.indexOf("guardAction === 'defer_untrusted'")).toBeLessThan(guard.indexOf('universalApiPolicyEnforcement().execute'));
+    expect(main).toContain('registerClientApplicationServiceChannel(VAULT_SESSION_CHECKPOINT_CHANNEL)');
   });
 
   it('ilk 2FA sonrasi ana uygulamadan once mevcut bilgisayari guclu dogrulamayla guvenilir yapar',()=>{

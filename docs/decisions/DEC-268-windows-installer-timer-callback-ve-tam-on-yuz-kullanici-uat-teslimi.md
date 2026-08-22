@@ -2,7 +2,7 @@
 
 - Tarih: 22.08.2026
 - Durum: ACTIVE
-- Görünür sürüm: Bronze 22.08.2026.49
+- Görünür sürüm: Bronze 22.08.2026.50
 - Bağlayıcı kural: PR-233
 - Korunan önceki karar: DEC-267
 
@@ -12,11 +12,11 @@ Kullanıcı yeni kurulum dosyasının oluşturulmasını, ardından uygulamanın
 
 ## İlk başarısız paketleme
 
-Bronze 22.08.2026.46 NSIS denemesi, `AymWelcomeTransition` fonksiyon adresi derleyici tarafından bağlanmadığı için warning 6010 ile FAIL oldu. Kısmi EXE, geçici uninstaller, builder debug kaydı ve `win-unpacked` kalıntıları temizlendi. Bronze 22.08.2026.47 paketlemesi teknik olarak tamamlandı; ancak `.46`dan kalan dahili `@pptdesktop-*.nsis.7z` payload arşivinin retention kapsamı dışında kaldığı görüldüğünden teslim kabul edilmedi ve `.47` paketi de silindi. Bronze 22.08.2026.48 kurulu ön yüz UAT'sinde kullanıcı ve 2FA başarıyla oluşturulduktan sonra güvenilir cihaz kaydı iptal kaldığı için Gösterge Paneli `AUTHORITY_RESOLUTION_FAILED` verdi; `.48` paketi de teslim edilmedi. Bu denemeler PASS sayılmaz.
+Bronze 22.08.2026.46 NSIS denemesi, `AymWelcomeTransition` fonksiyon adresi derleyici tarafından bağlanmadığı için warning 6010 ile FAIL oldu. Kısmi EXE, geçici uninstaller, builder debug kaydı ve `win-unpacked` kalıntıları temizlendi. Bronze 22.08.2026.47 paketlemesi teknik olarak tamamlandı; ancak `.46`dan kalan dahili `@pptdesktop-*.nsis.7z` payload arşivinin retention kapsamı dışında kaldığı görüldüğünden teslim kabul edilmedi ve `.47` paketi de silindi. Bronze 22.08.2026.48 kurulu ön yüz UAT'sinde kullanıcı ve 2FA başarıyla oluşturulduktan sonra güvenilir cihaz kaydı iptal kaldığı için Gösterge Paneli `AUTHORITY_RESOLUTION_FAILED` verdi. Bronze 22.08.2026.49 bu güven törenini geçti; ancak kayıtsız `system:captureVaultSessionCheckpoint` iç kanalı 15 saniyelik bekçi turunda reddedilince canlı kasa mühürlendi ve ikinci ana yüzey yüklenemedi. `.48` ve `.49` paketleri teslim edilmedi; çıktıları silindi. Bu denemeler PASS sayılmaz.
 
 ## Düzeltme
 
-Karşılama geçiş zamanlayıcısı compiler-bound `${NSD_CreateTimer}` ve `${NSD_KillTimer}` makrolarını kullanır. Bilgi kartı geçişi kurulum ilerlemesi değildir; gerçek dosya ilerlemesi yalnız yerel NSIS sayfasında gösterilir. Temizlik kuralı kullanıcıya dönük EXE/blockmap/SHA setinin yanında dahili sürümlü `@pptdesktop-*.nsis.7z` payload kalıntılarını da siler ve testle bağlar. İlk 2FA tamamlandığında ana uygulama açılmadan önce kullanıcı yerel parolasını ve güncel TOTP/kurtarma kodunu girer; mevcut bilgisayar güçlü doğrulamayla güvenilir cihaz yapılır ve yalnız `trustedDevice=true` durumu doğrulandıktan sonra politika korumalı ekranlar yüklenir.
+Karşılama geçiş zamanlayıcısı compiler-bound `${NSD_CreateTimer}` ve `${NSD_KillTimer}` makrolarını kullanır. Bilgi kartı geçişi kurulum ilerlemesi değildir; gerçek dosya ilerlemesi yalnız yerel NSIS sayfasında gösterilir. Temizlik kuralı kullanıcıya dönük EXE/blockmap/SHA setinin yanında dahili sürümlü `@pptdesktop-*.nsis.7z` payload kalıntılarını da siler ve testle bağlar. İlk 2FA tamamlandığında ana uygulama açılmadan önce kullanıcı yerel parolasını ve güncel TOTP/kurtarma kodunu girer; mevcut bilgisayar güçlü doğrulamayla güvenilir cihaz yapılır ve yalnız `trustedDevice=true` durumu doğrulandıktan sonra politika korumalı ekranlar yüklenir. İç kasa checkpoint kanalı Client Data Access siciline kayıtlıdır; ilk güven töreninde normal politika otoritesi bilinçli olarak hazır değilken checkpoint kasayı mühürlemek yerine ertelenir.
 
 ## Kabul zinciri
 

@@ -8,7 +8,7 @@
   "anaKuralSayisi": 233,
   "aktifKuralSayisi": 211,
   "degistirilmisKuralSayisi": 22,
-  "anaKuralSha256": "cb02fed18fb3ca097877ed3be73fbaacea60c8e291498fbeb21c28f9ad9e5a90",
+  "anaKuralSha256": "b57ed6bf996709e1522c71e6b61a835ec48df9f0c52b1671dca61f914fab7a5f",
   "yurutmeKapisi": "../06_KOD/app/scripts/run-governed-preflight.mjs",
   "temelAlanDogrulamaKapisi": "11_OTOMASYON/dogrula-ticari-temel-alani.mjs",
   "kurallar": [

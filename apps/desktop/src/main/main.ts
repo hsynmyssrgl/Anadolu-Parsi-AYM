@@ -206,7 +206,10 @@ import { connectCoreServiceAtStartup, type CoreServiceStartupConnectionResult } 
 import { CoreServiceCompanionManager } from './core-service-companion-manager.js';
 import { PlatformPolicyReceiptFileSink } from './platform-policy-receipt-file-sink.js';
 import { PlatformPolicyDecisionAuditInspectionAdapter } from './policy-decision-audit-application-adapter.js';
-import { DesktopUniversalApiPolicyEnforcement } from './desktop-universal-api-policy-enforcement.js';
+import {
+  DesktopUniversalApiPolicyEnforcement,
+  VAULT_SESSION_CHECKPOINT_CHANNEL
+} from './desktop-universal-api-policy-enforcement.js';
 import { DesktopRepositoryPolicyScope } from './desktop-repository-policy-scope.js';
 import { PolicyServiceAvailabilityApplicationAdapter } from './policy-service-availability-application-adapter.js';
 import { ProductLicenseManager } from './product-license-manager.js';
@@ -1119,17 +1122,19 @@ function startVaultSessionGuard(): void {
   vaultSessionGuardTimer = setInterval(() => {
     const current = dataStore;
     if (!current) return;
+    const auth = current.getAuthState();
     const guardAction = resolveVaultSessionGuardAction(
       current.getSessionLockState().status,
-      current.isAuthenticated()
+      auth.authenticated,
+      auth.trustedDevice === true
     );
     // A locked session has no normal policy authority by design. Defer before
     // entering the PEP so its fail-closed authority resolver cannot seal the
     // recoverable vault that the reauthentication overlay still needs.
-    if (guardAction === 'defer_locked') return;
+    if (guardAction === 'defer_locked' || guardAction === 'defer_untrusted') return;
     const correlationId = createRuntimeCorrelationId('job');
     void runtime().correlation.run({ correlationId }, () => universalApiPolicyEnforcement().execute({
-      channel: 'system:captureVaultSessionCheckpoint',
+      channel: VAULT_SESSION_CHECKPOINT_CHANNEL,
       correlationId,
       operation: () => {
         if (guardAction === 'seal') throw new Error('VAULT_SESSION_AUTHORITY_EXPIRED');
@@ -1487,6 +1492,7 @@ function localGovernedOcrBridgeMethod<K extends keyof LocalGovernedOcrIpcDataSto
 }
 
 function registerIpc(): void {
+  universalApiPolicyEnforcement().registerClientApplicationServiceChannel(VAULT_SESSION_CHECKPOINT_CHANNEL);
   registerIpcCancellationHandlers({
     ipcMain,
     runtime: runtime(),

@@ -9,6 +9,7 @@ import {
 } from '@ppt/platform-policy';
 import {
   DesktopUniversalApiPolicyEnforcement,
+  VAULT_SESSION_CHECKPOINT_CHANNEL,
   isDesktopPolicyBootstrapChannel,
   resolveDesktopUniversalApiIntent
 } from '../src/main/desktop-universal-api-policy-enforcement.js';
@@ -115,7 +116,8 @@ const createHarness = (writable = true, trusted = true) => {
     'auth:trustCurrentDevice',
     'app:getInfo',
     'app:getLocalizationBootstrap',
-    'app:setLanguagePreference'
+    'app:setLanguagePreference',
+    VAULT_SESSION_CHECKPOINT_CHANNEL
   ]) {
     enforcement.registerClientApplicationServiceChannel(channel);
   }
@@ -147,6 +149,21 @@ describe('31-U universal Desktop API policy enforcement', () => {
     expect(result).toBe('ok');
     expect(order).toEqual(['operation-after-1-receipt']);
     expect(records[0]).toMatchObject({ resourceType: 'desktop_ipc_endpoint', resourceId: 'dashboard:getOverview', action: 'read', capability: 'family.read' });
+  });
+
+  it('authorizes the registered internal vault checkpoint before running it', async () => {
+    const { enforcement, records } = createHarness();
+    await expect(enforcement.execute({
+      channel: VAULT_SESSION_CHECKPOINT_CHANNEL,
+      correlationId,
+      operation: () => 'checkpoint-ok'
+    })).resolves.toBe('checkpoint-ok');
+    expect(records).toHaveLength(1);
+    expect(records[0]).toMatchObject({
+      resourceId: VAULT_SESSION_CHECKPOINT_CHANNEL,
+      action: 'update',
+      capability: 'family.write'
+    });
   });
 
   it('fails closed before a mutation when the cluster fence is not writable', async () => {

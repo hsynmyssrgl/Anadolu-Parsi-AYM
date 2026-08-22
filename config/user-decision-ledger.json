@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
-  "release": "Bronze 22.08.2026.49",
+  "release": "Bronze 22.08.2026.50",
   "decisionCount": 97,
   "decisions": [
     {
@@ -2563,12 +2563,15 @@
         "docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md",
         "docs/10_MASTER_DECISION_REGISTER.md"
       ],
-      "workListImpact": "Basarisiz .46 NSIS denemesi ve .47 stale dahili NSIS payload bulgusu tarihsel FAIL olarak korunur. .48 kurulu UAT'de bulunan ilk 2FA sonrasi AUTHORITY_RESOLUTION_FAILED hatasi, yerel parola ve TOTP ile mevcut bilgisayari guvenilir cihaz yapmadan ana uygulamayi acmayarak kapatilir. .49 installer temiz tam buildden uretilir, paketli ve kurulu runtime acilir, sentetik kullanici on yuzden olusturulur ve tum otomatik regresyon ile UAT kanitlari gercek sonuclarina gore kaydedilir.",
+      "workListImpact": "Basarisiz .46 NSIS, .47 stale dahili payload, .48 ilk 2FA sonrasi policy authority ve .49 kayitsiz ic checkpoint kanali nedeniyle kasa muhurlenmesi bulgulari tarihsel FAIL olarak korunur. .50; ilk guven toreni boyunca checkpoint'i erteler, ic checkpoint kanalini Client Data Access siciline baglar, temiz installer ve paketli/kurulu runtime uretir, sentetik kullaniciyi on yuzden olusturur ve tam regresyon ile 22 yuzey UAT kanitlarini gercek sonuclarina gore kaydeder.",
       "syncStatus": "SYNCHRONIZED",
       "requirements": [],
       "codeAreas": [
         "apps/desktop/build/installer.nsh",
         "apps/desktop/scripts/verify-installer.mjs",
+        "apps/desktop/src/main/desktop-universal-api-policy-enforcement.ts",
+        "apps/desktop/src/main/vault-session-guard-policy.ts",
+        "apps/desktop/src/main/main.ts",
         "apps/desktop/tests/installer-narration-experience.test.ts",
         "scripts/verify-first-family-clean-release-policy.mjs"
       ],

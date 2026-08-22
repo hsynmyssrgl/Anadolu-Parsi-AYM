@@ -1,25 +1,25 @@
 {
   "name": "@ppt/desktop",
-  "version": "22.8.2026-49",
+  "version": "22.8.2026-50",
   "private": true,
   "type": "module",
   "main": "dist/main/main.mjs",
   "dependencies": {
-    "@ppt/application": "22.8.2026-49",
-    "@ppt/config": "22.8.2026-49",
-    "@ppt/contracts": "22.8.2026-49",
-    "@ppt/core": "22.8.2026-49",
-    "@ppt/core-service-client": "22.8.2026-49",
-    "@ppt/core-service-contracts": "22.8.2026-49",
-    "@ppt/database": "22.8.2026-49",
-    "@ppt/domain": "22.8.2026-49",
-    "@ppt/events": "22.8.2026-49",
-    "@ppt/infrastructure": "22.8.2026-49",
-    "@ppt/logging": "22.8.2026-49",
-    "@ppt/platform-policy": "22.8.2026-49",
-    "@ppt/repositories": "22.8.2026-49",
-    "@ppt/repository-contracts": "22.8.2026-49",
-    "@ppt/security": "22.8.2026-49",
+    "@ppt/application": "22.8.2026-50",
+    "@ppt/config": "22.8.2026-50",
+    "@ppt/contracts": "22.8.2026-50",
+    "@ppt/core": "22.8.2026-50",
+    "@ppt/core-service-client": "22.8.2026-50",
+    "@ppt/core-service-contracts": "22.8.2026-50",
+    "@ppt/database": "22.8.2026-50",
+    "@ppt/domain": "22.8.2026-50",
+    "@ppt/events": "22.8.2026-50",
+    "@ppt/infrastructure": "22.8.2026-50",
+    "@ppt/logging": "22.8.2026-50",
+    "@ppt/platform-policy": "22.8.2026-50",
+    "@ppt/repositories": "22.8.2026-50",
+    "@ppt/repository-contracts": "22.8.2026-50",
+    "@ppt/security": "22.8.2026-50",
     "maplibre-gl": "6.4.1",
     "pmtiles": "4.5.0",
     "react": "19.2.7",
@@ -68,7 +68,7 @@
       "target": [
         "nsis"
       ],
-      "artifactName": "ParsYuva-Bronze-22.08.2026.49.${ext}",
+      "artifactName": "ParsYuva-Bronze-22.08.2026.50.${ext}",
       "icon": "build/icon.ico",
       "requestedExecutionLevel": "asInvoker"
     },
@@ -92,7 +92,7 @@
       "uninstallerIcon": "build/icon.ico"
     },
     "copyright": "Copyright © 2026 ParsYuva",
-    "artifactName": "ParsYuva-Bronze-22.08.2026.49.${ext}"
+    "artifactName": "ParsYuva-Bronze-22.08.2026.50.${ext}"
   },
   "description": "ParsYuva Aile Yaşam Merkezi yerel öncelikli aile yaşam, güvenlik ve dijital hafıza merkezi.",
   "author": {

@@ -67,6 +67,7 @@ const BOOTSTRAP_CHANNELS = new Set([
 ]);
 
 export const POLICY_SERVICE_AVAILABILITY_STATUS_CHANNEL = 'system:getPolicyServiceAvailabilityBoundary' as const;
+export const VAULT_SESSION_CHECKPOINT_CHANNEL = 'system:captureVaultSessionCheckpoint' as const;
 
 const nonEmpty = (value: unknown, max = 512): value is string =>
   typeof value === 'string' && value.trim() === value && value.length > 0 && value.length <= max;

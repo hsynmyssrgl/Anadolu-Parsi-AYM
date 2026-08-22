@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "PPT-WORK-SEGMENTATION-PLAN-29",
-  "release": "Bronze 22.08.2026.49",
+  "release": "Bronze 22.08.2026.50",
   "rule": "PR-171",
   "policy": "ONE_IN_PROGRESS_PREVIOUS_MUST_HAVE_PASS_AND_PERSISTENT_RECEIPT",
   "workflowStatus": "IN_PROGRESS",
@@ -2542,5 +2542,5 @@
   "recoveryAuthority": "USER_FULL_AUTO_2026-08-14",
   "recoveryReason": "33-O persistent receipt, source protection and Git remote equality PASS; user authorized automatic sequential execution. DEC-268 executes the DEC-267 and PR-233 installer acceptance chain without claiming completion of 33-P.",
   "updatedAt": "2026-08-22T14:08:00.000Z",
-  "segmentationNote": "33-P / DEC-227 is the sole IN_PROGRESS feature step. DEC-268 governs the Bronze 22.08.2026.49 stale-payload-safe clean installer, packaged and installed runtime, synthetic front-end user plus trusted-device UAT and backup delivery sidechain; it does not close or replace 33-P. Live provider, real authenticator and 33-P runtime evidence remain NOT_RUN."
+  "segmentationNote": "33-P / DEC-227 is the sole IN_PROGRESS feature step. DEC-268 governs the Bronze 22.08.2026.50 stale-payload-safe clean installer, registered internal vault checkpoint, first-trust defer boundary, packaged and installed runtime, synthetic front-end user plus trusted-device UAT and backup delivery sidechain; it does not close or replace 33-P. Live provider, real authenticator and 33-P runtime evidence remain NOT_RUN."
 }

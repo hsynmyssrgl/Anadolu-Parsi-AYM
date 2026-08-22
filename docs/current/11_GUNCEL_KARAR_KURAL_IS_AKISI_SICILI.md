@@ -2,7 +2,7 @@
 
 - Belge sürümü: **GUNCEL-2026-08-22-V5**
 - Tarih: **22.08.2026**
-- Görünür ürün sürümü: **Bronze 22.08.2026.49**
+- Görünür ürün sürümü: **Bronze 22.08.2026.50**
 - Kaynak HEAD: `19a5c84d02ad0700315bc67873a19d5e1fed9945`
 - Statü: **ACTIVE_WORKING_REFERENCE_NOT_BUILD_CLOSURE**
 - Kararlar: **DEC-250–DEC-268**
@@ -30,7 +30,7 @@
 ## 3. Kapsam ve kural özeti
 
 - Gereksinim: **358** — COMPLETE 109, PARTIAL 25, FOUNDATION_STARTED 1, NOT_IMPLEMENTED 223.
-- Kural sicili: **PPT-CANONICAL-RULE-REGISTRY-V21**, toplam 233, aktif 211, superseded 22, SHA-256 `cb02fed18fb3ca097877ed3be73fbaacea60c8e291498fbeb21c28f9ad9e5a90`.
+- Kural sicili: **PPT-CANONICAL-RULE-REGISTRY-V21**, toplam 233, aktif 211, superseded 22, SHA-256 `b57ed6bf996709e1522c71e6b61a835ec48df9f0c52b1671dca61f914fab7a5f`.
 - Kullanıcı karar defteri: **94** açık kullanıcı kararı.
 
 ## 4. İş akışları

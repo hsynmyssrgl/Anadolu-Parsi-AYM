@@ -1,6 +1,6 @@
 # Kullanıcı Kararları Kaydı
 
-- Görünür sürüm: **Bronze 22.08.2026.49**
+- Görünür sürüm: **Bronze 22.08.2026.50**
 - Makine okunur defter: `config/user-decision-ledger.json`
 - Aktif karar sayısı: **96**
 
@@ -79,7 +79,7 @@ Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağ
 - `DEC-265` — Her durum değiştiren işlemden önce güncel kural sicili, hash, kullanıcı onayı ve enforcement bağı doğrulanır; PASS olmadan işlem başlayamaz
 - `DEC-266` — `DEC-267` ile superseded edilen önceki üç pars ve statik kurulum kabul zinciridir
 - `DEC-267` — İlk kullanıcı oluşturma görsel dilinde üç bilgi kartı arasında geçişli fakat sahte ilerlemesiz özel kurulum; Türkçe/İngilizce kadın sesi önceliği ve aynı dilde erkek/kurulu ses yedeği; eski tek pars; kilitli kasa yeniden doğrulaması; ilk 2FA/güvenilir cihaz bootstrap sınırı ve temiz teslim kanıtları tek kabul zinciridir
-- `DEC-268` — `.46` NSIS callback, `.47` stale dahili payload ve `.48` ilk 2FA sonrası policy authority FAIL kayıtlarını korur; `.49` temiz installer, paketli/kurulu runtime ve sentetik ön yüz kullanıcı/güvenilir cihaz UAT zincirini yetkilendirir
+- `DEC-268` — `.46` NSIS callback, `.47` stale dahili payload, `.48` ilk 2FA policy authority ve `.49` kayıtsız iç checkpoint/kasa mühürleme FAIL kayıtlarını korur; `.50` kayıtlı checkpoint, ilk güven töreni ertelemesi, temiz installer ve 22 yüzey sentetik ön yüz UAT zincirini yetkilendirir
 
 ## Bundan sonraki kararlar için zorunlu eşzamanlılık kuralı
 

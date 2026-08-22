@@ -6,13 +6,13 @@
     "channel": "Bronze",
     "date": "2026-08-22",
     "displayDate": "22.08.2026",
-    "monthlySequence": 49,
-    "version": "22.08.2026.49",
-    "visibleRelease": "Bronze 22.08.2026.49",
-    "packageVersion": "22.8.2026-49",
-    "releaseId": "bronze-2026-08-22-r49",
+    "monthlySequence": 50,
+    "version": "22.08.2026.50",
+    "visibleRelease": "Bronze 22.08.2026.50",
+    "packageVersion": "22.8.2026-50",
+    "releaseId": "bronze-2026-08-22-r50",
     "status": "IN_PROGRESS",
-    "parentRelease": "Bronze 22.08.2026.48",
+    "parentRelease": "Bronze 22.08.2026.49",
     "summary": "Resmî derleme numarası yalnız paketleme yetkisi tarafından ayrıldı.",
     "parentSourceSha256": "d65e908bf8157d2eff111dcdbbae2762cb48a527021b97c3df26f463e993dea4"
   },
@@ -254,6 +254,16 @@
       "version": "22.08.2026.49",
       "packageVersion": "22.8.2026-49",
       "releaseId": "bronze-2026-08-22-r49",
+      "status": "REJECTED_INSTALLED_FRONTEND_UAT_FAIL",
+      "summary": "Kurulu sentetik ön yüz UAT, kayıtsız iç vault checkpoint kanalı kasayı mühürlediği için ikinci ana yüzeyde reddedildi; installer çıktıları silindi."
+    },
+    {
+      "channel": "Bronze",
+      "date": "2026-08-22",
+      "monthlySequence": 50,
+      "version": "22.08.2026.50",
+      "packageVersion": "22.8.2026-50",
+      "releaseId": "bronze-2026-08-22-r50",
       "status": "IN_PROGRESS",
       "summary": "Resmî derleme numarası yalnız paketleme yetkisi tarafından ayrıldı."
     }

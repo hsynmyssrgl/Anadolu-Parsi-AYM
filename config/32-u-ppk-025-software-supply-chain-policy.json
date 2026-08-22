@@ -5,9 +5,9 @@
   "defaultDecision": "DENY",
   "release": {
     "name": "panthera-pardus-tulliana-family-platform",
-    "version": "22.8.2026-49",
+    "version": "22.8.2026-50",
     "channel": "Bronze",
-    "releaseId": "anadolu-parsi-aym-bronze-22.8.2026-49",
+    "releaseId": "anadolu-parsi-aym-bronze-22.8.2026-50",
     "productionReleaseEligible": false,
     "blockingState": "EXTERNAL_SIGNING_PENDING"
   },
