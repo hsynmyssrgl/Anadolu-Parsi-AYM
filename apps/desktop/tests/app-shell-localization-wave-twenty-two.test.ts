@@ -31,6 +31,7 @@ describe('app shell English localization wave twenty-two', () => {
     expect(html).toContain('Document Center');
     expect(html).toContain('Advanced document lifecycle');
     expect(html).toContain('Archive categories');
+    expect(html).toContain('aria-label="New document title"');
     expect(html).not.toMatch(/[ÇĞİÖŞÜçğıöşü]/u);
   });
 
@@ -38,6 +39,7 @@ describe('app shell English localization wave twenty-two', () => {
     const html = renderArchive('tr-TR');
     expect(html).toContain('Doküman Merkezi');
     expect(html).toContain('Arşiv kategorileri');
+    expect(html).toContain('aria-label="Yeni belge başlığı"');
   });
 
   it('never translates user-authored values marked for preservation', () => {

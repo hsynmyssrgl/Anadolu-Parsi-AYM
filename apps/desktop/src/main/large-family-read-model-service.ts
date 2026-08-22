@@ -83,6 +83,7 @@ export interface LargeFamilyReadModelServiceDependencies {
   readonly locationPolicyTransactionRunner:Pick<RepositoryBackedLocationPolicyTransactionRunner,'execute'>;
   readonly locationApplicationContext:(prefix:string)=>LocationApplicationContext;
   readonly currentAccountId:()=>string;
+  readonly currentCorrelationId?:()=>CorrelationId|undefined;
   readonly canReadEvent:(eventId:string)=>boolean;
   readonly canReadArchiveItem:(itemId:string)=>boolean;
 }
@@ -94,6 +95,10 @@ export class LargeFamilyReadModelService {
     return {transaction:transaction.transaction,actor:{userId:asUserId(accountId),roles:['reader']},correlationId,occurredAt:transaction.occurredAt};
   }
 
+  #correlationId(prefix:string):CorrelationId{
+    return this.dependencies.currentCorrelationId?.()??asCorrelationId(`${prefix}-${randomUUID()}`);
+  }
+
   public listTreePage(input:GenealogyTreePageInput={}):GenealogyTreePageView{
     const limit=pageSize(input.limit);const query=boundedText(input.query,'Kişi araması',MAX_QUERY_LENGTH).toLocaleLowerCase('tr-TR');const branch=boundedText(input.branch,'Aile dalı');
     const generation=input.generation;
@@ -101,7 +106,7 @@ export class LargeFamilyReadModelService {
     const accountId=this.dependencies.currentAccountId();const scope=cursorScope('tree',accountId,{query,branch,generation:generation??null});
     const decoded=decodeCursor(input.cursor,'tree',scope) as Extract<CursorEnvelope,{kind:'tree'}>|undefined;
     const cursor:LargeTreeCursor|undefined=decoded?{generation:decoded.generation,displayName:decoded.displayName,id:decoded.id}:undefined;
-    const correlationId=asCorrelationId(`large-tree-${randomUUID()}`);const started=performance.now();
+    const correlationId=this.#correlationId('large-tree');const started=performance.now();
     const result=this.dependencies.transactionExecutor.execute(correlationId,transaction=>this.dependencies.repository.listTreePage(this.#context(correlationId,transaction,accountId),{familyId:asFamilyId('family-main'),limit:limit+1,query,branch,...(generation===undefined?{}:{generation}),...(cursor?{cursor}:{})}));
     if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
     const hasMore=result.value.length>limit;const rows=result.value.slice(0,limit);const last=rows.at(-1);
@@ -140,7 +145,7 @@ export class LargeFamilyReadModelService {
     const accountId=this.dependencies.currentAccountId();const scope=cursorScope('archive',accountId,{query,categoryId,sensitivity,tag,mimeType,linkedEventId});
     const decoded=decodeCursor(input.cursor,'archive',scope) as Extract<CursorEnvelope,{kind:'archive'}>|undefined;
     const cursor:LargeArchiveCursor|undefined=decoded?{createdAt:decoded.createdAt,id:decoded.id}:undefined;
-    const correlationId=asCorrelationId(`large-archive-${randomUUID()}`);const started=performance.now();let occurredAt='';
+    const correlationId=this.#correlationId('large-archive');const started=performance.now();let occurredAt='';
     const result=this.dependencies.transactionExecutor.execute(correlationId,transaction=>{occurredAt=transaction.occurredAt;return this.dependencies.repository.listArchivePage(this.#context(correlationId,transaction,accountId),{familyId:asFamilyId('family-main'),limit:limit+1,query,categoryId,sensitivity,tag,mimeType,linkedEventId,...(cursor?{cursor}:{})});});
     if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
     const scanned=result.value;const hasMore=scanned.length>limit;const pageRows=scanned.slice(0,limit);const visible=pageRows.filter(item=>this.dependencies.canReadArchiveItem(item.id));const last=pageRows.at(-1);

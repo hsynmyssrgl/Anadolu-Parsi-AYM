@@ -29,7 +29,7 @@ const exactCopy: Readonly<Record<string,string>> = {
   'İmha kuyruğu':'Destruction queue','İmhaya hazır':'Ready for destruction','Kaldırıldı':'Removed','Kaldırma fiziksel geçmiş silmez. Renderer hesap, sahip, dosya yolu, receipt veya ham dosya yetkisi almaz.':'Removal does not erase physical history. The renderer receives no account, owner, file-path, receipt, or raw-file authority.',
   'Kanıt olarak bağla':'Link as evidence','Kanıt tarihi':'Evidence date','Kategori adı':'Category name','Kategori kimliği (boş = mevcut kategori):':'Category ID (empty = current category):',
   'Kategori oluştur':'Create category','Kategorisiz':'Uncategorized','Kişisel':'Personal','Koruma altında':'Protected','Kuyruk boş':'Queue is empty',
-  'MIME türü':'MIME type','Onay metni:':'Confirmation text:','Onay metnini birebir yazın':'Enter the exact confirmation text','Orta':'Medium','Örn. Tapular':'Example: Deeds',
+  'MIME türü':'MIME type','Yeni belge başlığı':'New document title','Onay metni:':'Confirmation text:','Onay metnini birebir yazın':'Enter the exact confirmation text','Orta':'Medium','Örn. Tapular':'Example: Deeds',
   'Parola':'Password','Politika adı':'Policy name','Politika oluştur':'Create policy','Politika yok':'No policy','Politika yönetimi':'Policy management',
   'Saklama politikaları':'Retention policies','Saklama politikası':'Retention policy','Saklama politikası atanamadı.':'The retention policy could not be assigned.',
   'Seçili belgeyi mevcut bir aile ilişkisine kanıt olarak bağlayabilirsiniz.':'You can link the selected document as evidence for an existing family relationship.',

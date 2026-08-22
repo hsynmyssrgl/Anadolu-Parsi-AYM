@@ -2477,6 +2477,7 @@ export class FamilyDataStore {
       locationPolicyTransactionRunner,
       locationApplicationContext: (prefix) => this.#locationApplicationContext(prefix),
       currentAccountId: () => this.#requireAuth(),
+      currentCorrelationId: () => this.#correlation?.current()?.correlationId,
       canReadEvent: (eventId) => this.#hasObjectPermission(this.#requireAuth(), 'event', eventId, 'read'),
       canReadArchiveItem: (itemId) => this.#hasObjectPermission(this.#requireAuth(), 'archive_item', itemId, 'read')
     });
