@@ -170,6 +170,7 @@
     "CRYPTO_IMPORT|apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts|node:crypto:createHash",
     "CRYPTO_IMPORT|apps/desktop/src/main/local-governed-ocr-search-index.ts|node:crypto:createHash",
     "CRYPTO_IMPORT|apps/desktop/src/main/main.ts|node:crypto:createHash",
+    "CRYPTO_IMPORT|apps/desktop/src/main/main.ts|node:crypto:createPublicKey",
     "CRYPTO_IMPORT|apps/desktop/src/main/main.ts|node:crypto:randomUUID",
     "CRYPTO_IMPORT|apps/desktop/src/main/managed-backup-password.ts|node:crypto:randomBytes",
     "CRYPTO_IMPORT|apps/desktop/src/main/managed-backup-password.ts|node:crypto:randomUUID",
