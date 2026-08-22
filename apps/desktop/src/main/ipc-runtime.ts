@@ -39,6 +39,25 @@ export type IpcHandler<TArguments extends unknown[], TResult> = (
   ...args: TArguments
 ) => TResult | Promise<TResult>;
 
+export type IpcPreparedOperation<TResult> = () => TResult | Promise<TResult>;
+
+export type IpcOperationPreparer<TArguments extends unknown[], TResult> = (
+  event: IpcMainInvokeEvent,
+  ...args: TArguments
+) => IpcPreparedOperation<TResult> | Promise<IpcPreparedOperation<TResult>>;
+
+export const prepareIpcPolicyOperation = async <TArguments extends unknown[], TResult>(input: {
+  readonly event: IpcMainInvokeEvent;
+  readonly args: TArguments;
+  readonly handler: IpcHandler<TArguments, TResult>;
+  readonly preparer?: IpcOperationPreparer<TArguments, TResult>;
+}): Promise<IpcPreparedOperation<TResult>> => {
+  if (!input.preparer) return () => input.handler(input.event, ...input.args);
+  const operation = await input.preparer(input.event, ...input.args);
+  if (typeof operation !== 'function') throw new Error('IPC_POLICY_OPERATION_PREPARATION_INVALID');
+  return operation;
+};
+
 export interface IpcPolicyEnforcementBoundary {
   execute<TResult>(input: {
     readonly channel: string;
@@ -77,6 +96,7 @@ export const registerCorrelatedIpcHandler = <TArguments extends unknown[], TResu
   readonly adaptiveBudget: IpcAdaptiveResourceBudgetController;
   readonly policyEnforcement?: IpcPolicyEnforcementBoundary;
   readonly handler: IpcHandler<TArguments, TResult>;
+  readonly prepareOperation?: IpcOperationPreparer<TArguments, TResult>;
 }): void => {
   input.ipcMain.handle(input.channel, (event, ...rawArguments) => {
     const correlationId = createRuntimeCorrelationId('ipc');
@@ -359,13 +379,19 @@ export const registerCorrelatedIpcHandler = <TArguments extends unknown[], TResu
         }
       });
       try {
+        const preparedOperation = await prepareIpcPolicyOperation({
+          event,
+          args: handlerArguments as TArguments,
+          handler: input.handler,
+          ...(input.prepareOperation ? { preparer: input.prepareOperation } : {})
+        });
         const operation = input.policyEnforcement
           ? input.policyEnforcement.execute({
               channel: input.channel,
               correlationId,
-              operation: () => input.handler(event, ...(handlerArguments as TArguments))
+              operation: preparedOperation
             })
-          : Promise.resolve(input.handler(event, ...(handlerArguments as TArguments)));
+          : Promise.resolve(preparedOperation());
         const result = await requestLease.run(operation);
         const resultDecision = evaluateIpcIntegrationResultPolicy(input.channel, result);
         if (!resultDecision.accepted) {

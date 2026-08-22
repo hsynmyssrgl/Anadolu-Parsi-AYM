@@ -118,7 +118,13 @@ import {
   type IdentityAccessDataStorePorts
 } from './data-store.js';
 import { bootstrapDesktopRuntime, type DesktopRuntime } from './runtime-bootstrap.js';
-import { registerCorrelatedIpcHandler, registerIpcCancellationHandlers, createRuntimeCorrelationId, type IpcHandler } from './ipc-runtime.js';
+import {
+  registerCorrelatedIpcHandler,
+  registerIpcCancellationHandlers,
+  createRuntimeCorrelationId,
+  type IpcHandler,
+  type IpcOperationPreparer
+} from './ipc-runtime.js';
 import {
   CHILD_EDUCATION_COORDINATION_IPC_CHANNELS,
   FAMILY_AI_ASSISTANT_IPC_CHANNELS,
@@ -1394,6 +1400,32 @@ function registerIpcHandler<TArguments extends unknown[], TResult>(
     adaptiveBudget: ipcAdaptiveResourceBudget,
     policyEnforcement,
     handler
+  });
+  startupIpcRegistrationChannel = undefined;
+}
+
+function registerPreparedIpcHandler<TArguments extends unknown[], TResult>(
+  channel: string,
+  prepareOperation: IpcOperationPreparer<TArguments, TResult>
+): void {
+  startupIpcRegistrationChannel = channel;
+  const policyEnforcement = universalApiPolicyEnforcement();
+  policyEnforcement.registerClientApplicationServiceChannel(channel);
+  registerCorrelatedIpcHandler({
+    ipcMain,
+    runtime: runtime(),
+    channel,
+    resolveTrustedRenderer: () => trustedRenderer,
+    transportSessions: ipcTransportSessions,
+    requestLifecycles: ipcRequestLifecycles,
+    readResults: ipcReadResults,
+    telemetry: ipcPerformanceTelemetry,
+    adaptiveBudget: ipcAdaptiveResourceBudget,
+    policyEnforcement,
+    prepareOperation,
+    handler: () => {
+      throw new Error('IPC_PREPARED_OPERATION_MISSING');
+    }
   });
   startupIpcRegistrationChannel = undefined;
 }
@@ -3069,53 +3101,63 @@ function registerIpc(): void {
     if (result.canceled || !result.filePaths[0]) return store().listArchive();
     return store().importArchiveFile(result.filePaths[0], input);
   });
-  registerIpcHandler('backup:exportFull', async (_event, input: { readonly password: string }) => {
+  registerPreparedIpcHandler('backup:exportFull', async (_event, input: { readonly password: string }) => {
     const result=await dialog.showSaveDialog({title:'Parola korumalı tam yedeği kaydet',defaultPath:`ParsYuva_Aile_Yasam_Merkezi_${new Date().toISOString().slice(0,10)}.pptbackup`,filters:[{name:'ParsYuva Aile Yaşam Merkezi Tam Yedek',extensions:['pptbackup']}]});
-    if(result.canceled||!result.filePath) return {canceled:true};
-    store().exportFullBackup(result.filePath,input.password);
-    return {canceled:false,filePath:result.filePath};
+    if(result.canceled||!result.filePath) return () => ({canceled:true});
+    const filePath=result.filePath;
+    return () => {
+      store().exportFullBackup(filePath,input.password);
+      return {canceled:false,filePath};
+    };
   });
-  registerIpcHandler('backup:inspectFull', async (_event, input: { readonly password?: string }) => {
+  registerPreparedIpcHandler('backup:inspectFull', async (_event, input: { readonly password?: string }) => {
     const result=await dialog.showOpenDialog({title:'Tam yedeği güvenli biçimde incele',properties:['openFile'],filters:[{name:'ParsYuva Aile Yaşam Merkezi Tam Yedek',extensions:['pptbackup']}]});
-    if(result.canceled||!result.filePaths[0]) return {canceled:true};
-    return {canceled:false,filePath:result.filePaths[0],inspection:store().inspectFullBackup(result.filePaths[0],input.password)};
+    if(result.canceled||!result.filePaths[0]) return () => ({canceled:true});
+    const filePath=result.filePaths[0];
+    return () => ({canceled:false,filePath,inspection:store().inspectFullBackup(filePath,input.password)});
   });
-  registerIpcHandler('backup:restoreFull', async (_event, input: { readonly password?: string }) => {
+  registerPreparedIpcHandler('backup:restoreFull', async (_event, input: { readonly password?: string }) => {
     const result=await dialog.showOpenDialog({title:'Tam yedekten geri yükle',properties:['openFile'],filters:[{name:'ParsYuva Aile Yaşam Merkezi Tam Yedek',extensions:['pptbackup']}]});
-    if(result.canceled||!result.filePaths[0]) return {canceled:true};
-    const safetyDir=join(app.getPath('userData'),'safety-backups');
-    const safetyPath=join(safetyDir,`Geri_Yukleme_Oncesi_${new Date().toISOString().replace(/[:.]/g,'-')}.pptbackup`);
-    const current=store();
-    let restoreCompleted=false;
-    try {
-      current.restoreFullBackup(result.filePaths[0],safetyPath,input.password);
-      restoreCompleted=true;
-    } catch (error) {
-      if (!(error instanceof FullBackupRestoreRestartRequiredError)) throw error;
-    }
-    if (restoreCompleted) {
-      const restoredDatabasePath=userDataSqliteSession?.restoreDatabasePath();
-      if (!restoredDatabasePath || !existsSync(restoredDatabasePath)) throw new Error('Geri yüklenen veritabanı korumalı staging alanında bulunamadı.');
-      vault().sealExternalDatabaseFile(restoredDatabasePath);
-    } else {
-      vault().discardSession();
-    }
-    dataStore=undefined;
-    userDataSqliteSession?.close();
-    userDataSqliteSession=undefined;
-    automaticCleanBackupRewriteService=undefined;
-    app.relaunch(); setImmediate(()=>app.exit(0));
-    return {canceled:false,safetyBackupPath:safetyPath,restarting:true};
+    if(result.canceled||!result.filePaths[0]) return () => ({canceled:true});
+    const backupPath=result.filePaths[0];
+    return () => {
+      const safetyDir=join(app.getPath('userData'),'safety-backups');
+      const safetyPath=join(safetyDir,`Geri_Yukleme_Oncesi_${new Date().toISOString().replace(/[:.]/g,'-')}.pptbackup`);
+      const current=store();
+      let restoreCompleted=false;
+      try {
+        current.restoreFullBackup(backupPath,safetyPath,input.password);
+        restoreCompleted=true;
+      } catch (error) {
+        if (!(error instanceof FullBackupRestoreRestartRequiredError)) throw error;
+      }
+      if (restoreCompleted) {
+        const restoredDatabasePath=userDataSqliteSession?.restoreDatabasePath();
+        if (!restoredDatabasePath || !existsSync(restoredDatabasePath)) throw new Error('Geri yüklenen veritabanı korumalı staging alanında bulunamadı.');
+        vault().sealExternalDatabaseFile(restoredDatabasePath);
+      } else {
+        vault().discardSession();
+      }
+      dataStore=undefined;
+      userDataSqliteSession?.close();
+      userDataSqliteSession=undefined;
+      automaticCleanBackupRewriteService=undefined;
+      app.relaunch(); setImmediate(()=>app.exit(0));
+      return {canceled:false,safetyBackupPath:safetyPath,restarting:true};
+    };
   });
-  registerIpcHandler('backup:export', async () => {
+  registerPreparedIpcHandler('backup:export', async () => {
     const result = await dialog.showSaveDialog({
       title: 'Cihaz korumalı tam yedeği kaydet',
       defaultPath: `ParsYuva_Aile_Yasam_Merkezi_Aile_Yedek_${new Date().toISOString().slice(0, 10)}.pptbackup`,
       filters: [{ name: 'ParsYuva Aile Yaşam Merkezi Korumalı Yedek', extensions: ['pptbackup'] }]
     });
-    if (result.canceled || !result.filePath) return { canceled: true };
-    store().exportBackup(result.filePath);
-    return { canceled: false, filePath: result.filePath };
+    if (result.canceled || !result.filePath) return () => ({ canceled: true });
+    const filePath=result.filePath;
+    return () => {
+      store().exportBackup(filePath);
+      return { canceled: false, filePath };
+    };
   });
 }
 
