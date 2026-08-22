@@ -83,7 +83,7 @@ export class SqliteEntityCatalogRepository extends SqliteRepository implements E
         params.push(`%${escapeLike(input.query)}%`);
       }
       if (input.personId) {
-        where.push('EXISTS (SELECT 1 FROM json_each(events.participant_person_ids) participant WHERE participant.value=?)');
+        where.push('EXISTS (SELECT 1 FROM json_each(governed_timeline_events.participant_person_ids) participant WHERE participant.value=?)');
         params.push(input.personId);
       }
       if (input.kind) {
