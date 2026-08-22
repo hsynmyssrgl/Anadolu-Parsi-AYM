@@ -185,7 +185,7 @@ kbd { border: 0; background: transparent; color: var(--muted-2); font-family: in
 .tree-canvas { min-height: 650px; padding: 0; overflow: hidden; }
 .tree-toolbar { height: 48px; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); color: var(--muted); font-size: 10px; }
 .tree-toolbar div { display: flex; gap: 5px; }
-.tree-toolbar button { width: 29px; height: 29px; border: 1px solid var(--border); border-radius: 7px; background: rgba(255,255,255,.03); cursor: pointer; }
+.tree-toolbar button { width: 29px; height: 29px; border: 1px solid var(--border); border-radius: var(--radius-md, 12px); background: rgba(255,255,255,.03); cursor: pointer; }
 .generations { padding: 18px; background-image: radial-gradient(rgba(119,157,194,.08) 1px, transparent 1px); background-size: 16px 16px; }
 .generation-row { position: relative; display: grid; grid-template-columns: 100px 1fr; gap: 16px; align-items: center; min-height: 92px; }
 .generation-row:not(:last-child)::after { content: ''; position: absolute; left: 116px; right: 18px; bottom: 0; height: 1px; background: linear-gradient(90deg, rgba(90,136,178,.35), transparent); }
@@ -202,7 +202,7 @@ kbd { border: 0; background: transparent; color: var(--muted-2); font-family: in
 .evidence-cards { display: flex; gap: 8px; }
 .evidence-cards span { padding: 10px; border: 1px solid var(--border); border-radius: 8px; color: #bdcad7; background: rgba(255,255,255,.025); font-size: 9px; }
 .segmented { width: fit-content; display: flex; padding: 3px; border: 1px solid var(--border); border-radius: 10px; background: rgba(255,255,255,.025); margin-bottom: 12px; }
-.segmented button { min-width: 185px; height: 32px; border: 0; background: transparent; border-radius: 7px; color: var(--muted); cursor: pointer; font-size: 10px; }
+.segmented button { min-width: 185px; height: 32px; border: 0; background: transparent; border-radius: var(--radius-md, 12px); color: var(--muted); cursor: pointer; font-size: 10px; }
 .segmented button.active { background: rgba(52,105,177,.34); color: #8eb8ff; }
 .person-select { margin-bottom: 12px; min-width: 260px; height: 34px; border: 1px solid var(--border); border-radius: 8px; background: var(--panel); color: white; padding: 0 10px; }
 .timeline-layout { display: grid; grid-template-columns: minmax(0,1fr) 260px; gap: 13px; }

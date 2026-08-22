@@ -30,4 +30,9 @@ describe('unified rounded control visual contract', () => {
   it('does not force checkbox, radio or range geometry into text-field styling', () => {
     expect(styles).toContain(':not([type="checkbox"]):not([type="radio"]):not([type="range"])');
   });
+
+  it('keeps compact interactive controls on the shared rounded language', () => {
+    expect(styles).toContain('.tree-toolbar button { width: 29px; height: 29px; border: 1px solid var(--border); border-radius: var(--radius-md, 12px);');
+    expect(styles).toContain('.segmented button { min-width: 185px; height: 32px; border: 0; background: transparent; border-radius: var(--radius-md, 12px);');
+  });
 });
