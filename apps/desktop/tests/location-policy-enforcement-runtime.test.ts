@@ -583,6 +583,58 @@ describe('30-Z governed location policy runtime', () => {
     expect(saved).toBe(1);
   });
 
+  it('requires a finite end for timeline event allow grants at the application boundary', () => {
+    let saved = 0;
+    const authorizationContext: AuthorizationApplicationContext = Object.freeze({
+      correlationId: asCorrelationId('timeline-permission-validation')
+    });
+    const authorizationAccount: AuthorizationAccountRecord = Object.freeze({
+      id: actorAccountId,
+      role: 'family_admin',
+      status: 'active',
+      personId: actorPersonId,
+      startsAt: asIsoDateTime('2020-01-01T00:00:00.000Z'),
+      endsAt: asIsoDateTime('2030-01-01T00:00:00.000Z')
+    });
+    const unitOfWork: AuthorizationUnitOfWork = Object.freeze({
+      execute<T>(
+        _applicationContext: AuthorizationApplicationContext,
+        _actorId: typeof actorAccountId,
+        operation: (scope: AuthorizationWriteScope) => Result<T, AppError>
+      ): Result<T, AppError> {
+        return operation(Object.freeze({
+          occurredAt: asIsoDateTime(initialNow),
+          getAccount: () => ok(authorizationAccount),
+          upsertPermission: () => { saved += 1; return ok(undefined); },
+          deletePermission: () => ok(false),
+          appendAudit: () => ok('authorization-audit-chain')
+        }));
+      }
+    });
+    const useCase = new UpsertObjectPermissionUseCase(unitOfWork);
+    const execute = (endsAt?: string) => useCase.execute({
+      context: authorizationContext,
+      actorId: actorAccountId,
+      command: {
+        subjectAccountId: actorAccountId,
+        resourceType: 'event',
+        resourceId: '*',
+        actions: ['read'],
+        effect: 'allow',
+        purpose: 'general',
+        startsAt: initialNow,
+        ...(endsAt ? { endsAt } : {})
+      },
+      permissionId: `timeline-permission-${saved}`,
+      auditId: `timeline-permission-audit-${saved}`
+    });
+
+    expect(execute().ok).toBe(false);
+    expect(saved).toBe(0);
+    expect(execute('2026-08-08T11:00:00.000Z').ok).toBe(true);
+    expect(saved).toBe(1);
+  });
+
   it('has no stale privacy, family.read or location.share production branches in the runtime source', () => {
     const source = readFileSync(new URL('../src/main/location-production-policy-runtime.ts', import.meta.url), 'utf8');
     expect(source).toContain("requestedIntent.capability !== 'location.read'");

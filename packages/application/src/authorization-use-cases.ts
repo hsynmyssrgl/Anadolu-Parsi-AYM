@@ -98,6 +98,35 @@ const objectPermissionActionSet = new Set<string>(OBJECT_PERMISSION_ACTIONS);
 const isObjectPermissionAction = (value: unknown): value is ObjectPermissionAction =>
   typeof value === 'string' && objectPermissionActionSet.has(value);
 
+const finiteTimelineAllowResourceTypes = new Set<string>([
+  'event',
+  'accessibility_preferences',
+  'form_draft',
+  'privacy_ownership_center',
+  'ai_memory_record',
+  'data_rights_request',
+  'privacy_incident',
+  'identity_access_center',
+  'identity_challenge',
+  'passkey_credential',
+  'federated_identity_link',
+  'temporary_verifiable_credential',
+  'companion_sync_snapshot'
+]);
+const permissionRequiresFiniteAllow = (input: {
+  readonly resourceType: string;
+  readonly actions: readonly ObjectPermissionAction[];
+  readonly purpose: AuthorizationGrant['purpose'];
+}): boolean => input.resourceType === 'location'
+  || finiteTimelineAllowResourceTypes.has(input.resourceType)
+  || input.resourceType === 'local_ocr_job'
+  || input.resourceType === 'local_ocr_result'
+  || input.resourceType === 'local_ocr_settings'
+  || (input.resourceType === 'archive_item'
+    && (input.purpose === 'ai_processing'
+      || input.actions.includes('ai_process')
+      || (input.purpose === 'general' && input.actions.includes('read'))));
+
 const toGrant = (permission: ObjectPermissionView): AuthorizationGrant => ({
   id: permission.id,
   subjectAccountId: permission.subjectAccountId,
@@ -214,10 +243,14 @@ export class UpsertObjectPermissionUseCase {
         )
       ) return err(invalid(input.context.correlationId, 'Konum izinleri yalnız genel amaçlı, dal kapsamı olmayan tek bir okuma eylemi taşıyabilir.'));
       if (
-        resourceType === 'location'
-        && input.command.effect === 'allow'
+        input.command.effect === 'allow'
+        && permissionRequiresFiniteAllow({
+          resourceType,
+          actions,
+          purpose: input.command.purpose ?? 'general'
+        })
         && !endsAt
-      ) return err(invalid(input.context.correlationId, 'Konum okuma izni sonlu bir bitiş tarihi gerektirir.'));
+      ) return err(invalid(input.context.correlationId, 'Bu kaynak türünde izin veren kayıt sonlu bir bitiş tarihi gerektirir.'));
       const denialReason = input.command.denialReason?.trim();
       const ownershipBasisPoints = input.command.ownershipBasisPoints;
       if (ownershipBasisPoints !== undefined && (!Number.isInteger(ownershipBasisPoints) || ownershipBasisPoints < 1 || ownershipBasisPoints > 10_000)) return err(invalid(input.context.correlationId, 'Sahiplik oranı 1 ile 10.000 baz puan arasında tam sayı olmalıdır.'));

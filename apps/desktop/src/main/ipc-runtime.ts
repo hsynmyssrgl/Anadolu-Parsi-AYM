@@ -50,6 +50,18 @@ export interface IpcPolicyEnforcementBoundary {
 export const createRuntimeCorrelationId = (scope: 'ipc' | 'job' | 'startup' | 'migration'): CorrelationId =>
   asCorrelationId(`${scope}-${randomUUID()}`);
 
+export const toIpcRendererError = (error: unknown): Error => {
+  if (error instanceof Error) return error;
+  if (isAppError(error)) {
+    const rendererError = new Error(`[${error.code}] ${error.message}`);
+    rendererError.name = 'AppError';
+    return rendererError;
+  }
+  return new Error(typeof error === 'string' && error.trim()
+    ? error.trim()
+    : 'Beklenmeyen IPC hatası oluştu.');
+};
+
 export const registerCorrelatedIpcHandler = <TArguments extends unknown[], TResult>(input: {
   readonly ipcMain: IpcMain;
   readonly runtime: DesktopRuntime;
@@ -448,6 +460,8 @@ export const registerCorrelatedIpcHandler = <TArguments extends unknown[], TResu
         input.requestLifecycles.unbindEvent(event);
         requestLease.complete();
       }
+    }).catch((error: unknown) => {
+      throw toIpcRendererError(error);
     });
   });
 };

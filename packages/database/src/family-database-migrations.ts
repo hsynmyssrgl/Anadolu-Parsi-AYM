@@ -18179,7 +18179,8 @@ UPDATE database_metadata SET value='REVISION-34-K-WINDOWS-RESILIENCE-UNIVERSAL-U
 `;
 
 const COMMUNICATION_SCHEDULED_MESSAGE_SCHEMA_GENERATION = 'REVISION-34-B-SCHEDULED-MESSAGE-RELEASE' as const;
-export const FAMILY_DATABASE_SCHEMA_GENERATION = 'REVISION-PPK-RECEIPT-CLOCK-SKEW-CONTRACT' as const;
+const PLATFORM_POLICY_RECEIPT_CLOCK_SKEW_SCHEMA_GENERATION = 'REVISION-PPK-RECEIPT-CLOCK-SKEW-CONTRACT' as const;
+export const FAMILY_DATABASE_SCHEMA_GENERATION = 'REVISION-OBJECT-PERMISSION-FINITE-ALLOW-CONTRACT' as const;
 
 const bankingCatalog2026RefreshSql = `
 CREATE TABLE b4_banking_catalog_refresh_guard(
@@ -18240,6 +18241,57 @@ UPDATE database_metadata SET value='${COMMUNICATION_SCHEDULED_MESSAGE_SCHEMA_GEN
 const platformPolicyReceiptClockSkewContractSql = `
 DROP TRIGGER trg_platform_policy_receipt_insert;
 ${platformPolicyReceiptInsertTriggerSql}
+UPDATE database_metadata SET value='${PLATFORM_POLICY_RECEIPT_CLOCK_SKEW_SCHEMA_GENERATION}',
+  updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
+`;
+
+const objectPermissionFiniteAllowContractSql = `
+UPDATE object_permissions
+SET ends_at=strftime('%Y-%m-%dT%H:%M:%fZ',starts_at,'+1 second')
+WHERE effect='allow'
+  AND ends_at IS NULL
+  AND (
+    resource_type IN (
+      'event','accessibility_preferences','form_draft','privacy_ownership_center','ai_memory_record',
+      'data_rights_request','privacy_incident','identity_access_center','identity_challenge',
+      'passkey_credential','federated_identity_link','temporary_verifiable_credential',
+      'companion_sync_snapshot','location','local_ocr_job','local_ocr_result','local_ocr_settings'
+    )
+    OR (resource_type='archive_item' AND (
+      purpose IN ('general','ai_processing') OR instr(actions,'"ai_process"')>0
+    ))
+  );
+
+CREATE TRIGGER trg_object_permissions_finite_allow_insert
+BEFORE INSERT ON object_permissions
+WHEN NEW.effect='allow' AND NEW.ends_at IS NULL AND (
+  NEW.resource_type IN (
+    'event','accessibility_preferences','form_draft','privacy_ownership_center','ai_memory_record',
+    'data_rights_request','privacy_incident','identity_access_center','identity_challenge',
+    'passkey_credential','federated_identity_link','temporary_verifiable_credential',
+    'companion_sync_snapshot','location','local_ocr_job','local_ocr_result','local_ocr_settings'
+  )
+  OR (NEW.resource_type='archive_item' AND (
+    NEW.purpose IN ('general','ai_processing') OR instr(NEW.actions,'"ai_process"')>0
+  ))
+)
+BEGIN SELECT RAISE(ABORT,'policy-sensitive allow permission requires finite ends_at'); END;
+
+CREATE TRIGGER trg_object_permissions_finite_allow_update
+BEFORE UPDATE OF resource_type,actions,effect,purpose,ends_at ON object_permissions
+WHEN NEW.effect='allow' AND NEW.ends_at IS NULL AND (
+  NEW.resource_type IN (
+    'event','accessibility_preferences','form_draft','privacy_ownership_center','ai_memory_record',
+    'data_rights_request','privacy_incident','identity_access_center','identity_challenge',
+    'passkey_credential','federated_identity_link','temporary_verifiable_credential',
+    'companion_sync_snapshot','location','local_ocr_job','local_ocr_result','local_ocr_settings'
+  )
+  OR (NEW.resource_type='archive_item' AND (
+    NEW.purpose IN ('general','ai_processing') OR instr(NEW.actions,'"ai_process"')>0
+  ))
+)
+BEGIN SELECT RAISE(ABORT,'policy-sensitive allow permission requires finite ends_at'); END;
+
 UPDATE database_metadata SET value='${FAMILY_DATABASE_SCHEMA_GENERATION}',
   updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
 `;
@@ -18362,7 +18414,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(115, 'windows_resilience_universal_ux', windowsResilienceUniversalUxSql),
   createMigrationDefinition(116, 'b4_banking_catalog_2026_refresh', bankingCatalog2026RefreshSql),
   createMigrationDefinition(117, 'communication_scheduled_message_release', communicationScheduledMessageReleaseSql),
-  createMigrationDefinition(118, 'platform_policy_receipt_clock_skew_contract', platformPolicyReceiptClockSkewContractSql)
+  createMigrationDefinition(118, 'platform_policy_receipt_clock_skew_contract', platformPolicyReceiptClockSkewContractSql),
+  createMigrationDefinition(119, 'object_permission_finite_allow_contract', objectPermissionFiniteAllowContractSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

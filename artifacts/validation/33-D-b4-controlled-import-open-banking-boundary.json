@@ -171,7 +171,7 @@
     }
   ],
   "failures": [],
-  "latestDatabaseMigration": 118,
+  "latestDatabaseMigration": 119,
   "importTables": 2,
   "persistedImportColumns": 42,
   "prohibitedPersistedColumns": 0,
@@ -183,5 +183,5 @@
   "ppk021ExactAllowlistEntries": 896,
   "ppk021UseCaseCompositionSurfaces": 435,
   "ppk022CapabilitySurfaces": 447,
-  "generatedAt": "2026-08-22T20:44:14.224Z"
+  "generatedAt": "2026-08-22T21:25:02.828Z"
 }

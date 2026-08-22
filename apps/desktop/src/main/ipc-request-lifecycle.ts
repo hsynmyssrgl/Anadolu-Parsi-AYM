@@ -53,9 +53,6 @@ const readLatestWinsChannels = new Set<string>([
   'data:getSnapshot',
   'data:getSnapshotSections',
   'dashboard:getOverview',
-  'catalog:listPeople',
-  'catalog:listEvents',
-  'catalog:lookup',
   'largeData:tree',
   'largeData:timeline',
   'largeData:archive',
@@ -64,6 +61,11 @@ const readLatestWinsChannels = new Set<string>([
   'archive:search',
   'unifiedSearch:search',
   'timeline:listArchived'
+]);
+const concurrentCatalogReadChannels = new Set<string>([
+  'catalog:listPeople',
+  'catalog:listEvents',
+  'catalog:lookup'
 ]);
 const formDraftReadChannels = new Set<string>([
   'formDraft:getWorkspace'
@@ -347,6 +349,9 @@ export const resolveIpcRequestLifecyclePolicy = (channel: string): IpcRequestLif
   }
   if (readLatestWinsChannels.has(channel)) {
     return Object.freeze({ cancellable: true, latestWins: true, timeoutMs: 30_000 });
+  }
+  if (concurrentCatalogReadChannels.has(channel)) {
+    return Object.freeze({ cancellable: true, latestWins: false, timeoutMs: 30_000 });
   }
   if (cancellableNetworkChannels.has(channel)) {
     return Object.freeze({ cancellable: true, latestWins: true, timeoutMs: 45_000 });

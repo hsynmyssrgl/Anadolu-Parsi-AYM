@@ -159,10 +159,10 @@
     }
   ],
   "failures": [],
-  "latestDatabaseMigration": 118,
+  "latestDatabaseMigration": 119,
   "ppk021ExactAllowlistEntries": 896,
   "ppk022CapabilitySurfaces": 447,
   "prohibitedSecretColumns": 0,
   "bankExecutionPerformed": false,
-  "generatedAt": "2026-08-22T20:43:55.119Z"
+  "generatedAt": "2026-08-22T21:24:43.380Z"
 }
