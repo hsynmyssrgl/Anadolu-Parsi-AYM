@@ -64,6 +64,9 @@ describe('Ilk acilis deneyimi',()=>{
     const guard=main.slice(guardStart,guardStart+2_500);
     expect(guard).toContain("guardAction === 'defer_untrusted'");
     expect(guard.indexOf("guardAction === 'defer_untrusted'")).toBeLessThan(guard.indexOf('universalApiPolicyEnforcement().execute'));
+    expect(guard).toContain('const locked = current.lockSession()');
+    expect(guard.indexOf('const locked = current.lockSession()')).toBeLessThan(guard.indexOf("locked.status !== 'locked'"));
+    expect(guard.indexOf("locked.status !== 'locked'")).toBeLessThan(guard.indexOf('sealUserDataSession()',guard.indexOf("locked.status !== 'locked'")));
     expect(main).toContain('registerClientApplicationServiceChannel(VAULT_SESSION_CHECKPOINT_CHANNEL)');
   });
 

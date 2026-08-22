@@ -69,6 +69,34 @@ class MonotonicAuthority {
   }
 }
 
+class DelayedMonotonicAuthority {
+  readonly acceptedSequences: number[] = [];
+  #sequence = 0;
+  #headHash = '0'.repeat(64);
+  #sizeBytes = 0;
+
+  public async checkpointPolicyJournal(input: { journalSequence: number; journalHeadHash: string; journalSizeBytes: number }) {
+    if (input.journalSequence === 1) await new Promise((resolve) => setTimeout(resolve, 25));
+    if (input.journalSequence < this.#sequence) throw new Error('PPK018_ROLLBACK');
+    if (input.journalSequence === this.#sequence && (
+      input.journalHeadHash !== this.#headHash || input.journalSizeBytes !== this.#sizeBytes
+    )) throw new Error('PPK018_EQUIVOCATION');
+    this.#sequence = input.journalSequence;
+    this.#headHash = input.journalHeadHash;
+    this.#sizeBytes = input.journalSizeBytes;
+    this.acceptedSequences.push(input.journalSequence);
+    return Object.freeze({
+      schemaVersion: 1 as const,
+      authorityEpoch: Math.max(1, this.#sequence),
+      journalSequence: this.#sequence,
+      journalHeadHash: this.#headHash,
+      journalSizeBytes: this.#sizeBytes,
+      checkpointHash: createHash('sha256').update(JSON.stringify(input)).digest('hex'),
+      acceptedAt: NOW
+    });
+  }
+}
+
 const kernel = (): PlatformPolicyKernel => new PlatformPolicyKernel({
   policyVersion: 'PPK-018-V1',
   signingKey: Buffer.alloc(32, 18),
@@ -135,7 +163,10 @@ const captureRecord = async (allowed: boolean, nonce: string): Promise<PlatformP
   return captured;
 };
 
-const createSink = (directory: string) => {
+const createSink = (
+  directory: string,
+  monotonicAuthority: ConstructorParameters<typeof PlatformPolicyReceiptFileSink>[0]['monotonicAuthority'] = new MonotonicAuthority()
+) => {
   const store = new ProtectedSideArtifactStore({
     keyPath: join(directory, 'secrets', 'data-key.json'),
     applicationVersion: '4.8.2026-29',
@@ -147,7 +178,7 @@ const createSink = (directory: string) => {
     macKeyPath: join(directory, 'secrets', 'audit-mac-key.json'),
     macKeyProtector: protector,
     protectedArtifactStore: store,
-    monotonicAuthority: new MonotonicAuthority()
+    monotonicAuthority
   });
   return { sink, store, journalPath: join(directory, 'data', 'policy-decisions.pptjournal') };
 };
@@ -242,6 +273,23 @@ describe('PPK-018 değişmez policy karar audit zinciri', () => {
       } finally {
         plaintext.fill(0);
       }
+    } finally {
+      sink.dispose();
+      store.dispose();
+    }
+  });
+
+  it('es zamanli makbuz checkpointlerini Core Service otoritesine journal sirasiyla iletir', async () => {
+    const directory = mkdtempSync(join(tmpdir(), 'ppk018-audit-concurrent-'));
+    temporaryDirectories.push(directory);
+    const monotonicAuthority = new DelayedMonotonicAuthority();
+    const { sink, store } = createSink(directory, monotonicAuthority);
+    try {
+      const first = await captureRecord(true, 'nonce-018-concurrent-first');
+      const second = await captureRecord(false, 'nonce-018-concurrent-second');
+      await expect(Promise.all([sink.append(first), sink.append(second)])).resolves.toEqual([undefined, undefined]);
+      expect(monotonicAuthority.acceptedSequences).toEqual([1, 2]);
+      expect(sink.inspectForControlledTest()).toMatchObject({ valid: true, entryCount: 2 });
     } finally {
       sink.dispose();
       store.dispose();

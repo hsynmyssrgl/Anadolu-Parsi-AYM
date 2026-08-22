@@ -1150,7 +1150,12 @@ function startVaultSessionGuard(): void {
         outcome: 'failure',
         metadata: { errorName: error instanceof Error ? error.name : typeof error }
       });
-      sealUserDataSession();
+      try {
+        const locked = current.lockSession();
+        if (locked.status !== 'locked') sealUserDataSession();
+      } catch {
+        sealUserDataSession();
+      }
     });
   }, 15_000);
 }

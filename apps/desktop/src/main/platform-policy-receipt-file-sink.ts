@@ -460,6 +460,7 @@ export class PlatformPolicyReceiptFileSink implements PlatformPolicyReceiptSink 
   readonly #protectedArtifactStore: ProtectedSideArtifactStore;
   readonly #maxJournalBytes: number;
   readonly #monotonicAuthority: PlatformPolicyReceiptFileSinkOptions['monotonicAuthority'];
+  #checkpointTail: Promise<void> = Promise.resolve();
   #disposed = false;
 
   public constructor(options: PlatformPolicyReceiptFileSinkOptions) {
@@ -828,6 +829,15 @@ export class PlatformPolicyReceiptFileSink implements PlatformPolicyReceiptSink 
   }
 
   async #checkpoint(journalSequence: number, journalHeadHash: string, journalSizeBytes: number): Promise<void> {
+    const checkpoint = this.#checkpointTail.then(
+      () => this.#checkpointNow(journalSequence, journalHeadHash, journalSizeBytes),
+      () => this.#checkpointNow(journalSequence, journalHeadHash, journalSizeBytes)
+    );
+    this.#checkpointTail = checkpoint.catch(() => undefined);
+    await checkpoint;
+  }
+
+  async #checkpointNow(journalSequence: number, journalHeadHash: string, journalSizeBytes: number): Promise<void> {
     let result: PolicyJournalCheckpointContractResult;
     try {
       result = await this.#monotonicAuthority.checkpointPolicyJournal({
