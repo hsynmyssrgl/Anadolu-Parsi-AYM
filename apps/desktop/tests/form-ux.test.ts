@@ -92,12 +92,15 @@ describe('33-N renderer form UX', () => {
     }
   });
 
-  it('taslak merkezini oturum boyunca mounted tutar ve ağ sinyalini yerel yazma kapısı yapmaz', () => {
+  it('taslak merkezini ilk Ayarlar ziyaretinde başlatır, sonra oturum boyunca mounted tutar ve ağ sinyalini yerel yazma kapısı yapmaz', () => {
     const appSource = readFileSync(new URL('../src/renderer/App.tsx', import.meta.url), 'utf8');
     const centerStart = appSource.indexOf('function GovernedFormDraftCenter');
     const centerEnd = appSource.indexOf('function SystemManagementScreen', centerStart);
     const centerSource = appSource.slice(centerStart, centerEnd);
     expect(appSource).toContain('data-session-draft-host="workspace.notes"');
+    expect(appSource).toContain("if(auth.authenticated&&active==='settings')setDraftCenterActivated(true);");
+    expect(appSource).toContain('draftCenterActivated&&<div data-session-draft-host="workspace.notes"');
+    expect(appSource).toContain('setDraftCenterActivated(false);');
     expect(appSource).toContain('<GovernedFormDraftCenter visible={active===\'settings\'}/>');
     expect(centerSource).toContain("leavingVisibleRoute&&draft.state.phase==='dirty'");
     expect(centerSource).toContain('expectedRevision:operation.expectedRevision');

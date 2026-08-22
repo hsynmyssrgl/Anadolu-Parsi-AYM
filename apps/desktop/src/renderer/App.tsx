@@ -2800,6 +2800,7 @@ export function App() {
   const [navigation, dispatchNavigation] = useReducer(navigationReducer, undefined, () => readNavigationState('dashboard', navItems.map((item) => item.id)));
   const active = navigation.active as ScreenId;
   const setActive = (id: ScreenId) => dispatchNavigation({ type: 'navigate', screen: id });
+  const [draftCenterActivated,setDraftCenterActivated]=useState(active==='settings');
   const [snapshot, setSnapshot] = useState<FamilyAppSnapshot>(fallbackSnapshot);
   const [dashboardOverview, setDashboardOverview] = useState<DashboardOverviewView>(() => fallbackDashboardOverview(fallbackSnapshot));
   const [householdWorkspace,setHouseholdWorkspace]=useState<HouseholdMembershipWorkspaceView>({households:[],branches:[],memberships:[]});
@@ -3171,6 +3172,10 @@ export function App() {
     void run();return()=>{cancelled=true;};
   },[active,auth.authenticated,loading,screenLoadRevision]);
 
+  useEffect(()=>{
+    if(auth.authenticated&&active==='settings')setDraftCenterActivated(true);
+  },[active,auth.authenticated]);
+
   useEffect(()=>{if(notificationOpen&&auth.authenticated&&!loadedSnapshotSectionsRef.current.has('timeline'))void ensureSnapshotSection('timeline').catch(error=>setScreenDataError(error instanceof Error?error.message:'Bildirimler yüklenemedi.'));},[notificationOpen,auth.authenticated]);
 
   const localizedNavItems = useMemo(() => navItems.map((item)=>({...item,label:localizeNavigationLabel(item.id,item.label)})), [language]);
@@ -3227,6 +3232,7 @@ export function App() {
       setArchivedEvents([]);
       setDashboardOverview(fallbackDashboardOverview(fallbackSnapshot));
       setActive('dashboard');
+      setDraftCenterActivated(false);
     });
   };
   const continueSession=async()=>{if(window.pardus)setSessionLock(await window.pardus.recordSessionActivity());};
@@ -3456,9 +3462,9 @@ export function App() {
           </div>
         </header>
         <div className="page-content">
-          <div data-session-draft-host="workspace.notes" hidden={active!=='settings'}>
+          {draftCenterActivated&&<div data-session-draft-host="workspace.notes" hidden={active!=='settings'}>
             <GovernedFormDraftCenter visible={active==='settings'}/>
-          </div>
+          </div>}
           {!networkOnline&&<AsyncStatePanel state={routeOfflineState.panelState} title={routeOfflineState.title} message={routeOfflineState.message} retryLabel="Yeniden dene" retryFocusTarget={mainContentRef} onRetry={async()=>{setNetworkOnline(globalThis.navigator?.onLine!==false);}}/>}
           {loading
             ? <AsyncStatePanel state="loading" title="Aile verileri hazırlanıyor" message="Yetkili kişisel çalışma alanı ve ekran durumu yükleniyor."/>
