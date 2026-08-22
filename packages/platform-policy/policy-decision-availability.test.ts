@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   PlatformPolicyEnforcementPoint,
   PlatformPolicyKernel,
+  PLATFORM_POLICY_PROVIDER_CLOCK_SKEW_TOLERANCE_MS,
   type PlatformPolicyAuthorizationProvider,
   type PlatformPolicyAuthorityResolver,
   type PlatformPolicyReceiptSink,
@@ -199,10 +200,13 @@ describe('31-Y PPK-003 bounded default-deny policy decision availability', () =>
       }),
       verify:({request,receipt})=>signingKernel.verifyReceiptForRequest(receipt,request)
     });
-    await expect(createHarness({provider:withReceiptSkew(1)}).execute(
+    await expect(createHarness({provider:withReceiptSkew(-PLATFORM_POLICY_PROVIDER_CLOCK_SKEW_TOLERANCE_MS)}).execute(
       intent,()=>({writable:true,epoch:31}),()=> 'authorized-with-bounded-skew'
     )).resolves.toBe('authorized-with-bounded-skew');
-    await expect(createHarness({provider:withReceiptSkew(5_001)}).execute(
+    await expect(createHarness({provider:withReceiptSkew(-(PLATFORM_POLICY_PROVIDER_CLOCK_SKEW_TOLERANCE_MS+1))}).execute(
+      intent,()=>({writable:true,epoch:31}),()=> 'must-not-run'
+    )).rejects.toMatchObject({code:'RECEIPT_VERIFICATION_FAILED'});
+    await expect(createHarness({provider:withReceiptSkew(PLATFORM_POLICY_PROVIDER_CLOCK_SKEW_TOLERANCE_MS+1)}).execute(
       intent,()=>({writable:true,epoch:31}),()=> 'must-not-run'
     )).rejects.toMatchObject({code:'RECEIPT_VERIFICATION_FAILED'});
   });

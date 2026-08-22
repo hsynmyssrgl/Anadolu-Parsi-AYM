@@ -2174,6 +2174,55 @@ SET value='REVISION-30-K-B2-01-WINDOWS-HELLO-FOUNDATION',
 WHERE key='schema_generation';
 `;
 
+export const PLATFORM_POLICY_RECEIPT_CLOCK_SKEW_TOLERANCE_MS = 5_000 as const;
+
+const platformPolicyReceiptInsertTriggerSql = `CREATE TRIGGER trg_platform_policy_receipt_insert
+BEFORE INSERT ON platform_policy_transaction_receipts
+WHEN NOT EXISTS(
+    SELECT 1 FROM platform_policy_database_fences fence
+    WHERE fence.fence_name=NEW.fence_name
+      AND fence.epoch=NEW.fence_epoch
+      AND fence.writable=NEW.fence_writable
+  )
+  OR julianday(NEW.issued_at) IS NULL
+  OR julianday(NEW.recorded_at) IS NULL
+  OR julianday(NEW.recorded_at)<julianday(NEW.issued_at)
+  OR NOT EXISTS(
+    SELECT 1 FROM platform_policy_replay_reservations reservation
+    WHERE reservation.nonce=NEW.nonce
+      AND reservation.reserved_at_ms<=((julianday(NEW.issued_at)-2440587.5)*86400000.0)+${PLATFORM_POLICY_RECEIPT_CLOCK_SKEW_TOLERANCE_MS}.0
+      AND reservation.reserved_at_ms<=((julianday(NEW.recorded_at)-2440587.5)*86400000.0)+${PLATFORM_POLICY_RECEIPT_CLOCK_SKEW_TOLERANCE_MS}.0
+      AND reservation.expires_at_ms>=((julianday(NEW.recorded_at)-2440587.5)*86400000.0)-1.0
+  )
+  OR json_extract(NEW.record_json,'$.correlationId') IS NOT NEW.correlation_id
+  OR json_extract(NEW.record_json,'$.resourceType') IS NOT NEW.resource_type
+  OR json_extract(NEW.record_json,'$.resourceId') IS NOT NEW.resource_id
+  OR json_extract(NEW.record_json,'$.action') IS NOT NEW.action
+  OR json_extract(NEW.record_json,'$.capability') IS NOT NEW.capability
+  OR json_extract(NEW.record_json,'$.recordedAt') IS NOT NEW.recorded_at
+  OR json_extract(NEW.record_json,'$.receipt.receiptVersion') IS NOT NEW.receipt_version
+  OR json_extract(NEW.record_json,'$.receipt.requestHash') IS NOT NEW.request_hash
+  OR json_extract(NEW.record_json,'$.receipt.nonce') IS NOT NEW.nonce
+  OR json_extract(NEW.record_json,'$.receipt.issuedAt') IS NOT NEW.issued_at
+  OR json_extract(NEW.record_json,'$.receipt.decision.policyVersion') IS NOT NEW.policy_version
+  OR json_extract(NEW.record_json,'$.decision.policyVersion') IS NOT NEW.policy_version
+  OR json_extract(NEW.record_json,'$.decision.allowed') IS NOT 1
+  OR json_extract(NEW.record_json,'$.receipt.decision.allowed') IS NOT 1
+  OR json_extract(NEW.record_json,'$.request.correlationId') IS NOT NEW.correlation_id
+  OR json_extract(NEW.record_json,'$.request.policyVersion') IS NOT NEW.policy_version
+  OR json_extract(NEW.record_json,'$.request.resource.type') IS NOT NEW.resource_type
+  OR json_extract(NEW.record_json,'$.request.resource.id') IS NOT NEW.resource_id
+  OR json_extract(NEW.record_json,'$.request.action') IS NOT NEW.action
+  OR json_extract(NEW.record_json,'$.request.capability') IS NOT NEW.capability
+  OR json_extract(NEW.record_json,'$.request.clusterWritable') IS NOT NEW.fence_writable
+  OR json_extract(NEW.record_json,'$.request.enforcementMode') IS NOT 'strict'
+  OR json_type(NEW.record_json,'$.receipt.signature') IS NOT 'text'
+  OR length(json_extract(NEW.record_json,'$.receipt.signature'))<>64
+  OR json_extract(NEW.record_json,'$.receipt.signature') GLOB '*[^0-9a-f]*'
+BEGIN
+  SELECT RAISE(ABORT,'platform policy receipt, context or database fence mismatch');
+END;`;
+
 const durablePlatformPolicyTransactionsSql = `CREATE TABLE platform_policy_replay_reservations (
   nonce TEXT PRIMARY KEY CHECK(length(trim(nonce)) BETWEEN 1 AND 256),
   reserved_at_ms INTEGER NOT NULL CHECK(reserved_at_ms>=0),
@@ -2273,52 +2322,7 @@ BEGIN
   SELECT RAISE(ABORT,'consumed platform policy replay reservation is immutable');
 END;
 
-CREATE TRIGGER trg_platform_policy_receipt_insert
-BEFORE INSERT ON platform_policy_transaction_receipts
-WHEN NOT EXISTS(
-    SELECT 1 FROM platform_policy_database_fences fence
-    WHERE fence.fence_name=NEW.fence_name
-      AND fence.epoch=NEW.fence_epoch
-      AND fence.writable=NEW.fence_writable
-  )
-  OR julianday(NEW.issued_at) IS NULL
-  OR julianday(NEW.recorded_at) IS NULL
-  OR julianday(NEW.recorded_at)<julianday(NEW.issued_at)
-  OR NOT EXISTS(
-    SELECT 1 FROM platform_policy_replay_reservations reservation
-    WHERE reservation.nonce=NEW.nonce
-      AND reservation.reserved_at_ms<=((julianday(NEW.issued_at)-2440587.5)*86400000.0)+1.0
-      AND reservation.reserved_at_ms<=((julianday(NEW.recorded_at)-2440587.5)*86400000.0)+1.0
-      AND reservation.expires_at_ms>=((julianday(NEW.recorded_at)-2440587.5)*86400000.0)-1.0
-  )
-  OR json_extract(NEW.record_json,'$.correlationId') IS NOT NEW.correlation_id
-  OR json_extract(NEW.record_json,'$.resourceType') IS NOT NEW.resource_type
-  OR json_extract(NEW.record_json,'$.resourceId') IS NOT NEW.resource_id
-  OR json_extract(NEW.record_json,'$.action') IS NOT NEW.action
-  OR json_extract(NEW.record_json,'$.capability') IS NOT NEW.capability
-  OR json_extract(NEW.record_json,'$.recordedAt') IS NOT NEW.recorded_at
-  OR json_extract(NEW.record_json,'$.receipt.receiptVersion') IS NOT NEW.receipt_version
-  OR json_extract(NEW.record_json,'$.receipt.requestHash') IS NOT NEW.request_hash
-  OR json_extract(NEW.record_json,'$.receipt.nonce') IS NOT NEW.nonce
-  OR json_extract(NEW.record_json,'$.receipt.issuedAt') IS NOT NEW.issued_at
-  OR json_extract(NEW.record_json,'$.receipt.decision.policyVersion') IS NOT NEW.policy_version
-  OR json_extract(NEW.record_json,'$.decision.policyVersion') IS NOT NEW.policy_version
-  OR json_extract(NEW.record_json,'$.decision.allowed') IS NOT 1
-  OR json_extract(NEW.record_json,'$.receipt.decision.allowed') IS NOT 1
-  OR json_extract(NEW.record_json,'$.request.correlationId') IS NOT NEW.correlation_id
-  OR json_extract(NEW.record_json,'$.request.policyVersion') IS NOT NEW.policy_version
-  OR json_extract(NEW.record_json,'$.request.resource.type') IS NOT NEW.resource_type
-  OR json_extract(NEW.record_json,'$.request.resource.id') IS NOT NEW.resource_id
-  OR json_extract(NEW.record_json,'$.request.action') IS NOT NEW.action
-  OR json_extract(NEW.record_json,'$.request.capability') IS NOT NEW.capability
-  OR json_extract(NEW.record_json,'$.request.clusterWritable') IS NOT NEW.fence_writable
-  OR json_extract(NEW.record_json,'$.request.enforcementMode') IS NOT 'strict'
-  OR json_type(NEW.record_json,'$.receipt.signature') IS NOT 'text'
-  OR length(json_extract(NEW.record_json,'$.receipt.signature'))<>64
-  OR json_extract(NEW.record_json,'$.receipt.signature') GLOB '*[^0-9a-f]*'
-BEGIN
-  SELECT RAISE(ABORT,'platform policy receipt, context or database fence mismatch');
-END;
+${platformPolicyReceiptInsertTriggerSql}
 
 CREATE TRIGGER trg_platform_policy_receipt_update
 BEFORE UPDATE ON platform_policy_transaction_receipts
@@ -18174,7 +18178,8 @@ UPDATE database_metadata SET value='REVISION-34-K-WINDOWS-RESILIENCE-UNIVERSAL-U
   updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
 `;
 
-export const FAMILY_DATABASE_SCHEMA_GENERATION = 'REVISION-34-B-SCHEDULED-MESSAGE-RELEASE' as const;
+const COMMUNICATION_SCHEDULED_MESSAGE_SCHEMA_GENERATION = 'REVISION-34-B-SCHEDULED-MESSAGE-RELEASE' as const;
+export const FAMILY_DATABASE_SCHEMA_GENERATION = 'REVISION-PPK-RECEIPT-CLOCK-SKEW-CONTRACT' as const;
 
 const bankingCatalog2026RefreshSql = `
 CREATE TABLE b4_banking_catalog_refresh_guard(
@@ -18228,6 +18233,13 @@ WHEN NEW.id<>OLD.id OR NEW.family_id<>OLD.family_id OR NEW.owner_person_id<>OLD.
             AND NEW.scheduled_at=OLD.scheduled_at AND julianday(NEW.updated_at)>=julianday(OLD.scheduled_at)))))
   )
 BEGIN SELECT RAISE(ABORT,'34-B message update requires exact immutable identity, transition and mutation'); END;
+UPDATE database_metadata SET value='${COMMUNICATION_SCHEDULED_MESSAGE_SCHEMA_GENERATION}',
+  updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
+`;
+
+const platformPolicyReceiptClockSkewContractSql = `
+DROP TRIGGER trg_platform_policy_receipt_insert;
+${platformPolicyReceiptInsertTriggerSql}
 UPDATE database_metadata SET value='${FAMILY_DATABASE_SCHEMA_GENERATION}',
   updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
 `;
@@ -18349,7 +18361,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(114, 'distributed_clients_operations_disaster_recovery', distributedClientOperationsSql),
   createMigrationDefinition(115, 'windows_resilience_universal_ux', windowsResilienceUniversalUxSql),
   createMigrationDefinition(116, 'b4_banking_catalog_2026_refresh', bankingCatalog2026RefreshSql),
-  createMigrationDefinition(117, 'communication_scheduled_message_release', communicationScheduledMessageReleaseSql)
+  createMigrationDefinition(117, 'communication_scheduled_message_release', communicationScheduledMessageReleaseSql),
+  createMigrationDefinition(118, 'platform_policy_receipt_clock_skew_contract', platformPolicyReceiptClockSkewContractSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

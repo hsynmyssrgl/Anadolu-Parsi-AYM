@@ -32,7 +32,7 @@ import {
 // The desktop and Core Service use independent process clocks. A narrowly
 // bounded skew prevents a valid signed receipt from being rejected for a
 // millisecond-scale scheduling difference while preserving fail-closed expiry.
-const PROVIDER_CLOCK_SKEW_TOLERANCE_MS = 5_000;
+export const PLATFORM_POLICY_PROVIDER_CLOCK_SKEW_TOLERANCE_MS = 5_000 as const;
 
 export interface PlatformPolicyIntent {
   readonly correlationId: string;
@@ -961,8 +961,8 @@ export class PlatformPolicyEnforcementPoint {
     const providerReturnedAtMs = parseTimestamp(this.#clock());
     if (
       !Number.isFinite(receiptIssuedAtMs) || !Number.isFinite(providerReturnedAtMs) ||
-      receiptIssuedAtMs < issuedAtMs - PROVIDER_CLOCK_SKEW_TOLERANCE_MS
-      || receiptIssuedAtMs > providerReturnedAtMs + PROVIDER_CLOCK_SKEW_TOLERANCE_MS ||
+      receiptIssuedAtMs < issuedAtMs - PLATFORM_POLICY_PROVIDER_CLOCK_SKEW_TOLERANCE_MS
+      || receiptIssuedAtMs > providerReturnedAtMs + PLATFORM_POLICY_PROVIDER_CLOCK_SKEW_TOLERANCE_MS ||
       receiptIssuedAtMs - issuedAtMs > this.#receiptTtlMs ||
       (this.#kernel !== undefined && receiptIssuedAtMs !== issuedAtMs)
     ) {
@@ -1055,7 +1055,7 @@ export class PlatformPolicyEnforcementPoint {
     }
     const executionStartedAtMs = parseTimestamp(this.#clock());
     if (!Number.isFinite(executionStartedAtMs)
-      || executionStartedAtMs + PROVIDER_CLOCK_SKEW_TOLERANCE_MS < receiptIssuedAtMs
+      || executionStartedAtMs + PLATFORM_POLICY_PROVIDER_CLOCK_SKEW_TOLERANCE_MS < receiptIssuedAtMs
       || executionStartedAtMs > effectiveExpiresAtMs) {
       throw new PlatformPolicyEnforcementError('RECEIPT_EXPIRED', 'Policy receipt expired before transaction execution', {
         decision: authorization.decision,

@@ -19,11 +19,16 @@ import {
 import {
   PlatformPolicyEnforcementPoint,
   PlatformPolicyKernel,
+  PLATFORM_POLICY_PROVIDER_CLOCK_SKEW_TOLERANCE_MS,
   type PlatformPolicyJournalProjectionProof,
   type PlatformPolicyReceiptRecord,
   type PlatformPolicyReceiptSink,
   type PlatformPolicyTransactionContext
 } from '@ppt/platform-policy';
+import {
+  FAMILY_DATABASE_MIGRATIONS,
+  PLATFORM_POLICY_RECEIPT_CLOCK_SKEW_TOLERANCE_MS
+} from '@ppt/database';
 import type {
   PolicyAuthorizedRepositoryExecutionContext,
   RepositoryExecutionContext,
@@ -657,6 +662,25 @@ describe('30-P durable archive policy transaction', () => {
       candidate.action, candidate.capability, candidate.fence_name, candidate.fence_epoch,
       candidate.fence_writable, candidate.issued_at, candidate.recorded_at, candidate.record_json
     );
+
+    expect(PLATFORM_POLICY_RECEIPT_CLOCK_SKEW_TOLERANCE_MS)
+      .toBe(PLATFORM_POLICY_PROVIDER_CLOCK_SKEW_TOLERANCE_MS);
+    const clockSkewMigration = FAMILY_DATABASE_MIGRATIONS.find(({ version }) => version === 118);
+    expect(clockSkewMigration).toMatchObject({ name: 'platform_policy_receipt_clock_skew_contract' });
+    expect(clockSkewMigration?.sql).toContain('DROP TRIGGER trg_platform_policy_receipt_insert');
+
+    harness.runtime.database.prepare(`
+      INSERT INTO platform_policy_replay_reservations(nonce,reserved_at_ms,expires_at_ms)
+      VALUES(?,?,?)
+    `).run('nonce-30p-direct-bounded-skew', Date.parse(NOW) + 4_999, Date.parse(NOW) + 60_000);
+    expect(() => executeInsert(makeCandidate('bounded-skew'))).not.toThrow();
+
+    harness.runtime.database.prepare(`
+      INSERT INTO platform_policy_replay_reservations(nonce,reserved_at_ms,expires_at_ms)
+      VALUES(?,?,?)
+    `).run('nonce-30p-direct-excessive-skew', Date.parse(NOW) + 5_001, Date.parse(NOW) + 60_000);
+    expect(() => executeInsert(makeCandidate('excessive-skew')))
+      .toThrow(/platform policy receipt, context or database fence mismatch/u);
 
     const missingClassification = makeCandidate('missing-classification');
     expect(() => harness.runtime.database.prepare(`
