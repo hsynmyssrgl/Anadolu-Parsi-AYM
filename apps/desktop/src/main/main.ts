@@ -1423,7 +1423,7 @@ function registerPreparedIpcHandler<TArguments extends unknown[], TResult>(
     adaptiveBudget: ipcAdaptiveResourceBudget,
     policyEnforcement,
     prepareOperation,
-    handler: () => {
+    handler: (_event: IpcMainInvokeEvent, ..._args: TArguments): TResult => {
       throw new Error('IPC_PREPARED_OPERATION_MISSING');
     }
   });
