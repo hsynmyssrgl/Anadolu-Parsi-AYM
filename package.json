@@ -1,6 +1,6 @@
 {
   "name": "parsyuva-aile-yasam-merkezi-family-platform",
-  "version": "22.8.2026-45",
+  "version": "22.8.2026-46",
   "private": true,
   "type": "module",
   "packageManager": "npm@10.9.2",
@@ -45,6 +45,7 @@
     "verify:migrations": "tsc -p tests/smoke/tsconfig.data-store.json && node scripts/verify-database-migrations.mjs",
     "verify:version": "node scripts/verify-monthly-release-contract.mjs",
     "installer:clean-stale": "node scripts/clean-stale-windows-installers.mjs",
+    "installer:clean-stale:external": "node scripts/clean-stale-external-windows-installer.mjs",
     "installer:verify-retention": "node scripts/verify-windows-installer-retention-policy.mjs",
     "verify:user-visible-release-display": "node scripts/verify-user-visible-release-display-policy.mjs",
     "rules:check": "node scripts/verify-operation-rule-check.mjs",

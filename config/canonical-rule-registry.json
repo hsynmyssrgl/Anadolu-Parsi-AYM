@@ -1,17 +1,17 @@
 {
   "schemaVersion": 1,
-  "id": "PPT-CANONICAL-RULE-REGISTRY-V20",
+  "id": "PPT-CANONICAL-RULE-REGISTRY-V21",
   "product": "ParsYuva Aile Yaşam Merkezi",
   "upperBrand": "ParsYuva",
-  "effectiveRelease": "Bronze 22.08.2026.45",
+  "effectiveRelease": "Bronze 22.08.2026.46",
   "exceptionless": true,
   "previousRuleSet": {
     "version": "PROJECT-RULES-2026-08-02-V6",
     "sha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
   },
-  "ruleCount": 232,
+  "ruleCount": 233,
   "activeRuleCount": 211,
-  "supersededRuleCount": 21,
+  "supersededRuleCount": 22,
   "rules": [
     {
       "id": "PR-001",
@@ -1654,10 +1654,18 @@
     {
       "id": "PR-232",
       "text": "Özel Windows kurulum karşılama yüzeyi, ilk aile oluşturma ekranı ve temiz paket teslim zinciri tek bağlayıcı kabul kapsamıdır. Kurulum sayfası ParsYuva marka/paletini kullanır; dekoratif hareket gerçek ilerleme gibi gösterilemez. İlk aile ekranı 900x640 görünümde yatay taşmadan çalışır, üç pars ailesi hareket azaltma tercihine uyar, pencere ve tepsi simgeleri küçük yüzeyde seçilir. Türkçe ve İngilizce anlatımda aynı dilde kadın sesi önceliklidir; bulunamazsa aynı dilde erkek ses yedeği kullanılır ve ses çıkışı doğrulanmadan duyuldu iddiası kurulamaz. Güncelleme kişisel veriyi korur ve yıkıcı kaldırma seçimini açmaz. Teslimden önce tüm çalışma alanları sıfırdan derlenir, eski installer artefaktları silinir, paketlenmiş gerçek uygulama sürümü ve açılışı sınanır, SHA-256 ile imza durumu kaydedilir; kesin kaynak commit’i GitHub ve haricî Git yedeğine gönderilip haricî disk kaynak arşivi geri-okumayla doğrulanmadan paket teslimi tamamlanmış sayılamaz.",
-      "state": "ACTIVE",
+      "state": "SUPERSEDED",
       "source": "USER_DECISION_DEC-266",
-      "effectiveRelease": "Bronze 22.08.2026.45"
+      "effectiveRelease": "Bronze 22.08.2026.45",
+      "replacedBy": "PR-233"
+    },
+    {
+      "id": "PR-233",
+      "text": "Özel Windows kurulum karşılama yüzeyi, ilk kullanıcı ve aile oluşturma ekranının sakin görsel diliyle üç gerçek tanıtım adımı arasında geçiş yapar; bu bilgi geçişi kurulum ilerlemesi değildir, yüzde veya sahte ilerleme çubuğu gösteremez ve gerçek dosya kurulumu yalnız NSIS yerel ilerlemesiyle sunulur. Kurulum anlatımı Türkçe ve İngilizcede aynı dilde kadın sesi önceliğiyle, bulunamazsa aynı dilde erkek veya kurulu ilk ses yedeğiyle çalışır; görünür metin her zaman asıl kaynaktır. İlk aile ve güvenlik yüzeyleri 900x640 görünümde yatay taşmadan, eski tek pars marka görseliyle ve hareket azaltma tercihiyle çalışır. Oturum kilidi açık ilk kurulum veri kasasını yok edemez; yeniden doğrulama yolu kasayı kullanılabilir tutar ve ilk aile oluşturulduktan sonra iki aşamalı doğrulama başlatma çağrısı kilitli kasa hatası veremez. Güncelleme kişisel veriyi korur; eski installer setleri silinir; temiz tam derleme, paketli sürüm/açılış, SHA-256/imza kaydı, GitHub ve haricî Git eşitliği ile geri-okumalı haricî kaynak arşivi tamamlanmadan paket teslimi kabul edilemez.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-267",
+      "effectiveRelease": "Bronze 22.08.2026.46"
     }
   ],
-  "rulesSha256": "a11d80649bc74759371fe68f7f5b8c0ab12c1cd6a9e77e09c7e96a9a3a7e068b"
+  "rulesSha256": "2fea36f41b4b1f809defed5adb9eb274c6e0eaf35ce4d272a05eee304a730fe0"
 }

@@ -1,11 +1,11 @@
 # Kanonik Kural Sicili
 
-- Görünür sürüm: **Bronze 22.08.2026.45**
-- Sicil kimliği: `PPT-CANONICAL-RULE-REGISTRY-V20`
-- Toplam kural: **232**
+- Görünür sürüm: **Bronze 22.08.2026.46**
+- Sicil kimliği: `PPT-CANONICAL-RULE-REGISTRY-V21`
+- Toplam kural: **233**
 - Aktif kural: **211**
-- Açıkça superseded tarihsel kural: **21**
-- Kural SHA-256: `a11d80649bc74759371fe68f7f5b8c0ab12c1cd6a9e77e09c7e96a9a3a7e068b`
+- Açıkça superseded tarihsel kural: **22**
+- Kural SHA-256: `2fea36f41b4b1f809defed5adb9eb274c6e0eaf35ce4d272a05eee304a730fe0`
 - Makine okunur tek aktif kaynak: `config/canonical-rule-registry.json`
 
 `PR-186` her bağlayıcı kararın aynı sürümde DEC ve makine defterine kaydını, `PR-187` bilinen belge/kod/kural driftinde kapanış yasağını getirir. `DEC-251` ve `config/documentation-synchronization-policy.json` bu iki kuralı karar anında DEC + etkilenen belge + iş listesi açık/kapalı/neden güncellemesi olarak fail-closed uygular.
@@ -18,7 +18,7 @@
 
 `PR-217`; güncel ürün ve belge başlıklarında yalnız `ParsYuva Aile Yaşam Merkezi` tam adının kullanılmasını bağlar. `AYM` kısaltması kullanıcı yüzeylerinde yasaktır; yalnız değiştirilemeyen tarihsel kayıtlar ve geriye dönük uyumluluk için zorunlu teknik kimliklerde korunabilir.
 
-`PR-218`–`PR-232`; sürüm kanalı renk/saydamlık sistemini, güvenli parola görünürlüğünü, kurulum adlandırma ve yaşam döngüsü kanıtını, atomik sürüm numarasını, 30 günlük deneme/Gold etkinleştirmeyi, kaldırma-yedek-sıfırlama sınırını, tepsiye küçülmeyi, veri koruyan migration/rollback sözleşmesini, ek kararların ana sicillere/Git teslimine bağlanmasını, Windows kurulum yoluyla kısa teslim adını, eski installer temizliğini, görünür sürüm kanalının tek kez gösterilmesini, her işlem öncesi zorunlu kural kontrolünü ve özel kurulumdan çift yedeğe uzanan temiz teslim kabul zincirini düzenler.
+`PR-218`–`PR-233`; sürüm kanalı renk/saydamlık sistemini, güvenli parola görünürlüğünü, kurulum adlandırma ve yaşam döngüsü kanıtını, atomik sürüm numarasını, 30 günlük deneme/Gold etkinleştirmeyi, kaldırma-yedek-sıfırlama sınırını, tepsiye küçülmeyi, veri koruyan migration/rollback sözleşmesini, ek kararların ana sicillere/Git teslimine bağlanmasını, Windows kurulum yoluyla kısa teslim adını, eski installer temizliğini, görünür sürüm kanalının tek kez gösterilmesini, her işlem öncesi zorunlu kural kontrolünü ve geçişli sesli kurulumdan kasa kilidi güvenliğine uzanan temiz teslim kabul zincirini düzenler.
 
 `PR-220` dosya adı bölümü `PR-228` ile değiştirilmiştir. Güncel teknik teslim kuralı: `C:\Program Files\PPT\ParsYuva`, `ParsYuva.exe`, `ParsYuva` kısayolu ve `ParsYuva-<Kanal>-GG.AA.YYYY.NN.exe` dosya adıdır.
 
@@ -28,7 +28,7 @@
 
 `PR-231`; her durum değiştiren işlem öncesinde kural sicili, yeniden hesaplanan hash, kullanıcı onayı ve tüm aktif enforcement bağlarının doğrulanmasını zorunlu kılar. Kontrol PASS olmadan işlem başlayamaz; kural değişiminden sonra kontrol yenilenir ve waiver/atlama kullanılamaz.
 
-`PR-232`; özel marka uyumlu installer, 900x640 ölçekli üç pars aile ekranı, aynı dilde kadın ses önceliği ve erkek ses yedeği, belirgin simgeler, atomik SQLite ilk kurulum, veri koruyan yükseltme, temiz tam derleme, paketli runtime sınaması ve GitHub + haricî Git + geri-okumalı haricî kaynak arşivini tek teslim kapısına bağlar.
+`PR-232`, `PR-233` ile superseded edilmiştir. `PR-233`; ilk kullanıcı oluşturma diliyle üç bilgi kartı arasında geçiş yapan fakat sahte ilerleme göstermeyen özel installer, Türkçe/İngilizce aynı dil kadın sesi önceliği ve erkek/kurulu aynı dil ses yedeği, eski tek pars marka görseli, 900x640 reflow, kilitli oturumda kasayı koruyan yeniden doğrulama, güvenilir cihaz kurulumu için kapalı bootstrap kanalları, veri koruyan yükseltme, temiz tam derleme, paketli runtime sınaması ve GitHub + haricî Git + geri-okumalı haricî kaynak arşivini tek teslim kapısına bağlar.
 
 ## Aşılmaz uygulama
 

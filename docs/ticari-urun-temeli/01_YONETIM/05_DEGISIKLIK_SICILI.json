@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PARSYUVA-AILE-YASAM-MERKEZI-TICARI-DEGISIKLIK-SICILI-V2",
   "temelTarihi": "2026-08-19",
-  "sonKayit": "TICARI-007",
+  "sonKayit": "TICARI-008",
   "kayitlar": [
     {
       "id": "TICARI-001",
@@ -114,6 +114,23 @@
         "docs/ticari-urun-temeli"
       ],
       "isListesiEtkisi": "IS-0109 ve IS-0209 eklendi; ozel installer ve ilk aile UX'i temiz tam rebuild, paketli runtime ve GitHub harici Git ile D kaynak readback teslim kanitlarina baglandi.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-008",
+      "tarih": "2026-08-22",
+      "baslik": "Gecisli sesli kurulum tek pars ve kilitli kasa guvenligi",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-267, PR-233 ve acik kullanici karari",
+      "etkilenenAlanlar": [
+        "apps/desktop/build/installer.nsh",
+        "apps/desktop/build/installer-narration.ps1",
+        "apps/desktop/src/renderer",
+        "apps/desktop/src/main/vault-session-guard-policy.ts",
+        "apps/desktop/src/main/desktop-universal-api-policy-enforcement.ts",
+        "docs/ticari-urun-temeli"
+      ],
+      "isListesiEtkisi": "IS-0109 ve IS-0209; kurulumun uc bilgi karti, ayni dil ses yedegi, tek pars ve ilk guvenlik/kasa regresyon kapilariyla guncellendi. Yeni EXE bu kod duzeltme turunda uretilmez.",
       "senkronDurumu": "SYNCHRONIZED"
     }
   ]

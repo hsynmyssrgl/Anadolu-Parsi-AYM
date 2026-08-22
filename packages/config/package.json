@@ -1,6 +1,6 @@
 {
   "name": "@ppt/config",
-  "version": "22.8.2026-45",
+  "version": "22.8.2026-46",
   "private": true,
   "type": "module",
   "main": "dist/index.js",
@@ -9,7 +9,7 @@
     ".": "./dist/index.js"
   },
   "dependencies": {
-    "@ppt/core": "22.8.2026-45"
+    "@ppt/core": "22.8.2026-46"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

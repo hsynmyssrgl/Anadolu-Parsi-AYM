@@ -157,7 +157,7 @@ for (const rule of ruleBinding.kurallar ?? []) {
   check(/^TK-[0-9]{3}$/.test(rule.id), `yerel ticari kural ID gecersiz: ${rule.id}`);
   check(!localRuleIds.has(rule.id), `yerel ticari kural ID tekrarli: ${rule.id}`);
   localRuleIds.add(rule.id);
-  check(rule.durum === 'ACTIVE', `${rule.id} aktif olmali`);
+  check(rule.durum === 'ACTIVE' || (rule.id === 'TK-010' && rule.durum === 'SUPERSEDED'), `${rule.id} durum gecersiz`);
   check(rule.yurutme === 'FAIL_CLOSED', `${rule.id} fail-closed olmali`);
   check(rule.kanitZorunlu === true, `${rule.id} kanit zorunlulugu eksik`);
 }
@@ -184,6 +184,7 @@ const decision263 = decisionLedger.decisions.find((decision) => decision.id === 
 const decision264 = decisionLedger.decisions.find((decision) => decision.id === 'DEC-264');
 const decision265 = decisionLedger.decisions.find((decision) => decision.id === 'DEC-265');
 const decision266 = decisionLedger.decisions.find((decision) => decision.id === 'DEC-266');
+const decision267 = decisionLedger.decisions.find((decision) => decision.id === 'DEC-267');
 check(decisionLedger.decisionCount === decisionLedger.decisions.length, 'karar defteri sayisi uyusmuyor');
 check(decision259?.status === 'ACTIVE', 'DEC-259 aktif karar defterinde yok');
 check(decision259?.syncStatus === 'SYNCHRONIZED', 'DEC-259 senkron degil');
@@ -199,8 +200,10 @@ check(decision264?.status === 'ACTIVE', 'DEC-264 aktif karar defterinde yok');
 check(decision264?.syncStatus === 'SYNCHRONIZED', 'DEC-264 senkron degil');
 check(decision265?.status === 'ACTIVE', 'DEC-265 aktif karar defterinde yok');
 check(decision265?.syncStatus === 'SYNCHRONIZED', 'DEC-265 senkron degil');
-check(decision266?.status === 'ACTIVE', 'DEC-266 aktif karar defterinde yok');
+check(decision266?.status === 'SUPERSEDED', 'DEC-266 superseded karar defterinde yok');
 check(decision266?.syncStatus === 'SYNCHRONIZED', 'DEC-266 senkron degil');
+check(decision267?.status === 'ACTIVE', 'DEC-267 aktif karar defterinde yok');
+check(decision267?.syncStatus === 'SYNCHRONIZED', 'DEC-267 senkron degil');
 const currentDecisionSummary = await readText(resolve(REPO, 'docs', 'current', '09_KULLANICI_KARARLARI_KAYDI.md'));
 const currentMaster = await readText(resolve(REPO, 'docs', 'current', '11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md'));
 const currentCommercial = await readText(resolve(REPO, 'docs', 'current', '14_TICARI_URUN_TEMEL_SURUMU.md'));
@@ -220,6 +223,8 @@ check(currentDecisionSummary.includes('DEC-265'), 'DEC-265 kullanici kararlari k
 check(currentMaster.includes('DEC-265'), 'DEC-265 guncel ana sicilde yok');
 check(currentDecisionSummary.includes('DEC-266'), 'DEC-266 kullanici kararlari kaydinda yok');
 check(currentMaster.includes('DEC-266'), 'DEC-266 guncel ana sicilde yok');
+check(currentDecisionSummary.includes('DEC-267'), 'DEC-267 kullanici kararlari kaydinda yok');
+check(currentMaster.includes('DEC-267'), 'DEC-267 guncel ana sicilde yok');
 check(currentCommercial.includes('verify:commercial-baseline'), 'ticari aktif belge dogrulama komutunu gostermiyor');
 
 const workRegistry = await readJson(resolve(ROOT, '08_IS_LISTESI', '03_ANA_IS_SICILI.json'));

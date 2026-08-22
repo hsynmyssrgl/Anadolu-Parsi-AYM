@@ -1,7 +1,7 @@
 {
   "schemaVersion": 3,
   "id": "PPT-PROJECT-CONSTITUTION-V9",
-  "effectiveRelease": "Bronze 22.08.2026.45",
+  "effectiveRelease": "Bronze 22.08.2026.46",
   "projectStartDate": "2026-07-20",
   "applicationName": "ParsYuva Aile Yaşam Merkezi",
   "exceptionless": true,
@@ -71,7 +71,7 @@
   "activeDocuments": "config/active-document-set.json",
   "ownerBrand": "ParsYuva",
   "canonicalRuleRegistry": "config/canonical-rule-registry.json",
-  "canonicalRulesSha256": "a11d80649bc74759371fe68f7f5b8c0ab12c1cd6a9e77e09c7e96a9a3a7e068b",
+  "canonicalRulesSha256": "2fea36f41b4b1f809defed5adb9eb274c6e0eaf35ce4d272a05eee304a730fe0",
   "activeGovernanceLedger": "config/active-governance-ledger.json",
   "deliveryReportContract": "config/delivery-report-contract.json",
   "documentInventoryPolicy": "config/document-inventory-policy.json",

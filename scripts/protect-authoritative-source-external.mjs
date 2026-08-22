@@ -91,7 +91,7 @@ const createExternal = async () => {
     copied.push({ path: item.path, sourceSizeBytes: sourceBytes.length, externalSizeBytes: targetBytes.length, sourceSha256: sha256(sourceBytes), externalSha256: sha256(targetBytes), status: 'PASS' });
   }
   const receipt = {
-    schemaVersion: 1, release: visibleRelease, requirement: 'PR-232', decision: 'DEC-266',
+    schemaVersion: 1, release: visibleRelease, requirement: 'PR-233', decision: 'DEC-267',
     phase: 'AUTHORITATIVE_SOURCE_EXTERNAL_USB_PROTECTION', status: 'PASS', officialCompletionClaimed: true,
     source: protection.source, treeSha256: protection.treeSha256, fileCount: protection.fileCount, totalBytes: protection.totalBytes,
     storageBackend: 'EXTERNAL_USB_D_DRIVE', externalPath: targetRoot,
@@ -109,7 +109,7 @@ const createExternal = async () => {
   const externalReceiptBytes = await readFile(externalReceiptPath);
   assert(sha256(externalReceiptBytes) === receiptBinding.sha256, 'D: external receipt self readback mismatch');
   const readback = {
-    schemaVersion: 1, release: receipt.release, requirement: 'PR-232', decision: 'DEC-266',
+    schemaVersion: 1, release: receipt.release, requirement: 'PR-233', decision: 'DEC-267',
     phase: 'AUTHORITATIVE_SOURCE_EXTERNAL_USB_FINAL_READBACK', status: 'PASS', countsAsPass: true,
     storageBackend: 'EXTERNAL_USB_D_DRIVE', externalPath: targetRoot,
     treeSha256: protection.treeSha256, baseExpected: copied.length, baseMatched: copied.length,
@@ -135,7 +135,7 @@ const createExternal = async () => {
   };
   await writeBytes(local.latestPath, jsonBytes(completedProtection));
   await writeBytes(resolve(externalReceiptRoot, 'LATEST.json'), jsonBytes(receipt));
-  console.log(JSON.stringify({ status: 'PASS', requirement: 'PR-232', treeSha256: protection.treeSha256, externalPath: targetRoot, files: names.length }));
+  console.log(JSON.stringify({ status: 'PASS', requirement: 'PR-233', treeSha256: protection.treeSha256, externalPath: targetRoot, files: names.length }));
 };
 
 const verifyExternal = async () => {
@@ -150,7 +150,7 @@ const verifyExternal = async () => {
   assert(sha256(readbackBytes) === protection.externalReceipt.readbackSha256, 'External readback local hash mismatch');
   const receipt = JSON.parse(receiptBytes.toString('utf8'));
   const readback = JSON.parse(readbackBytes.toString('utf8'));
-  assert(receipt.status === 'PASS' && receipt.release === visibleRelease && receipt.requirement === 'PR-232' && receipt.decision === 'DEC-266' && receipt.treeSha256 === protection.treeSha256 && receipt.externalPath === protection.externalReceipt.externalPath, 'External receipt identity mismatch');
+  assert(receipt.status === 'PASS' && receipt.release === visibleRelease && receipt.requirement === 'PR-233' && receipt.decision === 'DEC-267' && receipt.treeSha256 === protection.treeSha256 && receipt.externalPath === protection.externalReceipt.externalPath, 'External receipt identity mismatch');
   const names = await listFiles(protection.externalReceipt.externalPath);
   assert(names.length === protection.externalReceipt.finalFileCount && names.length === readback.expectedFinalFileCount, 'D: external inventory count mismatch');
   for (const artifact of receipt.artifacts) {
@@ -162,7 +162,7 @@ const verifyExternal = async () => {
     const [left, right] = await Promise.all([readFile(path), readFile(external)]);
     assert(left.length === right.length && sha256(left) === sha256(right), `D: supplemental readback mismatch: ${basename(path)}`);
   }
-  console.log(JSON.stringify({ status: 'PASS', requirement: 'PR-232', treeSha256: protection.treeSha256, externalPath: protection.externalReceipt.externalPath, files: names.length }));
+  console.log(JSON.stringify({ status: 'PASS', requirement: 'PR-233', treeSha256: protection.treeSha256, externalPath: protection.externalReceipt.externalPath, files: names.length }));
 };
 
 if (mode === 'create') await createExternal();

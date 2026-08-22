@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "id": "PARSYUVA-AILE-YASAM-MERKEZI-TICARI-KURAL-BAGI-V4",
+  "id": "PARSYUVA-AILE-YASAM-MERKEZI-TICARI-KURAL-BAGI-V5",
   "durum": "ACTIVE",
   "istisnaIzinli": false,
   "anaKuralKaynagi": "../06_KOD/app/config/canonical-rule-registry.json",
-  "anaKuralSiciliId": "PPT-CANONICAL-RULE-REGISTRY-V20",
-  "anaKuralSayisi": 232,
+  "anaKuralSiciliId": "PPT-CANONICAL-RULE-REGISTRY-V21",
+  "anaKuralSayisi": 233,
   "aktifKuralSayisi": 211,
-  "degistirilmisKuralSayisi": 21,
-  "anaKuralSha256": "a11d80649bc74759371fe68f7f5b8c0ab12c1cd6a9e77e09c7e96a9a3a7e068b",
+  "degistirilmisKuralSayisi": 22,
+  "anaKuralSha256": "2fea36f41b4b1f809defed5adb9eb274c6e0eaf35ce4d272a05eee304a730fe0",
   "yurutmeKapisi": "../06_KOD/app/scripts/run-governed-preflight.mjs",
   "temelAlanDogrulamaKapisi": "11_OTOMASYON/dogrula-ticari-temel-alani.mjs",
   "kurallar": [
@@ -95,10 +95,19 @@
     },
     {
       "id": "TK-010",
-      "baslik": "Ozel ilk aile ve temiz teslim zinciri ayrilamaz",
-      "metin": "Ozel installer, olcekli uc pars ilk aile ekrani, ayni dilde kadin ses onceligi ve erkek ses yedegi, atomik SQLite baslangici, veri koruyan yukseltme, temiz tam derleme, paketli runtime kaniti ve GitHub harici Git ile harici kaynak arsivi yedegi tek fail-closed kabul zinciridir.",
-      "durum": "ACTIVE",
+      "baslik": "Onceki uc pars ve kurulum teslim zinciri",
+      "metin": "DEC-266 kapsamindaki uc pars ve onceki karsilama modeli DEC-267 ile degistirilmistir.",
+      "durum": "SUPERSEDED",
       "kaynak": "PR-232 ve DEC-266",
+      "yurutme": "FAIL_CLOSED",
+      "kanitZorunlu": true
+    },
+    {
+      "id": "TK-011",
+      "baslik": "Gecisli sesli kurulum tek pars ve kasa guvenligi ayrilamaz",
+      "metin": "Uc bilgi karti arasinda gecisli fakat sahte ilerlemesiz installer, kurulum icinde ayni dil kadin ses onceligi ve erkek veya kurulu ses yedegi, tek pars, kilitli kasa yeniden dogrulamasi, ilk guvenlik bootstrap siniri ve temiz cift yedek teslim kanitlari tek fail-closed kabul zinciridir.",
+      "durum": "ACTIVE",
+      "kaynak": "PR-233 ve DEC-267",
       "yurutme": "FAIL_CLOSED",
       "kanitZorunlu": true
     }

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "id": "PPT-RULE-ENFORCEMENT-REGISTRY-V1",
-  "release": "Bronze 22.08.2026.45",
-  "canonicalRulesSha256": "a11d80649bc74759371fe68f7f5b8c0ab12c1cd6a9e77e09c7e96a9a3a7e068b",
+  "release": "Bronze 22.08.2026.46",
+  "canonicalRulesSha256": "2fea36f41b4b1f809defed5adb9eb274c6e0eaf35ce4d272a05eee304a730fe0",
   "activeRuleCount": 211,
   "defaultPolicy": "FAIL_CLOSED_NO_WAIVER",
   "entries": [
@@ -2909,7 +2909,7 @@
       "trackedIn": "AGENTS.md"
     },
     {
-      "ruleId": "PR-232",
+      "ruleId": "PR-233",
       "mode": "RELEASE_EVIDENCE_GATE",
       "failClosed": true,
       "waiverAllowed": false,
@@ -2921,7 +2921,7 @@
       ],
       "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
       "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
-      "trackedIn": "docs/decisions/DEC-266-ozel-kurulum-ilk-aile-temiz-paket-ve-cift-yedek-kabul-zinciri.md"
+      "trackedIn": "docs/decisions/DEC-267-gecisli-sesli-kurulum-tek-pars-ve-kasa-kilidi-duzeltmesi.md"
     }
   ]
 }

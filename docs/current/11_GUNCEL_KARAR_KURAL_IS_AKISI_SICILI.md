@@ -2,10 +2,10 @@
 
 - Belge sürümü: **GUNCEL-2026-08-22-V5**
 - Tarih: **22.08.2026**
-- Görünür ürün sürümü: **Bronze 22.08.2026.45**
+- Görünür ürün sürümü: **Bronze 22.08.2026.46**
 - Kaynak HEAD: `19a5c84d02ad0700315bc67873a19d5e1fed9945`
 - Statü: **ACTIVE_WORKING_REFERENCE_NOT_BUILD_CLOSURE**
-- Kararlar: **DEC-250–DEC-266**
+- Kararlar: **DEC-250–DEC-267**
 
 > Bu sürüm geçmiş PDF/DOCX ve build kapanış belgelerinin üzerine yazmaz. Yerel PASS ile dış kabul kanıtını ayırır; NOT_RUN/PARTIAL/BLOCKED sonuçlarını tamamlanmış göstermez.
 
@@ -30,7 +30,7 @@
 ## 3. Kapsam ve kural özeti
 
 - Gereksinim: **358** — COMPLETE 109, PARTIAL 25, FOUNDATION_STARTED 1, NOT_IMPLEMENTED 223.
-- Kural sicili: **PPT-CANONICAL-RULE-REGISTRY-V19**, toplam 231, aktif 210, superseded 21, SHA-256 `07f19ad3f1ad3d23e0d900e9cd37665fede518b3e825b86902715a6d465bc6d5`.
+- Kural sicili: **PPT-CANONICAL-RULE-REGISTRY-V21**, toplam 233, aktif 211, superseded 22, SHA-256 `2fea36f41b4b1f809defed5adb9eb274c6e0eaf35ce4d272a05eee304a730fe0`.
 - Kullanıcı karar defteri: **94** açık kullanıcı kararı.
 
 ## 4. İş akışları
@@ -347,7 +347,8 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - `DEC-263` — DEC-263 — Kod değişikliğinde eski Windows kurulum artefaktlarının silinmesi — ACTIVE — `docs/decisions/DEC-263-kod-degisikliginde-eski-windows-kurulum-artefaktlarinin-silinmesi.md`
 - `DEC-264` — DEC-264 — Görünür sürüm kanalının tek kez gösterilmesi — ACTIVE — `docs/decisions/DEC-264-gorunur-surum-kanalinin-tek-kez-gosterilmesi.md`
 - `DEC-265` — DEC-265 — Her işlem öncesi zorunlu kural kontrolü — ACTIVE — `docs/decisions/DEC-265-her-islem-oncesi-zorunlu-kural-kontrolu.md`
-- `DEC-266` — DEC-266 — Özel kurulum, ilk aile, temiz paket ve çift yedek kabul zinciri — ACTIVE — `docs/decisions/DEC-266-ozel-kurulum-ilk-aile-temiz-paket-ve-cift-yedek-kabul-zinciri.md`
+- `DEC-266` — DEC-266 — Özel kurulum, ilk aile, temiz paket ve çift yedek kabul zinciri — SUPERSEDED — `docs/decisions/DEC-266-ozel-kurulum-ilk-aile-temiz-paket-ve-cift-yedek-kabul-zinciri.md`
+- `DEC-267` — DEC-267 — Geçişli sesli kurulum, tek pars ve kasa kilidi düzeltmesi — ACTIVE — `docs/decisions/DEC-267-gecisli-sesli-kurulum-tek-pars-ve-kasa-kilidi-duzeltmesi.md`
 
 ## 12. ADR dizini
 
@@ -691,7 +692,8 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - **PR-229 [ACTIVE]** — Kaynak kodda veya Windows paketleme davranışında değişiklik yapıldığında apps/desktop/release altındaki önceki kurulum artefaktları geçersiz olur ve yeni derleme başlamadan önce silinir. Temizlik ParsYuva kurulum EXE dosyalarını ve bunlara bağlı .blockmap ile .sha256 yan dosyalarını kapsar; paketleme sonrasında klasörde yalnız güncel görünür sürüme ait en fazla bir kurulum seti kalabilir. Kullanıcı verisi, kurulu uygulama, kaynak arşivi ve tarihsel yönetişim kanıtları bu temizliğin dışındadır.
 - **PR-230 [ACTIVE]** — Kullanıcıya görünür sürüm satırlarında Bronze, Silver veya Gold kanal adı tam bir kez gösterilir. Kanal adı yalnız kanonik releaseLabel alanında bulunur; kanal-bağımsız yaşam döngüsü durumu olan stage alanı kanal adı içeremez. İlk kurulum, güvenli başlangıç, ana uygulama, Türkçe ve İngilizce yüzeyler kanal ile kanal içeren sürüm etiketini yeniden birleştiremez.
 - **PR-231 [ACTIVE]** — Her durum değiştiren işlem başlamadan önce güncel kanonik kural sicili, yeniden hesaplanan kural hash'i, kullanıcı onayı, Proje Anayasası bağı ve tüm aktif kuralların fail-closed enforcement kayıtları doğrulanır. Kod, dosya, yapılandırma, belge, test, derleme, paketleme, kurulum, silme, yayımlama veya dış sisteme yazma işlemi kontrol PASS olmadan başlayamaz. Salt okunur inceleme yalnız uygulanacak kuralları belirleyebilir; kural veya hash değişirse sonraki mutasyondan önce kontrol yeniden çalışır. Waiver, sessiz atlama ve eski makbuz kullanımı yasaktır.
-- **PR-232 [ACTIVE]** — Özel Windows installer, ölçekli üç pars ilk aile ekranı, aynı dilde kadın ses önceliği ve erkek ses yedeği, belirgin simgeler, atomik SQLite başlangıcı, veri koruyan yükseltme, temiz tam derleme, paketli runtime sınaması, GitHub ve haricî Git eşitliği ile geri-okumalı haricî kaynak arşivi tek fail-closed teslim zinciridir.
+- **PR-232 [SUPERSEDED]** — Üç pars ve önceki kurulum kabul zinciri PR-233 ile değiştirilmiştir.
+- **PR-233 [ACTIVE]** — Üç bilgi kartı arasında geçişli fakat sahte ilerlemesiz özel Windows installer, aynı dilde kadın sesi önceliği ve erkek/kurulu ses yedeği, eski tek pars, 900x640 reflow, kilitli kasayı koruyan yeniden doğrulama, ilk güvenlik kurulumu bootstrap sınırı ve temiz çift yedek teslim zinciri fail-closed uygulanır.
 
 ## 14. Aktif repo Word/PDF tarihsel denetim envanteri
 

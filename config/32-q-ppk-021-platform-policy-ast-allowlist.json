@@ -435,6 +435,7 @@
     "REPOSITORY_IMPORT|apps/desktop/src/main/repository-composition-root.ts|@ppt/repositories:SqliteTimelineRepository",
     "REPOSITORY_IMPORT|apps/desktop/src/main/repository-composition-root.ts|@ppt/repositories:SqliteTrustedDeviceRepository",
     "REPOSITORY_IMPORT|apps/desktop/src/main/repository-composition-root.ts|@ppt/repositories:SqliteWindowsHelloRegistrationRepository",
+    "REPOSITORY_IMPORT|apps/desktop/src/main/repository-composition-root.ts|@ppt/repositories:SqliteWindowsResilienceUniversalUxRepository",
     "REPOSITORY_IMPORT|apps/desktop/src/main/repository-composition-root.ts|@ppt/repositories:StaticProductSurfaceGovernanceRepository",
     "REPOSITORY_IMPORT|apps/desktop/src/main/timeline-application-adapter.ts|@ppt/repositories:computePlatformPolicyReceiptHash",
     "ROLE_PRESENTATION|apps/desktop/src/renderer/App.tsx|family_admin",

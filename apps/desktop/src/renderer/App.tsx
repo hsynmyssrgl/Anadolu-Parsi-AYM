@@ -904,11 +904,7 @@ export function AuthScreen({ auth, onSetup, onLogin, onWindowsHelloLogin, onInvi
   return <main className="auth-shell">
     <section className="auth-story" aria-label="ParsYuva Aile Yaşam Merkezi">
       <div className="auth-brand">
-        <div className="auth-family-pars" aria-hidden="true">
-          <img className="auth-pars auth-pars-adult-male" src={brandMarkUrl} alt=""/>
-          <img className="auth-pars auth-pars-adult-female" src={brandMarkUrl} alt=""/>
-          <img className="auth-pars auth-pars-child" src={brandMarkUrl} alt=""/>
-        </div>
+        <img className="auth-brand-mark" src={brandMarkUrl} alt="" aria-hidden="true"/>
         <div className="auth-brand-copy"><strong>ParsYuva</strong><small>Aile Yaşam Merkezi</small></div>
       </div>
       <div className="auth-story-copy"><span className="eyebrow">{t('auth.private')}</span><h1>{t('auth.story').split('\n').map((line,index)=><span key={line}>{line}{index===0&&<br/>}</span>)}</h1><p>{t('auth.storyBody')}</p></div>

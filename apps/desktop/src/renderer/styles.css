@@ -2150,65 +2150,26 @@ body {
   backdrop-filter:blur(28px) saturate(1.08);
 }
 .auth-brand { gap:22px; }
-.auth-family-pars {
-  position:relative;
-  width:184px;
-  height:112px;
-  flex:0 0 184px;
-}
-.auth-family-pars .auth-pars {
-  position:absolute;
+.auth-brand .auth-brand-mark {
   display:block;
+  width:112px;
+  height:112px;
+  flex:0 0 112px;
   object-fit:contain;
   transform-origin:50% 74%;
   filter:drop-shadow(0 11px 22px rgba(155,91,34,.26));
-}
-.auth-pars-adult-male {
-  left:0;
-  bottom:5px;
-  width:92px;
-  height:92px;
-  animation:auth-pars-male-breathe 4.1s ease-in-out infinite;
-}
-.auth-pars-adult-female {
-  left:64px;
-  bottom:3px;
-  width:82px;
-  height:82px;
-  animation:auth-pars-female-breathe 4.1s .32s ease-in-out infinite;
-}
-.auth-pars-child {
-  right:0;
-  bottom:0;
-  width:58px;
-  height:58px;
-  animation:auth-pars-child-breathe 3.2s .58s ease-in-out infinite;
+  animation:auth-brand-breathe 4.1s ease-in-out infinite;
 }
 .auth-brand-copy { align-items:flex-start;text-align:left; }
 .auth-brand-copy strong { font-size:clamp(22px,2vw,27px);line-height:1.05; }
 .auth-brand-copy small { margin-top:7px;font-size:clamp(15px,1.25vw,18px); }
-@keyframes auth-pars-male-breathe {
-  0%,100%{transform:translateY(0) rotate(0)}
-  50%{transform:translateY(-4px) rotate(-1deg)}
-}
-@keyframes auth-pars-female-breathe {
-  0%,100%{transform:scaleX(-1) translateY(0) rotate(0)}
-  50%{transform:scaleX(-1) translateY(-3px) rotate(-1deg)}
-}
-@keyframes auth-pars-child-breathe {
-  0%,100%{transform:translateY(0) scale(1)}
-  50%{transform:translateY(-6px) scale(1.04)}
-}
 
 @media(max-width:1100px) {
   .auth-shell { grid-template-columns:minmax(310px,.78fr) minmax(480px,1.22fr); }
   .auth-story { padding:28px 32px; }
   .auth-story-copy h1 { font-size:clamp(38px,4.7vw,52px); }
   .auth-story-copy p { font-size:16px;line-height:1.55; }
-  .auth-family-pars { width:154px;height:96px;flex-basis:154px; }
-  .auth-pars-adult-male { width:78px;height:78px; }
-  .auth-pars-adult-female { left:54px;width:70px;height:70px; }
-  .auth-pars-child { width:50px;height:50px; }
+  .auth-brand .auth-brand-mark { width:96px;height:96px;flex-basis:96px; }
   .auth-brand { gap:16px; }
 }
 @media(max-height:760px) {
@@ -2231,5 +2192,5 @@ body {
   .auth-entry { overflow:visible; }
 }
 @media(prefers-reduced-motion:reduce) {
-  .auth-family-pars .auth-pars { animation:none!important;transition:none!important; }
+  .auth-brand .auth-brand-mark { animation:none!important;transition:none!important; }
 }

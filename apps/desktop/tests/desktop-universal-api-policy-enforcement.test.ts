@@ -110,6 +110,9 @@ const createHarness = (writable = true, trusted = true) => {
     'dashboard:getOverview',
     'family:createMember',
     'auth:login',
+    'auth:beginTwoFactorSetup',
+    'auth:enableTwoFactor',
+    'auth:trustCurrentDevice',
     'app:getInfo',
     'app:getLocalizationBootstrap',
     'app:setLanguagePreference'
@@ -124,6 +127,9 @@ describe('31-U universal Desktop API policy enforcement', () => {
     expect(resolveDesktopUniversalApiIntent('dashboard:getOverview', correlationId)).toMatchObject({ action: 'read', capability: 'family.read' });
     expect(resolveDesktopUniversalApiIntent('family:createMember', correlationId)).toMatchObject({ action: 'update', capability: 'family.write' });
     expect(isDesktopPolicyBootstrapChannel('auth:login')).toBe(true);
+    expect(isDesktopPolicyBootstrapChannel('auth:beginTwoFactorSetup')).toBe(true);
+    expect(isDesktopPolicyBootstrapChannel('auth:enableTwoFactor')).toBe(true);
+    expect(isDesktopPolicyBootstrapChannel('auth:trustCurrentDevice')).toBe(true);
     expect(isDesktopPolicyBootstrapChannel('app:getLocalizationBootstrap')).toBe(true);
     expect(isDesktopPolicyBootstrapChannel('app:setLanguagePreference')).toBe(true);
     expect(isDesktopPolicyBootstrapChannel('auth:reauthorizeCurrentDeviceAfterRecovery')).toBe(false);
@@ -165,6 +171,9 @@ describe('31-U universal Desktop API policy enforcement', () => {
   it('limits the receiptless path to the explicit bootstrap registry', async () => {
     const { enforcement, records } = createHarness();
     await expect(enforcement.execute({ channel: 'auth:login', correlationId, operation: () => 'bootstrap' })).resolves.toBe('bootstrap');
+    await expect(enforcement.execute({ channel: 'auth:beginTwoFactorSetup', correlationId, operation: () => '2fa-begin' })).resolves.toBe('2fa-begin');
+    await expect(enforcement.execute({ channel: 'auth:enableTwoFactor', correlationId, operation: () => '2fa-enable' })).resolves.toBe('2fa-enable');
+    await expect(enforcement.execute({ channel: 'auth:trustCurrentDevice', correlationId, operation: () => 'device-trust' })).resolves.toBe('device-trust');
     await expect(enforcement.execute({ channel: 'app:getInfo', correlationId, operation: () => 'info' })).resolves.toBe('info');
     await expect(enforcement.execute({ channel: 'app:getLocalizationBootstrap', correlationId, operation: () => 'tr' })).resolves.toBe('tr');
     await expect(enforcement.execute({ channel: 'app:setLanguagePreference', correlationId, operation: () => 'tr' })).resolves.toBe('tr');

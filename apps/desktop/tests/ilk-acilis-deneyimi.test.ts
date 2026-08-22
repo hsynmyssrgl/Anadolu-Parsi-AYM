@@ -5,6 +5,7 @@ import {afterEach,describe,expect,it} from 'vitest';
 import {evaluateIpcIntegrationPolicy,evaluateIpcIntegrationResultPolicy} from '../src/main/ipc-integration-policy.js';
 import {resolveIpcRequestLifecyclePolicy} from '../src/main/ipc-request-lifecycle.js';
 import {readFirstRunExperience,writeFirstRunExperience} from '../src/main/ui-language-preference-store.js';
+import {resolveVaultSessionGuardAction} from '../src/main/vault-session-guard-policy.js';
 import {selectPreferredFemaleNarrationVoice,selectPreferredNarrationVoice,waitForPreferredNarrationVoice} from '../src/renderer/accessibility.js';
 
 const temporaryDirectories:string[]=[];
@@ -49,6 +50,19 @@ describe('Ilk acilis deneyimi',()=>{
       expect(evaluateIpcIntegrationResultPolicy(channel,{introductionCompleted:true,narrationOffered:false}),channel).toMatchObject({accepted:false});
     }
     for(const channel of ['app:getInfo','app:getFirstRunExperience','auth:getState'])expect(resolveIpcRequestLifecyclePolicy(channel)).toEqual({cancellable:true,latestWins:true,timeoutMs:10_000});
+  });
+
+  it('kilitli oturumda kasayi yeniden kimlik dogrulama icin acik tutar',()=>{
+    expect(resolveVaultSessionGuardAction('active',true)).toBe('checkpoint');
+    expect(resolveVaultSessionGuardAction('warning',true)).toBe('checkpoint');
+    expect(resolveVaultSessionGuardAction('locked',false)).toBe('defer_locked');
+    expect(resolveVaultSessionGuardAction('signed_out',false)).toBe('seal');
+    expect(resolveVaultSessionGuardAction('active',false)).toBe('seal');
+    const main=readFileSync(new URL('../src/main/main.ts',import.meta.url),'utf8');
+    const guardStart=main.indexOf('function startVaultSessionGuard');
+    const guard=main.slice(guardStart,guardStart+2_500);
+    expect(guard).toContain("if (guardAction === 'defer_locked') return;");
+    expect(guard.indexOf("if (guardAction === 'defer_locked') return;")).toBeLessThan(guard.indexOf('universalApiPolicyEnforcement().execute'));
   });
 
   it('Turkce ve Ingilizce anlatimda kadin sesi tercih eder',()=>{

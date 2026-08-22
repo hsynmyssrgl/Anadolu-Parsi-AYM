@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
 
 const installerUrl = new URL('../build/installer.nsh', import.meta.url);
+const installerNarrationUrl = new URL('../build/installer-narration.ps1', import.meta.url);
 const extractorUrl = new URL('../build/extractAppPackage.nsh', import.meta.url);
 const appUrl = new URL('../src/renderer/App.tsx', import.meta.url);
 const accessibilityUrl = new URL('../src/renderer/accessibility.ts', import.meta.url);
@@ -11,8 +12,8 @@ const stylesUrl = new URL('../src/renderer/styles.css', import.meta.url);
 const packageUrl = new URL('../package.json', import.meta.url);
 
 describe('installer progress, narration and Silver help experience', () => {
-  it('keeps the custom welcome static and reserves progress for real file installation', async () => {
-    const [source,extractor,rawPackage]=await Promise.all([readFile(installerUrl,'utf8'),readFile(extractorUrl,'utf8'),readFile(packageUrl,'utf8')]);
+  it('uses a transitional narrated welcome while reserving progress for real file installation', async () => {
+    const [source,narration,extractor,rawPackage]=await Promise.all([readFile(installerUrl,'utf8'),readFile(installerNarrationUrl,'utf8'),readFile(extractorUrl,'utf8'),readFile(packageUrl,'utf8')]);
     const packageJson=JSON.parse(rawPackage) as {build:{executableName?:string;win?:{artifactName?:string};artifactName?:string;nsis?:{shortcutName?:string;multiLanguageInstaller?:boolean;installerLanguages?:string[]}}};
     for (const marker of [
       '!macro customWelcomePage','!macro customPageAfterChangeDir',
@@ -26,9 +27,13 @@ describe('installer progress, narration and Silver help experience', () => {
       '!define PPT_INSTALLER_CHANNEL_BITMAP "installer-gold-sidebar.bmp"',
       '!define MUI_WELCOMEFINISHPAGE_BITMAP "${__FILEDIR__}\\${PPT_INSTALLER_CHANNEL_BITMAP}"',
       'Function AymWelcomePageCreate','Function AymWelcomePageLeave',
+      'Function AymWelcomeTransition','nsDialogs::CreateTimer AymWelcomeTransition 2600',
+      'nsDialogs::KillTimer AymWelcomeTransition','Call AymStartInstallerNarration',
+      'File /oname=$PLUGINSDIR\\aym-installer-narration.ps1',
       'Page custom AymWelcomePageCreate AymWelcomePageLeave',
       '${NSD_CreateBitmap} 0 0 108u 100% ""',
-      'Ailenizin hikâyesi, tek ve güvenli bir yerde.',
+      'Ailenizi oluşturalım','Bilgileriniz bu bilgisayarda kalır',
+      'Rehberli ve erişilebilir bir karşılama','1 / 3 · Aile alanı',
       'kişisel veri aktarmaz','C:\\Program Files\\PPT\\ParsYuva',
       'CreateFont $1 "Segoe UI" 11 400','CreateFont $2 "Segoe UI" 10 600',
       'ParsYuva Aile Yaşam Merkezi kullanıma hazır','ParsYuva Family Life Center is ready',
@@ -55,10 +60,16 @@ describe('installer progress, narration and Silver help experience', () => {
     expect(source).not.toContain('ParsYuva AYM');
     expect(source).not.toContain('Function AymInstallProgressTick');
     expect(source).not.toContain('${PBM_GETPOS}');
-    expect(source).not.toContain('${NSD_CreateTimer}');
-    expect(source).not.toContain('nsDialogs::CreateTimer');
-    expect(source).not.toContain('nsDialogs::KillTimer');
     expect(source).not.toContain('Function AymWelcomeAnimate');
+    expect(source.match(/nsDialogs::CreateTimer/gu)).toEqual(['nsDialogs::CreateTimer']);
+    expect(source.match(/nsDialogs::KillTimer/gu)).toEqual(['nsDialogs::KillTimer']);
+    expect(narration).toContain('Add-Type -AssemblyName System.Speech');
+    expect(narration).toContain('$_.VoiceInfo.Gender -eq [System.Speech.Synthesis.VoiceGender]::Female');
+    expect(narration).toContain('$_.VoiceInfo.Gender -eq [System.Speech.Synthesis.VoiceGender]::Male');
+    expect(narration).toContain('$selectedVoice = if ($femaleVoice) { $femaleVoice } elseif ($maleVoice)');
+    expect(narration).toContain('$synthesizer.SpeakAsync($text)');
+    expect(narration).toContain('Test-Path -LiteralPath $StopFile');
+    expect(narration).not.toMatch(/https?:|Invoke-WebRequest|Start-Process/iu);
     expect(extractor.match(/Nsis7z::ExtractWithDetails "\$\{FILE\}" "\$\(AymInstallingDetail\)"/gu)).toHaveLength(2);
     expect(extractor.match(/Call AymInstallPayloadStageBegin/gu)).toHaveLength(3);
     expect(extractor.match(/Call AymInstallPayloadStageEnd/gu)).toHaveLength(3);
@@ -67,7 +78,9 @@ describe('installer progress, narration and Silver help experience', () => {
     expect(packageJson.build.nsis?.shortcutName).toBe('ParsYuva');
     expect(packageJson.build.nsis).toMatchObject({multiLanguageInstaller:true,installerLanguages:['en_US','tr_TR']});
     const [installerSource, uninstallerSource = ''] = source.split('!macro customUnInstall');
-    expect(installerSource).not.toMatch(/https?:|Exec(?:Shell)?|nsExec|inetc|download/iu);
+    expect(installerSource).not.toMatch(/https?:|ExecShell|nsExec|inetc|download/iu);
+    expect(installerSource.match(/\bExec\b/gu)).toHaveLength(2);
+    expect(installerSource.match(/\bExec\s+'"\$SYSDIR\\WindowsPowerShell\\v1\.0\\powershell\.exe"/gu)).toHaveLength(2);
     expect(uninstallerSource).toMatch(
       /\$\{If\} \$\{isUpdated\}\r?\n\s+\$\{OrIf\} \$\{Silent\}[\s\S]*?Goto aym_uninstall_done[\s\S]*?MessageBox MB_YESNOCANCEL/u,
     );

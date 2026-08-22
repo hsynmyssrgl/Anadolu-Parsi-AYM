@@ -59,6 +59,7 @@ import {
   SqliteTaskRepository,
   SqliteTimelineRepository,
   SqliteTrustedDeviceRepository,
+  SqliteWindowsResilienceUniversalUxRepository,
   SqliteWindowsHelloRegistrationRepository,
   StaticProductSurfaceGovernanceRepository
 } from '@ppt/repositories';
@@ -147,6 +148,7 @@ import type {
   TimelineEventPolicyResourceRepositoryPort,
   TimelineRepositoryPort,
   TrustedDeviceRepositoryPort,
+  WindowsResilienceUniversalUxRepositoryPort,
   WindowsHelloRegistrationRepositoryPort
 } from '@ppt/repository-contracts';
 
@@ -211,6 +213,7 @@ export interface RepositoryCompositionRoot {
   readonly taskRepository: TaskRepositoryPort;
   readonly timelineRepository: TimelineRepositoryPort & TimelineEventPolicyResourceRepositoryPort;
   readonly trustedDeviceRepository: TrustedDeviceRepositoryPort;
+  readonly windowsResilienceUniversalUxRepository: WindowsResilienceUniversalUxRepositoryPort;
   readonly windowsHelloRegistrationRepository: WindowsHelloRegistrationRepositoryPort;
 }
 
@@ -288,6 +291,7 @@ export const createSqliteRepositoryCompositionRoot = (
     taskRepository: new SqliteTaskRepository(repositoryOptions),
     timelineRepository: new SqliteTimelineRepository(repositoryOptions),
     trustedDeviceRepository: new SqliteTrustedDeviceRepository(repositoryOptions),
+    windowsResilienceUniversalUxRepository: new SqliteWindowsResilienceUniversalUxRepository(repositoryOptions),
     windowsHelloRegistrationRepository: new SqliteWindowsHelloRegistrationRepository(repositoryOptions),
   };
 };

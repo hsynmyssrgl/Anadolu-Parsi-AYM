@@ -43,6 +43,24 @@ LangString AymWelcomeTitle ${AYM_LANG_ENGLISH} "Your family's story, in one secu
 LangString AymWelcomeTitle ${AYM_LANG_TURKISH} "Ailenizin hikâyesi, tek ve güvenli bir yerde."
 LangString AymWelcomeLead ${AYM_LANG_ENGLISH} "One calm, secure and local center for your family's documents, memories and daily life."
 LangString AymWelcomeLead ${AYM_LANG_TURKISH} "Ailenizin belgeleri, anıları ve günlük yaşamı için sakin, güvenli ve yerel bir merkez."
+LangString AymWelcomeCreateTitle ${AYM_LANG_ENGLISH} "Let's create your family"
+LangString AymWelcomeCreateTitle ${AYM_LANG_TURKISH} "Ailenizi oluşturalım"
+LangString AymWelcomeCreateLead ${AYM_LANG_ENGLISH} "A calm first step for your family's documents, memories and daily life."
+LangString AymWelcomeCreateLead ${AYM_LANG_TURKISH} "Ailenizin belgeleri, anıları ve günlük yaşamı için sakin bir ilk adım."
+LangString AymWelcomeLocalTitle ${AYM_LANG_ENGLISH} "Your information stays on this computer"
+LangString AymWelcomeLocalTitle ${AYM_LANG_TURKISH} "Bilgileriniz bu bilgisayarda kalır"
+LangString AymWelcomeLocalLead ${AYM_LANG_ENGLISH} "Setup never creates an online family account or transmits personal information."
+LangString AymWelcomeLocalLead ${AYM_LANG_TURKISH} "Kurulum çevrimiçi aile hesabı oluşturmaz ve kişisel bilgi aktarmaz."
+LangString AymWelcomeVoiceTitle ${AYM_LANG_ENGLISH} "A guided and accessible welcome"
+LangString AymWelcomeVoiceTitle ${AYM_LANG_TURKISH} "Rehberli ve erişilebilir bir karşılama"
+LangString AymWelcomeVoiceLead ${AYM_LANG_ENGLISH} "The narrated introduction uses a female voice first and a same-language male voice when needed."
+LangString AymWelcomeVoiceLead ${AYM_LANG_TURKISH} "Sesli tanıtım önce kadın sesini, gerektiğinde aynı dilde erkek sesini kullanır."
+LangString AymWelcomeStepOne ${AYM_LANG_ENGLISH} "1 of 3 · Family space"
+LangString AymWelcomeStepOne ${AYM_LANG_TURKISH} "1 / 3 · Aile alanı"
+LangString AymWelcomeStepTwo ${AYM_LANG_ENGLISH} "2 of 3 · Local privacy"
+LangString AymWelcomeStepTwo ${AYM_LANG_TURKISH} "2 / 3 · Yerel gizlilik"
+LangString AymWelcomeStepThree ${AYM_LANG_ENGLISH} "3 of 3 · Narrated guidance"
+LangString AymWelcomeStepThree ${AYM_LANG_TURKISH} "3 / 3 · Sesli rehberlik"
 LangString AymWelcomeBody ${AYM_LANG_ENGLISH} "The application will be installed in C:\Program Files\PPT\ParsYuva. Setup does not create family records, sign in to an online account or transmit personal data."
 LangString AymWelcomeBody ${AYM_LANG_TURKISH} "Uygulama C:\Program Files\PPT\ParsYuva klasörüne kurulacak. Kurulum aile kaydı oluşturmaz, çevrimiçi hesaba giriş yapmaz ve kişisel veri aktarmaz."
 LangString AymReadyTitle ${AYM_LANG_ENGLISH} "Ready to install"
@@ -110,6 +128,54 @@ Var AymInstallStatusText
 Var AymWelcomeDialog
 Var AymWelcomeBitmap
 Var AymWelcomeBitmapHandle
+Var AymWelcomeEyebrow
+Var AymWelcomeTitleControl
+Var AymWelcomeLeadControl
+Var AymWelcomeStepControl
+Var AymWelcomeSlide
+
+Function AymWelcomeRenderSlide
+  ${If} $AymWelcomeSlide == 1
+    ${NSD_SetText} $AymWelcomeEyebrow "$(AymWelcome1)"
+    ${NSD_SetText} $AymWelcomeTitleControl "$(AymWelcomeCreateTitle)"
+    ${NSD_SetText} $AymWelcomeLeadControl "$(AymWelcomeCreateLead)"
+    ${NSD_SetText} $AymWelcomeStepControl "$(AymWelcomeStepOne)"
+  ${ElseIf} $AymWelcomeSlide == 2
+    ${NSD_SetText} $AymWelcomeEyebrow "$(AymWelcome2)"
+    ${NSD_SetText} $AymWelcomeTitleControl "$(AymWelcomeLocalTitle)"
+    ${NSD_SetText} $AymWelcomeLeadControl "$(AymWelcomeLocalLead)"
+    ${NSD_SetText} $AymWelcomeStepControl "$(AymWelcomeStepTwo)"
+  ${Else}
+    ${NSD_SetText} $AymWelcomeEyebrow "$(AymWelcome3)"
+    ${NSD_SetText} $AymWelcomeTitleControl "$(AymWelcomeVoiceTitle)"
+    ${NSD_SetText} $AymWelcomeLeadControl "$(AymWelcomeVoiceLead)"
+    ${NSD_SetText} $AymWelcomeStepControl "$(AymWelcomeStepThree)"
+  ${EndIf}
+FunctionEnd
+
+Function AymWelcomeTransition
+  IntOp $AymWelcomeSlide $AymWelcomeSlide + 1
+  ${If} $AymWelcomeSlide > 3
+    StrCpy $AymWelcomeSlide 1
+  ${EndIf}
+  Call AymWelcomeRenderSlide
+FunctionEnd
+
+Function AymStartInstallerNarration
+  File /oname=$PLUGINSDIR\aym-installer-narration.ps1 "${__FILEDIR__}\installer-narration.ps1"
+  Delete "$PLUGINSDIR\aym-installer-narration.stop"
+  ${If} $LANGUAGE == ${AYM_LANG_TURKISH}
+    Exec '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoLogo -NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "$PLUGINSDIR\aym-installer-narration.ps1" -Language tr -StopFile "$PLUGINSDIR\aym-installer-narration.stop"'
+  ${Else}
+    Exec '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoLogo -NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "$PLUGINSDIR\aym-installer-narration.ps1" -Language en -StopFile "$PLUGINSDIR\aym-installer-narration.stop"'
+  ${EndIf}
+FunctionEnd
+
+Function AymStopInstallerNarration
+  FileOpen $0 "$PLUGINSDIR\aym-installer-narration.stop" w
+  FileWrite $0 "stop"
+  FileClose $0
+FunctionEnd
 
 Function AymWelcomePageCreate
   !insertmacro MUI_HEADER_TEXT "$(AymProductName)" "$(AymPressNext)"
@@ -127,23 +193,23 @@ Function AymWelcomePageCreate
   Pop $AymWelcomeBitmap
   ${NSD_SetImage} $AymWelcomeBitmap "$PLUGINSDIR\aym-welcome-sidebar.bmp" $AymWelcomeBitmapHandle
 
-  ${NSD_CreateLabel} 121u 5u 174u 18u "$(AymWelcome1)"
-  Pop $0
+  ${NSD_CreateLabel} 121u 5u 174u 18u ""
+  Pop $AymWelcomeEyebrow
   CreateFont $1 "Segoe UI" 10 700
-  SendMessage $0 ${WM_SETFONT} $1 1
-  SetCtlColors $0 "${PPT_INSTALLER_CHANNEL_COLOR}" "F0F0F0"
+  SendMessage $AymWelcomeEyebrow ${WM_SETFONT} $1 1
+  SetCtlColors $AymWelcomeEyebrow "${PPT_INSTALLER_CHANNEL_COLOR}" "F0F0F0"
 
-  ${NSD_CreateLabel} 121u 25u 174u 43u "$(AymWelcomeTitle)"
-  Pop $0
+  ${NSD_CreateLabel} 121u 25u 174u 43u ""
+  Pop $AymWelcomeTitleControl
   CreateFont $1 "Segoe UI" 18 700
-  SendMessage $0 ${WM_SETFONT} $1 1
-  SetCtlColors $0 "333537" "F0F0F0"
+  SendMessage $AymWelcomeTitleControl ${WM_SETFONT} $1 1
+  SetCtlColors $AymWelcomeTitleControl "333537" "F0F0F0"
 
-  ${NSD_CreateLabel} 121u 72u 174u 36u "$(AymWelcomeLead)"
-  Pop $0
+  ${NSD_CreateLabel} 121u 72u 174u 36u ""
+  Pop $AymWelcomeLeadControl
   CreateFont $1 "Segoe UI" 10 400
-  SendMessage $0 ${WM_SETFONT} $1 1
-  SetCtlColors $0 "676B6A" "F0F0F0"
+  SendMessage $AymWelcomeLeadControl ${WM_SETFONT} $1 1
+  SetCtlColors $AymWelcomeLeadControl "676B6A" "F0F0F0"
 
   ${NSD_CreateLabel} 121u 113u 174u 39u "✓  $(AymWelcome2)$\r$\n✓  $(AymWelcome3)"
   Pop $0
@@ -151,18 +217,31 @@ Function AymWelcomePageCreate
   SendMessage $0 ${WM_SETFONT} $1 1
   SetCtlColors $0 "467259" "F0F0F0"
 
-  ; Keep the complete pre-installation plan static. Only the native INSTFILES
-  ; page may move, so decorative dots cannot be mistaken for progress.
-  ${NSD_CreateLabel} 121u 156u 174u 19u "$(AymPressNext)"
+  ; This is an informational three-card introduction, never install progress.
+  ; The native INSTFILES page remains the only place that represents file work.
+  ${NSD_CreateLabel} 121u 153u 174u 12u ""
+  Pop $AymWelcomeStepControl
+  CreateFont $1 "Segoe UI" 9 600
+  SendMessage $AymWelcomeStepControl ${WM_SETFONT} $1 1
+  SetCtlColors $AymWelcomeStepControl "${PPT_INSTALLER_CHANNEL_COLOR}" "F0F0F0"
+
+  ${NSD_CreateLabel} 121u 167u 174u 12u "$(AymPressNext)"
   Pop $0
   CreateFont $1 "Segoe UI" 9 600
   SendMessage $0 ${WM_SETFONT} $1 1
   SetCtlColors $0 "71441F" "F0F0F0"
 
+  StrCpy $AymWelcomeSlide 1
+  Call AymWelcomeRenderSlide
+  nsDialogs::CreateTimer AymWelcomeTransition 2600
+  Call AymStartInstallerNarration
+
   nsDialogs::Show
 FunctionEnd
 
 Function AymWelcomePageLeave
+  nsDialogs::KillTimer AymWelcomeTransition
+  Call AymStopInstallerNarration
   ${NSD_FreeImage} $AymWelcomeBitmapHandle
 FunctionEnd
 

@@ -187,6 +187,7 @@ import { SecureRevocationSyncService } from './secure-revocation-sync-service.js
 import { ProtectedRevocationSyncStateStore } from './secure-revocation-sync-state.js';
 import { AutomaticCleanBackupRewriteService } from './automatic-clean-backup-rewrite-service.js';
 import { UserDataVault, WindowsHelloVaultUnlockError } from './user-data-vault.js';
+import { resolveVaultSessionGuardAction } from './vault-session-guard-policy.js';
 import { PowerShellWindowsHelloPlatformAdapter } from './windows-hello-platform-adapter.js';
 import {
   WindowsHelloPlatformCoordinator,
@@ -1118,12 +1119,20 @@ function startVaultSessionGuard(): void {
   vaultSessionGuardTimer = setInterval(() => {
     const current = dataStore;
     if (!current) return;
+    const guardAction = resolveVaultSessionGuardAction(
+      current.getSessionLockState().status,
+      current.isAuthenticated()
+    );
+    // A locked session has no normal policy authority by design. Defer before
+    // entering the PEP so its fail-closed authority resolver cannot seal the
+    // recoverable vault that the reauthentication overlay still needs.
+    if (guardAction === 'defer_locked') return;
     const correlationId = createRuntimeCorrelationId('job');
     void runtime().correlation.run({ correlationId }, () => universalApiPolicyEnforcement().execute({
       channel: 'system:captureVaultSessionCheckpoint',
       correlationId,
       operation: () => {
-        if (!current.isAuthenticated()) throw new Error('VAULT_SESSION_AUTHORITY_EXPIRED');
+        if (guardAction === 'seal') throw new Error('VAULT_SESSION_AUTHORITY_EXPIRED');
         if (Date.now() - lastVaultCheckpointAt >= 30_000) checkpointUserDataSession();
       }
     })).catch((error: unknown) => {

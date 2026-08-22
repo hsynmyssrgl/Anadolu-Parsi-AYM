@@ -1,12 +1,12 @@
 {
   "name": "@ppt/core-service-client",
-  "version": "22.8.2026-45",
+  "version": "22.8.2026-46",
   "private": true,
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "dependencies": {
-    "@ppt/core-service-contracts": "22.8.2026-45"
+    "@ppt/core-service-contracts": "22.8.2026-46"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

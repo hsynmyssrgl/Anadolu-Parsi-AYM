@@ -56,6 +56,12 @@ const BOOTSTRAP_CHANNELS = new Set([
   'auth:login',
   'auth:loginWithWindowsHello',
   'auth:setup',
+  // The first trusted policy subject does not exist until this closed security
+  // ceremony completes. Domain authentication and 2FA checks stay authoritative
+  // inside these handlers; no other post-setup channel receives bootstrap access.
+  'auth:beginTwoFactorSetup',
+  'auth:enableTwoFactor',
+  'auth:trustCurrentDevice',
   'invitations:accept',
   'invitations:inspect'
 ]);

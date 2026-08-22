@@ -14,6 +14,7 @@ const required = [
   ['build/installer-bronze-sidebar.bmp', 10000],
   ['build/installer-silver-sidebar.bmp', 10000],
   ['build/installer-gold-sidebar.bmp', 10000],
+  ['build/installer-narration.ps1', 1000],
   ['build/extractAppPackage.nsh', 3000],
   ['docs/LISANS_TR_KAYNAK.txt', 100],
   ['build/LICENSE_TR.rtf', 200],
@@ -49,7 +50,10 @@ if (!/^ParsYuva-(?:Bronze|Silver|Gold)-\d{2}\.\d{2}\.\d{4}\.\d+\.\$\{ext\}$/u.te
   failures.push('Kurulum dosyası adı yalnız ParsYuva, sürüm kanalı ve görünür sürüm numarasını taşımalı.');
 }
 try {
-  const installerInclude = await readFile(resolve(desktopRoot, 'build/installer.nsh'), 'utf8');
+  const [installerInclude, installerNarration] = await Promise.all([
+    readFile(resolve(desktopRoot, 'build/installer.nsh'), 'utf8'),
+    readFile(resolve(desktopRoot, 'build/installer-narration.ps1'), 'utf8')
+  ]);
   const installerChannel = /!define PPT_INSTALLER_RELEASE_CHANNEL "(Bronze|Silver|Gold)"/u.exec(installerInclude)?.[1];
   if (!artifactChannel || !installerChannel || artifactChannel !== installerChannel) {
     failures.push(`Sürüm-paleti uyuşmazlığı: paket=${artifactChannel ?? 'yok'}, kurulum=${installerChannel ?? 'yok'}.`);
@@ -83,7 +87,15 @@ try {
     'Page custom AymWelcomePageCreate AymWelcomePageLeave',
     'nsDialogs::Create 1018',
     '${NSD_CreateBitmap} 0 0 108u 100% ""',
-    'Ailenizin hikâyesi, tek ve güvenli bir yerde.',
+    'Function AymWelcomeTransition',
+    'nsDialogs::CreateTimer AymWelcomeTransition 2600',
+    'nsDialogs::KillTimer AymWelcomeTransition',
+    'Call AymStartInstallerNarration',
+    'File /oname=$PLUGINSDIR\\aym-installer-narration.ps1',
+    'Ailenizi oluşturalım',
+    'Bilgileriniz bu bilgisayarda kalır',
+    'Rehberli ve erişilebilir bir karşılama',
+    '1 / 3 · Aile alanı',
     'ParsYuva Aile Yaşam Merkezi',
     'Kuruluma hazır',
     'Sesli Yardım Merkezi',
@@ -117,9 +129,6 @@ try {
     if (!installerInclude.includes(marker)) failures.push(`NSIS deneyim/metin sözleşmesi eksik: ${marker}`);
   }
   if (installerInclude.includes('Function AymWelcomeAnimate')
-    || installerInclude.includes('${NSD_CreateTimer} AymWelcomeAnimate')
-    || installerInclude.includes('nsDialogs::CreateTimer AymWelcomeAnimate')
-    || installerInclude.includes('nsDialogs::KillTimer AymWelcomeAnimate')
     || installerInclude.includes('Function AymReadyAnimate')
     || installerInclude.includes('${NSD_CreateTimer} AymReadyAnimate')
     || installerInclude.includes('${NSD_CreateProgressBar}')) {
@@ -132,17 +141,40 @@ try {
   if (installerInclude.includes('${PBM_GETPOS}')
     || installerInclude.includes('AymInstallProgressTick')
     || installerInclude.includes('${NSD_CreateTimer}')
-    || installerInclude.includes('${NSD_KillTimer}')
-    || installerInclude.includes('nsDialogs::CreateTimer')
-    || installerInclude.includes('nsDialogs::KillTimer')) {
+    || installerInclude.includes('${NSD_KillTimer}')) {
     failures.push('Kurulum yüzdesi ana NSIS iş parçacığındaki zamanlayıcıyla tahmin edilemez; gerçek Nsis7z ilerlemesi kullanılmalı.');
+  }
+  const createTimers = installerInclude.match(/nsDialogs::CreateTimer[^\r\n]*/gu) ?? [];
+  const killTimers = installerInclude.match(/nsDialogs::KillTimer[^\r\n]*/gu) ?? [];
+  if (createTimers.length !== 1 || createTimers[0]?.trim() !== 'nsDialogs::CreateTimer AymWelcomeTransition 2600'
+    || killTimers.length !== 1 || killTimers[0]?.trim() !== 'nsDialogs::KillTimer AymWelcomeTransition') {
+    failures.push('Kurulumda yalnız üç bilgi kartını değiştiren sabit karşılama zamanlayıcısına izin verilir.');
   }
   if (installerInclude.includes('ParsYuva AYM')) {
     failures.push('Kurulum yüzeyinde kaldırılan AYM kısaltması kullanılamaz.');
   }
   const [installerOnly, uninstallerOnly = ''] = installerInclude.split('!macro customUnInstall');
-  if (/https?:|Exec(?:Shell)?|nsExec|inetc|download/iu.test(installerOnly)) {
-    failures.push('NSIS karşılama/animasyon kodu ağ veya haricî süreç yetkisi içeremez.');
+  if (/https?:|ExecShell|nsExec|inetc|download/iu.test(installerOnly)) {
+    failures.push('NSIS karşılama kodu ağ veya kabuk çalıştırma yetkisi içeremez.');
+  }
+  const installerExecutions = installerOnly.match(/\bExec\b/gu) ?? [];
+  const fixedNarrationExecutions = installerOnly.match(/\bExec\s+'"\$SYSDIR\\WindowsPowerShell\\v1\.0\\powershell\.exe"[^\r\n]+-File "\$PLUGINSDIR\\aym-installer-narration\.ps1"[^\r\n]+-StopFile "\$PLUGINSDIR\\aym-installer-narration\.stop"'/gu) ?? [];
+  if (installerExecutions.length !== 2 || fixedNarrationExecutions.length !== 2) {
+    failures.push('Kurulum yalnız sabit yerel PowerShell anlatım betiğini Türkçe veya İngilizce için çağırabilir.');
+  }
+  const narrationMarkers = [
+    'Add-Type -AssemblyName System.Speech',
+    '$_.VoiceInfo.Gender -eq [System.Speech.Synthesis.VoiceGender]::Female',
+    '$_.VoiceInfo.Gender -eq [System.Speech.Synthesis.VoiceGender]::Male',
+    '$selectedVoice = if ($femaleVoice) { $femaleVoice } elseif ($maleVoice)',
+    '$synthesizer.SpeakAsync($text)',
+    'Test-Path -LiteralPath $StopFile'
+  ];
+  for (const marker of narrationMarkers) {
+    if (!installerNarration.includes(marker)) failures.push(`Kurulum seslendirme sözleşmesi eksik: ${marker}`);
+  }
+  if (/https?:|Invoke-WebRequest|Start-Process/iu.test(installerNarration)) {
+    failures.push('Kurulum seslendirmesi ağ veya haricî süreç kullanamaz.');
   }
   const expectedUninstallHelper = 'ExecWait \'"$INSTDIR\\ParsYuva.exe" --uninstall-backup-assistant\' $0';
   const upgradeGuardIndex = uninstallerOnly.indexOf('${If} ${isUpdated}');

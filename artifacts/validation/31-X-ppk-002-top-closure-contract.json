@@ -17,7 +17,7 @@
       "name": "every Desktop renderer API remains on the single universal composition boundary",
       "status": "PASS",
       "details": {
-        "channelCount": 221
+        "channelCount": 311
       }
     },
     {
@@ -59,8 +59,8 @@
       "name": "every production SQLite repository receives the same execution guard",
       "status": "PASS",
       "details": {
-        "repositoryClassCount": 38,
-        "guardedCompositionCount": 38
+        "repositoryClassCount": 62,
+        "guardedCompositionCount": 62
       }
     },
     {
@@ -88,7 +88,7 @@
       "status": "PASS"
     },
     {
-      "name": "vault session guard executes through PEP and seals on authorization failure",
+      "name": "vault session guard defers recoverable locks before PEP and seals real authorization failures",
       "status": "PASS"
     },
     {
@@ -118,5 +118,5 @@
   ],
   "failures": [],
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-11T09:49:47.653Z"
+  "generatedAt": "2026-08-22T10:00:48.968Z"
 }

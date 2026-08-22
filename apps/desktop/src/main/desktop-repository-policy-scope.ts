@@ -51,6 +51,9 @@ const REPOSITORY_BOOTSTRAP_BOUNDARIES = new Set([
   'auth:login',
   'auth:loginWithWindowsHello',
   'auth:setup',
+  'auth:beginTwoFactorSetup',
+  'auth:enableTwoFactor',
+  'auth:trustCurrentDevice',
   'invitations:accept',
   'invitations:inspect'
 ]);

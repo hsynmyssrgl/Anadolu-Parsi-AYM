@@ -415,10 +415,9 @@ describe('approved brand and release-channel visual contract', () => {
       'background:linear-gradient(145deg,var(--release-accent-soft),var(--release-accent-edge));',
       '.desktop-titlebar img {',
       'width:29px;',
-      '.auth-family-pars {',
-      '.auth-pars-adult-male {',
-      '.auth-pars-adult-female {',
-      '.auth-pars-child {',
+      '.auth-brand .auth-brand-mark {',
+      'width:112px;',
+      'height:112px;',
       '.first-run-actions .button,',
       '.first-run-skip { min-height: 44px; }'
     ]) expect(styles).toContain(marker);
@@ -449,13 +448,10 @@ describe('approved brand and release-channel visual contract', () => {
     ]) expect(styles).toContain(marker);
   });
 
-  it('scales the first-family surface without the old fixed body width and keeps calm family motion optional', async () => {
+  it('scales the first-family surface with the restored single pars and keeps calm motion optional', async () => {
     const [app, styles] = await Promise.all([readFile(appUrl, 'utf8'), readFile(stylesUrl, 'utf8')]);
     for (const marker of [
-      'className="auth-family-pars" aria-hidden="true"',
-      'className="auth-pars auth-pars-adult-male"',
-      'className="auth-pars auth-pars-adult-female"',
-      'className="auth-pars auth-pars-child"',
+      'className="auth-brand-mark" src={brandMarkUrl} alt="" aria-hidden="true"',
       "globalThis.addEventListener('pointerdown',retryAfterUserGesture,{capture:true,once:true})",
       "globalThis.addEventListener('keydown',retryAfterUserGesture,{capture:true,once:true})"
     ]) expect(app).toContain(marker);
@@ -465,8 +461,10 @@ describe('approved brand and release-channel visual contract', () => {
       'height:calc(100vh - 42px);',
       '.auth-shell {\n  grid-template-columns:minmax(340px,.98fr) minmax(470px,1.02fr);',
       '@media(max-height:760px)',
-      '@media(prefers-reduced-motion:reduce) {\n  .auth-family-pars .auth-pars { animation:none!important;transition:none!important; }'
+      '@media(prefers-reduced-motion:reduce) {\n  .auth-brand .auth-brand-mark { animation:none!important;transition:none!important; }'
     ]) expect(styles).toContain(marker);
+    expect(app).not.toContain('auth-family-pars');
+    expect(app).not.toContain('auth-pars-child');
   });
 
   it('keeps the local password hidden by default and exposes an accessible user-controlled toggle', async () => {

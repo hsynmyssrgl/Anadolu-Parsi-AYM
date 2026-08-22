@@ -1,7 +1,7 @@
 {
   "status": "PASS",
   "productionSourceZones": 18,
-  "scannedFiles": 588,
+  "scannedFiles": 589,
   "capabilitySurfaces": 447,
   "exactManifestSurfaces": 447,
   "exactManifestSha256": "2ac32190c1b40c455093841eb2456c06a168c9aaf519068a14f570705b8a177a",

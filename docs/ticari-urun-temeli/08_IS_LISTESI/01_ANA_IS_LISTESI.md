@@ -25,7 +25,7 @@ Durumlar: `TAMAMLANDI`, `DEVAM`, `ACIK`, `BLOCKED`, `NOT_RUN`.
 | IS-0106 | Tam English uzman panel cevirisi | Codex | DEVAM | Ilk 24 uzman panel ile pano, katalog, aile, soy agaci, zaman tuneli, onemli gunler ve birlesik arama PASS; kalan ana kabuk ekranlarinda gorunur Turkce sabit metin 0 (English locale) |
 | IS-0107 | Ilk tanitim ve yardim sesli anlatim | Codex | DEVAM | TR/EN metin-ses, fallback ve erisilebilirlik PASS |
 | IS-0108 | Gorunur surum kanalini tek kez goster | Codex | TAMAMLANDI | Bronze/Silver/Gold, TR/EN ortak bicimlendirici ve preflight kapisi PASS |
-| IS-0109 | Ozel kurulum ve olcekli ilk aile kabul yuzeyi | Codex | DEVAM | 900x640 yatay tasma 0, uc pars/reduced-motion, TR/EN kadin ses onceligi ve erkek fallback, pencere/tepsi simge kapilari PASS; gercek ses insan UAT acik |
+| IS-0109 | Ozel kurulum ve olcekli ilk aile kabul yuzeyi | Codex | DEVAM | Uc bilgi karti arasinda gecisli/sahte ilerlemesiz kurulum, TR/EN ayni dil kadin ses onceligi ve erkek/kurulu ses yedegi, 900x640 tek pars/reduced-motion ile kilitli kasa ve ilk guvenlik bootstrap kapilari PASS; gercek ses insan UAT acik |
 
 ## 2. Kurulum, acilis ve yasam dongusu
 

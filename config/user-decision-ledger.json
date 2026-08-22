@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
-  "release": "Bronze 22.08.2026.45",
-  "decisionCount": 95,
+  "release": "Bronze 22.08.2026.46",
+  "decisionCount": 96,
   "decisions": [
     {
       "id": "DEC-121",
@@ -2467,7 +2467,8 @@
       "date": "2026-08-22",
       "acceptedAt": "2026-08-22T11:35:49+03:00",
       "title": "Ozel kurulum ilk aile temiz paket ve cift yedek kabul zinciri",
-      "status": "ACTIVE",
+      "status": "SUPERSEDED",
+      "supersededBy": "DEC-267",
       "source": "Acik kullanici karari: tum degisiklikleri kurallara ve tum yapilara isle, tum kodu harici diske ve Git'e yedekle, temiz kurulum dosyasi olustur",
       "document": "docs/decisions/DEC-266-ozel-kurulum-ilk-aile-temiz-paket-ve-cift-yedek-kabul-zinciri.md",
       "documents": [
@@ -2503,6 +2504,45 @@
         "apps/desktop/tests/first-run-narration-voice.test.ts",
         "artifacts/validation/first-family-clean-release-policy.json",
         "artifacts/validation/packaged-runtime-launch.json"
+      ]
+    },
+    {
+      "id": "DEC-267",
+      "date": "2026-08-22",
+      "acceptedAt": "2026-08-22T12:28:00+03:00",
+      "title": "Gecisli sesli kurulum tek pars ve kasa kilidi duzeltmesi",
+      "status": "ACTIVE",
+      "source": "Acik kullanici karari: ilk setup kullanici olusturma ekrani gibi gecisli olacak, uclu pars eski tek parse donecek, kurulum sesli anlatimi geri gelecek ve iki asamali dogrulamada kasa kilitli hatasi duzeltilecek",
+      "document": "docs/decisions/DEC-267-gecisli-sesli-kurulum-tek-pars-ve-kasa-kilidi-duzeltmesi.md",
+      "documents": [
+        "config/canonical-rule-registry.json",
+        "config/rule-enforcement-registry.json",
+        "docs/current/06_KANONIK_KURAL_SICILI.md",
+        "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
+        "docs/current/10_TUM_KURALLAR_ASILAMAZ_YURUTME_SOZLESMESI.md",
+        "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
+        "docs/ticari-urun-temeli/01_YONETIM/01_ASILAMAZ_KURALLAR.md",
+        "docs/ticari-urun-temeli/04_URUN_TASARIMI/01_UX_ERISILEBILIRLIK_VE_MARKA.md",
+        "docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md",
+        "docs/10_MASTER_DECISION_REGISTER.md"
+      ],
+      "workListImpact": "Kurulum karsilamasi kullanici olusturma yuzeyinin sakin dilinde uc bilgi adimi arasinda gecis yapar ve TR/EN sistem sesiyle anlatilir; tek pars marka geri gelir. Oturum kilidi veri kasasini kapatip ilk 2FA kurulumunu bozamaz. Eski .45 installer seti silinir; yeni EXE bu turda uretilmez.",
+      "syncStatus": "SYNCHRONIZED",
+      "requirements": [],
+      "codeAreas": [
+        "apps/desktop/build/installer.nsh",
+        "apps/desktop/build/installer-narration.ps1",
+        "apps/desktop/src/renderer/App.tsx",
+        "apps/desktop/src/renderer/styles.css",
+        "apps/desktop/src/main/main.ts",
+        "scripts/clean-stale-external-windows-installer.mjs",
+        "scripts/verify-first-family-clean-release-policy.mjs"
+      ],
+      "evidence": [
+        "apps/desktop/tests/installer-narration-experience.test.ts",
+        "apps/desktop/tests/first-family-production-composition.test.ts",
+        "apps/desktop/tests/ilk-acilis-deneyimi.test.ts",
+        "artifacts/validation/first-family-clean-release-policy.json"
       ]
     }
   ]
