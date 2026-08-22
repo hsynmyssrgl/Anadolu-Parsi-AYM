@@ -454,6 +454,7 @@ describe('31-U universal Desktop API policy enforcement', () => {
     const allowedSuffixes = [
       'timeline-location-proof',
       'timeline-location-collection',
+      'timeline-archived-location-collection',
       'timeline-location-exact',
       'life-report'
     ];

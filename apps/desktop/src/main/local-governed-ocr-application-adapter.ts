@@ -1248,7 +1248,11 @@ implements LocalGovernedOcrUnitOfWork, LocalGovernedOcrMainAuthorityPort {
                 this.dependencies,
                 context,
                 established,
-                asIsoDateTime(established.find((slot) => slot.slot === 'primary')!.authorization.occurredAt)
+                // Governed OCR rows are sealed against the durable receipt time.
+                // The transaction/request time can precede issuance by a few milliseconds
+                // and is therefore not an exact match for the SQLite receipt trigger.
+                asIsoDateTime(established.find((slot) => slot.slot === 'primary')!
+                  .authorization.receiptRecord.receipt.issuedAt)
               );
               const personId = context.actor.personId;
               if (!personId || this.#activeAuthorityLease) {

@@ -73,6 +73,7 @@ const REPOSITORY_BOOTSTRAP_BOUNDARIES = new Set([
 const AUTHORIZED_INTERNAL_CHILD_CORRELATION_SUFFIXES = new Set([
   'timeline-location-proof',
   'timeline-location-collection',
+  'timeline-archived-location-collection',
   'timeline-location-exact',
   'life-report'
 ]);

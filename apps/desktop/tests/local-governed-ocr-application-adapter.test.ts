@@ -41,6 +41,7 @@ import type {
 } from '../src/main/timeline-production-policy-runtime.js';
 
 const NOW = asIsoDateTime('2026-08-14T10:00:00.000Z');
+const RECEIPT_NOW = asIsoDateTime('2026-08-14T10:00:00.004Z');
 const FAMILY = asFamilyId('family-33-q-uow');
 const ACCOUNT = asUserId('account-33-q-uow');
 const PERSON = asPersonId('person-33-q-uow');
@@ -243,7 +244,8 @@ const createPolicyResolver = (
   transactionExecutor: TestAsyncTransactionExecutor,
   recorded: string[],
   projected: string[],
-  resolvedCorrelations: string[]
+  resolvedCorrelations: string[],
+  receiptIssuedAt = NOW
 ): LocalGovernedOcrProductionPolicyEnforcementPointResolver => Object.freeze({
   async resolve(policyContext, intent): Promise<LocalGovernedOcrProductionPolicyEnforcementPoint> {
     resolvedCorrelations.push(policyContext.correlationId);
@@ -281,7 +283,13 @@ const createPolicyResolver = (
         : {})
     });
     const enforcementPoint = createTypedPolicyEnforcementPoint({
-      provider,
+      provider: receiptIssuedAt === NOW ? provider : Object.freeze({
+        ...provider,
+        authorize: ({ request, nonce }) => Object.freeze({
+          effectiveRequest: request,
+          authorization: policyKernel.authorizeWithReceipt(request, receiptIssuedAt, nonce)
+        })
+      }),
       authorityResolver: { resolve: () => authority },
       resourceResolver: { resolve: () => resource },
       receiptSink: {
@@ -289,7 +297,7 @@ const createPolicyResolver = (
         ensure: () => { throw new Error('projection is mocked by the adapter test'); }
       },
       deferAllowedReceiptPersistence: true,
-      clock: () => NOW
+      clock: () => receiptIssuedAt
     });
     return Object.freeze(Object.assign(enforcementPoint, {
       requiresTransactionRevalidation: true as const,
@@ -315,7 +323,8 @@ const createPolicyResolver = (
 
 const dependencies = (
   currentJob = jobRow,
-  transactionExecutor: TestAsyncTransactionExecutor = new TestAsyncTransactionExecutor()
+  transactionExecutor: TestAsyncTransactionExecutor = new TestAsyncTransactionExecutor(),
+  receiptIssuedAt = NOW
 ) => {
   let currentJobState = currentJob;
   const mutations = new Map<string, unknown>();
@@ -478,7 +487,8 @@ const dependencies = (
       transactionExecutor,
       recorded,
       projected,
-      resolvedCorrelations
+      resolvedCorrelations,
+      receiptIssuedAt
     ),
     clusterFence: () => ({ writable: true, epoch: 94 })
   };
@@ -487,6 +497,20 @@ const dependencies = (
 };
 
 describe('33-Q repository-backed local governed OCR UoW', () => {
+  it('binds governed row time to the durable receipt when issuance follows the transaction clock', async () => {
+    const fixture = dependencies(jobRow, new TestAsyncTransactionExecutor(), RECEIPT_NOW);
+    const result = await new RepositoryBackedLocalGovernedOcrUnitOfWork(fixture.value)
+      .execute(context, maintenancePlan(), (scope) => {
+        expect(scope.occurredAt).toBe(RECEIPT_NOW);
+        expect(scope.occurredAt).not.toBe(NOW);
+        return ok(scope.occurredAt);
+      });
+
+    expect(result).toEqual(ok(RECEIPT_NOW));
+    expect(fixture.recorded).toEqual([`local_ocr_settings:${SETTINGS_ID}`]);
+    expect(fixture.projected).toEqual(fixture.recorded);
+  });
+
   it('records primary, source, settings and target receipts then routes every port in one async transaction', async () => {
     const fixture = dependencies();
     const unitOfWork = new RepositoryBackedLocalGovernedOcrUnitOfWork(fixture.value);

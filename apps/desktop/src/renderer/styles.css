@@ -249,6 +249,10 @@ kbd { border: 0; background: transparent; color: var(--muted-2); font-family: in
 .invitation-preview small { margin-top: 10px; font-size: 8px; }
 .participant-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 11px; }
 .participant-chips span { padding: 7px 9px; border-radius: 999px; background: rgba(79,145,255,.1); color: #a8c8ff; font-size: 9px; }
+.participant-chips button { min-height: 38px; padding: 7px 12px; border: 1px solid var(--glass-border); border-radius: 999px; background: color-mix(in srgb,var(--surface-elevated) 88%,transparent); color: var(--text); cursor: pointer; transition: border-color .16s ease,background .16s ease,color .16s ease,box-shadow .16s ease; }
+.participant-chips button:hover:not(:disabled),.participant-chips button:focus-visible { border-color: var(--release-border); background: var(--release-accent-soft); box-shadow: 0 0 0 3px color-mix(in srgb,var(--release-accent) 18%,transparent); }
+.participant-chips button.active { border-color: var(--release-accent); background: var(--release-accent); color: #fff; }
+.participant-chips button:disabled { opacity: .52; cursor: not-allowed; }
 .attachment-overview { margin-top: 10px; min-height: 125px; display: grid; align-content: center; justify-items: center; border-radius: 8px; background: rgba(79,145,255,.06); }
 .attachment-overview strong { font-size: 34px; }
 .attachment-overview span { color: var(--muted); font-size: 9px; margin: 3px 0 10px; }

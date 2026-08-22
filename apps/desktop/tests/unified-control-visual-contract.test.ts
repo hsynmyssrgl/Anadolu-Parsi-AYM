@@ -36,5 +36,7 @@ describe('unified rounded control visual contract', () => {
     expect(styles).toContain('.segmented button { min-width: 185px; height: 32px; border: 0; background: transparent; border-radius: var(--radius-md, 12px);');
     expect(styles).toContain('.family-location-map-canvas .maplibregl-ctrl-group{overflow:hidden;border:1px solid var(--release-border);border-radius:var(--radius-action,12px);');
     expect(styles).toContain('.family-location-map-canvas .maplibregl-ctrl-group button{border-radius:var(--radius-action,12px);');
+    expect(styles).toContain('.participant-chips button { min-height: 38px; padding: 7px 12px; border: 1px solid var(--glass-border); border-radius: 999px;');
+    expect(styles).toContain('.participant-chips button.active { border-color: var(--release-accent); background: var(--release-accent); color: #fff; }');
   });
 });
