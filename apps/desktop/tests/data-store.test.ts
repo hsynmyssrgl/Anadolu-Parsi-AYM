@@ -776,14 +776,20 @@ describe('FamilyDataStore', () => {
     const correlation = new StoredCorrelationContextProvider(
       new AsyncLocalStorage<CorrelationContext>()
     );
-    const store = trackStore(new FamilyDataStore({
-      databasePath: join(directory, 'family.db'),
-      backupSecretProtector: testSecretProtector,
-      backupPasswordPath: join(directory, 'managed-backup-password.json'),
-      repositoryExecutionPolicyGuard: repositoryScope.guard,
-      correlation,
-      ...policyStoreOptions()
-    }));
+    const provisioningCorrelationId = asCorrelationId(`guarded-provision-${crypto.randomUUID()}`);
+    const store = correlation.run({ correlationId: provisioningCorrelationId }, () =>
+      repositoryScope.runBootstrap({
+        correlationId: provisioningCorrelationId,
+        boundary: 'auth:getExternalIdentityProviders'
+      }, () => trackStore(new FamilyDataStore({
+        databasePath: join(directory, 'family.db'),
+        backupSecretProtector: testSecretProtector,
+        backupPasswordPath: join(directory, 'managed-backup-password.json'),
+        repositoryExecutionPolicyGuard: repositoryScope.guard,
+        correlation,
+        ...policyStoreOptions()
+      })))
+    );
     const bootstrap = async <T>(boundary: string, operation: () => T | Promise<T>): Promise<T> => {
       const correlationId = asCorrelationId(`guarded-${boundary}-${crypto.randomUUID()}`);
       return correlation.run({ correlationId }, () => repositoryScope.runBootstrapExclusive({

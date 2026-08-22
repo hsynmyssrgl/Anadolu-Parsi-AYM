@@ -284,6 +284,42 @@ describe('PPK-017 hassas log politikası', () => {
     store.dispose();
   });
 
+  it('IPC ve bakım günlüklerinin güvenli teknik sayaç adlarını kabul eder', () => {
+    const directory = mkdtempSync(join(tmpdir(), 'ppk017-safe-log-metadata-'));
+    temporaryDirectories.push(directory);
+    const store = new ProtectedSideArtifactStore({
+      keyPath: join(directory, 'side-artifact.key'),
+      applicationVersion: '22.8.2026.50',
+      protector: testProtector,
+      now: () => NOW
+    });
+    const failures: unknown[] = [];
+    const logger = new ProtectedSideArtifactLogger({
+      directory,
+      store,
+      minimumLevel: 'debug',
+      maxFileBytes: 1_000_000,
+      retentionDays: 30,
+      onWriteError: (failure) => failures.push(failure)
+    });
+
+    logger.info({
+      timestamp: asIsoDateTime(NOW), service: 'desktop-main', process: 'electron-main',
+      event: 'ipc.safe_metadata.completed', correlationId: asCorrelationId('cor-safe-metadata-017'),
+      metadata: {
+        requestNodeCount: 12,
+        requestEstimatedBytes: 2048,
+        clearedScopeCount: 2,
+        restoredScopeCount: 1,
+        recoveryScopeFingerprint: 'abcdef1234567890'
+      }
+    });
+
+    expect(failures).toEqual([]);
+    expect(readFileSync(logger.filePath, 'utf8').trim()).not.toBe('');
+    store.dispose();
+  });
+
   it('üretim başlangıç kanıtında ham message/stack yerine fingerprint kullanır', () => {
     const source = readSource(new URL('../src/main/main.ts', import.meta.url), 'utf8');
     const segment = source.slice(source.indexOf('const writeEarlyStartupFailureEvidence'), source.indexOf('let revocationSyncService'));

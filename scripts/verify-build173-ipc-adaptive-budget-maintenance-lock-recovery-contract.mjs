@@ -58,7 +58,7 @@ for(const [needle,label] of [
   ["maintenance_lock_recovery_reauthentication_failed",'privacy-safe recovery failure audit'],
   ["maintenance_lock_recovered",'recovery success audit'],
   ["previousReason",'previous lock reason audited'],
-  ["clearedContextCount",'cleared count audited'],
+  ["clearedScopeCount: clearedContextCount",'privacy-safe cleared count audited'],
   ["explicitConfirmation: true",'confirmation fact audited without phrase']
 ]) verify(main.includes(needle),label);
 for(const [needle,label] of [

@@ -140,8 +140,8 @@ for (const marker of [
   'ipc.payload.rejected',
   'CORE_INVALID_ARGUMENT',
   "category: 'security'",
-  'payloadEstimatedBytes',
-  'payloadNodeCount'
+  'requestEstimatedBytes',
+  'requestNodeCount'
 ]) verify(runtimeSource.includes(marker), `IPC runtime payload integration marker missing=${marker}`);
 for (const marker of [
   'DEFAULT_IPC_PAYLOAD_SECURITY_LIMITS',

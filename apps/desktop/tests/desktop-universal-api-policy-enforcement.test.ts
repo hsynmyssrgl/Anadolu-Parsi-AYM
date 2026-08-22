@@ -1,5 +1,10 @@
+import { AsyncLocalStorage } from 'node:async_hooks';
 import { describe, expect, it } from 'vitest';
-import { asCorrelationId } from '@ppt/core';
+import {
+  StoredCorrelationContextProvider,
+  asCorrelationId,
+  type CorrelationContext
+} from '@ppt/core';
 import { SqliteRepository } from '@ppt/repositories';
 import type { RepositoryExecutionContext } from '@ppt/repository-contracts';
 import {
@@ -334,6 +339,44 @@ describe('31-U universal Desktop API policy enforcement', () => {
       'later-bootstrap-poll'
     ]);
     expect(order).toEqual(['active', 'session-bootstrap', 'later-bootstrap-poll']);
+  });
+
+  it('preserves each queued caller runtime correlation context', async () => {
+    const repositoryPolicyScope = new DesktopRepositoryPolicyScope();
+    const runtimeCorrelation = new StoredCorrelationContextProvider(
+      new AsyncLocalStorage<CorrelationContext>()
+    );
+    const firstCorrelationId = asCorrelationId('corr-exclusive-first');
+    const secondCorrelationId = asCorrelationId('corr-exclusive-second');
+    let firstEntered = false;
+    let releaseFirst!: () => void;
+    const firstGate = new Promise<void>((resolve) => { releaseFirst = resolve; });
+
+    const first = runtimeCorrelation.run({ correlationId: firstCorrelationId }, () =>
+      repositoryPolicyScope.runPolicyResolutionExclusive({
+        correlationId: firstCorrelationId,
+        boundary: 'dashboard:getOverview'
+      }, async () => {
+        firstEntered = true;
+        expect(runtimeCorrelation.current()?.correlationId).toBe(firstCorrelationId);
+        await firstGate;
+        return runtimeCorrelation.current()?.correlationId;
+      })
+    );
+    while (!firstEntered) await new Promise<void>((resolve) => setTimeout(resolve, 0));
+
+    const second = runtimeCorrelation.run({ correlationId: secondCorrelationId }, () =>
+      repositoryPolicyScope.runPolicyResolutionExclusive({
+        correlationId: secondCorrelationId,
+        boundary: 'dashboard:getOverview'
+      }, () => runtimeCorrelation.current()?.correlationId)
+    );
+    releaseFirst();
+
+    await expect(Promise.all([first, second])).resolves.toEqual([
+      firstCorrelationId,
+      secondCorrelationId
+    ]);
   });
 
   it('rejects an unregistered direct repository bootstrap scope', () => {

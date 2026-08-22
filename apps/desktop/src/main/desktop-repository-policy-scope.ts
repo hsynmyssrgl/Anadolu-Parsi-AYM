@@ -1,4 +1,4 @@
-import { AsyncLocalStorage } from 'node:async_hooks';
+import { AsyncLocalStorage, AsyncResource } from 'node:async_hooks';
 import type { CorrelationId } from '@ppt/core';
 import {
   PlatformPolicyEnforcementError,
@@ -158,13 +158,14 @@ export class DesktopRepositoryPolicyScope {
   }
 
   #runExclusive<T>(priorityWeight: number, operation: () => Promise<T>): Promise<T> {
+    const boundOperation = AsyncResource.bind(operation);
     return new Promise<T>((resolve, reject) => {
       const sequence = this.#exclusiveSequence;
       this.#exclusiveSequence += 1;
       this.#exclusiveQueue.push({
         priorityWeight,
         sequence,
-        operation,
+        operation: boundOperation,
         resolve: (value) => resolve(value as T),
         reject
       });

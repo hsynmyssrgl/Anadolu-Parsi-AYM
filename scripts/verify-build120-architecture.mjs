@@ -35,8 +35,8 @@ verify(attestation.evidence?.length === 18, `delivery attestation evidence count
 for (const marker of [
   'evaluateIpcPayloadSecurity',
   'ipc.payload.rejected',
-  'payloadEstimatedBytes',
-  'payloadNodeCount',
+  'requestEstimatedBytes',
+  'requestNodeCount',
   'CORE_INVALID_ARGUMENT'
 ]) verify(runtimeSource.includes(marker), `IPC runtime payload security marker missing=${marker}`);
 for (const marker of [

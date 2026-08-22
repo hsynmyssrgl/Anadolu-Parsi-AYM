@@ -2087,8 +2087,8 @@ function registerIpc(): void {
       metadata: {
         senderId: event.sender.id,
         previousReason: recoveryContext.primaryAuthority.reason,
-        clearedContextCount,
-        recoveryContextFingerprint,
+        clearedScopeCount: clearedContextCount,
+        recoveryScopeFingerprint: recoveryContextFingerprint,
         twoFactorRequired: recoveryContext.authority.twoFactorRequired,
         explicitConfirmation: true,
         sessionTerminated: true,
@@ -3821,7 +3821,7 @@ app.whenReady().then(async () => {
       metadata: {
         status: maintenanceReauthenticationRestore.status,
         reason: maintenanceReauthenticationRestore.reason,
-        restoredContextCount: maintenanceReauthenticationRestore.restoredContextCount,
+        restoredScopeCount: maintenanceReauthenticationRestore.restoredContextCount,
         recoveryHold: maintenanceReauthenticationRestore.recoveryHold,
         recoveryHoldUntil: maintenanceReauthenticationRestore.recoveryHoldUntil,
         quarantined: maintenanceReauthenticationRestore.quarantinePath !== undefined,

@@ -109,10 +109,10 @@ export const registerCorrelatedIpcHandler = <TArguments extends unknown[], TResu
             reason: payloadDecision.reason,
             argumentCount: payloadDecision.metrics.argumentCount,
             nodeCount: payloadDecision.metrics.nodeCount,
-            payloadNodeCount: payloadDecision.metrics.nodeCount,
+            requestNodeCount: payloadDecision.metrics.nodeCount,
             maximumDepth: payloadDecision.metrics.maximumDepth,
             estimatedBytes: payloadDecision.metrics.estimatedBytes,
-            payloadEstimatedBytes: payloadDecision.metrics.estimatedBytes
+            requestEstimatedBytes: payloadDecision.metrics.estimatedBytes
           }
         });
         throw createAppError({
