@@ -1184,7 +1184,7 @@ export function GovernedFormDraftCenter({visible}:{readonly visible:boolean}){
   return localizeDraftCenterNode(panel,language);
 }
 
-export function SystemManagementScreen(){
+export function SystemManagementScreen({draftCenterVisible=false,onDraftCenterVisibilityChange=()=>undefined}:{readonly draftCenterVisible?:boolean;readonly onDraftCenterVisibilityChange?:(visible:boolean)=>void}={}){
   const {language}=useLocalization();
   const [activeSystemModule,setActiveSystemModule]=useState<string>();
   const [networkEgressBoundary,setNetworkEgressBoundary]=useState<NetworkEgressBoundaryView>();
@@ -1254,6 +1254,7 @@ export function SystemManagementScreen(){
   const bytes=(n:number)=>new Intl.NumberFormat('tr-TR',{style:'unit',unit:'megabyte',maximumFractionDigits:1}).format(n/1048576);
   const trendLabel=trend?.direction==='improving'?'İyileşiyor':trend?.direction==='degrading'?'Baskı artıyor':'Dengeli';
   const systemModules=[
+    {id:'drafts',label:language==='tr'?'Kişisel taslaklar':'Personal drafts'},
     {id:'operations',label:language==='tr'?'Operasyonlar ve yedekleme':'Operations and backups'},
     {id:'universal-ux',label:language==='tr'?'Birleşik aile deneyimi':'Unified family experience'},
     {id:'distributed',label:language==='tr'?'Dağıtık işlemler':'Distributed operations'},
@@ -1266,8 +1267,13 @@ export function SystemManagementScreen(){
     {id:'translation',label:language==='tr'?'Yerel çeviri':'Local translation'},
     {id:'signed-plugins',label:language==='tr'?'İmzalı eklenti platformu':'Signed plugin platform'}
   ] as const;
+  const selectSystemModule=(id:string)=>{
+    const next=activeSystemModule===id?undefined:id;
+    setActiveSystemModule(next);
+    onDraftCenterVisibilityChange(next==='drafts');
+  };
   const panel=<section><PageHeader eyebrow="Sistem yönetimi" title="Sistem, bakım ve operasyon" description="Yedek hedeflerini, performansı, bakım görevlerini ve tanılama işlemlerini yönetin." actions={activeSystemModule==='operations'?<Button onClick={()=>void refresh()}>Yenile</Button>:undefined}/>
-  <Surface className="system-module-index"><SectionHeader eyebrow={language==='tr'?'İsteğe bağlı yükleme':'On-demand loading'} title={language==='tr'?'Sistem modülleri':'System modules'}/><p>{language==='tr'?'Modüller kapalı başlar; yalnız açtığınız bölüm yüklenir.':'Modules start closed; only the section you open is loaded.'}</p><div className="system-module-grid">{systemModules.map(module=><Button key={module.id} aria-expanded={activeSystemModule===module.id} aria-controls={`system-module-${module.id}`} onClick={()=>setActiveSystemModule(current=>current===module.id?undefined:module.id)}>{module.label}<span aria-hidden="true">{activeSystemModule===module.id?'⌃':'⌄'}</span></Button>)}</div></Surface>
+  <Surface className="system-module-index"><SectionHeader eyebrow={language==='tr'?'İsteğe bağlı yükleme':'On-demand loading'} title={language==='tr'?'Sistem modülleri':'System modules'}/><p>{language==='tr'?'Modüller kapalı başlar; yalnız açtığınız bölüm yüklenir.':'Modules start closed; only the section you open is loaded.'}</p><div className="system-module-grid">{systemModules.map(module=><Button key={module.id} aria-expanded={activeSystemModule===module.id} aria-controls={`system-module-${module.id}`} onClick={()=>selectSystemModule(module.id)}>{module.label}<span aria-hidden="true">{activeSystemModule===module.id?'⌃':'⌄'}</span></Button>)}</div></Surface>
   {activeSystemModule==='universal-ux'&&<div id="system-module-universal-ux"><UniversalUxConsolidationPanel/></div>}
   {activeSystemModule==='distributed'&&<div id="system-module-distributed"><DistributedOperationsPanel/></div>}
   {activeSystemModule==='communication-audit'&&<div id="system-module-communication-audit"><CommunicationAuditArchivePanel/></div>}
@@ -2826,7 +2832,8 @@ export function App() {
   const [navigation, dispatchNavigation] = useReducer(navigationReducer, undefined, () => readNavigationState('dashboard', navItems.map((item) => item.id)));
   const active = navigation.active as ScreenId;
   const setActive = (id: ScreenId) => dispatchNavigation({ type: 'navigate', screen: id });
-  const [draftCenterActivated,setDraftCenterActivated]=useState(active==='settings');
+  const [draftCenterActivated,setDraftCenterActivated]=useState(false);
+  const [draftCenterVisible,setDraftCenterVisible]=useState(false);
   const [snapshot, setSnapshot] = useState<FamilyAppSnapshot>(fallbackSnapshot);
   const [dashboardOverview, setDashboardOverview] = useState<DashboardOverviewView>(() => fallbackDashboardOverview(fallbackSnapshot));
   const [householdWorkspace,setHouseholdWorkspace]=useState<HouseholdMembershipWorkspaceView>({households:[],branches:[],memberships:[]});
@@ -3198,9 +3205,7 @@ export function App() {
     void run();return()=>{cancelled=true;};
   },[active,auth.authenticated,loading,screenLoadRevision]);
 
-  useEffect(()=>{
-    if(auth.authenticated&&active==='settings')setDraftCenterActivated(true);
-  },[active,auth.authenticated]);
+  useEffect(()=>{if(active!=='settings')setDraftCenterVisible(false);},[active]);
 
   useEffect(()=>{if(notificationOpen&&auth.authenticated&&!loadedSnapshotSectionsRef.current.has('timeline'))void ensureSnapshotSection('timeline').catch(error=>setScreenDataError(error instanceof Error?error.message:'Bildirimler yüklenemedi.'));},[notificationOpen,auth.authenticated]);
 
@@ -3259,6 +3264,7 @@ export function App() {
       setDashboardOverview(fallbackDashboardOverview(fallbackSnapshot));
       setActive('dashboard');
       setDraftCenterActivated(false);
+      setDraftCenterVisible(false);
     });
   };
   const continueSession=async()=>{if(window.pardus)setSessionLock(await window.pardus.recordSessionActivity());};
@@ -3407,7 +3413,7 @@ export function App() {
   else if (active === 'legacy') screen = <DigitalLegacyScreen snapshot={snapshot} />;
   else if (active === 'windows-hello') screen = <WindowsHelloScreen auth={auth}/>;
   else if (active === SECURITY_CENTER_ROUTE) screen = <><PageHeader eyebrow="Hesap ve veri koruması" title="Gizlilik, Sahiplik ve Olay Kontrol Merkezi" description="Yerel veri envanteri, AI hafıza denetimi, erişim görünürlüğü, veri hakları, olay containment, parola, 2FA ve yedeklemeyi tek güvenlik rotasında yönetin."/><SettingsSecurity auth={auth} accessibility={accessibility} onAccessibilityChange={updateAccessibility} onFamilyDataChanged={refreshFamilyData}/></>;
-  else if (active === 'settings') screen = <SystemManagementScreen/>;
+  else if (active === 'settings') screen = <SystemManagementScreen draftCenterVisible={draftCenterVisible} onDraftCenterVisibilityChange={visible=>{setDraftCenterVisible(visible);if(visible)setDraftCenterActivated(true);}}/>;
   else screen = <PlaceholderScreen screen={active} snapshot={snapshot} auth={auth} />;
 
   return (<>
@@ -3488,8 +3494,8 @@ export function App() {
           </div>
         </header>
         <div className="page-content">
-          {draftCenterActivated&&<div data-session-draft-host="workspace.notes" hidden={active!=='settings'}>
-            <GovernedFormDraftCenter visible={active==='settings'}/>
+          {draftCenterActivated&&<div id="system-module-drafts" data-session-draft-host="workspace.notes" hidden={active!=='settings'||!draftCenterVisible}>
+            <GovernedFormDraftCenter visible={active==='settings'&&draftCenterVisible}/>
           </div>}
           {!networkOnline&&<AsyncStatePanel state={routeOfflineState.panelState} title={routeOfflineState.title} message={routeOfflineState.message} retryLabel="Yeniden dene" retryFocusTarget={mainContentRef} onRetry={async()=>{setNetworkOnline(globalThis.navigator?.onLine!==false);}}/>}
           {loading

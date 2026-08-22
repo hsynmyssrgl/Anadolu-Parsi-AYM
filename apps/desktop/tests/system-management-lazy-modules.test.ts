@@ -8,7 +8,9 @@ describe('system management lazy module integrity', () => {
   it('keeps every heavy module closed until its exact module button is selected', () => {
     expect(app).toContain('const [activeSystemModule,setActiveSystemModule]=useState<string>();');
     expect(app).toContain('aria-expanded={activeSystemModule===module.id}');
-    expect(app).toContain('current===module.id?undefined:module.id');
+    expect(app).toContain('const next=activeSystemModule===id?undefined:id;');
+    expect(app).toContain("onDraftCenterVisibilityChange(next==='drafts');");
+    expect(app).toContain("{id:'drafts',label:language==='tr'?'Kişisel taslaklar':'Personal drafts'}");
     for (const marker of [
       "activeSystemModule==='universal-ux'&&",
       "activeSystemModule==='distributed'&&",

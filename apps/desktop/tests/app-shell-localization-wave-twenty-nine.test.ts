@@ -15,9 +15,10 @@ describe('app shell English localization wave twenty-nine',()=>{
     expect(html).toContain('System, maintenance, and operations');
     expect(html).toContain('System modules');
     expect(html).toContain('Operations and backups');
+    expect(html).toContain('Personal drafts');
     expect(html).toContain('Signed plugin platform');
     expect(html).not.toContain('IPC performance telemetry');
-    expect(html.match(/aria-expanded="false"/gu)).toHaveLength(11);
+    expect(html.match(/aria-expanded="false"/gu)).toHaveLength(12);
     expect(html).not.toMatch(/[ÇĞİÖŞÜçğıöşü]/u);
     expect(html).not.toMatch(/\b(?:bilinmiyor|keyfi mesaj|ret nedeni|zincir|Manuel|Haftalik|Aylik|Denetleniyor)\b/iu);
   });
