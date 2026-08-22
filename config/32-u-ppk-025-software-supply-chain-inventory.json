@@ -5,7 +5,7 @@
   "status": "IN_PROGRESS",
   "completionClaimed": false,
   "release": {
-    "releaseVersion": "22.8.2026-46",
+    "releaseVersion": "22.8.2026-49",
     "channel": "Bronze",
     "productionReleaseEligible": false,
     "blockingState": "EXTERNAL_SIGNING_PENDING"

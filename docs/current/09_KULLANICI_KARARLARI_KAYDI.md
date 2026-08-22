@@ -1,8 +1,8 @@
 # Kullanıcı Kararları Kaydı
 
-- Görünür sürüm: **Bronze 22.08.2026.46**
+- Görünür sürüm: **Bronze 22.08.2026.49**
 - Makine okunur defter: `config/user-decision-ledger.json`
-- Aktif karar sayısı: **95**
+- Aktif karar sayısı: **96**
 
 Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağlayıcı kullanıcı kararlarını karar düzeyinde, etkilediği kural/belge/kod alanlarıyla saklar. Ham konuşma erişimi olmadan “tam transcript” iddiası yapılmaz.
 
@@ -79,6 +79,7 @@ Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağ
 - `DEC-265` — Her durum değiştiren işlemden önce güncel kural sicili, hash, kullanıcı onayı ve enforcement bağı doğrulanır; PASS olmadan işlem başlayamaz
 - `DEC-266` — `DEC-267` ile superseded edilen önceki üç pars ve statik kurulum kabul zinciridir
 - `DEC-267` — İlk kullanıcı oluşturma görsel dilinde üç bilgi kartı arasında geçişli fakat sahte ilerlemesiz özel kurulum; Türkçe/İngilizce kadın sesi önceliği ve aynı dilde erkek/kurulu ses yedeği; eski tek pars; kilitli kasa yeniden doğrulaması; ilk 2FA/güvenilir cihaz bootstrap sınırı ve temiz teslim kanıtları tek kabul zinciridir
+- `DEC-268` — `.46` NSIS callback, `.47` stale dahili payload ve `.48` ilk 2FA sonrası policy authority FAIL kayıtlarını korur; `.49` temiz installer, paketli/kurulu runtime ve sentetik ön yüz kullanıcı/güvenilir cihaz UAT zincirini yetkilendirir
 
 ## Bundan sonraki kararlar için zorunlu eşzamanlılık kuralı
 
@@ -86,4 +87,4 @@ Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağ
 
 `DEC-252` gereği bu yenilemedeki kapsamlı tarihsel tarama son temeldir. Bundan sonra eski build, arşiv ve checkpoint belgelerinin içeriği yeniden denetlenmez veya güncel karar kaynağı sayılmaz; yalnız değişmez `HISTORICAL` kayıt olarak korunur. Yeni denetimler aktif ve yeni belgelere uygulanır.
 
-Makine defteri yalnız açık kullanıcı kararlarını tutar. Türetilmiş paket/mimari kararlarının eksiksiz DEC-090–DEC-267 dizini ve dosya yolları `docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md` içindedir.
+Makine defteri yalnız açık kullanıcı kararlarını tutar. Türetilmiş paket/mimari kararlarının eksiksiz DEC-090–DEC-268 dizini ve dosya yolları `docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md` içindedir.

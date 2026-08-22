@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
-  "release": "Bronze 22.08.2026.46",
-  "decisionCount": 96,
+  "release": "Bronze 22.08.2026.49",
+  "decisionCount": 97,
   "decisions": [
     {
       "id": "DEC-121",
@@ -2543,6 +2543,40 @@
         "apps/desktop/tests/first-family-production-composition.test.ts",
         "apps/desktop/tests/ilk-acilis-deneyimi.test.ts",
         "artifacts/validation/first-family-clean-release-policy.json"
+      ]
+    },
+    {
+      "id": "DEC-268",
+      "date": "2026-08-22",
+      "acceptedAt": "2026-08-22T16:06:00+03:00",
+      "title": "Windows installer timer callback ve tam on yuz kullanici UAT teslimi",
+      "status": "ACTIVE",
+      "source": "Acik kullanici karari: kurulum dosyasini olustur, on yuzden kullanici olustur ve tum uygulamayi test et; tum uygulama yetkisi Codex'e verildi",
+      "document": "docs/decisions/DEC-268-windows-installer-timer-callback-ve-tam-on-yuz-kullanici-uat-teslimi.md",
+      "documents": [
+        "config/canonical-rule-registry.json",
+        "config/rule-enforcement-registry.json",
+        "docs/current/06_KANONIK_KURAL_SICILI.md",
+        "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
+        "docs/current/10_TUM_KURALLAR_ASILAMAZ_YURUTME_SOZLESMESI.md",
+        "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
+        "docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md",
+        "docs/10_MASTER_DECISION_REGISTER.md"
+      ],
+      "workListImpact": "Basarisiz .46 NSIS denemesi ve .47 stale dahili NSIS payload bulgusu tarihsel FAIL olarak korunur. .48 kurulu UAT'de bulunan ilk 2FA sonrasi AUTHORITY_RESOLUTION_FAILED hatasi, yerel parola ve TOTP ile mevcut bilgisayari guvenilir cihaz yapmadan ana uygulamayi acmayarak kapatilir. .49 installer temiz tam buildden uretilir, paketli ve kurulu runtime acilir, sentetik kullanici on yuzden olusturulur ve tum otomatik regresyon ile UAT kanitlari gercek sonuclarina gore kaydedilir.",
+      "syncStatus": "SYNCHRONIZED",
+      "requirements": [],
+      "codeAreas": [
+        "apps/desktop/build/installer.nsh",
+        "apps/desktop/scripts/verify-installer.mjs",
+        "apps/desktop/tests/installer-narration-experience.test.ts",
+        "scripts/verify-first-family-clean-release-policy.mjs"
+      ],
+      "evidence": [
+        "artifacts/validation/governed-preflight.json",
+        "artifacts/validation/first-family-clean-release-policy.json",
+        "artifacts/validation/packaged-runtime-launch.json",
+        "apps/desktop/release"
       ]
     }
   ]

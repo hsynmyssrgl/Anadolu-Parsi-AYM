@@ -65,6 +65,15 @@ describe('Ilk acilis deneyimi',()=>{
     expect(guard.indexOf("if (guardAction === 'defer_locked') return;")).toBeLessThan(guard.indexOf('universalApiPolicyEnforcement().execute'));
   });
 
+  it('ilk 2FA sonrasi ana uygulamadan once mevcut bilgisayari guclu dogrulamayla guvenilir yapar',()=>{
+    const renderer=readFileSync(new URL('../src/renderer/App.tsx',import.meta.url),'utf8');
+    expect(renderer).toContain("auth.authenticated && (!auth.twoFactorEnabled||auth.trustedDevice!==true)");
+    expect(renderer).toContain("window.pardus.trustCurrentDevice({password,code");
+    expect(renderer).toContain("trustedState.trustedDevice!==true");
+    expect(renderer.indexOf("window.pardus.trustCurrentDevice({password,code")).toBeLessThan(renderer.indexOf('await bootstrapAuthenticatedSession();',renderer.indexOf('completeFirstRunSecuritySetup')));
+    expect(renderer).toContain('autoComplete="current-password"');
+  });
+
   it('Turkce ve Ingilizce anlatimda kadin sesi tercih eder',()=>{
     const voices=[{name:'Microsoft Tolga',lang:'tr-TR'},{name:'Microsoft Emel',lang:'tr-TR'},{name:'Microsoft Zira',lang:'en-US'}];
     expect(selectPreferredFemaleNarrationVoice(voices,'tr')?.name).toBe('Microsoft Emel');

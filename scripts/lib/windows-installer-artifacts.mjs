@@ -2,6 +2,8 @@ import { readdir, rm, stat } from 'node:fs/promises';
 import { basename, resolve } from 'node:path';
 
 const INSTALLER_ARTIFACT_PATTERN = /^ParsYuva-.*\.exe(?:\.blockmap|\.sha256)?$/u;
+const GENERATED_NSIS_PAYLOAD_PATTERN =
+  /^@pptdesktop-\d+\.\d+\.\d+-\d+-(?:x64|arm64|ia32)\.nsis\.7z$/u;
 const VERSIONED_INSTALLER_ARTIFACT_PATTERN =
   /^ParsYuva-(Bronze|Silver|Gold)-(\d{2}\.\d{2}\.\d{4}\.\d+)\.exe(?:(\.blockmap|\.sha256))?$/u;
 const GENERATED_WINDOWS_PACKAGE_ENTRY_NAMES = new Set([
@@ -96,7 +98,9 @@ export async function removeWindowsPackagingArtifacts(releaseRoot) {
   const entries = await readDirectory(resolvedRoot);
   const removed = [];
   for (const entry of entries) {
-    if (!INSTALLER_ARTIFACT_PATTERN.test(entry.name) && !GENERATED_WINDOWS_PACKAGE_ENTRY_NAMES.has(entry.name)) {
+    if (!INSTALLER_ARTIFACT_PATTERN.test(entry.name)
+      && !GENERATED_NSIS_PAYLOAD_PATTERN.test(entry.name)
+      && !GENERATED_WINDOWS_PACKAGE_ENTRY_NAMES.has(entry.name)) {
       continue;
     }
     const path = resolve(resolvedRoot, entry.name);
@@ -110,6 +114,7 @@ export async function removeWindowsPackagingArtifacts(releaseRoot) {
   const remainingEntries = await readDirectory(resolvedRoot);
   const remaining = remainingEntries.filter(
     (entry) => INSTALLER_ARTIFACT_PATTERN.test(entry.name)
+      || GENERATED_NSIS_PAYLOAD_PATTERN.test(entry.name)
       || GENERATED_WINDOWS_PACKAGE_ENTRY_NAMES.has(entry.name),
   );
   if (remaining.length > 0) {

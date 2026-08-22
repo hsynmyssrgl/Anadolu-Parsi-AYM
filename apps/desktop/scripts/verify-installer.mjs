@@ -88,8 +88,8 @@ try {
     'nsDialogs::Create 1018',
     '${NSD_CreateBitmap} 0 0 108u 100% ""',
     'Function AymWelcomeTransition',
-    'nsDialogs::CreateTimer AymWelcomeTransition 2600',
-    'nsDialogs::KillTimer AymWelcomeTransition',
+    '${NSD_CreateTimer} AymWelcomeTransition 2600',
+    '${NSD_KillTimer} AymWelcomeTransition',
     'Call AymStartInstallerNarration',
     'File /oname=$PLUGINSDIR\\aym-installer-narration.ps1',
     'Ailenizi oluşturalım',
@@ -139,15 +139,13 @@ try {
     failures.push('Genel MUI veya eski metin-only karşılama yüzeyi özel tam sayfa ParsYuva panelinin yerine geçmemeli.');
   }
   if (installerInclude.includes('${PBM_GETPOS}')
-    || installerInclude.includes('AymInstallProgressTick')
-    || installerInclude.includes('${NSD_CreateTimer}')
-    || installerInclude.includes('${NSD_KillTimer}')) {
+    || installerInclude.includes('AymInstallProgressTick')) {
     failures.push('Kurulum yüzdesi ana NSIS iş parçacığındaki zamanlayıcıyla tahmin edilemez; gerçek Nsis7z ilerlemesi kullanılmalı.');
   }
-  const createTimers = installerInclude.match(/nsDialogs::CreateTimer[^\r\n]*/gu) ?? [];
-  const killTimers = installerInclude.match(/nsDialogs::KillTimer[^\r\n]*/gu) ?? [];
-  if (createTimers.length !== 1 || createTimers[0]?.trim() !== 'nsDialogs::CreateTimer AymWelcomeTransition 2600'
-    || killTimers.length !== 1 || killTimers[0]?.trim() !== 'nsDialogs::KillTimer AymWelcomeTransition') {
+  const createTimers = installerInclude.match(/\$\{NSD_CreateTimer\}[^\r\n]*/gu) ?? [];
+  const killTimers = installerInclude.match(/\$\{NSD_KillTimer\}[^\r\n]*/gu) ?? [];
+  if (createTimers.length !== 1 || createTimers[0]?.trim() !== '${NSD_CreateTimer} AymWelcomeTransition 2600'
+    || killTimers.length !== 1 || killTimers[0]?.trim() !== '${NSD_KillTimer} AymWelcomeTransition') {
     failures.push('Kurulumda yalnız üç bilgi kartını değiştiren sabit karşılama zamanlayıcısına izin verilir.');
   }
   if (installerInclude.includes('ParsYuva AYM')) {

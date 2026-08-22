@@ -27,8 +27,8 @@ describe('installer progress, narration and Silver help experience', () => {
       '!define PPT_INSTALLER_CHANNEL_BITMAP "installer-gold-sidebar.bmp"',
       '!define MUI_WELCOMEFINISHPAGE_BITMAP "${__FILEDIR__}\\${PPT_INSTALLER_CHANNEL_BITMAP}"',
       'Function AymWelcomePageCreate','Function AymWelcomePageLeave',
-      'Function AymWelcomeTransition','nsDialogs::CreateTimer AymWelcomeTransition 2600',
-      'nsDialogs::KillTimer AymWelcomeTransition','Call AymStartInstallerNarration',
+      'Function AymWelcomeTransition','${NSD_CreateTimer} AymWelcomeTransition 2600',
+      '${NSD_KillTimer} AymWelcomeTransition','Call AymStartInstallerNarration',
       'File /oname=$PLUGINSDIR\\aym-installer-narration.ps1',
       'Page custom AymWelcomePageCreate AymWelcomePageLeave',
       '${NSD_CreateBitmap} 0 0 108u 100% ""',
@@ -61,8 +61,8 @@ describe('installer progress, narration and Silver help experience', () => {
     expect(source).not.toContain('Function AymInstallProgressTick');
     expect(source).not.toContain('${PBM_GETPOS}');
     expect(source).not.toContain('Function AymWelcomeAnimate');
-    expect(source.match(/nsDialogs::CreateTimer/gu)).toEqual(['nsDialogs::CreateTimer']);
-    expect(source.match(/nsDialogs::KillTimer/gu)).toEqual(['nsDialogs::KillTimer']);
+    expect(source.match(/\$\{NSD_CreateTimer\}/gu)).toEqual(['${NSD_CreateTimer}']);
+    expect(source.match(/\$\{NSD_KillTimer\}/gu)).toEqual(['${NSD_KillTimer}']);
     expect(narration).toContain('Add-Type -AssemblyName System.Speech');
     expect(narration).toContain('$_.VoiceInfo.Gender -eq [System.Speech.Synthesis.VoiceGender]::Female');
     expect(narration).toContain('$_.VoiceInfo.Gender -eq [System.Speech.Synthesis.VoiceGender]::Male');

@@ -8,7 +8,7 @@
   "anaKuralSayisi": 233,
   "aktifKuralSayisi": 211,
   "degistirilmisKuralSayisi": 22,
-  "anaKuralSha256": "2fea36f41b4b1f809defed5adb9eb274c6e0eaf35ce4d272a05eee304a730fe0",
+  "anaKuralSha256": "cb02fed18fb3ca097877ed3be73fbaacea60c8e291498fbeb21c28f9ad9e5a90",
   "yurutmeKapisi": "../06_KOD/app/scripts/run-governed-preflight.mjs",
   "temelAlanDogrulamaKapisi": "11_OTOMASYON/dogrula-ticari-temel-alani.mjs",
   "kurallar": [
@@ -107,7 +107,7 @@
       "baslik": "Gecisli sesli kurulum tek pars ve kasa guvenligi ayrilamaz",
       "metin": "Uc bilgi karti arasinda gecisli fakat sahte ilerlemesiz installer, kurulum icinde ayni dil kadin ses onceligi ve erkek veya kurulu ses yedegi, tek pars, kilitli kasa yeniden dogrulamasi, ilk guvenlik bootstrap siniri ve temiz cift yedek teslim kanitlari tek fail-closed kabul zinciridir.",
       "durum": "ACTIVE",
-      "kaynak": "PR-233 ve DEC-267",
+      "kaynak": "PR-233, DEC-267 ve DEC-268",
       "yurutme": "FAIL_CLOSED",
       "kanitZorunlu": true
     }

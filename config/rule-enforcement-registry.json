@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "id": "PPT-RULE-ENFORCEMENT-REGISTRY-V1",
-  "release": "Bronze 22.08.2026.46",
-  "canonicalRulesSha256": "2fea36f41b4b1f809defed5adb9eb274c6e0eaf35ce4d272a05eee304a730fe0",
+  "release": "Bronze 22.08.2026.49",
+  "canonicalRulesSha256": "cb02fed18fb3ca097877ed3be73fbaacea60c8e291498fbeb21c28f9ad9e5a90",
   "activeRuleCount": 211,
   "defaultPolicy": "FAIL_CLOSED_NO_WAIVER",
   "entries": [

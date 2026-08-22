@@ -6,13 +6,13 @@
     "channel": "Bronze",
     "date": "2026-08-22",
     "displayDate": "22.08.2026",
-    "monthlySequence": 46,
-    "version": "22.08.2026.46",
-    "visibleRelease": "Bronze 22.08.2026.46",
-    "packageVersion": "22.8.2026-46",
-    "releaseId": "bronze-2026-08-22-r46",
+    "monthlySequence": 49,
+    "version": "22.08.2026.49",
+    "visibleRelease": "Bronze 22.08.2026.49",
+    "packageVersion": "22.8.2026-49",
+    "releaseId": "bronze-2026-08-22-r49",
     "status": "IN_PROGRESS",
-    "parentRelease": "Bronze 22.08.2026.45",
+    "parentRelease": "Bronze 22.08.2026.48",
     "summary": "Resmî derleme numarası yalnız paketleme yetkisi tarafından ayrıldı.",
     "parentSourceSha256": "d65e908bf8157d2eff111dcdbbae2762cb48a527021b97c3df26f463e993dea4"
   },
@@ -224,6 +224,36 @@
       "version": "22.08.2026.46",
       "packageVersion": "22.8.2026-46",
       "releaseId": "bronze-2026-08-22-r46",
+      "status": "IN_PROGRESS",
+      "summary": "Resmî derleme numarası yalnız paketleme yetkisi tarafından ayrıldı."
+    },
+    {
+      "channel": "Bronze",
+      "date": "2026-08-22",
+      "monthlySequence": 47,
+      "version": "22.08.2026.47",
+      "packageVersion": "22.8.2026-47",
+      "releaseId": "bronze-2026-08-22-r47",
+      "status": "IN_PROGRESS",
+      "summary": "Resmî derleme numarası yalnız paketleme yetkisi tarafından ayrıldı."
+    },
+    {
+      "channel": "Bronze",
+      "date": "2026-08-22",
+      "monthlySequence": 48,
+      "version": "22.08.2026.48",
+      "packageVersion": "22.8.2026-48",
+      "releaseId": "bronze-2026-08-22-r48",
+      "status": "IN_PROGRESS",
+      "summary": "Resmî derleme numarası yalnız paketleme yetkisi tarafından ayrıldı."
+    },
+    {
+      "channel": "Bronze",
+      "date": "2026-08-22",
+      "monthlySequence": 49,
+      "version": "22.08.2026.49",
+      "packageVersion": "22.8.2026-49",
+      "releaseId": "bronze-2026-08-22-r49",
       "status": "IN_PROGRESS",
       "summary": "Resmî derleme numarası yalnız paketleme yetkisi tarafından ayrıldı."
     }

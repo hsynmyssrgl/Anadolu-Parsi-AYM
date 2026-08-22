@@ -3,7 +3,7 @@
   "id": "PPT-CANONICAL-RULE-REGISTRY-V21",
   "product": "ParsYuva Aile Yaşam Merkezi",
   "upperBrand": "ParsYuva",
-  "effectiveRelease": "Bronze 22.08.2026.46",
+  "effectiveRelease": "Bronze 22.08.2026.49",
   "exceptionless": true,
   "previousRuleSet": {
     "version": "PROJECT-RULES-2026-08-02-V6",
@@ -1664,8 +1664,8 @@
       "text": "Özel Windows kurulum karşılama yüzeyi, ilk kullanıcı ve aile oluşturma ekranının sakin görsel diliyle üç gerçek tanıtım adımı arasında geçiş yapar; bu bilgi geçişi kurulum ilerlemesi değildir, yüzde veya sahte ilerleme çubuğu gösteremez ve gerçek dosya kurulumu yalnız NSIS yerel ilerlemesiyle sunulur. Kurulum anlatımı Türkçe ve İngilizcede aynı dilde kadın sesi önceliğiyle, bulunamazsa aynı dilde erkek veya kurulu ilk ses yedeğiyle çalışır; görünür metin her zaman asıl kaynaktır. İlk aile ve güvenlik yüzeyleri 900x640 görünümde yatay taşmadan, eski tek pars marka görseliyle ve hareket azaltma tercihiyle çalışır. Oturum kilidi açık ilk kurulum veri kasasını yok edemez; yeniden doğrulama yolu kasayı kullanılabilir tutar ve ilk aile oluşturulduktan sonra iki aşamalı doğrulama başlatma çağrısı kilitli kasa hatası veremez. Güncelleme kişisel veriyi korur; eski installer setleri silinir; temiz tam derleme, paketli sürüm/açılış, SHA-256/imza kaydı, GitHub ve haricî Git eşitliği ile geri-okumalı haricî kaynak arşivi tamamlanmadan paket teslimi kabul edilemez.",
       "state": "ACTIVE",
       "source": "USER_DECISION_DEC-267",
-      "effectiveRelease": "Bronze 22.08.2026.46"
+      "effectiveRelease": "Bronze 22.08.2026.49"
     }
   ],
-  "rulesSha256": "2fea36f41b4b1f809defed5adb9eb274c6e0eaf35ce4d272a05eee304a730fe0"
+  "rulesSha256": "cb02fed18fb3ca097877ed3be73fbaacea60c8e291498fbeb21c28f9ad9e5a90"
 }

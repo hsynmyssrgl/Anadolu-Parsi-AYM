@@ -76,6 +76,7 @@ describe('Windows installer retention policy', () => {
   it('cleans every stale generated Windows package output before a new build', async () => {
     const directory = await createTemporaryRelease();
     await writeFile(join(directory, 'ParsYuva-Bronze-22.08.2026.42.exe'), 'old');
+    await writeFile(join(directory, '@pptdesktop-22.8.2026-42-x64.nsis.7z'), 'stale-payload');
     await writeFile(join(directory, 'builder-debug.yml'), 'diagnostic');
     await writeFile(join(directory, 'builder-effective-config.yaml'), 'config');
     await mkdir(join(directory, 'win-unpacked'));
@@ -85,6 +86,7 @@ describe('Windows installer retention policy', () => {
     const result = await removeWindowsPackagingArtifacts(directory);
 
     expect(result.removed.map((item) => item.name).sort()).toEqual([
+      '@pptdesktop-22.8.2026-42-x64.nsis.7z',
       'ParsYuva-Bronze-22.08.2026.42.exe',
       'builder-debug.yml',
       'builder-effective-config.yaml',

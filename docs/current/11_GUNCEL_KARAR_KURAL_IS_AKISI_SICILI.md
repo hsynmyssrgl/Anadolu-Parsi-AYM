@@ -2,10 +2,10 @@
 
 - Belge sürümü: **GUNCEL-2026-08-22-V5**
 - Tarih: **22.08.2026**
-- Görünür ürün sürümü: **Bronze 22.08.2026.46**
+- Görünür ürün sürümü: **Bronze 22.08.2026.49**
 - Kaynak HEAD: `19a5c84d02ad0700315bc67873a19d5e1fed9945`
 - Statü: **ACTIVE_WORKING_REFERENCE_NOT_BUILD_CLOSURE**
-- Kararlar: **DEC-250–DEC-267**
+- Kararlar: **DEC-250–DEC-268**
 
 > Bu sürüm geçmiş PDF/DOCX ve build kapanış belgelerinin üzerine yazmaz. Yerel PASS ile dış kabul kanıtını ayırır; NOT_RUN/PARTIAL/BLOCKED sonuçlarını tamamlanmış göstermez.
 
@@ -30,7 +30,7 @@
 ## 3. Kapsam ve kural özeti
 
 - Gereksinim: **358** — COMPLETE 109, PARTIAL 25, FOUNDATION_STARTED 1, NOT_IMPLEMENTED 223.
-- Kural sicili: **PPT-CANONICAL-RULE-REGISTRY-V21**, toplam 233, aktif 211, superseded 22, SHA-256 `2fea36f41b4b1f809defed5adb9eb274c6e0eaf35ce4d272a05eee304a730fe0`.
+- Kural sicili: **PPT-CANONICAL-RULE-REGISTRY-V21**, toplam 233, aktif 211, superseded 22, SHA-256 `cb02fed18fb3ca097877ed3be73fbaacea60c8e291498fbeb21c28f9ad9e5a90`.
 - Kullanıcı karar defteri: **94** açık kullanıcı kararı.
 
 ## 4. İş akışları
@@ -349,6 +349,7 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - `DEC-265` — DEC-265 — Her işlem öncesi zorunlu kural kontrolü — ACTIVE — `docs/decisions/DEC-265-her-islem-oncesi-zorunlu-kural-kontrolu.md`
 - `DEC-266` — DEC-266 — Özel kurulum, ilk aile, temiz paket ve çift yedek kabul zinciri — SUPERSEDED — `docs/decisions/DEC-266-ozel-kurulum-ilk-aile-temiz-paket-ve-cift-yedek-kabul-zinciri.md`
 - `DEC-267` — DEC-267 — Geçişli sesli kurulum, tek pars ve kasa kilidi düzeltmesi — ACTIVE — `docs/decisions/DEC-267-gecisli-sesli-kurulum-tek-pars-ve-kasa-kilidi-duzeltmesi.md`
+- `DEC-268` — DEC-268 — Windows installer timer callback ve tam ön yüz kullanıcı UAT teslimi — ACTIVE — `docs/decisions/DEC-268-windows-installer-timer-callback-ve-tam-on-yuz-kullanici-uat-teslimi.md`
 
 ## 12. ADR dizini
 

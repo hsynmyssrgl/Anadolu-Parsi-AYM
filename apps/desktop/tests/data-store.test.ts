@@ -755,6 +755,9 @@ describe('FamilyDataStore', () => {
     store.logout();
     expect(() => store.login({ email: 'test@example.com', password: 'GucluTestParolasi123!' })).toThrow(/doğrulama/);
     expect(store.login({ email: 'test@example.com', password: 'GucluTestParolasi123!', secondFactorCode: makeTotp(setup.secret) }).authenticated).toBe(true);
+    store.trustCurrentDevice({password:'GucluTestParolasi123!',code:makeTotp(setup.secret),displayName:'Ilk 2FA sonrasi cihaz'});
+    expect(store.getAuthState().trustedDevice).toBe(true);
+    expect(()=>store.currentPlatformPolicyAuthority({policyVersion:'uat-policy-v1',policyPackageVersion:1,policyPackageSha256:'a'.repeat(64),applicationVersion:'22.8.2026-49'})).not.toThrow();
     store.close();
   });
 

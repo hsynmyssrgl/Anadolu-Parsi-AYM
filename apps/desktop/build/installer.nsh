@@ -233,14 +233,14 @@ Function AymWelcomePageCreate
 
   StrCpy $AymWelcomeSlide 1
   Call AymWelcomeRenderSlide
-  nsDialogs::CreateTimer AymWelcomeTransition 2600
+  ${NSD_CreateTimer} AymWelcomeTransition 2600
   Call AymStartInstallerNarration
 
   nsDialogs::Show
 FunctionEnd
 
 Function AymWelcomePageLeave
-  nsDialogs::KillTimer AymWelcomeTransition
+  ${NSD_KillTimer} AymWelcomeTransition
   Call AymStopInstallerNarration
   ${NSD_FreeImage} $AymWelcomeBitmapHandle
 FunctionEnd
