@@ -61,7 +61,12 @@ describe('Ilk acilis deneyimi',()=>{
     expect(resolveVaultSessionGuardAction('active',false,false)).toBe('seal');
     const main=readFileSync(new URL('../src/main/main.ts',import.meta.url),'utf8');
     const guardStart=main.indexOf('function startVaultSessionGuard');
-    const guard=main.slice(guardStart,guardStart+2_500);
+    const guard=main.slice(guardStart,guardStart+4_500);
+    expect(guard).toContain('desktopRepositoryPolicyScope.runBootstrapExclusive');
+    expect(guard.indexOf('desktopRepositoryPolicyScope.runBootstrapExclusive')).toBeLessThan(guard.indexOf('const auth = current.getAuthState()'));
+    expect(guard).toContain("boundary: 'auth:getSessionLockState'");
+    expect(guard).toContain("boundary: 'auth:lockSession'");
+    expect(guard).toContain('vaultSessionGuardCheckRunning');
     expect(guard).toContain("guardAction === 'defer_untrusted'");
     expect(guard.indexOf("guardAction === 'defer_untrusted'")).toBeLessThan(guard.indexOf('universalApiPolicyEnforcement().execute'));
     expect(guard).toContain('const locked = current.lockSession()');

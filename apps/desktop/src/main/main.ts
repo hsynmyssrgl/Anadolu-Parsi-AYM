@@ -812,6 +812,7 @@ let automaticCleanBackupRewriteService: AutomaticCleanBackupRewriteService | und
 let userDataVault: UserDataVault | undefined;
 let userDataSqliteSession: VolatileSqliteSession | undefined;
 let vaultSessionGuardTimer: NodeJS.Timeout | undefined;
+let vaultSessionGuardCheckRunning = false;
 let lastVaultCheckpointAt = 0;
 let maintenanceReauthenticationBinding: string | undefined;
 const ipcTransportSessions = new IpcTransportSessionRegistry();
@@ -1120,27 +1121,43 @@ function sealUserDataSession(): void {
 function startVaultSessionGuard(): void {
   if (vaultSessionGuardTimer) return;
   vaultSessionGuardTimer = setInterval(() => {
+    if (vaultSessionGuardCheckRunning) return;
     const current = dataStore;
     if (!current) return;
-    const auth = current.getAuthState();
-    const guardAction = resolveVaultSessionGuardAction(
-      current.getSessionLockState().status,
-      auth.authenticated,
-      auth.trustedDevice === true
-    );
-    // A locked session has no normal policy authority by design. Defer before
-    // entering the PEP so its fail-closed authority resolver cannot seal the
-    // recoverable vault that the reauthentication overlay still needs.
-    if (guardAction === 'defer_locked' || guardAction === 'defer_untrusted') return;
     const correlationId = createRuntimeCorrelationId('job');
-    void runtime().correlation.run({ correlationId }, () => universalApiPolicyEnforcement().execute({
-      channel: VAULT_SESSION_CHECKPOINT_CHANNEL,
-      correlationId,
-      operation: () => {
-        if (guardAction === 'seal') throw new Error('VAULT_SESSION_AUTHORITY_EXPIRED');
-        if (Date.now() - lastVaultCheckpointAt >= 30_000) checkpointUserDataSession();
-      }
-    })).catch((error: unknown) => {
+    vaultSessionGuardCheckRunning = true;
+    void runtime().correlation.run({ correlationId }, async () => {
+      const observation = await desktopRepositoryPolicyScope.runBootstrapExclusive({
+        correlationId,
+        boundary: 'auth:getSessionLockState'
+      }, () => {
+        if (dataStore !== current) return undefined;
+        const auth = current.getAuthState();
+        return Object.freeze({
+          lockStatus: current.getSessionLockState().status,
+          authenticated: auth.authenticated,
+          trustedDevice: auth.trustedDevice === true
+        });
+      });
+      if (!observation) return;
+      const guardAction = resolveVaultSessionGuardAction(
+        observation.lockStatus,
+        observation.authenticated,
+        observation.trustedDevice
+      );
+      // A locked session has no normal policy authority by design. Defer before
+      // entering the PEP so its fail-closed authority resolver cannot seal the
+      // recoverable vault that the reauthentication overlay still needs.
+      if (guardAction === 'defer_locked' || guardAction === 'defer_untrusted') return;
+      await universalApiPolicyEnforcement().execute({
+        channel: VAULT_SESSION_CHECKPOINT_CHANNEL,
+        correlationId,
+        operation: () => {
+          if (guardAction === 'seal') throw new Error('VAULT_SESSION_AUTHORITY_EXPIRED');
+          if (Date.now() - lastVaultCheckpointAt >= 30_000) checkpointUserDataSession();
+        }
+      });
+    }).catch(async (error: unknown) => {
       runtime().logger.warn({
         timestamp: runtime().clock.now(),
         service: 'desktop-main',
@@ -1151,12 +1168,23 @@ function startVaultSessionGuard(): void {
         metadata: { errorName: error instanceof Error ? error.name : typeof error }
       });
       try {
-        const locked = current.lockSession();
-        if (locked.status !== 'locked') sealUserDataSession();
+        await desktopRepositoryPolicyScope.runBootstrapExclusive({
+          correlationId,
+          boundary: 'auth:lockSession'
+        }, () => {
+          if (dataStore !== current) return;
+          const locked = current.lockSession();
+          if (locked.status !== 'locked') sealUserDataSession();
+        });
       } catch {
-        sealUserDataSession();
+        await desktopRepositoryPolicyScope.runBootstrapExclusive({
+          correlationId,
+          boundary: 'auth:lockSession'
+        }, () => {
+          if (dataStore === current) sealUserDataSession();
+        }).catch(() => undefined);
       }
-    });
+    }).finally(() => { vaultSessionGuardCheckRunning = false; });
   }, 15_000);
 }
 
