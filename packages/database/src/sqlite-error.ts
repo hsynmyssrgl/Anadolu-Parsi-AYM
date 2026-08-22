@@ -10,6 +10,7 @@ interface SqliteLikeError {
   readonly errcode?: unknown;
   readonly errstr?: unknown;
   readonly message?: unknown;
+  readonly name?: unknown;
 }
 
 const errorText = (error: unknown): string => {
@@ -33,6 +34,19 @@ export const mapSqliteError = (
     .map(String)
     .join(' ')
     .toLocaleUpperCase('en-US');
+
+  if (
+    candidate?.name === 'PlatformPolicyEnforcementError'
+    && typeof candidate.code === 'string'
+  ) {
+    return createAppError({
+      code: ERROR_CODES.AUTHORIZATION_DENIED,
+      message: 'SQLite repository işlemi etkin güvenlik bağlamıyla eşleşmedi.',
+      category: 'authorization',
+      correlationId,
+      details: { enforcementCode: candidate.code }
+    });
+  }
 
   if (codeText.includes('SQLITE_TRANSACTION_ALREADY_ACTIVE')) {
     return createAppError({

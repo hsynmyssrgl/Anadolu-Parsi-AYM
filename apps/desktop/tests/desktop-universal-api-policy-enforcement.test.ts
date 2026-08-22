@@ -447,4 +447,39 @@ describe('31-U universal Desktop API policy enforcement', () => {
       operation: () => repository.probe(repositoryContext(asCorrelationId('corr-mismatch')))
     })).rejects.toMatchObject({ code: 'TRANSACTION_CONTEXT_MISMATCH' });
   });
+
+  it('allows only registered internal child correlations inside the signed callback', async () => {
+    const { enforcement, repositoryPolicyScope } = createHarness();
+    const repository = new GuardedProbeRepository({ executionPolicyGuard: repositoryPolicyScope.guard });
+    const allowedSuffixes = [
+      'timeline-location-proof',
+      'timeline-location-collection',
+      'timeline-location-exact',
+      'life-report'
+    ];
+
+    await expect(enforcement.execute({
+      channel: 'data:getSnapshotSections',
+      correlationId,
+      operation: () => allowedSuffixes.map((suffix) => repository.probe(
+        repositoryContext(asCorrelationId(`${correlationId}:${suffix}`))
+      ))
+    })).resolves.toHaveLength(allowedSuffixes.length);
+
+    await expect(enforcement.execute({
+      channel: 'data:getSnapshotSections',
+      correlationId,
+      operation: () => repository.probe(
+        repositoryContext(asCorrelationId(`${correlationId}:unregistered-child`))
+      )
+    })).rejects.toMatchObject({ code: 'TRANSACTION_CONTEXT_MISMATCH' });
+
+    await expect(enforcement.execute({
+      channel: 'data:getSnapshotSections',
+      correlationId,
+      operation: () => repository.probe(
+        repositoryContext(asCorrelationId(`${correlationId}:timeline-location-collection:nested`))
+      )
+    })).rejects.toMatchObject({ code: 'TRANSACTION_CONTEXT_MISMATCH' });
+  });
 });

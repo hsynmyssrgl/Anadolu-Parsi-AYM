@@ -17,4 +17,23 @@ describe('SQLite hata eşleme', () => {
     });
     expect(error.message).not.toContain('SQLITE_TRANSACTION_ALREADY_ACTIVE');
   });
+
+  it('repository policy guard hatasını beklenmeyen SQLite hatası olarak maskelemez', () => {
+    const policyError = Object.assign(new Error('Repository correlation mismatch'), {
+      name: 'PlatformPolicyEnforcementError',
+      code: 'TRANSACTION_CONTEXT_MISMATCH'
+    });
+    const error = mapSqliteError(
+      policyError,
+      asCorrelationId('correlation-policy-guard')
+    );
+
+    expect(error).toMatchObject({
+      code: ERROR_CODES.AUTHORIZATION_DENIED,
+      category: 'authorization',
+      retryable: false,
+      details: { enforcementCode: 'TRANSACTION_CONTEXT_MISMATCH' }
+    });
+    expect(error.message).not.toContain('SQLite işlemi beklenmeyen');
+  });
 });

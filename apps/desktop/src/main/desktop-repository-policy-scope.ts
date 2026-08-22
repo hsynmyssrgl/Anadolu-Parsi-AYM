@@ -70,6 +70,25 @@ const REPOSITORY_BOOTSTRAP_BOUNDARIES = new Set([
   'invitations:inspect'
 ]);
 
+const AUTHORIZED_INTERNAL_CHILD_CORRELATION_SUFFIXES = new Set([
+  'timeline-location-proof',
+  'timeline-location-collection',
+  'timeline-location-exact',
+  'life-report'
+]);
+
+const isRegisteredAuthorizedChildCorrelation = (
+  scope: RepositoryPolicyScope,
+  correlationId: CorrelationId
+): boolean => {
+  if (scope.kind !== 'AUTHORIZED') return false;
+  const prefix = `${scope.correlationId}:`;
+  if (!correlationId.startsWith(prefix)) return false;
+  return AUTHORIZED_INTERNAL_CHILD_CORRELATION_SUFFIXES.has(
+    correlationId.slice(prefix.length)
+  );
+};
+
 const hasPolicyAuthorization = (
   context: RepositoryExecutionContext
 ): context is PolicyAuthorizedRepositoryExecutionContext =>
@@ -214,7 +233,10 @@ export class DesktopRepositoryPolicyScope {
         'Repository execution attempted outside an authorized Desktop policy scope'
       );
     }
-    if (scope.correlationId !== context.correlationId) {
+    if (
+      scope.correlationId !== context.correlationId
+      && !isRegisteredAuthorizedChildCorrelation(scope, context.correlationId)
+    ) {
       throw new PlatformPolicyEnforcementError(
         'TRANSACTION_CONTEXT_MISMATCH',
         'Repository execution correlation does not match the active Desktop policy scope'
