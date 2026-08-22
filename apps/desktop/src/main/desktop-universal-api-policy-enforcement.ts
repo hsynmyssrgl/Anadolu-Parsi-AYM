@@ -251,7 +251,8 @@ export class DesktopUniversalApiPolicyEnforcement {
           expiresAt: certificate?.expiresAt ?? ''
         }),
         operation: () => this.#repositoryPolicyScope.runAuthorized(authorization, input.operation)
-      }));
+      });
+    }));
     });
   }
 }
