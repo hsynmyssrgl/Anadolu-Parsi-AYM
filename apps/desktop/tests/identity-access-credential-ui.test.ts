@@ -86,6 +86,9 @@ describe('33-P identity, access and temporary credential UI', () => {
   });
 
   it('exposes read-only companion creation and an explicit write-denial probe', () => {
+    expect(center).toContain('companionRecipientTrustedDeviceId');
+    expect(center).toContain('companionEligibleDevices.length===0');
+    expect(center).toContain('Eşlikçi cihaz anahtarı yapılandırılmadı');
     expect(center).toContain("createCompanion('read_only')");
     expect(center).toContain("createCompanion('write')");
     expect(center).toContain('createReadOnlyCompanionSnapshot({clientOperationId:operation.clientOperationId');

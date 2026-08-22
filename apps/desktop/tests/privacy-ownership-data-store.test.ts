@@ -319,6 +319,22 @@ describe('33-O FamilyDataStore privacy ownership integration', () => {
     expect(updated).toMatchObject({ previousRevision: 1, revision: 2, replayed: false, mutationKind: 'rights_request_update' });
     expect(updateReplay).toEqual({ ...updated, replayed: true });
 
+    const completed = await fixture.store.updatePrivacyRightsRequest({
+      requestId: created.resourceId,
+      expectedRevision: 2,
+      clientOperationId: '33-o-rights-local-completion',
+      status: 'locally_completed',
+      resolutionNote: 'Yerel saklama talebi incelemesi tamamlandı; dış kopyalar için fiziksel silme garantisi verilmez.'
+    });
+    expect(completed).toMatchObject({
+      previousRevision: 2,
+      revision: 3,
+      replayed: false,
+      mutationKind: 'rights_request_update'
+    });
+    expect(databaseValue(fixture.databasePath, `SELECT request_kind requestKind,status,revision FROM privacy_rights_requests WHERE id=?`, created.resourceId))
+      .toEqual({ requestKind: 'retention_change', status: 'locally_completed', revision: 3 });
+
     const before = operationalCounts(fixture.databasePath);
     const simulated = await fixture.store.simulatePrivacyPermission({ targets: [{
       subjectAccountId: account.id,

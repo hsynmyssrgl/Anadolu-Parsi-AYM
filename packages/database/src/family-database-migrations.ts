@@ -18180,7 +18180,8 @@ UPDATE database_metadata SET value='REVISION-34-K-WINDOWS-RESILIENCE-UNIVERSAL-U
 
 const COMMUNICATION_SCHEDULED_MESSAGE_SCHEMA_GENERATION = 'REVISION-34-B-SCHEDULED-MESSAGE-RELEASE' as const;
 const PLATFORM_POLICY_RECEIPT_CLOCK_SKEW_SCHEMA_GENERATION = 'REVISION-PPK-RECEIPT-CLOCK-SKEW-CONTRACT' as const;
-export const FAMILY_DATABASE_SCHEMA_GENERATION = 'REVISION-OBJECT-PERMISSION-FINITE-ALLOW-CONTRACT' as const;
+const OBJECT_PERMISSION_FINITE_ALLOW_SCHEMA_GENERATION = 'REVISION-OBJECT-PERMISSION-FINITE-ALLOW-CONTRACT' as const;
+export const FAMILY_DATABASE_SCHEMA_GENERATION = 'REVISION-PRIVACY-RIGHTS-LOCAL-COMPLETION-CONTRACT' as const;
 
 const bankingCatalog2026RefreshSql = `
 CREATE TABLE b4_banking_catalog_refresh_guard(
@@ -18292,6 +18293,30 @@ WHEN NEW.effect='allow' AND NEW.ends_at IS NULL AND (
 )
 BEGIN SELECT RAISE(ABORT,'policy-sensitive allow permission requires finite ends_at'); END;
 
+UPDATE database_metadata SET value='${OBJECT_PERMISSION_FINITE_ALLOW_SCHEMA_GENERATION}',
+  updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
+`;
+
+const privacyRightsLocalCompletionContractSql = `
+DROP TRIGGER trg_33o_rights_update;
+CREATE TRIGGER trg_33o_rights_update BEFORE UPDATE ON privacy_rights_requests
+WHEN NEW.id<>OLD.id OR NEW.family_id<>OLD.family_id OR NEW.account_id<>OLD.account_id OR NEW.owner_person_id<>OLD.owner_person_id
+ OR NEW.request_kind<>OLD.request_kind OR NEW.scope_resource_type<>OLD.scope_resource_type OR NEW.scope_resource_id<>OLD.scope_resource_id
+ OR NEW.reason<>OLD.reason OR NEW.created_at<>OLD.created_at OR NEW.revision<>OLD.revision+1
+ OR julianday(NEW.updated_at)<julianday(OLD.updated_at) OR OLD.status IN ('locally_completed','rejected','cancelled')
+ OR (OLD.status='requested' AND NEW.status NOT IN ('in_review','locally_completed','rejected','cancelled'))
+ OR (OLD.status='in_review' AND NEW.status NOT IN ('locally_completed','rejected','cancelled'))
+ OR (NEW.status='locally_completed' AND OLD.request_kind IN ('encrypted_export','legacy_export'))
+ OR NOT EXISTS(SELECT 1 FROM governed_ai_memory_mutations m WHERE m.id=NEW.last_mutation_id
+   AND m.mutation_kind=CASE
+     WHEN NEW.status='locally_completed' AND OLD.request_kind IN ('encrypted_export','legacy_export') THEN 'rights_export_finalize'
+     ELSE 'rights_request_update'
+   END
+   AND m.resource_type='data_rights_request' AND m.resource_id=OLD.id
+   AND m.family_id=OLD.family_id AND m.account_id=OLD.account_id AND m.owner_person_id=OLD.owner_person_id
+   AND m.previous_revision=OLD.revision AND m.revision=NEW.revision AND m.state_fingerprint=NEW.state_fingerprint
+   AND m.policy_receipt_hash=NEW.policy_receipt_hash AND m.occurred_at=NEW.updated_at)
+BEGIN SELECT RAISE(ABORT,'33-O rights request transition is stale or invalid'); END;
 UPDATE database_metadata SET value='${FAMILY_DATABASE_SCHEMA_GENERATION}',
   updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
 `;
@@ -18415,7 +18440,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(116, 'b4_banking_catalog_2026_refresh', bankingCatalog2026RefreshSql),
   createMigrationDefinition(117, 'communication_scheduled_message_release', communicationScheduledMessageReleaseSql),
   createMigrationDefinition(118, 'platform_policy_receipt_clock_skew_contract', platformPolicyReceiptClockSkewContractSql),
-  createMigrationDefinition(119, 'object_permission_finite_allow_contract', objectPermissionFiniteAllowContractSql)
+  createMigrationDefinition(119, 'object_permission_finite_allow_contract', objectPermissionFiniteAllowContractSql),
+  createMigrationDefinition(120, 'privacy_rights_local_completion_contract', privacyRightsLocalCompletionContractSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

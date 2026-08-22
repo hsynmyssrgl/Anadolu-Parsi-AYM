@@ -2271,8 +2271,9 @@ const identityAccessTruth = (value: unknown): boolean => identityAccessExact(val
 
 const identityAccessCenter = (value: unknown): boolean => {
   if (!identityAccessExact(value, [
-    'schemaVersion', 'key', 'passkeys', 'federatedLinks', 'temporaryCredentials', 'companionSnapshots', 'truth', 'generatedAt'
+    'schemaVersion', 'key', 'companionRecipientTrustedDeviceId', 'passkeys', 'federatedLinks', 'temporaryCredentials', 'companionSnapshots', 'truth', 'generatedAt'
   ]) || value.schemaVersion !== 1 || !identityAccessKey(value.key)
+    || (value.companionRecipientTrustedDeviceId !== null && !identityAccessId(value.companionRecipientTrustedDeviceId))
     || !Array.isArray(value.passkeys) || value.passkeys.length > 16 || !value.passkeys.every(identityAccessPasskey)
     || !Array.isArray(value.federatedLinks) || value.federatedLinks.length > 3 || !value.federatedLinks.every(identityAccessFederatedLink)
     || !Array.isArray(value.temporaryCredentials) || value.temporaryCredentials.length > 256

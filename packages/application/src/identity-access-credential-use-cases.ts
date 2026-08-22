@@ -562,6 +562,7 @@ export class GetIdentityAccessCredentialCenterUseCase {
       return ok({
         schemaVersion: 1,
         key: key.value,
+        companionRecipientTrustedDeviceId: null,
         passkeys: snapshot.value.passkeys.map(passkeyView),
         federatedLinks: snapshot.value.federatedLinks.map(federatedView),
         temporaryCredentials: snapshot.value.temporaryCredentials.map(temporaryView),

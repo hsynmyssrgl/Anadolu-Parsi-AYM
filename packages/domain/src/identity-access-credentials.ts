@@ -297,6 +297,8 @@ export interface IdentityAccessTruthView {
 export interface IdentityAccessCredentialCenterView {
   readonly schemaVersion: 1;
   readonly key: IdentityAccessAggregateKey;
+  /** Exact trusted-device target with a locally configured and validated X25519 recipient key. */
+  readonly companionRecipientTrustedDeviceId: string | null;
   readonly passkeys: readonly PasskeyCredentialView[];
   readonly federatedLinks: readonly FederatedIdentityLinkView[];
   readonly temporaryCredentials: readonly TemporaryVerifiableCredentialView[];

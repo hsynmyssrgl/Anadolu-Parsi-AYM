@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { basename, dirname, extname, isAbsolute, join, resolve } from 'node:path';
 import { closeSync, constants, existsSync, fstatSync, fsyncSync, linkSync, lstatSync, mkdirSync, openSync, readFileSync, readSync, realpathSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
-import { createHash, randomUUID } from 'node:crypto';
+import { createHash, createPublicKey, randomUUID } from 'node:crypto';
 import { performance } from 'node:perf_hooks';
 import { asCorrelationId, asIsoDateTime, createAppError, err, ERROR_CODES, ok, type AppError, type Result } from '@ppt/core';
 import { createWebAuthnChallenge, encryptPortableEmergencyPack, sha256Hex, validateOidcProviderConfiguration, verifyPortableEmergencyPackReadback, type OidcProviderConfiguration, type WebAuthnAssertionInput, type WebAuthnRegistrationInput } from '@ppt/security';
@@ -1224,6 +1224,22 @@ function cleanBackupRewrite():AutomaticCleanBackupRewriteService {
   return automaticCleanBackupRewriteService;
 }
 
+function configuredCompanionRecipient(): {
+  readonly trustedDeviceId: string;
+  readonly publicKeySpkiBase64Url: string;
+} | undefined {
+  const trustedDeviceId=process.env.PPT_COMPANION_TRUSTED_DEVICE_ID;
+  const publicKeySpkiBase64Url=process.env.PPT_COMPANION_X25519_PUBLIC_KEY_SPKI_BASE64URL;
+  if(!trustedDeviceId?.trim()||trustedDeviceId!==trustedDeviceId.trim()||!publicKeySpkiBase64Url?.trim()||publicKeySpkiBase64Url!==publicKeySpkiBase64Url.trim())return undefined;
+  try{
+    const bytes=Buffer.from(publicKeySpkiBase64Url,'base64url');
+    if(bytes.byteLength<32||bytes.toString('base64url')!==publicKeySpkiBase64Url)return undefined;
+    const key=createPublicKey({key:bytes,format:'der',type:'spki'});
+    if(key.asymmetricKeyType!=='x25519')return undefined;
+    return Object.freeze({trustedDeviceId,publicKeySpkiBase64Url});
+  }catch{return undefined;}
+}
+
 function createIdentityAccessProductionPorts(current:DesktopRuntime,protector:DeviceSecretProtector):{
   readonly ports:Partial<IdentityAccessDataStorePorts>;
   readonly providerConfigurations:readonly import('@ppt/repository-contracts').FederatedProviderProvisioningRow[];
@@ -1241,8 +1257,8 @@ function createIdentityAccessProductionPorts(current:DesktopRuntime,protector:De
   const temporaryCredentialEnvelope=new ProtectedTemporaryCredentialEnvelopeAdapter({directory:join(current.config.paths.secrets,'temporary-credentials'),protector,deviceIdentity,clock:current.clock});
   const encryptedCompanionSnapshot=new X25519EncryptedCompanionSnapshotAdapter({
     encryptionKeys:{resolve:({trustedDeviceId,securityEpoch})=>{
-      const configuredDevice=process.env.PPT_COMPANION_TRUSTED_DEVICE_ID;const publicKeySpkiBase64Url=process.env.PPT_COMPANION_X25519_PUBLIC_KEY_SPKI_BASE64URL;
-      return configuredDevice&&publicKeySpkiBase64Url&&configuredDevice===trustedDeviceId?ok({publicKeySpkiBase64Url,algorithm:'X25519' as const,securityEpoch}):err(identityFailure('Companion X25519 recipient key is unavailable.'));
+      const configured=configuredCompanionRecipient();
+      return configured?.trustedDeviceId===trustedDeviceId?ok({publicKeySpkiBase64Url:configured.publicKeySpkiBase64Url,algorithm:'X25519' as const,securityEpoch}):err(identityFailure('Companion X25519 recipient key is unavailable.'));
     }}
   });
   const ports:Partial<IdentityAccessDataStorePorts>={challengeGenerator:{createChallenge:createWebAuthnChallenge},passkeyCeremonyVerifier:webAuthnCeremony,passkeyRecoveryVerifier:passkeyRecoveryRegistry,
@@ -2557,7 +2573,10 @@ function registerIpc(): void {
       await localGovernedOcrBridgeMethod('setLocalGovernedOcrEnabled')(input),
       input.enabled ? 'processing_enable' : 'processing_disable'
     ));
-  registerIpcHandler('identityAccess:getCenter',()=>store().getIdentityAccessCredentialCenter());
+  registerIpcHandler('identityAccess:getCenter',async()=>{
+    const center=await store().getIdentityAccessCredentialCenter();
+    return Object.freeze({...center,companionRecipientTrustedDeviceId:configuredCompanionRecipient()?.trustedDeviceId??null});
+  });
   registerIpcHandler('identityAccess:issueOperationToken',(_event,input:{readonly operationKind:IdentityAccessOperationKind})=>store().issueIdentityAccessOperationToken(input.operationKind));
   registerIpcHandler('identityAccess:beginPasskeyRegistration',(_event,input:{readonly clientOperationId:string})=>store().beginPasskeyRegistration({...input,relyingPartyId:IDENTITY_WEBAUTHN_RP_ID}));
   registerIpcHandler('identityAccess:beginPasskeyAuthentication',(_event,input:{readonly clientOperationId:string})=>store().beginPasskeyAuthentication({...input,relyingPartyId:IDENTITY_WEBAUTHN_RP_ID}));

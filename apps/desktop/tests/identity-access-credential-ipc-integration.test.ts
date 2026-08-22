@@ -175,7 +175,7 @@ const truth = {
   remoteRevocationFreshnessGuaranteed: false
 } as const;
 const center = {
-  schemaVersion: 1, key, passkeys: [passkey], federatedLinks: [federatedLink],
+  schemaVersion: 1, key, companionRecipientTrustedDeviceId: null, passkeys: [passkey], federatedLinks: [federatedLink],
   temporaryCredentials: [temporaryCredential], companionSnapshots: [companionMetadata], truth, generatedAt: occurredAt
 } as const;
 const registrationChallenge = {
