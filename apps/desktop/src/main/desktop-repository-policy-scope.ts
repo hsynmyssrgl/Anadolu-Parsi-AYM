@@ -130,6 +130,16 @@ export class DesktopRepositoryPolicyScope {
     );
   }
 
+  public runAdmissionExclusive<T>(
+    input: DesktopRepositoryPolicyBoundaryInput,
+    operation: () => T | Promise<T>
+  ): Promise<T> {
+    const priorityWeight = REPOSITORY_BOOTSTRAP_BOUNDARIES.has(input.boundary)
+      ? INTERACTIVE_EXCLUSIVE_PRIORITY_WEIGHT
+      : resolveIpcRequestAdmissionPolicy(input.boundary).priorityWeight;
+    return this.#runExclusive(priorityWeight, async () => await operation());
+  }
+
   public runPolicyResolution<T>(
     input: DesktopRepositoryPolicyBoundaryInput,
     operation: () => T

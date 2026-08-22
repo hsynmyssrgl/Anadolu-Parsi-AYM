@@ -170,27 +170,23 @@ export class DesktopUniversalApiPolicyEnforcement {
     return this.#clientDataAccessStatus.execute();
   }
 
-  async #assertPolicyServiceAvailability(
-    action: PlatformPolicyIntent['action']
-  ): Promise<PolicyServiceAvailabilityDecision> {
-    const availability = await this.#evaluatePolicyServiceAvailability();
-    if (availability.mode !== 'read-write') this.#onAvailabilityRestricted?.(availability);
-    this.#policyServiceAvailabilityPolicy.assertOperationAllowed(
-      action === 'read' ? 'read' : 'mutation',
-      availability
-    );
-    return availability;
-  }
-
   public async execute<T>(input: DesktopUniversalApiExecutionInput<T>): Promise<T> {
     if (isDesktopPolicyServiceAvailabilityStatusChannel(input.channel)) return input.operation();
-    if (isDesktopPolicyBootstrapChannel(input.channel)) {
-      const bootstrapIntent = resolveDesktopUniversalApiIntent(input.channel, input.correlationId);
-      return this.#repositoryPolicyScope.runBootstrapExclusive({
-        correlationId: input.correlationId,
-        boundary: input.channel
-      }, async () => {
-        await this.#assertPolicyServiceAvailability(bootstrapIntent.action);
+    return this.#repositoryPolicyScope.runAdmissionExclusive({
+      correlationId: input.correlationId,
+      boundary: input.channel
+    }, async () => {
+      const availability = await this.#evaluatePolicyServiceAvailability();
+      if (availability.mode !== 'read-write') this.#onAvailabilityRestricted?.(availability);
+      if (availability.mode === 'deny') {
+        this.#policyServiceAvailabilityPolicy.assertOperationAllowed('read', availability);
+      }
+      if (isDesktopPolicyBootstrapChannel(input.channel)) {
+        const bootstrapIntent = resolveDesktopUniversalApiIntent(input.channel, input.correlationId);
+        this.#policyServiceAvailabilityPolicy.assertOperationAllowed(
+          bootstrapIntent.action === 'read' ? 'read' : 'mutation',
+          availability
+        );
         const binding = this.#resolveBootstrapClientContext();
         return this.#clientDataAccessEnforcement.executeBootstrap({
           correlationId: input.correlationId,
@@ -206,15 +202,12 @@ export class DesktopUniversalApiPolicyEnforcement {
             boundary: input.channel
           }, input.operation)
         });
-      });
-    }
-    const intent = resolveDesktopUniversalApiIntent(input.channel, input.correlationId);
-    return this.#repositoryPolicyScope.runPolicyResolutionExclusive({
-      correlationId: input.correlationId,
-      boundary: input.channel
-    }, async () => {
-      await this.#assertPolicyServiceAvailability(intent.action);
-      return this.#enforcementPoint.execute(intent, this.#clusterFence, async (authorization) => {
+      }
+      const intent = resolveDesktopUniversalApiIntent(input.channel, input.correlationId);
+      return this.#repositoryPolicyScope.runPolicyResolution({
+        correlationId: input.correlationId,
+        boundary: input.channel
+      }, () => this.#enforcementPoint.execute(intent, this.#clusterFence, async (authorization) => {
       assertActivePlatformPolicyTransactionContext(authorization, {
         resourceType: intent.resourceType,
         resourceId: intent.resourceId,
@@ -258,8 +251,7 @@ export class DesktopUniversalApiPolicyEnforcement {
           expiresAt: certificate?.expiresAt ?? ''
         }),
         operation: () => this.#repositoryPolicyScope.runAuthorized(authorization, input.operation)
-      });
-    });
+      }));
     });
   }
 }
