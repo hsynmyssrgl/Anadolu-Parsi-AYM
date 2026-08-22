@@ -112,6 +112,7 @@ const createHarness = (writable = true, trusted = true) => {
     'formDraft:getWorkspace',
     'family:createMember',
     'auth:login',
+    'auth:getState',
     'auth:beginTwoFactorSetup',
     'auth:enableTwoFactor',
     'auth:trustCurrentDevice',
@@ -297,6 +298,42 @@ describe('31-U universal Desktop API policy enforcement', () => {
     await expect(Promise.all([first, standard, interactive])).resolves.toEqual(['active', 'standard', 'interactive']);
     expect(order).toEqual(['active', 'interactive', 'standard']);
     expect(maximumActive).toBe(1);
+  });
+
+  it('keeps queued interactive session bootstrap work ahead of later bootstrap polling', async () => {
+    const { enforcement } = createHarness();
+    let releaseActive!: () => void;
+    const activeGate = new Promise<void>((resolve) => { releaseActive = resolve; });
+    const order: string[] = [];
+    let activeEntered = false;
+    const active = enforcement.execute({
+      channel: 'dashboard:getOverview',
+      correlationId,
+      operation: async () => {
+        order.push('active');
+        activeEntered = true;
+        await activeGate;
+        return 'active';
+      }
+    });
+    while (!activeEntered) await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    const sessionBootstrap = enforcement.execute({
+      channel: 'formDraft:getWorkspace',
+      correlationId,
+      operation: () => { order.push('session-bootstrap'); return 'session-bootstrap'; }
+    });
+    const laterBootstrapPoll = enforcement.execute({
+      channel: 'auth:getState',
+      correlationId,
+      operation: () => { order.push('later-bootstrap-poll'); return 'later-bootstrap-poll'; }
+    });
+    releaseActive();
+    await expect(Promise.all([active, sessionBootstrap, laterBootstrapPoll])).resolves.toEqual([
+      'active',
+      'session-bootstrap',
+      'later-bootstrap-poll'
+    ]);
+    expect(order).toEqual(['active', 'session-bootstrap', 'later-bootstrap-poll']);
   });
 
   it('rejects an unregistered direct repository bootstrap scope', () => {

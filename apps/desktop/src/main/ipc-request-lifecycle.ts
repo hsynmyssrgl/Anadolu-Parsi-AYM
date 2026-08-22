@@ -374,6 +374,8 @@ const interactiveAdmissionChannels = new Set<string>([
   'data:getSnapshot',
   'data:getSnapshotSections',
   'dashboard:getOverview',
+  'accessibility:getPreferences',
+  'accessibility:updatePreferences',
   'catalog:listPeople',
   'catalog:listEvents',
   'catalog:lookup',

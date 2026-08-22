@@ -94,6 +94,19 @@ describe('33-N form draft IPC boundary', () => {
     expect(resolveIpcRequestLifecyclePolicy('formDraft:undo')).toMatchObject({ cancellable: false, latestWins: false });
   });
 
+  it('keeps authenticated-session accessibility hydration in the interactive admission class', () => {
+    expect(resolveIpcRequestAdmissionPolicy('accessibility:getPreferences')).toMatchObject({
+      enabled: true,
+      priority: 'interactive',
+      priorityWeight: 100
+    });
+    expect(resolveIpcRequestAdmissionPolicy('accessibility:updatePreferences')).toMatchObject({
+      enabled: true,
+      priority: 'interactive',
+      priorityWeight: 100
+    });
+  });
+
   it('fails closed when the draft write rate budget is exhausted and admits retry after reset', async () => {
     let now = 10_000;
     const registry = new IpcRequestLifecycleRegistry({ now: () => now });

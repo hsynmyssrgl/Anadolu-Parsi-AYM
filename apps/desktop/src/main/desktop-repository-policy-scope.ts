@@ -43,6 +43,9 @@ interface PendingExclusiveOperation {
   readonly reject: (reason: unknown) => void;
 }
 
+const INTERACTIVE_EXCLUSIVE_PRIORITY_WEIGHT =
+  resolveIpcRequestAdmissionPolicy('dashboard:getOverview').priorityWeight;
+
 const REPOSITORY_BOOTSTRAP_BOUNDARIES = new Set([
   'app:getInfo',
   'app:getLocalizationBootstrap',
@@ -122,7 +125,7 @@ export class DesktopRepositoryPolicyScope {
     operation: () => T | Promise<T>
   ): Promise<T> {
     return this.#runExclusive(
-      Number.MAX_SAFE_INTEGER,
+      INTERACTIVE_EXCLUSIVE_PRIORITY_WEIGHT,
       async () => await this.runBootstrap(input, operation)
     );
   }
