@@ -34,6 +34,16 @@ export const mapSqliteError = (
     .join(' ')
     .toLocaleUpperCase('en-US');
 
+  if (codeText.includes('SQLITE_TRANSACTION_ALREADY_ACTIVE')) {
+    return createAppError({
+      code: ERROR_CODES.DATABASE_BUSY,
+      message: 'SQLite işlem sınırı başka bir işlem tamamlanana kadar meşgul.',
+      category: 'infrastructure',
+      correlationId,
+      retryable: true,
+      details: { reason: 'transaction_already_active' }
+    });
+  }
   if (codeText.includes('SQLITE_BUSY')) {
     return createAppError({
       code: ERROR_CODES.DATABASE_BUSY,
