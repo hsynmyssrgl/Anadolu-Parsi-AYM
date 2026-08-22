@@ -175,7 +175,10 @@ export class DesktopUniversalApiPolicyEnforcement {
   ): Promise<PolicyServiceAvailabilityDecision> {
     const availability = await this.#evaluatePolicyServiceAvailability();
     if (availability.mode !== 'read-write') this.#onAvailabilityRestricted?.(availability);
-    this.#policyServiceAvailabilityPolicy.assertOperationAllowed(action, availability);
+    this.#policyServiceAvailabilityPolicy.assertOperationAllowed(
+      action === 'read' ? 'read' : 'mutation',
+      availability
+    );
     return availability;
   }
 

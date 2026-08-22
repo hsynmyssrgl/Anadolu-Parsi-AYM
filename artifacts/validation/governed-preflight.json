@@ -11,11 +11,8 @@
     "authority": "Explicit user instruction in current conversation",
     "statement": "All written project rules, including mandatory current-rule, hash, acknowledgement and universal enforcement checks before every state-changing operation with no waiver or skip, the exact ParsYuva Aile Yaşam Merkezi product name, C:\\Program Files\\PPT\\ParsYuva installation, ParsYuva.exe and ParsYuva shortcuts, stale installer cleanup, one visible release channel, the custom branded installer with three clearly informational transitions separated from real NSIS progress, Turkish and English installer narration with same-language female preference and same-language installed voice fallback, a responsive 900x640 first-family surface using the original single Pars mark, visible window and tray icons, atomic local first-family setup, a vault-safe session lock and working two-factor setup immediately after onboarding, upgrade-time personal-data preservation, a clean all-workspace rebuild, packaged runtime launch and version verification, SHA-256 and signing-state recording, and the exact source commit backed up to GitHub, the external Git remote and a readback-verified external source archive, are binding and non-skippable. Every ACTIVE rule must be fail-closed enforced or explicitly BLOCKED/NOT_RUN until evidence exists."
   },
-  "sourceFingerprint": {
-    "sha256": "87307ed3e8c5f7f006194358423da9b87219e6d18a416c72640f6c0f3122dc66",
-    "fileCount": 2718
-  },
-  "status": "PASS",
+  "sourceFingerprint": null,
+  "status": "FAIL",
   "results": [
     {
       "script": "scripts/verify-canonical-rule-registry.mjs",
@@ -103,64 +100,10 @@
     },
     {
       "script": "scripts/verify-platform-policy-gate.mjs",
-      "exitCode": 0,
-      "stdout": "Platform Policy Gate: PASS / authorization bypass 0 / presentation conditions 10 / AST gate PASS / capability manifest gate PASS / application security profile gate PASS / policy service availability gate PASS.\nPlatform Policy runtime: PASS (8 checks).",
-      "stderr": ""
-    },
-    {
-      "script": "scripts/verify-core-service-boundary.mjs",
-      "exitCode": 0,
-      "stdout": "Core Service boundary: PASS (8 checks).",
-      "stderr": ""
-    },
-    {
-      "script": "scripts/verify-core-service-local-admin-contract.mjs",
-      "exitCode": 0,
-      "stdout": "Core Service Local Admin Contract: PASS (154 checks).",
-      "stderr": ""
-    },
-    {
-      "script": "scripts/verify-core-service-local-admin-runtime-wrapper.mjs",
-      "exitCode": 0,
-      "stdout": "Core Service Local Admin Runtime: PASS (50 checks).",
-      "stderr": "(node:15040) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
-    },
-    {
-      "script": "scripts/verify-desktop-core-service-startup-contract.mjs",
-      "exitCode": 0,
-      "stdout": "Desktop Core Service Startup Contract: PASS (41 checks).",
-      "stderr": ""
-    },
-    {
-      "script": "scripts/verify-desktop-core-service-startup-runtime-wrapper.mjs",
-      "exitCode": 0,
-      "stdout": "Desktop Core Service Startup Runtime: PASS (51 checks).",
-      "stderr": "(node:13624) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
-    },
-    {
-      "script": "scripts/verify-system-health-core-service-ipc-contract.mjs",
-      "exitCode": 0,
-      "stdout": "System Health Core Service IPC Contract: PASS (10 checks).",
-      "stderr": ""
-    },
-    {
-      "script": "scripts/verify-system-health-core-service-ipc-runtime-wrapper.mjs",
-      "exitCode": 0,
-      "stdout": "System Health Core Service IPC Runtime: PASS (10 checks).",
-      "stderr": "(node:14664) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
-    },
-    {
-      "script": "scripts/generate-project-artifact-index-v2.mjs",
-      "exitCode": 0,
-      "stdout": "Artifact indexes generated: 6286 files / 3811 documents.",
-      "stderr": ""
-    },
-    {
-      "script": "scripts/verify-project-artifact-index-v2.mjs",
-      "exitCode": 0,
-      "stdout": "Complete Document/Artifact Index: PASS (20240 checks / 6286 files / 3811 documents).",
-      "stderr": ""
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "{\n  \"status\": \"FAIL\",\n  \"productionSourceZones\": 18,\n  \"scannedFiles\": 589,\n  \"securityRelevantFiles\": 21,\n  \"canonicalAvailabilityReferenceFiles\": 19,\n  \"exactCanonicalReferenceAllowlistEntries\": 19,\n  \"exactStatusChannelAllowlistEntries\": 5,\n  \"canonicalPolicyClassDefinitions\": 1,\n  \"legacyPolicyServiceRuntimeReferences\": 0,\n  \"broadAllowlistExceptions\": 0,\n  \"maliciousSelfTestAssertions\": 14,\n  \"benignFalsePositiveAssertions\": 5,\n  \"canonicalReferencePaths\": [\n    \"apps/desktop/src/main/core-service-application-adapter.ts\",\n    \"apps/desktop/src/main/core-service-startup-connection.ts\",\n    \"apps/desktop/src/main/desktop-universal-api-policy-enforcement.ts\",\n    \"apps/desktop/src/main/ipc-integration-policy.ts\",\n    \"apps/desktop/src/main/ipc-read-sharing.ts\",\n    \"apps/desktop/src/main/main.ts\",\n    \"apps/desktop/src/main/policy-service-availability-application-adapter.ts\",\n    \"apps/desktop/src/main/preload.ts\",\n    \"apps/desktop/src/renderer/App.tsx\",\n    \"apps/desktop/src/renderer/global.d.ts\",\n    \"packages/application/src/index.ts\",\n    \"packages/application/src/policy-service-availability-use-cases.ts\",\n    \"packages/core-service-client/src/core-service-policy-sdk.ts\",\n    \"packages/core-service-contracts/src/index.ts\",\n    \"packages/domain/src/index.ts\",\n    \"packages/domain/src/policy-service-availability.ts\",\n    \"packages/platform-policy/src/index.ts\",\n    \"packages/platform-policy/src/policy-enforcement-point.ts\",\n    \"packages/platform-policy/src/policy-service-availability-policy.ts\"\n  ],\n  \"findings\": [\n    {\n      \"path\": \"apps/desktop/src/main/desktop-universal-api-policy-enforcement.ts\",\n      \"line\": 1,\n      \"column\": 1,\n      \"kind\": \"UNIVERSAL_AVAILABILITY_GATE_INCOMPLETE\",\n      \"detail\": \"missing: if (availability.mode === 'deny')\"\n    },\n    {\n      \"path\": \"apps/desktop/src/main/desktop-universal-api-policy-enforcement.ts\",\n      \"line\": 185,\n      \"column\": 3,\n      \"kind\": \"UNIVERSAL_GATE_NOT_BEFORE_BOOTSTRAP\",\n      \"detail\": \"status exception -> availability gate -> bootstrap order required\"\n    }\n  ]\n}"
     }
   ],
-  "generatedAt": "2026-08-22T17:51:03.961Z"
+  "generatedAt": "2026-08-22T17:59:59.614Z"
 }
