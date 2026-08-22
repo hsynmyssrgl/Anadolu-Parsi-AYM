@@ -12,7 +12,7 @@
     "statement": "All written project rules, including mandatory current-rule, hash, acknowledgement and universal enforcement checks before every state-changing operation with no waiver or skip, the exact ParsYuva Aile Yaşam Merkezi product name, C:\\Program Files\\PPT\\ParsYuva installation, ParsYuva.exe and ParsYuva shortcuts, stale installer cleanup, one visible release channel, the custom branded installer without decorative fake progress, a responsive 900x640 first-family surface with three reduced-motion-aware Pars figures, same-language female narration preference with male fallback, visible window and tray icons, atomic local first-family setup, upgrade-time personal-data preservation, a clean all-workspace rebuild, packaged runtime launch and version verification, SHA-256 and signing-state recording, and the exact source commit backed up to GitHub, the external Git remote and a readback-verified external source archive, are binding and non-skippable. Every ACTIVE rule must be fail-closed enforced or explicitly BLOCKED/NOT_RUN until evidence exists."
   },
   "sourceFingerprint": {
-    "sha256": "4c27d5f3ceb6a5fc439ad01687aadab3017ec2955b2fb1ef3ea97ba3695985ad",
+    "sha256": "85f5d8b5f51aa226daef6870328c8380d187c401748a90c80e201eadb22c7811",
     "fileCount": 2706
   },
   "status": "PASS",
@@ -62,7 +62,7 @@
     {
       "script": "scripts/verify-windows-installer-retention-policy.mjs",
       "exitCode": 0,
-      "stdout": "Windows installer retention policy: PASS (0 artefakt / yalnız 22.08.2026.45 kabul edilir).",
+      "stdout": "Windows installer retention policy: PASS (2 artefakt / yalnız 22.08.2026.45 kabul edilir).",
       "stderr": ""
     },
     {
@@ -123,7 +123,7 @@
       "script": "scripts/verify-core-service-local-admin-runtime-wrapper.mjs",
       "exitCode": 0,
       "stdout": "Core Service Local Admin Runtime: PASS (50 checks).",
-      "stderr": "(node:30852) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+      "stderr": "(node:11404) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
     },
     {
       "script": "scripts/verify-desktop-core-service-startup-contract.mjs",
@@ -135,7 +135,7 @@
       "script": "scripts/verify-desktop-core-service-startup-runtime-wrapper.mjs",
       "exitCode": 0,
       "stdout": "Desktop Core Service Startup Runtime: PASS (51 checks).",
-      "stderr": "(node:26892) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+      "stderr": "(node:20144) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
     },
     {
       "script": "scripts/verify-system-health-core-service-ipc-contract.mjs",
@@ -147,7 +147,7 @@
       "script": "scripts/verify-system-health-core-service-ipc-runtime-wrapper.mjs",
       "exitCode": 0,
       "stdout": "System Health Core Service IPC Runtime: PASS (10 checks).",
-      "stderr": "(node:11604) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+      "stderr": "(node:18240) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
     },
     {
       "script": "scripts/generate-project-artifact-index-v2.mjs",
@@ -162,5 +162,5 @@
       "stderr": ""
     }
   ],
-  "generatedAt": "2026-08-22T08:52:20.558Z"
+  "generatedAt": "2026-08-22T09:01:01.505Z"
 }

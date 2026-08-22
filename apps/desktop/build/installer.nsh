@@ -110,22 +110,6 @@ Var AymInstallStatusText
 Var AymWelcomeDialog
 Var AymWelcomeBitmap
 Var AymWelcomeBitmapHandle
-Var AymWelcomePulse
-Var AymWelcomePulsePhase
-
-Function AymWelcomeAnimate
-  IntOp $AymWelcomePulsePhase $AymWelcomePulsePhase + 1
-  ${If} $AymWelcomePulsePhase > 3
-    StrCpy $AymWelcomePulsePhase 1
-  ${EndIf}
-  ${If} $AymWelcomePulsePhase == 1
-    ${NSD_SetText} $AymWelcomePulse "●  ○  ○"
-  ${ElseIf} $AymWelcomePulsePhase == 2
-    ${NSD_SetText} $AymWelcomePulse "○  ●  ○"
-  ${Else}
-    ${NSD_SetText} $AymWelcomePulse "○  ○  ●"
-  ${EndIf}
-FunctionEnd
 
 Function AymWelcomePageCreate
   !insertmacro MUI_HEADER_TEXT "$(AymProductName)" "$(AymPressNext)"
@@ -167,26 +151,18 @@ Function AymWelcomePageCreate
   SendMessage $0 ${WM_SETFONT} $1 1
   SetCtlColors $0 "467259" "F0F0F0"
 
-  ; A restrained three-point pulse gives the requested motion without looking
-  ; like installation progress; real progress remains exclusive to INSTFILES.
-  ${NSD_CreateLabel} 121u 157u 58u 15u "●  ○  ○"
-  Pop $AymWelcomePulse
-  CreateFont $1 "Segoe UI Symbol" 10 400
-  SendMessage $AymWelcomePulse ${WM_SETFONT} $1 1
-  SetCtlColors $AymWelcomePulse "${PPT_INSTALLER_CHANNEL_COLOR}" "F0F0F0"
-  ${NSD_CreateLabel} 174u 156u 121u 19u "$(AymPressNext)"
+  ; Keep the complete pre-installation plan static. Only the native INSTFILES
+  ; page may move, so decorative dots cannot be mistaken for progress.
+  ${NSD_CreateLabel} 121u 156u 174u 19u "$(AymPressNext)"
   Pop $0
   CreateFont $1 "Segoe UI" 9 600
   SendMessage $0 ${WM_SETFONT} $1 1
   SetCtlColors $0 "71441F" "F0F0F0"
 
-  StrCpy $AymWelcomePulsePhase 1
-  nsDialogs::CreateTimer AymWelcomeAnimate 680
   nsDialogs::Show
 FunctionEnd
 
 Function AymWelcomePageLeave
-  nsDialogs::KillTimer AymWelcomeAnimate
   ${NSD_FreeImage} $AymWelcomeBitmapHandle
 FunctionEnd
 

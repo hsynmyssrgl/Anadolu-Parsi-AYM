@@ -11,7 +11,7 @@ const stylesUrl = new URL('../src/renderer/styles.css', import.meta.url);
 const packageUrl = new URL('../package.json', import.meta.url);
 
 describe('installer progress, narration and Silver help experience', () => {
-  it('keeps decorative welcome motion separate and reserves progress for real file installation', async () => {
+  it('keeps the custom welcome static and reserves progress for real file installation', async () => {
     const [source,extractor,rawPackage]=await Promise.all([readFile(installerUrl,'utf8'),readFile(extractorUrl,'utf8'),readFile(packageUrl,'utf8')]);
     const packageJson=JSON.parse(rawPackage) as {build:{executableName?:string;win?:{artifactName?:string};artifactName?:string;nsis?:{shortcutName?:string;multiLanguageInstaller?:boolean;installerLanguages?:string[]}}};
     for (const marker of [
@@ -28,8 +28,6 @@ describe('installer progress, narration and Silver help experience', () => {
       'Function AymWelcomePageCreate','Function AymWelcomePageLeave',
       'Page custom AymWelcomePageCreate AymWelcomePageLeave',
       '${NSD_CreateBitmap} 0 0 108u 100% ""',
-      'nsDialogs::CreateTimer AymWelcomeAnimate 680',
-      'nsDialogs::KillTimer AymWelcomeAnimate',
       'Ailenizin hikâyesi, tek ve güvenli bir yerde.',
       'kişisel veri aktarmaz','C:\\Program Files\\PPT\\ParsYuva',
       'CreateFont $1 "Segoe UI" 11 400','CreateFont $2 "Segoe UI" 10 600',
@@ -58,6 +56,9 @@ describe('installer progress, narration and Silver help experience', () => {
     expect(source).not.toContain('Function AymInstallProgressTick');
     expect(source).not.toContain('${PBM_GETPOS}');
     expect(source).not.toContain('${NSD_CreateTimer}');
+    expect(source).not.toContain('nsDialogs::CreateTimer');
+    expect(source).not.toContain('nsDialogs::KillTimer');
+    expect(source).not.toContain('Function AymWelcomeAnimate');
     expect(extractor.match(/Nsis7z::ExtractWithDetails "\$\{FILE\}" "\$\(AymInstallingDetail\)"/gu)).toHaveLength(2);
     expect(extractor.match(/Call AymInstallPayloadStageBegin/gu)).toHaveLength(3);
     expect(extractor.match(/Call AymInstallPayloadStageEnd/gu)).toHaveLength(3);

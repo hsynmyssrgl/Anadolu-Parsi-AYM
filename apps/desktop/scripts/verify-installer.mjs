@@ -80,7 +80,9 @@ try {
     '!define MUI_WELCOMEPAGE_TITLE_3LINES',
     '!define MUI_WELCOMEPAGE_TITLE "$(AymWelcomeTitle)"',
     '!define MUI_WELCOMEPAGE_TEXT "$(AymProductName)',
-    '!insertmacro MUI_PAGE_WELCOME',
+    'Page custom AymWelcomePageCreate AymWelcomePageLeave',
+    'nsDialogs::Create 1018',
+    '${NSD_CreateBitmap} 0 0 108u 100% ""',
     'Ailenizin hikâyesi, tek ve güvenli bir yerde.',
     'ParsYuva Aile Yaşam Merkezi',
     'Kuruluma hazır',
@@ -116,19 +118,23 @@ try {
   }
   if (installerInclude.includes('Function AymWelcomeAnimate')
     || installerInclude.includes('${NSD_CreateTimer} AymWelcomeAnimate')
+    || installerInclude.includes('nsDialogs::CreateTimer AymWelcomeAnimate')
+    || installerInclude.includes('nsDialogs::KillTimer AymWelcomeAnimate')
     || installerInclude.includes('Function AymReadyAnimate')
     || installerInclude.includes('${NSD_CreateTimer} AymReadyAnimate')
     || installerInclude.includes('${NSD_CreateProgressBar}')) {
     failures.push('Kurulum öncesi sayfalar sahte hareketli ilerleme göstergesi kullanmamalı; tek ilerleme yerel NSIS dosya kurulum sayfası olmalı.');
   }
-  if (installerInclude.includes('Page custom AymWelcomePageCreate')
+  if (installerInclude.includes('!insertmacro MUI_PAGE_WELCOME')
     || installerInclude.includes('Var AymWelcomePulseLabel')) {
-    failures.push('Özel karşılama sayfası tam boy MUI marka panelini örten eski metin-only child dialog kullanmamalı.');
+    failures.push('Genel MUI veya eski metin-only karşılama yüzeyi özel tam sayfa ParsYuva panelinin yerine geçmemeli.');
   }
   if (installerInclude.includes('${PBM_GETPOS}')
     || installerInclude.includes('AymInstallProgressTick')
     || installerInclude.includes('${NSD_CreateTimer}')
-    || installerInclude.includes('${NSD_KillTimer}')) {
+    || installerInclude.includes('${NSD_KillTimer}')
+    || installerInclude.includes('nsDialogs::CreateTimer')
+    || installerInclude.includes('nsDialogs::KillTimer')) {
     failures.push('Kurulum yüzdesi ana NSIS iş parçacığındaki zamanlayıcıyla tahmin edilemez; gerçek Nsis7z ilerlemesi kullanılmalı.');
   }
   if (installerInclude.includes('ParsYuva AYM')) {
