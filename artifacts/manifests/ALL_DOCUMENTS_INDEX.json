@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "release": "Bronze 22.08.2026.50",
   "releaseId": "bronze-2026-08-22-r50",
-  "generatedAt": "2026-08-22T18:03:15.695Z",
+  "generatedAt": "2026-08-22T21:04:36.651Z",
   "selfIndexedPaths": [
     "SHA256SUMS.txt",
     "artifacts/inventory/TESLIMAT_CALISMA_AGACI_ENVANTERI.json",
@@ -16,7 +16,7 @@
     "docs/current/13_TESLIMAT_CALISMA_AGACI_ENVANTERI.md",
     "manifest.json"
   ],
-  "documentCount": 3812,
+  "documentCount": 3840,
   "documents": [
     {
       "path": ".github/workflows/ci.yml",
@@ -84,8 +84,8 @@
     },
     {
       "path": "apps/desktop/index.html",
-      "bytes": 601,
-      "sha256": "8cd91cf1dba7b42edcbb88bc3fe4f2366f9c5946d09f42a3f46131593ddcdc0f",
+      "bytes": 577,
+      "sha256": "d4f38dee193d5f3136c79987faedb5fa4295e5096075a67ad914192db678a1b1",
       "extension": ".html",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -14445,7 +14445,7 @@
     {
       "path": "artifacts/validation/32-W-b0-03-b0-04-product-surface-boundary.json",
       "bytes": 2106,
-      "sha256": "94f12eeee859888df858019d92559b1f6c78159c700fbd44a0717594f81d5f49",
+      "sha256": "0c233dd03e262eba03b4fde6181e97935cc58b1b31a4bd4ef6d95632facdd7b8",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -14469,7 +14469,7 @@
     {
       "path": "artifacts/validation/32-X-b2-03-b2-04-desktop-security-boundary.json",
       "bytes": 3192,
-      "sha256": "a1ac4169d9eea00fd9fb7f04773900ba6a6939064494979df7b8d480eae6f8f6",
+      "sha256": "6b7250d52127fab71a38f74895d62fb91cc5867ff0cd976aa8d4f5dc08e0bac3",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -14501,7 +14501,7 @@
     {
       "path": "artifacts/validation/32-Y-b2-05-b6-03-sensitive-data-consent-boundary.json",
       "bytes": 3234,
-      "sha256": "5d54be17720dd7b029aea3d653aaa7fb4e8661e2fe8ec09019deff8735bf315e",
+      "sha256": "e8b67043ab43c9741b4030724e8163337d5c62bbf1a0447293859e98378de3e7",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -14525,7 +14525,7 @@
     {
       "path": "artifacts/validation/32-Z-b4-banking-foundation-boundary.json",
       "bytes": 4183,
-      "sha256": "ae7ac1aac31355476ad218a56bd6f3680cebc4efb722d19f42fafa417397cb35",
+      "sha256": "fc5ee20b78386e53e7fcbfc71a178058a3dda0e93cb3d41a15534f6b88fb0a2d",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -14549,7 +14549,7 @@
     {
       "path": "artifacts/validation/33-A-b4-payment-card-management-boundary.json",
       "bytes": 4672,
-      "sha256": "55cf9351e645d94dd50ef7326c466ae83528329f9ac7222ac8126bfcd9cebb6c",
+      "sha256": "ff718bec309181c2f50bd00d4e26d0d0632a6643aaf9f5bb8c1da7c4e626ebd7",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -14573,7 +14573,7 @@
     {
       "path": "artifacts/validation/33-B-b4-loan-management-boundary.json",
       "bytes": 4916,
-      "sha256": "fc6068a2966083592f9c363a31308740ab34ebbe9a82a45f4b9ffa3f125ee643",
+      "sha256": "5f221cf6ad2c8c57a7a7eca719ead7945ddf7b7a2b732df12ccf523019c9db42",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -14597,7 +14597,7 @@
     {
       "path": "artifacts/validation/33-C-b4-finance-planning-portfolio-analytics-boundary.json",
       "bytes": 5449,
-      "sha256": "a51f0707954e0b919091ddaee8a8fe14fa622163828e48064b746bea6f39b795",
+      "sha256": "ae1f566da8ac3626eff05665f621bb5debdd9fd176507f3433f55c1926d0fda4",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -14669,7 +14669,7 @@
     {
       "path": "artifacts/validation/33-D-b4-controlled-import-open-banking-boundary.json",
       "bytes": 5681,
-      "sha256": "61ceecab542948b14e8e3a6d3610fe7956b8a56d05e6676eb9c50d961610b99a",
+      "sha256": "86bb67e925aadaf3ab4f58312cefafd2d9065497275eb2871c2d9a70fa668e14",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -14741,7 +14741,7 @@
     {
       "path": "artifacts/validation/33-E-b5-category-life-home-vehicle-boundary.json",
       "bytes": 6509,
-      "sha256": "85ff205d5623376da720242a701e9d10a31acaf3e193b63eb83842486525fc1f",
+      "sha256": "996af3d2814b7e1d4c55919f16a63b910661090adb05c851b50b47443d405267",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -14813,7 +14813,7 @@
     {
       "path": "artifacts/validation/33-F-home-inventory-utility-belongings-boundary.json",
       "bytes": 6263,
-      "sha256": "6bd677025038156947ee99fa9e6b4e2b11ec9f36240345dec51a6ba2def05238",
+      "sha256": "55935a7dc2c9718b79549c05360dca4fe5062f21e052e06992bb63c4858a53af",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -14885,7 +14885,7 @@
     {
       "path": "artifacts/validation/33-G-family-emergency-planning-boundary.json",
       "bytes": 6281,
-      "sha256": "4012d5dc45881eb0827a0e17c0f45ccd35e7b396653e224457134a104b1e2b38",
+      "sha256": "06510bd74b6eae8ef70c2abf12abe800675bf3cbfd6a410bd9d96a3611af683b",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -14957,7 +14957,7 @@
     {
       "path": "artifacts/validation/33-H-family-emergency-preparedness-boundary.json",
       "bytes": 6606,
-      "sha256": "28aff878bf5f316e934a69705b70f414dc4cfefc1e8b451ce3d2e791eb368dd6",
+      "sha256": "a4774402108ed8119ac30240bf8501798a2edc020ce312a68444bf183dfc1cac",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -15029,7 +15029,7 @@
     {
       "path": "artifacts/validation/33-I-family-emergency-assistance-card-boundary.json",
       "bytes": 7223,
-      "sha256": "1e63008ad6bbbcf02ee13baeb92f612dcdcb50569a1db1ccbeb5feee6166d0e2",
+      "sha256": "df234bc2b95221683f421fd68586e4b5b1025da6a8a666e8ffa12fb761f07bbd",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -15101,7 +15101,7 @@
     {
       "path": "artifacts/validation/33-J-family-emergency-card-portability-boundary.json",
       "bytes": 7769,
-      "sha256": "3e0353fdfa46c087834fcaff6519a7629d2c01ba74ce4e652588a2919e7fe1b9",
+      "sha256": "9d0e8cbf0a87a3fce934b91f5423481e5fea1a1ccede17aad5e6c1f72d25c10e",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -15173,7 +15173,7 @@
     {
       "path": "artifacts/validation/33-K-privacy-consent-lost-device-control-boundary.json",
       "bytes": 2838,
-      "sha256": "fe48a3e3bfde383d44458eb843c342ad120783610306d775319a47b090856fd6",
+      "sha256": "fa9becae791c0e1e77999298b96be97192e26598131788e82b30c55358bd902f",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -15245,7 +15245,7 @@
     {
       "path": "artifacts/validation/33-L-long-term-portfolio-boundary.json",
       "bytes": 4118,
-      "sha256": "6d63f847253c5e8e7d668e120a596e84c58fbc0a2ee6b3a3bb3970e20c9f4a4f",
+      "sha256": "325aed7b4d8e46026bc3758a0b9796dfb4e56884dab15aa77561aba7b79e7443",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -15317,7 +15317,7 @@
     {
       "path": "artifacts/validation/33-M-accessibility-boundary.json",
       "bytes": 5254,
-      "sha256": "2cd3bff31ae07914a2d6f405b78a245652b29b9eb21f44979d00d5633176c9e0",
+      "sha256": "87fa87dd080c6f4420f45c15d8bafecef633816b3d68afbaf8e02d17104bcfc7",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -15397,7 +15397,7 @@
     {
       "path": "artifacts/validation/33-N-draft-async-state-ux-boundary.json",
       "bytes": 5651,
-      "sha256": "5be74bbb4076d542c966a891d31fae16b1430dde9f042a6f7d6fee025cace5d5",
+      "sha256": "06b7ae2ce152bf53ab0565bddb5689163f6bef4e35188c2bbeff3126e7bd527a",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -16109,7 +16109,7 @@
     {
       "path": "artifacts/validation/active-release-contract-v2.json",
       "bytes": 186,
-      "sha256": "41c43f898f01eed0c4ebd1fcd9d430a9546f69ff454eb39f6e280c2250b62843",
+      "sha256": "d567f4e9ecc68f11a4c822d92c998fdbe02ebc8542a37605ba73919bb204a4f7",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -16741,7 +16741,7 @@
     {
       "path": "artifacts/validation/canonical-rule-registry-gate.json",
       "bytes": 323,
-      "sha256": "134218c3a81d6b4cefa6315b4c120296ff2a59893320730816a087450dfbcfbb",
+      "sha256": "16d2f0fdd308e00dde4147d59bf0f9243b0664111818efb72142a403b9522809",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -16757,7 +16757,7 @@
     {
       "path": "artifacts/validation/conversation-capacity.json",
       "bytes": 241,
-      "sha256": "4feb4598e2b65e21b54c1ec790fc1458b729d543cc25b5729f2969b8da2c5a73",
+      "sha256": "fe288301f26345fe11d17d0a1ad663ebdbdea3e307caaa5611a11dadb3de1dbc",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -16765,7 +16765,7 @@
     {
       "path": "artifacts/validation/core-service-boundary.json",
       "bytes": 123,
-      "sha256": "2ee1d90000f270beb68be9ced785493f8176b1abe7d2f2d1ca9bf136857e130d",
+      "sha256": "152d163542eeda6436155090ce842516d8220eaf018b1e5dbe16873f1a84eafc",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -16773,7 +16773,7 @@
     {
       "path": "artifacts/validation/core-service-local-admin-contract.json",
       "bytes": 260,
-      "sha256": "46273c5a08604be9bb46735fc36ca432e48ddf130626477b1dd20083cacef7b5",
+      "sha256": "a73a81e07aa609a31615cf3dc8779ffacba9bf23440e4723a7faea314bee1f91",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -16797,7 +16797,7 @@
     {
       "path": "artifacts/validation/desktop-core-service-startup-contract.json",
       "bytes": 161,
-      "sha256": "3ce67c33c3103ad9a51a3ee54bf19e7d421052b63cb88a5906fac90199937b3a",
+      "sha256": "59cba94d313644803928b769496fee4f5eb727ee835b0e484ce3fc1db42e2119",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -16805,7 +16805,7 @@
     {
       "path": "artifacts/validation/desktop-core-service-startup-runtime.json",
       "bytes": 161,
-      "sha256": "8f03d79ef1d39559282f712a451f38a95fd8d87bd17eadcf3db1e5ad8e1473b0",
+      "sha256": "f439f8aa8e9d8b625267e82fb682e26b08ccb0fb037cf99b0a3aa0bceb9eaa28",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -16821,7 +16821,7 @@
     {
       "path": "artifacts/validation/documentation-synchronization-policy.json",
       "bytes": 284,
-      "sha256": "20aea8c64ec80bc6d5dafbae39292abcde88a3ee517c8322c51dc4ebf6535b9e",
+      "sha256": "d9e5f5cfae71ed8c416ff12a2309b401f8bb10a5d8f5a882e3c2dfdbabfc248a",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -16829,7 +16829,7 @@
     {
       "path": "artifacts/validation/feature-reality-gate.json",
       "bytes": 673,
-      "sha256": "a50a96adc1cfb82409a83f0625d12885c52138ff76792d3c611e92a3206a08a5",
+      "sha256": "e0b54129a94e0dffcb2d661fb987e25beff3422fe82ab34dd335225e35cd2ae5",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -16837,7 +16837,7 @@
     {
       "path": "artifacts/validation/first-family-clean-release-policy.json",
       "bytes": 2691,
-      "sha256": "3df02df83040544fd8df0fd1626909803bef227126aff790103ab90066c991de",
+      "sha256": "2b637c95f2e26b3bd5ddf8bbbc64350b8ae26a6b958527ff6d66aa4f17c2e76b",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -16860,8 +16860,8 @@
     },
     {
       "path": "artifacts/validation/governed-preflight.json",
-      "bytes": 7280,
-      "sha256": "a822d7c02e73ccb323ad0bbf04d8ce7fdbcc7b6fdfafa715833e68e1a3420ad0",
+      "bytes": 8377,
+      "sha256": "5d2d2d4ee47fb1d8bbcd9aa2ce3f6bf8105c7e4f2c5c47184c00f550cdf94307",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -16909,7 +16909,7 @@
     {
       "path": "artifacts/validation/operation-rule-check.json",
       "bytes": 354,
-      "sha256": "ca0bcd9dcb0be96665a549dd923dd35814dfe4e7a2ef633f573b773d83e9a8c6",
+      "sha256": "10bfd602c6eedb39258d4b877bfb046b6ab21744b8c0ea9c5ac56d889eba78f5",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -16941,7 +16941,7 @@
     {
       "path": "artifacts/validation/platform-policy-gate.json",
       "bytes": 2203,
-      "sha256": "120cb70c73fd4a265ddcce22c93bef1f767812a9f71d567184a2624a118bf0ee",
+      "sha256": "02fdf958554dde9e5b8f977bf5ae3c50e0bd0fbec09b910d8261b274353c81a0",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -16973,7 +16973,7 @@
     {
       "path": "artifacts/validation/project-artifact-index-gate-v2.json",
       "bytes": 212,
-      "sha256": "b1e175b56e0b5666828f7c173410f45b33920e390fbe811c56b12e4234a5eabb",
+      "sha256": "72607bbbda96fa2d952dcbb04eddc196e5aebce9e6f04ab92a058bf5b9ea8dc3",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -16995,6 +16995,86 @@
       "isDocument": true
     },
     {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-10.json",
+      "bytes": 4177,
+      "sha256": "4ad02e442290ee76c234667a3d2762eebf19133ea15c0791c84a9b39809a4c71",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-11-diagnostic.json",
+      "bytes": 4409,
+      "sha256": "b2380bc9fb1dc2f801086ca5ccf4158352f693b142b78afcf9df3eddceefb977",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-12-diagnostic.json",
+      "bytes": 4754,
+      "sha256": "794c8b49657fd6cd3c1d74bffc8bdabf20ad99cf440aa08b80b83c0e6543740b",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-13.json",
+      "bytes": 2051,
+      "sha256": "9ed39a60740623aba7be3e00a278ea16bcf098dfc87ed62cc4a726f970680246",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-14-diagnostic.json",
+      "bytes": 4621,
+      "sha256": "29c36f44b5eddb0beff7097091ccabe1c58631815c2843188de249509083fe15",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-15.json",
+      "bytes": 5339,
+      "sha256": "4cbcf9a092a940c8f5108c4d4a1e8caa8f5732431d2a90e011e797f043be01a9",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-16.json",
+      "bytes": 4610,
+      "sha256": "f2d68b1d78c5a14975a18c94bfec86f81d6989f83f29d33a25b59584d028ef5a",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-17.json",
+      "bytes": 5579,
+      "sha256": "2e557a956d6b9e5294192e62619fc8bdd4c199de25676f5cedab7d1cb5263314",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-18-diagnostic.json",
+      "bytes": 5590,
+      "sha256": "626c3a1bdafc947a170ca47c7d1b1e8f6189fb42da6a0c52ce8c85e725984abf",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-19-diagnostic.json",
+      "bytes": 2062,
+      "sha256": "34378b6cc30b7b8ca5bb3b53e99bdea5ff8a4f7bae22f206529d7690751130f0",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
       "path": "artifacts/validation/source-frontend-user-uat-rounded-2.json",
       "bytes": 2050,
       "sha256": "8c08bff584525ab3662e405833248b9317ae6da2a64ff2377a62f13e17c5c1cb",
@@ -17003,9 +17083,129 @@
       "isDocument": true
     },
     {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-20-diagnostic.json",
+      "bytes": 5590,
+      "sha256": "2e8c176a7088c2c2975939c5de43771e936d9f73664dcdc07b760d1f5b0a1c7d",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-21-diagnostic.json",
+      "bytes": 5590,
+      "sha256": "b107b3a276c32645a0d634b15c0d92c6031f38c6184f6ccc5f4090a23a20f86c",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-22.json",
+      "bytes": 7390,
+      "sha256": "d568f946a9eac9ea9799a2c2770cd26e8649fc090f5b1d21dc86375b7e966169",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-23.json",
+      "bytes": 1807,
+      "sha256": "265a458b9c453a83ba0fc602a7a2350cbc554a806ffb80d2cc0594c0e7262c9a",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-24.json",
+      "bytes": 9538,
+      "sha256": "e9205435c2c5335933d734e436cedc4aa8f1d50a2741fc6b5c8cc1ddae019994",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-25.json",
+      "bytes": 8141,
+      "sha256": "55c9148afc9186867ad0e2cb83cde760f1b7daa33d46a453223d4829c5885652",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-26.json",
+      "bytes": 9674,
+      "sha256": "1f5e96f6d1f3f7cb423422ec24ff389329323bf3ff15d9aa10924c35da25cd6b",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-27.json",
+      "bytes": 12636,
+      "sha256": "68e27b555aa46b8e317a3d8eebd3cad5dcb77d95bbb99b5d9ea13f684d2dc886",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-28.json",
+      "bytes": 15918,
+      "sha256": "bc5267a9abc00db7b7067dcde88e7edd3886d712ecd87a22b6a56ae0ed742a59",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-29-diagnostic.json",
+      "bytes": 15929,
+      "sha256": "c1ea2cd95787dc2e958b778d8f0e266d2767541de8462273d7f00ce996ee1589",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
       "path": "artifacts/validation/source-frontend-user-uat-rounded-3.json",
       "bytes": 2050,
       "sha256": "e6442d88fe9b701fef5a2276b40a896a8a3d5cbb85f888f436113358087cd205",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-30.json",
+      "bytes": 19625,
+      "sha256": "cb9dc2081ce73337c3849e4f20b8a465d2826d1f54fb8c266c1ce6d1b8b0eee0",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-31.json",
+      "bytes": 20227,
+      "sha256": "fdb8f03e9f02683f392a1c26bc606e4723e70d24f24d1c77a07929a98f904961",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-32.json",
+      "bytes": 17956,
+      "sha256": "86aaad22ad492f860c4744c552ab0043d697e2db7a0d1fdf2c0db1359b67a97a",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-33.json",
+      "bytes": 8353,
+      "sha256": "18ac4d15c9321d27e933c68ef7736b9682b558467c19e3ef9b5516abf74e24e9",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-34.json",
+      "bytes": 20222,
+      "sha256": "15d1a6109be9bfb69b246e1af801c37d9db215be6a16e9b9544a133f2c595448",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -17030,6 +17230,30 @@
       "path": "artifacts/validation/source-frontend-user-uat-rounded-6.json",
       "bytes": 4741,
       "sha256": "2444c40dc9bec5c9c43d65e10076ba5a24977edbac0e0cf559cc741c62e3d59c",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-7.json",
+      "bytes": 4176,
+      "sha256": "c522d5f7bfaef157b059868baf4534d0a53bde56c90059ea51c368c6d4f9176a",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-8.json",
+      "bytes": 2050,
+      "sha256": "f71e2385629141d1ef978274a37dd7a389fd10b160bf2dc093ad0c3f5675e8d5",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-9.json",
+      "bytes": 4176,
+      "sha256": "ddb960de6c84d19c0e47ed2b8eb54ef44ab1fa647e7f0e8b9871b5c54381f0e6",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -17069,7 +17293,7 @@
     {
       "path": "artifacts/validation/step-checkpoint-gate.json",
       "bytes": 188,
-      "sha256": "5a0cbad0c0e27acdadf24c72bb58d62c6f082d2f106cf3fddc041465588e9b69",
+      "sha256": "568adf51981a91bd0b14bf8b0e97f52c2fbeaaba182fa4636c1ee2b14040d981",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -17085,7 +17309,7 @@
     {
       "path": "artifacts/validation/system-health-core-service-ipc-contract.json",
       "bytes": 161,
-      "sha256": "89855ff92696addc10c02f9636d1046fe1df02e0b1c7afb68a72755c4ad7f0eb",
+      "sha256": "6fe37c67f476c0bc8a2fd0a63a236e0b2c578cd68d865deea4b37569e1fe4b1b",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -17093,7 +17317,7 @@
     {
       "path": "artifacts/validation/system-health-core-service-ipc-runtime.json",
       "bytes": 161,
-      "sha256": "3cd66fce8ee22aacabd15d69f4033c1c7f9173ac9289a858f82719fcf70324b2",
+      "sha256": "6123bb33eff453d21313df9303966f39f1860a0d640ff9ea508d1d931ea49eca",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -17109,7 +17333,7 @@
     {
       "path": "artifacts/validation/universal-rule-enforcement-gate.json",
       "bytes": 299,
-      "sha256": "35ea82af8c058f476887f44e971fcf98d8dad70afe519efe2a160052302c15db",
+      "sha256": "47dee58969907d309ab401f3ca4b531a6562c76b36053a5764ca3db928721f7f",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -17125,7 +17349,7 @@
     {
       "path": "artifacts/validation/user-decision-ledger-gate.json",
       "bytes": 181,
-      "sha256": "4f872480abeeac3c28c512a516636281809bb1531a968556e18de8ddfc263c4a",
+      "sha256": "f8bbb86f55ff17127d8897474cdb68a0c44ab7f883fbbe4fa0d7e292b42891b1",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -17133,7 +17357,7 @@
     {
       "path": "artifacts/validation/user-visible-release-display-policy.json",
       "bytes": 237,
-      "sha256": "935ef0c651527b5979bcb2d7f0cde31c19ceb482669b2657165dd1f2ef13051d",
+      "sha256": "ba03489eb64ef75b851fa8769e7fa076596a83cf6f8426ca7a169056c24cb677",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -17141,7 +17365,7 @@
     {
       "path": "artifacts/validation/windows-installer-retention-policy.json",
       "bytes": 333,
-      "sha256": "b81330c5edc7d476624781ebee62df21518ee04f31ad55b1853ec7ba96b56e2e",
+      "sha256": "a3c26c534833ec5f70b1a575fc730c1d9f555279d5a978ef39d3727b75ce64f5",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -27709,7 +27933,7 @@
     {
       "path": "docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json",
       "bytes": 17088,
-      "sha256": "b4564cbf8117e2a10d412789cb87e346abfdad365d1e3abe95dc173709c602fa",
+      "sha256": "d02157f1f1d9df661bcdfa6b410c5ce224f08f77af344cb1595c817375a1d04b",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true

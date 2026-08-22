@@ -1286,7 +1286,7 @@ export const createTimelineProductionPolicyEnforcementPointResolver = (
       if (!snapshot.ok) {
         throw new PlatformPolicyEnforcementError(
           'AUTHORITY_RESOLUTION_FAILED',
-          `Timeline production policy authority could not be loaded: ${snapshot.error.code}`,
+          `Timeline production policy authority could not be loaded: ${snapshot.error.code}: ${snapshot.error.message}`,
           { cause: snapshot.error }
         );
       }

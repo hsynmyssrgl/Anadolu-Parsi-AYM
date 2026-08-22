@@ -2119,6 +2119,104 @@ body:has(.app-shell[data-high-contrast="true"]) :is(.modal-backdrop,.narrated-he
 .app-shell:not(.sidebar-collapsed) .family-switcher { min-height:76px;height:auto; }
 .app-shell:not(.sidebar-collapsed) .family-switcher strong { white-space:normal;overflow:visible;text-overflow:clip; }
 
+/* Kabuk menü bütünlüğü: ana başlıklar alt rotalardan belirgin, tüm satırlar aynı eksende. */
+.app-shell .nav-group { gap:6px;margin-bottom:12px; }
+.app-shell .nav-module-toggle {
+  min-height:46px!important;
+  padding:10px 12px!important;
+  border-radius:var(--radius-control);
+}
+.app-shell .nav-group-label-copy {
+  min-width:0;
+  font-size:var(--font-size-body)!important;
+  line-height:var(--line-height-body)!important;
+  font-weight:800;
+  letter-spacing:.035em;
+  text-align:left;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+.app-shell .nav-group-disclosure { justify-self:end;font-size:15px;line-height:1; }
+.app-shell .nav-module-items { gap:4px;padding:0 4px 0 10px; }
+.app-shell .nav-module-items>button {
+  min-height:44px;
+  grid-template-columns:24px minmax(0,1fr) 8px;
+  gap:8px;
+  padding:9px 10px;
+  border-radius:var(--radius-action);
+}
+.app-shell .nav-module-items .nav-label {
+  min-width:0;
+  font-size:var(--font-size-subheadline)!important;
+  line-height:var(--line-height-subheadline)!important;
+  font-weight:600;
+  text-align:left;
+  overflow-wrap:anywhere;
+}
+
+/* Üst çubuk içerik genişliğine göre yerleşir; yardım ve kullanıcı metni satır kırmaz. */
+.app-shell .topbar {
+  grid-template-columns:minmax(170px,1fr) max-content max-content;
+  align-items:center;
+}
+.app-shell .breadcrumb { min-width:0;white-space:nowrap;overflow:hidden; }
+.app-shell .breadcrumb strong { min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+.app-shell .topbar-center { white-space:nowrap; }
+.app-shell .topbar-actions { min-width:0;flex-wrap:nowrap;align-items:center; }
+.app-shell .help-trigger {
+  flex:0 0 auto;
+  min-width:max-content;
+  min-height:44px;
+  padding-inline:12px;
+  border-radius:var(--radius-action);
+  white-space:nowrap;
+}
+.app-shell .help-trigger>span,.app-shell .help-trigger kbd { flex:0 0 auto;white-space:nowrap; }
+.app-shell .notification { flex:0 0 44px;width:44px;height:44px; }
+.app-shell .search-box {
+  flex:0 1 240px;
+  width:clamp(180px,18vw,240px);
+  min-width:180px;
+  border-radius:var(--radius-control);
+  white-space:nowrap;
+}
+.app-shell .user-menu { min-width:0;max-width:220px;border-radius:var(--radius-control); }
+.app-shell .user-copy { min-width:0;max-width:150px; }
+.app-shell .user-copy :is(strong,small) { display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+
+/* Açılır menüler de ortak yuvarlak ve hizalı kontrol dilini kullanır. */
+.app-shell :is(.family-switcher,.search-box,.user-menu) { border-radius:var(--radius-control); }
+.app-shell :is(.menu-popover,.sidebar-popover) { border-radius:var(--radius-surface); }
+.app-shell .command-palette { border-radius:var(--radius-dialog); }
+.app-shell :is(.profile-popover>button,.command-results>button,.notification-row>button:first-child) {
+  min-height:44px;
+  border-radius:var(--radius-action);
+}
+
+@media(max-width:1600px){
+  .app-shell .topbar { grid-template-columns:minmax(0,1fr) max-content; }
+  .app-shell .topbar-center { display:none; }
+}
+@media(max-width:900px){
+  .app-shell .help-trigger { min-width:44px;width:44px;padding:0;justify-content:center; }
+  .app-shell .help-trigger>span:nth-child(2),.app-shell .help-trigger kbd,
+  .app-shell .search-box>span:nth-child(2),.app-shell .search-box kbd { display:none; }
+  .app-shell .search-box { flex:0 0 44px;width:44px;min-width:44px;padding:0;justify-content:center; }
+  .app-shell .search-box .search-icon { flex:0 0 auto; }
+}
+@media(max-width:800px){
+  .app-shell .topbar {
+    display:flex;
+    min-height:68px;
+    padding:10px 16px;
+    flex-direction:row;
+    flex-wrap:nowrap;
+    align-items:center;
+  }
+  .app-shell .breadcrumb { flex:1 1 auto; }
+  .app-shell .topbar-actions { flex:0 0 auto;justify-content:flex-end; }
+}
+
 /* Ortak kontrol geometrisi: tum modullerde yumusak, olceklenebilir ve tutarli. */
 .app-shell :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),select,textarea),
 .modal :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),select,textarea){

@@ -39,4 +39,15 @@ describe('unified rounded control visual contract', () => {
     expect(styles).toContain('.participant-chips button { min-height: 38px; padding: 7px 12px; border: 1px solid var(--glass-border); border-radius: 999px;');
     expect(styles).toContain('.participant-chips button.active { border-color: var(--release-accent); background: var(--release-accent); color: #fff; }');
   });
+
+  it('keeps module hierarchy, topbar controls and popup menus aligned without wrapped labels', () => {
+    expect(styles).toContain('font-size:var(--font-size-body)!important;');
+    expect(styles).toContain('.app-shell .nav-module-items .nav-label {');
+    expect(styles).toContain('font-size:var(--font-size-subheadline)!important;');
+    expect(styles).toContain('grid-template-columns:minmax(170px,1fr) max-content max-content;');
+    expect(styles).toContain('.app-shell .help-trigger>span,.app-shell .help-trigger kbd { flex:0 0 auto;white-space:nowrap; }');
+    expect(styles).toContain('.app-shell :is(.profile-popover>button,.command-results>button,.notification-row>button:first-child) {');
+    expect(styles).toContain('@media(max-width:1600px)');
+    expect(styles).toContain('@media(max-width:800px)');
+  });
 });

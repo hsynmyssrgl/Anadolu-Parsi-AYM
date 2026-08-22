@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "release": "Bronze 22.08.2026.50",
   "releaseId": "bronze-2026-08-22-r50",
-  "generatedAt": "2026-08-22T18:03:15.695Z",
+  "generatedAt": "2026-08-22T21:04:36.651Z",
   "selfIndexedPaths": [
     "SHA256SUMS.txt",
     "artifacts/inventory/TESLIMAT_CALISMA_AGACI_ENVANTERI.json",
@@ -17,16 +17,16 @@
     "manifest.json"
   ],
   "summary": {
-    "totalFiles": 6293,
-    "totalDocuments": 3812,
+    "totalFiles": 6485,
+    "totalDocuments": 3840,
     "classifications": {
       "ACTIVE_AUTHORITY": 31,
       "ACTIVE_REFERENCE": 879,
-      "EVIDENCE": 1481,
+      "EVIDENCE": 1668,
       "GENERATED": 659,
       "HISTORICAL": 1579,
       "SOURCE_CODE": 626,
-      "TEST_OR_GATE": 1038
+      "TEST_OR_GATE": 1043
     }
   },
   "files": [
@@ -608,8 +608,8 @@
     },
     {
       "path": "apps/desktop/index.html",
-      "bytes": 601,
-      "sha256": "8cd91cf1dba7b42edcbb88bc3fe4f2366f9c5946d09f42a3f46131593ddcdc0f",
+      "bytes": 577,
+      "sha256": "d4f38dee193d5f3136c79987faedb5fa4295e5096075a67ad914192db678a1b1",
       "extension": ".html",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -1088,8 +1088,8 @@
     },
     {
       "path": "apps/desktop/src/main/data-store.ts",
-      "bytes": 549635,
-      "sha256": "3075c0249e88741aec085d4b841ffc063afcaea5128c784375dc76fecaf0af80",
+      "bytes": 549793,
+      "sha256": "62fd7ec8b85a124c2e8585a0c5fd2de37983cab713cd3a5193b00cbc2935b60a",
       "extension": ".ts",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -1112,8 +1112,8 @@
     },
     {
       "path": "apps/desktop/src/main/desktop-repository-policy-scope.ts",
-      "bytes": 7403,
-      "sha256": "27b067c9916541f6450429384650a264b301ee9df009a7a4d3caa6fbbb60adac",
+      "bytes": 8100,
+      "sha256": "b5df592441d283b70173727cf6b8d4daf8bc99c1cf144ce8fffaf6e56e483d71",
       "extension": ".ts",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -1144,8 +1144,8 @@
     },
     {
       "path": "apps/desktop/src/main/entity-catalog-service.ts",
-      "bytes": 10585,
-      "sha256": "d755dd8d2e99c16aa497ca5fa778cb74104dc675500eeeaed25e150c016c2c1d",
+      "bytes": 10780,
+      "sha256": "c9f033247857767df57694965cc259816c3888a15ba53a8f312dc26534cccd23",
       "extension": ".ts",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -1488,8 +1488,8 @@
     },
     {
       "path": "apps/desktop/src/main/large-family-read-model-service.ts",
-      "bytes": 13545,
-      "sha256": "d1660e2344101e0f6fa20c4730164cde5348ed198de4d39be6d79ae01d3b157a",
+      "bytes": 13736,
+      "sha256": "24fe4e33fcc1cee727354fa8912eb060fe3ec4f605e4244d95862041eef019a7",
       "extension": ".ts",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -1528,8 +1528,8 @@
     },
     {
       "path": "apps/desktop/src/main/local-governed-ocr-application-adapter.ts",
-      "bytes": 58249,
-      "sha256": "7714ae22e489b96170912e0165fbed49769ac36ac36f5c0066da5bf8623dddba",
+      "bytes": 58548,
+      "sha256": "1e83aa1cd631fd923fb1f3e3f668a59f0501f777d48b4ea38257b8d94ad7c50b",
       "extension": ".ts",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -1616,8 +1616,8 @@
     },
     {
       "path": "apps/desktop/src/main/main.ts",
-      "bytes": 239232,
-      "sha256": "4a0ded4b26b6d43689ac15e276821577e1b287ae33c325f520b36c95f83bfe3b",
+      "bytes": 239274,
+      "sha256": "726030262938a465f76e1234df562618edf25cdb801b2f82b565b2247bae1ba8",
       "extension": ".ts",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -1968,8 +1968,8 @@
     },
     {
       "path": "apps/desktop/src/main/timeline-production-policy-runtime.ts",
-      "bytes": 84113,
-      "sha256": "40a559092e9df789c44f1ddf951b7669a8420f19493a32accaade7052df5f145",
+      "bytes": 84140,
+      "sha256": "3b321350ec3ef7fcd25c2e23b64a360c9e46ba8ce3e17585fbd25d842d5a3286",
       "extension": ".ts",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -2112,8 +2112,8 @@
     },
     {
       "path": "apps/desktop/src/renderer/App.tsx",
-      "bytes": 569819,
-      "sha256": "6b78785cf391a5402f854a257d2ad76885828b2f962d6811199b7a7d0d596cb1",
+      "bytes": 574374,
+      "sha256": "a91519a75556cd177b09b413d76762cb82e43fad2afa8bfac064882fb80cf267",
       "extension": ".tsx",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -2448,8 +2448,8 @@
     },
     {
       "path": "apps/desktop/src/renderer/styles.css",
-      "bytes": 168138,
-      "sha256": "c14c5e1b8448ac9d634ff7778e882f9703367aed49d66f6515d53c44a7d5d0af",
+      "bytes": 173478,
+      "sha256": "29d0252ecea9d015d822576afa03f4683204b179b8ac09c1c4d240b1351fa911",
       "extension": ".css",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -2648,8 +2648,8 @@
     },
     {
       "path": "apps/desktop/tests/app-shell-localization-wave-twenty-nine.test.ts",
-      "bytes": 1285,
-      "sha256": "c83fe535eb8ff4ee99945135eef1bf15000c3b21b39c896f3b8d5239864267c7",
+      "bytes": 1628,
+      "sha256": "c355be338af95f874f5e3858b922ca48cb296cc3cd873ae5980f1ce14ee9a04a",
       "extension": ".ts",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -2688,8 +2688,8 @@
     },
     {
       "path": "apps/desktop/tests/app-shell-localization-wave-twenty-two.test.ts",
-      "bytes": 1929,
-      "sha256": "1446cc3999ba23b2addf7e6c19eb99d83087f1a76a06556cb6aba5d96c6a0eaa",
+      "bytes": 2059,
+      "sha256": "dccf4db12c10723d0276d64ea8964e08c4dc86e62bd5d1acdc0a0a65cbc9750e",
       "extension": ".ts",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -2720,8 +2720,8 @@
     },
     {
       "path": "apps/desktop/tests/archive-durable-policy-transaction-runtime.test.ts",
-      "bytes": 53164,
-      "sha256": "39e079d16d126ab0b8141b52fb3de82f27b329d664cfbacfe6abe1401a104d2b",
+      "bytes": 54834,
+      "sha256": "5c8f7091c81712b785fb6310afd68ddf504f26472209966cd1b46e2b66c287e0",
       "extension": ".ts",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -3176,8 +3176,16 @@
     },
     {
       "path": "apps/desktop/tests/desktop-universal-api-policy-enforcement.test.ts",
-      "bytes": 19342,
-      "sha256": "fbd3b4fe950bed717362675d43e70a138d4d52079d5c220ade2d8ceba79e4c72",
+      "bytes": 20769,
+      "sha256": "60a65182860d69264086c85918f325accbc78b2790adc23341f76f11a6f8fd10",
+      "extension": ".ts",
+      "classification": "TEST_OR_GATE",
+      "isDocument": false
+    },
+    {
+      "path": "apps/desktop/tests/entity-catalog-service.test.ts",
+      "bytes": 2479,
+      "sha256": "e8fc4e94e4e3e4b8487f00fb44a5e33257522a621c251721806377bf86e6045a",
       "extension": ".ts",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -3496,8 +3504,8 @@
     },
     {
       "path": "apps/desktop/tests/form-ux.test.ts",
-      "bytes": 9110,
-      "sha256": "af75c0245b7f5456689c3e027456eca7f1649c1a95fbf3774b9c265002803224",
+      "bytes": 9343,
+      "sha256": "7718bce11a08ce7a7cb9d14219d16d8e683626d3168c3550ee0c7b518317fb35",
       "extension": ".ts",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -3671,6 +3679,14 @@
       "isDocument": false
     },
     {
+      "path": "apps/desktop/tests/large-family-read-model-correlation.test.ts",
+      "bytes": 2317,
+      "sha256": "4a28e2361eb0c03453d760ec3e1beeb4bb2c304919b601e75f9df7207e4bc09a",
+      "extension": ".ts",
+      "classification": "TEST_OR_GATE",
+      "isDocument": false
+    },
+    {
       "path": "apps/desktop/tests/large-timeline-location-privacy-runtime.test.ts",
       "bytes": 10374,
       "sha256": "9811f6c0d40026e7d01744e134fcec2b1ff7e8680fe4ea3016a3acfcf2fb51a0",
@@ -3704,8 +3720,8 @@
     },
     {
       "path": "apps/desktop/tests/local-governed-ocr-application-adapter.test.ts",
-      "bytes": 35475,
-      "sha256": "c40a874868325434ca316c6a3541e5541c4b4d1fa782302e9ff0ce7c5945270d",
+      "bytes": 36735,
+      "sha256": "121c172d588066475fca02c101aa53a56c7ecfb91a4b98d177f17cb8056d3caa",
       "extension": ".ts",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -4223,6 +4239,14 @@
       "isDocument": false
     },
     {
+      "path": "apps/desktop/tests/renderer-asset-security-contract.test.ts",
+      "bytes": 700,
+      "sha256": "247eda7e1cbb9b47d13f6b1e031ff01b9a10f1d7c8f228e06b48356d8cfd7a2c",
+      "extension": ".ts",
+      "classification": "TEST_OR_GATE",
+      "isDocument": false
+    },
+    {
       "path": "apps/desktop/tests/secure-oidc-network-adapter.test.ts",
       "bytes": 13677,
       "sha256": "832b9eda4e6d96da672072604828cea136adf1d7e484cc66ae3bc06fded805b8",
@@ -4279,6 +4303,14 @@
       "isDocument": false
     },
     {
+      "path": "apps/desktop/tests/system-management-lazy-modules.test.ts",
+      "bytes": 2109,
+      "sha256": "3d7853194556ac23db111d0fe9dd7b7ef3e2e2312bb213b22ab2e6acc4de5891",
+      "extension": ".ts",
+      "classification": "TEST_OR_GATE",
+      "isDocument": false
+    },
+    {
       "path": "apps/desktop/tests/temporary-credential-envelope-adapter.test.ts",
       "bytes": 8725,
       "sha256": "b78dbf5fd6415b0078c23e56a7d533d0cb27aa00f53ce7cb89d4d1e5cebdfd86",
@@ -4328,8 +4360,8 @@
     },
     {
       "path": "apps/desktop/tests/unified-control-visual-contract.test.ts",
-      "bytes": 1797,
-      "sha256": "18fa931ed3a2de37fa14b59aabcb7bce6cc39604f3d9bc7916353a93d041eb89",
+      "bytes": 3650,
+      "sha256": "0c350265131678f8f81f004733ddae1b3309697d4ff197d4d3f94a6e7bfc1447",
       "extension": ".ts",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -20113,7 +20145,7 @@
     {
       "path": "artifacts/validation/32-W-b0-03-b0-04-product-surface-boundary.json",
       "bytes": 2106,
-      "sha256": "94f12eeee859888df858019d92559b1f6c78159c700fbd44a0717594f81d5f49",
+      "sha256": "0c233dd03e262eba03b4fde6181e97935cc58b1b31a4bd4ef6d95632facdd7b8",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -20137,7 +20169,7 @@
     {
       "path": "artifacts/validation/32-X-b2-03-b2-04-desktop-security-boundary.json",
       "bytes": 3192,
-      "sha256": "a1ac4169d9eea00fd9fb7f04773900ba6a6939064494979df7b8d480eae6f8f6",
+      "sha256": "6b7250d52127fab71a38f74895d62fb91cc5867ff0cd976aa8d4f5dc08e0bac3",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -20169,7 +20201,7 @@
     {
       "path": "artifacts/validation/32-Y-b2-05-b6-03-sensitive-data-consent-boundary.json",
       "bytes": 3234,
-      "sha256": "5d54be17720dd7b029aea3d653aaa7fb4e8661e2fe8ec09019deff8735bf315e",
+      "sha256": "e8b67043ab43c9741b4030724e8163337d5c62bbf1a0447293859e98378de3e7",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -20193,7 +20225,7 @@
     {
       "path": "artifacts/validation/32-Z-b4-banking-foundation-boundary.json",
       "bytes": 4183,
-      "sha256": "ae7ac1aac31355476ad218a56bd6f3680cebc4efb722d19f42fafa417397cb35",
+      "sha256": "fc5ee20b78386e53e7fcbfc71a178058a3dda0e93cb3d41a15534f6b88fb0a2d",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -20217,7 +20249,7 @@
     {
       "path": "artifacts/validation/33-A-b4-payment-card-management-boundary.json",
       "bytes": 4672,
-      "sha256": "55cf9351e645d94dd50ef7326c466ae83528329f9ac7222ac8126bfcd9cebb6c",
+      "sha256": "ff718bec309181c2f50bd00d4e26d0d0632a6643aaf9f5bb8c1da7c4e626ebd7",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -20241,7 +20273,7 @@
     {
       "path": "artifacts/validation/33-B-b4-loan-management-boundary.json",
       "bytes": 4916,
-      "sha256": "fc6068a2966083592f9c363a31308740ab34ebbe9a82a45f4b9ffa3f125ee643",
+      "sha256": "5f221cf6ad2c8c57a7a7eca719ead7945ddf7b7a2b732df12ccf523019c9db42",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -20265,7 +20297,7 @@
     {
       "path": "artifacts/validation/33-C-b4-finance-planning-portfolio-analytics-boundary.json",
       "bytes": 5449,
-      "sha256": "a51f0707954e0b919091ddaee8a8fe14fa622163828e48064b746bea6f39b795",
+      "sha256": "ae1f566da8ac3626eff05665f621bb5debdd9fd176507f3433f55c1926d0fda4",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -20385,7 +20417,7 @@
     {
       "path": "artifacts/validation/33-D-b4-controlled-import-open-banking-boundary.json",
       "bytes": 5681,
-      "sha256": "61ceecab542948b14e8e3a6d3610fe7956b8a56d05e6676eb9c50d961610b99a",
+      "sha256": "86bb67e925aadaf3ab4f58312cefafd2d9065497275eb2871c2d9a70fa668e14",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -20505,7 +20537,7 @@
     {
       "path": "artifacts/validation/33-E-b5-category-life-home-vehicle-boundary.json",
       "bytes": 6509,
-      "sha256": "85ff205d5623376da720242a701e9d10a31acaf3e193b63eb83842486525fc1f",
+      "sha256": "996af3d2814b7e1d4c55919f16a63b910661090adb05c851b50b47443d405267",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -20625,7 +20657,7 @@
     {
       "path": "artifacts/validation/33-F-home-inventory-utility-belongings-boundary.json",
       "bytes": 6263,
-      "sha256": "6bd677025038156947ee99fa9e6b4e2b11ec9f36240345dec51a6ba2def05238",
+      "sha256": "55935a7dc2c9718b79549c05360dca4fe5062f21e052e06992bb63c4858a53af",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -20745,7 +20777,7 @@
     {
       "path": "artifacts/validation/33-G-family-emergency-planning-boundary.json",
       "bytes": 6281,
-      "sha256": "4012d5dc45881eb0827a0e17c0f45ccd35e7b396653e224457134a104b1e2b38",
+      "sha256": "06510bd74b6eae8ef70c2abf12abe800675bf3cbfd6a410bd9d96a3611af683b",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -20865,7 +20897,7 @@
     {
       "path": "artifacts/validation/33-H-family-emergency-preparedness-boundary.json",
       "bytes": 6606,
-      "sha256": "28aff878bf5f316e934a69705b70f414dc4cfefc1e8b451ce3d2e791eb368dd6",
+      "sha256": "a4774402108ed8119ac30240bf8501798a2edc020ce312a68444bf183dfc1cac",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -20985,7 +21017,7 @@
     {
       "path": "artifacts/validation/33-I-family-emergency-assistance-card-boundary.json",
       "bytes": 7223,
-      "sha256": "1e63008ad6bbbcf02ee13baeb92f612dcdcb50569a1db1ccbeb5feee6166d0e2",
+      "sha256": "df234bc2b95221683f421fd68586e4b5b1025da6a8a666e8ffa12fb761f07bbd",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -21105,7 +21137,7 @@
     {
       "path": "artifacts/validation/33-J-family-emergency-card-portability-boundary.json",
       "bytes": 7769,
-      "sha256": "3e0353fdfa46c087834fcaff6519a7629d2c01ba74ce4e652588a2919e7fe1b9",
+      "sha256": "9d0e8cbf0a87a3fce934b91f5423481e5fea1a1ccede17aad5e6c1f72d25c10e",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -21225,7 +21257,7 @@
     {
       "path": "artifacts/validation/33-K-privacy-consent-lost-device-control-boundary.json",
       "bytes": 2838,
-      "sha256": "fe48a3e3bfde383d44458eb843c342ad120783610306d775319a47b090856fd6",
+      "sha256": "fa9becae791c0e1e77999298b96be97192e26598131788e82b30c55358bd902f",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -21345,7 +21377,7 @@
     {
       "path": "artifacts/validation/33-L-long-term-portfolio-boundary.json",
       "bytes": 4118,
-      "sha256": "6d63f847253c5e8e7d668e120a596e84c58fbc0a2ee6b3a3bb3970e20c9f4a4f",
+      "sha256": "325aed7b4d8e46026bc3758a0b9796dfb4e56884dab15aa77561aba7b79e7443",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -21465,7 +21497,7 @@
     {
       "path": "artifacts/validation/33-M-accessibility-boundary.json",
       "bytes": 5254,
-      "sha256": "2cd3bff31ae07914a2d6f405b78a245652b29b9eb21f44979d00d5633176c9e0",
+      "sha256": "87fa87dd080c6f4420f45c15d8bafecef633816b3d68afbaf8e02d17104bcfc7",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -21593,7 +21625,7 @@
     {
       "path": "artifacts/validation/33-N-draft-async-state-ux-boundary.json",
       "bytes": 5651,
-      "sha256": "5be74bbb4076d542c966a891d31fae16b1430dde9f042a6f7d6fee025cace5d5",
+      "sha256": "06b7ae2ce152bf53ab0565bddb5689163f6bef4e35188c2bbeff3126e7bd527a",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22361,7 +22393,7 @@
     {
       "path": "artifacts/validation/active-release-contract-v2.json",
       "bytes": 186,
-      "sha256": "41c43f898f01eed0c4ebd1fcd9d430a9546f69ff454eb39f6e280c2250b62843",
+      "sha256": "d567f4e9ecc68f11a4c822d92c998fdbe02ebc8542a37605ba73919bb204a4f7",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22583,6 +22615,54 @@
       "isDocument": false
     },
     {
+      "path": "artifacts/validation/bronze-22.08.2026.50-source-ui-uat-rounded-29-diagnostic/01-first-run-introduction.png",
+      "bytes": 349777,
+      "sha256": "0f474d50c703fc10adb46af3e4583f32e8ff112da8b2eaeaf9952a4ad4e04e9b",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/bronze-22.08.2026.50-source-ui-uat-rounded-29-diagnostic/02-first-family-form.png",
+      "bytes": 661612,
+      "sha256": "127ef897544b538e4dfbbcc186a62a4504d55b925bb4cebb6cd80e64fa7ae05c",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/bronze-22.08.2026.50-source-ui-uat-rounded-29-diagnostic/03-first-family-filled.png",
+      "bytes": 663076,
+      "sha256": "5323e251398b474887b0858d8a489680bdf4ef4ddefd54e925bbcb9f455f1cbb",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/bronze-22.08.2026.50-source-ui-uat-rounded-29-diagnostic/04-security-start.png",
+      "bytes": 363348,
+      "sha256": "b37e99f57d4854b36f36bad2c916cce682bd20bf33fcebb496d7cdbe1e02db6a",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/bronze-22.08.2026.50-source-ui-uat-rounded-29-diagnostic/04b-security-fields-rounded.png",
+      "bytes": 312493,
+      "sha256": "002232b2ecc28531347853ad4f48a8e83b85f94b2d02b34938585e181425ed70",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/bronze-22.08.2026.50-source-ui-uat-rounded-29-diagnostic/05-authenticated-main-shell.png",
+      "bytes": 438857,
+      "sha256": "b617c0d888f507739b6b604a581f18e3652eb0eb054e493e60ce44794355f5f6",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
       "path": "artifacts/validation/bronze-22.08.2026.50-source-ui-uat-rounded-3/01-first-run-introduction.png",
       "bytes": 345952,
       "sha256": "410bf1b614a0db96c8ce1a2e1641939b67df9f0cb9b056122405edeb7510f5f3",
@@ -22618,6 +22698,102 @@
       "path": "artifacts/validation/bronze-22.08.2026.50-source-ui-uat-rounded-3/04b-security-fields-rounded.png",
       "bytes": 313073,
       "sha256": "9cb41c3a8fd24903d16078eddc9f75bf29e6b313f265d18cb004469302fd1517",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/bronze-22.08.2026.50-source-ui-uat-rounded-30/01-first-run-introduction.png",
+      "bytes": 349777,
+      "sha256": "0f474d50c703fc10adb46af3e4583f32e8ff112da8b2eaeaf9952a4ad4e04e9b",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/bronze-22.08.2026.50-source-ui-uat-rounded-30/02-first-family-form.png",
+      "bytes": 661277,
+      "sha256": "0804212ccf98ca333f35b585b23fea1799106e2f59294c85714589faa40c5ef9",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/bronze-22.08.2026.50-source-ui-uat-rounded-30/03-first-family-filled.png",
+      "bytes": 663699,
+      "sha256": "0552c091a6a66b7c4d8d591835b866bc3b69c05d191f3320a0c8f3dec1aa6788",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/bronze-22.08.2026.50-source-ui-uat-rounded-30/04-security-start.png",
+      "bytes": 329043,
+      "sha256": "5f61fa28ce72ff7ec5def8b3457322bd72ad118a81529baa9a62b658b00ad9a1",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/bronze-22.08.2026.50-source-ui-uat-rounded-30/04b-security-fields-rounded.png",
+      "bytes": 312505,
+      "sha256": "ca1257f0acd2d0bb001e116af28cd8ba6176ff9195a15f428d4812f421ba22ac",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/bronze-22.08.2026.50-source-ui-uat-rounded-30/05-authenticated-main-shell.png",
+      "bytes": 438914,
+      "sha256": "b86b4ee42a3f3427888c9fb7ead562b7a5cf02c9614388d8e44267a7165b527e",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/bronze-22.08.2026.50-source-ui-uat-rounded-31/01-first-run-introduction.png",
+      "bytes": 349777,
+      "sha256": "0f474d50c703fc10adb46af3e4583f32e8ff112da8b2eaeaf9952a4ad4e04e9b",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/bronze-22.08.2026.50-source-ui-uat-rounded-31/02-first-family-form.png",
+      "bytes": 661344,
+      "sha256": "d3be0899abff177629635987caa61ea3170efbd625929f24e5ead98cffec72c1",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/bronze-22.08.2026.50-source-ui-uat-rounded-31/03-first-family-filled.png",
+      "bytes": 662880,
+      "sha256": "feecf40137f001923bb6774dbfa35240fdc6061bef2f8376007f98d703277b46",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/bronze-22.08.2026.50-source-ui-uat-rounded-31/04-security-start.png",
+      "bytes": 329043,
+      "sha256": "5f61fa28ce72ff7ec5def8b3457322bd72ad118a81529baa9a62b658b00ad9a1",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/bronze-22.08.2026.50-source-ui-uat-rounded-31/04b-security-fields-rounded.png",
+      "bytes": 312946,
+      "sha256": "46b205985b12ab10f65d77a74d326f8fd2b0fda530f7cee1c8b8c6c705c34d0b",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/bronze-22.08.2026.50-source-ui-uat-rounded-31/05-authenticated-main-shell.png",
+      "bytes": 438658,
+      "sha256": "e1ecf0574af2756c85093e547cda3f7d90fe923c9a2c9a911438a6a7c9151be5",
       "extension": ".png",
       "classification": "EVIDENCE",
       "isDocument": false
@@ -22746,6 +22922,54 @@
       "path": "artifacts/validation/bronze-22.08.2026.50-source-ui-uat-rounded-6/05-authenticated-main-shell.png",
       "bytes": 438830,
       "sha256": "412b51802fa6337f6609001d4f43c292991414c9479856ba58c3844ae6cf1af7",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/bronze-22.08.2026.50-source-ui-uat-rounded-7/01-first-run-introduction.png",
+      "bytes": 353341,
+      "sha256": "c137a1b7f5ddf57b8512b8d3d1003f0e2110779768d757abe54861c5d015bc2a",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/bronze-22.08.2026.50-source-ui-uat-rounded-7/02-first-family-form.png",
+      "bytes": 661539,
+      "sha256": "39eca2280ea7ba4d7d19b9700c78be7525e270cc45707c12891c8bf264fbf130",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/bronze-22.08.2026.50-source-ui-uat-rounded-7/03-first-family-filled.png",
+      "bytes": 663228,
+      "sha256": "8977b663dff878004ff852f9630bb60475c4759a0ebe21ce52c80fc255243738",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/bronze-22.08.2026.50-source-ui-uat-rounded-7/04-security-start.png",
+      "bytes": 333843,
+      "sha256": "94ec0f2bd07739b8068924bad2eeab5eb2b1b7352f99f19b648321eb4d60b6c4",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/bronze-22.08.2026.50-source-ui-uat-rounded-7/04b-security-fields-rounded.png",
+      "bytes": 313020,
+      "sha256": "33749fb2f89ffa12d9b3f1efa56734406403ac182e7ea5864208ba0cbaba476a",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/bronze-22.08.2026.50-source-ui-uat-rounded-7/05-authenticated-main-shell.png",
+      "bytes": 438740,
+      "sha256": "fb6b48ab247545cbcd2ec34d4b6aa03009b744c87dc0668d6fef23c72dedf871",
       "extension": ".png",
       "classification": "EVIDENCE",
       "isDocument": false
@@ -23433,7 +23657,7 @@
     {
       "path": "artifacts/validation/canonical-rule-registry-gate.json",
       "bytes": 323,
-      "sha256": "134218c3a81d6b4cefa6315b4c120296ff2a59893320730816a087450dfbcfbb",
+      "sha256": "16d2f0fdd308e00dde4147d59bf0f9243b0664111818efb72142a403b9522809",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23449,7 +23673,7 @@
     {
       "path": "artifacts/validation/conversation-capacity.json",
       "bytes": 241,
-      "sha256": "4feb4598e2b65e21b54c1ec790fc1458b729d543cc25b5729f2969b8da2c5a73",
+      "sha256": "fe288301f26345fe11d17d0a1ad663ebdbdea3e307caaa5611a11dadb3de1dbc",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23457,7 +23681,7 @@
     {
       "path": "artifacts/validation/core-service-boundary.json",
       "bytes": 123,
-      "sha256": "2ee1d90000f270beb68be9ced785493f8176b1abe7d2f2d1ca9bf136857e130d",
+      "sha256": "152d163542eeda6436155090ce842516d8220eaf018b1e5dbe16873f1a84eafc",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23465,7 +23689,7 @@
     {
       "path": "artifacts/validation/core-service-local-admin-contract.json",
       "bytes": 260,
-      "sha256": "46273c5a08604be9bb46735fc36ca432e48ddf130626477b1dd20083cacef7b5",
+      "sha256": "a73a81e07aa609a31615cf3dc8779ffacba9bf23440e4723a7faea314bee1f91",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23489,7 +23713,7 @@
     {
       "path": "artifacts/validation/desktop-core-service-startup-contract.json",
       "bytes": 161,
-      "sha256": "3ce67c33c3103ad9a51a3ee54bf19e7d421052b63cb88a5906fac90199937b3a",
+      "sha256": "59cba94d313644803928b769496fee4f5eb727ee835b0e484ce3fc1db42e2119",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23497,7 +23721,7 @@
     {
       "path": "artifacts/validation/desktop-core-service-startup-runtime.json",
       "bytes": 161,
-      "sha256": "8f03d79ef1d39559282f712a451f38a95fd8d87bd17eadcf3db1e5ad8e1473b0",
+      "sha256": "f439f8aa8e9d8b625267e82fb682e26b08ccb0fb037cf99b0a3aa0bceb9eaa28",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23513,7 +23737,7 @@
     {
       "path": "artifacts/validation/documentation-synchronization-policy.json",
       "bytes": 284,
-      "sha256": "20aea8c64ec80bc6d5dafbae39292abcde88a3ee517c8322c51dc4ebf6535b9e",
+      "sha256": "d9e5f5cfae71ed8c416ff12a2309b401f8bb10a5d8f5a882e3c2dfdbabfc248a",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23529,7 +23753,7 @@
     {
       "path": "artifacts/validation/feature-reality-gate.json",
       "bytes": 673,
-      "sha256": "a50a96adc1cfb82409a83f0625d12885c52138ff76792d3c611e92a3206a08a5",
+      "sha256": "e0b54129a94e0dffcb2d661fb987e25beff3422fe82ab34dd335225e35cd2ae5",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23537,7 +23761,7 @@
     {
       "path": "artifacts/validation/first-family-clean-release-policy.json",
       "bytes": 2691,
-      "sha256": "3df02df83040544fd8df0fd1626909803bef227126aff790103ab90066c991de",
+      "sha256": "2b637c95f2e26b3bd5ddf8bbbc64350b8ae26a6b958527ff6d66aa4f17c2e76b",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23560,8 +23784,8 @@
     },
     {
       "path": "artifacts/validation/governed-preflight.json",
-      "bytes": 7280,
-      "sha256": "a822d7c02e73ccb323ad0bbf04d8ce7fdbcc7b6fdfafa715833e68e1a3420ad0",
+      "bytes": 8377,
+      "sha256": "5d2d2d4ee47fb1d8bbcd9aa2ce3f6bf8105c7e4f2c5c47184c00f550cdf94307",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23609,7 +23833,7 @@
     {
       "path": "artifacts/validation/operation-rule-check.json",
       "bytes": 354,
-      "sha256": "ca0bcd9dcb0be96665a549dd923dd35814dfe4e7a2ef633f573b773d83e9a8c6",
+      "sha256": "10bfd602c6eedb39258d4b877bfb046b6ab21744b8c0ea9c5ac56d889eba78f5",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23641,7 +23865,7 @@
     {
       "path": "artifacts/validation/platform-policy-gate.json",
       "bytes": 2203,
-      "sha256": "120cb70c73fd4a265ddcce22c93bef1f767812a9f71d567184a2624a118bf0ee",
+      "sha256": "02fdf958554dde9e5b8f977bf5ae3c50e0bd0fbec09b910d8261b274353c81a0",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23673,7 +23897,7 @@
     {
       "path": "artifacts/validation/project-artifact-index-gate-v2.json",
       "bytes": 212,
-      "sha256": "b1e175b56e0b5666828f7c173410f45b33920e390fbe811c56b12e4234a5eabb",
+      "sha256": "72607bbbda96fa2d952dcbb04eddc196e5aebce9e6f04ab92a058bf5b9ea8dc3",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23695,9 +23919,1017 @@
       "isDocument": true
     },
     {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-10.json",
+      "bytes": 4177,
+      "sha256": "4ad02e442290ee76c234667a3d2762eebf19133ea15c0791c84a9b39809a4c71",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-10/01-first-run-introduction.png",
+      "bytes": 364035,
+      "sha256": "c43ce11f20e65659fac64fea460d9fe9685f022cf878535118065218324195d0",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-10/02-first-family-form.png",
+      "bytes": 661606,
+      "sha256": "a0c71364c804a477dd686c83d6d9ea8719cc60abc5a3a692429e505bf10b816d",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-10/03-first-family-filled.png",
+      "bytes": 663219,
+      "sha256": "dff5ef5ed3d0047088c329970b0cb0b45acd1891b4d003cbec197d018e96573e",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-10/04-security-start.png",
+      "bytes": 332260,
+      "sha256": "f1ffc126fd0ec0425ae37a2ffc40e758e876c64218d2ec14ff882df1f13e74ce",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-10/04b-security-fields-rounded.png",
+      "bytes": 312345,
+      "sha256": "1ca32d0df73be3ef0d3816a1f5dc664108fa28ca475fdbf2a50a187ecaac8a51",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-10/05-authenticated-main-shell.png",
+      "bytes": 438714,
+      "sha256": "6024284e3801938b65ee5ab4b5e2459e05de65a28da9bfda52db8ffa4f08e52f",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-11-diagnostic.json",
+      "bytes": 4409,
+      "sha256": "b2380bc9fb1dc2f801086ca5ccf4158352f693b142b78afcf9df3eddceefb977",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-11-diagnostic/01-first-run-introduction.png",
+      "bytes": 367670,
+      "sha256": "9bf7ee339761eb225a1b7bf1d9bdda286764f2959f2503e88667be1f8ce23e27",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-11-diagnostic/02-first-family-form.png",
+      "bytes": 661208,
+      "sha256": "b1d94153a7b57d9affb4f14b91ec01a0981c68a4616b3edfa43f20f4151b2902",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-11-diagnostic/03-first-family-filled.png",
+      "bytes": 663228,
+      "sha256": "8977b663dff878004ff852f9630bb60475c4759a0ebe21ce52c80fc255243738",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-11-diagnostic/04-security-start.png",
+      "bytes": 335618,
+      "sha256": "b4d4fa516b5bc2b7a3c237d5f3fe5fc5d087ac5d67a2ed60d95646c683b4eb6f",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-11-diagnostic/04b-security-fields-rounded.png",
+      "bytes": 313104,
+      "sha256": "80c6df1c5dd2907cc5d3d46ab7b109622fdbf5c01cbbd8528e03e4d8a3091ee4",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-11-diagnostic/05-authenticated-main-shell.png",
+      "bytes": 438732,
+      "sha256": "20406d1c2ff876b054efee8512ac3af0325dcca76a63d9ac3cb52f6adc1afc44",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-12-diagnostic.json",
+      "bytes": 4754,
+      "sha256": "794c8b49657fd6cd3c1d74bffc8bdabf20ad99cf440aa08b80b83c0e6543740b",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-12-diagnostic/01-first-run-introduction.png",
+      "bytes": 353341,
+      "sha256": "c137a1b7f5ddf57b8512b8d3d1003f0e2110779768d757abe54861c5d015bc2a",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-12-diagnostic/02-first-family-form.png",
+      "bytes": 661367,
+      "sha256": "4683833a7c6373b61dfb9049487c2c1beeeb5f01296df642ce44432764fabc7d",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-12-diagnostic/03-first-family-filled.png",
+      "bytes": 663039,
+      "sha256": "dd4f3ad9f69f9bbe01cf811231eb150f00d46e530b2dee46eed25381026bd5f0",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-12-diagnostic/04-security-start.png",
+      "bytes": 333962,
+      "sha256": "8ddd530dc9559c2be66413a99869c93b17ea151bad0e7ec9520a7d093edfc307",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-12-diagnostic/04b-security-fields-rounded.png",
+      "bytes": 313682,
+      "sha256": "da878233e1cd6c9edb07f40c65ab27144522ad932a8c5a31055e1f1ade28c251",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-12-diagnostic/05-authenticated-main-shell.png",
+      "bytes": 438619,
+      "sha256": "a56506ea5db0e64616d1da29121bf99e8df6562d69fb1409b575c3d92e91ba8d",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-13.json",
+      "bytes": 2051,
+      "sha256": "9ed39a60740623aba7be3e00a278ea16bcf098dfc87ed62cc4a726f970680246",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-13/01-first-run-introduction.png",
+      "bytes": 352530,
+      "sha256": "c1a890830664a4911ef79d625b76b147fa8f24e61ed3a1ca5de133ea0235787d",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-13/02-first-family-form.png",
+      "bytes": 661271,
+      "sha256": "162fc7024225c5d624e256d17546e54c5dc64f3bd6aa506df0e9e8e27e573c89",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-13/03-first-family-filled.png",
+      "bytes": 663878,
+      "sha256": "48e2143d32f0270dda16171e59872cc2b88e643864f3219054d05a1da7b7fb76",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-13/04-security-start.png",
+      "bytes": 335618,
+      "sha256": "b4d4fa516b5bc2b7a3c237d5f3fe5fc5d087ac5d67a2ed60d95646c683b4eb6f",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-13/04b-security-fields-rounded.png",
+      "bytes": 312709,
+      "sha256": "84cf14ca024517acf3e0a1b6f9cb3e4fab3e289e269e4ac5114c23db6b4af14e",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-14-diagnostic.json",
+      "bytes": 4621,
+      "sha256": "29c36f44b5eddb0beff7097091ccabe1c58631815c2843188de249509083fe15",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-14-diagnostic/01-first-run-introduction.png",
+      "bytes": 364035,
+      "sha256": "c43ce11f20e65659fac64fea460d9fe9685f022cf878535118065218324195d0",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-14-diagnostic/02-first-family-form.png",
+      "bytes": 661208,
+      "sha256": "b1d94153a7b57d9affb4f14b91ec01a0981c68a4616b3edfa43f20f4151b2902",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-14-diagnostic/03-first-family-filled.png",
+      "bytes": 663228,
+      "sha256": "8977b663dff878004ff852f9630bb60475c4759a0ebe21ce52c80fc255243738",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-14-diagnostic/04-security-start.png",
+      "bytes": 332260,
+      "sha256": "f1ffc126fd0ec0425ae37a2ffc40e758e876c64218d2ec14ff882df1f13e74ce",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-14-diagnostic/04b-security-fields-rounded.png",
+      "bytes": 312792,
+      "sha256": "9a32ef1c70534e6c546cb2b4c8198d42129e1fe8d57ebf737add08f0ae604e42",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-14-diagnostic/05-authenticated-main-shell.png",
+      "bytes": 438749,
+      "sha256": "3e88e03552b3f2f89413faa665f1acd2c3ca6915880fc8a61ae1951931f7f5a2",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-15.json",
+      "bytes": 5339,
+      "sha256": "4cbcf9a092a940c8f5108c4d4a1e8caa8f5732431d2a90e011e797f043be01a9",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-15/01-first-run-introduction.png",
+      "bytes": 362726,
+      "sha256": "09a0a566168fe277705db31374fc3290789f9244d8667db171b0551ac8a62531",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-15/02-first-family-form.png",
+      "bytes": 661603,
+      "sha256": "e596348b2ea34fa4d9aa6a83da474199c98520b431b08d8bcd6b17d62992ab87",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-15/03-first-family-filled.png",
+      "bytes": 663223,
+      "sha256": "ba5a902f5d6ff4aa0d19a63192675af834ed8f350a7b276c54a5478b4f0eb7b3",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-15/04-security-start.png",
+      "bytes": 335618,
+      "sha256": "b4d4fa516b5bc2b7a3c237d5f3fe5fc5d087ac5d67a2ed60d95646c683b4eb6f",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-15/04b-security-fields-rounded.png",
+      "bytes": 312338,
+      "sha256": "03daca87cb9340e6723ee5d2628e0089482a2c94390616bbf879185727bcb4e9",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-15/05-authenticated-main-shell.png",
+      "bytes": 438814,
+      "sha256": "d68c284484953b2a83e4cee8ef32455c626a1d907774e91cafb684073ba8a9f9",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-16.json",
+      "bytes": 4610,
+      "sha256": "f2d68b1d78c5a14975a18c94bfec86f81d6989f83f29d33a25b59584d028ef5a",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-16/01-first-run-introduction.png",
+      "bytes": 349938,
+      "sha256": "5dcfffafaf4aaa0d8c46e69236feb24b175a429e9e8ef2d39cfb224095bd9413",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-16/02-first-family-form.png",
+      "bytes": 661344,
+      "sha256": "d3be0899abff177629635987caa61ea3170efbd625929f24e5ead98cffec72c1",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-16/03-first-family-filled.png",
+      "bytes": 663905,
+      "sha256": "17ffd75c262416e430fd438417cdb09e5cc6265df90bddbd13e00c63394a3310",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-16/04-security-start.png",
+      "bytes": 366236,
+      "sha256": "ff5a5f460d8b4981ad0a9e7737e106e4191559d243e758836766ca8384545d97",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-16/04b-security-fields-rounded.png",
+      "bytes": 313168,
+      "sha256": "5576c5422aabcc6be9e0b451d26397fcf5b9969910c598d7cce599d66fba9df0",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-16/05-authenticated-main-shell.png",
+      "bytes": 438910,
+      "sha256": "593757bb4050277b7348bac31083e79ef8408b2a4c760ad3b3f2f2e49997b7df",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-17.json",
+      "bytes": 5579,
+      "sha256": "2e557a956d6b9e5294192e62619fc8bdd4c199de25676f5cedab7d1cb5263314",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-17/01-first-run-introduction.png",
+      "bytes": 353292,
+      "sha256": "6b2a255c67df1bf38fc64b5a723c0ae10f82793e8fcde3409651ca3971d35249",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-17/02-first-family-form.png",
+      "bytes": 661336,
+      "sha256": "cf525177cbaf854f0802ab9ed913af7872bb79e6ca1dc03bb6bd888e11ba193f",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-17/03-first-family-filled.png",
+      "bytes": 662880,
+      "sha256": "6e8572883973b224183861d038bca49d122a87fd4810fbe5fcaa9803c293c475",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-17/04-security-start.png",
+      "bytes": 331843,
+      "sha256": "0a06994212165bd5826933544f8d68d2cdeb8f3ffb6b7f01f59ee0ee4c751936",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-17/04b-security-fields-rounded.png",
+      "bytes": 312780,
+      "sha256": "3ca60ac3dcf1df591691e7f719fc43bf2806e79db2983688cb257756dcaa64b6",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-17/05-authenticated-main-shell.png",
+      "bytes": 438661,
+      "sha256": "d3de06812974c3a2ac187807063aa792e9d55ae9e7ca1aea2095fc0886954001",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-18-diagnostic.json",
+      "bytes": 5590,
+      "sha256": "626c3a1bdafc947a170ca47c7d1b1e8f6189fb42da6a0c52ce8c85e725984abf",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-18-diagnostic/01-first-run-introduction.png",
+      "bytes": 351106,
+      "sha256": "6162f8fd5bbad83f8b6c81a92a122bb6722a99f3397f70ff6e0fa563b9c6715c",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-18-diagnostic/02-first-family-form.png",
+      "bytes": 661277,
+      "sha256": "0804212ccf98ca333f35b585b23fea1799106e2f59294c85714589faa40c5ef9",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-18-diagnostic/03-first-family-filled.png",
+      "bytes": 663905,
+      "sha256": "17ffd75c262416e430fd438417cdb09e5cc6265df90bddbd13e00c63394a3310",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-18-diagnostic/04-security-start.png",
+      "bytes": 328379,
+      "sha256": "d0a600fe98774641d82684a834819a04ce5e833b17cfd0c66a390422e9543181",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-18-diagnostic/04b-security-fields-rounded.png",
+      "bytes": 312332,
+      "sha256": "f0285ef682113344756de7bb929d453609b27385a033146cc5dc2d4f7710a2b3",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-18-diagnostic/05-authenticated-main-shell.png",
+      "bytes": 438772,
+      "sha256": "6a3b35ad4e896dbaab34ead061fcff2a009b3bea53a293e6e9698b8e05be4559",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-19-diagnostic.json",
+      "bytes": 2062,
+      "sha256": "34378b6cc30b7b8ca5bb3b53e99bdea5ff8a4f7bae22f206529d7690751130f0",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-19-diagnostic/01-first-run-introduction.png",
+      "bytes": 353343,
+      "sha256": "9ca23cea8dbf2c2e52fce831c5c950d6c9e24bd6a07c0a54f9113379adaed189",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-19-diagnostic/02-first-family-form.png",
+      "bytes": 661426,
+      "sha256": "94300581c9f6beaa1efea77ec24185f3cf6e303acf3cbf020632e332361e6ca7",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-19-diagnostic/03-first-family-filled.png",
+      "bytes": 663034,
+      "sha256": "48d3129d8d6f57c7b2b3275385fb1ea4c464629aaa59668de3f33b92a6945777",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-19-diagnostic/04-security-start.png",
+      "bytes": 363411,
+      "sha256": "22132aa56f785d1163296f169bf39bad63632c3c0b42c4531f8500a16cef5d0a",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-19-diagnostic/04b-security-fields-rounded.png",
+      "bytes": 312746,
+      "sha256": "796ad08ad3a2d1076372dd8d978800b17774fc094632506df31e43832d231f20",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
       "path": "artifacts/validation/source-frontend-user-uat-rounded-2.json",
       "bytes": 2050,
       "sha256": "8c08bff584525ab3662e405833248b9317ae6da2a64ff2377a62f13e17c5c1cb",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-20-diagnostic.json",
+      "bytes": 5590,
+      "sha256": "2e8c176a7088c2c2975939c5de43771e936d9f73664dcdc07b760d1f5b0a1c7d",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-20-diagnostic/01-first-run-introduction.png",
+      "bytes": 349777,
+      "sha256": "0f474d50c703fc10adb46af3e4583f32e8ff112da8b2eaeaf9952a4ad4e04e9b",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-20-diagnostic/02-first-family-form.png",
+      "bytes": 661275,
+      "sha256": "fc46c33f64a0d57909bb3030fe2658f8db4db8774260f8c9b74f50a23c8dacb8",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-20-diagnostic/03-first-family-filled.png",
+      "bytes": 663699,
+      "sha256": "0552c091a6a66b7c4d8d591835b866bc3b69c05d191f3320a0c8f3dec1aa6788",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-20-diagnostic/04-security-start.png",
+      "bytes": 329043,
+      "sha256": "5f61fa28ce72ff7ec5def8b3457322bd72ad118a81529baa9a62b658b00ad9a1",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-20-diagnostic/04b-security-fields-rounded.png",
+      "bytes": 313282,
+      "sha256": "462805f22f2d6fde776450c9623c25b3aeb295ac920d93a57e61e84ca423c12a",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-20-diagnostic/05-authenticated-main-shell.png",
+      "bytes": 438717,
+      "sha256": "d44417edd742c14e60f259c9b81b82f67a23020ef0ea22e50c03239e3f76bc7a",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-21-diagnostic.json",
+      "bytes": 5590,
+      "sha256": "b107b3a276c32645a0d634b15c0d92c6031f38c6184f6ccc5f4090a23a20f86c",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-21-diagnostic/01-first-run-introduction.png",
+      "bytes": 351097,
+      "sha256": "827a7ba90156364cdc214668e8645f31743714d2ecb0a21ffb9f2564f9fa6321",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-21-diagnostic/02-first-family-form.png",
+      "bytes": 661277,
+      "sha256": "0804212ccf98ca333f35b585b23fea1799106e2f59294c85714589faa40c5ef9",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-21-diagnostic/03-first-family-filled.png",
+      "bytes": 663369,
+      "sha256": "c71895839024697c503dc18666275929ad2868cedbbc65cf24d747922bf3d80d",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-21-diagnostic/04-security-start.png",
+      "bytes": 329043,
+      "sha256": "5f61fa28ce72ff7ec5def8b3457322bd72ad118a81529baa9a62b658b00ad9a1",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-21-diagnostic/04b-security-fields-rounded.png",
+      "bytes": 313040,
+      "sha256": "f25007e22330433f0c520c80e615aeee50a2733a3aa573371d22e2cc9714edfa",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-21-diagnostic/05-authenticated-main-shell.png",
+      "bytes": 438760,
+      "sha256": "d2c573cc2b63a59d1f26473a3dacce87ab6b30b478d9367fe699e14f8af440e3",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-22.json",
+      "bytes": 7390,
+      "sha256": "d568f946a9eac9ea9799a2c2770cd26e8649fc090f5b1d21dc86375b7e966169",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-22/01-first-run-introduction.png",
+      "bytes": 352567,
+      "sha256": "addf727bd6568e80d93bb8cb0d04d1ca3e2709afc8a1a29daab2d181ebf6470e",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-22/02-first-family-form.png",
+      "bytes": 661336,
+      "sha256": "cf525177cbaf854f0802ab9ed913af7872bb79e6ca1dc03bb6bd888e11ba193f",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-22/03-first-family-filled.png",
+      "bytes": 663910,
+      "sha256": "f98b6f89e43b66a5c955aa775e9bc33ae05e69b25723428561290f132b4d2e0f",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-22/04-security-start.png",
+      "bytes": 366236,
+      "sha256": "ff5a5f460d8b4981ad0a9e7737e106e4191559d243e758836766ca8384545d97",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-22/04b-security-fields-rounded.png",
+      "bytes": 313329,
+      "sha256": "39bffdc57bf35c0caf79de7abe9eb72a2227be72e151fe02464301d371dc7bf2",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-22/05-authenticated-main-shell.png",
+      "bytes": 438795,
+      "sha256": "85bcbcc2ce714b19b4fe9ff0a6393200a6641c8702ce370617b33e24113e82ea",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-23.json",
+      "bytes": 1807,
+      "sha256": "265a458b9c453a83ba0fc602a7a2350cbc554a806ffb80d2cc0594c0e7262c9a",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-24.json",
+      "bytes": 9538,
+      "sha256": "e9205435c2c5335933d734e436cedc4aa8f1d50a2741fc6b5c8cc1ddae019994",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-24/01-first-run-introduction.png",
+      "bytes": 349852,
+      "sha256": "a1eff963f125633e0ceeb8b15c885dfc2498a9211b007375ff3022ecbe9a78c1",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-24/02-first-family-form.png",
+      "bytes": 661277,
+      "sha256": "0804212ccf98ca333f35b585b23fea1799106e2f59294c85714589faa40c5ef9",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-24/03-first-family-filled.png",
+      "bytes": 663558,
+      "sha256": "d6a946c30bea5f12f50c0058c963cdad2cccc278dd88f490ed27fcbe282c24d3",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-24/04-security-start.png",
+      "bytes": 366581,
+      "sha256": "b341079c0d653d9ffab58e30199d36398968b27dfc0867df909df5f259ff2053",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-24/04b-security-fields-rounded.png",
+      "bytes": 312807,
+      "sha256": "649e7d4f811ce99c361ac6fffc966f7e8d263bf0720fa7c3bfd12162b7b33625",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-24/05-authenticated-main-shell.png",
+      "bytes": 438836,
+      "sha256": "0a73f6fccd0e2b11a5f2ddd0ef974fffaf61a25b568cf9c288707d9006c64b34",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-25.json",
+      "bytes": 8141,
+      "sha256": "55c9148afc9186867ad0e2cb83cde760f1b7daa33d46a453223d4829c5885652",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-25/01-first-run-introduction.png",
+      "bytes": 353057,
+      "sha256": "111d98b3fbcda3bc7f490de94f7133a48b717a7a1d5513df818103484134d563",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-25/02-first-family-form.png",
+      "bytes": 661344,
+      "sha256": "d3be0899abff177629635987caa61ea3170efbd625929f24e5ead98cffec72c1",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-25/03-first-family-filled.png",
+      "bytes": 662880,
+      "sha256": "6e8572883973b224183861d038bca49d122a87fd4810fbe5fcaa9803c293c475",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-25/04-security-start.png",
+      "bytes": 329043,
+      "sha256": "5f61fa28ce72ff7ec5def8b3457322bd72ad118a81529baa9a62b658b00ad9a1",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-25/04b-security-fields-rounded.png",
+      "bytes": 312643,
+      "sha256": "7765ffc855b98d678b6410f539f0016f423b6f584713aac2306a66d6a209cbf9",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-25/05-authenticated-main-shell.png",
+      "bytes": 438763,
+      "sha256": "895b5a1ad47488fe93aaf572759f3b9c92650c41b3b319022ca324aa90450c6a",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-26.json",
+      "bytes": 9674,
+      "sha256": "1f5e96f6d1f3f7cb423422ec24ff389329323bf3ff15d9aa10924c35da25cd6b",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-26/01-first-run-introduction.png",
+      "bytes": 349777,
+      "sha256": "0f474d50c703fc10adb46af3e4583f32e8ff112da8b2eaeaf9952a4ad4e04e9b",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-26/02-first-family-form.png",
+      "bytes": 661344,
+      "sha256": "d3be0899abff177629635987caa61ea3170efbd625929f24e5ead98cffec72c1",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-26/03-first-family-filled.png",
+      "bytes": 663076,
+      "sha256": "5323e251398b474887b0858d8a489680bdf4ef4ddefd54e925bbcb9f455f1cbb",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-26/04-security-start.png",
+      "bytes": 328979,
+      "sha256": "c8af7537284b2db05224927ee07d3ae1cfeeb974d9c88f878acf30b8582410ac",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-26/04b-security-fields-rounded.png",
+      "bytes": 312847,
+      "sha256": "d5b7793f05685b7127fe2314c1934edfa456b23099e3f336d4ebd851271f62b1",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-26/05-authenticated-main-shell.png",
+      "bytes": 438735,
+      "sha256": "21caf51e06ea2d8d97e9a98be2a84f03386ebb82014e24da2cec86ee9c2c0475",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-27.json",
+      "bytes": 12636,
+      "sha256": "68e27b555aa46b8e317a3d8eebd3cad5dcb77d95bbb99b5d9ea13f684d2dc886",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-27/01-first-run-introduction.png",
+      "bytes": 351136,
+      "sha256": "e1d367917b07ebb789d7c3ea4b3ffaee18dccfcdafd639e0e160fdc7f3c33390",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-27/02-first-family-form.png",
+      "bytes": 661277,
+      "sha256": "0804212ccf98ca333f35b585b23fea1799106e2f59294c85714589faa40c5ef9",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-27/03-first-family-filled.png",
+      "bytes": 663699,
+      "sha256": "0552c091a6a66b7c4d8d591835b866bc3b69c05d191f3320a0c8f3dec1aa6788",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-27/04-security-start.png",
+      "bytes": 366524,
+      "sha256": "921c11ce82cf101dab90c477a0659092ccdfda2ba1b563a1e8125678f86c2cb1",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-27/04b-security-fields-rounded.png",
+      "bytes": 312890,
+      "sha256": "c7df05e5121bc34a7356f54b3cf46f8530d1730a6e7d8f200f76318a61772358",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-27/05-authenticated-main-shell.png",
+      "bytes": 438740,
+      "sha256": "245359c6ad68999b15f3619a9de272bed4baff7fcc0e4d47a2e339f2193d4c83",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-28.json",
+      "bytes": 15918,
+      "sha256": "bc5267a9abc00db7b7067dcde88e7edd3886d712ecd87a22b6a56ae0ed742a59",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-28/01-first-run-introduction.png",
+      "bytes": 349834,
+      "sha256": "e269186ff8a4dabd1b7dd0929c8452496e8c321db2f56c591225edc7da0e2cc4",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-28/02-first-family-form.png",
+      "bytes": 661275,
+      "sha256": "fc46c33f64a0d57909bb3030fe2658f8db4db8774260f8c9b74f50a23c8dacb8",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-28/03-first-family-filled.png",
+      "bytes": 663558,
+      "sha256": "d6a946c30bea5f12f50c0058c963cdad2cccc278dd88f490ed27fcbe282c24d3",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-28/04-security-start.png",
+      "bytes": 329043,
+      "sha256": "5f61fa28ce72ff7ec5def8b3457322bd72ad118a81529baa9a62b658b00ad9a1",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-28/04b-security-fields-rounded.png",
+      "bytes": 312731,
+      "sha256": "6422d106c65f19b39f3d56f15fb6b175785ad98b91f4a9a965d4423e5915c0a2",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-28/05-authenticated-main-shell.png",
+      "bytes": 438758,
+      "sha256": "d6e66f120921bd31f04f9b522152b88b8f21f06c80a7f6ccf2ff59420e53e1c6",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-29-diagnostic.json",
+      "bytes": 15929,
+      "sha256": "c1ea2cd95787dc2e958b778d8f0e266d2767541de8462273d7f00ce996ee1589",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23709,6 +24941,190 @@
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-30.json",
+      "bytes": 19625,
+      "sha256": "cb9dc2081ce73337c3849e4f20b8a465d2826d1f54fb8c266c1ce6d1b8b0eee0",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-31.json",
+      "bytes": 20227,
+      "sha256": "fdb8f03e9f02683f392a1c26bc606e4723e70d24f24d1c77a07929a98f904961",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-32.json",
+      "bytes": 17956,
+      "sha256": "86aaad22ad492f860c4744c552ab0043d697e2db7a0d1fdf2c0db1359b67a97a",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-32/01-first-run-introduction.png",
+      "bytes": 353319,
+      "sha256": "f72813c965e00e0cd9046f06aabad973c4a97a08bed6cdedc63bb1407266228e",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-32/02-first-family-form.png",
+      "bytes": 661275,
+      "sha256": "fc46c33f64a0d57909bb3030fe2658f8db4db8774260f8c9b74f50a23c8dacb8",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-32/03-first-family-filled.png",
+      "bytes": 663913,
+      "sha256": "7cf1a3f3578f1a657a5d20f9b8d5d565beff61ed014a0bc43aaa6f96612ee3bf",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-32/04-security-start.png",
+      "bytes": 328979,
+      "sha256": "c8af7537284b2db05224927ee07d3ae1cfeeb974d9c88f878acf30b8582410ac",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-32/04b-security-fields-rounded.png",
+      "bytes": 313024,
+      "sha256": "fec807e3cb8b748c8e014d01958827c2f8d8c2640aebcc1158d38f272d53e64e",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-32/05-authenticated-main-shell.png",
+      "bytes": 438814,
+      "sha256": "1afb341d4017db08ce6e2425c1a445db0beac8dadabb7a4dafcc96787d0b8e4a",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-33.json",
+      "bytes": 8353,
+      "sha256": "18ac4d15c9321d27e933c68ef7736b9682b558467c19e3ef9b5516abf74e24e9",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-33/01-first-run-introduction.png",
+      "bytes": 349948,
+      "sha256": "bb97de6bb0762a700d58d7609628f188df7928c9fc139b17ee48095d32e92d0e",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-33/02-first-family-form.png",
+      "bytes": 661275,
+      "sha256": "fc46c33f64a0d57909bb3030fe2658f8db4db8774260f8c9b74f50a23c8dacb8",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-33/03-first-family-filled.png",
+      "bytes": 663699,
+      "sha256": "0552c091a6a66b7c4d8d591835b866bc3b69c05d191f3320a0c8f3dec1aa6788",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-33/04-security-start.png",
+      "bytes": 329043,
+      "sha256": "5f61fa28ce72ff7ec5def8b3457322bd72ad118a81529baa9a62b658b00ad9a1",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-33/04b-security-fields-rounded.png",
+      "bytes": 312883,
+      "sha256": "ddad51a2c7dbea032d7bcb20ee7576255eb2dd3b9ea2a715e1fb1aca03136e09",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-33/05-authenticated-main-shell.png",
+      "bytes": 438887,
+      "sha256": "42a40f08ba8be1d451579387a549bf60105bd5661bdeaa6b16f677d853df3624",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-34.json",
+      "bytes": 20222,
+      "sha256": "15d1a6109be9bfb69b246e1af801c37d9db215be6a16e9b9544a133f2c595448",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-34/01-first-run-introduction.png",
+      "bytes": 346180,
+      "sha256": "38b8b8d42ac0f71ed1627f7184bf72db9c2a4804a85af6f4bbca6dee8de59889",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-34/02-first-family-form.png",
+      "bytes": 661275,
+      "sha256": "fc46c33f64a0d57909bb3030fe2658f8db4db8774260f8c9b74f50a23c8dacb8",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-34/03-first-family-filled.png",
+      "bytes": 663899,
+      "sha256": "3776d2741aa8be65bef2a8585272c827a655a4db8ad040834a0bda4797ce1845",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-34/04-security-start.png",
+      "bytes": 328379,
+      "sha256": "d0a600fe98774641d82684a834819a04ce5e833b17cfd0c66a390422e9543181",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-34/04b-security-fields-rounded.png",
+      "bytes": 313017,
+      "sha256": "5aa9960a39ecc3fd9ccac2c3a378e8f7dcd9dabaddc6e35f91892e773ffe7dca",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-34/05-authenticated-main-shell.png",
+      "bytes": 438782,
+      "sha256": "51af0a10105b303741ba97ba33d1c216db88c28f7e682b671346214c7b5d680d",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
     },
     {
       "path": "artifacts/validation/source-frontend-user-uat-rounded-4.json",
@@ -23733,6 +25149,118 @@
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-7.json",
+      "bytes": 4176,
+      "sha256": "c522d5f7bfaef157b059868baf4534d0a53bde56c90059ea51c368c6d4f9176a",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-8.json",
+      "bytes": 2050,
+      "sha256": "f71e2385629141d1ef978274a37dd7a389fd10b160bf2dc093ad0c3f5675e8d5",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-8/01-first-run-introduction.png",
+      "bytes": 352575,
+      "sha256": "17d664e150d4e45a0396712cd62e8a2a98f20d740ec4f7f8f2f05a2c86462573",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-8/02-first-family-form.png",
+      "bytes": 661205,
+      "sha256": "d1c978c2d7aeefc311bdbef82ed054c6614056b13ccf1e4a449538cfb52e839c",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-8/03-first-family-filled.png",
+      "bytes": 663224,
+      "sha256": "879eacd151719c3648cf2ab8d5d90fb6aeb1fdb4a11656fb95ca275692b9da81",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-8/04-security-start.png",
+      "bytes": 367482,
+      "sha256": "9a66c7abd6d8c7d24bf55c13a1dcaa66d52769617587735fa86befbce006db0d",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-8/04b-security-fields-rounded.png",
+      "bytes": 312345,
+      "sha256": "972686c87eb68d997ed994267ddea7f8d5533f534d49e0f5f3c1e6443de6415e",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-9.json",
+      "bytes": 4176,
+      "sha256": "ddb960de6c84d19c0e47ed2b8eb54ef44ab1fa647e7f0e8b9871b5c54381f0e6",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-9/01-first-run-introduction.png",
+      "bytes": 364035,
+      "sha256": "c43ce11f20e65659fac64fea460d9fe9685f022cf878535118065218324195d0",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-9/02-first-family-form.png",
+      "bytes": 661539,
+      "sha256": "39eca2280ea7ba4d7d19b9700c78be7525e270cc45707c12891c8bf264fbf130",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-9/03-first-family-filled.png",
+      "bytes": 663228,
+      "sha256": "8977b663dff878004ff852f9630bb60475c4759a0ebe21ce52c80fc255243738",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-9/04-security-start.png",
+      "bytes": 335618,
+      "sha256": "b4d4fa516b5bc2b7a3c237d5f3fe5fc5d087ac5d67a2ed60d95646c683b4eb6f",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-9/04b-security-fields-rounded.png",
+      "bytes": 312833,
+      "sha256": "734279bac193878a6a1f72305a752e6a952a30f253bae9b7aa121de31d634ca1",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/validation/source-frontend-user-uat-rounded-9/05-authenticated-main-shell.png",
+      "bytes": 438635,
+      "sha256": "ff624c2f84a4e78808c2f2e31b3c6c16bfac03045f43388ab3d3ab76db6c8382",
+      "extension": ".png",
+      "classification": "EVIDENCE",
+      "isDocument": false
     },
     {
       "path": "artifacts/validation/source-frontend-user-uat-rounded.json",
@@ -23769,7 +25297,7 @@
     {
       "path": "artifacts/validation/step-checkpoint-gate.json",
       "bytes": 188,
-      "sha256": "5a0cbad0c0e27acdadf24c72bb58d62c6f082d2f106cf3fddc041465588e9b69",
+      "sha256": "568adf51981a91bd0b14bf8b0e97f52c2fbeaaba182fa4636c1ee2b14040d981",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23785,7 +25313,7 @@
     {
       "path": "artifacts/validation/system-health-core-service-ipc-contract.json",
       "bytes": 161,
-      "sha256": "89855ff92696addc10c02f9636d1046fe1df02e0b1c7afb68a72755c4ad7f0eb",
+      "sha256": "6fe37c67f476c0bc8a2fd0a63a236e0b2c578cd68d865deea4b37569e1fe4b1b",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23793,7 +25321,7 @@
     {
       "path": "artifacts/validation/system-health-core-service-ipc-runtime.json",
       "bytes": 161,
-      "sha256": "3cd66fce8ee22aacabd15d69f4033c1c7f9173ac9289a858f82719fcf70324b2",
+      "sha256": "6123bb33eff453d21313df9303966f39f1860a0d640ff9ea508d1d931ea49eca",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23809,7 +25337,7 @@
     {
       "path": "artifacts/validation/universal-rule-enforcement-gate.json",
       "bytes": 299,
-      "sha256": "35ea82af8c058f476887f44e971fcf98d8dad70afe519efe2a160052302c15db",
+      "sha256": "47dee58969907d309ab401f3ca4b531a6562c76b36053a5764ca3db928721f7f",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23825,7 +25353,7 @@
     {
       "path": "artifacts/validation/user-decision-ledger-gate.json",
       "bytes": 181,
-      "sha256": "4f872480abeeac3c28c512a516636281809bb1531a968556e18de8ddfc263c4a",
+      "sha256": "f8bbb86f55ff17127d8897474cdb68a0c44ab7f883fbbe4fa0d7e292b42891b1",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23833,7 +25361,7 @@
     {
       "path": "artifacts/validation/user-visible-release-display-policy.json",
       "bytes": 237,
-      "sha256": "935ef0c651527b5979bcb2d7f0cde31c19ceb482669b2657165dd1f2ef13051d",
+      "sha256": "ba03489eb64ef75b851fa8769e7fa076596a83cf6f8426ca7a169056c24cb677",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23841,7 +25369,7 @@
     {
       "path": "artifacts/validation/windows-installer-retention-policy.json",
       "bytes": 333,
-      "sha256": "b81330c5edc7d476624781ebee62df21518ee04f31ad55b1853ec7ba96b56e2e",
+      "sha256": "a3c26c534833ec5f70b1a575fc730c1d9f555279d5a978ef39d3727b75ce64f5",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -34721,7 +36249,7 @@
     {
       "path": "docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json",
       "bytes": 17088,
-      "sha256": "b4564cbf8117e2a10d412789cb87e346abfdad365d1e3abe95dc173709c602fa",
+      "sha256": "d02157f1f1d9df661bcdfa6b410c5ce224f08f77af344cb1595c817375a1d04b",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -36768,8 +38296,8 @@
     },
     {
       "path": "packages/database/sqlite-error.test.ts",
-      "bytes": 740,
-      "sha256": "c96084c836461edb81bf29bbffb1e16c194856115b74090cdbe061858b42b763",
+      "bytes": 1420,
+      "sha256": "73a582cbacecf295fe8a8891455114d2bcaae37164382728f1cc683fd2aa71f7",
       "extension": ".ts",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -36792,8 +38320,8 @@
     },
     {
       "path": "packages/database/src/family-database-migrations.ts",
-      "bytes": 1198253,
-      "sha256": "73c06e46a3b673afb427a5aaaae7b647bb8c9947f769918d673105c598b0eaff",
+      "bytes": 1199075,
+      "sha256": "891ce78fe287684e0532e7d11067527f370f7a99626bdea4ca20b22002de5af3",
       "extension": ".ts",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -36832,8 +38360,8 @@
     },
     {
       "path": "packages/database/src/sqlite-error.ts",
-      "bytes": 3593,
-      "sha256": "4c774dd7a5c268607086062244582439d03a1727f68291557f4c262af7eaebba",
+      "bytes": 4010,
+      "sha256": "e3a1582388f7420d1f36b55135a1991eaee50d8e1988bd6e8820db4d5ee9d6e5",
       "extension": ".ts",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -37536,8 +39064,8 @@
     },
     {
       "path": "packages/platform-policy/policy-decision-availability.test.ts",
-      "bytes": 8052,
-      "sha256": "a46567447c5e7e3f8b51f7b36a5d50813ba9392095cee91aacca834acfb42493",
+      "bytes": 8452,
+      "sha256": "ae95d05524471341a016456f3c363d4b42861aac4a637e29d2d90eee21492a74",
       "extension": ".ts",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -37648,8 +39176,8 @@
     },
     {
       "path": "packages/platform-policy/src/policy-enforcement-point.ts",
-      "bytes": 70473,
-      "sha256": "03cfaf2b7c9088f59a4b7912ef8feb2328dd40489e141ddae2fea7ee6ed2e648",
+      "bytes": 70553,
+      "sha256": "1f64a6f0c4ce4147db7637fa74c436fcdf3c03fe6c77ce9fb197ba456122b4dc",
       "extension": ".ts",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -37802,6 +39330,14 @@
       "path": "packages/repositories/communication-security-repository-policy.test.ts",
       "bytes": 25317,
       "sha256": "79190ac424bcb30e378821fb0ff2dd80126b374779ccc186509362a4c597a4c6",
+      "extension": ".ts",
+      "classification": "TEST_OR_GATE",
+      "isDocument": false
+    },
+    {
+      "path": "packages/repositories/entity-catalog-repository.test.ts",
+      "bytes": 2671,
+      "sha256": "712d0fa4dd26868224a6e778c0298d5a4489733f7fdff32683e6aca86f1661d9",
       "extension": ".ts",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -38160,8 +39696,8 @@
     },
     {
       "path": "packages/repositories/src/entity-catalog-repository.ts",
-      "bytes": 5591,
-      "sha256": "7c0e1ccbec57c2567eb52765d27b4bb37a922f972e1773c8817f3eccbddd0ab8",
+      "bytes": 5609,
+      "sha256": "5ceffbfb504bdb399c6c0e563c353c30d0ce0ed865e6c7d6d4436eaf475dc552",
       "extension": ".ts",
       "classification": "SOURCE_CODE",
       "isDocument": false
