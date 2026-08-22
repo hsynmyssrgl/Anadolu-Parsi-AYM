@@ -99,7 +99,10 @@ describe('33-O privacy ownership and data rights IPC boundary', () => {
       });
     }
     for (const channel of ['privacyOwnership:getCenter', 'privacyOwnership:simulatePermission']) {
-      expect(resolveIpcRequestLifecyclePolicy(channel)).toMatchObject({ cancellable: true, latestWins: true });
+      expect(resolveIpcRequestLifecyclePolicy(channel)).toMatchObject({
+        cancellable: true,
+        latestWins: channel === 'privacyOwnership:simulatePermission'
+      });
       expect(resolveIpcRequestRatePolicy(channel)).toEqual({ enabled: true, maxRequestsPerWindow: 120, windowMs: 60_000 });
     }
     for (const channel of writes) {
