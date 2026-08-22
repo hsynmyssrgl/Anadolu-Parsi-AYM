@@ -9,6 +9,13 @@
 !define AYM_LANG_ENGLISH 1033
 !define AYM_LANG_TURKISH 1055
 
+; Release channels are separate installed products. The channel token binds the
+; installer directory, executable, shortcuts, uninstall scope and user-data
+; root so development/testing can never mutate a Gold profile.
+!define PPT_INSTALLER_RELEASE_CHANNEL "Bronze"
+!define PPT_INSTALLER_CHANNEL_DIRECTORY "${PPT_INSTALLER_RELEASE_CHANNEL}"
+!define PPT_INSTALLER_EXECUTABLE "ParsYuva-${PPT_INSTALLER_RELEASE_CHANNEL}.exe"
+
 ; Keep the complete installer readable at normal and high-DPI Windows scales.
 ; Custom pages also set explicit fonts below because NSIS otherwise falls back
 ; to a smaller legacy dialog font for dynamically created controls.
@@ -61,8 +68,8 @@ LangString AymWelcomeStepTwo ${AYM_LANG_ENGLISH} "2 of 3 · Local privacy"
 LangString AymWelcomeStepTwo ${AYM_LANG_TURKISH} "2 / 3 · Yerel gizlilik"
 LangString AymWelcomeStepThree ${AYM_LANG_ENGLISH} "3 of 3 · Narrated guidance"
 LangString AymWelcomeStepThree ${AYM_LANG_TURKISH} "3 / 3 · Sesli rehberlik"
-LangString AymWelcomeBody ${AYM_LANG_ENGLISH} "The application will be installed in C:\Program Files\PPT\ParsYuva. Setup does not create family records, sign in to an online account or transmit personal data."
-LangString AymWelcomeBody ${AYM_LANG_TURKISH} "Uygulama C:\Program Files\PPT\ParsYuva klasörüne kurulacak. Kurulum aile kaydı oluşturmaz, çevrimiçi hesaba giriş yapmaz ve kişisel veri aktarmaz."
+LangString AymWelcomeBody ${AYM_LANG_ENGLISH} "The ${PPT_INSTALLER_RELEASE_CHANNEL} application will be installed in C:\Program Files\PPT\ParsYuva\${PPT_INSTALLER_CHANNEL_DIRECTORY}. Setup does not create family records, sign in to an online account or transmit personal data."
+LangString AymWelcomeBody ${AYM_LANG_TURKISH} "${PPT_INSTALLER_RELEASE_CHANNEL} uygulaması C:\Program Files\PPT\ParsYuva\${PPT_INSTALLER_CHANNEL_DIRECTORY} klasörüne kurulacak. Kurulum aile kaydı oluşturmaz, çevrimiçi hesaba giriş yapmaz ve kişisel veri aktarmaz."
 LangString AymReadyTitle ${AYM_LANG_ENGLISH} "Ready to install"
 LangString AymReadyTitle ${AYM_LANG_TURKISH} "Kuruluma hazır"
 LangString AymReadyBody ${AYM_LANG_ENGLISH} "Everything is ready. Continuing will place the verified application files and create Desktop and Start menu shortcuts for all users."
@@ -92,7 +99,6 @@ LangString AymDeleteFailed ${AYM_LANG_TURKISH} "Kişisel veri klasörü tamamen 
 
 ; Binding release-channel palette. Future channel builds change only this value;
 ; the wizard artwork and all custom emphasis colors follow the same mapping.
-!define PPT_INSTALLER_RELEASE_CHANNEL "Bronze"
 !if "${PPT_INSTALLER_RELEASE_CHANNEL}" == "Bronze"
   !define PPT_INSTALLER_CHANNEL_COLOR "A5672F"
   !define PPT_INSTALLER_CHANNEL_BITMAP "installer-bronze-sidebar.bmp"
@@ -341,7 +347,7 @@ FunctionEnd
 
 !macro customInit
   Call AymApplySystemUiLanguage
-  StrCpy $INSTDIR "$PROGRAMFILES64\PPT\ParsYuva"
+  StrCpy $INSTDIR "$PROGRAMFILES64\PPT\ParsYuva\${PPT_INSTALLER_CHANNEL_DIRECTORY}"
 !macroend
 !endif
 
@@ -375,7 +381,7 @@ FunctionEnd
   MessageBox MB_YESNOCANCEL|MB_ICONQUESTION "$(AymUninstallChoice)" IDYES aym_uninstall_backup IDNO aym_uninstall_delete
   Goto aym_uninstall_cancel
 aym_uninstall_backup:
-  ExecWait '"$INSTDIR\ParsYuva.exe" --uninstall-backup-assistant' $0
+  ExecWait '"$INSTDIR\${PPT_INSTALLER_EXECUTABLE}" --uninstall-backup-assistant' $0
   ${If} $0 != 0
     MessageBox MB_OK|MB_ICONSTOP "$(AymBackupFailed)"
     Abort
@@ -384,10 +390,10 @@ aym_uninstall_backup:
 aym_uninstall_delete:
   MessageBox MB_YESNO|MB_ICONEXCLAMATION "$(AymDeleteConfirm)" IDYES aym_uninstall_remove_data IDNO aym_uninstall_cancel
 aym_uninstall_remove_data:
-  ; Public product name changed, but this legacy directory is the stable data
-  ; identity used by existing installations and must remain upgrade-compatible.
-  RMDir /r "$APPDATA\Anadolu Parsı Aile Yaşam Merkezi"
-  ${If} ${FileExists} "$APPDATA\Anadolu Parsı Aile Yaşam Merkezi\*.*"
+  ; Delete only the current release channel. Bronze and Silver uninstallers
+  ; must never touch a Gold profile (and vice versa).
+  RMDir /r "$APPDATA\ParsYuva\${PPT_INSTALLER_CHANNEL_DIRECTORY}"
+  ${If} ${FileExists} "$APPDATA\ParsYuva\${PPT_INSTALLER_CHANNEL_DIRECTORY}\*.*"
     MessageBox MB_OK|MB_ICONSTOP "$(AymDeleteFailed)"
     Abort
   ${EndIf}

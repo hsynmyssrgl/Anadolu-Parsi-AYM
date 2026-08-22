@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useReducer, useRef, useState, type CSSProperties, type FormEvent, type ReactNode } from 'react';
 import { Button, EmptyState, Modal, PageHeader, SectionHeader, StatRow, StatusMessage, Surface, VisuallyHidden } from './ui';
-import { navigationReducer, persistNavigationState, readNavigationState } from './navigation';
+import { navigationReducer, persistNavigationState, readNavigationState, toggleNavigationModule } from './navigation';
 import brandMarkUrl from './assets/brand-mark.png';
 import { accessibilityAnnouncement, applyAccessibilityProfile, cancelFirstRunNarration, firstRunNarrationContent, isFirstRunIntroductionComplete, nextRovingIndex, parseAccessibilityPreferences, persistBrandAudioMuted, persistFirstRunIntroductionComplete, readBootstrapPreference, readBrandAudioMuted, resolveAccessibilityTheme, serializeAccessibilityPreferences, startFirstRunNarration, waitForPreferredNarrationVoice, writeBootstrapPreference, type AccessibilityAudienceProfile, type AccessibilityPreferences, type BootstrapPreferenceStorage, type FirstRunNarrationStatus } from './accessibility';
 import { getActiveUiLocale, localizeNavigationGroup, localizeNavigationLabel, useLocalization } from './localization';
@@ -2860,6 +2860,7 @@ export function App() {
     return()=>{delete document.documentElement.dataset.releaseChannel;};
   },[releaseChannel]);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(readSidebarState);
+  const [expandedNavigationModule, setExpandedNavigationModule] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [menuNarrationStatus,setMenuNarrationStatus]=useState<SilverHelpNarrationStatus>(menuNarrationPreviewMode?'speaking':'idle');
@@ -3399,13 +3400,24 @@ export function App() {
           </div>}
         </div>
         <nav aria-label={t('shell.navigation')}>
-          {localizedNavGroups.map((group)=><section className="nav-group" key={group.label}>
-            <h2 className="nav-group-label">{group.label}</h2>
-            {group.items.map((id)=>{
-              const item=localizedNavItems.find((candidate)=>candidate.id===id)!;
-              return <button type="button" title={sidebarCollapsed ? item.label : undefined} aria-current={active === item.id ? 'page' : undefined} className={active === item.id ? 'active' : ''} key={item.id} onClick={() => navigateFromShell(item.id)}><span aria-hidden="true">{item.icon}</span><span className="nav-label">{item.label}</span>{item.id === 'health' && <i />}{item.id === SECURITY_CENTER_ROUTE && securityCenterNeedsAttention(auth) && <i title="Cihaz yeniden yetkilendirmesi gerekiyor" />}</button>;
-            })}
-          </section>)}
+          {localizedNavGroups.map((group)=>{
+            const expanded=expandedNavigationModule===group.id;
+            const groupItemsId=`navigation-module-${group.id}`;
+            const groupIcon=localizedNavItems.find((candidate)=>candidate.id===group.items[0])?.icon??'•';
+            return <section className={`nav-group ${expanded?'expanded':''}`} key={group.id}>
+              <h2 className="nav-group-label">
+                <button type="button" className="nav-module-toggle" aria-expanded={expanded} aria-controls={groupItemsId} title={sidebarCollapsed?group.label:undefined} onClick={()=>setExpandedNavigationModule(current=>toggleNavigationModule(current,group.id))}>
+                  <span className="nav-group-icon" aria-hidden="true">{groupIcon}</span><span className="nav-group-label-copy">{group.label}</span><span className="nav-group-disclosure" aria-hidden="true">⌄</span>
+                </button>
+              </h2>
+              <div id={groupItemsId} className="nav-module-items" hidden={!expanded}>
+                {group.items.map((id)=>{
+                  const item=localizedNavItems.find((candidate)=>candidate.id===id)!;
+                  return <button type="button" data-navigation-route={item.id} title={sidebarCollapsed ? item.label : undefined} aria-current={active === item.id ? 'page' : undefined} className={active === item.id ? 'active' : ''} key={item.id} onClick={() => navigateFromShell(item.id)}><span aria-hidden="true">{item.icon}</span><span className="nav-label">{item.label}</span>{item.id === 'health' && <i />}{item.id === SECURITY_CENTER_ROUTE && securityCenterNeedsAttention(auth) && <i title="Cihaz yeniden yetkilendirmesi gerekiyor" />}</button>;
+                })}
+              </div>
+            </section>;
+          })}
         </nav>
         <div className="sidebar-footer"><div className="sync-state"><span>◌</span><div><strong>{t('shell.localReady')}</strong><small>{formatDate(snapshot.lastUpdatedAt, { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' })}</small></div><i>✓</i></div><div className="edition-line"><span>{appInfo.releaseLabel}</span><small>{releaseStageForChannel(appInfo.channel,language)}</small></div></div>
       </aside>

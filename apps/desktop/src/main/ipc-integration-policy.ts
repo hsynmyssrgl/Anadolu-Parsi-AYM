@@ -441,6 +441,149 @@ const optionalInteger = (value: unknown, minimum: number, maximum: number): bool
   value === undefined || (typeof value === 'number' && Number.isInteger(value) && value >= minimum && value <= maximum);
 const optionalArgument = (args: readonly unknown[]): unknown => args.length === 0 ? undefined : args[0];
 
+/**
+ * Older desktop surfaces predate the per-channel schemas below. Keeping their
+ * names in one explicit inventory prevents a newly registered channel from
+ * silently becoming renderer-accessible. These channels still pass a bounded,
+ * descriptor-safe structured-clone inspection in both directions.
+ */
+export const COMPATIBILITY_IPC_CHANNELS = new Set([
+  'accounts:list','accounts:update','archive:assignRetentionPolicy','archive:createCategory',
+  'archive:createRetentionPolicy','archive:import','archive:list','archive:listCategories',
+  'archive:listClassifications','archive:listRetentionPolicies','archive:listRetentionStatus',
+  'archive:listVersions','archive:open','archive:search','archive:secureDestroy',
+  'archive:updateClassification','audit:list','audit:verifyIntegrity','automation:create',
+  'automation:list','automation:run','automation:runs','automation:toggle','backup:export',
+  'backup:exportFull','backup:inspectFull','backup:restoreFull','clientDataAccess:getBoundary',
+  'data-repair:apply','data-repair:preview','data-repair:undo','data-repair:workspace',
+  'data:getSnapshot','dataLifecycle:applyExternalBackupEvidenceRevocationList',
+  'dataLifecycle:archive','dataLifecycle:attestExternalBackupCopyDestroyed',
+  'dataLifecycle:cancelPurge','dataLifecycle:createPolicy','dataLifecycle:destroyBackupQuarantineBatch',
+  'dataLifecycle:executePurge','dataLifecycle:getBackupCleanRewriteStatus',
+  'dataLifecycle:getBackupQuarantinePolicy','dataLifecycle:getExternalBackupInventorySummary',
+  'dataLifecycle:listBackupCleanRewriteRuns','dataLifecycle:listBackupPropagationRuns',
+  'dataLifecycle:listBackupQuarantineBatches','dataLifecycle:listExternalBackupCopies',
+  'dataLifecycle:listExternalBackupDestructionEvidence','dataLifecycle:listExternalBackupEvidenceIssuerRotations',
+  'dataLifecycle:listExternalBackupEvidenceIssuers','dataLifecycle:listExternalBackupEvidenceRevocationLists',
+  'dataLifecycle:listExternalBackupRevocationEndpoints','dataLifecycle:listPolicies','dataLifecycle:listRecords',
+  'dataLifecycle:propagatePurgedBackups','dataLifecycle:registerExternalBackupCopy',
+  'dataLifecycle:registerExternalBackupEvidenceIssuer','dataLifecycle:requestPurge','dataLifecycle:restore',
+  'dataLifecycle:reviewExternalBackupCopy','dataLifecycle:revokeExternalBackupEvidenceIssuer',
+  'dataLifecycle:rotateExternalBackupEvidenceIssuer','dataLifecycle:runBackupCleanRewrite',
+  'dataLifecycle:setBackupQuarantineLegalHold','dataLifecycle:setExternalBackupCopyLegalHold',
+  'dataLifecycle:setLegalHold','dataLifecycle:updateBackupCleanRewritePolicy',
+  'dataLifecycle:updateBackupQuarantinePolicy','dataLifecycle:verifyExternalBackupDestructionEvidence',
+  'family:createMember','family:createRelation','genealogy:insights','health:create',
+  'health:createFamilyHistory','health:createMedicationPlan','health:list','health:listFamilyHistory',
+  'health:listMedicationPlans','households:assignPerson','households:create','households:createBranch',
+  'households:endMembership','households:getWorkspace','invitations:accept','invitations:create',
+  'invitations:inspect','invitations:list','invitations:resend','invitations:revoke','legacy:approve',
+  'legacy:cancel','legacy:execute','legacy:finalize','legacy:listApprovals','legacy:listGrants',
+  'legacy:listPlans','legacy:upsertGrant','legacy:upsertPlan','life:create','life:list',
+  'location:create','notifications:acknowledge','offlineCapability:getWorkspace',
+  'offlineCapability:issue','offlineCapability:revoke','people:archiveProfile',
+  'people:getLifecycleWorkspace','people:mergeProfiles','people:requestSafeDeletion',
+  'people:undoLifecycleOperation','people:updateProfile','permissions:delete',
+  'permissions:getContextWorkspace','permissions:list','permissions:upsert','reports:summary',
+  'system:acknowledgeHealthNotification','system:adaptiveState','system:archiveDiagnostics',
+  'system:captureHealthScore','system:capturePerformance','system:compareDiagnosticReports',
+  'system:enqueueTask','system:evaluateHealthNotifications','system:exportDiagnosticArchiveEntries',
+  'system:exportDiagnosticReport','system:exportMaintenanceHistory','system:exportSystemPdf',
+  'system:factoryReset','system:getDiagnosticReport','system:getHealthScore','system:getHealthTrend',
+  'system:getIpcAdaptiveBudgetMaintenanceRecoveryAuthority','system:getMaintenancePolicy',
+  'system:getMaintenanceRecommendations','system:getPerformanceAnomalies','system:getPerformanceTrend',
+  'system:health','system:listBackgroundTasks','system:listBackupRuns','system:listBackupTargets',
+  'system:listDiagnosticArchives','system:listDiagnosticReports','system:listDiagnostics',
+  'system:listExportArtifacts','system:listHealthHistory','system:listHealthNotifications',
+  'system:listMaintenanceHistory','system:listPerformance','system:listQueuedTasks','system:maintenance',
+  'system:processTaskQueue','system:readDiagnosticArchive','system:readDiagnosticReport',
+  'system:recoverIpcAdaptiveBudgetMaintenanceLock','system:runAllBackups',
+  'system:runAutomaticMaintenance','system:runBackupTarget','system:runDueBackups',
+  'system:schedulerStatus','system:searchAllDiagnosticArchives','system:searchDiagnosticArchive',
+  'system:searchDiagnostics','system:searchMaintenanceHistory','system:upsertBackupTarget',
+  'system:upsertMaintenancePolicy','system:verifyDiagnosticArchive','system:verifyDiagnosticReport',
+  'system:verifyExportArtifact','timeline:createImportantDay','timeline:listArchived',
+  'timeline:setArchived','timeline:updateEvent','timeline:updateInvitation','timeline:updateNotes',
+  'timeline:updateParticipants'
+] as const);
+
+const inspectCompatibilityPayload = (
+  value: unknown,
+  maximumBytes: number,
+  path: string
+): IpcIntegrationPolicyDecision => {
+  const visited = new Set<object>();
+  let observedBytes = 0;
+  const inspect = (candidate: unknown, candidatePath: string, depth: number): IpcIntegrationPolicyDecision => {
+    if (depth > 32) return rejected('COMPATIBILITY_PAYLOAD_DEPTH_EXCEEDED', candidatePath);
+    if (candidate === null || candidate === undefined || typeof candidate === 'boolean') {
+      observedBytes += 8;
+      return observedBytes <= maximumBytes ? accepted() : rejected('COMPATIBILITY_PAYLOAD_SIZE_EXCEEDED', candidatePath);
+    }
+    if (typeof candidate === 'string') {
+      observedBytes += candidate.length * 2;
+      return observedBytes <= maximumBytes ? accepted() : rejected('COMPATIBILITY_PAYLOAD_SIZE_EXCEEDED', candidatePath);
+    }
+    if (typeof candidate === 'number') {
+      observedBytes += 8;
+      return Number.isFinite(candidate) && observedBytes <= maximumBytes
+        ? accepted()
+        : rejected(Number.isFinite(candidate) ? 'COMPATIBILITY_PAYLOAD_SIZE_EXCEEDED' : 'COMPATIBILITY_NUMBER_INVALID', candidatePath);
+    }
+    if (typeof candidate === 'bigint') {
+      observedBytes += candidate.toString().length;
+      return observedBytes <= maximumBytes ? accepted() : rejected('COMPATIBILITY_PAYLOAD_SIZE_EXCEEDED', candidatePath);
+    }
+    if (typeof candidate === 'symbol' || typeof candidate === 'function') {
+      return rejected('COMPATIBILITY_PAYLOAD_TYPE_PROHIBITED', candidatePath);
+    }
+    if (candidate instanceof Date) {
+      observedBytes += 16;
+      return Number.isFinite(candidate.getTime()) && observedBytes <= maximumBytes
+        ? accepted()
+        : rejected('COMPATIBILITY_DATE_INVALID', candidatePath);
+    }
+    if (candidate instanceof ArrayBuffer || ArrayBuffer.isView(candidate)) {
+      observedBytes += candidate.byteLength;
+      return observedBytes <= maximumBytes ? accepted() : rejected('COMPATIBILITY_PAYLOAD_SIZE_EXCEEDED', candidatePath);
+    }
+    if (visited.has(candidate)) return rejected('COMPATIBILITY_PAYLOAD_CYCLE_PROHIBITED', candidatePath);
+    visited.add(candidate);
+    if (Array.isArray(candidate)) {
+      if (candidate.length > 16_384) return rejected('COMPATIBILITY_ARRAY_LENGTH_EXCEEDED', candidatePath);
+      for (let index = 0; index < candidate.length; index += 1) {
+        const decision = inspect(candidate[index], `${candidatePath}[${index}]`, depth + 1);
+        if (!decision.accepted) return decision;
+      }
+      return accepted();
+    }
+    if (!isObject(candidate)) return rejected('COMPATIBILITY_OBJECT_PROTOTYPE_PROHIBITED', candidatePath);
+    const ownKeys = Reflect.ownKeys(candidate);
+    if (ownKeys.length > 512) return rejected('COMPATIBILITY_OBJECT_KEYS_EXCEEDED', candidatePath);
+    for (const key of ownKeys) {
+      if (typeof key === 'symbol') return rejected('SYMBOL_FIELD_PROHIBITED', candidatePath);
+      if (key === '__proto__' || key === 'prototype' || key === 'constructor') {
+        return rejected('PROTOTYPE_FIELD_PROHIBITED', `${candidatePath}.${key}`);
+      }
+      const descriptor = Object.getOwnPropertyDescriptor(candidate, key);
+      if (!descriptor || descriptor.get || descriptor.set || !('value' in descriptor)) {
+        return rejected('ACCESSOR_FIELD_PROHIBITED', `${candidatePath}.${key}`);
+      }
+      observedBytes += key.length * 2;
+      const decision = inspect(descriptor.value, `${candidatePath}.${key}`, depth + 1);
+      if (!decision.accepted) return decision;
+    }
+    return observedBytes <= maximumBytes ? accepted() : rejected('COMPATIBILITY_PAYLOAD_SIZE_EXCEEDED', candidatePath);
+  };
+  return inspect(value, path, 0);
+};
+
+const compatibilityArguments = (args: readonly unknown[]): IpcIntegrationPolicyDecision =>
+  inspectCompatibilityPayload(args, 8 * 1024 * 1024, '$');
+
+const compatibilityResult = (result: unknown): IpcIntegrationPolicyDecision =>
+  inspectCompatibilityPayload(result, 64 * 1024 * 1024, '$result');
+
 const exactObject = (
   args: readonly unknown[],
   keys: readonly string[],
@@ -5690,7 +5833,12 @@ export const evaluateIpcIntegrationResultPolicy = (channel: string, result: unkn
       ? accepted()
       : rejected('POLICY_SERVICE_AVAILABILITY_RESULT_INVALID', '$result');
   }
-  if (channel !== 'privacyOwnership:exportEncrypted') return accepted();
+  if (channel !== 'privacyOwnership:exportEncrypted') {
+    const inputDecision = evaluateIpcIntegrationPolicy(channel, []);
+    return inputDecision.reason === 'UNKNOWN_IPC_CHANNEL'
+      ? rejected('UNKNOWN_IPC_CHANNEL', '$result')
+      : compatibilityResult(result);
+  }
   if (!exactNested(result, ['fileName', 'artifactSha256', 'artifactSizeBytes', 'createdAt', 'delivery'])) {
     return rejected('PRIVACY_EXPORT_RESULT_INVALID', '$result');
   }
@@ -5753,6 +5901,8 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
   if (identityAccessChannels.has(channel)) return identityAccessInput(channel, args);
   if (privacyOwnershipChannels.has(channel)) return privacyOwnershipInput(channel, args);
   switch (channel) {
+    case 'dashboard:getOverview':
+      return zeroArguments(args);
     case 'accessibility:getPreferences':
       return zeroArguments(args);
     case 'accessibility:updatePreferences':
@@ -5964,6 +6114,8 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
     case 'catalog:lookup':
       return catalogLookupInput(args);
     default:
-      return rejected('UNKNOWN_IPC_CHANNEL', '$');
+      return COMPATIBILITY_IPC_CHANNELS.has(channel)
+        ? compatibilityArguments(args)
+        : rejected('UNKNOWN_IPC_CHANNEL', '$');
   }
 };

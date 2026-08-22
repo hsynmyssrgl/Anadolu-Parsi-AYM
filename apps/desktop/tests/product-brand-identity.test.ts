@@ -7,7 +7,12 @@ import {
   CURRENT_PRODUCT_NAME,
   LEGACY_PRODUCT_NAME,
   STABLE_APPLICATION_ID,
-  STABLE_USER_DATA_DIRECTORY_NAME
+  STABLE_USER_DATA_DIRECTORY_NAME,
+  releaseApplicationId,
+  releaseExecutableName,
+  releaseProductName,
+  releaseShortcutName,
+  releaseUserDataDirectoryName
 } from '@ppt/domain';
 import { ProtectedSideArtifactStore } from '../src/main/protected-side-artifact-store.js';
 import type { DeviceSecretProtector } from '../src/main/device-secret-protector.js';
@@ -26,6 +31,20 @@ describe('ParsYuva Aile Yaşam Merkezi product identity', () => {
     expect(CURRENT_PRODUCT_NAME).toBe('ParsYuva Aile Yaşam Merkezi');
     expect(STABLE_APPLICATION_ID).toBe('tr.anadoluparsi.aileyasammerkezi');
     expect(STABLE_USER_DATA_DIRECTORY_NAME).toBe(LEGACY_PRODUCT_NAME);
+  });
+
+  it('isolates application, executable, shortcut and user-data identities by release channel', () => {
+    expect(['Bronze','Silver','Gold'].map((channel) => ({
+      applicationId: releaseApplicationId(channel as 'Bronze'|'Silver'|'Gold'),
+      executableName: releaseExecutableName(channel as 'Bronze'|'Silver'|'Gold'),
+      productName: releaseProductName(channel as 'Bronze'|'Silver'|'Gold'),
+      shortcutName: releaseShortcutName(channel as 'Bronze'|'Silver'|'Gold'),
+      userDataDirectory: releaseUserDataDirectoryName(channel as 'Bronze'|'Silver'|'Gold')
+    }))).toEqual([
+      { applicationId:'tr.anadoluparsi.aileyasammerkezi.bronze', executableName:'ParsYuva-Bronze', productName:'ParsYuva Aile Yaşam Merkezi Bronze', shortcutName:'ParsYuva Bronze', userDataDirectory:'ParsYuva/Bronze' },
+      { applicationId:'tr.anadoluparsi.aileyasammerkezi.silver', executableName:'ParsYuva-Silver', productName:'ParsYuva Aile Yaşam Merkezi Silver', shortcutName:'ParsYuva Silver', userDataDirectory:'ParsYuva/Silver' },
+      { applicationId:'tr.anadoluparsi.aileyasammerkezi.gold', executableName:'ParsYuva-Gold', productName:'ParsYuva Aile Yaşam Merkezi Gold', shortcutName:'ParsYuva Gold', userDataDirectory:'ParsYuva/Gold' }
+    ]);
   });
 
   it('writes new protected envelopes and reads the legacy product envelope', () => {

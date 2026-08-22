@@ -5,9 +5,15 @@ import { renderLicenseRtf } from './license-rtf-lib.mjs';
 const desktopRoot = resolve(process.cwd());
 const packageJson = JSON.parse(await readFile(resolve(desktopRoot, 'package.json'), 'utf8'));
 const build = packageJson.build ?? {};
-const expectedInstallDirectory = '$PROGRAMFILES64\\PPT\\ParsYuva';
 const artifactTemplate = build.win?.artifactName ?? build.artifactName ?? '';
 const artifactChannel = /-(Bronze|Silver|Gold)-/u.exec(artifactTemplate)?.[1];
+const expectedInstallDirectory = '$PROGRAMFILES64\\PPT\\ParsYuva\\${PPT_INSTALLER_CHANNEL_DIRECTORY}';
+const expectedApplicationId = artifactChannel
+  ? `tr.anadoluparsi.aileyasammerkezi.${artifactChannel.toLowerCase()}`
+  : '';
+const expectedExecutableName = artifactChannel ? `ParsYuva-${artifactChannel}` : '';
+const expectedProductName = artifactChannel ? `ParsYuva Aile Yaşam Merkezi ${artifactChannel}` : '';
+const expectedShortcutName = artifactChannel ? `ParsYuva ${artifactChannel}` : '';
 const failures = [];
 const required = [
   ['build/icon.ico', 1024],
@@ -30,7 +36,8 @@ for (const [file, minimum] of required) {
     if (info.size < minimum) failures.push(`${file}: dosya beklenenden küçük (${info.size} bayt).`);
   } catch { failures.push(`${file}: bulunamadı.`); }
 }
-if (build.appId !== 'tr.anadoluparsi.aileyasammerkezi') failures.push('build.appId geçersiz.');
+if (build.appId !== expectedApplicationId) failures.push('build.appId sürüm kanalına göre yalıtılmış değil.');
+if (build.productName !== expectedProductName) failures.push('build.productName sürüm kanalına göre yalıtılmış değil.');
 if (build.win?.icon !== 'build/icon.ico') failures.push('Windows simgesi tanımlı değil.');
 if (build.nsis?.oneClick !== false) failures.push('NSIS yardımcı kurulum modu etkin değil.');
 if (build.nsis?.allowToChangeInstallationDirectory !== false) failures.push('Kurulum dizini kullanıcı tarafından değiştirilemez olmalı.');
@@ -41,8 +48,8 @@ if (build.nsis?.multiLanguageInstaller !== true
   || JSON.stringify(build.nsis?.installerLanguages) !== JSON.stringify(['en_US','tr_TR'])) {
   failures.push('NSIS sistem dili seçimi İngilizce varsayılan ve Türkçe destekli değil.');
 }
-if (build.executableName !== 'ParsYuva') failures.push('Kurulu ana program dosyası ParsYuva.exe olmalı.');
-if (build.nsis?.shortcutName !== 'ParsYuva') failures.push('Masaüstü ve Başlat menüsü kısayolu ParsYuva olmalı.');
+if (build.executableName !== expectedExecutableName) failures.push('Kurulu ana program dosyası sürüm kanalına göre yalıtılmış değil.');
+if (build.nsis?.shortcutName !== expectedShortcutName) failures.push('Kısayol sürüm kanalına göre yalıtılmış değil.');
 if (/[çğıöşüÇĞİÖŞÜ]/u.test(artifactTemplate) || !/^[A-Za-z0-9_.$\{\}-]+$/u.test(artifactTemplate)) {
   failures.push('Kurulum dosyası adı Türkçe anlamlı ASCII karakterlerle sınırlandırılmalı.');
 }
@@ -71,7 +78,9 @@ try {
   const requiredInstallerExperience = [
     '!macro customWelcomePage',
     '!macro customPageAfterChangeDir',
-    '!define PPT_INSTALLER_RELEASE_CHANNEL "Bronze"',
+    `!define PPT_INSTALLER_RELEASE_CHANNEL "${artifactChannel}"`,
+    '!define PPT_INSTALLER_CHANNEL_DIRECTORY "${PPT_INSTALLER_RELEASE_CHANNEL}"',
+    '!define PPT_INSTALLER_EXECUTABLE "ParsYuva-${PPT_INSTALLER_RELEASE_CHANNEL}.exe"',
     '!define MUI_FONT "Segoe UI"',
     '!define MUI_FONTSIZE 10',
     '!define PPT_INSTALLER_CHANNEL_COLOR "A5672F"',
@@ -128,6 +137,10 @@ try {
   for (const marker of requiredInstallerExperience) {
     if (!installerInclude.includes(marker)) failures.push(`NSIS deneyim/metin sözleşmesi eksik: ${marker}`);
   }
+  if (!installerInclude.includes('RMDir /r "$APPDATA\\ParsYuva\\${PPT_INSTALLER_CHANNEL_DIRECTORY}"')
+    || installerInclude.includes('RMDir /r "$APPDATA\\Anadolu Parsı Aile Yaşam Merkezi"')) {
+    failures.push('Kaldırıcı yalnız etkin sürüm kanalının kullanıcı verisini silebilmeli.');
+  }
   if (installerInclude.includes('Function AymWelcomeAnimate')
     || installerInclude.includes('Function AymReadyAnimate')
     || installerInclude.includes('${NSD_CreateTimer} AymReadyAnimate')
@@ -174,7 +187,7 @@ try {
   if (/https?:|Invoke-WebRequest|Start-Process/iu.test(installerNarration)) {
     failures.push('Kurulum seslendirmesi ağ veya haricî süreç kullanamaz.');
   }
-  const expectedUninstallHelper = 'ExecWait \'"$INSTDIR\\ParsYuva.exe" --uninstall-backup-assistant\' $0';
+  const expectedUninstallHelper = 'ExecWait \'"$INSTDIR\\${PPT_INSTALLER_EXECUTABLE}" --uninstall-backup-assistant\' $0';
   const upgradeGuardIndex = uninstallerOnly.indexOf('${If} ${isUpdated}');
   const silentGuardIndex = uninstallerOnly.indexOf('${OrIf} ${Silent}');
   const dataChoiceIndex = uninstallerOnly.indexOf('$(AymUninstallChoice)');

@@ -560,13 +560,33 @@ linear-gradient(145deg,#071a2d 0%,#0b2744 52%,#0b1c31 100%)}
 .sidebar nav { display:block; scrollbar-width:thin; }
 .nav-group { display:grid;gap:3px;margin-bottom:14px; }
 .nav-group-label {
-  padding: 0 12px 5px;
+  margin:0;
+  padding:0;
+}
+.nav-module-toggle {
+  width:100%;
+  min-height:34px!important;
+  display:grid!important;
+  grid-template-columns:auto 1fr auto!important;
+  gap:8px;
+  align-items:center;
+  padding:5px 10px!important;
+  text-align:left;
   color: var(--shell-muted);
+  background:transparent;
+}
+.nav-module-toggle:hover,.nav-module-toggle[aria-expanded="true"] { color:var(--shell-text);background:var(--shell-hover); }
+.nav-group-icon { display:none; }
+.nav-group-label-copy {
   font-size: 9px;
   font-weight: 750;
   letter-spacing: .09em;
   text-transform: uppercase;
 }
+.nav-group-disclosure { font-size:13px;transition:transform .18s ease; }
+.nav-module-toggle[aria-expanded="true"] .nav-group-disclosure { transform:rotate(180deg); }
+.nav-module-items { display:grid;gap:3px; }
+.nav-module-items[hidden] { display:none; }
 .sidebar nav button {
   min-height: 38px;
   border-radius: 10px;
@@ -584,7 +604,6 @@ linear-gradient(145deg,#071a2d 0%,#0b2744 52%,#0b1c31 100%)}
 .sidebar-collapsed .brand-copy,
 .sidebar-collapsed .family-copy,
 .sidebar-collapsed .family-switcher .disclosure,
-.sidebar-collapsed .nav-group-label,
 .sidebar-collapsed .nav-label,
 .sidebar-collapsed .sidebar-footer { display:none; }
 .sidebar-collapsed .window-brand { justify-content:center;padding:0;gap:6px; }
@@ -593,6 +612,10 @@ linear-gradient(145deg,#071a2d 0%,#0b2744 52%,#0b1c31 100%)}
 .sidebar-collapsed .family-switcher { display:grid;grid-template-columns:1fr;padding:8px; }
 .sidebar-collapsed .family-icon { margin:auto; }
 .sidebar-collapsed .nav-group { margin-bottom:8px; }
+.sidebar-collapsed .nav-group-label-copy,
+.sidebar-collapsed .nav-group-disclosure { display:none; }
+.sidebar-collapsed .nav-group-icon { display:block;font-size:19px; }
+.sidebar-collapsed .nav-module-toggle { grid-template-columns:1fr!important;padding:9px!important;justify-items:center; }
 .sidebar-collapsed .sidebar nav button { display:grid;grid-template-columns:1fr;padding:9px;justify-items:center; }
 .sidebar-collapsed .sidebar nav button>span:first-child { font-size:19px; }
 .sidebar-collapsed .sidebar nav button i { position:absolute;right:8px;top:8px; }

@@ -48,9 +48,9 @@
     "verify:license-sync": "node scripts/verify-license-rtf-sync.mjs"
   },
   "build": {
-    "appId": "tr.anadoluparsi.aileyasammerkezi",
-    "productName": "ParsYuva Aile Yaşam Merkezi",
-    "executableName": "ParsYuva",
+    "appId": "tr.anadoluparsi.aileyasammerkezi.bronze",
+    "productName": "ParsYuva Aile Yaşam Merkezi Bronze",
+    "executableName": "ParsYuva-Bronze",
     "asar": true,
     "afterPack": "scripts/apply-electron-fuses.mjs",
     "forceCodeSigning": true,
@@ -85,7 +85,7 @@
       "include": "build/installer.nsh",
       "createDesktopShortcut": "always",
       "createStartMenuShortcut": true,
-      "shortcutName": "ParsYuva",
+      "shortcutName": "ParsYuva Bronze",
       "runAfterFinish": true,
       "deleteAppDataOnUninstall": false,
       "installerIcon": "build/icon.ico",

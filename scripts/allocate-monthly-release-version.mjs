@@ -31,6 +31,13 @@ const turkishReleaseStage = Object.freeze({
   Gold: 'Aktif Sürüm'
 });
 
+const releaseChannelIdentity = (channel) => ({
+  appId: `tr.anadoluparsi.aileyasammerkezi.${channel.toLowerCase()}`,
+  productName: `ParsYuva Aile Yaşam Merkezi ${channel}`,
+  executableName: `ParsYuva-${channel}`,
+  shortcutName: `ParsYuva ${channel}`
+});
+
 const updateReleaseJson = (value, release) => {
   const visit = (node, key = '') => {
     if (Array.isArray(node)) return node.map((item) => visit(item));
@@ -69,6 +76,11 @@ try {
       }
       if (path === 'apps/desktop/package.json') {
         const artifactName = installerArtifactTemplate(release);
+        const identity = releaseChannelIdentity(release.channel);
+        manifest.build.appId = identity.appId;
+        manifest.build.productName = identity.productName;
+        manifest.build.executableName = identity.executableName;
+        manifest.build.nsis.shortcutName = identity.shortcutName;
         manifest.build.artifactName = artifactName;
         manifest.build.win.artifactName = artifactName;
       }
@@ -110,6 +122,16 @@ try {
     appMeta = replaceRequired(appMeta, /monthlySequence: \d+,/u, `monthlySequence: ${release.monthlySequence},`, 'APP_META monthlySequence');
     appMeta = replaceRequired(appMeta, /stage: '[^']+'/u, `stage: '${turkishReleaseStage[release.channel]}'`, 'APP_META stage');
     planned.set(appMetaPath, appMeta);
+
+    const installerPath = 'apps/desktop/build/installer.nsh';
+    let installer = await readFile(resolve(root, installerPath), 'utf8');
+    installer = replaceRequired(
+      installer,
+      /!define PPT_INSTALLER_RELEASE_CHANNEL "(?:Bronze|Silver|Gold)"/u,
+      `!define PPT_INSTALLER_RELEASE_CHANNEL "${release.channel}"`,
+      'installer release channel'
+    );
+    planned.set(installerPath, installer);
 
     ledger.current = { ...release, parentSourceSha256: ledger.current?.parentSourceSha256 ?? null };
     ledger.entries.push({

@@ -11,6 +11,13 @@ export type NavigationAction =
 
 export const createNavigationState = (initial: string): NavigationState => ({ active: initial, history: [initial] });
 
+export type ExpandedNavigationModule = string | null;
+
+export const toggleNavigationModule = (
+  current: ExpandedNavigationModule,
+  requested: string
+): ExpandedNavigationModule => current === requested ? null : requested;
+
 export const navigationReducer = (state: NavigationState, action: NavigationAction): NavigationState => {
   if (action.type === 'reset') return createNavigationState(action.screen);
   if (action.type === 'back') {

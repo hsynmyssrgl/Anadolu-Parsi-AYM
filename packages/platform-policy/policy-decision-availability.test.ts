@@ -21,6 +21,7 @@ const intent = Object.freeze({
 });
 const never = <T>(): Promise<T> => new Promise<T>(() => undefined);
 const wait = (milliseconds: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, milliseconds));
+const shiftedNow = (milliseconds: number): string => new Date(Date.parse(NOW) + milliseconds).toISOString();
 
 const kernel = (): PlatformPolicyKernel => new PlatformPolicyKernel({
   policyVersion: 'PPK-003',
@@ -187,5 +188,22 @@ describe('31-Y PPK-003 bounded default-deny policy decision availability', () =>
     });
     await wait(70);
     expect(operationExecuted).toBe(false);
+  });
+
+  it('accepts only the bounded five-second Core Service clock skew', async () => {
+    const signingKernel=kernel();
+    const withReceiptSkew=(milliseconds:number):PlatformPolicyAuthorizationProvider=>({
+      authorize:({request,nonce})=>({
+        effectiveRequest:request,
+        authorization:signingKernel.authorizeWithReceipt(request,shiftedNow(milliseconds),nonce)
+      }),
+      verify:({request,receipt})=>signingKernel.verifyReceiptForRequest(receipt,request)
+    });
+    await expect(createHarness({provider:withReceiptSkew(1)}).execute(
+      intent,()=>({writable:true,epoch:31}),()=> 'authorized-with-bounded-skew'
+    )).resolves.toBe('authorized-with-bounded-skew');
+    await expect(createHarness({provider:withReceiptSkew(5_001)}).execute(
+      intent,()=>({writable:true,epoch:31}),()=> 'must-not-run'
+    )).rejects.toMatchObject({code:'RECEIPT_VERIFICATION_FAILED'});
   });
 });

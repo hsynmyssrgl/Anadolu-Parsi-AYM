@@ -17,6 +17,28 @@ export type PersistedProductName = (typeof ACCEPTED_PERSISTED_PRODUCT_NAMES)[num
 export type UserVisibleReleaseChannel = 'Bronze' | 'Silver' | 'Gold';
 export type UserVisibleReleaseLanguage = 'tr' | 'en';
 
+const RELEASE_CHANNEL_SLUGS:Readonly<Record<UserVisibleReleaseChannel,'bronze'|'silver'|'gold'>>=Object.freeze({
+  Bronze:'bronze',Silver:'silver',Gold:'gold'
+});
+
+export const releaseChannelSlug=(channel:UserVisibleReleaseChannel):'bronze'|'silver'|'gold'=>
+  RELEASE_CHANNEL_SLUGS[channel];
+
+export const releaseApplicationId=(channel:UserVisibleReleaseChannel):string=>
+  `${STABLE_APPLICATION_ID}.${releaseChannelSlug(channel)}`;
+
+export const releaseUserDataDirectoryName=(channel:UserVisibleReleaseChannel):string=>
+  `${CURRENT_BRAND_NAME}/${channel}`;
+
+export const releaseExecutableName=(channel:UserVisibleReleaseChannel):string=>
+  `${CURRENT_BRAND_NAME}-${channel}`;
+
+export const releaseProductName=(channel:UserVisibleReleaseChannel):string=>
+  `${CURRENT_PRODUCT_LONG_NAME} ${channel}`;
+
+export const releaseShortcutName=(channel:UserVisibleReleaseChannel):string=>
+  `${CURRENT_BRAND_NAME} ${channel}`;
+
 const USER_VISIBLE_RELEASE_STAGES:Readonly<Record<UserVisibleReleaseLanguage,Readonly<Record<UserVisibleReleaseChannel,string>>>>=Object.freeze({
   tr:Object.freeze({Bronze:'Aktif Geliştirme',Silver:'Aktif Test',Gold:'Aktif Sürüm'}),
   en:Object.freeze({Bronze:'Active Development',Silver:'Active Testing',Gold:'Active Release'})

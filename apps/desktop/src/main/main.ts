@@ -10,7 +10,7 @@ import { createWebAuthnChallenge, encryptPortableEmergencyPack, sha256Hex, valid
 import { writeContentFreeConsoleEvent } from '@ppt/logging';
 import { APP_META, USER_VISIBLE_APP_INFO, resolveUiLocalization, selectOperatingSystemUiLanguage, type UiLocalizationBootstrapView, type CreateArchiveItemInput, CreateFamilyEventInput, UpdateFamilyEventInput, SetFamilyEventArchivedInput, UpdateEventParticipantsInput, UpdateEventInvitationInput, UpdateEventNotesInput, AcknowledgeFamilyNotificationInput, CreateFamilyLocationInput, CreateFamilyMemberInput, CreateFamilyRelationInput, LoginInput, SetupAdminInput, ChangePasswordInput, EnableTwoFactorInput, DisableTwoFactorInput, TrustCurrentDeviceInput, ReauthorizeCurrentDeviceInput, CreateFamilyInvitationInput, InspectFamilyInvitationInput, ResendFamilyInvitationInput, AcceptFamilyInvitationInput, UpsertObjectPermissionInput, UpdateFamilyAccountInput, CreateFinanceRecordInput, CreateBankAccountInput, ValidateIbanInput, CreatePaymentCardInput, CreateHealthRecordInput, CreateMedicationPlanInput, CreateFamilyHealthHistoryInput, CreateFinanceValuationInput, CreateLifeRecordInput, CreateAutomationRuleInput, CreateArchiveCategoryInput, UpdateArchiveClassificationInput, UpsertAiConsentInput, AiConsentPurpose, UpsertSensitiveDataConsentInput, SensitiveExportPreviewInput, RunAutomationInput, UpsertDigitalLegacyPlanInput, UpsertLegacyGrantInput, ExecuteLegacyPlanInput, ApproveLegacyExecutionInput, CancelLegacyExecutionInput, ArchiveSearchInput, CreateArchiveRetentionPolicyInput, AssignArchiveRetentionPolicyInput, UpsertBackupTargetInput, MaintenanceResultView, BackupSchedulerResultView, AdaptiveResourceStateView, EnqueueTaskInput, UpsertMaintenancePolicyInput, DiagnosticFilterInput, DiagnosticArchiveSearchInput, MaintenanceHistoryFilterInput, CreateDataRetentionPolicyInput, ArchiveDataResourceInput, RestoreDataResourceInput, RequestDataPurgeInput, CancelDataPurgeInput, ExecuteDataPurgeInput, SetDataLegalHoldInput, UpdateBackupQuarantinePolicyInput, SetBackupQuarantineLegalHoldInput, DestroyBackupQuarantineBatchInput, RegisterExternalBackupCopyInput, ReviewExternalBackupCopyInput, SetExternalBackupCopyLegalHoldInput, AttestExternalBackupCopyDestroyedInput, RegisterExternalBackupEvidenceIssuerInput, RotateExternalBackupEvidenceIssuerInput, RevokeExternalBackupEvidenceIssuerInput, ApplyExternalBackupEvidenceRevocationListInput, UpsertExternalBackupRevocationEndpointInput, PendingRevocationSyncListView, ApplyPendingRevocationSyncInput, RevocationSyncEndpointStateView, RevocationSyncRunResultView, VerifyExternalBackupDestructionEvidenceInput, ApplyFamilyDataImportInput, RollbackFamilyDataImportInput, GenealogyTreePageInput, TimelinePageInput, ArchivePageInput, PersonCatalogPageInput, EventCatalogPageInput, EntityCatalogLookupInput, FamilySnapshotSectionsInput, IpcAdaptiveBudgetMaintenanceOperation, IpcAdaptiveBudgetMaintenanceAuthorizationInput, IpcAdaptiveBudgetMaintenanceReauthenticationInput, IpcAdaptiveBudgetMaintenanceRecoveryInput, UpdateBackupCleanRewritePolicyInput } from '@ppt/domain';
 import type { AddArchiveItemVersionInput, AddArchiveRelationEvidenceInput, RemoveArchiveRelationEvidenceInput } from '@ppt/domain';
-import { STABLE_USER_DATA_DIRECTORY_NAME } from '@ppt/domain';
+import { releaseUserDataDirectoryName } from '@ppt/domain';
 import type { UiLanguagePreference } from '@ppt/domain';
 import type { RecordHealthCareEntryInput, RevokeHealthCareAccessGrantInput, UpsertHealthCareAccessGrantInput } from '@ppt/domain';
 import type { CreateHouseholdOperationItemInput, DeleteHouseholdOperationItemInput, UpdateHouseholdOperationItemInput } from '@ppt/domain';
@@ -413,7 +413,7 @@ const mainText = (turkish: string, english: string): string =>
 const uninstallBackupAssistantRequested = process.argv.includes('--uninstall-backup-assistant');
 assertPinnedBootstrapRuntimeCapability('windows-desktop', 'file.access');
 assertPinnedBootstrapRuntimeCapability('windows-desktop', 'network.access');
-const volatileRuntimeBase = join(app.getPath('temp'), 'ParsYuva-Aile-Yasam-Merkezi');
+const volatileRuntimeBase = join(app.getPath('temp'), 'ParsYuva-Aile-Yasam-Merkezi', APP_META.edition);
 const volatileRuntimeCleanupMarker = join(volatileRuntimeBase, 'last-runtime-root.txt');
 const volatileRuntimeRoot = join(
   volatileRuntimeBase,
@@ -432,7 +432,7 @@ if (process.env.PPT_WINDOWS_LAUNCH_USER_DATA_PATH) {
   app.setPath('userData', process.env.PPT_WINDOWS_LAUNCH_USER_DATA_PATH);
 } else if (app.isPackaged) {
   const appDataPath = app.getPath('appData');
-  const currentUserDataPath = join(appDataPath, STABLE_USER_DATA_DIRECTORY_NAME);
+  const currentUserDataPath = join(appDataPath, ...releaseUserDataDirectoryName(APP_META.edition).split('/'));
   app.setPath('userData', currentUserDataPath);
 }
 const singleInstanceLock = app.requestSingleInstanceLock();

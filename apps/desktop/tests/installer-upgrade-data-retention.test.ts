@@ -20,6 +20,14 @@ describe('Windows installer upgrade data retention', () => {
     );
   });
 
+  it('keeps install, executable and deletion scopes isolated to the compiled release channel', async () => {
+    const source = await readFile(installerUrl, 'utf8');
+    expect(source).toContain('StrCpy $INSTDIR "$PROGRAMFILES64\\PPT\\ParsYuva\\${PPT_INSTALLER_CHANNEL_DIRECTORY}"');
+    expect(source).toContain('ExecWait \'"$INSTDIR\\${PPT_INSTALLER_EXECUTABLE}" --uninstall-backup-assistant\' $0');
+    expect(source).toContain('RMDir /r "$APPDATA\\ParsYuva\\${PPT_INSTALLER_CHANNEL_DIRECTORY}"');
+    expect(source).not.toContain('RMDir /r "$APPDATA\\Anadolu Parsı Aile Yaşam Merkezi"');
+  });
+
   it('patches the reviewed builder template for every already-shipped affected version', async () => {
     const upstream = await readFile(upstreamInstallUtilUrl, 'utf8');
     const governed = applyLegacyUpgradeDataPreservation(upstream);
