@@ -327,6 +327,7 @@
     "verify:build149:clean-validation": "node scripts/verify-build149-clean-validation-contract.mjs",
     "create:build149:validation-boundary": "node scripts/create-build149-validation-boundary.mjs",
     "windows-packager:install": "npm ci --prefix tools/windows-packager --ignore-scripts --no-audit --no-fund",
+    "worktrees:channels": "node scripts/setup-release-channel-worktrees.mjs",
     "verify:windows-packager": "node scripts/verify-windows-packager-split.mjs",
     "verify:build150:dependency-bootstrap": "node scripts/verify-build150-dependency-bootstrap.mjs",
     "verify:build150:windows-packager-split": "node scripts/verify-windows-packager-split.mjs",

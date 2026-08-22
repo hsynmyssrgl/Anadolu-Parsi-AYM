@@ -447,7 +447,7 @@ const optionalArgument = (args: readonly unknown[]): unknown => args.length === 
  * silently becoming renderer-accessible. These channels still pass a bounded,
  * descriptor-safe structured-clone inspection in both directions.
  */
-export const COMPATIBILITY_IPC_CHANNELS = new Set([
+export const COMPATIBILITY_IPC_CHANNELS:ReadonlySet<string> = new Set([
   'accounts:list','accounts:update','archive:assignRetentionPolicy','archive:createCategory',
   'archive:createRetentionPolicy','archive:import','archive:list','archive:listCategories',
   'archive:listClassifications','archive:listRetentionPolicies','archive:listRetentionStatus',

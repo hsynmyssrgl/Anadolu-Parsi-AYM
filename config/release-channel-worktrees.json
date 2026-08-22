@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "policyId": "PPT-RELEASE-CHANNEL-WORKTREE-ISOLATION-V1",
+  "authoritativeRepositoryDirectory": "app",
+  "worktreeRootDirectory": "kanallar",
+  "channels": [
+    { "channel": "Bronze", "directory": "Bronze", "branch": "channel/bronze" },
+    { "channel": "Silver", "directory": "Silver", "branch": "channel/silver" },
+    { "channel": "Gold", "directory": "Gold", "branch": "channel/gold" }
+  ],
+  "rules": {
+    "sharedGitObjectDatabase": true,
+    "separateBranchesRequired": true,
+    "separateWorkingDirectoriesRequired": true,
+    "directDirectoryCopyProhibited": true,
+    "crossChannelBuildOutputReuseProhibited": true,
+    "crossChannelUserDataReuseProhibited": true
+  }
+}
