@@ -23,6 +23,7 @@ describe('unified rounded control visual contract', () => {
     expect(app).toContain('className="first-run-security-form"');
     expect(styles).toContain('.first-run-security-field input{width:100%;min-width:0;min-height:52px');
     expect(styles).toContain('.first-run-security-form>.button.primary{width:100%;min-height:52px');
+    expect(styles).toContain('.first-run-security-shell .status-message{border-radius:var(--radius-surface)}');
     expect(styles).toContain('@media(max-width:720px)');
   });
 
