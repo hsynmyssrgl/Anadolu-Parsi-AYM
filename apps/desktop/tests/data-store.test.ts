@@ -1,4 +1,5 @@
 import { DatabaseSync } from 'node:sqlite';
+import { AsyncLocalStorage } from 'node:async_hooks';
 import { afterEach, describe, expect, it } from 'vitest';
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { createHmac } from 'node:crypto';
@@ -16,8 +17,15 @@ import {
   computePlatformPolicyReceiptRecordHash
 } from '@ppt/repositories';
 import type { ObjectPermissionAction } from '@ppt/domain';
-import { asIsoDateTime, type Clock } from '@ppt/core';
+import {
+  StoredCorrelationContextProvider,
+  asCorrelationId,
+  asIsoDateTime,
+  type Clock,
+  type CorrelationContext
+} from '@ppt/core';
 import { FamilyDataStore } from '../src/main/data-store.js';
+import { DesktopRepositoryPolicyScope } from '../src/main/desktop-repository-policy-scope.js';
 import { decryptFullBackupPayloadV3 } from '../src/main/backup-container-v3.js';
 import type { DeviceSecretProtector } from '../src/main/device-secret-protector.js';
 
@@ -758,6 +766,64 @@ describe('FamilyDataStore', () => {
     store.trustCurrentDevice({password:'GucluTestParolasi123!',code:makeTotp(setup.secret),displayName:'Ilk 2FA sonrasi cihaz'});
     expect(store.getAuthState().trustedDevice).toBe(true);
     expect(()=>store.currentPlatformPolicyAuthority({policyVersion:'uat-policy-v1',policyPackageVersion:1,policyPackageSha256:'a'.repeat(64),applicationVersion:'22.8.2026-50'})).not.toThrow();
+    store.close();
+  });
+
+  it('üretim repository guard altında ilk kurulumdan sonra policy authority hesabını okur', async () => {
+    const directory = mkdtempSync(join(tmpdir(), 'panthera-family-guarded-'));
+    temporaryDirectories.push(directory);
+    const repositoryScope = new DesktopRepositoryPolicyScope();
+    const correlation = new StoredCorrelationContextProvider(
+      new AsyncLocalStorage<CorrelationContext>()
+    );
+    const store = trackStore(new FamilyDataStore({
+      databasePath: join(directory, 'family.db'),
+      backupSecretProtector: testSecretProtector,
+      backupPasswordPath: join(directory, 'managed-backup-password.json'),
+      repositoryExecutionPolicyGuard: repositoryScope.guard,
+      correlation,
+      ...policyStoreOptions()
+    }));
+    const bootstrap = async <T>(boundary: string, operation: () => T | Promise<T>): Promise<T> => {
+      const correlationId = asCorrelationId(`guarded-${boundary}-${crypto.randomUUID()}`);
+      return correlation.run({ correlationId }, () => repositoryScope.runBootstrapExclusive({
+        correlationId,
+        boundary
+      }, operation));
+    };
+
+    await bootstrap('auth:setup', () => store.setupAdmin({
+      familyName: 'Guardlı Test Ailesi',
+      displayName: 'Guardlı Test Yöneticisi',
+      email: 'guarded@example.com',
+      password: 'GuardliGucluParola!2026'
+    }));
+    const setup = await bootstrap('auth:beginTwoFactorSetup', () => store.beginTwoFactorSetup());
+    await bootstrap('auth:enableTwoFactor', () => store.enableTwoFactor({ code: makeTotp(setup.secret) }));
+    await bootstrap('auth:trustCurrentDevice', () => store.trustCurrentDevice({
+      password: 'GuardliGucluParola!2026',
+      code: makeTotp(setup.secret),
+      displayName: 'Guardlı ilk kurulum cihazı'
+    }));
+
+    const policyCorrelationId = asCorrelationId(`guarded-policy-${crypto.randomUUID()}`);
+    const authority = await correlation.run({ correlationId: policyCorrelationId }, () =>
+      repositoryScope.runPolicyResolutionExclusive({
+        correlationId: policyCorrelationId,
+        boundary: 'dashboard:getOverview'
+      }, () => store.currentPlatformPolicyAuthority({
+        policyVersion: 'uat-policy-v1',
+        policyPackageVersion: 1,
+        policyPackageSha256: 'a'.repeat(64),
+        applicationVersion: '22.8.2026-50'
+      }))
+    );
+
+    expect(authority).toMatchObject({
+      accountId: expect.any(String),
+      roles: ['family_admin'],
+      deviceTrusted: true
+    });
     store.close();
   });
 
