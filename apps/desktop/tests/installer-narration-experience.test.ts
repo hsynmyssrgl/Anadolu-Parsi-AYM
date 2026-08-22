@@ -15,6 +15,9 @@ describe('installer progress, narration and Silver help experience', () => {
   it('uses a transitional narrated welcome while reserving progress for real file installation', async () => {
     const [source,narration,extractor,rawPackage]=await Promise.all([readFile(installerUrl,'utf8'),readFile(installerNarrationUrl,'utf8'),readFile(extractorUrl,'utf8'),readFile(packageUrl,'utf8')]);
     const packageJson=JSON.parse(rawPackage) as {build:{executableName?:string;win?:{artifactName?:string};artifactName?:string;nsis?:{shortcutName?:string;multiLanguageInstaller?:boolean;installerLanguages?:string[]}}};
+    const artifactName=packageJson.build.win?.artifactName??packageJson.build.artifactName??'';
+    const channel=/(Bronze|Silver|Gold)/u.exec(artifactName)?.[1];
+    expect(channel).toBeTruthy();
     for (const marker of [
       '!macro customWelcomePage','!macro customPageAfterChangeDir',
       '!define MUI_FONT "Segoe UI"','!define MUI_FONTSIZE 10',
@@ -74,8 +77,8 @@ describe('installer progress, narration and Silver help experience', () => {
     expect(extractor.match(/Call AymInstallPayloadStageBegin/gu)).toHaveLength(3);
     expect(extractor.match(/Call AymInstallPayloadStageEnd/gu)).toHaveLength(3);
     expect(extractor).not.toContain('Nsis7z::Extract "${FILE}"');
-    expect(packageJson.build.executableName).toBe('ParsYuva');
-    expect(packageJson.build.nsis?.shortcutName).toBe('ParsYuva');
+    expect(packageJson.build.executableName).toBe(`ParsYuva-${channel}`);
+    expect(packageJson.build.nsis?.shortcutName).toBe(`ParsYuva ${channel}`);
     expect(packageJson.build.nsis).toMatchObject({multiLanguageInstaller:true,installerLanguages:['en_US','tr_TR']});
     const [installerSource, uninstallerSource = ''] = source.split('!macro customUnInstall');
     expect(installerSource).not.toMatch(/https?:|ExecShell|nsExec|inetc|download/iu);
@@ -88,7 +91,7 @@ describe('installer progress, narration and Silver help experience', () => {
       uninstallerSource.indexOf('$(AymUninstallChoice)'),
     );
     expect(uninstallerSource).toContain(
-      'ExecWait \'"$INSTDIR\\ParsYuva.exe" --uninstall-backup-assistant\' $0'
+      'ExecWait \'"$INSTDIR\\${PPT_INSTALLER_EXECUTABLE}" --uninstall-backup-assistant\' $0'
     );
     expect(uninstallerSource).toMatch(/MessageBox MB_YESNOCANCEL\|MB_ICONQUESTION [^\r\n]+ IDYES aym_uninstall_backup IDNO aym_uninstall_delete\r?\n\s+Goto aym_uninstall_cancel/u);
     expect(uninstallerSource).not.toContain('IDCANCEL aym_uninstall_cancel');
