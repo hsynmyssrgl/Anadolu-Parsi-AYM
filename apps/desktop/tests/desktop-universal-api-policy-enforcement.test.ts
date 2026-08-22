@@ -10,6 +10,7 @@ import type { RepositoryExecutionContext } from '@ppt/repository-contracts';
 import {
   PlatformPolicyKernel,
   PolicyServiceAvailabilityPolicy,
+  type PolicyServiceAvailabilityDecision,
   type PlatformPolicyReceiptRecord
 } from '@ppt/platform-policy';
 import {
@@ -37,7 +38,11 @@ const repositoryContext = (value = correlationId): RepositoryExecutionContext =>
   occurredAt: NOW as RepositoryExecutionContext['occurredAt']
 });
 
-const createHarness = (writable = true, trusted = true) => {
+const createHarness = (
+  writable = true,
+  trusted = true,
+  availabilityEvaluator?: () => Promise<PolicyServiceAvailabilityDecision>
+) => {
   const records: PlatformPolicyReceiptRecord[] = [];
   const repositoryPolicyScope = new DesktopRepositoryPolicyScope();
   const kernel = new PlatformPolicyKernel({
@@ -87,7 +92,7 @@ const createHarness = (writable = true, trusted = true) => {
       expiresAt: EXPIRES
     }),
     repositoryPolicyScope,
-    evaluatePolicyServiceAvailability: () => new PolicyServiceAvailabilityPolicy().evaluate({
+    evaluatePolicyServiceAvailability: availabilityEvaluator ?? (async () => new PolicyServiceAvailabilityPolicy().evaluate({
       schemaVersion: 1,
       lifecycle: writable ? 'ready' : 'degraded',
       writable,
@@ -101,7 +106,7 @@ const createHarness = (writable = true, trusted = true) => {
       expectedPolicyPackageSha256: kernel.policyPackage.payloadSha256,
       observedAt: NOW,
       checkedAt: NOW
-    }),
+    })),
     resolveBootstrapClientContext: () => ({
       applicationId: 'windows-desktop',
       deviceId: 'device-31-u',
@@ -303,6 +308,49 @@ describe('31-U universal Desktop API policy enforcement', () => {
     await expect(Promise.all([first, standard, interactive])).resolves.toEqual(['active', 'standard', 'interactive']);
     expect(order).toEqual(['active', 'interactive', 'standard']);
     expect(maximumActive).toBe(1);
+  });
+
+  it('serializes policy availability observations with protected operations', async () => {
+    const availability = new PolicyServiceAvailabilityPolicy().evaluate({
+      schemaVersion: 1,
+      lifecycle: 'ready', writable: true, safeMode: false,
+      policyPackageVerified: true, policyVersion: 'PPK-31-U',
+      policyPackageVersion: 1,
+      policyPackageSha256: 'a'.repeat(64),
+      expectedPolicyVersion: 'PPK-31-U',
+      expectedPolicyPackageVersion: 1,
+      expectedPolicyPackageSha256: 'a'.repeat(64),
+      observedAt: NOW, checkedAt: NOW
+    });
+    let observationCount = 0;
+    const { enforcement } = createHarness(true, true, async () => {
+      observationCount += 1;
+      return availability;
+    });
+    let firstEntered = false;
+    let releaseFirst!: () => void;
+    const firstGate = new Promise<void>((resolve) => { releaseFirst = resolve; });
+    const first = enforcement.execute({
+      channel: 'dashboard:getOverview',
+      correlationId,
+      operation: async () => {
+        firstEntered = true;
+        await firstGate;
+        return 'first';
+      }
+    });
+    while (!firstEntered) await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    const second = enforcement.execute({
+      channel: 'formDraft:getWorkspace',
+      correlationId,
+      operation: () => 'second'
+    });
+
+    await new Promise<void>((resolve) => setTimeout(resolve, 10));
+    expect(observationCount).toBe(1);
+    releaseFirst();
+    await expect(Promise.all([first, second])).resolves.toEqual(['first', 'second']);
+    expect(observationCount).toBe(2);
   });
 
   it('keeps queued interactive session bootstrap work ahead of later bootstrap polling', async () => {

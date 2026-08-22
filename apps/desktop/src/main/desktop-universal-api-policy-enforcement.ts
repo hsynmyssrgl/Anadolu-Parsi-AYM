@@ -170,40 +170,48 @@ export class DesktopUniversalApiPolicyEnforcement {
     return this.#clientDataAccessStatus.execute();
   }
 
-  public async execute<T>(input: DesktopUniversalApiExecutionInput<T>): Promise<T> {
-    if (isDesktopPolicyServiceAvailabilityStatusChannel(input.channel)) return input.operation();
+  async #assertPolicyServiceAvailability(
+    action: PlatformPolicyIntent['action']
+  ): Promise<PolicyServiceAvailabilityDecision> {
     const availability = await this.#evaluatePolicyServiceAvailability();
     if (availability.mode !== 'read-write') this.#onAvailabilityRestricted?.(availability);
-    if (availability.mode === 'deny') {
-      this.#policyServiceAvailabilityPolicy.assertOperationAllowed('read', availability);
-    }
+    this.#policyServiceAvailabilityPolicy.assertOperationAllowed(action, availability);
+    return availability;
+  }
+
+  public async execute<T>(input: DesktopUniversalApiExecutionInput<T>): Promise<T> {
+    if (isDesktopPolicyServiceAvailabilityStatusChannel(input.channel)) return input.operation();
     if (isDesktopPolicyBootstrapChannel(input.channel)) {
       const bootstrapIntent = resolveDesktopUniversalApiIntent(input.channel, input.correlationId);
-      this.#policyServiceAvailabilityPolicy.assertOperationAllowed(
-        bootstrapIntent.action === 'read' ? 'read' : 'mutation',
-        availability
-      );
-      const binding = this.#resolveBootstrapClientContext();
-      return this.#clientDataAccessEnforcement.executeBootstrap({
+      return this.#repositoryPolicyScope.runBootstrapExclusive({
         correlationId: input.correlationId,
-        request: Object.freeze({
-          schemaVersion: 1,
-          channel: input.channel,
-          method: 'application-service',
-          transport: 'typed-electron-ipc',
-          ...binding
-        }),
-        operation: () => this.#repositoryPolicyScope.runBootstrapExclusive({
+        boundary: input.channel
+      }, async () => {
+        await this.#assertPolicyServiceAvailability(bootstrapIntent.action);
+        const binding = this.#resolveBootstrapClientContext();
+        return this.#clientDataAccessEnforcement.executeBootstrap({
           correlationId: input.correlationId,
-          boundary: input.channel
-        }, input.operation)
+          request: Object.freeze({
+            schemaVersion: 1,
+            channel: input.channel,
+            method: 'application-service',
+            transport: 'typed-electron-ipc',
+            ...binding
+          }),
+          operation: () => this.#repositoryPolicyScope.runBootstrap({
+            correlationId: input.correlationId,
+            boundary: input.channel
+          }, input.operation)
+        });
       });
     }
     const intent = resolveDesktopUniversalApiIntent(input.channel, input.correlationId);
     return this.#repositoryPolicyScope.runPolicyResolutionExclusive({
       correlationId: input.correlationId,
       boundary: input.channel
-    }, () => this.#enforcementPoint.execute(intent, this.#clusterFence, async (authorization) => {
+    }, async () => {
+      await this.#assertPolicyServiceAvailability(intent.action);
+      return this.#enforcementPoint.execute(intent, this.#clusterFence, async (authorization) => {
       assertActivePlatformPolicyTransactionContext(authorization, {
         resourceType: intent.resourceType,
         resourceId: intent.resourceId,
@@ -248,6 +256,7 @@ export class DesktopUniversalApiPolicyEnforcement {
         }),
         operation: () => this.#repositoryPolicyScope.runAuthorized(authorization, input.operation)
       });
-    }));
+    });
+    });
   }
 }
