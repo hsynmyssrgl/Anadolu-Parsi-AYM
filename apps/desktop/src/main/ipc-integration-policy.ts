@@ -550,31 +550,35 @@ const inspectCompatibilityPayload = (
     }
     if (visited.has(candidate)) return rejected('COMPATIBILITY_PAYLOAD_CYCLE_PROHIBITED', candidatePath);
     visited.add(candidate);
-    if (Array.isArray(candidate)) {
-      if (candidate.length > 16_384) return rejected('COMPATIBILITY_ARRAY_LENGTH_EXCEEDED', candidatePath);
-      for (let index = 0; index < candidate.length; index += 1) {
-        const decision = inspect(candidate[index], `${candidatePath}[${index}]`, depth + 1);
+    try {
+      if (Array.isArray(candidate)) {
+        if (candidate.length > 16_384) return rejected('COMPATIBILITY_ARRAY_LENGTH_EXCEEDED', candidatePath);
+        for (let index = 0; index < candidate.length; index += 1) {
+          const decision = inspect(candidate[index], `${candidatePath}[${index}]`, depth + 1);
+          if (!decision.accepted) return decision;
+        }
+        return accepted();
+      }
+      if (!isObject(candidate)) return rejected('COMPATIBILITY_OBJECT_PROTOTYPE_PROHIBITED', candidatePath);
+      const ownKeys = Reflect.ownKeys(candidate);
+      if (ownKeys.length > 512) return rejected('COMPATIBILITY_OBJECT_KEYS_EXCEEDED', candidatePath);
+      for (const key of ownKeys) {
+        if (typeof key === 'symbol') return rejected('SYMBOL_FIELD_PROHIBITED', candidatePath);
+        if (key === '__proto__' || key === 'prototype' || key === 'constructor') {
+          return rejected('PROTOTYPE_FIELD_PROHIBITED', `${candidatePath}.${key}`);
+        }
+        const descriptor = Object.getOwnPropertyDescriptor(candidate, key);
+        if (!descriptor || descriptor.get || descriptor.set || !('value' in descriptor)) {
+          return rejected('ACCESSOR_FIELD_PROHIBITED', `${candidatePath}.${key}`);
+        }
+        observedBytes += key.length * 2;
+        const decision = inspect(descriptor.value, `${candidatePath}.${key}`, depth + 1);
         if (!decision.accepted) return decision;
       }
-      return accepted();
+      return observedBytes <= maximumBytes ? accepted() : rejected('COMPATIBILITY_PAYLOAD_SIZE_EXCEEDED', candidatePath);
+    } finally {
+      visited.delete(candidate);
     }
-    if (!isObject(candidate)) return rejected('COMPATIBILITY_OBJECT_PROTOTYPE_PROHIBITED', candidatePath);
-    const ownKeys = Reflect.ownKeys(candidate);
-    if (ownKeys.length > 512) return rejected('COMPATIBILITY_OBJECT_KEYS_EXCEEDED', candidatePath);
-    for (const key of ownKeys) {
-      if (typeof key === 'symbol') return rejected('SYMBOL_FIELD_PROHIBITED', candidatePath);
-      if (key === '__proto__' || key === 'prototype' || key === 'constructor') {
-        return rejected('PROTOTYPE_FIELD_PROHIBITED', `${candidatePath}.${key}`);
-      }
-      const descriptor = Object.getOwnPropertyDescriptor(candidate, key);
-      if (!descriptor || descriptor.get || descriptor.set || !('value' in descriptor)) {
-        return rejected('ACCESSOR_FIELD_PROHIBITED', `${candidatePath}.${key}`);
-      }
-      observedBytes += key.length * 2;
-      const decision = inspect(descriptor.value, `${candidatePath}.${key}`, depth + 1);
-      if (!decision.accepted) return decision;
-    }
-    return observedBytes <= maximumBytes ? accepted() : rejected('COMPATIBILITY_PAYLOAD_SIZE_EXCEEDED', candidatePath);
   };
   return inspect(value, path, 0);
 };

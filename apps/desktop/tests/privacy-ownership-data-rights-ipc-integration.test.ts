@@ -76,6 +76,21 @@ describe('33-O privacy ownership and data rights IPC boundary', () => {
     expect(evaluateIpcIntegrationResultPolicy('privacyOwnership:exportEncrypted', { ...result, delivery: 'sent' })).toMatchObject({ accepted: false });
   });
 
+  it('paylaşılan nesneyi döngü saymaz, gerçek döngüyü reddeder', () => {
+    const shared = { status: 'ready' };
+    expect(evaluateIpcIntegrationResultPolicy('privacyOwnership:getCenter', {
+      current: shared,
+      summary: shared
+    })).toEqual({ accepted: true });
+
+    const cyclic: Record<string, unknown> = {};
+    cyclic.self = cyclic;
+    expect(evaluateIpcIntegrationResultPolicy('privacyOwnership:getCenter', cyclic)).toMatchObject({
+      accepted: false,
+      reason: 'COMPATIBILITY_PAYLOAD_CYCLE_PROHIBITED'
+    });
+  });
+
   it('applies read/write lifecycle, admission and rate limits to every channel', () => {
     for (const channel of channels) {
       expect(resolveIpcRequestAdmissionPolicy(channel)).toMatchObject({

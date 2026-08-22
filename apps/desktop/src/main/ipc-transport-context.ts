@@ -53,7 +53,7 @@ export class IpcTransportProtocolError extends Error {
 }
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const CHANNEL_PATTERN = /^[a-zA-Z][a-zA-Z0-9]*:[a-zA-Z][a-zA-Z0-9]*$/;
+const CHANNEL_PATTERN = /^[a-zA-Z][a-zA-Z0-9]*(?:-[a-zA-Z0-9]+)*:[a-zA-Z][a-zA-Z0-9]*(?:-[a-zA-Z0-9]+)*$/;
 const MAX_EPOCH = 2_147_483_647;
 const MAX_SEQUENCE = Number.MAX_SAFE_INTEGER;
 

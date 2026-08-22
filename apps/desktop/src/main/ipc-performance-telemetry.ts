@@ -77,7 +77,7 @@ interface Sample {
   readonly observedAt: number;
 }
 
-const CHANNEL_PATTERN = /^[a-zA-Z][a-zA-Z0-9]*:[a-zA-Z][a-zA-Z0-9]*$/;
+const CHANNEL_PATTERN = /^[a-zA-Z][a-zA-Z0-9]*(?:-[a-zA-Z0-9]+)*:[a-zA-Z][a-zA-Z0-9]*(?:-[a-zA-Z0-9]+)*$/;
 const clampMetric = (value: number | undefined, max: number): number => {
   if (!Number.isFinite(value)) return 0;
   return Math.min(max, Math.max(0, Math.round(Number(value) * 100) / 100));

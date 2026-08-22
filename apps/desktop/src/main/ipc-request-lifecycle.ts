@@ -275,7 +275,7 @@ const isRefreshSafeSingletonReadChannel = (channel: string): boolean =>
 
 export const resolveIpcRequestLifecyclePolicy = (channel: string): IpcRequestLifecyclePolicy => {
   if (destructiveSystemChannels.has(channel)) return Object.freeze({ cancellable: false, latestWins: false, timeoutMs: 0 });
-  if (isRefreshSafeSingletonReadChannel(channel)) return Object.freeze({ cancellable: true, latestWins: false, timeoutMs: 10_000 });
+  if (isRefreshSafeSingletonReadChannel(channel)) return Object.freeze({ cancellable: true, latestWins: false, timeoutMs: 30_000 });
   if (secureStartupReadChannels.has(channel)) return Object.freeze({ cancellable: true, latestWins: true, timeoutMs: 10_000 });
   if(communicationAuditArchiveReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
   if(familyMeetingReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
@@ -631,7 +631,7 @@ export const resolveIpcRequestRatePolicy = (channel: string): IpcRequestRatePoli
 };
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const CHANNEL_PATTERN = /^[a-zA-Z][a-zA-Z0-9]*:[a-zA-Z][a-zA-Z0-9]*$/;
+const CHANNEL_PATTERN = /^[a-zA-Z][a-zA-Z0-9]*(?:-[a-zA-Z0-9]+)*:[a-zA-Z][a-zA-Z0-9]*(?:-[a-zA-Z0-9]+)*$/;
 const cancellationReasons = new Set<IpcRequestCancellationReason>([
   'superseded',
   'timeout',
