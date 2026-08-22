@@ -682,6 +682,13 @@ describe('30-P durable archive policy transaction', () => {
     expect(() => executeInsert(makeCandidate('excessive-skew')))
       .toThrow(/platform policy receipt, context or database fence mismatch/u);
 
+    harness.runtime.database.prepare(`
+      INSERT INTO platform_policy_replay_reservations(nonce,reserved_at_ms,expires_at_ms)
+      VALUES(?,?,?),(?,?,?)
+    `).run(
+      'nonce-30p-direct-missing-classification', Date.parse(NOW), Date.parse(NOW) + 60_000,
+      'nonce-30p-direct-missing-obligation-execution', Date.parse(NOW), Date.parse(NOW) + 60_000
+    );
     const missingClassification = makeCandidate('missing-classification');
     expect(() => harness.runtime.database.prepare(`
       INSERT INTO platform_policy_transaction_receipts(
