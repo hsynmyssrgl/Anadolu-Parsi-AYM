@@ -34,6 +34,13 @@ describe('33-O privacy ownership and data rights UI', () => {
     expect(center).not.toContain("purpose:'owner_review'");
   });
 
+  it('eksik saklama tarihi ile istek gondermez ve oturum kapatan olayi acik onaya baglar', () => {
+    expect(center).toContain('disabled={Boolean(busy)||!retentionUntil}');
+    expect(center).toContain('Önce saklama bitiş zamanını seçin.');
+    expect(center).toContain("if(!confirm('Bu işlem yerel inceleme kaydını açar, mevcut oturumu kapatır ve yeniden giriş gerektirir. Devam edilsin mi?'))return;");
+    expect(center).toContain('Yerel inceleme kaydı açıldı; mevcut oturum kapatıldı.');
+  });
+
   it('creates both governed export request kinds with exact current-owner scopes and auto-selects an active request', () => {
     expect(center).toContain("createExportRequest('encrypted_export')");
     expect(center).toContain("createExportRequest('legacy_export')");

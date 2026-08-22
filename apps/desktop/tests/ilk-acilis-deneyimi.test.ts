@@ -88,6 +88,12 @@ describe('Ilk acilis deneyimi',()=>{
     expect(renderer).toContain('autoComplete="current-password"');
   });
 
+  it('guvenlik merkezinde eksik parola veya kodla 2FA ve cihaz guveni istegi gondermez',()=>{
+    const renderer=readFileSync(new URL('../src/renderer/App.tsx',import.meta.url),'utf8');
+    expect(renderer).toContain('disabled={!currentPassword||!twoFactorCode} onClick={()=>void disable2fa()}');
+    expect(renderer).toContain('disabled={!auth.twoFactorEnabled||!currentPassword||!twoFactorCode}>Bu cihazı güvenilir yap');
+  });
+
   it('Turkce ve Ingilizce anlatimda kadin sesi tercih eder',()=>{
     const voices=[{name:'Microsoft Tolga',lang:'tr-TR'},{name:'Microsoft Emel',lang:'tr-TR'},{name:'Microsoft Zira',lang:'en-US'}];
     expect(selectPreferredFemaleNarrationVoice(voices,'tr')?.name).toBe('Microsoft Emel');
