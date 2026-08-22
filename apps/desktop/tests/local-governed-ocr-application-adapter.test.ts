@@ -297,7 +297,9 @@ const createPolicyResolver = (
         ensure: () => { throw new Error('projection is mocked by the adapter test'); }
       },
       deferAllowedReceiptPersistence: true,
-      clock: () => receiptIssuedAt
+      // The local SQLite transaction/request clock is frozen at NOW while the
+      // remote authority may issue the signed receipt a few milliseconds later.
+      clock: () => NOW
     });
     return Object.freeze(Object.assign(enforcementPoint, {
       requiresTransactionRevalidation: true as const,
