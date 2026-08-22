@@ -77,6 +77,9 @@ describe('Ilk acilis deneyimi',()=>{
     expect(renderer).toContain("trustedState.trustedDevice!==true");
     expect(renderer.indexOf("window.pardus.trustCurrentDevice({password,code")).toBeLessThan(renderer.indexOf('await bootstrapAuthenticatedSession();',renderer.indexOf('completeFirstRunSecuritySetup')));
     expect(renderer.indexOf('await bootstrapAuthenticatedSession();',renderer.indexOf('completeFirstRunSecuritySetup'))).toBeLessThan(renderer.indexOf('setAuth(trustedState);',renderer.indexOf('completeFirstRunSecuritySetup')));
+    const setupAdmin=renderer.slice(renderer.indexOf('const setupAdmin=async'),renderer.indexOf('const login=async'));
+    expect(setupAdmin).not.toContain('bootstrapAuthenticatedSession');
+    expect(setupAdmin).toContain('setAuth(state)');
     expect(renderer).toContain('autoComplete="current-password"');
   });
 
