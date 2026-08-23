@@ -4674,7 +4674,12 @@ export class FamilyDataStore {
       resourceId: itemId,
       action: 'record'
     });
-    const plan=await this.#prepareArchiveOpenUseCase.execute(context,itemId);
+    const planContext: ArchiveApplicationContext = {
+      familyId: context.familyId,
+      actor: context.actor,
+      correlationId: asCorrelationId(`archive-open-prepare-${randomUUID()}`)
+    };
+    const plan=await this.#prepareArchiveOpenUseCase.execute(planContext,itemId);
     if(!plan.ok) throw new Error(`[${plan.error.code}] ${plan.error.message}`);
     const materialized=this.#materializeArchiveFileUseCase.execute(context.correlationId,{
       itemId,

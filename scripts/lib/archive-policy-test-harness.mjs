@@ -10,7 +10,7 @@ const kernel = new PlatformPolicyKernel({
   policyVersion: POLICY_VERSION,
   signingKey: Buffer.from('30-n-archive-policy-test-signing-key-v1', 'utf8'),
   applicationCapabilities: {
-    'windows-desktop': ['archive.write', 'family.read', 'family.write', 'location.read']
+    'windows-desktop': ['archive.read', 'archive.write', 'family.read', 'family.write', 'location.read']
   },
   consentRequiredCapabilities: [],
   onlineOnlyCapabilities: [],

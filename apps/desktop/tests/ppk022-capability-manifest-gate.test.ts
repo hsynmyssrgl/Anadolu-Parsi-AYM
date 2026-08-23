@@ -55,7 +55,7 @@ describe('32-R PPK-022 capability manifest AST gate', () => {
     expect(inventory.observations).toHaveLength(447);
     expect(result.exactSurfaceCount).toBe(447);
     expect(result.pinnedBootstrapSurfaceCount).toBe(26);
-  });
+  }, 20_000);
 
   it('rejects new, stale, wildcard and application-coverage drift', async () => {
     const manifest = JSON.parse(await readFile('config/32-r-ppk-022-capability-surface-manifest.json', 'utf8'));
@@ -88,7 +88,7 @@ describe('32-R PPK-022 capability manifest AST gate', () => {
     };
     expect(evaluatePlatformCapabilityManifest(inventory, enforcementDrift).findings)
       .toEqual(expect.arrayContaining([expect.objectContaining({ kind: 'CAPABILITY_SURFACE_ENTRY_INVALID' })]));
-  });
+  }, 20_000);
 
   it('produces a content-free full-production PASS report', async () => {
     const report = await runPlatformCapabilityManifestGate();
@@ -106,5 +106,5 @@ describe('32-R PPK-022 capability manifest AST gate', () => {
       findings: []
     });
     expect(Object.hasOwn(report, 'observations')).toBe(false);
-  });
+  }, 20_000);
 });

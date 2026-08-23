@@ -1603,6 +1603,24 @@ describe('FamilyDataStore', () => {
     store.close();
   });
 
+  it('arşiv açma okuması ve açıldı kaydı için ayrı politika makbuzları üretir', async () => {
+    const { store, directory } = makeStore();
+    await authenticate(store);
+    const source = join(directory, 'acilacak-belge.txt');
+    writeFileSync(source, 'arşiv açma makbuzu doğrulaması');
+    const item = (await store.importArchiveFile(source, { title: 'Açılacak Belge' }))
+      .find((entry) => entry.title === 'Açılacak Belge')!;
+
+    const openedPath = await store.openArchiveItem(item.id);
+    expect(readFileSync(openedPath, 'utf8')).toBe('arşiv açma makbuzu doğrulaması');
+    expect(store.listAudit(100)).toEqual(expect.arrayContaining([
+      expect.objectContaining({ action: 'archive.opened', resourceId: item.id })
+    ]));
+
+    rmSync(openedPath, { force: true });
+    store.close();
+  });
+
   it('hassas veri profillerini varsayılan reddeder, süreli onaylar ve dışa gönderimi yalnız önizler', async () => {
     const { store } = makeStore();
     await authenticate(store);

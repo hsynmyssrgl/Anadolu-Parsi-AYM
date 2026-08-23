@@ -1,7 +1,7 @@
 {
   "version": "22.08.2026.50",
   "status": "passed",
-  "checkedAt": "2026-08-23T14:58:14.378Z",
+  "checkedAt": "2026-08-23T15:20:17.903Z",
   "checks": [
     "non-admin cannot manage permissions",
     "owner can read own private record",
