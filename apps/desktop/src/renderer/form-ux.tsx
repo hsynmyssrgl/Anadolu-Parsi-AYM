@@ -298,20 +298,22 @@ export interface GovernedDraftBinding<T> {
 
 export function useGovernedDraft<T>(initialDraft: T, options: GovernedDraftOptions<T>): GovernedDraftBinding<T> {
   const saveRef = useRef(options.save);
+  const validateRef = useRef(options.validate);
   const onStateChangeRef = useRef(options.onStateChange);
   saveRef.current = options.save;
+  validateRef.current = options.validate;
   onStateChangeRef.current = options.onStateChange;
   const [draft, setDraftState] = useState(initialDraft);
   const [state, setState] = useState<GovernedDraftState>({ phase: 'idle', sequence: 0 });
   const controller = useMemo(() => new GovernedDraftController(initialDraft, {
     ...(options.debounceMs === undefined ? {} : { debounceMs: options.debounceMs }),
-    ...(options.validate === undefined ? {} : { validate: options.validate }),
+    validate: (value) => validateRef.current?.(value) ?? [],
     save: (value, context) => saveRef.current(value, context),
     onStateChange: (next) => {
       setState(next);
       onStateChangeRef.current?.(next);
     }
-  }), [options.debounceMs, options.validate]);
+  }), [options.debounceMs]);
 
   useEffect(() => () => controller.dispose(), [controller]);
   const setDraft = useCallback((value: T) => { setDraftState(value); controller.update(value); }, [controller]);

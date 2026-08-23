@@ -112,6 +112,18 @@ describe('33-N renderer form UX', () => {
     expect(centerSource).not.toContain('catch{await load();}');
   });
 
+  it('taslak denetleyicisini anonim doğrulama işleviyle yeniden çizimlerde kapatmaz', () => {
+    const source = readFileSync(new URL('../src/renderer/form-ux.tsx', import.meta.url), 'utf8');
+    const hookStart = source.indexOf('export function useGovernedDraft');
+    const hookSource = source.slice(hookStart);
+    expect(hookStart).toBeGreaterThan(-1);
+    expect(hookSource).toContain('const validateRef = useRef(options.validate);');
+    expect(hookSource).toContain('validateRef.current = options.validate;');
+    expect(hookSource).toContain('validate: (value) => validateRef.current?.(value) ?? []');
+    expect(hookSource).toContain('}), [options.debounceMs]);');
+    expect(hookSource).not.toContain('[options.debounceMs, options.validate]');
+  });
+
   it('ilk geçersiz alanı odaklar', () => {
     const focus = vi.fn();
     const root = { getElementById: (id: string) => id === 'email' ? { focus } : null };
