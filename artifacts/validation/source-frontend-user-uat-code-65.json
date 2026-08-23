@@ -1,0 +1,486 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 22.08.2026.50",
+  "runtimeKind": "SOURCE_ELECTRON",
+  "executable": "C:\\PPT\\AYM\\06_KOD\\app\\node_modules\\electron\\dist\\electron.exe",
+  "applicationPath": "C:\\PPT\\AYM\\06_KOD\\app\\apps\\desktop",
+  "installedFileVersion": "22.8.2026-50",
+  "profilePath": "C:\\Users\\Husey\\AppData\\Local\\Temp\\parsyuva-source-uat-65-kNDsyT",
+  "dataClassification": "SYNTHETIC_TEST_ONLY",
+  "familyName": "ParsYuva 50 UAT Ailesi",
+  "displayName": "Sentetik Test Yoneticisi",
+  "passwordRecorded": false,
+  "twoFactorSecretRecorded": false,
+  "recoveryCodesRecorded": false,
+  "startedAt": "2026-08-23T01:54:03.481Z",
+  "completedAt": "2026-08-23T01:58:22.275Z",
+  "status": "FAIL",
+  "checks": {
+    "firstRunIntroductionVisible": true,
+    "familyCreatedThroughVisibleForm": true,
+    "twoFactorStartedThroughVisibleButton": true,
+    "twoFactorCompletedThroughVisibleForm": true,
+    "currentDeviceTrustedThroughVisibleForm": true,
+    "authenticatedMainShellVisible": true,
+    "navigationSurfaceCount": 3,
+    "navigationSurfaces": [
+      {
+        "index": 10,
+        "routeId": "life-center",
+        "label": "◇Yaşam Merkezi",
+        "heading": "Yaşam merkezi",
+        "status": "PASS"
+      },
+      {
+        "index": 11,
+        "routeId": "automation",
+        "label": "◉Bildirim ve Otomasyon",
+        "heading": "Bildirim ve otomasyon merkezi",
+        "status": "PASS"
+      },
+      {
+        "index": 12,
+        "routeId": "reports",
+        "label": "▤Raporlama",
+        "heading": "Raporlama merkezi",
+        "status": "PASS"
+      }
+    ],
+    "moduleMenuCount": 4,
+    "moduleMenus": [
+      {
+        "index": 0,
+        "label": "⌂Ana Merkez⌄",
+        "routeCount": 1,
+        "status": "PASS"
+      },
+      {
+        "index": 1,
+        "label": "♙Aile Hafızası⌄",
+        "routeCount": 7,
+        "status": "PASS"
+      },
+      {
+        "index": 2,
+        "label": "₺Yaşam⌄",
+        "routeCount": 6,
+        "status": "PASS"
+      },
+      {
+        "index": 3,
+        "label": "✉Gizlilik ve Sistem⌄",
+        "routeCount": 8,
+        "status": "PASS"
+      }
+    ],
+    "clickedInteractionCount": 47,
+    "clickedInteractions": [
+      {
+        "routeId": "life-center",
+        "label": "Yenile",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Toplantı oluştur",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Profil",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Etkinlik / gider",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Profil",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Profil belgesi",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Profil belgesi",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Ev alanı ve envanter",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Ev alanı ve envanter",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Acil durum merkezi",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Acil durum merkezi",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Afet / tahliye planı",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Buluşma noktası",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Afet / tahliye planı",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Şehir dışı irtibat",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Şehir dışı irtibat",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Kontrol listesi maddesi",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Kontrol listesi maddesi",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Kontrol listesi durumu",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Kontrol listesi durumu",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Aile üyesi durumu",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Aile üyesi durumu",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Hazırlık kiti",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Hazırlık kiti",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Kit malzemesi",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Kit malzemesi",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Malzeme kontrolü",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Malzeme kontrolü",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Acil durum tatbikatı",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Acil durum tatbikatı",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Acil sağlık ve iletişim kartı",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Acil sağlık ve iletişim kartı",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Sağlık bilgisi",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Sağlık bilgisi",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Kart acil irtibatı",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Kart acil irtibatı",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Özel yardım planı",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Özel yardım planı",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Yenile",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Yenile",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Yerel işlemeyi aç",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "life-center",
+        "label": "Yenile",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "automation",
+        "label": "Kuralları şimdi çalıştır",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "automation",
+        "label": "Kural ekle",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "automation",
+        "label": "Kapat",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "automation",
+        "label": "Etkinleştir",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "reports",
+        "label": "PDF raporu oluştur",
+        "tag": "BUTTON",
+        "status": "PASS"
+      }
+    ],
+    "deferredInteractionCount": 0,
+    "deferredInteractions": [],
+    "visualAuditCount": 9,
+    "visualAudits": [
+      {
+        "surfaceId": "first-run-security-form",
+        "missingRoot": false,
+        "viewport": {
+          "width": 1600,
+          "height": 980
+        },
+        "controlCount": 5,
+        "surfaceCount": 3,
+        "issues": []
+      },
+      {
+        "surfaceId": "authenticated-shell",
+        "missingRoot": false,
+        "viewport": {
+          "width": 1600,
+          "height": 980
+        },
+        "controlCount": 19,
+        "surfaceCount": 2,
+        "issues": []
+      },
+      {
+        "surfaceId": "module-menu-0",
+        "missingRoot": false,
+        "viewport": {
+          "width": 1600,
+          "height": 980
+        },
+        "controlCount": 20,
+        "surfaceCount": 2,
+        "issues": []
+      },
+      {
+        "surfaceId": "module-menu-1",
+        "missingRoot": false,
+        "viewport": {
+          "width": 1600,
+          "height": 980
+        },
+        "controlCount": 26,
+        "surfaceCount": 2,
+        "issues": []
+      },
+      {
+        "surfaceId": "module-menu-2",
+        "missingRoot": false,
+        "viewport": {
+          "width": 1600,
+          "height": 980
+        },
+        "controlCount": 25,
+        "surfaceCount": 2,
+        "issues": []
+      },
+      {
+        "surfaceId": "module-menu-3",
+        "missingRoot": false,
+        "viewport": {
+          "width": 1600,
+          "height": 980
+        },
+        "controlCount": 27,
+        "surfaceCount": 2,
+        "issues": []
+      },
+      {
+        "surfaceId": "route-life-center",
+        "missingRoot": false,
+        "viewport": {
+          "width": 1600,
+          "height": 980
+        },
+        "controlCount": 84,
+        "surfaceCount": 14,
+        "issues": []
+      },
+      {
+        "surfaceId": "route-automation",
+        "missingRoot": false,
+        "viewport": {
+          "width": 1600,
+          "height": 980
+        },
+        "controlCount": 9,
+        "surfaceCount": 3,
+        "issues": []
+      },
+      {
+        "surfaceId": "route-reports",
+        "missingRoot": false,
+        "viewport": {
+          "width": 1600,
+          "height": 980
+        },
+        "controlCount": 5,
+        "surfaceCount": 2,
+        "issues": []
+      }
+    ],
+    "javascriptDialogCount": 0,
+    "javascriptDialogs": [],
+    "rendererExceptionCount": 1,
+    "diagnosticOnlyRendererExceptionCount": 0,
+    "unexpectedRendererExceptionCount": 1,
+    "rendererExceptions": [
+      "Error: Error invoking remote method 'automation:runs': Error: [PERMISSION-DENIED-001] Yaşam işlemi merkezi politika tarafından güvenli biçimde durduruldu: Life production policy receipt recovery must succeed before authorization"
+    ],
+    "failedResourceCount": 0,
+    "failedResources": []
+  },
+  "screenshots": [
+    "01-first-run-introduction.png",
+    "02-first-family-form.png",
+    "03-first-family-filled.png",
+    "04-security-start.png",
+    "04b-security-fields-rounded.png",
+    "05-authenticated-main-shell.png",
+    "06-responsive-760x720.png"
+  ],
+  "failure": "CDP komutu Runtime.evaluate 90000 ms icinde yanit vermedi."
+}
