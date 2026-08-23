@@ -298,9 +298,9 @@ export const resolveIpcRequestLifecyclePolicy = (channel: string): IpcRequestLif
   if(signedPluginPlatformWriteChannels.has(channel))return Object.freeze({cancellable:false,latestWins:false,timeoutMs:0});
   if(smartHomeEnergyReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
   if(smartHomeEnergyWriteChannels.has(channel))return Object.freeze({cancellable:false,latestWins:false,timeoutMs:0});
-  if(memoryStudioReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
+  if(memoryStudioReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:false,timeoutMs:30_000});
   if(memoryStudioWriteChannels.has(channel))return Object.freeze({cancellable:false,latestWins:false,timeoutMs:0});
-  if(familyAiAssistantLocalModelStatusChannels.has(channel))return Object.freeze({cancellable:true,latestWins:false,timeoutMs:10_000});
+  if(familyAiAssistantLocalModelStatusChannels.has(channel))return Object.freeze({cancellable:true,latestWins:false,timeoutMs:30_000});
   if(familyAiAssistantReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
   if(familyAiAssistantInferenceChannels.has(channel))return Object.freeze({cancellable:true,latestWins:false,timeoutMs:35_000});
   if(familyAiAssistantWriteChannels.has(channel))return Object.freeze({cancellable:false,latestWins:false,timeoutMs:0});

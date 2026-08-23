@@ -75,7 +75,7 @@ describe('33-X memory studio IPC boundary',()=>{
   });
 
   it('keeps reads cancellable and every durable mutation non-cancellable and rate bounded',()=>{
-    expect(resolveIpcRequestLifecyclePolicy(MEMORY_STUDIO_IPC_CHANNELS.getCenter)).toMatchObject({cancellable:true,latestWins:true,timeoutMs:10_000});
+    expect(resolveIpcRequestLifecyclePolicy(MEMORY_STUDIO_IPC_CHANNELS.getCenter)).toMatchObject({cancellable:true,latestWins:false,timeoutMs:30_000});
     for(const channel of Object.values(MEMORY_STUDIO_IPC_CHANNELS).filter(value=>value!==MEMORY_STUDIO_IPC_CHANNELS.getCenter)){
       expect(resolveIpcRequestLifecyclePolicy(channel)).toMatchObject({cancellable:false,latestWins:false,timeoutMs:0});
       expect(resolveIpcRequestRatePolicy(channel)).toMatchObject({enabled:true,maxRequestsPerWindow:12,windowMs:60_000});
