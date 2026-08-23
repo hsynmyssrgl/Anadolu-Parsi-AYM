@@ -384,6 +384,80 @@ describe('30-Y governed LIFE policy enforcement', () => {
     }
   });
 
+  it('binds governed writes to a remote receipt recorded after the request timestamp', async () => {
+    const directory = makeDirectory('ppt-30y-life-receipt-time-drift-');
+    const databasePath = join(directory, 'family.db');
+    let current = asIsoDateTime('2026-08-15T12:00:00.000Z');
+    const delayedReceiptProvider: PlatformPolicyAuthorizationProvider = Object.freeze({
+      resolvePolicyPackage: (applicationId) => provider.resolvePolicyPackage!(applicationId),
+      authorize({ request, nonce }) {
+        current = asIsoDateTime(new Date(Date.parse(request.occurredAt) + 2).toISOString());
+        return Object.freeze({
+          effectiveRequest: request,
+          authorization: kernel.authorizeWithReceipt(request, current, nonce)
+        });
+      },
+      verify(input) {
+        return provider.verify(input);
+      }
+    });
+    const store = trackStore(new FamilyDataStore({
+      databasePath,
+      seed: false,
+      clock: { now: () => current },
+      archivePolicyAuthorizationProvider: delayedReceiptProvider,
+      archivePolicyReceiptSink: {
+        append: () => undefined,
+        ensure: projectionProof,
+        verifyProjectionProof: () => true
+      },
+      archivePolicyVersion: POLICY_VERSION,
+      archiveClusterFence: () => ({ writable: true, epoch: 32 })
+    }));
+    store.setupAdmin({
+      familyName: '30-Y Makbuz Zamanı Ailesi',
+      displayName: '30-Y Makbuz Zamanı Yöneticisi',
+      email: 'life-30y-receipt-time@example.com',
+      password: 'Life30YReceiptTimeParola!'
+    });
+
+    const meeting = await store.createFamilyMeeting({
+      clientOperationId: 'meeting-receipt-time-drift-30-y',
+      expectedRevision: 0,
+      title: 'Makbuz zamanı toplantısı',
+      recurrenceKind: 'once',
+      recurrenceInterval: 1,
+      startsAt: '2026-08-16T12:00:00.000Z',
+      endsAt: '2026-08-16T13:00:00.000Z',
+      reminderMinutes: 30,
+      participantPersonIds: []
+    });
+    expect(meeting).toMatchObject({ mutationKind: 'meeting_create', revision: 1 });
+    const settings = await store.setSmartHomeProcessing({
+      clientOperationId: 'smart-home-receipt-time-drift-30-y',
+      expectedRevision: 0,
+      enabled: true,
+      reason: 'Yerel işleme kullanıcı tarafından açıldı.'
+    });
+    expect(settings).toMatchObject({ mutationKind: 'processing_enable', revision: 1 });
+    closeStore(store);
+
+    const database = new DatabaseSync(databasePath, { readOnly: true });
+    try {
+      for (const table of ['family_meeting_mutations', 'smart_home_mutations'] as const) {
+        expect(database.prepare(`SELECT COUNT(*) count FROM ${table}`).get()).toEqual({ count: 1 });
+        expect(database.prepare(`
+          SELECT COUNT(*) count FROM ${table} mutation
+          JOIN platform_policy_transaction_receipts receipt
+            ON receipt.receipt_hash=mutation.policy_receipt_hash
+          WHERE mutation.occurred_at<>receipt.recorded_at
+        `).get()).toEqual({ count: 0 });
+      }
+    } finally {
+      database.close();
+    }
+  });
+
   it('recovers one pending protected-journal projection after restart without duplication', async () => {
     const directory = makeDirectory('ppt-30y-life-projection-restart-');
     const databasePath = join(directory, 'family.db');

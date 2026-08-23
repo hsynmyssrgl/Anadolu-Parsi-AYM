@@ -275,7 +275,7 @@ const governedRepositoryContext = (
       personId: asPersonId(authorization.subject.personId)
     },
     correlationId: context.correlationId,
-    occurredAt: asIsoDateTime(authorization.occurredAt),
+    occurredAt: asIsoDateTime(authorization.receiptRecord.recordedAt),
     policyAuthorization: authorization
   };
 };

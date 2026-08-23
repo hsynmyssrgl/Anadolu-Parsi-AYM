@@ -156,7 +156,7 @@ const governedRepositoryContext = (
         : {})
     },
     correlationId: context.correlationId,
-    occurredAt: asIsoDateTime(authorization.occurredAt),
+    occurredAt: asIsoDateTime(authorization.receiptRecord.recordedAt),
     policyAuthorization: authorization
   };
 };
@@ -398,10 +398,10 @@ export class RepositoryBackedLifePolicyTransactionRunner {
         const result = operation({
           repository,
           // Every governed LIFE row, audit entry and outbox event must bind to
-          // the exact immutable timestamp in the durable authorization receipt.
-          // A fresh transaction clock read can differ by milliseconds and is
-          // correctly rejected by the SQLite receipt triggers.
-          occurredAt: asIsoDateTime(authorization.occurredAt),
+          // the exact immutable receipt issuance/record timestamp. The request
+          // occurrence time can precede a remote receipt by milliseconds and
+          // is correctly rejected by the SQLite receipt triggers.
+          occurredAt: asIsoDateTime(authorization.receiptRecord.recordedAt),
           authorization
         });
         if (!result.ok) return result;

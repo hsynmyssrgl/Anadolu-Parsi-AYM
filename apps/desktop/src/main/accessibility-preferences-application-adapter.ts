@@ -120,7 +120,7 @@ implements AccessibilityPreferencesUnitOfWork {
         new RepositoryBackedAccessibilityPreferencesWriteScope(
           this.dependencies,
           repository,
-          asIsoDateTime(authorization.occurredAt)
+          asIsoDateTime(authorization.receiptRecord.recordedAt)
         )
       )
     );

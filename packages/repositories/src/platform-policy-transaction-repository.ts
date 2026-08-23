@@ -239,7 +239,10 @@ export const platformPolicyPersistenceBinding = (
     capability: authorization.capability,
     resourceFamilyId: authorization.resourceFamilyId,
     purpose: authorization.purpose,
-    occurredAt: authorization.occurredAt
+    // Persistence rows bind to the immutable receipt issuance/record time.
+    // The request occurrence time can precede a remote policy receipt by a few
+    // milliseconds and must remain an authorization-evaluation timestamp only.
+    occurredAt: authorization.receiptRecord.recordedAt
   };
 };
 

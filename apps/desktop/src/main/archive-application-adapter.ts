@@ -167,7 +167,7 @@ const governedRepositoryContext = (
       ...(authorization.subject.personId ? { personId: asPersonId(authorization.subject.personId) } : {})
     },
     correlationId: context.correlationId,
-    occurredAt: asIsoDateTime(authorization.occurredAt),
+    occurredAt: asIsoDateTime(authorization.receiptRecord.recordedAt),
     policyAuthorization: authorization
   };
 };
@@ -740,7 +740,11 @@ export class RepositoryBackedArchiveUnitOfWork implements ArchiveUnitOfWork {
           }));
         }
         const execution = governedRepositoryContext(context, transaction, authorization, intent);
-        const result = operation(new GovernedArchiveWriteScope(this.dependencies, execution, asIsoDateTime(authorization.occurredAt)));
+        const result = operation(new GovernedArchiveWriteScope(
+          this.dependencies,
+          execution,
+          asIsoDateTime(authorization.receiptRecord.recordedAt)
+        ));
         if (!result.ok) return result;
         const idempotency = enforcementPoint.recordAuthorizedOperationResult?.({
           ...governedInput,

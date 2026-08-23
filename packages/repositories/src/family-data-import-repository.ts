@@ -297,7 +297,7 @@ export class SqliteFamilyDataImportRepository extends SqliteRepository implement
           batchId,target.entityType,target.entityId,target.familyId,target.ownerPersonId,target.createReceiptHash,
           binding.receiptHash,binding.receiptVersion,binding.nonce,policyContext.correlationId,
           binding.resourceType,binding.resourceId,binding.action,binding.capability,
-          authorization.receiptRecord.request.occurredAt
+          authorization.receiptRecord.recordedAt
         );
       };
 

@@ -110,7 +110,7 @@ export class RepositoryBackedFormDraftUnitOfWork implements FormDraftUnitOfWork 
       ({ repository, authorization }) => operation(new RepositoryBackedFormDraftWriteScope(
         this.dependencies,
         repository,
-        asIsoDateTime(authorization.occurredAt)
+        asIsoDateTime(authorization.receiptRecord.recordedAt)
       ))
     );
   }
