@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 22.08.2026.50",
+  "classification": "UNSIGNED_LOCAL_TEST_ONLY",
+  "status": "LOCAL_TEST_PASS_PRODUCTION_RELEASE_BLOCKED",
+  "generatedAt": "2026-08-23T12:57:15.8621447Z",
+  "installer": {
+    "path": "apps/desktop/release/ParsYuva-Bronze-22.08.2026.50.exe",
+    "sizeBytes": 116348251,
+    "sha256": "9DEBEDDFB6200864951DA0675DECA3631BB737E989FDA84D4E00D4072C9817D3",
+    "fileVersion": "22.8.2026-50",
+    "authenticodeStatus": "NotSigned",
+    "productionReleaseEligible": false
+  },
+  "installedBinary": {
+    "path": "C:/Program Files/PPT/ParsYuva/Bronze/ParsYuva-Bronze.exe",
+    "packagedSha256": "68266230DEF5369112919280ABF63ECE9D2D18044F939C926E3DD4E6066906DA",
+    "installedSha256": "68266230DEF5369112919280ABF63ECE9D2D18044F939C926E3DD4E6066906DA",
+    "exactMatch": "PASS",
+    "authenticodeStatus": "NotSigned"
+  },
+  "upgradeDataPreservation": {
+    "syntheticMarkerPath": "C:/Users/Husey/AppData/Roaming/ParsYuva/Bronze/upgrade-preservation-test/synthetic-marker-uat50.txt",
+    "sha256Before": "1F6667DE047DF56DAE081CFD9C8AFA96F293FA73C011E27EAF37A00EEB78FFF7",
+    "sha256After": "1F6667DE047DF56DAE081CFD9C8AFA96F293FA73C011E27EAF37A00EEB78FFF7",
+    "status": "PASS"
+  },
+  "packagedLaunchProbe": {
+    "evidence": "artifacts/validation/windows-packaged-launch-probe.json",
+    "status": "PASS",
+    "runs": 2,
+    "dpapiCrossProcessPersistence": "PASS",
+    "windowsEfsRuntime": "PASS",
+    "rendererSandboxPolicy": "PASS"
+  },
+  "installedFrontendUat": {
+    "evidence": "artifacts/validation/installed-frontend-user-uat102.json",
+    "status": "PASS",
+    "navigationRoutes": 22,
+    "moduleMenus": 4,
+    "clickedInteractions": 235,
+    "visualAudits": 30,
+    "visualIssues": 0,
+    "rendererExceptions": 0,
+    "failedResources": 0,
+    "mainProcessExceptions": 0
+  },
+  "antivirusBoundary": {
+    "product": "Kaspersky Premium",
+    "detection": "PDM:Trojan.Win32.Generic",
+    "detectedBinary": "C:/Program Files/PPT/ParsYuva/Bronze/ParsYuva-Bronze.exe",
+    "userReportedAntivirusStateDuringRetest": "PAUSED",
+    "resolutionStatus": "UNRESOLVED_RELEASE_BLOCKER",
+    "falsePositiveConclusion": "NOT_ESTABLISHED",
+    "requiredForProduction": [
+      "Authenticode signing with trusted certificate",
+      "reputation and antivirus validation with protection enabled",
+      "signed installer and installed binary revalidation"
+    ]
+  }
+}
