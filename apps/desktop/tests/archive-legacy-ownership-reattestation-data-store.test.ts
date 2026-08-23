@@ -97,7 +97,7 @@ describe('33-Q legacy archive ownership reattestation DataStore integration',()=
       await seedLegacyOwnerlessArchive(databasePath,account.id,account.personId!);
       store=new FamilyDataStore({databasePath,...storeOptions});
       store.login({accountId:account.id,password:PASSWORD});
-      store.upsertPermission({subjectAccountId:account.id,resourceType:'archive_item',resourceId:ITEM_ID,actions:['read','update'],effect:'allow',purpose:'general'});
+      store.upsertPermission({subjectAccountId:account.id,resourceType:'archive_item',resourceId:ITEM_ID,actions:['read','update'],effect:'allow',purpose:'general',startsAt:'2026-08-01T00:00:00.000Z',endsAt:'2027-08-01T00:00:00.000Z'});
       expect(store.listLargeArchive({limit:20}).items.find(item=>item.id===ITEM_ID)?.ownershipBinding).toBe('legacy_unverified');
       await expect(store.reattestLegacyArchiveOwnership({itemId:ITEM_ID,password:'yanlış-parola',confirmation:archiveLegacyOwnershipReattestationConfirmation(ITEM_ID)})).rejects.toThrow(/AUTH-CREDENTIALS-001/u);
       await expect(store.reattestLegacyArchiveOwnership({itemId:ITEM_ID,password:PASSWORD,confirmation:'YANLIŞ ONAY'})).rejects.toThrow(/onay metni/u);

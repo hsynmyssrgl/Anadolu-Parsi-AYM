@@ -99,11 +99,15 @@ describe('33-Q local governed OCR desktop IPC bridge', () => {
 
   it('runs input policy before dispatch and safe-result policy before transport response', () => {
     const inputGate = runtime.indexOf('evaluateIpcIntegrationPolicy(input.channel, handlerArguments)');
-    const dispatch = runtime.indexOf('input.handler(event, ...(handlerArguments as TArguments))');
+    const preparation = runtime.indexOf('const preparedOperation = await prepareIpcPolicyOperation({');
+    const dispatch = runtime.indexOf('const result = await requestLease.run(operation)');
     const resultGate = runtime.indexOf('evaluateIpcIntegrationResultPolicy(input.channel, result)');
     const response = runtime.indexOf('createIpcTransportResponseEnvelope(requestContext, correlationId, result)');
     expect(inputGate).toBeGreaterThan(-1);
-    expect(inputGate).toBeLessThan(dispatch);
+    expect(inputGate).toBeLessThan(preparation);
+    expect(preparation).toBeLessThan(dispatch);
+    expect(runtime).toContain('handler: input.handler');
+    expect(runtime).toContain('operation: preparedOperation');
     expect(resultGate).toBeGreaterThan(dispatch);
     expect(resultGate).toBeLessThan(response);
   });

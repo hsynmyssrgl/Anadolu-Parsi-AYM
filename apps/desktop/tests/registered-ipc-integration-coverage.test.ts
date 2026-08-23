@@ -7,7 +7,7 @@ import {
 } from '../src/main/ipc-integration-policy.js';
 
 const mainSource = readFileSync(new URL('../src/main/main.ts', import.meta.url), 'utf8');
-const registeredChannels = [...mainSource.matchAll(/registerIpcHandler\(\s*['"]([^'"]+)['"]/gu)]
+const registeredChannels = [...mainSource.matchAll(/register(?:Prepared)?IpcHandler\(\s*['"]([^'"]+)['"]/gu)]
   .map((match) => match[1]!)
   .sort();
 

@@ -18,9 +18,9 @@ const renderPanel = (Panel: ComponentType, locale: 'tr-TR' | 'en-US'): string =>
 
 describe('feature-panel English localization wave one', () => {
   const panels = [
-    [DistributedOperationsPanel, 'Cluster and device center', 'Dağıtık Core Service'],
+    [DistributedOperationsPanel, 'Cluster and device center', 'Dağıtık temel hizmet'],
     [UniversalUxConsolidationPanel, 'Unified family view', 'Tek aile görünümü'],
-    [SignedPluginPlatformPanel, 'Plugin and external provider platform', 'İmzalı aday kayıt']
+    [SignedPluginPlatformPanel, 'Plugin and external provider platform', 'İmzalı aday kaydı']
   ] as const;
 
   it.each(panels)('renders %p without visible Turkish copy in English', (Panel, englishMarker) => {
