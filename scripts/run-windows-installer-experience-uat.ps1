@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param(
   [Parameter(Mandatory = $true)]
   [ValidateNotNullOrEmpty()]
@@ -120,6 +120,13 @@ if (Test-Path -LiteralPath $evidenceFullPath) {
   throw "EvidenceRoot already exists; evidence is never overwritten: $evidenceFullPath"
 }
 
+$runnerIsAdministrator = ([Security.Principal.WindowsPrincipal]::new(
+  [Security.Principal.WindowsIdentity]::GetCurrent()
+)).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+if (-not $runnerIsAdministrator) {
+  throw 'Installer UAT must run from an elevated PowerShell session; no installer was launched.'
+}
+
 $channelMatch = [regex]::Match(
   $installerItem.Name,
   '^ParsYuva-(Bronze|Silver|Gold)-\d{2}\.\d{2}\.\d{4}\.\d+\.exe$',
@@ -156,6 +163,8 @@ $errors = [System.Collections.Generic.List[string]]::new()
 $rootProcess = $null
 $installerWindow = $null
 $forcedCleanup = $false
+$forcedCleanupSucceeded = $null
+$forcedCleanupSurvivorProcessIds = @()
 $cancelRequested = $false
 $cancelConfirmationInvoked = $false
 $processesExited = $false
@@ -238,6 +247,20 @@ function Get-CurrentProcessIdentity {
   $process = Get-CimInstance Win32_Process -Filter "ProcessId = $ProcessId" -ErrorAction SilentlyContinue
   if ($null -eq $process) { return $null }
   return ConvertTo-ProcessIdentity -Process $process
+}
+
+function Wait-CurrentProcessIdentity {
+  param(
+    [Parameter(Mandatory = $true)][int]$ProcessId,
+    [int]$TimeoutSeconds = 10
+  )
+  $deadline = [System.DateTimeOffset]::UtcNow.AddSeconds($TimeoutSeconds)
+  while ([System.DateTimeOffset]::UtcNow -lt $deadline) {
+    $identity = Get-CurrentProcessIdentity -ProcessId $ProcessId
+    if ($null -ne $identity -and $null -ne $identity.ExecutablePath) { return $identity }
+    Start-Sleep -Milliseconds 100
+  }
+  return $null
 }
 
 function Get-RelatedProcessSnapshot {
@@ -565,7 +588,7 @@ Assert-NoReparseAncestors -Candidate $evidenceFullPath -Boundary $validationRoot
 
 try {
   $rootProcess = Start-Process -FilePath $installerFullPath -PassThru
-  $rootProcessIdentity = Get-CurrentProcessIdentity -ProcessId $rootProcess.Id
+  $rootProcessIdentity = Wait-CurrentProcessIdentity -ProcessId $rootProcess.Id
   if ($null -eq $rootProcessIdentity -or $null -eq $rootProcessIdentity.ExecutablePath -or
     -not $rootProcessIdentity.ExecutablePath.Equals($installerFullPath, [System.StringComparison]::OrdinalIgnoreCase)) {
     throw 'Installer root process identity could not be bound to the governed executable.'
@@ -632,10 +655,19 @@ try {
       foreach ($identity in $remaining) {
         $current = Get-CurrentProcessIdentity -ProcessId $identity.ProcessId
         if ($null -ne $current -and (Test-SameProcessIdentity -Expected $identity -Actual $current)) {
-          Stop-Process -Id $identity.ProcessId -Force -ErrorAction SilentlyContinue
+          try {
+            Stop-Process -Id $identity.ProcessId -Force -ErrorAction Stop
+          } catch {
+            $errors.Add("Forced cleanup could not stop governed process $($identity.ProcessId): $($_.Exception.Message)")
+          }
         }
       }
       Start-Sleep -Milliseconds 500
+      $forcedCleanupSurvivorProcessIds = @($remaining | Where-Object {
+        $current = Get-CurrentProcessIdentity -ProcessId $_.ProcessId
+        $null -ne $current -and (Test-SameProcessIdentity -Expected $_ -Actual $current)
+      } | ForEach-Object { $_.ProcessId })
+      $forcedCleanupSucceeded = $forcedCleanupSurvivorProcessIds.Count -eq 0
     }
   }
 }
@@ -652,6 +684,9 @@ if (-not $installationUnchanged) {
 }
 if ($forcedCleanup) {
   $errors.Add('Forced process cleanup was required; safe cancellation cannot be accepted.')
+  if (-not $forcedCleanupSucceeded) {
+    $errors.Add("Governed installer processes survived forced cleanup: $($forcedCleanupSurvivorProcessIds -join ', ')")
+  }
 }
 
 $allSlidesPresent = $slides.Count -eq 3
@@ -682,7 +717,7 @@ $report = [ordered]@{
     osVersion = [System.Environment]::OSVersion.VersionString
     windowsUiLanguageId = $systemUiLanguageId
     expectedNarrationLanguage = $expectedNarrationLanguage
-    runnerIsAdministrator = ([Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+    runnerIsAdministrator = $runnerIsAdministrator
     installerProcess = if ($null -ne $rootProcessIdentity) {
       [ordered]@{
         processId = $rootProcessIdentity.ProcessId
@@ -704,6 +739,8 @@ $report = [ordered]@{
     confirmationInvoked = $cancelConfirmationInvoked
     processTreeExited = $processesExited
     forcedCleanupRequired = $forcedCleanup
+    forcedCleanupSucceeded = $forcedCleanupSucceeded
+    forcedCleanupSurvivorProcessIds = @($forcedCleanupSurvivorProcessIds)
   }
   installedPayloadSafety = [ordered]@{
     path = $expectedInstalledRoot

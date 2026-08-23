@@ -6,6 +6,11 @@ import { describe, expect, it } from 'vitest';
 const uatScriptUrl = new URL('../../../scripts/run-windows-installer-experience-uat.ps1', import.meta.url);
 
 describe('real Windows NSIS installer experience UAT contract', () => {
+  it('stays UTF-8 BOM encoded for Windows PowerShell 5.1 Turkish text compatibility', async () => {
+    const bytes = await readFile(uatScriptUrl);
+    expect([...bytes.subarray(0, 3)]).toEqual([0xef, 0xbb, 0xbf]);
+  });
+
   it('keeps the PowerShell helper syntactically valid', () => {
     if (process.platform !== 'win32') return;
     const scriptPath = fileURLToPath(uatScriptUrl).replaceAll("'", "''");
@@ -36,6 +41,11 @@ describe('real Windows NSIS installer experience UAT contract', () => {
     expect(source).toContain("'artifacts\\validation'");
     expect(source).toContain('Installer does not exist; live UAT was not started');
     expect(source).toContain('EvidenceRoot already exists; evidence is never overwritten');
+    expect(source).toContain('Installer UAT must run from an elevated PowerShell session; no installer was launched.');
+    expect(source.indexOf('Installer UAT must run from an elevated PowerShell session')).toBeLessThan(
+      source.indexOf('New-Item -ItemType Directory -Path $evidenceFullPath'),
+    );
+    expect(source).toContain('Wait-CurrentProcessIdentity');
     expect(source.indexOf('Installer does not exist; live UAT was not started')).toBeLessThan(
       source.indexOf('New-Item -ItemType Directory -Path $evidenceFullPath'),
     );
@@ -89,6 +99,8 @@ describe('real Windows NSIS installer experience UAT contract', () => {
       '[System.Windows.Automation.InvokePattern]::Pattern',
       'Installed channel payload changed during a welcome-only cancellation UAT.',
       'Forced process cleanup was required; safe cancellation cannot be accepted.',
+      'forcedCleanupSucceeded',
+      'forcedCleanupSurvivorProcessIds',
       'Get-TreeSnapshot -Root $expectedInstalledRoot',
       'Stop-Process -Id $identity.ProcessId -Force',
       "'windows-installer-experience-uat.json'",

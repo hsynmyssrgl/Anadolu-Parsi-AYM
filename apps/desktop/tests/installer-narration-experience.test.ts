@@ -12,6 +12,11 @@ const stylesUrl = new URL('../src/renderer/styles.css', import.meta.url);
 const packageUrl = new URL('../package.json', import.meta.url);
 
 describe('installer progress, narration and Silver help experience', () => {
+  it('keeps the packaged narrator UTF-8 BOM encoded for Windows PowerShell 5.1', async () => {
+    const bytes = await readFile(installerNarrationUrl);
+    expect([...bytes.subarray(0, 3)]).toEqual([0xef, 0xbb, 0xbf]);
+  });
+
   it('uses a transitional narrated welcome while reserving progress for real file installation', async () => {
     const [source,narration,extractor,rawPackage]=await Promise.all([readFile(installerUrl,'utf8'),readFile(installerNarrationUrl,'utf8'),readFile(extractorUrl,'utf8'),readFile(packageUrl,'utf8')]);
     const packageJson=JSON.parse(rawPackage) as {build:{executableName?:string;win?:{artifactName?:string};artifactName?:string;nsis?:{shortcutName?:string;multiLanguageInstaller?:boolean;installerLanguages?:string[]}}};
