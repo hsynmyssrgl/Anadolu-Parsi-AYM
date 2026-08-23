@@ -5,17 +5,19 @@
     "B0-04"
   ],
   "enforcement": "fail-closed",
-  "status": "PASS",
-  "checksPassed": 21,
-  "checksFailed": 0,
-  "failures": [],
+  "status": "FAIL",
+  "checksPassed": 20,
+  "checksFailed": 1,
+  "failures": [
+    "renderer must consume and display the governance boundary"
+  ],
   "productModuleCount": 17,
   "governanceSurfaceCount": 5,
   "routeCount": 22,
   "menuEntryCount": 22,
   "renderedScreenCount": 22,
   "preloadPairCount": 406,
-  "registeredPreloadPairCount": 301,
+  "registeredPreloadPairCount": 297,
   "classifiedUnusedRendererApiCount": 14,
   "unresolvedUnusedRendererApiCount": 0,
   "unusedRendererApis": [
@@ -83,5 +85,5 @@
   },
   "b901CompletedByThisPackage": false,
   "databaseMigrationRequired": false,
-  "generatedAt": "2026-08-22T21:24:23.727Z"
+  "generatedAt": "2026-08-23T07:16:56.273Z"
 }
