@@ -1060,6 +1060,10 @@ const parseWorkspaceNote=(payloadJson:string):WorkspaceNoteDraft=>{
 };
 
 interface PendingFormDraftOperation { readonly clientOperationId:string; readonly expectedRevision:number }
+const FORM_DRAFT_STARTUP_RETRY_DELAYS_MS=Object.freeze([250,500,1_000,2_000,4_000]);
+const isTransientFormDraftStartupError=(caught:unknown):boolean=>caught instanceof Error
+  &&/trusted startup|availability (?:gate|boundary)|veri kasası kilitli|data vault is locked|has not completed/iu.test(caught.message);
+const waitForFormDraftStartup=(delayMs:number):Promise<void>=>new Promise(resolve=>globalThis.setTimeout(resolve,delayMs));
 
 export function GovernedFormDraftCenter({visible}:{readonly visible:boolean}){
   const {language}=useLocalization();
@@ -1097,14 +1101,21 @@ export function GovernedFormDraftCenter({visible}:{readonly visible:boolean}){
     if(!window.pardus)return;
     const generation=++workspaceRefreshGenerationRef.current;
     setLoadState('loading');
-    try{
-      const next=await window.pardus.getFormDraftWorkspace(formKey);
-      if(generation!==workspaceRefreshGenerationRef.current)return;
-      setWorkspace(next);revisionRef.current=next.current?.revision??0;
-      draft.reset(next.current?parseWorkspaceNote(next.current.payloadJson):EMPTY_WORKSPACE_NOTE);
-      setHistoryRefreshError(false);setUndoError(false);undoOperationRef.current=undefined;
-      setLoadState('ready');
-    }catch{if(generation===workspaceRefreshGenerationRef.current)setLoadState('error');}
+    for(let attempt=0;;attempt+=1){
+      try{
+        const next=await window.pardus.getFormDraftWorkspace(formKey);
+        if(generation!==workspaceRefreshGenerationRef.current)return;
+        setWorkspace(next);revisionRef.current=next.current?.revision??0;
+        draft.reset(next.current?parseWorkspaceNote(next.current.payloadJson):EMPTY_WORKSPACE_NOTE);
+        setHistoryRefreshError(false);setUndoError(false);undoOperationRef.current=undefined;
+        setLoadState('ready');return;
+      }catch(caught){
+        if(generation!==workspaceRefreshGenerationRef.current)return;
+        const delayMs=FORM_DRAFT_STARTUP_RETRY_DELAYS_MS[attempt];
+        if(delayMs===undefined||!isTransientFormDraftStartupError(caught)){setLoadState('error');return;}
+        await waitForFormDraftStartup(delayMs);
+      }
+    }
   };
   const draft=useGovernedDraft<WorkspaceNoteDraft>(EMPTY_WORKSPACE_NOTE,{
     debounceMs:700,validate:value=>validateWorkspaceNote(value,language),
@@ -1126,7 +1137,7 @@ export function GovernedFormDraftCenter({visible}:{readonly visible:boolean}){
       saveChainRef.current=queued;await queued;
     }
   });
-  useEffect(()=>{void load();},[]);
+  useEffect(()=>{void load();return()=>{workspaceRefreshGenerationRef.current+=1;};},[]);
   useEffect(()=>{const onOnline=()=>setOnline(true),onOffline=()=>setOnline(false);globalThis.addEventListener('online',onOnline);globalThis.addEventListener('offline',onOffline);return()=>{globalThis.removeEventListener('online',onOnline);globalThis.removeEventListener('offline',onOffline);};},[]);
   const wasVisibleRef=useRef(visible);
   useEffect(()=>{
