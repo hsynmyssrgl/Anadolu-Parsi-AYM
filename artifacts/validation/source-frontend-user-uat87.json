@@ -1,0 +1,420 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 22.08.2026.50",
+  "runtimeKind": "SOURCE_ELECTRON",
+  "executable": "C:\\PPT\\AYM\\06_KOD\\app\\node_modules\\electron\\dist\\electron.exe",
+  "applicationPath": "C:\\PPT\\AYM\\06_KOD\\app\\apps\\desktop",
+  "installedFileVersion": "22.8.2026-50",
+  "profilePath": "C:\\Users\\Husey\\AppData\\Local\\Temp\\parsyuva-source-uat87-fqzA2X",
+  "dataClassification": "SYNTHETIC_TEST_ONLY",
+  "familyName": "ParsYuva 50 UAT Ailesi",
+  "displayName": "Sentetik Test Yoneticisi",
+  "passwordRecorded": false,
+  "twoFactorSecretRecorded": false,
+  "recoveryCodesRecorded": false,
+  "startedAt": "2026-08-23T05:13:28.796Z",
+  "completedAt": "2026-08-23T05:19:46.521Z",
+  "status": "FAIL",
+  "checks": {
+    "firstRunIntroductionVisible": true,
+    "familyCreatedThroughVisibleForm": true,
+    "twoFactorStartedThroughVisibleButton": true,
+    "twoFactorCompletedThroughVisibleForm": true,
+    "currentDeviceTrustedThroughVisibleForm": true,
+    "authenticatedMainShellVisible": true,
+    "navigationSurfaceCount": 1,
+    "navigationSurfaces": [
+      {
+        "index": 21,
+        "routeId": "settings",
+        "label": "⚙Sistem ve Bakım",
+        "heading": "Sistem, bakım ve operasyon",
+        "status": "PASS"
+      }
+    ],
+    "moduleMenuCount": 4,
+    "moduleMenus": [
+      {
+        "index": 0,
+        "label": "⌂Ana Merkez⌄",
+        "routeCount": 1,
+        "status": "PASS"
+      },
+      {
+        "index": 1,
+        "label": "♙Aile Hafızası⌄",
+        "routeCount": 7,
+        "status": "PASS"
+      },
+      {
+        "index": 2,
+        "label": "₺Yaşam⌄",
+        "routeCount": 6,
+        "status": "PASS"
+      },
+      {
+        "index": 3,
+        "label": "✉Gizlilik ve Sistem⌄",
+        "routeCount": 8,
+        "status": "PASS"
+      }
+    ],
+    "clickedInteractionCount": 42,
+    "clickedInteractions": [
+      {
+        "routeId": "settings",
+        "label": "Kişisel taslaklar⌄",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "Şimdi kaydet",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "Taslak başlığı zorunludur.",
+        "tag": "A",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "Operasyonlar ve yedekleme⌄",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "İlk kurulum anına dön",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "Hayır, vazgeç",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "Politikayı kaydet",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "Tümünü çalıştır",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "Şimdi örnek al",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "Bütünlük kontrolü",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "WAL temizle",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "ANALYZE",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "VACUUM",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "Kuyruğu çalıştır",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "Sağlığı değerlendir",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "JSON raporu dışa aktar",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "Verileri yenile",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "Filtrele",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "Politikayı kaydet",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "Bakımı şimdi çalıştır",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "Ölçüm al",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "Yeni rapor",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "Karşılaştır",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "30 günden eskiyi arşivle",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "Göreve dönüştür",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "Yenile",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "Birleşik aile deneyimi⌄",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "↓",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "↓",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "↑",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "↑",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "↑",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "↓",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "↑",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "↓",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "Dağıtık işlemler⌄",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "İletişim denetimi⌄",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "Yenile",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "Dosya paylaşımı⌄",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "Yenile",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "Dosya seç ve yerel olarak şifrele",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "Kararı kaydet",
+        "tag": "BUTTON",
+        "status": "PASS"
+      }
+    ],
+    "deferredInteractionCount": 0,
+    "deferredInteractions": [],
+    "visualAuditCount": 7,
+    "visualAudits": [
+      {
+        "surfaceId": "first-run-security-form",
+        "missingRoot": false,
+        "viewport": {
+          "width": 1600,
+          "height": 980
+        },
+        "controlCount": 5,
+        "surfaceCount": 3,
+        "issues": []
+      },
+      {
+        "surfaceId": "authenticated-shell",
+        "missingRoot": false,
+        "viewport": {
+          "width": 1600,
+          "height": 980
+        },
+        "controlCount": 19,
+        "surfaceCount": 2,
+        "issues": []
+      },
+      {
+        "surfaceId": "module-menu-0",
+        "missingRoot": false,
+        "viewport": {
+          "width": 1600,
+          "height": 980
+        },
+        "controlCount": 20,
+        "surfaceCount": 2,
+        "issues": []
+      },
+      {
+        "surfaceId": "module-menu-1",
+        "missingRoot": false,
+        "viewport": {
+          "width": 1600,
+          "height": 980
+        },
+        "controlCount": 26,
+        "surfaceCount": 2,
+        "issues": []
+      },
+      {
+        "surfaceId": "module-menu-2",
+        "missingRoot": false,
+        "viewport": {
+          "width": 1600,
+          "height": 980
+        },
+        "controlCount": 25,
+        "surfaceCount": 2,
+        "issues": []
+      },
+      {
+        "surfaceId": "module-menu-3",
+        "missingRoot": false,
+        "viewport": {
+          "width": 1600,
+          "height": 980
+        },
+        "controlCount": 27,
+        "surfaceCount": 2,
+        "issues": []
+      },
+      {
+        "surfaceId": "route-settings",
+        "missingRoot": false,
+        "viewport": {
+          "width": 1600,
+          "height": 980
+        },
+        "controlCount": 16,
+        "surfaceCount": 1,
+        "issues": []
+      }
+    ],
+    "javascriptDialogCount": 0,
+    "javascriptDialogs": [],
+    "rendererExceptionCount": 0,
+    "diagnosticOnlyRendererExceptionCount": 0,
+    "unexpectedRendererExceptionCount": 0,
+    "rendererExceptions": [],
+    "failedResourceCount": 0,
+    "failedResources": [],
+    "mainProcessExceptionCount": 0,
+    "mainProcessExceptions": []
+  },
+  "screenshots": [
+    "01-first-run-introduction.png",
+    "02-first-family-form.png",
+    "03-first-family-filled.png",
+    "04-security-start.png",
+    "04b-security-fields-rounded.png",
+    "05-authenticated-main-shell.png",
+    "06-responsive-760x720.png"
+  ],
+  "failure": "Tiklama sonrasi hata: settings / Kararı kaydet / Error invoking remote method 'communicationFileSharing:apply': Error: [RESOURCE-CONFLICT-001] Bildirim ve sessiz saat ayarı değişmemiştir. Aynı işlem kimliğiyle yeniden deneyebilirsiniz."
+}
