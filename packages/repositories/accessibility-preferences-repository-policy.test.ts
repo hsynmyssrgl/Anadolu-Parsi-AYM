@@ -25,6 +25,7 @@ import { SqliteAccessibilityPreferencesRepository } from './src/accessibility-pr
 import { computePlatformPolicyReceiptHash } from './src/platform-policy-transaction-repository.js';
 
 const NOW = '2026-08-14T06:00:00.000Z';
+const RECORDED_AT = '2026-08-14T06:00:00.125Z';
 const FAMILY_ID = asFamilyId('family-accessibility-a');
 const PERSON_ID = asPersonId('person-accessibility-a');
 const ACCOUNT_ID = asUserId('account-accessibility-a');
@@ -75,12 +76,25 @@ const fixtureSchema = `
 
 const migration90 = FAMILY_DATABASE_MIGRATIONS.find(({ version }) => version === 90);
 if (!migration90) throw new Error('MIGRATION_90_NOT_FOUND');
+const migration121 = FAMILY_DATABASE_MIGRATIONS.find(({ version }) => version === 121);
+if (!migration121) throw new Error('MIGRATION_121_NOT_FOUND');
+const accessibilityTriggerMarker = 'DROP TRIGGER IF EXISTS trg_accessibility_mutation_policy_receipt;';
+const accessibilityTriggerStart = migration121.sql.indexOf(accessibilityTriggerMarker);
+const accessibilityTriggerEnd = migration121.sql.indexOf('END;', accessibilityTriggerStart);
+if (accessibilityTriggerStart < 0 || accessibilityTriggerEnd < 0) {
+  throw new Error('MIGRATION_121_ACCESSIBILITY_TRIGGER_NOT_FOUND');
+}
+const accessibilityMigration121Sql = migration121.sql.slice(
+  accessibilityTriggerStart,
+  accessibilityTriggerEnd + 4
+);
 
 const openFixture = (): DatabaseSync => {
   const database = new DatabaseSync(':memory:');
   databases.push(database);
   database.exec(fixtureSchema);
   database.exec(migration90.sql);
+  database.exec(accessibilityMigration121Sql);
   return database;
 };
 
@@ -95,9 +109,17 @@ const kernel = new PlatformPolicyKernel({
 
 let sequence = 0;
 
-const persistReceipt = (database: DatabaseSync, record: PlatformPolicyReceiptRecord): void => {
+const persistReceipt = (
+  database: DatabaseSync,
+  record: PlatformPolicyReceiptRecord,
+  recordedAt = record.recordedAt
+): void => {
   const receiptHash = computePlatformPolicyReceiptHash(record.receipt);
-  const recordJson = JSON.stringify(record);
+  const storedRecord: PlatformPolicyReceiptRecord = {
+    ...record,
+    recordedAt: asIsoDateTime(recordedAt)
+  };
+  const recordJson = JSON.stringify(storedRecord);
   database.prepare(`
     INSERT INTO platform_policy_transaction_receipts(
       receipt_hash,receipt_version,request_hash,context_hash,data_classes_json,
@@ -113,14 +135,14 @@ const persistReceipt = (database: DatabaseSync, record: PlatformPolicyReceiptRec
     record.capabilityManifestSha256,record.deviceCertificateSha256 ?? null,
     record.decisionAuthorityId ?? null,record.receipt.nonce,record.correlationId,
     record.decision.policyVersion,record.resourceType,record.resourceId,record.action,
-    record.capability,FENCE_NAME,FENCE_EPOCH,1,record.receipt.issuedAt,record.recordedAt,
+    record.capability,FENCE_NAME,FENCE_EPOCH,1,record.receipt.issuedAt,recordedAt,
     recordJson
   );
   database.prepare(`
     INSERT INTO platform_policy_journal_projection_outbox(
       receipt_hash,record_json,status,created_at,projected_at
     ) VALUES(?,?,'pending',?,NULL)
-  `).run(receiptHash, recordJson, record.recordedAt);
+  `).run(receiptHash, recordJson, recordedAt);
 };
 
 const executePolicy = async <T>(
@@ -130,7 +152,8 @@ const executePolicy = async <T>(
   operation: (
     repository: SqliteAccessibilityPreferencesRepository,
     context: PolicyAuthorizedRepositoryExecutionContext
-  ) => RepositoryResult<T>
+  ) => RepositoryResult<T>,
+  recordedAt=NOW
 ): Promise<RepositoryResult<T>> => {
   sequence += 1;
   const correlationId = asCorrelationId(`correlation-accessibility-${sequence}`);
@@ -171,7 +194,7 @@ const executePolicy = async <T>(
         sensitivity: 'personal'
       })
     },
-    receiptSink: { append: (record) => persistReceipt(database, record) },
+    receiptSink: { append: (record) => persistReceipt(database, record, recordedAt) },
     replayStore: { reserve: () => true },
     clock: () => NOW,
     nonceFactory: () => `nonce-accessibility-${sequence}`
@@ -190,7 +213,7 @@ const executePolicy = async <T>(
       transaction: database as unknown as RepositoryTransaction,
       actor: { userId: ACCOUNT_ID, roles: ['family_admin'], personId: PERSON_ID },
       correlationId,
-      occurredAt: asIsoDateTime(NOW),
+      occurredAt: asIsoDateTime(recordedAt),
       policyAuthorization
     }
   ));
@@ -233,6 +256,19 @@ const currentRow = (
 });
 
 describe('33-M accessibility preferences repository policy boundary', () => {
+  it('accepts the authoritative receipt time when request and receipt times differ', async () => {
+    const database = openFixture();
+    const mutation = preferenceMutation(1, { createdAt: asIsoDateTime(RECORDED_AT) });
+    const inserted = await executePolicy(
+      database,
+      'create',
+      ACCOUNT_ID,
+      (repository, context) => repository.insertMutation(context, mutation),
+      RECORDED_AT
+    );
+    expect(inserted).toEqual({ ok: true, value: undefined });
+  });
+
   it('creates, updates and reads only the exact personal account scope', async () => {
     const database = openFixture();
     const first = preferenceMutation(1);

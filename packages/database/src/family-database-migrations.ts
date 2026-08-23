@@ -18181,7 +18181,8 @@ UPDATE database_metadata SET value='REVISION-34-K-WINDOWS-RESILIENCE-UNIVERSAL-U
 const COMMUNICATION_SCHEDULED_MESSAGE_SCHEMA_GENERATION = 'REVISION-34-B-SCHEDULED-MESSAGE-RELEASE' as const;
 const PLATFORM_POLICY_RECEIPT_CLOCK_SKEW_SCHEMA_GENERATION = 'REVISION-PPK-RECEIPT-CLOCK-SKEW-CONTRACT' as const;
 const OBJECT_PERMISSION_FINITE_ALLOW_SCHEMA_GENERATION = 'REVISION-OBJECT-PERMISSION-FINITE-ALLOW-CONTRACT' as const;
-export const FAMILY_DATABASE_SCHEMA_GENERATION = 'REVISION-PRIVACY-RIGHTS-LOCAL-COMPLETION-CONTRACT' as const;
+const PRIVACY_RIGHTS_LOCAL_COMPLETION_SCHEMA_GENERATION = 'REVISION-PRIVACY-RIGHTS-LOCAL-COMPLETION-CONTRACT' as const;
+export const FAMILY_DATABASE_SCHEMA_GENERATION = 'REVISION-AUTHORITATIVE-POLICY-RECEIPT-RECORDED-AT' as const;
 
 const bankingCatalog2026RefreshSql = `
 CREATE TABLE b4_banking_catalog_refresh_guard(
@@ -18316,6 +18317,39 @@ WHEN NEW.id<>OLD.id OR NEW.family_id<>OLD.family_id OR NEW.account_id<>OLD.accou
    AND m.previous_revision=OLD.revision AND m.revision=NEW.revision AND m.state_fingerprint=NEW.state_fingerprint
    AND m.policy_receipt_hash=NEW.policy_receipt_hash AND m.occurred_at=NEW.updated_at)
 BEGIN SELECT RAISE(ABORT,'33-O rights request transition is stale or invalid'); END;
+UPDATE database_metadata SET value='${PRIVACY_RIGHTS_LOCAL_COMPLETION_SCHEMA_GENERATION}',
+  updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
+`;
+
+const policyReceiptTriggerWithAuthoritativeRecordedAt = (
+  sourceSql: string,
+  triggerName: string
+): string => {
+  const marker = `CREATE TRIGGER ${triggerName}`;
+  const start = sourceSql.indexOf(marker);
+  const end = start < 0 ? -1 : sourceSql.indexOf('END;', start);
+  if (start < 0 || end < 0) {
+    throw new Error(`POLICY_RECEIPT_TRIGGER_NOT_FOUND:${triggerName}`);
+  }
+  const definition = sourceSql.slice(start, end + 4);
+  const requestTimestamp = "json_extract(receipt.record_json,'$.request.occurredAt')=NEW.created_at";
+  if (!definition.includes(requestTimestamp)) {
+    throw new Error(`POLICY_RECEIPT_REQUEST_TIMESTAMP_NOT_FOUND:${triggerName}`);
+  }
+  return definition.replace(requestTimestamp, 'receipt.recorded_at=NEW.created_at');
+};
+
+const authoritativePolicyReceiptRecordedAtSql = `${([
+  [familyEmergencyPlanningLedgerSql, 'trg_b5_family_emergency_policy_receipt'],
+  [familyEmergencyPreparednessLedgerSql, 'trg_b5_emergency_preparedness_policy_receipt'],
+  [familyEmergencyAssistanceCardLedgerSql, 'trg_b5_emergency_assistance_policy_receipt'],
+  [familyEmergencyCardPortabilityLedgerSql, 'trg_b5_emergency_card_portability_policy_receipt'],
+  [longTermPortfolioLedgerSql, 'trg_ltp_mutation_policy_receipt'],
+  [accessibilityPreferencesSql, 'trg_accessibility_mutation_policy_receipt'],
+  [governedFormDraftsSql, 'trg_form_draft_mutation_policy_receipt']
+] as const).map(([sourceSql, triggerName]) => (
+  `DROP TRIGGER IF EXISTS ${triggerName};\n${policyReceiptTriggerWithAuthoritativeRecordedAt(sourceSql, triggerName)}`
+)).join('\n')}
 UPDATE database_metadata SET value='${FAMILY_DATABASE_SCHEMA_GENERATION}',
   updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
 `;
@@ -18440,7 +18474,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(117, 'communication_scheduled_message_release', communicationScheduledMessageReleaseSql),
   createMigrationDefinition(118, 'platform_policy_receipt_clock_skew_contract', platformPolicyReceiptClockSkewContractSql),
   createMigrationDefinition(119, 'object_permission_finite_allow_contract', objectPermissionFiniteAllowContractSql),
-  createMigrationDefinition(120, 'privacy_rights_local_completion_contract', privacyRightsLocalCompletionContractSql)
+  createMigrationDefinition(120, 'privacy_rights_local_completion_contract', privacyRightsLocalCompletionContractSql),
+  createMigrationDefinition(121, 'authoritative_policy_receipt_recorded_at', authoritativePolicyReceiptRecordedAtSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {
