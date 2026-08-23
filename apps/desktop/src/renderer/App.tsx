@@ -1062,7 +1062,7 @@ const parseWorkspaceNote=(payloadJson:string):WorkspaceNoteDraft=>{
 interface PendingFormDraftOperation { readonly clientOperationId:string; readonly expectedRevision:number }
 const FORM_DRAFT_STARTUP_RETRY_DELAYS_MS=Object.freeze([250,500,1_000,2_000,4_000]);
 const isTransientFormDraftStartupError=(caught:unknown):boolean=>caught instanceof Error
-  &&/trusted startup|availability (?:gate|boundary)|veri kasası kilitli|data vault is locked|has not completed/iu.test(caught.message);
+  &&/trusted startup|availability (?:gate|boundary)|veri kasası kilitli|data vault is locked|has not completed|IPC isteği süre aşımına uğradı|IPC request timed out|REQUEST_TIMEOUT/iu.test(caught.message);
 const waitForFormDraftStartup=(delayMs:number):Promise<void>=>new Promise(resolve=>globalThis.setTimeout(resolve,delayMs));
 
 export function GovernedFormDraftCenter({visible}:{readonly visible:boolean}){

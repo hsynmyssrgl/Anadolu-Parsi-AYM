@@ -7,6 +7,9 @@ describe('governed form draft trusted-startup retry', () => {
   it('retries only known transient startup failures with a finite bounded schedule', () => {
     expect(app).toContain('const FORM_DRAFT_STARTUP_RETRY_DELAYS_MS=Object.freeze([250,500,1_000,2_000,4_000]);');
     expect(app).toContain('isTransientFormDraftStartupError(caught)');
+    expect(app).toContain('IPC isteği süre aşımına uğradı');
+    expect(app).toContain('IPC request timed out');
+    expect(app).toContain('REQUEST_TIMEOUT');
     expect(app).toContain("if(delayMs===undefined||!isTransientFormDraftStartupError(caught)){setLoadState('error');return;}");
     expect(app).toContain('await waitForFormDraftStartup(delayMs);');
     expect(app).toContain('return()=>{workspaceRefreshGenerationRef.current+=1;};');
