@@ -16,6 +16,17 @@ function notFound(): Response {
   });
 }
 
+function notInstalled(): Response {
+  return new Response(null, {
+    status: 204,
+    headers: { 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' }
+  });
+}
+
+function isMissingFile(error: unknown): boolean {
+  return typeof error === 'object' && error !== null && 'code' in error && error.code === 'ENOENT';
+}
+
 function rangeNotSatisfiable(size: number): Response {
   return new Response(null, {
     status: 416,
@@ -112,7 +123,7 @@ export function respondToOfflineFamilyMapRequest(request: Request, userDataPath:
         'content-range': `bytes ${range.start}-${range.end}/${metadata.size}`
       }
     });
-  } catch {
-    return notFound();
+  } catch (error) {
+    return isMissingFile(error) ? notInstalled() : notFound();
   }
 }

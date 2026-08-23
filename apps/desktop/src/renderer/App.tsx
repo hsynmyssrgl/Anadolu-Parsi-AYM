@@ -1942,6 +1942,7 @@ function SettingsSecurity({auth,accessibility,onAccessibilityChange,onFamilyData
   const [twoFactorCode,setTwoFactorCode]=useState('');
   const [devices,setDevices]=useState<TrustedDeviceView[]>([]);
   const [privacyCenter,setPrivacyCenter]=useState<PrivacyControlCenterView|null>(null);
+  const [privacyCenterLoadError,setPrivacyCenterLoadError]=useState('');
   const [liveLocationDuration,setLiveLocationDuration]=useState(60);
   const [lostDeviceId,setLostDeviceId]=useState('');
   const [lostDevicePassword,setLostDevicePassword]=useState('');
@@ -1961,13 +1962,19 @@ function SettingsSecurity({auth,accessibility,onAccessibilityChange,onFamilyData
   const [importBusy,setImportBusy]=useState(false);
 
   const refreshImports=async()=>{if(window.pardus)setImportBatches(await window.pardus.listFamilyDataImports(20));};
+  const refreshPrivacyCenter=async()=>{
+    if(!window.pardus)return;
+    setPrivacyCenterLoadError('');
+    try{setPrivacyCenter(await window.pardus.getPrivacyControlCenter());}
+    catch{setPrivacyCenter(null);setPrivacyCenterLoadError(language==='tr'?'Gizlilik merkezi güvenli biçimde yüklenemedi. Yerel yetki durumu kapalı tutuldu; yeniden deneyin.':'The privacy center could not be loaded safely. Local authority remains disabled; please retry.');}
+  };
   const changeLanguagePreference=async(preference:UiLanguagePreference)=>{
     if(!window.pardus||languagePreferenceBusy)return;setLanguagePreferenceBusy(true);setMessage('');
     try{await window.pardus.setLanguagePreference(preference);setLanguagePreference(preference);globalThis.location.reload();}
     catch(error){setMessage(error instanceof Error?error.message:(language==='tr'?'Dil tercihi kaydedilemedi.':'The language preference could not be saved.'));setLanguagePreferenceBusy(false);}
   };
   useEffect(()=>{
-    if(window.pardus&&auth.authenticated)void Promise.all([window.pardus.listTrustedDevices().then(setDevices),window.pardus.getPrivacyControlCenter().then(setPrivacyCenter),window.pardus.listSecurityEventReceipts(20).then(setSecurityReceiptHistory),refreshImports()]);
+    if(window.pardus&&auth.authenticated)void Promise.allSettled([window.pardus.listTrustedDevices().then(setDevices),refreshPrivacyCenter(),window.pardus.listSecurityEventReceipts(20).then(setSecurityReceiptHistory),refreshImports()]);
   },[auth.authenticated]);
 
   const validateBackupPassword=(confirmationRequired:boolean):boolean=>{
@@ -2083,7 +2090,8 @@ function SettingsSecurity({auth,accessibility,onAccessibilityChange,onFamilyData
     <section className="privacy-control-center">
       <h3>Gizlilik, süreli rıza ve kayıp cihaz kapatma merkezi</h3>
       <p>Varsayılan kapalıdır. Bu merkez yalnız yerel yetki, oturum, çevrimdışı kira ve rıza kayıtlarını yönetir; uzaktan silme, MDM veya ağ üzerinden teslim garantisi vermez.</p>
-      <div className="button-row"><label>Canlı konum rıza süresi (dakika)<input type="number" min={15} max={43200} value={liveLocationDuration} onChange={e=>setLiveLocationDuration(Number(e.target.value))}/></label><Button tone="primary" disabled={liveLocationDuration<15||liveLocationDuration>43200} onClick={()=>void setLiveLocationConsent('granted')}>Süreli rızayı aç</Button><Button tone="danger" onClick={()=>void setLiveLocationConsent('revoked')}>Derhal iptal et</Button></div>
+      {privacyCenterLoadError&&<AsyncStatePanel state="error" title={language==='tr'?'Gizlilik merkezi yüklenemedi':'Privacy center could not be loaded'} message={privacyCenterLoadError} retryLabel={language==='tr'?'Merkezi yeniden dene':'Retry privacy center'} onRetry={refreshPrivacyCenter}/>}
+      <div className="button-row"><label>Canlı konum rıza süresi (dakika)<input type="number" min={15} max={43200} value={liveLocationDuration} onChange={e=>setLiveLocationDuration(Number(e.target.value))}/></label><Button tone="primary" disabled={!privacyCenter||liveLocationDuration<15||liveLocationDuration>43200} onClick={()=>void setLiveLocationConsent('granted')}>Süreli rızayı aç</Button><Button tone="danger" disabled={!privacyCenter} onClick={()=>void setLiveLocationConsent('revoked')}>Derhal iptal et</Button></div>
       <p><strong>Gösterge:</strong> {privacyCenter?.liveLocationConsent.visibleActiveIndicator?'AKTİF':'KAPALI'} · {privacyCenter?.liveLocationConsent.effectiveStatus??'default_denied'}{privacyCenter?.liveLocationConsent.endsAt?` · ${formatDate(privacyCenter.liveLocationConsent.endsAt,{dateStyle:'short',timeStyle:'short'})} tarihinde otomatik kapanır`:''}</p>
       <h4>Kayıp cihaz yerel yetkilerini kapat</h4>
       <label>Hedef güvenilir cihaz<select value={lostDeviceId} onChange={e=>setLostDeviceId(e.target.value)}><option value="">Cihaz seçin</option>{devices.filter(device=>!device.revokedAt).map(device=><option key={device.id} value={device.id}>{device.displayName}{device.current?' (bu cihaz)':''}</option>)}</select></label>

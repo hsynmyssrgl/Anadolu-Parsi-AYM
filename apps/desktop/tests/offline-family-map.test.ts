@@ -27,6 +27,14 @@ afterEach(() => {
 });
 
 describe('çevrimdışı aile haritası', () => {
+  it('kurulmamış isteğe bağlı paketi konsol 404 hatası üretmeden boş sonuçla bildirir', () => {
+    const root = mkdtempSync(join(tmpdir(), 'parsyuva-offline-map-missing-'));
+    temporaryRoots.push(root);
+    expect(respondToOfflineFamilyMapRequest(new Request(OFFLINE_FAMILY_MAP_URL, {
+      headers: { range: 'bytes=0-127' }
+    }), root)?.status).toBe(204);
+  });
+
   it('yalnız sabit uygulama adresindeki geçerli PMTiles paketine kontrollü aralık erişimi verir', async () => {
     const { root, bytes } = createPackage();
     const response = respondToOfflineFamilyMapRequest(new Request(OFFLINE_FAMILY_MAP_URL, {
