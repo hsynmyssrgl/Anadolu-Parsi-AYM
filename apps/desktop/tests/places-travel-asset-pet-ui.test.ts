@@ -4,7 +4,8 @@ const app=readFileSync('apps/desktop/src/renderer/App.tsx','utf8');const styles=
 describe('33-V places travel asset and pet renderer surface',()=>{
   it('extends the existing Life route once without a competing route',()=>{
     expect(app).toContain("import { PlacesTravelAssetPetPanel } from './PlacesTravelAssetPetPanel';");
-    expect(app).toContain('<PlacesTravelAssetPetPanel people={snapshot.people}/>');
+    expect(app).toContain('<PlacesTravelAssetPetPanel people={people}/>');
+    expect(app).toContain("activeLifeModule==='places-travel'");
     expect(app.match(/<PlacesTravelAssetPetPanel\b/gu)).toHaveLength(1);expect(app).not.toContain("id: 'places-travel'");
   });
   it('covers four areas and all fourteen canonical workflows',()=>{

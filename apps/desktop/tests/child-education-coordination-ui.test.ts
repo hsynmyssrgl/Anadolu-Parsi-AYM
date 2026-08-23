@@ -8,7 +8,8 @@ const styles=readFileSync('apps/desktop/src/renderer/styles.css','utf8');
 describe('33-U child education coordination renderer surface',()=>{
   it('extends the existing Life route once without adding a competing route',()=>{
     expect(app).toContain("import { ChildEducationCoordinationPanel } from './ChildEducationCoordinationPanel';");
-    expect(app).toContain('<ChildEducationCoordinationPanel people={snapshot.people}/>');
+    expect(app).toContain('<ChildEducationCoordinationPanel people={people}/>');
+    expect(app).toContain("activeLifeModule==='child-education'");
     expect(app.match(/<ChildEducationCoordinationPanel\b/gu)).toHaveLength(1);
     expect(app).not.toContain("id: 'child-education'");
   });

@@ -8,7 +8,8 @@ const styles = readFileSync('apps/desktop/src/renderer/styles.css','utf8');
 describe('33-T household operations renderer surface',()=>{
   it('extends the existing Life route exactly once without adding a competing menu route',()=>{
     expect(app).toContain("import { HouseholdOperationsPanel } from './HouseholdOperationsPanel';");
-    expect(app).toContain('<HouseholdOperationsPanel people={snapshot.people}/>');
+    expect(app).toContain('<HouseholdOperationsPanel people={people}/>');
+    expect(app).toContain("activeLifeModule==='household'");
     expect(app.match(/<HouseholdOperationsPanel\b/gu)).toHaveLength(1);
     expect(app).not.toContain("id: 'household-operations'");
   });

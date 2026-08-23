@@ -8,7 +8,8 @@ const styles=readFileSync('apps/desktop/src/renderer/styles.css','utf8');
 describe('34-F family meeting renderer surface',()=>{
   it('extends the existing life center exactly once without adding a route',()=>{
     expect(app).toContain("import { FamilyMeetingPanel } from './FamilyMeetingPanel';");
-    expect(app.match(/<FamilyMeetingPanel people=\{snapshot\.people\}\/>/gu)).toHaveLength(1);
+    expect(app.match(/<FamilyMeetingPanel people=\{people\}\/>/gu)).toHaveLength(1);
+    expect(app).toContain("activeLifeModule==='family-meeting'");
     expect(app).not.toContain("id: 'family-meeting'");
   });
 

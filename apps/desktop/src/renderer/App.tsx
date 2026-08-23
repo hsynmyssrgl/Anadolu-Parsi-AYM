@@ -2765,6 +2765,41 @@ export function LifeCenterScreen({people,records,onCreate}:{people:FamilyMemberV
   return localizeOperationsCenterNode(panel,language);
 }
 
+type LifeCenterModuleId='family-meeting'|'managed-life'|'household'|'smart-home'|'child-education'|'places-travel';
+
+export function LifeCenterModules({people,workspace,onRecord}:{
+  people:FamilyMemberView[];
+  workspace:ManagedLifeWorkspaceView|undefined;
+  onRecord:(input:RecordManagedLifeItemInput)=>Promise<void>;
+}){
+  const {language}=useLocalization();
+  const [activeLifeModule,setActiveLifeModule]=useState<LifeCenterModuleId>();
+  const modules:ReadonlyArray<{readonly id:LifeCenterModuleId;readonly label:string}>=[
+    {id:'family-meeting',label:language==='tr'?'Aile toplantısı':'Family meeting'},
+    {id:'managed-life',label:language==='tr'?'Yönetilen yaşam':'Managed life'},
+    {id:'household',label:language==='tr'?'Hane operasyonları':'Household operations'},
+    {id:'smart-home',label:language==='tr'?'Akıllı ev ve enerji':'Smart home and energy'},
+    {id:'child-education',label:language==='tr'?'Çocuk ve eğitim':'Child and education'},
+    {id:'places-travel',label:language==='tr'?'Yerler ve seyahat':'Places and travel'}
+  ];
+  const selectLifeModule=(id:LifeCenterModuleId)=>setActiveLifeModule(current=>current===id?undefined:id);
+  return <section className="life-center-modules" aria-label={language==='tr'?'Yaşam Merkezi alt modülleri':'Life Center submodules'}>
+    <Surface className="system-module-index life-center-module-index">
+      <SectionHeader eyebrow={language==='tr'?'İsteğe bağlı yükleme':'On-demand loading'} title={language==='tr'?'Yaşam Merkezi modülleri':'Life Center modules'}/>
+      <p>{language==='tr'?'Modüller kapalı başlar; yalnız seçtiğiniz bölüm güvenli biçimde yüklenir.':'Modules start closed; only the section you select is loaded securely.'}</p>
+      <div className="system-module-grid life-center-module-grid">{modules.map(module=><Button key={module.id}
+        aria-expanded={activeLifeModule===module.id} aria-controls={`life-center-module-${module.id}`}
+        onClick={()=>selectLifeModule(module.id)}>{module.label}<span aria-hidden="true">{activeLifeModule===module.id?'⌃':'⌄'}</span></Button>)}</div>
+    </Surface>
+    {activeLifeModule==='family-meeting'&&<div id="life-center-module-family-meeting"><FamilyMeetingPanel people={people}/></div>}
+    {activeLifeModule==='managed-life'&&<div id="life-center-module-managed-life"><ManagedLifePanel people={people} workspace={workspace} onRecord={onRecord}/></div>}
+    {activeLifeModule==='household'&&<div id="life-center-module-household"><HouseholdOperationsPanel people={people}/></div>}
+    {activeLifeModule==='smart-home'&&<div id="life-center-module-smart-home"><SmartHomeEnergyPanel/></div>}
+    {activeLifeModule==='child-education'&&<div id="life-center-module-child-education"><ChildEducationCoordinationPanel people={people}/></div>}
+    {activeLifeModule==='places-travel'&&<div id="life-center-module-places-travel"><PlacesTravelAssetPetPanel people={people}/></div>}
+  </section>;
+}
+
 export function AutomationScreen({rules,onCreate,onToggle}:{rules:AutomationRuleView[];onCreate:(input:CreateAutomationRuleInput)=>Promise<void>;onToggle:(id:string,enabled:boolean)=>Promise<void>}){
   const {language}=useLocalization();
   const [title,setTitle]=useState(language==='tr'?'Yaklaşan görev hatırlatması':'Upcoming task reminder'); const [sourceType,setSourceType]=useState<AutomationRuleView['sourceType']>('life_record'); const [daysBefore,setDaysBefore]=useState(3); const [message,setMessage]=useState(''); const [messageTone,setMessageTone]=useState<'success'|'danger'>('success');
@@ -3420,7 +3455,7 @@ export function App() {
   else if (active === 'important-days') screen = <ImportantDaysScreen snapshot={snapshot} archivedEvents={archivedEvents} onAdd={openImportantDayModal} onEdit={setEditingEvent} onArchive={(eventId)=>setFamilyEventArchived(eventId,true)} onRestore={(eventId)=>setFamilyEventArchived(eventId,false)} onOpenArchive={openEventArchive} />;
   else if (active === 'finance') screen = <FinanceScreen people={snapshot.people} records={financeRecords} valuations={financeValuations} institutions={bankInstitutions} bankAccounts={bankAccounts} paymentCards={paymentCards} loanAccounts={loanAccounts} planningWorkspace={financePlanningWorkspace} longTermPortfolioWorkspace={longTermPortfolioWorkspace} onCreate={createFinance} onCreateValuation={createFinanceValuation} onValidateIban={validateIban} onCreateBankAccount={createBankAccount} onCreatePaymentCard={createPaymentCard} onCreateLoanAccount={createLoanAccount} onRecordLoanPayment={recordLoanPayment} onRecordPlanning={recordFinancePlanningItem} onRecordLongTermPortfolio={recordLongTermPortfolioItem} onPlanningWorkspaceChange={setFinancePlanningWorkspace} />;
   else if (active === 'health') screen = <><HealthScreen people={snapshot.people} records={healthRecords} medications={medicationPlans} history={familyHealthHistory} onCreate={createHealth} onCreateMedication={createMedicationPlan} onCreateHistory={createFamilyHistory} /><section className="workspace-grid"><HealthCareCoordinationPanel people={snapshot.people}/></section></>;
-  else if (active === 'life-center') screen = <><LifeCenterScreen people={snapshot.people} records={lifeRecords} onCreate={createLifeRecord} /><FamilyMeetingPanel people={snapshot.people}/><section className="workspace-grid"><ManagedLifePanel people={snapshot.people} workspace={managedLifeWorkspace} onRecord={recordManagedLifeItem}/><HouseholdOperationsPanel people={snapshot.people}/><SmartHomeEnergyPanel/><ChildEducationCoordinationPanel people={snapshot.people}/><PlacesTravelAssetPetPanel people={snapshot.people}/></section></>;
+  else if (active === 'life-center') screen = <><LifeCenterScreen people={snapshot.people} records={lifeRecords} onCreate={createLifeRecord}/><LifeCenterModules people={snapshot.people} workspace={managedLifeWorkspace} onRecord={recordManagedLifeItem}/></>;
   else if (active === 'automation') screen = <AutomationScreen rules={automationRules} onCreate={createAutomationRule} onToggle={toggleAutomationRule} />;
   else if (active === 'reports') screen = <ReportsScreen report={reportSummary} />;
   else if (active === 'invitations') screen = <InvitationsScreen snapshot={snapshot}/>;

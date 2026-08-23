@@ -10,7 +10,7 @@ describe('33-Y smart home and energy renderer surface', () => {
     expect(app).toContain("import { SmartHomeEnergyPanel } from './SmartHomeEnergyPanel';");
     expect(app.match(/<SmartHomeEnergyPanel\/>/gu)).toHaveLength(1);
     expect(app).not.toContain("id: 'smart-home-energy'");
-    expect(app.indexOf('<SmartHomeEnergyPanel/>')).toBeGreaterThan(app.indexOf("active === 'life-center'"));
+    expect(app).toContain("activeLifeModule==='smart-home'");
   });
 
   it('uses only the four safe bridge methods and preserves retry identity', () => {
