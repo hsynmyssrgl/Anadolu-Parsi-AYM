@@ -22,6 +22,14 @@
 !define MUI_FONT "Segoe UI"
 !define MUI_FONTSIZE 10
 
+!ifndef BUILD_UNINSTALLER
+  ; Keep cancellation explicit and stop the narration only after the user
+  ; confirms leaving setup. Choosing No returns to the current welcome card.
+  !define MUI_ABORTWARNING
+  !define MUI_ABORTWARNING_CANCEL_DEFAULT
+  !define MUI_CUSTOMFUNCTION_ABORT AymStopInstallerNarration
+!endif
+
 ; English is the safe fallback. NSIS selects Turkish only for a Turkish Windows
 ; locale; all other system languages use the first configured installer language.
 LangString AymInstallFilesDone ${AYM_LANG_ENGLISH} "Application files were placed securely"

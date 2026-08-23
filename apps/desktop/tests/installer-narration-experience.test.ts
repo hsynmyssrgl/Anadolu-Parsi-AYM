@@ -26,6 +26,8 @@ describe('installer progress, narration and Silver help experience', () => {
     for (const marker of [
       '!macro customWelcomePage','!macro customPageAfterChangeDir',
       '!define MUI_FONT "Segoe UI"','!define MUI_FONTSIZE 10',
+      '!define MUI_ABORTWARNING','!define MUI_ABORTWARNING_CANCEL_DEFAULT',
+      '!define MUI_CUSTOMFUNCTION_ABORT AymStopInstallerNarration',
       '!define PPT_INSTALLER_RELEASE_CHANNEL "Bronze"',
       '!define PPT_INSTALLER_CHANNEL_COLOR "A5672F"',
       '!define PPT_INSTALLER_CHANNEL_BITMAP "installer-bronze-sidebar.bmp"',
