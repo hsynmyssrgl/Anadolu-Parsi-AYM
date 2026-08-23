@@ -127,11 +127,10 @@ export function FamilyMeetingPanel({people}:FamilyMeetingPanelProps){
     const existing=pending.current.get(key);
     const operation=existing&&existing.expectedRevision===expectedRevision&&existing.requestFingerprint===requestFingerprint
       ?existing:{clientOperationId:newOperationId(),expectedRevision,requestFingerprint};
-    pending.current.set(key,operation);setBusy(key);setOperationError('');setNotice('');let committed=false;
-    try{await run({clientOperationId:operation.clientOperationId,expectedRevision:operation.expectedRevision});pending.current.delete(key);committed=true;setNotice(success);}
+    pending.current.set(key,operation);setBusy(key);setOperationError('');setNotice('');
+    try{await run({clientOperationId:operation.clientOperationId,expectedRevision:operation.expectedRevision});pending.current.delete(key);setNotice(success);await refresh(false);}
     catch(caught){setOperationError(`${errorText(caught,text('Toplantı işlemi tamamlanamadı.','The meeting operation could not be completed.'))} ${text('Aynı işlem kimliği ve özgün revizyonla yeniden deneyebilirsiniz.','You can retry with the same operation identifier and original revision.')}`);}
     finally{setBusy('');}
-    if(committed)await refresh(false);
   };
 
   const create=async()=>{const bridge=window.pardus;if(!bridge)return;const payload={title:createTitle,recurrenceKind:createRecurrence,
@@ -231,7 +230,7 @@ export function FamilyMeetingPanel({people}:FamilyMeetingPanelProps){
           <label>{text('Kişi','Person')}<select value={participantId} onChange={(event)=>setParticipantId(event.target.value)}>{people.map((person)=><option key={person.id} value={person.id}>{person.displayName}</option>)}</select></label>
           <label>{text('Rol','Role')}<select value={participantRole} onChange={(event)=>setParticipantRole(event.target.value as Role)}>{Object.entries(roleLabels).map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></label>
           <label>{text('Katılım','Attendance')}<select value={participantAttendance} onChange={(event)=>setParticipantAttendance(event.target.value as Attendance)}>{Object.entries(attendanceLabels).map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></label>
-          <Button type="submit" disabled={Boolean(busy)||!participantId}>{text('Katılımcıyı kaydet','Save participant')}</Button></form>
+          <Button type="submit" disabled={Boolean(busy)||!participantId||selected.state==='completed'||selected.state==='cancelled'}>{text('Katılımcıyı kaydet','Save participant')}</Button></form>
           <section><h3>{text('Katılımcılar','Participants')}</h3>{selected.participants.map((person)=><div className="family-meeting-row" key={person.personId}><strong>{people.find((item)=>item.id===person.personId)?.displayName??person.personId}</strong><span>{person.roles.map((role)=>roleLabels[role]).join(', ')} · {attendanceLabels[person.attendance]}</span></div>)}</section></div>
 
         <div className="family-meeting-columns"><form onSubmit={(event)=>{event.preventDefault();void saveAgenda();}}><h3>{text('Gündem ve ön okuma','Agenda and pre-reading')}</h3>

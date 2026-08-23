@@ -21,6 +21,9 @@ describe('34-F family meeting renderer surface',()=>{
     expect(panel).toContain('pending.current.delete(key)');
     expect(panel).toContain('run({clientOperationId:operation.clientOperationId,expectedRevision:operation.expectedRevision})');
     expect(panel).not.toContain('await run(operation)');
+    expect(panel).toContain('setNotice(success);await refresh(false);');
+    expect(panel).not.toContain('if(committed)await refresh(false)');
+    expect(panel).toContain("!participantId||selected.state==='completed'||selected.state==='cancelled'");
     expect(panel).toContain('Aynı işlem kimliği ve özgün revizyonla yeniden deneyebilirsiniz.');
     expect(panel).toContain("globalThis.crypto.subtle.digest('SHA-256',bytes)");
   });
