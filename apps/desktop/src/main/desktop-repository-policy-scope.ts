@@ -75,7 +75,14 @@ const AUTHORIZED_INTERNAL_CHILD_CORRELATION_SUFFIXES = new Set([
   'timeline-location-collection',
   'timeline-archived-location-collection',
   'timeline-location-exact',
-  'life-report'
+  'life-report',
+  'life-runs'
+]);
+
+const AUTHORIZED_INTERNAL_CHILD_CORRELATION_PATTERNS = Object.freeze([
+  /^life-source:[A-Za-z0-9][A-Za-z0-9._@-]{0,255}$/u,
+  /^life-source-revalidate:[A-Za-z0-9][A-Za-z0-9._@-]{0,255}$/u,
+  /^life-task:[A-Za-z0-9][A-Za-z0-9._@-]{0,255}$/u
 ]);
 
 const isRegisteredAuthorizedChildCorrelation = (
@@ -85,9 +92,9 @@ const isRegisteredAuthorizedChildCorrelation = (
   if (scope.kind !== 'AUTHORIZED') return false;
   const prefix = `${scope.correlationId}:`;
   if (!correlationId.startsWith(prefix)) return false;
-  return AUTHORIZED_INTERNAL_CHILD_CORRELATION_SUFFIXES.has(
-    correlationId.slice(prefix.length)
-  );
+  const suffix = correlationId.slice(prefix.length);
+  return AUTHORIZED_INTERNAL_CHILD_CORRELATION_SUFFIXES.has(suffix)
+    || AUTHORIZED_INTERNAL_CHILD_CORRELATION_PATTERNS.some((pattern) => pattern.test(suffix));
 };
 
 const hasPolicyAuthorization = (

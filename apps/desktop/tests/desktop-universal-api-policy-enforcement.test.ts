@@ -456,7 +456,11 @@ describe('31-U universal Desktop API policy enforcement', () => {
       'timeline-location-collection',
       'timeline-archived-location-collection',
       'timeline-location-exact',
-      'life-report'
+      'life-report',
+      'life-runs',
+      'life-source:rule-1',
+      'life-source-revalidate:rule-1',
+      'life-task:task-1'
     ];
 
     await expect(enforcement.execute({
@@ -480,6 +484,14 @@ describe('31-U universal Desktop API policy enforcement', () => {
       correlationId,
       operation: () => repository.probe(
         repositoryContext(asCorrelationId(`${correlationId}:timeline-location-collection:nested`))
+      )
+    })).rejects.toMatchObject({ code: 'TRANSACTION_CONTEXT_MISMATCH' });
+
+    await expect(enforcement.execute({
+      channel: 'dashboard:getOverview',
+      correlationId,
+      operation: () => repository.probe(
+        repositoryContext(asCorrelationId(`${correlationId}:life-source:rule-1:nested`))
       )
     })).rejects.toMatchObject({ code: 'TRANSACTION_CONTEXT_MISMATCH' });
   });
