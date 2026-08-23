@@ -71,7 +71,8 @@ if(external){
   let localProtectionResult;try{localProtectionResult=JSON.parse(localProtection.stdout.trim());}catch{localProtectionResult=null;}
   check(localProtection.status===0&&localProtectionResult?.status==='EXTERNAL_RECEIPT_VERIFIED'&&localProtectionResult?.externalLibraryReceiptStatus==='PASS'&&localProtectionResult?.officialCompletionClaimed===true,'current authoritative source has verified local protection and bound external receipt');
   const protection=nodeRun(['scripts/protect-authoritative-source-external.mjs','verify']);
-  check(protection.status===0&&protection.stdout.includes('"status":"PASS"')&&protection.stdout.includes('"requirement":"GOV-005"'),'current authoritative source has verified external D protection');
+  let protectionResult;try{protectionResult=JSON.parse(protection.stdout.trim());}catch{protectionResult=null;}
+  check(protection.status===0&&protectionResult?.status==='PASS'&&protectionResult?.requirement==='PR-233'&&protectionResult?.governanceRequirement==='GOV-005'&&protectionResult?.decision==='DEC-267','current authoritative source has verified external D protection');
 }
 console.log(`33-L completion verification: ${failures.length===0?'PASS':'FAIL'} (${checks.length-failures.length}/${checks.length} checks${external?', external':''}).`);
 if(failures.length){console.error(failures.join('\n'));process.exitCode=1;}

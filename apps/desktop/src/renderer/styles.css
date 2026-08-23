@@ -2231,6 +2231,26 @@ body:has(.app-shell[data-high-contrast="true"]) :is(.modal-backdrop,.narrated-he
 :where(.app-shell #main-content button,.modal button){border-radius:var(--radius-action)}
 .app-shell :is(.panel,.surface,.metric-card,.onboarding-card,.notes-card,.status-message){border-radius:var(--radius-surface)}
 .modal{border-radius:var(--radius-dialog)}
+.app-shell .notes-card,
+.first-run-security-form .notes-card{
+  display:grid;
+  gap:8px;
+  min-width:0;
+  padding:16px;
+  border:1px solid var(--release-border);
+  background:color-mix(in srgb,var(--release-panel-secondary) 86%,var(--release-panel));
+  color:var(--release-text);
+  font-size:var(--font-size-body);
+  line-height:var(--line-height-body);
+}
+.app-shell .notes-card>*,
+.first-run-security-form .notes-card>*{min-width:0;margin-block:0}
+.app-shell .notes-card>strong,
+.first-run-security-form .notes-card>strong{display:block;color:var(--release-text);font-size:var(--font-size-body);line-height:1.45}
+.app-shell .notes-card>:is(small,span,p),
+.first-run-security-form .notes-card>:is(small,span,p){display:block;color:var(--release-muted);font-size:var(--font-size-subheadline);line-height:1.65;white-space:normal;overflow-wrap:anywhere}
+.first-run-security-form .notes-card>small{padding:8px 10px;border:1px solid color-mix(in srgb,var(--release-border) 78%,transparent);border-radius:var(--radius-control);background:var(--release-panel);color:var(--release-text);font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;user-select:text}
+.first-run-security-form .notes-card>.button{width:max-content;max-width:100%;margin-top:2px}
 @media(max-width:720px){
   .first-run-security-shell{padding:16px}
   .first-run-security-shell .first-run-card{padding:24px 20px;border-radius:var(--radius-dialog)}

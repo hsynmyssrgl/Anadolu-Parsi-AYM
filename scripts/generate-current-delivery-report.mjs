@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
-import { DERIVED_DOCUMENT_INDEX_PATHS } from './lib/governance-utils.mjs';
+import { DERIVED_DOCUMENT_INDEX_PATHS, resolveCurrentDeliveryOutputBoundary } from './lib/governance-utils.mjs';
 
 const sourceRoot = resolve(process.cwd());
 const aymRoot = resolve(sourceRoot, '..', '..');
@@ -31,7 +31,7 @@ runRequired('scripts/require-current-governed-preflight.mjs');
 verifyProtection('scripts/protect-authoritative-source.mjs');
 verifyProtection('scripts/protect-authoritative-source-external.mjs');
 
-const [contract, release, scope, decisions, audit, capacity, receipt, manifestSummary, completion30Z, completion31A, completion31B, completion31C, completion31D, completion31E, completion33D, completion33E, completion33F, completion33G, completion33H, completion33I, completion33J, libraryReceipt33J] = await Promise.all([
+const [contract, release, scope, decisions, audit, capacity, receipt, manifestSummary, completion30Z, completion31A, completion31B, completion31C, completion31D, completion31E, completion33D, completion33E, completion33F, completion33G, completion33H, completion33I, completion33J, libraryReceipt33J, repositoryMetadata] = await Promise.all([
   readJson(resolve(sourceRoot, 'config', 'delivery-report-contract.json')),
   readJson(resolve(sourceRoot, 'config', 'release-ledger.json')),
   readJson(resolve(sourceRoot, 'config', 'accepted-scope-registry.json')),
@@ -53,8 +53,11 @@ const [contract, release, scope, decisions, audit, capacity, receipt, manifestSu
   readJson(resolve(sourceRoot, 'artifacts', 'checkpoints', '33-H_COMPLETION_RECORD.json')),
   readJson(resolve(sourceRoot, 'artifacts', 'checkpoints', '33-I_COMPLETION_RECORD.json')),
   readJson(resolve(sourceRoot, 'artifacts', 'checkpoints', '33-J_COMPLETION_RECORD.json')),
-  readJson(resolve(sourceRoot, 'artifacts', 'checkpoints', '33-J_LIBRARY_RECEIPT.json'))
+  readJson(resolve(sourceRoot, 'artifacts', 'checkpoints', '33-J_LIBRARY_RECEIPT.json')),
+  readJson(resolve(sourceRoot, 'repository-metadata.json'))
 ]);
+
+const currentDeliveryBoundary = resolveCurrentDeliveryOutputBoundary(release.current, repositoryMetadata);
 
 if (release.current.status !== 'IN_PROGRESS') throw new Error('Current release must remain IN_PROGRESS.');
 if (receipt.externalLibraryReceiptStatus !== 'PASS' || receipt.officialCompletionClaimed !== true
@@ -67,7 +70,8 @@ const expectedDerivedDeliveryExclusions = [
   'artifacts/reports/DELIVERY_STATUS_04.08.2026.29.json',
   'artifacts/validation/bronze-governance-reality-matrix.json',
   'artifacts/validation/delivery-report-contract-v2.json',
-  ...DERIVED_DOCUMENT_INDEX_PATHS
+  ...DERIVED_DOCUMENT_INDEX_PATHS,
+  ...currentDeliveryBoundary.excludedRelativePaths
 ].sort();
 if (JSON.stringify(receipt.excludedDerivedDeliveryFiles) !== JSON.stringify(expectedDerivedDeliveryExclusions)) {
   throw new Error('Current-source protection does not exclude only the exact self-referential delivery outputs.');
@@ -386,7 +390,7 @@ const report = {
   id: `DELIVERY-STATUS-${release.current.version}`,
   generatedAt: new Date().toISOString(),
   visibleRelease: release.current.visibleRelease,
-  userVisibleDeliveryFileName: `ParsYuva_Aile_Yasam_Merkezi_${release.current.visibleRelease.replaceAll(' ', '_')}.json`,
+  userVisibleDeliveryFileName: currentDeliveryBoundary.userVisibleFileName,
   releaseStatus: 'IN_PROGRESS',
   workCompleted: [
     'DEC-152 single authoritative source, local receipt and incremental governance binding',
@@ -577,7 +581,9 @@ const report = {
     'artifacts/checkpoints/31-D_LIBRARY_RECEIPT.json',
     'artifacts/checkpoints/31-E_LIBRARY_RECEIPT.json',
     'artifacts/deliveries/Anadolu_Parsi_Aile_Yasam_Merkezi_Bronze_04.08.2026.29.json',
-    'artifacts/reports/DELIVERY_STATUS_04.08.2026.29.json'
+    'artifacts/reports/DELIVERY_STATUS_04.08.2026.29.json',
+    currentDeliveryBoundary.userVisibleRelativePath,
+    currentDeliveryBoundary.reportRelativePath
   ],
   validationResults,
   openErrorsAndRisks: [
@@ -642,7 +648,7 @@ const report = {
 for (const field of contract.requiredFields) {
   if (!Object.hasOwn(report, field)) throw new Error(`Generated report missing contract field: ${field}`);
 }
-const target = resolve(sourceRoot, 'artifacts', 'reports', `DELIVERY_STATUS_${release.current.version}.json`);
+const target = resolve(sourceRoot, currentDeliveryBoundary.reportRelativePath);
 await mkdir(dirname(target), { recursive: true });
 const content = `${JSON.stringify(report, null, 2)}\n`;
 await writeFile(target, content, 'utf8');
@@ -650,7 +656,7 @@ if (await readFile(target, 'utf8') !== content) throw new Error('Delivery report
 if (/\b(?:RC2?|MVP|Build)\b/iu.test(report.userVisibleDeliveryFileName)) {
   throw new Error(`User-visible delivery filename leaks an internal release token: ${report.userVisibleDeliveryFileName}`);
 }
-const userVisibleTarget = resolve(sourceRoot, 'artifacts', 'deliveries', report.userVisibleDeliveryFileName);
+const userVisibleTarget = resolve(sourceRoot, currentDeliveryBoundary.userVisibleRelativePath);
 await mkdir(dirname(userVisibleTarget), { recursive: true });
 await writeFile(userVisibleTarget, content, 'utf8');
 if (await readFile(userVisibleTarget, 'utf8') !== content) throw new Error('User-visible delivery report readback mismatch.');
@@ -664,8 +670,8 @@ const localDeliveryRoot = resolve(report.deliveryBackupRoots.local);
 const externalDeliveryRoot = resolve(report.deliveryBackupRoots.external);
 const immutableFolder = reportSha256;
 const reportFiles = [
-  `DELIVERY_STATUS_${release.current.version}.json`,
-  report.userVisibleDeliveryFileName,
+  currentDeliveryBoundary.reportFileName,
+  currentDeliveryBoundary.userVisibleFileName,
   'artifacts/manifests/PROJECT_ARTIFACT_INDEX.json',
   'artifacts/manifests/PROJECT_ARTIFACT_INDEX.csv',
   'artifacts/manifests/PROJECT_ARTIFACT_INDEX.md',
@@ -678,7 +684,7 @@ const reportFiles = [
 ];
 for (const root of [localDeliveryRoot, externalDeliveryRoot]) {
   for (const name of reportFiles) {
-    const bytes = name === `DELIVERY_STATUS_${release.current.version}.json` || name === report.userVisibleDeliveryFileName
+    const bytes = name === currentDeliveryBoundary.reportFileName || name === currentDeliveryBoundary.userVisibleFileName
       ? contentBytes
       : await readFile(resolve(sourceRoot, name));
     const digest = sha256(bytes);
@@ -696,7 +702,7 @@ const backupReceipt = {
   reportSha256,
   immutableFolder,
   files: await Promise.all(reportFiles.map(async (path) => {
-    const bytes = path === `DELIVERY_STATUS_${release.current.version}.json` || path === report.userVisibleDeliveryFileName
+    const bytes = path === currentDeliveryBoundary.reportFileName || path === currentDeliveryBoundary.userVisibleFileName
       ? contentBytes
       : await readFile(resolve(sourceRoot, path));
     return { path, sizeBytes: bytes.length, sha256: sha256(bytes) };

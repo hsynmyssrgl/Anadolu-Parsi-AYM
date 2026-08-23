@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
 import { copyFile, mkdir, readFile, readdir, stat, writeFile } from 'node:fs/promises';
 import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 
@@ -48,7 +49,22 @@ const listFiles = async (directory) => {
   return files.sort();
 };
 
+const verifyLiveLocalSource = () => {
+  const result = spawnSync(process.execPath, ['scripts/protect-authoritative-source.mjs', 'verify'], {
+    cwd: sourceRoot,
+    encoding: 'utf8',
+    windowsHide: true
+  });
+  assert(result.status === 0, `Live local source protection failed: ${result.stderr || result.stdout}`);
+  let evidence;
+  try { evidence = JSON.parse(result.stdout.trim()); }
+  catch { throw new Error('Live local source protection returned invalid evidence.'); }
+  assert(typeof evidence.treeSha256 === 'string' && /^[0-9a-f]{64}$/u.test(evidence.treeSha256), 'Live local source protection tree identity is invalid.');
+  return evidence;
+};
+
 const localProtection = async () => {
+  const liveEvidence = verifyLiveLocalSource();
   const latestPath = resolve(localReceiptRoot, 'LATEST.json');
   const protection = await readJson(latestPath);
   assert(protection.source === '06_KOD/app' && protection.localReceiptStatus === 'LOCAL_RECEIPT_VERIFIED', 'Local source protection is not verified');
@@ -65,6 +81,7 @@ const localProtection = async () => {
   const immutableProtectionPath = resolve(localReceiptRoot, `PROTECTION_${protection.treeSha256}.json`);
   const immutableProtection = await readJson(immutableProtectionPath);
   assert(immutableProtection.treeSha256 === protection.treeSha256, 'Immutable local protection identity mismatch');
+  assert(liveEvidence.treeSha256 === protection.treeSha256, 'Live local source tree does not match the selected protection receipt');
   return { latestPath, protection, receiptPath, receiptSidecar, backupPath, backupSidecar, immutableProtectionPath };
 };
 
@@ -133,9 +150,11 @@ const createExternal = async () => {
       externalPath: targetRoot, finalFileCount: names.length
     }
   };
+  const finalLiveEvidence = verifyLiveLocalSource();
+  assert(finalLiveEvidence.treeSha256 === protection.treeSha256, 'Live local source changed before external protection promotion');
   await writeBytes(local.latestPath, jsonBytes(completedProtection));
   await writeBytes(resolve(externalReceiptRoot, 'LATEST.json'), jsonBytes(receipt));
-  console.log(JSON.stringify({ status: 'PASS', requirement: 'PR-233', treeSha256: protection.treeSha256, externalPath: targetRoot, files: names.length }));
+  console.log(JSON.stringify({ status: 'PASS', requirement: 'PR-233', governanceRequirement: 'GOV-005', decision: 'DEC-267', treeSha256: protection.treeSha256, externalPath: targetRoot, files: names.length }));
 };
 
 const verifyExternal = async () => {
@@ -162,7 +181,9 @@ const verifyExternal = async () => {
     const [left, right] = await Promise.all([readFile(path), readFile(external)]);
     assert(left.length === right.length && sha256(left) === sha256(right), `D: supplemental readback mismatch: ${basename(path)}`);
   }
-  console.log(JSON.stringify({ status: 'PASS', requirement: 'PR-233', treeSha256: protection.treeSha256, externalPath: protection.externalReceipt.externalPath, files: names.length }));
+  const finalLiveEvidence = verifyLiveLocalSource();
+  assert(finalLiveEvidence.treeSha256 === protection.treeSha256, 'Live local source changed during external protection verification');
+  console.log(JSON.stringify({ status: 'PASS', requirement: 'PR-233', governanceRequirement: 'GOV-005', decision: 'DEC-267', treeSha256: protection.treeSha256, externalPath: protection.externalReceipt.externalPath, files: names.length }));
 };
 
 if (mode === 'create') await createExternal();

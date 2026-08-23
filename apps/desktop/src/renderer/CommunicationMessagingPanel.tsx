@@ -184,7 +184,7 @@ export function CommunicationMessagingPanel(){
         {searchResults&&<button type="button" onClick={()=>setSearchResults(undefined)}>{text('Filtreyi temizle','Clear filter')}</button>}
         <label>{text('Presence','Presence')}<select value={presenceStatus} onChange={event=>setPresenceStatus(event.target.value as CommunicationPresenceStatus)}>
           {Object.entries(presenceLabels).map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></label>
-        <button type="button" disabled={Boolean(busy)} onClick={()=>void setPresence()}>{text('Presence kararını kaydet','Save presence decision')}</button>
+        <button type="button" disabled={Boolean(busy)} onClick={()=>void setPresence()}>{text('Çevrim içi durum kararını kaydet','Save presence decision')}</button>
         <label>{text('Saklama modu','Retention mode')}<select value={retentionMode} onChange={event=>setRetentionMode(event.target.value as CommunicationMessageRetentionMode)}>
           <option value="permanent">{text('Kalıcı','Permanent')}</option><option value="duration">{text('Süreli','Duration')}</option><option value="auto_delete">{text('Otomatik mantıksal sil','Automatic logical deletion')}</option>
           <option value="legal_hold">{text('Hukuki koruma etiketi','Legal-hold label')}</option></select></label>

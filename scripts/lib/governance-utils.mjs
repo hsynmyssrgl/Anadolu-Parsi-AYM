@@ -26,6 +26,33 @@ export const DERIVED_DOCUMENT_INDEX_PATHS = new Set([
   'artifacts/validation/operation-rule-check.json'
 ]);
 
+export const resolveCurrentDeliveryOutputBoundary = (currentRelease, repositoryMetadata) => {
+  const channel = String(currentRelease?.channel ?? '').trim();
+  const version = String(currentRelease?.version ?? '').trim();
+  const visibleRelease = String(currentRelease?.visibleRelease ?? '').trim();
+  if (!new Set(['Bronze', 'Silver', 'Gold']).has(channel)) throw new Error(`Unsafe current release channel: ${channel}`);
+  if (!/^\d{2}\.\d{2}\.\d{4}\.\d+$/u.test(version)) throw new Error(`Unsafe current release version: ${version}`);
+  if (visibleRelease !== `${channel} ${version}`) throw new Error('Current release visible identity mismatch.');
+  const identityMatches = repositoryMetadata?.visibleRelease === visibleRelease
+    && repositoryMetadata?.repositoryVersion === version
+    && repositoryMetadata?.applicationVersion === version
+    && repositoryMetadata?.packageVersion === currentRelease?.packageVersion
+    && repositoryMetadata?.edition === channel
+    && repositoryMetadata?.releaseId === currentRelease?.releaseId;
+  if (!identityMatches) throw new Error('Release ledger and repository metadata identity mismatch.');
+  const reportFileName = `DELIVERY_STATUS_${version}.json`;
+  const userVisibleFileName = `ParsYuva_Aile_Yasam_Merkezi_${visibleRelease.replaceAll(' ', '_')}.json`;
+  const reportRelativePath = `artifacts/reports/${reportFileName}`;
+  const userVisibleRelativePath = `artifacts/deliveries/${userVisibleFileName}`;
+  return Object.freeze({
+    reportFileName,
+    userVisibleFileName,
+    reportRelativePath,
+    userVisibleRelativePath,
+    excludedRelativePaths: Object.freeze([reportRelativePath, userVisibleRelativePath].sort())
+  });
+};
+
 export const DOCUMENT_EXTENSIONS = new Set(['.md','.pdf','.docx','.txt','.rtf','.json','.csv','.yml','.yaml','.html']);
 // Versioned 34-L receipts attest one exact local checkout and are intentionally
 // git-ignored. Indexing them would make the tracked complete-tree manifest

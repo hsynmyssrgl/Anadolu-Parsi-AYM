@@ -25,6 +25,10 @@ describe('unified rounded control visual contract', () => {
     expect(styles).toContain('.first-run-security-field input{width:100%;min-width:0;min-height:52px');
     expect(styles).toContain('.first-run-security-form>.button.primary{width:100%;min-height:52px');
     expect(styles).toContain('.first-run-security-shell .status-message{border-radius:var(--radius-surface)}');
+    expect(styles).toContain('.first-run-security-form .notes-card{');
+    expect(styles).toContain('background:color-mix(in srgb,var(--release-panel-secondary) 86%,var(--release-panel));');
+    expect(styles).toContain('.first-run-security-form .notes-card>small{padding:8px 10px;');
+    expect(styles).toContain('white-space:normal;overflow-wrap:anywhere');
     expect(styles).toContain('@media(max-width:720px)');
   });
 

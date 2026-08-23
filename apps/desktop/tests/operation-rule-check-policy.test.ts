@@ -38,4 +38,35 @@ describe('operation rule check policy', () => {
     expect(sourceProtection).toContain('...DERIVED_DOCUMENT_INDEX_PATHS');
     expect(deliveryReport).toContain('...DERIVED_DOCUMENT_INDEX_PATHS');
   });
+
+  it('binds local, external and delivery verification to one live source boundary', async () => {
+    const completionPaths = [
+      'scripts/verify-33-l-long-term-portfolio-completion.mjs',
+      'scripts/verify-33-m-accessibility-completion.mjs',
+      'scripts/verify-33-n-draft-async-state-ux-completion.mjs',
+      'scripts/verify-33-o-privacy-ownership-data-rights-incident-control-completion.mjs',
+      'scripts/verify-33-p-passkeys-federated-identity-verifiable-temporary-credentials-completion.mjs'
+    ];
+    const [sourceProtection, externalProtection, deliveryReport, ...completionVerifiers] = await Promise.all([
+      readSource('scripts/protect-authoritative-source.mjs'),
+      readSource('scripts/protect-authoritative-source-external.mjs'),
+      readSource('scripts/generate-current-delivery-report.mjs'),
+      ...completionPaths.map(readSource)
+    ]);
+    for (const source of [sourceProtection, deliveryReport]) {
+      expect(source).toContain('resolveCurrentDeliveryOutputBoundary');
+      expect(source).toContain('currentDeliveryBoundary.excludedRelativePaths');
+    }
+    expect(deliveryReport).toContain('currentDeliveryBoundary.reportRelativePath');
+    expect(deliveryReport).toContain('currentDeliveryBoundary.userVisibleRelativePath');
+    expect(externalProtection).toContain("['scripts/protect-authoritative-source.mjs', 'verify']");
+    expect(externalProtection).toContain('Live local source changed before external protection promotion');
+    expect(externalProtection).toContain("requirement: 'PR-233', governanceRequirement: 'GOV-005', decision: 'DEC-267'");
+    for (const verifier of completionVerifiers) {
+      expect(verifier).toMatch(/protectionResult\?\.requirement\s*===\s*'PR-233'/u);
+      expect(verifier).toMatch(/protectionResult\?\.governanceRequirement\s*===\s*'GOV-005'/u);
+      expect(verifier).toMatch(/protectionResult\?\.decision\s*===\s*'DEC-267'/u);
+      expect(verifier).not.toContain('"requirement":"GOV-005"');
+    }
+  });
 });

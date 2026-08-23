@@ -374,8 +374,9 @@ if (external) {
     && localProtectionResult?.officialCompletionClaimed === true,
   'current authoritative source has verified local protection and bound external receipt');
   const protection = nodeRun(['scripts/protect-authoritative-source-external.mjs', 'verify']);
-  check(protection.status === 0 && protection.stdout.includes('"status":"PASS"')
-    && protection.stdout.includes('"requirement":"GOV-005"'),
+  let protectionResult; try { protectionResult = JSON.parse(protection.stdout.trim()); } catch { protectionResult = null; }
+  check(protection.status === 0 && protectionResult?.status === 'PASS' && protectionResult?.requirement === 'PR-233'
+    && protectionResult?.governanceRequirement === 'GOV-005' && protectionResult?.decision === 'DEC-267',
   'current authoritative source has verified external D: protection');
 }
 const finalDeliveryStatus = external && failures.length === 0

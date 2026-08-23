@@ -11,13 +11,16 @@ import {
   writeFile
 } from 'node:fs/promises';
 import { basename, dirname, relative, resolve, sep } from 'node:path';
-import { DERIVED_DOCUMENT_INDEX_PATHS } from './lib/governance-utils.mjs';
+import { DERIVED_DOCUMENT_INDEX_PATHS, resolveCurrentDeliveryOutputBoundary } from './lib/governance-utils.mjs';
 
 const mode = process.argv[2] ?? 'verify';
 const sourceRoot = resolve(process.cwd());
 const aymRoot = resolve(sourceRoot, '..', '..');
 const receiptRoot = resolve(aymRoot, '05_TEST', '30Z_LOCAL_RECEIPT');
 const backupRoot = resolve(aymRoot, '10_YEDEK');
+const releaseLedger = JSON.parse(await readFile(resolve(sourceRoot, 'config', 'release-ledger.json'), 'utf8'));
+const repositoryMetadata = JSON.parse(await readFile(resolve(sourceRoot, 'repository-metadata.json'), 'utf8'));
+const currentDeliveryBoundary = resolveCurrentDeliveryOutputBoundary(releaseLedger.current, repositoryMetadata);
 const excludedDirectoryNames = new Set([
   '.git', '.cache', '.tmp', '.turbo', 'coverage', 'dist', 'node_modules', 'temp', 'tmp'
 ]);
@@ -26,7 +29,8 @@ const excludedRelativePaths = new Set([
   'artifacts/reports/DELIVERY_STATUS_04.08.2026.29.json',
   'artifacts/validation/bronze-governance-reality-matrix.json',
   'artifacts/validation/delivery-report-contract-v2.json',
-  ...DERIVED_DOCUMENT_INDEX_PATHS
+  ...DERIVED_DOCUMENT_INDEX_PATHS,
+  ...currentDeliveryBoundary.excludedRelativePaths
 ]);
 const fixedDosDate = 33;
 const utf8Flag = 0x0800;

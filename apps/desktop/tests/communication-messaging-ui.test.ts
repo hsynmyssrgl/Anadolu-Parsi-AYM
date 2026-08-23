@@ -44,7 +44,7 @@ describe('34-B communication messaging renderer surface',()=>{
 
   it('provides accessible bounded controls for compose, lifecycle, retry, presence and retention',()=>{
     for(const label of ['Yerel kasaya mühürle','Offline kuyruğa al','Yerel retry','Yerel olarak sil','Geri al',
-      'Presence kararını kaydet','Saklamayı güncelle','Yetkili yerel aramayı uygula','Ana süreçte dosya seç ve şifrele',
+      'Çevrim içi durum kararını kaydet','Saklamayı güncelle','Yetkili yerel aramayı uygula','Ana süreçte dosya seç ve şifrele',
       'Yanıtla','Alıntıla','Konu dizisi'])expect(panel).toContain(label);
     expect(panel).toContain('maxLength={32_768}');
     expect(panel).toContain('aria-labelledby="communication-messaging-title"');
