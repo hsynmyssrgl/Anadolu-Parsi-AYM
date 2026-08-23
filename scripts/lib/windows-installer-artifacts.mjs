@@ -1,4 +1,4 @@
-import { readdir, rm, stat } from 'node:fs/promises';
+import { lstat, readdir, rm, stat } from 'node:fs/promises';
 import { basename, resolve } from 'node:path';
 
 const INSTALLER_ARTIFACT_PATTERN = /^ParsYuva-.*\.exe(?:\.blockmap|\.sha256)?$/u;
@@ -22,6 +22,21 @@ const readDirectory = async (directory) => {
   }
 };
 
+const inspectInstallerArtifactEntry = async (entry, resolvedRoot) => {
+  const path = resolve(resolvedRoot, entry.name);
+  if (resolve(path) !== path || resolve(path, '..') !== resolvedRoot) {
+    throw new Error(`Unsafe installer artifact path: ${path}`);
+  }
+  if (!entry.isFile() || entry.isSymbolicLink()) {
+    throw new Error(`Installer artifact must be a regular file: ${path}`);
+  }
+  const info = await lstat(path);
+  if (!info.isFile() || info.isSymbolicLink()) {
+    throw new Error(`Installer artifact must be a regular file: ${path}`);
+  }
+  return { path, info };
+};
+
 export const parseWindowsInstallerArtifact = (name) => {
   const match = VERSIONED_INSTALLER_ARTIFACT_PATTERN.exec(name);
   if (!match) return null;
@@ -38,12 +53,8 @@ export async function listWindowsInstallerArtifacts(releaseRoot) {
   const entries = await readDirectory(resolvedRoot);
   const artifacts = [];
   for (const entry of entries) {
-    if (!entry.isFile() || !INSTALLER_ARTIFACT_PATTERN.test(entry.name)) continue;
-    const path = resolve(resolvedRoot, entry.name);
-    if (resolve(path) !== path || resolve(path, '..') !== resolvedRoot) {
-      throw new Error(`Unsafe installer artifact path: ${path}`);
-    }
-    const info = await stat(path);
+    if (!INSTALLER_ARTIFACT_PATTERN.test(entry.name)) continue;
+    const { path, info } = await inspectInstallerArtifactEntry(entry, resolvedRoot);
     artifacts.push({
       name: basename(path),
       path,
@@ -58,6 +69,7 @@ export function evaluateWindowsInstallerRetention({ artifacts, channel, version 
   const expectedPrefix = `ParsYuva-${channel}-${version}.exe`;
   const failures = [];
   const kinds = new Set();
+  let validInstallerExecutableFound = false;
   for (const artifact of artifacts) {
     if (!artifact.parsed) {
       failures.push(`Tanınmayan kurulum artefaktı: ${artifact.name}`);
@@ -66,10 +78,16 @@ export function evaluateWindowsInstallerRetention({ artifacts, channel, version 
     if (artifact.parsed.channel !== channel || artifact.parsed.version !== version) {
       failures.push(`Eski kurulum artefaktı: ${artifact.name}; beklenen ${expectedPrefix}`);
     }
+    if (artifact.name === expectedPrefix && artifact.parsed.kind === '.exe') {
+      validInstallerExecutableFound = true;
+    }
     if (kinds.has(artifact.parsed.kind)) {
       failures.push(`Aynı türden birden fazla kurulum artefaktı: ${artifact.parsed.kind}`);
     }
     kinds.add(artifact.parsed.kind);
+  }
+  if (artifacts.length > 0 && !validInstallerExecutableFound) {
+    failures.push(`Geçerli kurulum EXE'si eksik: ${expectedPrefix}`);
   }
   return {
     status: failures.length === 0 ? 'PASS' : 'FAIL',
@@ -96,6 +114,11 @@ export async function removeWindowsInstallerArtifacts(releaseRoot) {
 export async function removeWindowsPackagingArtifacts(releaseRoot) {
   const resolvedRoot = resolve(releaseRoot);
   const entries = await readDirectory(resolvedRoot);
+  for (const entry of entries) {
+    if (INSTALLER_ARTIFACT_PATTERN.test(entry.name)) {
+      await inspectInstallerArtifactEntry(entry, resolvedRoot);
+    }
+  }
   const removed = [];
   for (const entry of entries) {
     if (!INSTALLER_ARTIFACT_PATTERN.test(entry.name)

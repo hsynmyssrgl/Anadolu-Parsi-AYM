@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -60,6 +60,38 @@ describe('Windows installer retention policy', () => {
     })).toMatchObject({ status: 'PASS', artifactCount: 2 });
   });
 
+  it('fails closed when a non-empty artifact set has no current installer executable', async () => {
+    const directory = await createTemporaryRelease();
+    await writeFile(join(directory, 'ParsYuva-Bronze-22.08.2026.43.exe.blockmap'), 'blockmap');
+    const artifacts = await listWindowsInstallerArtifacts(directory);
+
+    const result = evaluateWindowsInstallerRetention({
+      artifacts,
+      channel: 'Bronze',
+      version: '22.08.2026.43',
+    });
+
+    expect(result.status).toBe('FAIL');
+    expect(result.failures).toContain(
+      "Geçerli kurulum EXE'si eksik: ParsYuva-Bronze-22.08.2026.43.exe",
+    );
+  });
+
+  it('rejects an installer-shaped reparse point', async () => {
+    const directory = await createTemporaryRelease();
+    const targetDirectory = join(directory, 'reparse-target');
+    await mkdir(targetDirectory);
+    await symlink(
+      targetDirectory,
+      join(directory, 'ParsYuva-Bronze-22.08.2026.43.exe'),
+      process.platform === 'win32' ? 'junction' : 'dir',
+    );
+
+    await expect(listWindowsInstallerArtifacts(directory)).rejects.toThrow(
+      'Installer artifact must be a regular file',
+    );
+  });
+
   it('removes installer artifacts but preserves unrelated release diagnostics', async () => {
     const directory = await createTemporaryRelease();
     await writeFile(join(directory, 'ParsYuva-Bronze-22.08.2026.42.exe'), 'old');
@@ -94,5 +126,17 @@ describe('Windows installer retention policy', () => {
     ]);
     expect(await listWindowsInstallerArtifacts(directory)).toEqual([]);
     expect(await readFile(join(directory, 'keep-me.txt'), 'utf8')).toBe('unrelated');
+  });
+
+  it('fails before cleanup when an installer-shaped entry is a directory', async () => {
+    const directory = await createTemporaryRelease();
+    const regularArtifact = join(directory, 'ParsYuva-Bronze-22.08.2026.43.exe');
+    await writeFile(regularArtifact, 'current');
+    await mkdir(join(directory, 'ParsYuva-Bronze-22.08.2026.42.exe'));
+
+    await expect(removeWindowsPackagingArtifacts(directory)).rejects.toThrow(
+      'Installer artifact must be a regular file',
+    );
+    expect(await readFile(regularArtifact, 'utf8')).toBe('current');
   });
 });
