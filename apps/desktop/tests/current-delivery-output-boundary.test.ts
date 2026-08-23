@@ -41,7 +41,7 @@ const fixture = (channel: CurrentRelease['channel'], version: string, packageVer
     version,
     visibleRelease: `${channel} ${version}`,
     packageVersion,
-    releaseId: `${channel.toLocaleLowerCase('en-US')}-fixture`
+    releaseId: `${channel.toLocaleLowerCase('en-US')}-${version.slice(6,10)}-${version.slice(3,5)}-${version.slice(0,2)}-r${version.slice(11)}`
   };
   const metadata: RepositoryMetadata = {
     visibleRelease: release.visibleRelease,
@@ -77,6 +77,8 @@ describe('current delivery output boundary', () => {
     const { release, metadata } = fixture('Bronze', '22.08.2026.50', '22.8.2026-50');
     expect(() => resolveBoundary({ ...release, version: '../22.08.2026.50' }, metadata)).toThrow('Unsafe current release version');
     expect(() => resolveBoundary({ ...release, visibleRelease: 'Silver 22.08.2026.50' }, metadata)).toThrow('Current release visible identity mismatch');
+    expect(() => resolveBoundary({ ...release, packageVersion: '' }, { ...metadata, packageVersion: '' })).toThrow('Current release package identity mismatch');
+    expect(() => resolveBoundary({ ...release, releaseId: '' }, { ...metadata, releaseId: '' })).toThrow('Current release ID mismatch');
     expect(() => resolveBoundary(release, { ...metadata, applicationVersion: '22.08.2026.49' })).toThrow('Release ledger and repository metadata identity mismatch');
   });
 });

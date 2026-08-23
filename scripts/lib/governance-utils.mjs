@@ -30,15 +30,20 @@ export const resolveCurrentDeliveryOutputBoundary = (currentRelease, repositoryM
   const channel = String(currentRelease?.channel ?? '').trim();
   const version = String(currentRelease?.version ?? '').trim();
   const visibleRelease = String(currentRelease?.visibleRelease ?? '').trim();
+  const packageVersion = String(currentRelease?.packageVersion ?? '').trim();
+  const releaseId = String(currentRelease?.releaseId ?? '').trim();
   if (!new Set(['Bronze', 'Silver', 'Gold']).has(channel)) throw new Error(`Unsafe current release channel: ${channel}`);
   if (!/^\d{2}\.\d{2}\.\d{4}\.\d+$/u.test(version)) throw new Error(`Unsafe current release version: ${version}`);
   if (visibleRelease !== `${channel} ${version}`) throw new Error('Current release visible identity mismatch.');
+  const [day, month, year, sequence] = version.split('.');
+  if (packageVersion !== `${Number(day)}.${Number(month)}.${year}-${sequence}`) throw new Error('Current release package identity mismatch.');
+  if (releaseId !== `${channel.toLocaleLowerCase('en-US')}-${year}-${month}-${day}-r${sequence}`) throw new Error('Current release ID mismatch.');
   const identityMatches = repositoryMetadata?.visibleRelease === visibleRelease
     && repositoryMetadata?.repositoryVersion === version
     && repositoryMetadata?.applicationVersion === version
-    && repositoryMetadata?.packageVersion === currentRelease?.packageVersion
+    && repositoryMetadata?.packageVersion === packageVersion
     && repositoryMetadata?.edition === channel
-    && repositoryMetadata?.releaseId === currentRelease?.releaseId;
+    && repositoryMetadata?.releaseId === releaseId;
   if (!identityMatches) throw new Error('Release ledger and repository metadata identity mismatch.');
   const reportFileName = `DELIVERY_STATUS_${version}.json`;
   const userVisibleFileName = `ParsYuva_Aile_Yasam_Merkezi_${visibleRelease.replaceAll(' ', '_')}.json`;

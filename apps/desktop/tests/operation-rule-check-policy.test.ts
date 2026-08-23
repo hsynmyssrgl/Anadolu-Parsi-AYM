@@ -61,7 +61,9 @@ describe('operation rule check policy', () => {
     expect(deliveryReport).toContain('currentDeliveryBoundary.userVisibleRelativePath');
     expect(externalProtection).toContain("['scripts/protect-authoritative-source.mjs', 'verify']");
     expect(externalProtection).toContain('Live local source changed before external protection promotion');
-    expect(externalProtection).toContain("requirement: 'PR-233', governanceRequirement: 'GOV-005', decision: 'DEC-267'");
+    expect(externalProtection).toContain("schemaVersion: 1, release: visibleRelease, requirement: 'PR-233', decision: 'DEC-267'");
+    expect(externalProtection).toContain("governanceRequirement: 'GOV-005'");
+    expect(externalProtection).toContain("readback.governanceRequirement === receipt.governanceRequirement");
     for (const verifier of completionVerifiers) {
       expect(verifier).toMatch(/protectionResult\?\.requirement\s*===\s*'PR-233'/u);
       expect(verifier).toMatch(/protectionResult\?\.governanceRequirement\s*===\s*'GOV-005'/u);

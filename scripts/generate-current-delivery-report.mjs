@@ -65,14 +65,14 @@ if (receipt.externalLibraryReceiptStatus !== 'PASS' || receipt.officialCompletio
   || !String(receipt.externalReceipt?.externalPath ?? '').startsWith('D:\\AYM_LIBRARY\\')) {
   throw new Error('Current-source external protection truth boundary mismatch.');
 }
-const expectedDerivedDeliveryExclusions = [
+const expectedDerivedDeliveryExclusions = [...new Set([
   'artifacts/deliveries/Anadolu_Parsi_Aile_Yasam_Merkezi_Bronze_04.08.2026.29.json',
   'artifacts/reports/DELIVERY_STATUS_04.08.2026.29.json',
   'artifacts/validation/bronze-governance-reality-matrix.json',
   'artifacts/validation/delivery-report-contract-v2.json',
   ...DERIVED_DOCUMENT_INDEX_PATHS,
   ...currentDeliveryBoundary.excludedRelativePaths
-].sort();
+])].sort();
 if (JSON.stringify(receipt.excludedDerivedDeliveryFiles) !== JSON.stringify(expectedDerivedDeliveryExclusions)) {
   throw new Error('Current-source protection does not exclude only the exact self-referential delivery outputs.');
 }
