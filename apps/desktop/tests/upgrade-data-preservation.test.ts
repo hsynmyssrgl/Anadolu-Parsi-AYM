@@ -14,7 +14,11 @@ class FixtureProtector implements DeviceSecretProtector {
 }
 
 const roots:string[]=[];
-afterEach(async()=>{await Promise.all(roots.splice(0).map(root=>rm(root,{recursive:true,force:true})))});
+afterEach(async()=>{
+  for(const root of roots.splice(0)){
+    await rm(root,{recursive:true,force:true,maxRetries:10,retryDelay:50});
+  }
+});
 
 describe('sürüm yükseltmede veri koruma',()=>{
   it('mevcut şifreli kasa ve DPAPI başlığını sürüm başına no-overwrite SHA geri-okuma kanıtıyla saklar',async()=>{
