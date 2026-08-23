@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 22.08.2026.50",
-  "decisionCount": 97,
+  "decisionCount": 98,
   "decisions": [
     {
       "id": "DEC-121",
@@ -2342,7 +2342,8 @@
       "date": "2026-08-20",
       "acceptedAt": "2026-08-20T18:48:00+03:00",
       "title": "ParsYuva kurulum yolu, program dosyasi ve kisa teslim adi",
-      "status": "ACTIVE",
+      "status": "SUPERSEDED",
+      "supersededBy": "DEC-269",
       "source": "Acik kullanici karari: kurulum yolu Program Files/PPT/ParsYuva, ana EXE ve kisayol ParsYuva, paket adi yalniz ParsYuva kanal ve surum olacak",
       "document": "docs/decisions/DEC-262-parsyuva-kurulum-yolu-program-dosyasi-ve-kisa-teslim-adi.md",
       "documents": [
@@ -2580,6 +2581,48 @@
         "artifacts/validation/first-family-clean-release-policy.json",
         "artifacts/validation/packaged-runtime-launch.json",
         "apps/desktop/release"
+      ]
+    },
+    {
+      "id": "DEC-269",
+      "date": "2026-08-23",
+      "acceptedAt": "2026-08-23T21:17:57+03:00",
+      "title": "Bronze Silver Gold kurulum veri ve kaynak calisma alani yalitimi",
+      "status": "ACTIVE",
+      "source": "Acik kullanici karari: Bronze Silver ve Gold ayri klasorlere kurulsun, birbirini etkilemesin ve kodlama klasorleri de ayri olsun",
+      "document": "docs/decisions/DEC-269-bronze-silver-gold-kurulum-veri-ve-kaynak-yalitimi.md",
+      "documents": [
+        "config/canonical-rule-registry.json",
+        "config/rule-enforcement-registry.json",
+        "config/release-channel-worktrees.json",
+        "docs/current/06_KANONIK_KURAL_SICILI.md",
+        "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
+        "docs/current/10_TUM_KURALLAR_ASILAMAZ_YURUTME_SOZLESMESI.md",
+        "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
+        "docs/current/DESKTOP_SESSION_AND_ELECTRON_SECURITY_CONTRACT.md",
+        "docs/ticari-urun-temeli/01_YONETIM/01_ASILAMAZ_KURALLAR.md",
+        "docs/ticari-urun-temeli/03_MIMARI/04_PLATFORM_VE_DAGITIM_MIMARISI.md",
+        "docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md",
+        "docs/10_MASTER_DECISION_REGISTER.md"
+      ],
+      "workListImpact": "IS-0210 eklendi. Her kanal ayri Program Files alt klasoru, EXE, kisayol, appId, kullanici veri koku, Git worktree ve branch kullanir; build ciktisi ve veri kanallar arasinda paylasilamaz.",
+      "syncStatus": "SYNCHRONIZED",
+      "requirements": [],
+      "codeAreas": [
+        "packages/domain/src/app-meta.ts",
+        "apps/desktop/package.json",
+        "apps/desktop/build/installer.nsh",
+        "apps/desktop/src/main/main.ts",
+        "config/release-channel-worktrees.json",
+        "scripts/setup-release-channel-worktrees.mjs",
+        "scripts/allocate-monthly-release-version.mjs",
+        "scripts/verify-product-brand-identity.mjs"
+      ],
+      "evidence": [
+        "apps/desktop/tests/product-brand-identity.test.ts",
+        "apps/desktop/tests/release-channel-isolation.test.ts",
+        "apps/desktop/tests/installer-narration-experience.test.ts",
+        "artifacts/validation/canonical-rule-registry-gate.json"
       ]
     }
   ]

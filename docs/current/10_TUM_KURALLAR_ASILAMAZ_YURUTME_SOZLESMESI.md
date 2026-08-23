@@ -2,15 +2,17 @@
 
 - Sürüm: **Bronze 22.08.2026.50**
 - Karar: **DEC-129**
-- Kanonik kural sayısı: **233**
+- Kanonik kural sayısı: **234**
 - Aktif kural: **211**
-- Kural SHA-256: `b57ed6bf996709e1522c71e6b61a835ec48df9f0c52b1671dca61f914fab7a5f`
+- Kural SHA-256: `67462d63e873b68a1eacfb358f904226d9199f99c81950645e05350df9963506`
 
 ## Değişmez çalışma ilkesi
 
 Her ACTIVE kural `config/rule-enforcement-registry.json` içinde tam bir enforcement kaydına sahiptir. `failClosed=true`, `waiverAllowed=false`, `skipAllowed=false` zorunludur. Makineyle doğrudan kanıtlanamayan bir kural PASS sayılmaz; kanıt gerektiren aşama BLOCKED kalır.
 
 Her durum değiştiren işlem öncesinde `scripts/verify-operation-rule-check.mjs` açık işlem türü ve açıklamasıyla çalıştırılır. Kural, hash, onay veya enforcement kontrolü PASS değilse kod, dosya, test, build, paketleme, kurulum, silme, yayımlama ya da dış yazma işlemi başlatılamaz.
+
+PR-234 gereği Bronze, Silver ve Gold ayrı Program Files alt klasörü, EXE, kısayol, appId, productName, kullanıcı veri kökü, kaldırma kapsamı, Git worktree ve branch kullanır. Bir kanal diğerinin programına, verisine veya build çıktısına dokunamaz.
 
 ## PR-171 adım kilidi
 

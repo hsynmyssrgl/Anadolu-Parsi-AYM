@@ -40,6 +40,7 @@ Durumlar: `TAMAMLANDI`, `DEVAM`, `ACIK`, `BLOCKED`, `NOT_RUN`.
 | IS-0207 | Fabrika ayarina donus | Codex | DEVAM | Yeniden kimlik, inventory, silme kaniti |
 | IS-0208 | Eski Windows installer artefaktlarini otomatik temizle | Codex | TAMAMLANDI | Prebuild/package temizligi, guncel-surum kapisi ve hedef test PASS |
 | IS-0209 | Temiz paket, paketli runtime ve cift yedek kabul zinciri | Codex | DEVAM | Tum workspace rebuild, installer/runtime/surum/hash/imza kaniti, GitHub + harici Git commit esitligi ve D: kaynak readback PASS |
+| IS-0210 | Bronze Silver Gold kurulum veri ve kaynak klasoru yalitimi | Codex | DEVAM | Kanal dizini, EXE, kisayol, appId, user-data, uninstall, Git worktree ve branch ayrimi; temiz final commit sonrasi uc worktree geri-okuma PASS |
 
 ## 3. Kimlik, lisans ve ticari guven
 

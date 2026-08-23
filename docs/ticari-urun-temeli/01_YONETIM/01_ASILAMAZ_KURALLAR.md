@@ -46,6 +46,7 @@ Eksik halka varsa durum `ACIK`, `BLOCKED`, `PARTIAL`, `NOT_RUN` veya `FAIL` olur
 - Kod veya Windows paketleme davranisi degistiginde onceki installer EXE, blockmap ve SHA-256 dosyalari yeni build oncesinde silinir; release klasorunde yalniz guncel surum seti kalabilir.
 - Varsayilan ana zemin acik/beyazdir; saydamlik okunabilirlik ve erisilebilirlik sinirlarini asamaz.
 - Ozel installer, uc bilgi karti arasinda gecisli fakat sahte ilerlemesiz karsilama, kurulum icinde ayni dilde kadin ses onceligi/erkek veya kurulu ses yedegi, 900x640 tek pars ilk aile ekrani, kilitli kasa yeniden dogrulamasi ve ilk 2FA guvenilir cihaz bootstrap siniri PR-233 kabul zincirinden ayrilamaz.
+- Bronze, Silver ve Gold ayri kurulum dizini, EXE, kisayol, appId, kullanici veri koku, kaldirma kapsami, Git worktree ve branch kullanir; kanal programi, verisi ve build ciktisi diger kanalla paylasilamaz.
 
 ## 6. Veri kurali
 

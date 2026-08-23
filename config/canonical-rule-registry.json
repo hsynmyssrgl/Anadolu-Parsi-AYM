@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "PPT-CANONICAL-RULE-REGISTRY-V21",
+  "id": "PPT-CANONICAL-RULE-REGISTRY-V22",
   "product": "ParsYuva Aile Yaşam Merkezi",
   "upperBrand": "ParsYuva",
   "effectiveRelease": "Bronze 22.08.2026.50",
@@ -9,9 +9,9 @@
     "version": "PROJECT-RULES-2026-08-02-V6",
     "sha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
   },
-  "ruleCount": 233,
+  "ruleCount": 234,
   "activeRuleCount": 211,
-  "supersededRuleCount": 22,
+  "supersededRuleCount": 23,
   "rules": [
     {
       "id": "PR-001",
@@ -1626,9 +1626,10 @@
     {
       "id": "PR-228",
       "text": "Windows kurulum hedefi C:\\Program Files\\PPT\\ParsYuva, kurulu ana program dosyası ParsYuva.exe ve masaüstü ile Başlat menüsü kısayolu ParsYuva olur. Dağıtım EXE dosya adı yalnız ParsYuva, güvenilir sürüm kanalı ve GG.AA.YYYY.NN sürümünü ParsYuva-<Kanal>-GG.AA.YYYY.NN.exe biçiminde taşır; mimari, Kurulum, AYM, tam uzun ürün adı veya yerel test eki dosya adına eklenmez. Uygulama içindeki görünür tam ürün adı ParsYuva Aile Yaşam Merkezi olarak kalır; kararlı appId ve eski kullanıcı-veri dizini yalnız yükseltme uyumluluğu için korunur.",
-      "state": "ACTIVE",
+      "state": "SUPERSEDED",
       "source": "USER_DECISION_DEC-262",
-      "effectiveRelease": "Bronze 20.08.2026.37"
+      "effectiveRelease": "Bronze 20.08.2026.37",
+      "replacedBy": "PR-234"
     },
     {
       "id": "PR-229",
@@ -1665,7 +1666,14 @@
       "state": "ACTIVE",
       "source": "USER_DECISION_DEC-267",
       "effectiveRelease": "Bronze 22.08.2026.50"
+    },
+    {
+      "id": "PR-234",
+      "text": "Bronze, Silver ve Gold birbirinden yalıtılmış kurulum, kullanıcı verisi ve kaynak çalışma alanları kullanır. Her kanal C:\\Program Files\\PPT\\ParsYuva\\<Kanal> dizinine, ParsYuva-<Kanal>.exe ana dosyasıyla ve ParsYuva <Kanal> kısayoluyla kurulur; appId, productName, kaldırma kapsamı ve kullanıcı veri kökü kanal kimliğini taşır. Bir kanalın kurulumu, yükseltmesi veya kaldırılması diğer kanalın programını ya da verisini değiştiremez. Kanal kaynakları C:\\PPT\\AYM\\06_KOD\\kanallar\\<Kanal> altında ayrı Git worktree ve ayrı branch olarak tutulur; build çıktısı ile kullanıcı verisi kanallar arasında yeniden kullanılamaz. Dağıtım EXE adı ParsYuva-<Kanal>-GG.AA.YYYY.NN.exe olarak kalır; görünür ana ürün adı ParsYuva Aile Yaşam Merkezi'dir.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-269",
+      "effectiveRelease": "Bronze 22.08.2026.50"
     }
   ],
-  "rulesSha256": "b57ed6bf996709e1522c71e6b61a835ec48df9f0c52b1671dca61f914fab7a5f"
+  "rulesSha256": "67462d63e873b68a1eacfb358f904226d9199f99c81950645e05350df9963506"
 }

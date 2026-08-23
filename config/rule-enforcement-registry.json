@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-RULE-ENFORCEMENT-REGISTRY-V1",
   "release": "Bronze 22.08.2026.50",
-  "canonicalRulesSha256": "b57ed6bf996709e1522c71e6b61a835ec48df9f0c52b1671dca61f914fab7a5f",
+  "canonicalRulesSha256": "67462d63e873b68a1eacfb358f904226d9199f99c81950645e05350df9963506",
   "activeRuleCount": 211,
   "defaultPolicy": "FAIL_CLOSED_NO_WAIVER",
   "entries": [
@@ -2781,7 +2781,7 @@
       "trackedIn": "config/canonical-rule-registry.json"
     },
     {
-      "ruleId": "PR-228",
+      "ruleId": "PR-234",
       "mode": "RELEASE_EVIDENCE_GATE",
       "failClosed": true,
       "waiverAllowed": false,
@@ -2789,7 +2789,7 @@
       "gateScripts": ["apps/desktop/scripts/verify-installer.mjs", "scripts/verify-product-brand-identity.mjs"],
       "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
       "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
-      "trackedIn": "apps/desktop/package.json"
+      "trackedIn": "config/release-channel-worktrees.json"
     },
     {
       "ruleId": "PR-221",

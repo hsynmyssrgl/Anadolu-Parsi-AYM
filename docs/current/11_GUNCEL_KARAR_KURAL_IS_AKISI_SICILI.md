@@ -1,11 +1,11 @@
 # ParsYuva Aile Yaşam Merkezi — Güncel Karar, Kural ve İş Akışı Sicili
 
-- Belge sürümü: **GUNCEL-2026-08-22-V5**
-- Tarih: **22.08.2026**
+- Belge sürümü: **GUNCEL-2026-08-23-V6**
+- Tarih: **23.08.2026**
 - Görünür ürün sürümü: **Bronze 22.08.2026.50**
 - Kaynak HEAD: `19a5c84d02ad0700315bc67873a19d5e1fed9945`
 - Statü: **ACTIVE_WORKING_REFERENCE_NOT_BUILD_CLOSURE**
-- Kararlar: **DEC-250–DEC-268**
+- Kararlar: **DEC-250–DEC-269**
 
 > Bu sürüm geçmiş PDF/DOCX ve build kapanış belgelerinin üzerine yazmaz. Yerel PASS ile dış kabul kanıtını ayırır; NOT_RUN/PARTIAL/BLOCKED sonuçlarını tamamlanmış göstermez.
 
@@ -30,8 +30,8 @@
 ## 3. Kapsam ve kural özeti
 
 - Gereksinim: **358** — COMPLETE 109, PARTIAL 25, FOUNDATION_STARTED 1, NOT_IMPLEMENTED 223.
-- Kural sicili: **PPT-CANONICAL-RULE-REGISTRY-V21**, toplam 233, aktif 211, superseded 22, SHA-256 `b57ed6bf996709e1522c71e6b61a835ec48df9f0c52b1671dca61f914fab7a5f`.
-- Kullanıcı karar defteri: **94** açık kullanıcı kararı.
+- Kural sicili: **PPT-CANONICAL-RULE-REGISTRY-V22**, toplam 234, aktif 211, superseded 23, SHA-256 `67462d63e873b68a1eacfb358f904226d9199f99c81950645e05350df9963506`.
+- Kullanıcı karar defteri: **98** kayıtlı kullanıcı kararı.
 
 ## 4. İş akışları
 
@@ -143,7 +143,8 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - EK-001–EK-019 tarihsel karar tamponu DEC-260 ile ana sicillere bağlandı; daha yeni ParsYuva, dil ve kurulum kararları çatışmada üstün tutuldu.
 - Kanonik kural sicili V19/231/210 durumuna yükseltildi; tam ParsYuva Aile Yaşam Merkezi adı, sürüm paleti, parola görünürlüğü, installer yaşam döngüsü, aylık build, deneme/Gold, kaldırma-sıfırlama, tepsi, migration/rollback, görünür kanal tekilleştirme ve her işlem öncesi kural kontrolü fail-closed kapılara bağlandı.
 - DEC-261 ile AYM kısaltması güncel kullanıcı yüzeylerinden kaldırıldı; yalnız tarihsel kayıtlar ve değiştirilemeyen teknik uyumluluk yolları güncel marka olmadığı açıkça belirtilerek korunur.
-- DEC-262 ile Windows kurulum hedefi C:\Program Files\PPT\ParsYuva, ana program ve kısayol adı ParsYuva, teslim adı ParsYuva-<Kanal>-GG.AA.YYYY.NN.exe olarak sabitlendi.
+- DEC-262 ortak kurulum, appId ve veri kimliği kararıydı; DEC-269 ile superseded edildi.
+- DEC-269 ile Bronze, Silver ve Gold kurulum dizini, EXE, kısayol, appId, kullanıcı veri kökü, Git worktree ve branch düzeyinde ayrıldı; kanal dışı program, veri ve build çıktısı etkisi yasaklandı.
 - DEC-263 ile kod veya Windows paketleme değişikliğinde önceki installer EXE, blockmap ve SHA-256 dosyalarının yeni build öncesinde silinmesi zorunlu ve otomatik hale getirildi.
 - DEC-264 ile Bronze, Silver ve Gold görünür sürüm satırlarında kanal adının yalnız bir kez gösterilmesi zorunlu hale getirildi; `stage` kanal adını yineleyemez.
 - DEC-265 ile her durum değiştiren işlemden önce güncel kural, hash, onay ve enforcement kontrolünün PASS olması zorunlu hale getirildi; waiver ve atlama yasaktır.
@@ -343,13 +344,14 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - `DEC-259` — DEC-259 — Ticari Temel Alani ve Asilamaz Belge Kapisi — ACTIVE — `docs/decisions/DEC-259-ticari-temel-alani-ve-asilamaz-belge-kapisi.md`
 - `DEC-260` — DEC-260 — Ek kural toplu birleştirme ve doğrulanmış Git teslimi — ACTIVE — `docs/decisions/DEC-260-ek-kural-toplu-birlestirme-ve-dogrulanmis-git-teslimi.md`
 - `DEC-261` — DEC-261 — AYM Kısaltmasının Güncel Ürün Yüzeylerinden Kaldırılması — ACTIVE — `docs/decisions/DEC-261-aym-kisaltmasinin-guncel-urun-yuzeylerinden-kaldirilmasi.md`
-- `DEC-262` — DEC-262 — ParsYuva kurulum yolu, program dosyası ve kısa teslim adı — ACTIVE — `docs/decisions/DEC-262-parsyuva-kurulum-yolu-program-dosyasi-ve-kisa-teslim-adi.md`
+- `DEC-262` — DEC-262 — ParsYuva kurulum yolu, program dosyası ve kısa teslim adı — SUPERSEDED_BY_DEC_269 — `docs/decisions/DEC-262-parsyuva-kurulum-yolu-program-dosyasi-ve-kisa-teslim-adi.md`
 - `DEC-263` — DEC-263 — Kod değişikliğinde eski Windows kurulum artefaktlarının silinmesi — ACTIVE — `docs/decisions/DEC-263-kod-degisikliginde-eski-windows-kurulum-artefaktlarinin-silinmesi.md`
 - `DEC-264` — DEC-264 — Görünür sürüm kanalının tek kez gösterilmesi — ACTIVE — `docs/decisions/DEC-264-gorunur-surum-kanalinin-tek-kez-gosterilmesi.md`
 - `DEC-265` — DEC-265 — Her işlem öncesi zorunlu kural kontrolü — ACTIVE — `docs/decisions/DEC-265-her-islem-oncesi-zorunlu-kural-kontrolu.md`
 - `DEC-266` — DEC-266 — Özel kurulum, ilk aile, temiz paket ve çift yedek kabul zinciri — SUPERSEDED — `docs/decisions/DEC-266-ozel-kurulum-ilk-aile-temiz-paket-ve-cift-yedek-kabul-zinciri.md`
 - `DEC-267` — DEC-267 — Geçişli sesli kurulum, tek pars ve kasa kilidi düzeltmesi — ACTIVE — `docs/decisions/DEC-267-gecisli-sesli-kurulum-tek-pars-ve-kasa-kilidi-duzeltmesi.md`
 - `DEC-268` — DEC-268 — Windows installer timer callback ve tam ön yüz kullanıcı UAT teslimi — ACTIVE — `docs/decisions/DEC-268-windows-installer-timer-callback-ve-tam-on-yuz-kullanici-uat-teslimi.md`
+- `DEC-269` — DEC-269 — Bronze Silver Gold kurulum veri ve kaynak çalışma alanı yalıtımı — ACTIVE — `docs/decisions/DEC-269-bronze-silver-gold-kurulum-veri-ve-kaynak-yalitimi.md`
 
 ## 12. ADR dizini
 
@@ -689,12 +691,13 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - **PR-225 [ACTIVE]** — Ana pencerenin X düğmesi ve Alt+F4 normal kullanımda uygulamayı sonlandırmaz; hassas ekranı gizleyip sistem tepsisine taşır. Tepsi Aç, Kilitle ve onaylı Tamamen kapat eylemlerini sunar; Windows kapanışı, güvenli güncelleme ve kaldırma kontrollü gerçek çıkış yapabilir.
 - **PR-226 [ACTIVE]** — Her güncelleme mevcut kişisel veriyi, ayarı, arşivi ve yedek bağlarını korur. Şema veya altyapı değişimi doğrulanmış şifreli geri dönüş yedeği, atomik migration, başarısızlıkta rollback ve kayıt sayısı, hash, sahiplik ile şifreleme bağı doğrulaması olmadan tamamlanamaz; dönüştürülemeyen kayıt açıkça raporlanır.
 - **PR-227 [ACTIVE]** — Geçici ek-kural dosyasında tutulan kararlar toplu birleştirmede tek tek kanonik kurala, karara, iş listesine, kaynak/test kanıtına veya açık dış bağımlılık nedenine eşlenir. Daha yeni kararla değişen eski metin yeniden etkinleştirilemez; birleştirme kaydı korunur ve GitHub/yerel yedek eşitliği canlı commit kanıtı olmadan güncel gösterilemez.
-- **PR-228 [ACTIVE]** — Windows kurulum hedefi C:\Program Files\PPT\ParsYuva, kurulu ana program dosyası ParsYuva.exe ve masaüstü ile Başlat menüsü kısayolu ParsYuva olur. Dağıtım EXE dosya adı yalnız ParsYuva, güvenilir sürüm kanalı ve GG.AA.YYYY.NN sürümünü ParsYuva-<Kanal>-GG.AA.YYYY.NN.exe biçiminde taşır; mimari, Kurulum, AYM, tam uzun ürün adı veya yerel test eki dosya adına eklenmez. Uygulama içindeki görünür tam ürün adı ParsYuva Aile Yaşam Merkezi olarak kalır; kararlı appId ve eski kullanıcı-veri dizini yalnız yükseltme uyumluluğu için korunur.
+- **PR-228 [SUPERSEDED]** — Ortak kurulum dosyası, appId ve kullanıcı veri kimliği PR-234 ile değiştirilmiştir.
 - **PR-229 [ACTIVE]** — Kaynak kodda veya Windows paketleme davranışında değişiklik yapıldığında apps/desktop/release altındaki önceki kurulum artefaktları geçersiz olur ve yeni derleme başlamadan önce silinir. Temizlik ParsYuva kurulum EXE dosyalarını ve bunlara bağlı .blockmap ile .sha256 yan dosyalarını kapsar; paketleme sonrasında klasörde yalnız güncel görünür sürüme ait en fazla bir kurulum seti kalabilir. Kullanıcı verisi, kurulu uygulama, kaynak arşivi ve tarihsel yönetişim kanıtları bu temizliğin dışındadır.
 - **PR-230 [ACTIVE]** — Kullanıcıya görünür sürüm satırlarında Bronze, Silver veya Gold kanal adı tam bir kez gösterilir. Kanal adı yalnız kanonik releaseLabel alanında bulunur; kanal-bağımsız yaşam döngüsü durumu olan stage alanı kanal adı içeremez. İlk kurulum, güvenli başlangıç, ana uygulama, Türkçe ve İngilizce yüzeyler kanal ile kanal içeren sürüm etiketini yeniden birleştiremez.
 - **PR-231 [ACTIVE]** — Her durum değiştiren işlem başlamadan önce güncel kanonik kural sicili, yeniden hesaplanan kural hash'i, kullanıcı onayı, Proje Anayasası bağı ve tüm aktif kuralların fail-closed enforcement kayıtları doğrulanır. Kod, dosya, yapılandırma, belge, test, derleme, paketleme, kurulum, silme, yayımlama veya dış sisteme yazma işlemi kontrol PASS olmadan başlayamaz. Salt okunur inceleme yalnız uygulanacak kuralları belirleyebilir; kural veya hash değişirse sonraki mutasyondan önce kontrol yeniden çalışır. Waiver, sessiz atlama ve eski makbuz kullanımı yasaktır.
 - **PR-232 [SUPERSEDED]** — Üç pars ve önceki kurulum kabul zinciri PR-233 ile değiştirilmiştir.
 - **PR-233 [ACTIVE]** — Üç bilgi kartı arasında geçişli fakat sahte ilerlemesiz özel Windows installer, aynı dilde kadın sesi önceliği ve erkek/kurulu ses yedeği, eski tek pars, 900x640 reflow, kilitli kasayı koruyan yeniden doğrulama, ilk güvenlik kurulumu bootstrap sınırı ve temiz çift yedek teslim zinciri fail-closed uygulanır.
+- **PR-234 [ACTIVE]** — Bronze, Silver ve Gold ayrı Program Files alt klasörü, EXE, kısayol, appId, productName, kullanıcı veri kökü, kaldırma kapsamı, Git worktree ve branch kullanır; kanal programı, verisi ve build çıktısı diğer kanalla paylaşılamaz.
 
 ## 14. Aktif repo Word/PDF tarihsel denetim envanteri
 

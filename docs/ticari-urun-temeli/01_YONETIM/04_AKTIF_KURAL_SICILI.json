@@ -4,11 +4,11 @@
   "durum": "ACTIVE",
   "istisnaIzinli": false,
   "anaKuralKaynagi": "../06_KOD/app/config/canonical-rule-registry.json",
-  "anaKuralSiciliId": "PPT-CANONICAL-RULE-REGISTRY-V21",
-  "anaKuralSayisi": 233,
+  "anaKuralSiciliId": "PPT-CANONICAL-RULE-REGISTRY-V22",
+  "anaKuralSayisi": 234,
   "aktifKuralSayisi": 211,
-  "degistirilmisKuralSayisi": 22,
-  "anaKuralSha256": "b57ed6bf996709e1522c71e6b61a835ec48df9f0c52b1671dca61f914fab7a5f",
+  "degistirilmisKuralSayisi": 23,
+  "anaKuralSha256": "67462d63e873b68a1eacfb358f904226d9199f99c81950645e05350df9963506",
   "yurutmeKapisi": "../06_KOD/app/scripts/run-governed-preflight.mjs",
   "temelAlanDogrulamaKapisi": "11_OTOMASYON/dogrula-ticari-temel-alani.mjs",
   "kurallar": [
@@ -108,6 +108,15 @@
       "metin": "Uc bilgi karti arasinda gecisli fakat sahte ilerlemesiz installer, kurulum icinde ayni dil kadin ses onceligi ve erkek veya kurulu ses yedegi, tek pars, kilitli kasa yeniden dogrulamasi, ilk guvenlik bootstrap siniri ve temiz cift yedek teslim kanitlari tek fail-closed kabul zinciridir.",
       "durum": "ACTIVE",
       "kaynak": "PR-233, DEC-267 ve DEC-268",
+      "yurutme": "FAIL_CLOSED",
+      "kanitZorunlu": true
+    },
+    {
+      "id": "TK-012",
+      "baslik": "Surum kanallari program veri ve kaynakta yalitilir",
+      "metin": "Bronze Silver ve Gold ayri Program Files klasoru EXE kisayol appId kullanici veri koku kaldirma kapsami Git worktree ve branch kullanir; kanal disi program veri ve build ciktisi paylasilamaz.",
+      "durum": "ACTIVE",
+      "kaynak": "PR-234 ve DEC-269",
       "yurutme": "FAIL_CLOSED",
       "kanitZorunlu": true
     }

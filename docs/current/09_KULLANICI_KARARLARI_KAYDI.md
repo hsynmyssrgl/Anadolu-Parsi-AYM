@@ -73,13 +73,14 @@ Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağ
 - `DEC-259` — Ticari temel çalışma alanı; aşılamaz kural bağı, makine şemaları, tek ana iş listesi ve governed preflight belge kapısı
 - `DEC-260` — EK-001–EK-019 karar tamponunun çatışma denetimiyle ana sicillere birleştirilmesi; tam regresyon, kurulum yaşam döngüsü ve iki Git uzak deposunda aynı commit teslimi
 - `DEC-261` — Güncel ürün, kurulum, kısayol, yardım, sesli anlatım ve belge başlıklarında yalnız tam `ParsYuva Aile Yaşam Merkezi` adı; `AYM` yalnız tarihsel veya zorunlu teknik uyumluluk kimliği
-- `DEC-262` — Windows kurulum hedefi `C:\Program Files\PPT\ParsYuva`; kurulu ana dosya ve masaüstü/Başlat kısayolu `ParsYuva`; teslim EXE adı yalnız `ParsYuva-<Kanal>-GG.AA.YYYY.NN.exe`
+- `DEC-262` — `DEC-269` ile superseded edilen ortak Windows kurulum, appId ve veri kimliği kararı; dağıtım adı ile uzun ürün adı tarihsel kayıttır
 - `DEC-263` — Kod veya Windows paketleme değişikliğinde önceki ParsYuva installer EXE, blockmap ve SHA-256 dosyaları yeni build öncesinde silinir; release klasöründe yalnız güncel sürüm seti kalabilir
 - `DEC-264` — Bronze, Silver ve Gold görünür sürüm satırlarında kanal adı yalnız bir kez gösterilir; `stage` kanal adını yineleyemez
 - `DEC-265` — Her durum değiştiren işlemden önce güncel kural sicili, hash, kullanıcı onayı ve enforcement bağı doğrulanır; PASS olmadan işlem başlayamaz
 - `DEC-266` — `DEC-267` ile superseded edilen önceki üç pars ve statik kurulum kabul zinciridir
 - `DEC-267` — İlk kullanıcı oluşturma görsel dilinde üç bilgi kartı arasında geçişli fakat sahte ilerlemesiz özel kurulum; Türkçe/İngilizce kadın sesi önceliği ve aynı dilde erkek/kurulu ses yedeği; eski tek pars; kilitli kasa yeniden doğrulaması; ilk 2FA/güvenilir cihaz bootstrap sınırı ve temiz teslim kanıtları tek kabul zinciridir
 - `DEC-268` — `.46` NSIS callback, `.47` stale dahili payload, `.48` ilk 2FA policy authority ve `.49` kayıtsız iç checkpoint/kasa mühürleme FAIL kayıtlarını korur; `.50` kayıtlı checkpoint, ilk güven töreni ertelemesi, temiz installer ve 22 yüzey sentetik ön yüz UAT zincirini yetkilendirir
+- `DEC-269` — Bronze, Silver ve Gold için ayrı kurulum dizini, EXE, kısayol, appId, kullanıcı veri kökü, Git worktree ve branch; kanallar arası program, veri ve build çıktısı paylaşımı yasaktır
 
 ## Bundan sonraki kararlar için zorunlu eşzamanlılık kuralı
 
@@ -87,4 +88,4 @@ Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağ
 
 `DEC-252` gereği bu yenilemedeki kapsamlı tarihsel tarama son temeldir. Bundan sonra eski build, arşiv ve checkpoint belgelerinin içeriği yeniden denetlenmez veya güncel karar kaynağı sayılmaz; yalnız değişmez `HISTORICAL` kayıt olarak korunur. Yeni denetimler aktif ve yeni belgelere uygulanır.
 
-Makine defteri yalnız açık kullanıcı kararlarını tutar. Türetilmiş paket/mimari kararlarının eksiksiz DEC-090–DEC-268 dizini ve dosya yolları `docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md` içindedir.
+Makine defteri yalnız açık kullanıcı kararlarını tutar. Türetilmiş paket/mimari kararlarının eksiksiz DEC-090–DEC-269 dizini ve dosya yolları `docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md` içindedir.

@@ -4,10 +4,12 @@
 
 - Birincil: Windows x64 Electron masaustu.
 - Kurulum: NSIS tabanli tek gercek dosya ilerleme cubugu.
-- Kalici teknik kimlik: veri uyumlulugu icin mevcut Windows appId ve eski user-data dizini korunur.
+- Kalici teknik kok kimlik tarihsel artifact okuma uyumlulugu icin korunur; calisan appId ve user-data dizini Bronze, Silver veya Gold kanal ekiyle yalitilir.
 - Gorunur kimlik: ParsYuva Aile Yasam Merkezi.
-- Kisayol: ParsYuva Aile Yasam Merkezi.
-- Varsayilan kurulum hedefi: urun politikasinda belirlenen sabit Program Files hedefi.
+- Kisayol: ParsYuva <Kanal>.
+- Varsayilan kurulum hedefi: C:\Program Files\PPT\ParsYuva\<Kanal>.
+- Ana program: ParsYuva-<Kanal>.exe.
+- Kaynak calisma alani: C:\PPT\AYM\06_KOD\kanallar\<Kanal> altinda ayri Git worktree ve branch.
 
 ## Gelecek platformlar
 
@@ -44,6 +46,6 @@ flowchart LR
 
 ## Guncelleme uyumlulugu
 
-Paket ismi, gorunur marka veya renk kanali degisebilir; veri dizini ve appId migration plani olmadan degismez. Her guncelleme mevcut kullanici verisini korur ve gerekirse yeni semaya donusturur.
+Paket ismi, gorunur marka veya renk kanali degisebilir; her kanalin veri dizini ve appId kimligi kendi icinde kararlidir. Bronze, Silver ve Gold arasinda veri, kaldirma kapsami veya build ciktisi paylasilmaz. Her kanal guncellemesi yalniz kendi mevcut kullanici verisini korur ve gerekirse yeni semaya donusturur.
 
 Yukseltme veya sessiz bakim onceki kaldiriciyi yikici veri secimine sokmaz. Acik kaldirma akisi ayridir. Ilk aile kurulumu aile, kisi, hesap, uyelik, cihaz, izin ve audit kayitlarini tek SQLite transaction sinirinda olusturur.

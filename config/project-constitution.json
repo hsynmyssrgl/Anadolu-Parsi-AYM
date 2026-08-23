@@ -71,7 +71,7 @@
   "activeDocuments": "config/active-document-set.json",
   "ownerBrand": "ParsYuva",
   "canonicalRuleRegistry": "config/canonical-rule-registry.json",
-  "canonicalRulesSha256": "b57ed6bf996709e1522c71e6b61a835ec48df9f0c52b1671dca61f914fab7a5f",
+  "canonicalRulesSha256": "67462d63e873b68a1eacfb358f904226d9199f99c81950645e05350df9963506",
   "activeGovernanceLedger": "config/active-governance-ledger.json",
   "deliveryReportContract": "config/delivery-report-contract.json",
   "documentInventoryPolicy": "config/document-inventory-policy.json",

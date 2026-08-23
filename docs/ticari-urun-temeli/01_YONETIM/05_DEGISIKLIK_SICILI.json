@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PARSYUVA-AILE-YASAM-MERKEZI-TICARI-DEGISIKLIK-SICILI-V2",
   "temelTarihi": "2026-08-19",
-  "sonKayit": "TICARI-008",
+  "sonKayit": "TICARI-009",
   "kayitlar": [
     {
       "id": "TICARI-001",
@@ -131,6 +131,23 @@
         "docs/ticari-urun-temeli"
       ],
       "isListesiEtkisi": "IS-0109 ve IS-0209; kurulumun uc bilgi karti, ayni dil ses yedegi, tek pars ve ilk guvenlik/kasa regresyon kapilariyla guncellendi. Yeni EXE bu kod duzeltme turunda uretilmez.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-009",
+      "tarih": "2026-08-23",
+      "baslik": "Bronze Silver Gold kurulum veri ve kaynak yalitimi",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-269, PR-234 ve acik kullanici karari",
+      "etkilenenAlanlar": [
+        "packages/domain/src/app-meta.ts",
+        "apps/desktop/package.json",
+        "apps/desktop/build/installer.nsh",
+        "config/release-channel-worktrees.json",
+        "scripts/setup-release-channel-worktrees.mjs",
+        "docs/ticari-urun-temeli"
+      ],
+      "isListesiEtkisi": "IS-0210 eklendi; kanal kurulum program veri kaldirma ve kaynak worktree kimlikleri ayrildi. Gercek worktree olusturma temiz final commit sonrasina baglidir.",
       "senkronDurumu": "SYNCHRONIZED"
     }
   ]
