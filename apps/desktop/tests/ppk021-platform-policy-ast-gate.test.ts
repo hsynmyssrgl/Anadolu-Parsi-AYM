@@ -80,7 +80,7 @@ describe('32-Q PPK-021 TypeScript AST fail-closed gate', () => {
     const inventory = await inventoryPlatformPolicyAstSurfaces();
     const result = evaluatePlatformPolicyAstAllowlist(inventory, manifest);
     expect(result.findings).toEqual([]);
-    expect(result.allowedCount).toBe(896);
+    expect(result.allowedCount).toBe(897);
     expect(inventory.zones).toBe(18);
     expect(inventory.files).toBe(589);
   }, 30_000);
@@ -91,8 +91,8 @@ describe('32-Q PPK-021 TypeScript AST fail-closed gate', () => {
       status: 'PASS',
       productionSourceZones: 18,
       scannedFiles: 589,
-      privilegedSurfaces: 896,
-      exactAllowlistEntries: 896,
+      privilegedSurfaces: 897,
+      exactAllowlistEntries: 897,
       directRoleAuthorizationBypasses: 0,
       maliciousSelfTestAssertions: 17,
       benignSelfTestAssertions: 4,
