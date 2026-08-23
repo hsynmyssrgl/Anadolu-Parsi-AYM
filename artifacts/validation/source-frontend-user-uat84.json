@@ -1,0 +1,470 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 22.08.2026.50",
+  "runtimeKind": "SOURCE_ELECTRON",
+  "executable": "C:\\PPT\\AYM\\06_KOD\\app\\node_modules\\electron\\dist\\electron.exe",
+  "applicationPath": "C:\\PPT\\AYM\\06_KOD\\app\\apps\\desktop",
+  "installedFileVersion": "22.8.2026-50",
+  "profilePath": "C:\\Users\\Husey\\AppData\\Local\\Temp\\parsyuva-source-uat84-PSCKaG",
+  "dataClassification": "SYNTHETIC_TEST_ONLY",
+  "familyName": "ParsYuva 50 UAT Ailesi",
+  "displayName": "Sentetik Test Yoneticisi",
+  "passwordRecorded": false,
+  "twoFactorSecretRecorded": false,
+  "recoveryCodesRecorded": false,
+  "startedAt": "2026-08-23T04:49:52.970Z",
+  "completedAt": "2026-08-23T04:54:41.946Z",
+  "status": "FAIL",
+  "checks": {
+    "firstRunIntroductionVisible": true,
+    "familyCreatedThroughVisibleForm": true,
+    "twoFactorStartedThroughVisibleButton": true,
+    "twoFactorCompletedThroughVisibleForm": true,
+    "currentDeviceTrustedThroughVisibleForm": true,
+    "authenticatedMainShellVisible": true,
+    "navigationSurfaceCount": 2,
+    "navigationSurfaces": [
+      {
+        "index": 20,
+        "routeId": "security",
+        "label": "⛨Güvenlik Merkezi",
+        "heading": "Gizlilik, Sahiplik ve Olay Kontrol Merkezi",
+        "status": "PASS"
+      },
+      {
+        "index": 21,
+        "routeId": "settings",
+        "label": "⚙Sistem ve Bakım",
+        "heading": "Sistem, bakım ve operasyon",
+        "status": "PASS"
+      }
+    ],
+    "moduleMenuCount": 4,
+    "moduleMenus": [
+      {
+        "index": 0,
+        "label": "⌂Ana Merkez⌄",
+        "routeCount": 1,
+        "status": "PASS"
+      },
+      {
+        "index": 1,
+        "label": "♙Aile Hafızası⌄",
+        "routeCount": 7,
+        "status": "PASS"
+      },
+      {
+        "index": 2,
+        "label": "₺Yaşam⌄",
+        "routeCount": 6,
+        "status": "PASS"
+      },
+      {
+        "index": 3,
+        "label": "✉Gizlilik ve Sistem⌄",
+        "routeCount": 8,
+        "status": "PASS"
+      }
+    ],
+    "clickedInteractionCount": 44,
+    "clickedInteractions": [
+      {
+        "routeId": "security",
+        "label": "Gizlilik ve sahiplik⌄",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Yerel silme talebi",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Kendi verim için şifreli talep",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Dijital miras için şifreli talep",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "İncelemeye al",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Yerel talebi iptal et",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "İncelemeye al",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Yerel incelemeyi tamamla",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Yerel inceleme olayı aç",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Kimlik ve geçici yetkiler⌄",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Merkezi yenile",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Bu cihazda passkey kaydet",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Süreli, imzalı QR payload oluştur",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Hedef kişi veya bağlam zorunludur.",
+        "tag": "A",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Gelecekte bir bitiş zamanı seçin.",
+        "tag": "A",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Konu kişi adı zorunludur.",
+        "tag": "A",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Yetkili kişi adı zorunludur.",
+        "tag": "A",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Yerel güvenlik ve yedekleme⌄",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Marka ve anlatım sesini aç/kapat",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Süreli rızayı aç",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Derhal iptal et",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Parola korumalı tam yedek",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Cihaz korumalı tam yedek",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Yedeği incele",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Geri yükle",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "JSON seç ve ön izle",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Geçmişi yenile",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Parolayı değiştir",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Geçmişi yenile",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Kayıtları göster",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Zinciri doğrula",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Politika oluştur",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Kopyayı envantere ekle",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Doğrulanmış kök güveni ekle",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Kaynak profili ekle",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Genç",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Standart",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "İleri yaş",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Düşük görme",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "security",
+        "label": "Bakım veren",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "Kişisel taslaklar⌄",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "Şimdi kaydet",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "Taslak başlığı zorunludur.",
+        "tag": "A",
+        "status": "PASS"
+      },
+      {
+        "routeId": "settings",
+        "label": "Operasyonlar ve yedekleme⌄",
+        "tag": "BUTTON",
+        "status": "PASS"
+      }
+    ],
+    "deferredInteractionCount": 2,
+    "deferredInteractions": [
+      {
+        "routeId": "security",
+        "label": "Tanıtımı yeniden oynat",
+        "reason": "TERMINAL_AUTH_OR_RESET_ACTION"
+      },
+      {
+        "routeId": "security",
+        "label": "Kaldır",
+        "reason": "TERMINAL_AUTH_OR_RESET_ACTION"
+      }
+    ],
+    "visualAuditCount": 8,
+    "visualAudits": [
+      {
+        "surfaceId": "first-run-security-form",
+        "missingRoot": false,
+        "viewport": {
+          "width": 1600,
+          "height": 980
+        },
+        "controlCount": 5,
+        "surfaceCount": 3,
+        "issues": []
+      },
+      {
+        "surfaceId": "authenticated-shell",
+        "missingRoot": false,
+        "viewport": {
+          "width": 1600,
+          "height": 980
+        },
+        "controlCount": 19,
+        "surfaceCount": 2,
+        "issues": []
+      },
+      {
+        "surfaceId": "module-menu-0",
+        "missingRoot": false,
+        "viewport": {
+          "width": 1600,
+          "height": 980
+        },
+        "controlCount": 20,
+        "surfaceCount": 2,
+        "issues": []
+      },
+      {
+        "surfaceId": "module-menu-1",
+        "missingRoot": false,
+        "viewport": {
+          "width": 1600,
+          "height": 980
+        },
+        "controlCount": 26,
+        "surfaceCount": 2,
+        "issues": []
+      },
+      {
+        "surfaceId": "module-menu-2",
+        "missingRoot": false,
+        "viewport": {
+          "width": 1600,
+          "height": 980
+        },
+        "controlCount": 25,
+        "surfaceCount": 2,
+        "issues": []
+      },
+      {
+        "surfaceId": "module-menu-3",
+        "missingRoot": false,
+        "viewport": {
+          "width": 1600,
+          "height": 980
+        },
+        "controlCount": 27,
+        "surfaceCount": 2,
+        "issues": []
+      },
+      {
+        "surfaceId": "route-security",
+        "missingRoot": false,
+        "viewport": {
+          "width": 1600,
+          "height": 980
+        },
+        "controlCount": 7,
+        "surfaceCount": 1,
+        "issues": []
+      },
+      {
+        "surfaceId": "route-settings",
+        "missingRoot": false,
+        "viewport": {
+          "width": 1600,
+          "height": 980
+        },
+        "controlCount": 16,
+        "surfaceCount": 1,
+        "issues": []
+      }
+    ],
+    "javascriptDialogCount": 2,
+    "javascriptDialogs": [
+      {
+        "type": "confirm",
+        "message": "Bu işlem yerel inceleme kaydını açar, mevcut oturumu kapatır ve yeniden giriş gerektirir. Devam edilsin mi?"
+      },
+      {
+        "type": "confirm",
+        "message": "Geri yükleme mevcut verilerin yerine yedekteki verileri koyacak. İşlem öncesi otomatik güvenlik yedeği alınır; tüm güvenilir cihaz kayıtları iptal edilir ve yeniden giriş gerekir. Devam edilsin mi?"
+      }
+    ],
+    "rendererExceptionCount": 0,
+    "diagnosticOnlyRendererExceptionCount": 0,
+    "unexpectedRendererExceptionCount": 0,
+    "rendererExceptions": [],
+    "failedResourceCount": 0,
+    "failedResources": [],
+    "mainProcessExceptionCount": 0,
+    "mainProcessExceptions": []
+  },
+  "screenshots": [
+    "01-first-run-introduction.png",
+    "02-first-family-form.png",
+    "03-first-family-filled.png",
+    "04-security-start.png",
+    "04b-security-fields-rounded.png",
+    "05-authenticated-main-shell.png",
+    "06-responsive-760x720.png"
+  ],
+  "failure": "sistem modulu yuklemesi system-module-operations beklenirken sure asildi."
+}
