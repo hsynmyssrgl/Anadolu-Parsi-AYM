@@ -47,6 +47,7 @@
     "installer:clean-stale": "node scripts/clean-stale-windows-installers.mjs",
     "installer:clean-stale:external": "node scripts/clean-stale-external-windows-installer.mjs",
     "installer:verify-retention": "node scripts/verify-windows-installer-retention-policy.mjs",
+    "create:bronze:final-local-test-delivery": "node scripts/create-bronze-final-local-test-delivery.mjs",
     "verify:user-visible-release-display": "node scripts/verify-user-visible-release-display-policy.mjs",
     "rules:check": "node scripts/verify-operation-rule-check.mjs",
     "verify:first-family-clean-release": "node scripts/verify-first-family-clean-release-policy.mjs",

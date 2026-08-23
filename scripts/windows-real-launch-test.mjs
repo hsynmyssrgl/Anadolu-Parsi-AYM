@@ -1,12 +1,15 @@
 import { spawn, spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import {
   closeSync,
+  createReadStream,
   existsSync,
   mkdtempSync,
   mkdirSync,
   openSync,
   readFileSync,
   rmSync,
+  statSync,
   writeFileSync
 } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -55,6 +58,39 @@ const evidencePath = resolve(
       : 'windows-real-launch-probe.json'
 );
 const electronCachePath = resolve(validationDirectory, 'electron-cache');
+let executableIdentityEvidence = null;
+
+const sha256File = (path) => new Promise((resolvePromise, rejectPromise) => {
+  const hasher = createHash('sha256');
+  const stream = createReadStream(path);
+  stream.on('error', rejectPromise);
+  stream.on('data', (chunk) => hasher.update(chunk));
+  stream.on('end', () => resolvePromise(hasher.digest('hex')));
+});
+
+const captureExecutableIdentity = async (path) => {
+  const item = statSync(path);
+  if (!item.isFile()) throw new Error(`Launch executable is not a file: ${path}`);
+  return Object.freeze({
+    path,
+    sizeBytes: item.size,
+    sha256: await sha256File(path)
+  });
+};
+
+const bindExecutableIdentity = (before, after) => {
+  const unchangedAcrossLaunches = before.path === after.path
+    && before.sizeBytes === after.sizeBytes
+    && before.sha256 === after.sha256;
+  return Object.freeze({
+    path: before.path,
+    sizeBytes: before.sizeBytes,
+    sha256: before.sha256,
+    before,
+    after,
+    unchangedAcrossLaunches
+  });
+};
 
 const normalizedEnvironment = () => {
   const result = {};
@@ -269,6 +305,8 @@ const run = async () => {
   if (packaged && !existsSync(packagedExecutable)) {
     throw new Error(`Packaged Windows executable not found: ${packagedExecutable}`);
   }
+  const launchExecutable = packaged ? packagedExecutable : electron;
+  const executableIdentityBefore = await captureExecutableIdentity(launchExecutable);
   mkdirSync(validationDirectory, { recursive: true });
   rmSync(evidencePath, { force: true });
   if (!packaged) ensureElectronRuntime();
@@ -288,8 +326,16 @@ const run = async () => {
       runNumber: 2,
       expectedSentinelState: 'verified'
     });
+    const executableIdentityAfter = await captureExecutableIdentity(launchExecutable);
+    executableIdentityEvidence = bindExecutableIdentity(
+      executableIdentityBefore,
+      executableIdentityAfter
+    );
+    if (!executableIdentityEvidence.unchangedAcrossLaunches) {
+      throw new Error(`Launch executable changed across runs: ${JSON.stringify(executableIdentityEvidence)}`);
+    }
     const evidence = {
-      schemaVersion: 2,
+      schemaVersion: 3,
       product: 'ParsYuva Aile Yaşam Merkezi',
       applicationVersion: secondRun.applicationVersion,
       mode: packaged ? 'packaged' : 'development',
@@ -302,6 +348,7 @@ const run = async () => {
       windowsEfsRuntime: 'PASS',
       windowsSafeStorageDpapiRuntime: 'PASS',
       protectedSideArtifactWindowsRuntime: 'PASS',
+      executableIdentity: executableIdentityEvidence,
       runs: [firstRun, secondRun],
       generatedAt: new Date().toISOString()
     };
@@ -330,12 +377,13 @@ run().catch((error) => {
   const message = error instanceof Error ? error.message : String(error);
   mkdirSync(validationDirectory, { recursive: true });
   writeFileSync(evidencePath, `${JSON.stringify({
-    schemaVersion: 2,
+    schemaVersion: 3,
     product: 'ParsYuva Aile Yaşam Merkezi',
     mode: packaged ? 'packaged' : 'development',
     status: diagnosticMode ? 'DIAGNOSTIC_FAIL' : 'FAIL',
     diagnosticMode,
     securityExceptions: diagnosticLabels,
+    executableIdentity: executableIdentityEvidence,
     error: message,
     generatedAt: new Date().toISOString()
   }, null, 2)}\n`);
