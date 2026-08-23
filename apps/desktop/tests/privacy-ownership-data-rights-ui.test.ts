@@ -13,7 +13,7 @@ describe('33-O privacy ownership and data rights UI', () => {
   });
 
   it('renders all governed local-observation sections and explicit claim boundaries', () => {
-    for (const heading of ['Tutulan veri','AI hafıza denetimi','Erişim geçmişi','Cihaz ve yerel işleme gözlemi','Veri hakları, saklama ve şifreli dışa aktarım','Türetilmiş veri zinciri','Olay ve yerel containment','Karşı taraf izin simülasyonu']) {
+    for (const heading of ['Tutulan veri','AI hafıza denetimi','Erişim geçmişi','Cihaz ve yerel işleme gözlemi','Veri hakları, saklama ve şifreli dışa aktarım','Türetilmiş veri zinciri','Olay ve yerel sınırlama','Karşı taraf izin simülasyonu']) {
       expect(app).toContain(`<h3>${heading}</h3>`);
     }
     for (const boundary of ['Uzaktan silme, MDM, ağ teslimi, uzak durum veya hukuk/gizlilik sertifikasyonu iddiası yoktur.','Güvenilir cihaz, açık oturum anlamına gelmez.','Yalnız yerel olarak gözlenen','dış kopya silme garantisi yok','İçerik gösterilmez','yetki oluşturmaz, erişim yapmaz']) expect(app).toContain(boundary);
@@ -69,7 +69,7 @@ describe('33-O privacy ownership and data rights UI', () => {
     expect(center).toContain('updatePrivacyIncident({...operation,incidentId:incident.id,status');
     expect(center).toContain("updateIncident(item,'contained_locally')");
     expect(center).toContain("updateIncident(item,'resolved')");
-    expect(center).toContain('remote wipe, MDM veya ağ üzerinden teslim yapılmadı');
+    expect(center).toContain('uzaktan silme, cihaz yönetimi veya ağ üzerinden teslim yapılmadı');
   });
 
   it('clears the export passphrase after both success and failure and refreshes completed-request selection', () => {

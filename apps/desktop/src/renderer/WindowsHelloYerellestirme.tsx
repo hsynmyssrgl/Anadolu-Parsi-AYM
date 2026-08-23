@@ -2,7 +2,7 @@ import { Children, cloneElement, isValidElement, type ReactElement, type ReactNo
 import type { SupportedUiLanguage } from '@ppt/domain';
 
 const exactCopy: Readonly<Record<string,string>> = {
-  '2FA / kurtarma kodu':'2FA / recovery code',
+  'İki aşamalı doğrulama / kurtarma kodu':'Two-factor authentication / recovery code',
   'Başka işlem kullanıyor':'In use by another operation',
   'Bu bilgisayar':'This computer',
   'Cihaz adı':'Device name',
@@ -21,7 +21,7 @@ const exactCopy: Readonly<Record<string,string>> = {
   'Hello olmazsa parola ile devam et':'Continue with password if Hello is unavailable',
   'Kasa bağı':'Vault binding',
   'Kayıt':'Enrollment',
-  'Kayıt için mevcut yerel parola ve hesabınızda etkinse 2FA kodu doğrulanır. Ardından Windows Hello penceresi yalnız bu düğmeye bastığınızda açılır.':'Your current local password and, when enabled for the account, 2FA code are verified for enrollment. The Windows Hello prompt then opens only when you press this button.',
+  'Kayıt için mevcut yerel parola ve hesabınızda etkinse iki aşamalı doğrulama kodu denetlenir. Ardından Windows Hello penceresi yalnız bu düğmeye bastığınızda açılır.':'Your current local password and, when enabled for the account, two-factor authentication code are verified for enrollment. The Windows Hello prompt then opens only when you press this button.',
   'Kayıtlı değil':'Not enrolled',
   'Kaydı güvenli biçimde yenile':'Securely renew enrollment',
   'Kontrol ediliyor…':'Checking…',

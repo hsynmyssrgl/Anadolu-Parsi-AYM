@@ -1381,6 +1381,9 @@ body:has(.app-shell[data-high-contrast="true"]) :is(.modal-backdrop,.narrated-he
   background:linear-gradient(180deg,color-mix(in srgb,var(--release-primary) 88%,white),var(--release-primary));
 }
 .app-shell[data-theme="light"] .button.primary:hover:not(:disabled) { border-color:var(--release-primary-hover); }
+.app-shell[data-theme="light"] :is(.workspace-form>label,.workspace-form form>label,.form-grid label,.security-grid label,.privacy-ownership-grid label,.identity-access-card label,.windows-hello-fallback label) {
+  color:var(--release-text);
+}
 .app-shell :is(button,input,select,textarea,a,[tabindex]):focus-visible { outline-color:var(--release-focus); }
 .app-shell .sidebar {
   background:radial-gradient(circle at 50% -10%,color-mix(in srgb,var(--release-accent-edge) 14%,transparent),transparent 33%),var(--shell-sidebar);
