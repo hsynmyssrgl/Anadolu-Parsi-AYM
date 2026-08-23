@@ -82,7 +82,10 @@ export function CommunicationFileSharingPanel(){
   const updateAlbum=(file:FileView)=>{const albumId=globalThis.prompt(text('Albüm kimliği:','Album identifier:'),'')?.trim();if(!albumId)return;
     void mutate(`album:${file.id}:${albumId}`,{kind:'update_album',fileId:file.id,albumId,selectedForStory:true,likedByPersonIds:[]},
       text('Albüm ve aile hikâyesi seçimi yalnız yerel metadata olarak kaydedildi.','The album and family-story selection was recorded as local metadata only.'));};
-  const saveNotifications=()=>center&&void mutate(`notifications:${center.revision}`,{kind:'set_notifications',quietHoursEnabled:quietEnabled,
+  const notificationsChanged=Boolean(center&&(center.notificationProfile.quietHoursEnabled!==quietEnabled
+    ||center.notificationProfile.quietHoursStart!==quietStart||center.notificationProfile.quietHoursEnd!==quietEnd
+    ||center.notificationProfile.nonEmergencyDigestEnabled!==digestEnabled));
+  const saveNotifications=()=>center&&notificationsChanged&&void mutate(`notifications:${center.revision}`,{kind:'set_notifications',quietHoursEnabled:quietEnabled,
     quietHoursStart:quietStart,quietHoursEnd:quietEnd,nonEmergencyDigestEnabled:digestEnabled,roomOverrides:[],personOverrides:[]},
     text('Sessiz saatler ve acil olmayan özet kararı kaydedildi.','Quiet hours and the non-emergency digest decision were recorded.'));
   const announce=()=>emergencyTitle.trim()&&void mutate(`emergency:${emergencyTitle.trim()}`,{kind:'announce_emergency',
@@ -124,7 +127,7 @@ export function CommunicationFileSharingPanel(){
         <label>{text('Başlangıç','Start')}<input type="time" value={quietStart} onChange={(event)=>setQuietStart(event.target.value)}/></label>
         <label>{text('Bitiş','End')}<input type="time" value={quietEnd} onChange={(event)=>setQuietEnd(event.target.value)}/></label>
         <label><input type="checkbox" checked={digestEnabled} onChange={(event)=>setDigestEnabled(event.target.checked)}/>{text('Acil olmayan yerel özet','Local non-emergency digest')}</label>
-        <Button type="submit" disabled={Boolean(busy)}>{text('Kararı kaydet','Save decision')}</Button></form></div>
+        <Button type="submit" disabled={Boolean(busy)||!notificationsChanged}>{text('Kararı kaydet','Save decision')}</Button></form></div>
 
     <section><h3>{text('Yerel dosya kayıtları','Local file records')}</h3>{center.files.length===0?<EmptyState title={text('Dosya yok','No files')} body={text('İlk dosyayı ana süreç seçicisiyle yerel kasaya mühürleyin.','Seal the first file in the local vault with the main-process picker.')}/>:
       <div className="communication-file-sharing-list">{center.files.map((file)=><article key={file.id}>
