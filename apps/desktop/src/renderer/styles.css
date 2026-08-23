@@ -2226,6 +2226,7 @@ body:has(.app-shell[data-high-contrast="true"]) :is(.modal-backdrop,.narrated-he
 .app-shell label>:is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),select,textarea),
 .modal label>:is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),select,textarea){width:100%}
 .app-shell .button,.modal .button{border-radius:var(--radius-action)}
+:where(.app-shell #main-content button,.modal button){border-radius:var(--radius-action)}
 .app-shell :is(.panel,.surface,.metric-card,.onboarding-card,.notes-card,.status-message){border-radius:var(--radius-surface)}
 .modal{border-radius:var(--radius-dialog)}
 @media(max-width:720px){

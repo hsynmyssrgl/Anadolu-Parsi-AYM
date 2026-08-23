@@ -15,6 +15,7 @@ describe('unified rounded control visual contract', () => {
     expect(styles).toContain('input:not([type="checkbox"]):not([type="radio"]):not([type="range"])');
     expect(styles).toContain('border-radius:var(--radius-control)');
     expect(styles).toContain('.app-shell .button,.modal .button{border-radius:var(--radius-action)}');
+    expect(styles).toContain(':where(.app-shell #main-content button,.modal button){border-radius:var(--radius-action)}');
     expect(styles).toContain('.modal{border-radius:var(--radius-dialog)}');
   });
 
