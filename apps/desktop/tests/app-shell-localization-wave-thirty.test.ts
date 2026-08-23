@@ -20,7 +20,7 @@ describe('app shell English localization wave thirty',()=>{
   it('covers loaded privacy, export, incident, and simulation truth in English',()=>{
     expect(translatePrivacyOwnershipCopy('Gizlilik, Sahiplik ve Olay Kontrol Merkezi','en')).toBe('Privacy, Ownership, and Incident Control Center');
     expect(translatePrivacyOwnershipCopy('Şifreli paket; sahip kapsamındaki yapılandırılmış kayıtları ve gizlilik merkezi verisini içerir. Arşiv ikili dosyaları, sahipliği kesin bağlanamayan aile etkinlikleri ve açıkça seçilmemiş form taslakları dahil edilmez.','en')).toContain('Archive binary files');
-    expect(translatePrivacyOwnershipCopy('remote wipe/MDM/ağ teslimi yapılmadı','en')).toBe('remote wipe, MDM, and network delivery were not performed');
+    expect(translatePrivacyOwnershipCopy('Uzaktan silme, cihaz yönetimi veya ağ teslimi yapılmadı','en')).toBe('Remote deletion, device management, and network delivery were not performed');
     expect(translatePrivacyOwnershipCopy('Salt okunurdur; yetki oluşturmaz, erişim yapmaz ve erişim denetim kaydı üretmez.','en')).toContain('creates no authority');
   });
   it('preserves the Turkish privacy-center surface',()=>{
