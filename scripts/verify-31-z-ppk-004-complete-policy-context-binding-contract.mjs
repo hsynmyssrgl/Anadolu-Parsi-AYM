@@ -35,7 +35,10 @@ check('canonical context snapshot is a public policy-kernel contract', sources.k
 check('context snapshot covers every PPK-004 identity and operation field', contextFields.every((field) => sources.kernel.includes(field)), { fieldCount: contextFields.length });
 check('context hash uses SHA-256 over the canonical snapshot', sources.kernel.includes("createHash('sha256').update(stable(platformPolicyContextSnapshot(request))"));
 check('signed decisions carry the computed context hash', sources.kernel.includes('readonly contextHash?: string') && sources.kernel.includes('contextHash = platformPolicyContextHash(request)'));
-check('strict requests require a bounded correlation and purpose', sources.kernel.includes("strictContext && (!nonEmpty(request.correlationId, 128) || !nonEmpty(request.purpose, 256))"));
+check('strict requests require a bounded correlation and purpose',
+  sources.kernel.includes('strictContext && (')
+  && sources.kernel.includes('!nonEmpty(request.correlationId, 128)')
+  && sources.kernel.includes('!nonEmpty(request.purpose, 256)'));
 check('roles require a non-empty unique bounded set', sources.kernel.includes('validUniqueStrings(request.subject.roles, 1, 64, 128)'));
 check('family scope requires a non-empty unique bounded set', sources.kernel.includes('validUniqueStrings(request.subject.familyIds, 1, 10_000, 256)'));
 check('strict household and family-branch sets are explicit', sources.kernel.includes("strictContext && (!Array.isArray(request.subject.householdIds) || !Array.isArray(request.subject.familyBranchIds))"));
