@@ -10,7 +10,7 @@ check(!main.includes("registerIpcHandler('system:getCoreServiceHealth', () => st
 check(preload.includes("getCoreServiceHealth:():Promise<CoreServiceHealthContract>=>invoke('system:getCoreServiceHealth')"),'preload Core Service health bridge missing');
 check(globalTypes.includes('getCoreServiceHealth():Promise<CoreServiceHealthContract>'),'renderer Core Service health type contract missing');
 check(policy.includes("case 'system:getCoreServiceHealth':"),'IPC integration policy does not explicitly classify Core Service health');
-check(app.includes('window.pardus.getCoreServiceHealth().catch(()=>undefined)'),'System Management screen does not request Core Service health');
+check(app.includes('window.pardus!.getCoreServiceHealth()')||app.includes('window.pardus.getCoreServiceHealth()'),'System Management screen does not request Core Service health');
 check(app.includes('setCoreServiceHealth(coreHealth)'),'System Management screen does not retain Core Service health state');
 check(app.includes("language==='tr'?'Temel Hizmet':'Core Service'"),'System Management screen does not render localized Core Service status');
 check(app.includes("coreServiceHealth.writable?(language==='tr'?'Yazılabilir':'Writable')"),'Core Service writable/read-only status is not localized');
