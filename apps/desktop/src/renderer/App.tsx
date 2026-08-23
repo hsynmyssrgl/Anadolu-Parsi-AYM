@@ -2928,7 +2928,7 @@ export function App() {
   useEffect(() => () => asyncWriteGuardRef.current.invalidateAll(), []);
   useEffect(()=>()=>{if(accessibilitySaveTimerRef.current!==undefined)globalThis.clearTimeout(accessibilitySaveTimerRef.current);},[]);
   useEffect(() => { writeBootstrapPreference(browserPreferenceStorage(), 'ppt-theme', theme); }, [theme]);
-  useEffect(() => { const storage=browserPreferenceStorage();writeBootstrapPreference(storage,'ppt-accessibility',serializeAccessibilityPreferences(accessibility));persistBrandAudioMuted(storage,accessibility.audioMuted);if(accessibility.audioMuted)cancelFirstRunNarration(browserSpeechSynthesis()); }, [accessibility]);
+  useEffect(() => { const storage=browserPreferenceStorage();writeBootstrapPreference(storage,'ppt-accessibility',serializeAccessibilityPreferences(accessibility));persistBrandAudioMuted(storage,accessibility.audioMuted); }, [accessibility]);
   useEffect(()=>{const query=globalThis.matchMedia?.('(prefers-color-scheme: dark)');if(!query)return;const update=()=>setSystemDark(query.matches);query.addEventListener?.('change',update);return()=>query.removeEventListener?.('change',update);},[]);
   useEffect(() => { writeBootstrapPreference(browserPreferenceStorage(), 'ppt-sidebar-collapsed', String(sidebarCollapsed)); }, [sidebarCollapsed]);
   useEffect(()=>{const replay=()=>setFirstRunIntroCompleted(false);globalThis.addEventListener('ppt-replay-intro',replay);return()=>globalThis.removeEventListener('ppt-replay-intro',replay);},[]);
