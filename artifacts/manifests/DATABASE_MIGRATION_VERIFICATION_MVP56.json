@@ -296,7 +296,7 @@
     {
       "version": 56,
       "name": "durable_platform_policy_transactions",
-      "checksum": "afc52b5d5f221e6493cd126dcc56a6aae1e1a0fe4c54b00ae3405c74a71c4b78"
+      "checksum": "78debf335b2e61c751c1494876e9795b4541205007f15ac47877049869ebc77e"
     },
     {
       "version": 57,
@@ -602,7 +602,27 @@
       "version": 117,
       "name": "communication_scheduled_message_release",
       "checksum": "9602df3d935441f033eb45d89d7403e09d8dbed3849873cfe68a098ff754dde3"
+    },
+    {
+      "version": 118,
+      "name": "platform_policy_receipt_clock_skew_contract",
+      "checksum": "13cdc3765c08e54e4b984b913173624b0eb88d38c85d5543227727eb3e8f8146"
+    },
+    {
+      "version": 119,
+      "name": "object_permission_finite_allow_contract",
+      "checksum": "dc64653d5aeb0f91a7c408c9f66d51c7680282fd6a9540c969390aeacc44612b"
+    },
+    {
+      "version": 120,
+      "name": "privacy_rights_local_completion_contract",
+      "checksum": "aca5ee037c1c5adc120222bffe6f2da3dfa817bcde386a731c48bb3b725bfdb2"
+    },
+    {
+      "version": 121,
+      "name": "authoritative_policy_receipt_recorded_at",
+      "checksum": "768be31fa4c6c99269c7b708231bef59b8aa8dd4e54df3ddc8a3e2b943e8f42a"
     }
   ],
-  "generatedAt": "2026-08-22T15:16:07.624Z"
+  "generatedAt": "2026-08-23T07:40:57.888Z"
 }

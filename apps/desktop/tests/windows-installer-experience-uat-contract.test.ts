@@ -28,8 +28,10 @@ describe('real Windows NSIS installer experience UAT contract', () => {
     expect(source).toContain('[Parameter(Mandatory = $true)]');
     expect(source).toContain('[string]$InstallerPath');
     expect(source).toContain('[string]$EvidenceRoot');
-    expect(source).toContain('[System.IO.Path]::IsPathFullyQualified($InstallerPath)');
-    expect(source).toContain('[System.IO.Path]::IsPathFullyQualified($EvidenceRoot)');
+    expect(source).toContain('Test-IsExplicitWindowsAbsolutePath -Path $InstallerPath');
+    expect(source).toContain('Test-IsExplicitWindowsAbsolutePath -Path $EvidenceRoot');
+    expect(source).not.toContain('[System.IO.Path]::IsPathFullyQualified');
+    expect(source).not.toContain('[System.Convert]::ToHexString');
     expect(source).toContain("'apps\\desktop\\release'");
     expect(source).toContain("'artifacts\\validation'");
     expect(source).toContain('Installer does not exist; live UAT was not started');
@@ -41,6 +43,10 @@ describe('real Windows NSIS installer experience UAT contract', () => {
       source.indexOf('Start-Process -FilePath $installerFullPath'),
     );
     expect(source).toContain('InstallerPath cannot be a reparse point.');
+    expect(source).toContain('Assert-NoReparseAncestors');
+    expect(source).toContain('Get-StrictRelativePath');
+    expect(source).not.toContain('[System.IO.Path]::GetRelativePath');
+    expect(source).toContain('Reparse points are forbidden inside the approved path boundary');
   });
 
   it('binds three timed #32770 screenshots, fake-progress rejection and narration language observation', async () => {
@@ -58,13 +64,19 @@ describe('real Windows NSIS installer experience UAT contract', () => {
       'visibleProgressBarCount',
       'transitionFromPreviousMs',
       '$delta -lt 1400 -or $delta -gt 5000',
-      '$graphics.CopyFromScreen',
-      'Get-FileHash -LiteralPath $path -Algorithm SHA256',
+      '[ParsYuvaInstallerNativeCapture]::PrintWindow',
+      "captureMode = 'PRINT_WINDOW_TARGET_ONLY'",
+      'titleBeforeCapture',
+      'titleAfterCapture',
+      'PrintWindow returned a blank or single-color installer capture.',
+      'Welcome-only screenshot unexpectedly contains a visible input field.',
+      'Get-DotNetFileSha256 -Path $path',
       'aym-installer-narration\\.ps1',
       '-Language\\s+(tr|en)',
       'GetUserDefaultUILanguage',
       '$narration.language -ne $expectedNarrationLanguage',
     ]) expect(source).toContain(marker);
+    expect(source).not.toContain('CopyFromScreen');
     expect(source).not.toContain("'/S'");
     expect(source).not.toMatch(/https?:|Invoke-WebRequest|Start-BitsTransfer/iu);
   });
@@ -78,11 +90,13 @@ describe('real Windows NSIS installer experience UAT contract', () => {
       'Installed channel payload changed during a welcome-only cancellation UAT.',
       'Forced process cleanup was required; safe cancellation cannot be accepted.',
       'Get-TreeSnapshot -Root $expectedInstalledRoot',
-      'Stop-Process -Id $processId -Force',
+      'Stop-Process -Id $identity.ProcessId -Force',
       "'windows-installer-experience-uat.json'",
       '[System.IO.File]::Move($temporaryReportPath, $reportPath)',
       "if ($status -ne 'PASS') { exit 1 }",
     ]) expect(source).toContain(marker);
+    expect(source).toContain('Test-SameProcessIdentity');
+    expect(source).toContain('$cancelConfirmationInvoked -and');
     expect(source).not.toMatch(/Remove-Item\s+[^\r\n]*(?:Program Files|EvidenceRoot|validationRoot)/iu);
     expect(source).not.toContain('Remove-Item -Recurse');
   });
@@ -90,10 +104,10 @@ describe('real Windows NSIS installer experience UAT contract', () => {
   it('records exact installer identity without treating NotSigned as a runtime UAT failure', async () => {
     const source = await readFile(uatScriptUrl, 'utf8');
     expect(source).toContain('Get-AuthenticodeSignature -LiteralPath $installerFullPath');
-    expect(source).toContain('Get-FileHash -LiteralPath $installerFullPath -Algorithm SHA256');
+    expect(source).toContain('Get-DotNetFileSha256 -Path $installerFullPath');
+    expect(source).not.toContain('Get-FileHash');
     expect(source).toContain('authenticodeStatus = $installerSignature.Status.ToString()');
     expect(source).not.toMatch(/authenticodeStatus[^\r\n]+PASS/iu);
     expect(source).not.toMatch(/NotSigned[^\r\n]+PASS/iu);
   });
 });
-
