@@ -34,7 +34,9 @@ describe('system management lazy module integrity', () => {
     expect(app).toContain("if(coreHealth?.lifecycle==='ready')void refreshGovernance(true);");
     expect(app).toContain('const serviceAvailability=await optional(()=>window.pardus!.getPolicyServiceAvailabilityBoundary());');
     expect(app).toContain('if(!serviceAvailability)return;');
-    expect(app).toContain('aria-busy={operationsLoading}');
+    expect(app).toContain("data-loading={operationsLoading?'true':'false'}");
+    expect(app).toContain('className="system-operations-progress" aria-busy="true" aria-live="polite"');
+    expect(app).toContain('Ekran kullanıma açık; operasyon ve politika göstergeleri güvenli sırayla güncelleniyor.');
     expect(app).toContain('Sistem verileri hazırlanıyor');
     const refreshBody=app.slice(app.indexOf('const refresh=async()=>{'),app.indexOf('const maintain=async'));
     expect(refreshBody).not.toContain('Promise.all');
