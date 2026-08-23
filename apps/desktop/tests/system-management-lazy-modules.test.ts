@@ -26,9 +26,15 @@ describe('system management lazy module integrity', () => {
     ]) expect(app).toContain(marker);
   });
 
-  it('starts system polling only while the operations module is open', () => {
+  it('loads operations through one sequential in-flight request and exposes its wait state', () => {
     expect(app).toContain("if(activeSystemModule!=='operations')return;void refresh()");
-    expect(app).toContain("if(activeSystemModule!=='operations')return;const load=");
+    expect(app).toContain('const operationsRefreshRef=useRef<Promise<void>|null>(null);');
+    expect(app).toContain('if(operationsRefreshRef.current){await operationsRefreshRef.current;return;}');
+    expect(app).toContain('aria-busy={operationsLoading}');
+    expect(app).toContain('Sistem verileri hazırlanıyor');
+    const refreshBody=app.slice(app.indexOf('const refresh=async()=>{'),app.indexOf('const maintain=async'));
+    expect(refreshBody).not.toContain('Promise.all');
+    expect(refreshBody).not.toContain('Promise.allSettled');
   });
 
   it('keeps the module selector rounded and responsive', () => {
