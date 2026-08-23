@@ -5,12 +5,10 @@
     "B0-04"
   ],
   "enforcement": "fail-closed",
-  "status": "FAIL",
-  "checksPassed": 20,
-  "checksFailed": 1,
-  "failures": [
-    "renderer must consume and display the governance boundary"
-  ],
+  "status": "PASS",
+  "checksPassed": 21,
+  "checksFailed": 0,
+  "failures": [],
   "productModuleCount": 17,
   "governanceSurfaceCount": 5,
   "routeCount": 22,
@@ -85,5 +83,5 @@
   },
   "b901CompletedByThisPackage": false,
   "databaseMigrationRequired": false,
-  "generatedAt": "2026-08-23T07:16:56.273Z"
+  "generatedAt": "2026-08-23T07:18:57.894Z"
 }
