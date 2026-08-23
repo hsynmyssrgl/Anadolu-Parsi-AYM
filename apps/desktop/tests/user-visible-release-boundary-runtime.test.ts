@@ -37,10 +37,14 @@ describe('desktop user-visible release boundary', () => {
   });
 
   it('generates a canonical public delivery file in the deliveries directory', async () => {
-    const generator = await readSource('scripts/generate-current-delivery-report.mjs');
+    const [generator, governanceUtils] = await Promise.all([
+      readSource('scripts/generate-current-delivery-report.mjs'),
+      readSource('scripts/lib/governance-utils.mjs')
+    ]);
     expect(generator).toContain('userVisibleDeliveryFileName');
-    expect(generator).toContain("'artifacts', 'deliveries'");
-    expect(generator).toContain('ParsYuva_Aile_Yasam_Merkezi_');
+    expect(generator).toContain('resolveCurrentDeliveryOutputBoundary(release.current, repositoryMetadata)');
+    expect(governanceUtils).toContain('ParsYuva_Aile_Yasam_Merkezi_');
+    expect(governanceUtils).toContain('artifacts/deliveries/${userVisibleFileName}');
     expect(generator).toContain('RC2?|MVP|Build');
   });
 });
