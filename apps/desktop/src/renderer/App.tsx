@@ -2931,7 +2931,7 @@ export function App() {
   useEffect(() => { const storage=browserPreferenceStorage();writeBootstrapPreference(storage,'ppt-accessibility',serializeAccessibilityPreferences(accessibility));persistBrandAudioMuted(storage,accessibility.audioMuted); }, [accessibility]);
   useEffect(()=>{const query=globalThis.matchMedia?.('(prefers-color-scheme: dark)');if(!query)return;const update=()=>setSystemDark(query.matches);query.addEventListener?.('change',update);return()=>query.removeEventListener?.('change',update);},[]);
   useEffect(() => { writeBootstrapPreference(browserPreferenceStorage(), 'ppt-sidebar-collapsed', String(sidebarCollapsed)); }, [sidebarCollapsed]);
-  useEffect(()=>{const replay=()=>setFirstRunIntroCompleted(false);globalThis.addEventListener('ppt-replay-intro',replay);return()=>globalThis.removeEventListener('ppt-replay-intro',replay);},[]);
+  useEffect(()=>{const replay=()=>setIntroductionReplayOpen(true);globalThis.addEventListener('ppt-replay-intro',replay);return()=>globalThis.removeEventListener('ppt-replay-intro',replay);},[]);
   useEffect(() => {
     const clock = globalThis.setInterval(() => setCurrentTime(new Date()), 30_000);
     const onKeyDown = (event: KeyboardEvent) => {

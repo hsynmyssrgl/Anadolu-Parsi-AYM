@@ -88,6 +88,15 @@ describe('Ilk acilis deneyimi',()=>{
     expect(renderer).toContain('autoComplete="current-password"');
   });
 
+  it('tamamlanmis ilk kurulumu bozmadan tanitimi gecici replay kipinde acar',()=>{
+    const renderer=readFileSync(new URL('../src/renderer/App.tsx',import.meta.url),'utf8');
+    expect(renderer).toContain("const replay=()=>setIntroductionReplayOpen(true)");
+    expect(renderer).not.toContain("const replay=()=>setFirstRunIntroCompleted(false)");
+    expect(renderer).toContain('if(introductionReplayOpen)return <FirstRunIntroduction');
+    expect(renderer).toContain('mode="replay"');
+    expect(renderer).toContain('onComplete={()=>setIntroductionReplayOpen(false)}');
+  });
+
   it('guvenlik merkezinde eksik parola veya kodla 2FA ve cihaz guveni istegi gondermez',()=>{
     const renderer=readFileSync(new URL('../src/renderer/App.tsx',import.meta.url),'utf8');
     expect(renderer).toContain('disabled={!currentPassword||!twoFactorCode} onClick={()=>void disable2fa()}');
