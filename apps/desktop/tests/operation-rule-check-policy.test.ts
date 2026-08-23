@@ -27,4 +27,15 @@ describe('operation rule check policy', () => {
     expect(workspaceInstructions).toContain('kural hash\'i değişirse');
     expect(workspaceInstructions).toContain('Waiver, sessiz atlama');
   });
+
+  it('keeps the per-operation receipt outside the authoritative source hash cycle', async () => {
+    const [governanceUtils, sourceProtection, deliveryReport] = await Promise.all([
+      readSource('scripts/lib/governance-utils.mjs'),
+      readSource('scripts/protect-authoritative-source.mjs'),
+      readSource('scripts/generate-current-delivery-report.mjs')
+    ]);
+    expect(governanceUtils).toContain("'artifacts/validation/operation-rule-check.json'");
+    expect(sourceProtection).toContain('...DERIVED_DOCUMENT_INDEX_PATHS');
+    expect(deliveryReport).toContain('...DERIVED_DOCUMENT_INDEX_PATHS');
+  });
 });

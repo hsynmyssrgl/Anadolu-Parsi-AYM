@@ -16,12 +16,15 @@ export const SELF_INDEX_PATHS = new Set([
   'SHA256SUMS.txt'
 ]);
 
-// These files describe the complete live tree and therefore change whenever a
-// delivery report changes.  They cannot be part of the authoritative source
-// hash that the report itself cites without creating a hash cycle.  They stay
-// tracked and are regenerated/verified immediately before every report backup.
-// Reuse the preflight self-index boundary so the two exclusion lists cannot drift.
-export const DERIVED_DOCUMENT_INDEX_PATHS = SELF_INDEX_PATHS;
+// These files describe the complete live tree or the operation that is about
+// to inspect it. They therefore change while a protected source is being
+// verified. They cannot be part of the authoritative source hash cited by the
+// same verification/report cycle. They stay tracked and their exclusion is an
+// exact allowlist shared by source protection and delivery report validation.
+export const DERIVED_DOCUMENT_INDEX_PATHS = new Set([
+  ...SELF_INDEX_PATHS,
+  'artifacts/validation/operation-rule-check.json'
+]);
 
 export const DOCUMENT_EXTENSIONS = new Set(['.md','.pdf','.docx','.txt','.rtf','.json','.csv','.yml','.yaml','.html']);
 // Versioned 34-L receipts attest one exact local checkout and are intentionally
