@@ -138,6 +138,17 @@ describe('33-J family emergency card portability application boundary', () => {
         accepted: true, contractFamily: 'family_emergency_card_portability', itemType: command.itemType
       });
     }
+    const uuidWithPanLikeDigits = '41111111-1111-1111-a111-111111111111';
+    const uuidSelectedField = {
+      ...valid[1], profileId:uuidWithPanLikeDigits, configurationId:uuidWithPanLikeDigits,
+      sourceItemId:uuidWithPanLikeDigits
+    };
+    expect(inspectManagedLifeDataContract(uuidSelectedField)).toMatchObject({
+      accepted:true, panLikeValueDetected:false, contractFamily:'family_emergency_card_portability'
+    });
+    expect(inspectManagedLifeDataContract({ ...uuidSelectedField, sourceItemId:'4111111111111111' })).toMatchObject({
+      accepted:false, panLikeValueDetected:true
+    });
     for (const prohibited of [
       { ...valid[0], passphrase: 'do-not-store' },
       { ...valid[0], totp: '123456' },
