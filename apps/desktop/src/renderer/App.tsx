@@ -3104,7 +3104,7 @@ export function App() {
 
 
   const ensureSnapshotSections=async(sections:readonly FamilySnapshotSection[]):Promise<void>=>{
-    await Promise.all(sections.map(section=>ensureSnapshotSection(section)));
+    for(const section of sections)await ensureSnapshotSection(section);
   };
 
   const ensureAuxiliaryScreen=async(screen:ScreenId):Promise<void>=>{
@@ -3247,9 +3247,9 @@ export function App() {
   const refreshFamilyData = async () => {
     if(!window.pardus)return;
     const ticket=asyncWriteGuardRef.current.start('family-refresh');
-    const [graph,timeline,nextDashboard,nextArchived]=await Promise.all([window.pardus.getSnapshotSections({sections:['graph']}),window.pardus.getSnapshotSections({sections:['timeline']}),window.pardus.getDashboardOverview(),window.pardus.listArchivedTimelineEvents()]);
+    const [familySnapshot,nextDashboard,nextArchived]=await Promise.all([window.pardus.getSnapshotSections({sections:['graph','timeline']}),window.pardus.getDashboardOverview(),window.pardus.listArchivedTimelineEvents()]);
     asyncWriteGuardRef.current.commit(ticket,()=>{
-      setSnapshot(current=>mergeSnapshotPatch(mergeSnapshotPatch(current,graph),timeline));
+      setSnapshot(current=>mergeSnapshotPatch(current,familySnapshot));
       const loaded=new Set<FamilySnapshotSection>(['graph','timeline']);loadedSnapshotSectionsRef.current=loaded;setLoadedSnapshotSections(new Set(loaded));
       setDashboardOverview(nextDashboard);setArchivedEvents(nextArchived);
     });
