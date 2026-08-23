@@ -1928,6 +1928,8 @@ export function IdentityAccessCredentialCenter({trustedDevices}:{trustedDevices:
 
 function SettingsSecurity({auth,accessibility,onAccessibilityChange,onFamilyDataChanged}:{auth:AuthStateView;accessibility:AccessibilityPreferences;onAccessibilityChange:(next:AccessibilityPreferences)=>void;onFamilyDataChanged:()=>Promise<void>}) {
   const {language,bootstrap}=useLocalization();
+  type SecurityModuleId='privacy-ownership'|'identity-access'|'local-controls';
+  const [activeSecurityModule,setActiveSecurityModule]=useState<SecurityModuleId>();
   const [languagePreference,setLanguagePreference]=useState<UiLanguagePreference>(bootstrap.preference);
   const [languagePreferenceBusy,setLanguagePreferenceBusy]=useState(false);
   const [message,setMessage]=useState('');
@@ -1974,8 +1976,27 @@ function SettingsSecurity({auth,accessibility,onAccessibilityChange,onFamilyData
     catch(error){setMessage(error instanceof Error?error.message:(language==='tr'?'Dil tercihi kaydedilemedi.':'The language preference could not be saved.'));setLanguagePreferenceBusy(false);}
   };
   useEffect(()=>{
-    if(window.pardus&&auth.authenticated)void Promise.allSettled([window.pardus.listTrustedDevices().then(setDevices),refreshPrivacyCenter(),window.pardus.listSecurityEventReceipts(20).then(setSecurityReceiptHistory),refreshImports()]);
-  },[auth.authenticated]);
+    let cancelled=false;
+    const load=async()=>{
+      if(!window.pardus||!auth.authenticated||!activeSecurityModule)return;
+      if(activeSecurityModule==='identity-access'){
+        const nextDevices=await window.pardus.listTrustedDevices();
+        if(!cancelled)setDevices(nextDevices);
+        return;
+      }
+      if(activeSecurityModule==='local-controls'){
+        const nextDevices=await window.pardus.listTrustedDevices();
+        if(cancelled)return;setDevices(nextDevices);
+        await refreshPrivacyCenter();if(cancelled)return;
+        const receipts=await window.pardus.listSecurityEventReceipts(20);
+        if(cancelled)return;setSecurityReceiptHistory(receipts);
+        const imports=await window.pardus.listFamilyDataImports(20);
+        if(!cancelled)setImportBatches(imports);
+      }
+    };
+    void load().catch(error=>{if(!cancelled)setMessage(error instanceof Error?error.message:(language==='tr'?'Güvenlik modülü yüklenemedi.':'The security module could not be loaded.'));});
+    return()=>{cancelled=true;};
+  },[activeSecurityModule,auth.authenticated]);
 
   const validateBackupPassword=(confirmationRequired:boolean):boolean=>{
     if(backupPassword.length<12){
@@ -2075,9 +2096,20 @@ function SettingsSecurity({auth,accessibility,onAccessibilityChange,onFamilyData
     finally{setImportBusy(false);}
   };
 
+  const securityModules:ReadonlyArray<{readonly id:SecurityModuleId;readonly label:string}>=[
+    {id:'privacy-ownership',label:language==='tr'?'Gizlilik ve sahiplik':'Privacy and ownership'},
+    {id:'identity-access',label:language==='tr'?'Kimlik ve geçici yetkiler':'Identity and temporary access'},
+    {id:'local-controls',label:language==='tr'?'Yerel güvenlik ve yedekleme':'Local security and backups'}
+  ];
   return <Surface className="security-center">
-    <PrivacyOwnershipCenter/>
-    <IdentityAccessCredentialCenter trustedDevices={devices}/>
+    <SectionHeader eyebrow={language==='tr'?'İsteğe bağlı yükleme':'On-demand loading'} title={language==='tr'?'Güvenlik Merkezi modülleri':'Security Center modules'}/>
+    <p>{language==='tr'?'Modüller kapalı başlar; yalnız seçtiğiniz güvenlik alanı yüklenir.':'Modules start closed; only the security area you select is loaded.'}</p>
+    <div className="system-module-grid security-module-grid">{securityModules.map(module=><Button key={module.id}
+      aria-expanded={activeSecurityModule===module.id} aria-controls={`security-module-${module.id}`}
+      onClick={()=>setActiveSecurityModule(current=>current===module.id?undefined:module.id)}>{module.label}<span aria-hidden="true">{activeSecurityModule===module.id?'⌃':'⌄'}</span></Button>)}</div>
+    {activeSecurityModule==='privacy-ownership'&&<div id="security-module-privacy-ownership"><PrivacyOwnershipCenter/></div>}
+    {activeSecurityModule==='identity-access'&&<div id="security-module-identity-access"><IdentityAccessCredentialCenter trustedDevices={devices}/></div>}
+    {activeSecurityModule==='local-controls'&&<div id="security-module-local-controls" className="security-local-controls">
     <SectionHeader eyebrow="Yerel koruma" title="Güvenlik ve yedekleme"/>
     <section className="language-preference-card" aria-label={language==='tr'?'Uygulama dili tercihi':'Application language preference'}>
       <h3>{language==='tr'?'Uygulama dili':'Application language'}</h3>
@@ -2139,6 +2171,7 @@ function SettingsSecurity({auth,accessibility,onAccessibilityChange,onFamilyData
     </div>
     {backupInspection&&<div className="backup-inspection"><strong>{backupInspection.legacy?'Eski açık yedek biçimi':'Parola korumalı yedek doğrulandı'} · v{backupInspection.formatVersion}</strong><small>{backupInspection.archiveCount} arşiv girdisi · {(backupInspection.fileBytes/1048576).toFixed(1)} MB · Risk: {backupInspection.riskLevel==='low'?'Düşük':'Dikkat'}</small>{backupInspection.checks.map(check=><small key={check.code}>{check.valid?'✓':'!'} {check.label}: {check.detail}</small>)}</div>}
     {message&&<StatusMessage>{message}</StatusMessage>}
+    </div>}
   </Surface>;
 }
 

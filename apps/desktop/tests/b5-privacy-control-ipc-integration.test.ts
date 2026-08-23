@@ -23,7 +23,9 @@ describe('33-K B5-06/EXT-039 desktop boundary',()=>{
     expect(read('apps/desktop/src/main/main.ts')).toContain('sealUserDataSession()');
     expect(read('apps/desktop/src/main/ipc-read-sharing.ts')).toMatch(/MUTATION_ACTION_PATTERN[^\n]+shutdown/u);
     expect(ui).toContain('uzaktan silme, MDM veya ağ üzerinden teslim garantisi vermez');
-    expect(ui).toContain('Promise.allSettled([window.pardus.listTrustedDevices()');
+    expect(ui).toContain("activeSecurityModule==='local-controls'");
+    expect(ui).toContain('await refreshPrivacyCenter();if(cancelled)return;');
+    expect(ui).not.toContain('Promise.allSettled([window.pardus.listTrustedDevices()');
     expect(ui).toContain('Gizlilik merkezi güvenli biçimde yüklenemedi. Yerel yetki durumu kapalı tutuldu; yeniden deneyin.');
     expect(ui).toContain('disabled={!privacyCenter||liveLocationDuration<15||liveLocationDuration>43200}');
     for(const marker of ["scope:'local_authority_only'","remoteWipePerformed:false","mdmOperationPerformed:false","networkDelivery:'not_performed'"])expect(application).toContain(marker);

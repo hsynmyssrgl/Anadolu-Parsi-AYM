@@ -854,6 +854,8 @@ linear-gradient(145deg,#071a2d 0%,#0b2744 52%,#0b1c31 100%)}
   background: var(--shell-accent-soft, #eef5ef);
   border-color: var(--shell-accent, #4f8068);
 }
+.security-local-controls { display:grid;gap:16px;margin-top:16px; }
+.security-module-grid + [id^="security-module-"] { margin-top:16px; }
 @media(max-width:900px){.system-module-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){.system-module-grid{grid-template-columns:1fr}}
 .insight-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin-top:16px; }
