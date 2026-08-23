@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "status": "passed",
-  "version": "04.08.2026.29",
-  "milestone": "Bronze RC2 Build undefined",
+  "version": "22.08.2026.50",
+  "milestone": "Bronze 22.08.2026.50",
   "checks": 14,
   "checkNames": [
     "dashboard family identity is authoritative",
@@ -32,5 +32,5 @@
     "finalTimelineEvents": 1,
     "memberVisibleArchiveCount": 0
   },
-  "verifiedAt": "2026-08-11T06:57:13.780Z"
+  "verifiedAt": "2026-08-23T14:58:01.859Z"
 }

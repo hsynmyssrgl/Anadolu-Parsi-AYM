@@ -17,6 +17,9 @@ const policyVersion = '30-x-health-verifier-policy-v1';
 const policyKernel = new PlatformPolicyKernel({
   policyVersion,
   signingKey: Buffer.from('30-x-health-verifier-signing-key-v1', 'utf8'),
+  applicationVersions: {
+    'windows-desktop': ACTIVE_BUILD_META.applicationVersion
+  },
   applicationCapabilities: {
     'windows-desktop': ['health.read', 'health.write', 'finance.read', 'finance.write', 'archive.write']
   },
@@ -25,6 +28,7 @@ const policyKernel = new PlatformPolicyKernel({
   writeActions: ['create', 'update', 'delete', 'record']
 });
 const policyProvider = Object.freeze({
+  resolvePolicyPackage: () => policyKernel.policyPackage,
   authorize({ request, nonce }) {
     return Object.freeze({
       effectiveRequest: request,

@@ -1,7 +1,7 @@
 {
   "status": "passed",
-  "version": "04.08.2026.29",
-  "milestone": "Bronze RC2 Build undefined",
+  "version": "22.08.2026.50",
+  "milestone": "Bronze 22.08.2026.50",
   "checks": 14,
   "scenarios": [
     "family graph query returns seeded family",

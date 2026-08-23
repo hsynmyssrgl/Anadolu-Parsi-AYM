@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "status": "passed",
-  "version": "04.08.2026.29",
-  "milestone": "Bronze RC2 Build undefined",
+  "version": "22.08.2026.50",
+  "milestone": "Bronze 22.08.2026.50",
   "checks": 16,
   "checkNames": [
     "TOTP setup returns secret and eight recovery codes",
@@ -28,5 +28,5 @@
     "trustedDeviceTable": true,
     "cryptographicIdentity": "Ed25519"
   },
-  "verifiedAt": "2026-08-11T06:57:19.918Z"
+  "verifiedAt": "2026-08-23T14:58:10.308Z"
 }
