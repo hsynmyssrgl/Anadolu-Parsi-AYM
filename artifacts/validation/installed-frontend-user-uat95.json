@@ -1,0 +1,245 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 22.08.2026.50",
+  "runtimeKind": "INSTALLED_EXECUTABLE",
+  "executable": "C:\\Program Files\\PPT\\ParsYuva\\Bronze\\ParsYuva-Bronze.exe",
+  "installedFileVersion": "22.8.2026-50",
+  "profilePath": "C:\\Users\\Husey\\AppData\\Local\\Temp\\parsyuva-installed-uat95-WV0Hpk",
+  "dataClassification": "SYNTHETIC_TEST_ONLY",
+  "familyName": "ParsYuva 50 UAT Ailesi",
+  "displayName": "Sentetik Test Yoneticisi",
+  "passwordRecorded": false,
+  "twoFactorSecretRecorded": false,
+  "recoveryCodesRecorded": false,
+  "startedAt": "2026-08-23T08:05:26.694Z",
+  "completedAt": "2026-08-23T08:09:16.054Z",
+  "status": "FAIL",
+  "checks": {
+    "firstRunIntroductionVisible": true,
+    "familyCreatedThroughVisibleForm": true,
+    "twoFactorStartedThroughVisibleButton": true,
+    "twoFactorCompletedThroughVisibleForm": true,
+    "currentDeviceTrustedThroughVisibleForm": true,
+    "authenticatedMainShellVisible": true,
+    "navigationSurfaceCount": 2,
+    "navigationSurfaces": [
+      {
+        "index": 0,
+        "routeId": "dashboard",
+        "label": "⌂Gösterge Paneli",
+        "heading": "Aile alanınız hazır",
+        "status": "PASS"
+      },
+      {
+        "index": 1,
+        "routeId": "family",
+        "label": "♙Aile",
+        "heading": "Aile üyeleri",
+        "status": "PASS"
+      }
+    ],
+    "moduleMenuCount": 4,
+    "moduleMenus": [
+      {
+        "index": 0,
+        "label": "⌂Ana Merkez⌄",
+        "routeCount": 1,
+        "status": "PASS"
+      },
+      {
+        "index": 1,
+        "label": "♙Aile Hafızası⌄",
+        "routeCount": 7,
+        "status": "PASS"
+      },
+      {
+        "index": 2,
+        "label": "₺Yaşam⌄",
+        "routeCount": 6,
+        "status": "PASS"
+      },
+      {
+        "index": 3,
+        "label": "✉Gizlilik ve Sistem⌄",
+        "routeCount": 8,
+        "status": "PASS"
+      }
+    ],
+    "clickedInteractionCount": 10,
+    "clickedInteractions": [
+      {
+        "routeId": "dashboard",
+        "label": "＋ İlk aile üyesini ekle",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "dashboard",
+        "label": "□ Önemli gün oluştur",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "dashboard",
+        "label": "✓1. adımAile alanı oluşturulduYerel yönetici profiliniz güvenli biçimde hazır.",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "dashboard",
+        "label": "＋2. adımAile üyelerini ekleyinEş, çocuk, anne, baba ve diğer yakınlarınızı kaydedin.",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "dashboard",
+        "label": "⌘3. adımAile bağlarını kurunKişileri birbirine bağlayarak soy ağacınızı oluşturun.",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "dashboard",
+        "label": "□4. adımİlk önemli günü ekleyinDoğum günü, buluşma ve özel anları unutmayın.",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "dashboard",
+        "label": "Yedeklemeyi ayarla",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "dashboard",
+        "label": "×",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "dashboard",
+        "label": "×",
+        "tag": "BUTTON",
+        "status": "PASS"
+      },
+      {
+        "routeId": "family",
+        "label": "＋ Üye ekle",
+        "tag": "BUTTON",
+        "status": "PASS"
+      }
+    ],
+    "deferredInteractionCount": 0,
+    "deferredInteractions": [],
+    "visualAuditCount": 8,
+    "visualAudits": [
+      {
+        "surfaceId": "first-run-security-form",
+        "missingRoot": false,
+        "viewport": {
+          "width": 1600,
+          "height": 980
+        },
+        "controlCount": 5,
+        "surfaceCount": 3,
+        "issues": []
+      },
+      {
+        "surfaceId": "authenticated-shell",
+        "missingRoot": false,
+        "viewport": {
+          "width": 1600,
+          "height": 980
+        },
+        "controlCount": 19,
+        "surfaceCount": 2,
+        "issues": []
+      },
+      {
+        "surfaceId": "module-menu-0",
+        "missingRoot": false,
+        "viewport": {
+          "width": 1600,
+          "height": 980
+        },
+        "controlCount": 20,
+        "surfaceCount": 2,
+        "issues": []
+      },
+      {
+        "surfaceId": "module-menu-1",
+        "missingRoot": false,
+        "viewport": {
+          "width": 1600,
+          "height": 980
+        },
+        "controlCount": 26,
+        "surfaceCount": 2,
+        "issues": []
+      },
+      {
+        "surfaceId": "module-menu-2",
+        "missingRoot": false,
+        "viewport": {
+          "width": 1600,
+          "height": 980
+        },
+        "controlCount": 25,
+        "surfaceCount": 2,
+        "issues": []
+      },
+      {
+        "surfaceId": "module-menu-3",
+        "missingRoot": false,
+        "viewport": {
+          "width": 1600,
+          "height": 980
+        },
+        "controlCount": 27,
+        "surfaceCount": 2,
+        "issues": []
+      },
+      {
+        "surfaceId": "route-dashboard",
+        "missingRoot": false,
+        "viewport": {
+          "width": 1600,
+          "height": 980
+        },
+        "controlCount": 11,
+        "surfaceCount": 2,
+        "issues": []
+      },
+      {
+        "surfaceId": "route-family",
+        "missingRoot": false,
+        "viewport": {
+          "width": 1600,
+          "height": 980
+        },
+        "controlCount": 7,
+        "surfaceCount": 2,
+        "issues": []
+      }
+    ],
+    "javascriptDialogCount": 0,
+    "javascriptDialogs": [],
+    "rendererExceptionCount": 0,
+    "diagnosticOnlyRendererExceptionCount": 0,
+    "unexpectedRendererExceptionCount": 0,
+    "rendererExceptions": [],
+    "failedResourceCount": 0,
+    "failedResources": [],
+    "mainProcessExceptionCount": 0,
+    "mainProcessExceptions": []
+  },
+  "screenshots": [
+    "01-first-run-introduction.png",
+    "02-first-family-form.png",
+    "03-first-family-filled.png",
+    "04-security-start.png",
+    "04b-security-fields-rounded.png",
+    "05-authenticated-main-shell.png",
+    "06-responsive-760x720.png"
+  ],
+  "failure": "CDP komutu Runtime.evaluate 90000 ms icinde yanit vermedi."
+}
