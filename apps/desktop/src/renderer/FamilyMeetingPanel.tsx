@@ -128,7 +128,7 @@ export function FamilyMeetingPanel({people}:FamilyMeetingPanelProps){
     const operation=existing&&existing.expectedRevision===expectedRevision&&existing.requestFingerprint===requestFingerprint
       ?existing:{clientOperationId:newOperationId(),expectedRevision,requestFingerprint};
     pending.current.set(key,operation);setBusy(key);setOperationError('');setNotice('');let committed=false;
-    try{await run(operation);pending.current.delete(key);committed=true;setNotice(success);}
+    try{await run({clientOperationId:operation.clientOperationId,expectedRevision:operation.expectedRevision});pending.current.delete(key);committed=true;setNotice(success);}
     catch(caught){setOperationError(`${errorText(caught,text('Toplantı işlemi tamamlanamadı.','The meeting operation could not be completed.'))} ${text('Aynı işlem kimliği ve özgün revizyonla yeniden deneyebilirsiniz.','You can retry with the same operation identifier and original revision.')}`);}
     finally{setBusy('');}
     if(committed)await refresh(false);

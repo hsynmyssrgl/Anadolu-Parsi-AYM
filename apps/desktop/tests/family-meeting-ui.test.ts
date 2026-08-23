@@ -19,6 +19,8 @@ describe('34-F family meeting renderer surface',()=>{
       'prepareFamilyMeetingAiMinutes','finalizeFamilyMeetingMinutes'])expect(panel).toContain(`.${method}(`);
     expect(panel).toContain('pending.current.get(key)');
     expect(panel).toContain('pending.current.delete(key)');
+    expect(panel).toContain('run({clientOperationId:operation.clientOperationId,expectedRevision:operation.expectedRevision})');
+    expect(panel).not.toContain('await run(operation)');
     expect(panel).toContain('Aynı işlem kimliği ve özgün revizyonla yeniden deneyebilirsiniz.');
     expect(panel).toContain("globalThis.crypto.subtle.digest('SHA-256',bytes)");
   });
