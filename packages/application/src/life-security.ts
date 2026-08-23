@@ -237,10 +237,6 @@ const explicitlyAllowedOpaqueIdentifierKeys = new Set([
   'subjectpersonid','subjectpetid','responsiblepersonid','configurationid','sourceitemid'
 ]);
 
-const isExactOpaqueIdentifier = (value:string):boolean =>
-  /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/iu.test(value)
-  || /^[a-z][a-z0-9]*(?:[-_:][a-z0-9]+)+$/iu.test(value);
-
 const isProhibitedKey = (key: string): boolean => {
   const normalized = normalizedKey(key);
   if (explicitlyAllowedOpaqueIdentifierKeys.has(normalized)) return false;
@@ -307,8 +303,7 @@ const collectRecursiveSignals = (
   if (typeof value === 'string') {
     const exactE164Phone = fieldName === 'phoneE164' && /^\+[1-9][0-9]{7,14}$/u.test(value);
     const exactOpaqueIdentifier = fieldName !== undefined
-      && explicitlyAllowedOpaqueIdentifierKeys.has(normalizedKey(fieldName))
-      && isExactOpaqueIdentifier(value);
+      && explicitlyAllowedOpaqueIdentifierKeys.has(normalizedKey(fieldName));
     signals.panLikeValueDetected ||= !exactE164Phone
       && !exactOpaqueIdentifier
       && containsLikelyManagedLifePan(value);

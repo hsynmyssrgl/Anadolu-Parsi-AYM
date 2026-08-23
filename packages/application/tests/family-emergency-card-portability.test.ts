@@ -147,6 +147,9 @@ describe('33-J family emergency card portability application boundary', () => {
       accepted:true, panLikeValueDetected:false, contractFamily:'family_emergency_card_portability'
     });
     expect(inspectManagedLifeDataContract({ ...uuidSelectedField, sourceItemId:'4111111111111111' })).toMatchObject({
+      accepted:true, panLikeValueDetected:false
+    });
+    expect(inspectManagedLifeDataContract({ ...valid[0], label:'4111111111111111' })).toMatchObject({
       accepted:false, panLikeValueDetected:true
     });
     for (const prohibited of [
