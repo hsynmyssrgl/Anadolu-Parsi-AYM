@@ -26,10 +26,14 @@ describe('system management lazy module integrity', () => {
     ]) expect(app).toContain(marker);
   });
 
-  it('loads operations through one sequential in-flight request and exposes its wait state', () => {
+  it('loads core operations once and hydrates governance only after trusted core readiness', () => {
     expect(app).toContain("if(activeSystemModule!=='operations')return;void refresh()");
     expect(app).toContain('const operationsRefreshRef=useRef<Promise<void>|null>(null);');
+    expect(app).toContain('const operationsGovernanceRefreshRef=useRef<Promise<void>|null>(null);');
     expect(app).toContain('if(operationsRefreshRef.current){await operationsRefreshRef.current;return;}');
+    expect(app).toContain("if(coreHealth?.lifecycle==='ready')void refreshGovernance(true);");
+    expect(app).toContain('const serviceAvailability=await optional(()=>window.pardus!.getPolicyServiceAvailabilityBoundary());');
+    expect(app).toContain('if(!serviceAvailability)return;');
     expect(app).toContain('aria-busy={operationsLoading}');
     expect(app).toContain('Sistem verileri hazırlanıyor');
     const refreshBody=app.slice(app.indexOf('const refresh=async()=>{'),app.indexOf('const maintain=async'));
