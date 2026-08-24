@@ -104,6 +104,12 @@ check(mutationReadinessPolicy?.schemaVersion === 2
   && mutationReadinessPolicy?.dependencyRegistry?.unmatchedChangedPathEffect === 'BLOCK'
   && mutationReadinessPolicy?.dependencyRegistry?.dependentRecordsMustBeChanged === true
   && mutationReadinessPolicy?.dependencyRegistry?.targetedVitestMustEqualAffectedFiles === true
+  && mutationReadinessPolicy?.externalBaselineChain?.bootstrapAdoption?.historicalBaseCommitPreservedAsImpactBase === true
+  && mutationReadinessPolicy?.externalBaselineChain?.bootstrapAdoption?.producerCommitSource === 'REPOSITORY_POINTER_SOURCE_COMMIT'
+  && mutationReadinessPolicy?.externalBaselineChain?.bootstrapAdoption?.producerCommitMustDifferFromBaseCommit === true
+  && mutationReadinessPolicy?.externalBaselineChain?.bootstrapAdoption?.producerCommitAncestry === 'BASE_COMMIT_TO_POINTER_SOURCE_COMMIT_TO_CURRENT_HEAD'
+  && mutationReadinessPolicy?.externalBaselineChain?.bootstrapAdoption?.producerBindingReadback === 'GIT_SHOW_EXACT_PATH_SIZE_SHA256'
+  && mutationReadinessPolicy?.baseline?.preMutationProducerBoundToBaselineCommit === true
   && dependencyRegistry?.schemaVersion === 1
   && dependencyRegistry?.id === 'PPT-CHANGE-IMPACT-DEPENDENCY-REGISTRY-V1'
   && dependencyRegistry?.requirement === 'PR-235'
@@ -132,6 +138,14 @@ const exactPr235GateScripts = ['scripts/verify-operation-rule-check.mjs', 'scrip
   'scripts/create-bronze-final-local-test-delivery.mjs'];
 check(JSON.stringify(mutationReadinessEnforcement?.gateScripts) === JSON.stringify(exactPr235GateScripts),
 'PR-235 kalıcı completion/paket/teslim enforcement kapıları eksik.');
+check(mutationReadinessEnforcement?.bootstrapAdoptionDiffBaseCommit === '440d5c7a9fbbd840faef58d1e1ef2048f8a989b4'
+  && mutationReadinessEnforcement?.bootstrapAdoptionProducerCommitSource === 'REPOSITORY_POINTER_SOURCE_COMMIT'
+  && mutationReadinessEnforcement?.bootstrapAdoptionProducerBinding === 'EXTERNAL_RECEIPT_EQUALS_POINTER_AND_BASE_TO_POINTER_TO_HEAD_ANCESTRY'
+  && mutationReadinessEnforcement?.preMutationProducerBinding === 'BASELINE_COMMIT_EXACT_PATH_SIZE_SHA256'
+  && constitution.mutationBootstrapProducerPointerCommitBindingRequired === true
+  && constitution.mutationBootstrapProducerBasePointerHeadAncestryRequired === true
+  && constitution.mutationPreMutationProducerBaselineCommitBindingRequired === true,
+'PR-235 bootstrap ve normal baseline producer commit bağları eksik veya gevşetilmiş.');
 check(['scripts/allocate-monthly-release-version.mjs', 'scripts/verify-active-version-sweep.mjs',
   'apps/desktop/scripts/build-signed-windows-release.mjs', 'apps/desktop/scripts/run-electron-builder.mjs']
   .every((gate) => releaseAllocationEnforcement?.gateScripts?.includes(gate)),

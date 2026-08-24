@@ -11,16 +11,18 @@ import {
 
 describe('PR-235 canonical mutation evidence producers', () => {
   it('binds baseline, impact and real Vitest execution to read-only postflight', async () => {
-    const [policyText, dependencyRegistryText, packageText, baseline, impact, testRunner, preflight, postflight, builder] = await Promise.all([
+    const [policyText, dependencyRegistryText, packageText, baseline, assessment, impact, testRunner, preflight, postflight, builder, packageProvenance] = await Promise.all([
       readFile('config/mutation-release-readiness-policy.json', 'utf8'),
       readFile('config/change-impact-dependency-registry.json', 'utf8'),
       readFile('package.json', 'utf8'),
       readFile('scripts/record-mutation-baseline.mjs', 'utf8'),
+      readFile('scripts/create-mutation-impact-assessment.mjs', 'utf8'),
       readFile('scripts/create-mutation-impact-analysis.mjs', 'utf8'),
       readFile('scripts/run-mutation-test-evidence.mjs', 'utf8'),
       readFile('scripts/run-governed-preflight.mjs', 'utf8'),
       readFile('scripts/run-governed-postflight.mjs', 'utf8'),
-      readFile('apps/desktop/scripts/run-electron-builder.mjs', 'utf8')
+      readFile('apps/desktop/scripts/run-electron-builder.mjs', 'utf8'),
+      readFile('scripts/lib/windows-package-provenance.mjs', 'utf8')
     ]);
     const policy = JSON.parse(policyText);
     const dependencyRegistry = JSON.parse(dependencyRegistryText);
@@ -30,7 +32,16 @@ describe('PR-235 canonical mutation evidence producers', () => {
       requirement: 'PR-235', decision: 'DEC-270',
       strengthenedByRequirement: 'PR-240', strengthenedByDecision: 'DEC-275',
       defaultEvidence: { baseline: 'artifacts/validation/mutation-baseline.json' },
-      baseline: { impactBaseOverrideAllowed: false },
+      baseline: { impactBaseOverrideAllowed: false, preMutationProducerBoundToBaselineCommit: true },
+      externalBaselineChain: {
+        bootstrapAdoption: {
+          historicalBaseCommitPreservedAsImpactBase: true,
+          producerCommitSource: 'REPOSITORY_POINTER_SOURCE_COMMIT',
+          producerCommitMustDifferFromBaseCommit: true,
+          producerCommitAncestry: 'BASE_COMMIT_TO_POINTER_SOURCE_COMMIT_TO_CURRENT_HEAD',
+          producerBindingReadback: 'GIT_SHOW_EXACT_PATH_SIZE_SHA256'
+        }
+      },
       evidenceExecution: { fullRegressionCommandFixedAndUnfiltered: true },
       dependencyRegistry: {
         path: 'config/change-impact-dependency-registry.json',
@@ -51,6 +62,8 @@ describe('PR-235 canonical mutation evidence producers', () => {
     expect(baseline).toContain('appendExternalBaselineRecord');
     expect(baseline).toContain('BOOTSTRAP_ADOPTION_BASE_COMMIT');
     expect(impact).toContain('readExternalBaselineFromPointer');
+    expect(assessment).toContain('baselinePointer: baselinePointer.value');
+    expect(impact).toContain('baselinePointer: baselinePointer.value');
     expect(impact).not.toContain("optionValue('--assessment");
     expect(testRunner).toContain('spawnSync(process.execPath');
     expect(testRunner).toContain('validateTargetedTestFiles(requested)');
@@ -72,6 +85,10 @@ describe('PR-235 canonical mutation evidence producers', () => {
     expect(postflight).not.toContain("['scripts/generate-project-artifact-index-v2.mjs']");
     expect(postflight).not.toContain("['scripts/verify-universal-rule-enforcement.mjs']");
     expect(builder).toContain('readExternalBaselineFromPointer');
+    expect(builder).toContain('baselinePointer: byId.baseline.value');
+    expect(postflight).toContain('baselinePointer: bindings.baseline.value');
+    expect(packageProvenance).toContain('baselinePointer: baseline');
+    expect(packageProvenance).toContain('baselinePointer: byId.baseline.value');
     expect(builder).not.toContain('PPT_MUTATION_BASELINE');
     expect(validateChangeImpactDependencyRegistry(dependencyRegistry)).toBe(dependencyRegistry);
     expect(dependencyRegistry.universalDependentRecords).toEqual(CANONICAL_UNIVERSAL_DEPENDENT_RECORDS);

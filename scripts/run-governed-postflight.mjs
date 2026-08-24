@@ -59,6 +59,7 @@ if (!failed) {
     const changedFiles = listChangedPathsForImpactAnalysis({
       runGit: source.runGit,
       baselineReceipt: externalBaseline.record.value,
+      baselinePointer: bindings.baseline.value,
       headCommit: source.provenance.headCommit,
       currentProvenance: source.provenance
     });

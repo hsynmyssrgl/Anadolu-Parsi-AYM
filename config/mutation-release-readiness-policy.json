@@ -63,12 +63,18 @@
       "decision": "DEC-270_INITIAL_ACTIVATION_ONLY",
       "requiredSequence": 1,
       "fullDiffRequired": true,
+      "historicalBaseCommitPreservedAsImpactBase": true,
+      "producerCommitSource": "REPOSITORY_POINTER_SOURCE_COMMIT",
+      "producerCommitMustDifferFromBaseCommit": true,
+      "producerCommitAncestry": "BASE_COMMIT_TO_POINTER_SOURCE_COMMIT_TO_CURRENT_HEAD",
+      "producerBindingReadback": "GIT_SHOW_EXACT_PATH_SIZE_SHA256",
       "generalWaiver": false
     }
   },
   "baseline": {
     "recordedOnCleanBronzeWorktreeBeforeMutation": true,
     "exactCommitTreeAndFingerprintReadbackRequired": true,
+    "preMutationProducerBoundToBaselineCommit": true,
     "impactBaseOverrideAllowed": false
   },
   "impactAssessment": {

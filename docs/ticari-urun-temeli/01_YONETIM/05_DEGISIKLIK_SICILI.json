@@ -253,6 +253,25 @@
       ],
       "isListesiEtkisi": "IS-0215 eklendi. Her degisiklik tum bagimli kayit siniflarini atomik kapatir; hedefli ve filtresiz tam regresyon, typecheck, sozdizimi, kaynak butunlugu ve UI etkisinde tam etkilesim/gorsel UAT PASS olmadan paket yoktur. Gercek test hatalari wip(rejected) checkpoint olarak korunur.",
       "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-016",
+      "tarih": "2026-08-24",
+      "baslik": "PR-235 bootstrap baseline producer commit bagi",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-270, PR-235 ve gercek fail-closed etki analizi bulgusu",
+      "etkilenenAlanlar": [
+        "scripts/lib/release-source-provenance.mjs",
+        "scripts/create-mutation-impact-assessment.mjs",
+        "scripts/create-mutation-impact-analysis.mjs",
+        "scripts/run-governed-postflight.mjs",
+        "apps/desktop/scripts/run-electron-builder.mjs",
+        "scripts/lib/windows-package-provenance.mjs",
+        "config/canonical-rule-registry.json",
+        "docs/ticari-urun-temeli"
+      ],
+      "isListesiEtkisi": "IS-0211 DEVAM kalir. BOOTSTRAP_ADOPTION diff tabani 440d5c7a olarak korunur; o committe producer bulunmadigi icin producer pointer sourceCommit kayit commitinde external-pointer exact esitligi ve base-pointer-HEAD ancestry ile dogrulanir. PRE_MUTATION producer bagi kendi baseline commitinde kalir. Hedefli, tam regresyon, paket ve kurulu UAT kanitlari tamamlanmadan PASS yoktur.",
+      "senkronDurumu": "SYNCHRONIZED"
     }
   ]
 }

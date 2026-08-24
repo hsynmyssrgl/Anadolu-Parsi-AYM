@@ -456,6 +456,12 @@ export const loadMutationEvidencePolicy = async (root = process.cwd()) => {
     || policy.evidenceExecution?.fullRegressionChangedPs1ParserRequired !== true
     || policy.evidenceExecution?.commandMatrixMustMatchDependencyRegistry !== true
     || policy.externalBaselineChain?.bootstrapAdoption?.baseCommit !== BOOTSTRAP_ADOPTION_BASE_COMMIT
+    || policy.externalBaselineChain?.bootstrapAdoption?.historicalBaseCommitPreservedAsImpactBase !== true
+    || policy.externalBaselineChain?.bootstrapAdoption?.producerCommitSource !== 'REPOSITORY_POINTER_SOURCE_COMMIT'
+    || policy.externalBaselineChain?.bootstrapAdoption?.producerCommitMustDifferFromBaseCommit !== true
+    || policy.externalBaselineChain?.bootstrapAdoption?.producerCommitAncestry !== 'BASE_COMMIT_TO_POINTER_SOURCE_COMMIT_TO_CURRENT_HEAD'
+    || policy.externalBaselineChain?.bootstrapAdoption?.producerBindingReadback !== 'GIT_SHOW_EXACT_PATH_SIZE_SHA256'
+    || policy.baseline?.preMutationProducerBoundToBaselineCommit !== true
     || policy.externalBaselineChain?.bootstrapAdoption?.generalWaiver !== false) {
     fail('PR-235 mutation-release readiness policy is invalid or weakened.');
   }

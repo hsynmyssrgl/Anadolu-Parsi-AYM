@@ -1,11 +1,11 @@
 # Kanonik Kural Sicili
 
 - Görünür sürüm: **Bronze 22.08.2026.50**
-- Sicil kimliği: `PPT-CANONICAL-RULE-REGISTRY-V27`
+- Sicil kimliği: `PPT-CANONICAL-RULE-REGISTRY-V28`
 - Toplam kural: **240**
 - Aktif kural: **215**
 - Açıkça superseded tarihsel kural: **25**
-- Kural SHA-256: `3936b7fc4a1c6e04e195edf1a9d201c620ed613220286788f83cac5e82c2bc2e`
+- Kural SHA-256: `f43126d7c874689e09e58f82e0fcc8771692649de5353e79191d82222af99285`
 - Makine okunur tek aktif kaynak: `config/canonical-rule-registry.json`
 
 `PR-186` her bağlayıcı kararın aynı sürümde DEC ve makine defterine kaydını, `PR-187` bilinen belge/kod/kural driftinde kapanış yasağını getirir. `DEC-251` ve `config/documentation-synchronization-policy.json` bu iki kuralı karar anında DEC + etkilenen belge + iş listesi açık/kapalı/neden güncellemesi olarak fail-closed uygular.
@@ -32,7 +32,7 @@
 
 `PR-234`, `PR-236` ile superseded edilmiştir. Nested program kökü tarihsel kalır; kanal kimliği, veri ve worktree yalıtımı `PR-236` içinde korunur.
 
-`PR-235`; her mutasyondan sonra exact changed-file etki analizini bağlı kural, karar, aktif belge, manifest, ratchet, test ve UAT kapsamıyla eşler. Baseline repo içinde yalnız pointer olarak, Bronze kanalına sabit harici append-only SHA-256 zincirinde exact tree/fingerprint ve işlem-kural/producer SHA bağlarıyla tutulur; hedefli test yalnız repo içi `.test.ts` dosyaları ve sabit worker argümanlarıyla çalışır. Kalıcı completion ve paketleme aynı temiz kanal commitine bağlı hedefli test, tam regresyon ve kaynak bütünlüğü PASS olmadan; installer teslimi ise paket sonrasında aynı commit ve paket provenance'ına bağlı gerçek kurulu ana EXE UAT PASS olmadan yapılamaz.
+`PR-235`; her mutasyondan sonra exact changed-file etki analizini bağlı kural, karar, aktif belge, manifest, ratchet, test ve UAT kapsamıyla eşler. Baseline repo içinde yalnız pointer olarak, Bronze kanalına sabit harici append-only SHA-256 zincirinde exact tree/fingerprint ve işlem-kural/producer SHA bağlarıyla tutulur. Tek seferlik `BOOTSTRAP_ADOPTION` diff tabanı sabit kalır; producer yalnız pointer `sourceCommit` kayıt commitinde external-pointer exact eşitliği ve `base → pointer → HEAD` ancestry altında doğrulanır. Normal `PRE_MUTATION` producer bağı baseline commitinde kalır. Hedefli test yalnız repo içi `.test.ts` dosyaları ve sabit worker argümanlarıyla çalışır. Kalıcı completion ve paketleme aynı temiz kanal commitine bağlı hedefli test, tam regresyon ve kaynak bütünlüğü PASS olmadan; installer teslimi ise paket sonrasında aynı commit ve paket provenance'ına bağlı gerçek kurulu ana EXE UAT PASS olmadan yapılamaz.
 
 `PR-236`; Bronze, Silver ve Gold programlarını legacy `ParsYuva` kökünün dışındaki `C:\Program Files\PPT\ParsYuva-<Kanal>` kardeş dizinlerine taşır; AppData `ParsYuva/<Kanal>` olarak kalır. Interactive kaldırıcı signed-in kullanıcı bağlamına geçip her çıkışta all-users bağlamını geri yükler. Legacy 37–44 kökünde kanal dizini varsa recursive silme fail-closed durur; otomatik legacy veri taşıma veya silme yoktur.
 

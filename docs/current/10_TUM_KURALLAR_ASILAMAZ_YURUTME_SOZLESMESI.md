@@ -2,9 +2,9 @@
 
 - Sürüm: **Bronze 22.08.2026.50**
 - Karar: **DEC-129**
-- Kanonik kural sayısı: **238**
-- Aktif kural: **212**
-- Kural SHA-256: `3936b7fc4a1c6e04e195edf1a9d201c620ed613220286788f83cac5e82c2bc2e`
+- Kanonik kural sayısı: **240**
+- Aktif kural: **215**
+- Kural SHA-256: `f43126d7c874689e09e58f82e0fcc8771692649de5353e79191d82222af99285`
 
 ## Değişmez çalışma ilkesi
 
@@ -20,7 +20,7 @@ PR-239 gereği Windows installer teslimi yalnız schema2 exact-commit package pr
 
 PR-235 gereği her mutasyonun exact changed-file etki analizi kural, karar, belge, manifest, ratchet, test ve UAT bağlarını günceller veya açık gerekçeyle etkilenmediğini gösterir. Kalıcı postflight ve paketleme aynı temiz committe hedefli test, tam regresyon ve kaynak bütünlüğü PASS olmadan; installer teslimi aynı pakete/commite bağlı paket sonrası gerçek kurulu ana EXE UAT PASS olmadan ilerleyemez.
 
-PR-235 baseline'ı mutasyondan önce temiz Bronze worktree'sinde kanonik üreticiyle, dış sabit kökte exclusive-create append-only SHA-256 zincirine kaydedilir; repo yalnız hash-bağlı pointer taşır ve sonradan CLI ile başka bir ata commit seçilemez. Tek seferlik ilk etkinleştirme yalnız sabit `440d5c7a9fbbd840faef58d1e1ef2048f8a989b4` tabanlı zincir sıra 1 `BOOTSTRAP_ADOPTION` tam diff kaydıdır, waiver değildir. Hedefli test yalnız repo içi `.test.ts` dosyalarını sabit worker/reporter argümanlarıyla gerçekten çalıştıran kanonik üreticiden gelir; producer SHA, exit/failed-suite, assessment/manifest ve önceki makbuz hashleri readback edilir. Postflight tracked indeks üretmez, yalnız commit içine alınmış indeksi exact Git HEAD envanteriyle salt okunur doğrular.
+PR-235 baseline'ı mutasyondan önce temiz Bronze worktree'sinde kanonik üreticiyle, dış sabit kökte exclusive-create append-only SHA-256 zincirine kaydedilir; repo yalnız hash-bağlı pointer taşır ve sonradan CLI ile başka bir ata commit seçilemez. Tek seferlik ilk etkinleştirme yalnız sabit `440d5c7a9fbbd840faef58d1e1ef2048f8a989b4` tabanlı zincir sıra 1 `BOOTSTRAP_ADOPTION` tam diff kaydıdır, waiver değildir. Bu sabit tabanda üretici henüz bulunmadığı için yalnız bootstrap producer path/boyut/SHA kimliği pointer `sourceCommit` kayıt commitinden, external receipt-pointer exact eşitliği ve `base → pointer → HEAD` ancestry kanıtıyla okunur; diff tabanı değişmez. Normal `PRE_MUTATION` producer kendi baseline commitinden doğrulanır. Hedefli test yalnız repo içi `.test.ts` dosyalarını sabit worker/reporter argümanlarıyla gerçekten çalıştıran kanonik üreticiden gelir; producer SHA, exit/failed-suite, assessment/manifest ve önceki makbuz hashleri readback edilir. Postflight tracked indeks üretmez, yalnız commit içine alınmış indeksi exact Git HEAD envanteriyle salt okunur doğrular.
 
 PR-240 gereği en küçük mutasyon, etkilenen ana ve kanal kaynakları ile bütün kural/karar/aktif-ticari belge/iş listesi/kapsam/envanter/ratchet/manifest/indeks/ana DOCX-PDF/kanıt sözleşmelerini aynı zincirde `UPDATED` veya kanıtlı `NOT_AFFECTED` olarak kapatır. Hedefli test, filtresiz tam regresyon, typecheck, değişen komut dosyası sözdizimi ve kaynak bütünlüğü zorunludur. UI etkisinde bütün modül, rota, ana/alt menü, görünür uygun kontrol, durum, erişilebilirlik ve görsel bütünlük UAT'ı yapılır. Gerçek FAIL boş `wip(rejected)` checkpoint commit ile kaydedilir; bütün kapanış bitmeden ara installer üretilemez ve paket yalnız ana/kanal kaynak eşitliği doğrulanmış temiz exact committen çıkar.
 

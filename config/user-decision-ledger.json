@@ -2646,7 +2646,7 @@
         "docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md",
         "docs/10_MASTER_DECISION_REGISTER.md"
       ],
-      "workListImpact": "IS-0211 eklendi. Her mutasyon için exact changed-file etki analizi; bağlı kural, karar, belge, manifest, ratchet, test ve UAT etkisi; baseline için Bronze kanalına sabit harici append-only SHA-256 zinciri ve repo içinde yalnız doğrulanmış pointer; kanonik producer SHA, sabit test argümanları ve assessment readback; aynı temiz committe hedefli test, tam regresyon ve kaynak bütünlüğü; paket sonrası aynı paket/committe kurulu ana EXE UAT kanıtı zorunludur.",
+      "workListImpact": "IS-0211 eklendi. Her mutasyon için exact changed-file etki analizi; bağlı kural, karar, belge, manifest, ratchet, test ve UAT etkisi; baseline için Bronze kanalına sabit harici append-only SHA-256 zinciri ve repo içinde yalnız doğrulanmış pointer; BOOTSTRAP_ADOPTION producer'ı pointer sourceCommit kayıt commitinde base-pointer-HEAD ancestry ile, PRE_MUTATION producer'ı baseline commitinde exact path/boyut/SHA bağıyla; sabit test argümanları ve assessment readback; aynı temiz committe hedefli test, tam regresyon ve kaynak bütünlüğü; paket sonrası aynı paket/committe kurulu ana EXE UAT kanıtı zorunludur.",
       "syncStatus": "SYNCHRONIZED",
       "requirements": [],
       "codeAreas": [

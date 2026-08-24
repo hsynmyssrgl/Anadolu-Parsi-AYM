@@ -421,7 +421,7 @@ export const captureHistoricalReleaseSourceProvenance = ({ runGit, currentProven
   });
 };
 
-export const verifyMutationBaselineReceipt = ({ runGit, baselineReceipt, currentProvenance }) => {
+export const verifyMutationBaselineReceipt = ({ runGit, baselineReceipt, baselinePointer, currentProvenance }) => {
   const baseline = baselineReceipt?.sourceProvenance;
   if (baselineReceipt?.schemaVersion !== 2 || baselineReceipt.id !== 'PPT-MUTATION-BASELINE-EXTERNAL-V2'
     || baselineReceipt.requirement !== 'PR-235' || baselineReceipt.decision !== 'DEC-270'
@@ -457,10 +457,33 @@ export const verifyMutationBaselineReceipt = ({ runGit, baselineReceipt, current
   const actualTree = gitText(runGit, ['rev-parse', `${baseCommit}^{tree}`]).toLowerCase();
   if (actualTree !== baseline.headTree) fail('Pre-mutation baseline tree is stale or forged.');
   const actual = captureCommitFingerprints({ runGit, commit: baseCommit, objectFormat: baseline.objectFormat });
-  const baselineProducer = actual.entries.find(({ path }) => path === baselineReceipt.producer.path);
-  if (!baselineProducer || baselineProducer.sha256 !== baselineReceipt.producer.sha256
-    || baselineProducer.sizeBytes !== baselineReceipt.producer.sizeBytes) {
-    fail('Pre-mutation baseline producer is not bound to its recorded baseline commit.');
+  let producerCommit = baseCommit;
+  if (baselineReceipt.baselineType === 'BOOTSTRAP_ADOPTION') {
+    producerCommit = String(baselinePointer?.sourceCommit ?? '').toLowerCase();
+    if (baselinePointer?.schemaVersion !== 2 || baselinePointer.id !== 'PPT-MUTATION-BASELINE-POINTER-V2'
+      || baselinePointer.status !== 'PASS' || baselinePointer.evidenceKind !== 'PRE_MUTATION_BASELINE_POINTER'
+      || baselinePointer.requirement !== 'PR-235' || baselinePointer.decision !== 'DEC-270'
+      || baselinePointer.strengthenedByRequirement !== 'PR-240'
+      || baselinePointer.strengthenedByDecision !== 'DEC-275'
+      || !GIT_OBJECT_PATTERN.test(producerCommit) || producerCommit === baseCommit
+      || baselinePointer.producer?.path !== baselineReceipt.producer.path
+      || baselinePointer.producer?.sizeBytes !== baselineReceipt.producer.sizeBytes
+      || baselinePointer.producer?.sha256 !== baselineReceipt.producer.sha256) {
+      fail('Bootstrap adoption baseline producer recording commit is invalid.');
+    }
+    try {
+      runGit(['merge-base', '--is-ancestor', baseCommit, producerCommit]);
+      runGit(['merge-base', '--is-ancestor', producerCommit, headCommit]);
+    } catch {
+      fail('Bootstrap adoption baseline producer recording commit is outside the release ancestry.');
+    }
+  }
+  let producerBytes;
+  try { producerBytes = asBuffer(runGit(['show', `${producerCommit}:${baselineReceipt.producer.path}`])); }
+  catch { fail('Pre-mutation baseline producer is not available at its governed producer commit.'); }
+  if (producerBytes.length !== baselineReceipt.producer.sizeBytes
+    || sha256Bytes(producerBytes) !== baselineReceipt.producer.sha256) {
+    fail('Pre-mutation baseline producer is not bound to its governed producer commit.');
   }
   assertMatchingReleaseSourceProvenance({
     ...baseline,
@@ -472,8 +495,8 @@ export const verifyMutationBaselineReceipt = ({ runGit, baselineReceipt, current
   return Object.freeze({ baseCommit, baseline });
 };
 
-export const listChangedPathsForImpactAnalysis = ({ runGit, baselineReceipt, headCommit, currentProvenance }) => {
-  const { baseCommit } = verifyMutationBaselineReceipt({ runGit, baselineReceipt, currentProvenance });
+export const listChangedPathsForImpactAnalysis = ({ runGit, baselineReceipt, baselinePointer, headCommit, currentProvenance }) => {
+  const { baseCommit } = verifyMutationBaselineReceipt({ runGit, baselineReceipt, baselinePointer, currentProvenance });
   const bytes = asBuffer(runGit(['diff', '--name-only', '-z', '--diff-filter=ACDMRTUXB', baseCommit, headCommit]));
   const paths = bytes.toString('utf8').split('\0').filter(Boolean);
   for (const path of paths) assertSafeTrackedPath(path);

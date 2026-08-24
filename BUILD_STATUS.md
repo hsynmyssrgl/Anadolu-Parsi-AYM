@@ -10,6 +10,8 @@
 
 ## Current validation status
 
+- PR-235 bootstrap producer pointer-sourceCommit/ancestry fix: **TARGETED PASS; FULL REGRESSION PENDING**
+
 - Source preflight gate: **NOT_RUN**
 - Source integrity: **NOT_RUN**
 - Clean install gate: **NOT_RUN**

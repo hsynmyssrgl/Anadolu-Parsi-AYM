@@ -14,7 +14,7 @@ describe('operation rule check policy', () => {
       readSource('config/mutation-release-readiness-policy.json'),
       readSource('config/change-impact-dependency-registry.json')
     ]);
-    const enforcement = JSON.parse(enforcementRaw) as { entries: Array<{ ruleId: string; gateScripts: string[] }> };
+    const enforcement = JSON.parse(enforcementRaw) as { entries: Array<Record<string, any> & { ruleId: string; gateScripts: string[] }> };
     const mutationPolicy = JSON.parse(mutationPolicyRaw) as any;
     const dependencyRegistry = JSON.parse(dependencyRegistryRaw) as any;
     expect(source).toContain("readJson('config/canonical-rule-registry.json')");
@@ -47,6 +47,15 @@ describe('operation rule check policy', () => {
         'apps/desktop/scripts/run-electron-builder.mjs',
         'scripts/create-bronze-final-local-test-delivery.mjs'
       ]);
+    expect(enforcement.entries.find((entry) => entry.ruleId === 'PR-235')).toMatchObject({
+      bootstrapAdoptionDiffBaseCommit: '440d5c7a9fbbd840faef58d1e1ef2048f8a989b4',
+      bootstrapAdoptionProducerCommitSource: 'REPOSITORY_POINTER_SOURCE_COMMIT',
+      bootstrapAdoptionProducerBinding: 'EXTERNAL_RECEIPT_EQUALS_POINTER_AND_BASE_TO_POINTER_TO_HEAD_ANCESTRY',
+      preMutationProducerBinding: 'BASELINE_COMMIT_EXACT_PATH_SIZE_SHA256'
+    });
+    expect(source).toContain('constitution.mutationBootstrapProducerPointerCommitBindingRequired === true');
+    expect(source).toContain('constitution.mutationBootstrapProducerBasePointerHeadAncestryRequired === true');
+    expect(source).toContain('constitution.mutationPreMutationProducerBaselineCommitBindingRequired === true');
     expect(source).toContain("entry.ruleId === 'PR-237'");
     expect(enforcement.entries.find((entry) => entry.ruleId === 'PR-237')?.gateScripts)
       .toEqual(expect.arrayContaining([
@@ -92,7 +101,16 @@ describe('operation rule check policy', () => {
       schemaVersion: 2, id: 'PPT-MUTATION-RELEASE-READINESS-V2',
       requirement: 'PR-235', decision: 'DEC-270', failClosed: true,
       strengthenedByRequirement: 'PR-240', strengthenedByDecision: 'DEC-275',
-      baseline: { impactBaseOverrideAllowed: false },
+      baseline: { impactBaseOverrideAllowed: false, preMutationProducerBoundToBaselineCommit: true },
+      externalBaselineChain: {
+        bootstrapAdoption: {
+          historicalBaseCommitPreservedAsImpactBase: true,
+          producerCommitSource: 'REPOSITORY_POINTER_SOURCE_COMMIT',
+          producerCommitMustDifferFromBaseCommit: true,
+          producerCommitAncestry: 'BASE_COMMIT_TO_POINTER_SOURCE_COMMIT_TO_CURRENT_HEAD',
+          producerBindingReadback: 'GIT_SHOW_EXACT_PATH_SIZE_SHA256'
+        }
+      },
       dependencyRegistry: {
         path: 'config/change-impact-dependency-registry.json',
         sha256: createHash('sha256').update(dependencyRegistryRaw).digest('hex'),

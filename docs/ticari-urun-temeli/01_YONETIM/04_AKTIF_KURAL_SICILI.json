@@ -4,11 +4,11 @@
   "durum": "ACTIVE",
   "istisnaIzinli": false,
   "anaKuralKaynagi": "../06_KOD/app/config/canonical-rule-registry.json",
-  "anaKuralSiciliId": "PPT-CANONICAL-RULE-REGISTRY-V27",
+  "anaKuralSiciliId": "PPT-CANONICAL-RULE-REGISTRY-V28",
   "anaKuralSayisi": 240,
   "aktifKuralSayisi": 215,
   "degistirilmisKuralSayisi": 25,
-  "anaKuralSha256": "3936b7fc4a1c6e04e195edf1a9d201c620ed613220286788f83cac5e82c2bc2e",
+  "anaKuralSha256": "f43126d7c874689e09e58f82e0fcc8771692649de5353e79191d82222af99285",
   "yurutmeKapisi": "../06_KOD/app/scripts/run-governed-preflight.mjs",
   "temelAlanDogrulamaKapisi": "11_OTOMASYON/dogrula-ticari-temel-alani.mjs",
   "kurallar": [
@@ -123,7 +123,7 @@
     {
       "id": "TK-013",
       "baslik": "Mutasyon sonrasi exact commit kanit zinciri",
-      "metin": "Her mutasyon exact etki analizine baglanir; baseline Bronze kanalina sabit harici append-only SHA-256 zincirinde ve repo icinde yalniz hash-bagli pointer olarak tutulur; kanonik producer arguman ve readback zorunludur; kalici completion ve paket ayni temiz committe hedefli test tam regresyon ve kaynak butunlugu PASS, installer teslimi paket sonrasi ayni paket committe gercek kurulu ana EXE taze UAT PASS gerektirir.",
+      "metin": "Her mutasyon exact etki analizine baglanir; baseline Bronze kanalina sabit harici append-only SHA-256 zincirinde ve repo icinde yalniz hash-bagli pointer olarak tutulur. BOOTSTRAP_ADOPTION diff tabani sabit kalirken producer pointer sourceCommit kayit commitinde base-pointer-HEAD ancestry ve exact path/boyut/SHA ile; PRE_MUTATION producer kendi baseline commitinde dogrulanir. Kalici completion ve paket ayni temiz committe hedefli test tam regresyon ve kaynak butunlugu PASS, installer teslimi paket sonrasi ayni paket committe gercek kurulu ana EXE taze UAT PASS gerektirir.",
       "durum": "ACTIVE",
       "kaynak": "PR-235 ve DEC-270",
       "yurutme": "FAIL_CLOSED",

@@ -1,20 +1,20 @@
 {
   "schemaVersion": 1,
   "release": "Bronze 22.08.2026.50",
-  "rulesSha256": "4c8a52f9adc2153177f1e504104e20ac5e9d3f7d780daa2c7d7bdb5d399a6050",
+  "rulesSha256": "f43126d7c874689e09e58f82e0fcc8771692649de5353e79191d82222af99285",
   "mode": "GENERATE_AND_VERIFY",
   "acknowledgement": {
     "schemaVersion": 1,
     "release": "Bronze 22.08.2026.50",
     "ruleRegistry": "config/canonical-rule-registry.json",
-    "rulesSha256": "4c8a52f9adc2153177f1e504104e20ac5e9d3f7d780daa2c7d7bdb5d399a6050",
+    "rulesSha256": "f43126d7c874689e09e58f82e0fcc8771692649de5353e79191d82222af99285",
     "acknowledgedAt": "2026-08-24T12:00:00+03:00",
     "authority": "Explicit user instruction in current conversation",
     "statement": "All written project rules and operation checks remain binding without waiver. Every smallest mutation must atomically update every affected main/channel source, rule, decision, active/commercial document, work item, scope, inventory, ratchet, manifest, index, current master DOCX/PDF and evidence contract, or record a concrete NOT_AFFECTED justification. Targeted tests, unfiltered full regression, typecheck, changed-script syntax and source integrity are mandatory; UI mutations require complete module, route, menu, visible-control, state, accessibility and visual-integrity UAT. Every actual test failure is preserved by a wip(rejected) checkpoint. No intermediate installer may be built before closure; packaging requires clean exact main/channel source equality. Bronze Windows local-test delivery also requires the complete PR-239 adversarial provenance, installer-experience, UAT110, UAT111 and final-readback chain. NotSigned or protection-disabled Kaspersky testing is not a production or harmlessness claim. Every ACTIVE rule must be fail-closed enforced or explicitly BLOCKED/NOT_RUN until evidence exists."
   },
   "certifiedFullPreflightGeneratedAt": null,
   "sourceFingerprint": {
-    "sha256": "d80e5438d1546dfc77108badd155cbc9c7121a13906fd15edf1c2b87ad7aae8e",
+    "sha256": "cf46ecfba6730df71bcc0e567b65b318cf31eff0a9b53f8ab88023f0b86ae5e0",
     "fileCount": 2791
   },
   "status": "PASS",
@@ -23,7 +23,7 @@
       "script": "scripts/verify-canonical-rule-registry.mjs",
       "arguments": [],
       "exitCode": 0,
-      "stdout": "Canonical Rule Registry: PASS (1060 checks / 240 rules / 4c8a52f9adc2153177f1e504104e20ac5e9d3f7d780daa2c7d7bdb5d399a6050).",
+      "stdout": "Canonical Rule Registry: PASS (1060 checks / 240 rules / f43126d7c874689e09e58f82e0fcc8771692649de5353e79191d82222af99285).",
       "stderr": ""
     },
     {
@@ -35,7 +35,7 @@
         "governed-preflight"
       ],
       "exitCode": 0,
-      "stdout": "İşlem kural kontrolü: PASS (test / governed-preflight / PPT-CANONICAL-RULE-REGISTRY-V27).",
+      "stdout": "İşlem kural kontrolü: PASS (test / governed-preflight / PPT-CANONICAL-RULE-REGISTRY-V28).",
       "stderr": ""
     },
     {
@@ -162,7 +162,7 @@
       "arguments": [],
       "exitCode": 0,
       "stdout": "Core Service Local Admin Runtime: PASS (50 checks).",
-      "stderr": "(node:6016) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+      "stderr": "(node:42000) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
     },
     {
       "script": "scripts/verify-desktop-core-service-startup-contract.mjs",
@@ -176,7 +176,7 @@
       "arguments": [],
       "exitCode": 0,
       "stdout": "Desktop Core Service Startup Runtime: PASS (51 checks).",
-      "stderr": "(node:19536) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+      "stderr": "(node:38076) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
     },
     {
       "script": "scripts/verify-system-health-core-service-ipc-contract.mjs",
@@ -190,7 +190,7 @@
       "arguments": [],
       "exitCode": 0,
       "stdout": "System Health Core Service IPC Runtime: PASS (10 checks).",
-      "stderr": "(node:30172) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+      "stderr": "(node:35860) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
     },
     {
       "script": "scripts/generate-project-artifact-index-v2.mjs",
@@ -211,5 +211,5 @@
       "stderr": ""
     }
   ],
-  "generatedAt": "2026-08-24T09:01:06.884Z"
+  "generatedAt": "2026-08-24T11:27:20.232Z"
 }

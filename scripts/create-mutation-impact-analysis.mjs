@@ -18,6 +18,7 @@ const external = await readExternalBaselineFromPointer({ pointer: baselinePointe
 const changedFiles = listChangedPathsForImpactAnalysis({
   runGit: source.runGit,
   baselineReceipt: external.record.value,
+  baselinePointer: baselinePointer.value,
   headCommit: source.provenance.headCommit,
   currentProvenance: source.provenance
 });

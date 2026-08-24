@@ -8,7 +8,7 @@
   "startedAt": "2026-08-04T12:55:00+03:00",
   "parentRelease": "Bronze 20.08.2026.36",
   "canonicalRules": "config/canonical-rule-registry.json",
-  "canonicalRulesSha256": "3936b7fc4a1c6e04e195edf1a9d201c620ed613220286788f83cac5e82c2bc2e",
+  "canonicalRulesSha256": "f43126d7c874689e09e58f82e0fcc8771692649de5353e79191d82222af99285",
   "acceptedScope": "config/accepted-scope-registry.json",
   "decisionLedger": "config/user-decision-ledger.json",
   "documentInventory": "artifacts/manifests/ALL_DOCUMENTS_INDEX.json",
@@ -23,6 +23,7 @@
     "decision": "DEC-275",
     "status": "IN_PROGRESS",
     "task": "PR-240_MUTATION_WIDE_RECORD_TEST_AND_UI_UAT_CLOSURE",
+    "bootstrapBaselineProducerBinding": "POINTER_SOURCE_COMMIT_WITH_BASE_POINTER_HEAD_ANCESTRY",
     "preflightStatus": "NOT_RUN_CURRENT_MUTATION",
     "postflightStatus": "NOT_RUN_CURRENT_MUTATION",
     "packageStatus": "BLOCKED_UNTIL_CLEAN_EXACT_COMMIT"

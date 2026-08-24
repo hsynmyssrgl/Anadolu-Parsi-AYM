@@ -24,6 +24,7 @@ const source = await captureReleaseSourceProvenance({ root, expectedChannel: 'Br
 const changedFiles = listChangedPathsForImpactAnalysis({
   runGit: source.runGit,
   baselineReceipt: externalBaseline.record.value,
+  baselinePointer: baselinePointer.value,
   headCommit: source.provenance.headCommit,
   currentProvenance: source.provenance
 });

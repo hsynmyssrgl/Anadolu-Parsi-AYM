@@ -324,6 +324,7 @@ const validateArchivedPr235 = ({ runGit, receipt, evidence, historicalProvenance
   const baselineExternal = evidence.baselineExternal.value;
   const assessment = evidence.impactAssessment.value;
   const changedFiles = listChangedPathsForImpactAnalysis({ runGit, baselineReceipt: baselineExternal,
+    baselinePointer: baseline,
     headCommit: commit, currentProvenance: historicalProvenance });
   const assessed = validateImpactAssessment({ policy, assessment, changedFiles, dependencyRegistry, dependencyRegistryBinding });
   const impactEvidencePaths = [...new Set(Object.values(assessed.impactAreas).flatMap((area) => area.evidencePaths ?? []))].sort();
@@ -755,7 +756,8 @@ export const verifyWindowsPackageProvenanceLive = async ({ root, expectedRelease
     const binding = await readRepoFileBinding(root, path, `${id} producer`); return [id, bindingWithoutBytes(binding)];
   }))));
   const changedFiles = listChangedPathsForImpactAnalysis({ runGit: liveSource.runGit,
-    baselineReceipt: externalBaseline.record.value, headCommit: liveSource.provenance.headCommit,
+    baselineReceipt: externalBaseline.record.value, baselinePointer: byId.baseline.value,
+    headCommit: liveSource.provenance.headCommit,
     currentProvenance: liveSource.provenance });
   const assessed = validateImpactAssessment({
     policy: policyRaw, assessment: assessment.value, changedFiles, dependencyRegistry, dependencyRegistryBinding

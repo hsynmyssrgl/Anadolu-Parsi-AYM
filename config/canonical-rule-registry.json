@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "PPT-CANONICAL-RULE-REGISTRY-V27",
+  "id": "PPT-CANONICAL-RULE-REGISTRY-V28",
   "product": "ParsYuva Aile Yaşam Merkezi",
   "upperBrand": "ParsYuva",
   "effectiveRelease": "Bronze 22.08.2026.50",
@@ -1677,7 +1677,7 @@
     },
     {
       "id": "PR-235",
-      "text": "En küçük kaynak, yapılandırma veya belge mutasyonundan sonra kalıcı tamamlanma, Windows paketleme ya da installer teslimi iddiası; değişen dosyaların etki analizi kanonik kural, kullanıcı kararı, aktif belge, manifest, ratchet, hedefli test, tam regresyon, kaynak bütünlüğü ve UAT etkilerini tek tek güncellediğini veya gerekçeli olarak etkilenmediğini aynı exact commit üzerinde göstermeden kurulamaz. Paket yalnız temiz ve kanalına ait exact Git commitinden, bu commit ile aynı kural hash'i ve governed-source fingerprint'ine bağlı hedefli test, tam regresyon ve kaynak bütünlüğü PASS kanıtlarıyla üretilir. Installer teslimi yalnız paket üretiminden sonra aynı paket ve kaynak commitine bağlı kurulu ana EXE üzerinde taze UAT PASS kanıtıyla yapılır; eski, başka committen, kaynak-runtime, win-unpacked veya yalnız metadata kanıtı kabul edilmez. Eksik ya da eski bağ kalıcı completion, paketleme ve teslimi fail-closed engeller; waiver yoktur.",
+      "text": "En küçük kaynak, yapılandırma veya belge mutasyonundan sonra kalıcı tamamlanma, Windows paketleme ya da installer teslimi iddiası; değişen dosyaların etki analizi kanonik kural, kullanıcı kararı, aktif belge, manifest, ratchet, hedefli test, tam regresyon, kaynak bütünlüğü ve UAT etkilerini tek tek güncellediğini veya gerekçeli olarak etkilenmediğini aynı exact commit üzerinde göstermeden kurulamaz. Paket yalnız temiz ve kanalına ait exact Git commitinden, bu commit ile aynı kural hash'i ve governed-source fingerprint'ine bağlı hedefli test, tam regresyon ve kaynak bütünlüğü PASS kanıtlarıyla üretilir. Installer teslimi yalnız paket üretiminden sonra aynı paket ve kaynak commitine bağlı kurulu ana EXE üzerinde taze UAT PASS kanıtıyla yapılır; eski, başka committen, kaynak-runtime, win-unpacked veya yalnız metadata kanıtı kabul edilmez. Eksik ya da eski bağ kalıcı completion, paketleme ve teslimi fail-closed engeller; waiver yoktur. Tek seferlik BOOTSTRAP_ADOPTION kaydında sabit diff taban commitinde üretici henüz bulunmadığı için baseline producer path, boyut ve SHA-256 kimliği yalnız repo pointer sourceCommit alanındaki kayıt commitinden, external receipt ve pointer producer alanlarının exact eşitliği ile baseCommit < sourceCommit <= current HEAD Git ancestry kanıtı altında doğrulanır; normal PRE_MUTATION producer bağı kendi baseline commitinde kalır.",
       "state": "ACTIVE",
       "source": "USER_DECISION_DEC-270",
       "effectiveRelease": "Bronze 22.08.2026.50"
@@ -1719,5 +1719,5 @@
       "effectiveRelease": "Bronze 22.08.2026.50"
     }
   ],
-  "rulesSha256": "3936b7fc4a1c6e04e195edf1a9d201c620ed613220286788f83cac5e82c2bc2e"
+  "rulesSha256": "f43126d7c874689e09e58f82e0fcc8771692649de5353e79191d82222af99285"
 }

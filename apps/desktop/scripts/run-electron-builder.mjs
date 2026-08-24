@@ -159,6 +159,7 @@ if (!isDirectoryMode) {
   const changedFiles = listChangedPathsForImpactAnalysis({
     runGit: sourceCaptureBefore.runGit,
     baselineReceipt: externalBaseline.record.value,
+    baselinePointer: byId.baseline.value,
     headCommit: sourceCaptureBefore.provenance.headCommit,
     currentProvenance: sourceCaptureBefore.provenance
   });
