@@ -217,6 +217,7 @@ DRIFT_FIXES = [
     "PR-235 BOOTSTRAP_ADOPTION diff tabanı sabit kalırken producer yalnız pointer sourceCommit kayıt commitinde external-pointer exact eşitliği ve baseCommit → pointer.sourceCommit → HEAD ancestry ile; normal PRE_MUTATION producer ise kendi baseline commitinde doğrulanır.",
     "PR-239 UAT111 kapsamı Git'te izlenen TypeScript kanonik rota otoritesi, tüm görünür ve uygun kontrollerin dinamik outcome matrisi, gerçek native CANCEL/ACCEPT ve exclusive reparse-korumalı kanıt köküyle güncellendi.",
     "PR-240 filtresiz tam regresyon guard hatası 4c6652e0 ile korunmuştur. PPK-022 masaüstü başlangıç zincirinde --no-write aktarımı çağrı, sarmalayıcı ve son makbuz üreticilerinde kapatılmış; kaynak regresyonu 1 dosya/6 test, çalışma 51/51, sözleşme 41/41 ve uçtan uca PPK-022 24/24 PASS verirken 1.571 doğrulama dosyasında sıfır değişiklik kanıtlanmıştır. Bundled render aracının yinelenen LibreOffice PATH hatası 6ec632c8 ile korunmuş, mutlak LibreOffice/Poppler yollarıyla ana belge 28/28 sayfa görsel QA PASS vermiştir.",
+    "PR-240 hedefli test üreticisinin zorunlu açık test listesi verilmeden çağrılması 4c8b6b7d ile fail-closed korunmuştur. Etki değerlendirmesi ve analizi 577 değişen yol ile 94 test dosyasını PASS hesaplamıştır; yeni exact koşu bu 94 dosyayı analizden türetilen sırayla açıkça aktarır ve ret PASS olarak yorumlanmaz.",
 ]
 
 

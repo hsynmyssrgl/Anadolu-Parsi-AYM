@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PARSYUVA-AILE-YASAM-MERKEZI-TICARI-DEGISIKLIK-SICILI-V2",
   "temelTarihi": "2026-08-19",
-  "sonKayit": "TICARI-022",
+  "sonKayit": "TICARI-023",
   "kayitlar": [
     {
       "id": "TICARI-001",
@@ -386,6 +386,25 @@
         "docs/ticari-urun-temeli"
       ],
       "isListesiEtkisi": "IS-0211 ve IS-0215 DEVAM kalir. Exact Bronze tam regresyon tum Vitest ve 47 ek komutu tamamladiktan sonra desktop-core-service-startup-runtime makbuzunun yeni olusmasi guard kapisini dusurdu; 4c6652e0 ile gercek FAIL kaydedildi. Kesin 34-D -> PPK-022 -> sarmalayici -> calisma dogrulayicisi zincirinde --no-write aktarimi kapatildi. Kaynak regresyonu 1 dosya/6 test, masaustu calisma 51/51, sozlesme 41/41, uctan uca PPK-022 24/24 PASS verdi ve 1.571 dogrulama dosyasinda sifir degisiklik kanitlandi. Bundled DOCX render LibreOffice PATH hatasi 6ec632c8 ile FAIL kaydedildi; mutlak LibreOffice/Poppler yollariyla 28/28 sayfa render ve gorsel QA PASS verdi. Yeni exact hedefli/tam regresyon, kaynak butunlugu ve kurulu UI UAT tamamlanmadan paket yoktur.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-023",
+      "tarih": "2026-08-25",
+      "baslik": "Exact hedefli test acik dosya listesi cagri reddi",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-275, PR-240 ve 4c8b6b7d reddedilmis hedefli test checkpointi",
+      "etkilenenAlanlar": [
+        "artifacts/validation/mutation-impact-assessment.json",
+        "artifacts/validation/mutation-impact-analysis.json",
+        "scripts/run-mutation-test-evidence.mjs",
+        "BUILD_STATUS.md",
+        "config/active-governance-ledger.json",
+        "config/user-decision-ledger.json",
+        "docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md",
+        "docs/ticari-urun-temeli"
+      ],
+      "isListesiEtkisi": "IS-0211 ve IS-0215 DEVAM kalir. Etki degerlendirmesi ve analizi 577 degisen yol ile 94 hedefli test dosyasini PASS hesapladiktan sonra hedefli test ureticisi zorunlu -- -- <repo-ici-testler> listesi verilmeden cagrildi ve test baslamadan fail-closed durdu. 4c8b6b7d gercek ret olarak korunur; test kodu veya hesaplanan kapsam degistirilmeden yeni exact kosu analizden turetilen 94 dosyayi exact sirayla acikca aktarir. Hedefli/tam regresyon, kaynak butunlugu ve kurulu UI UAT tamamlanmadan paket yoktur.",
       "senkronDurumu": "SYNCHRONIZED"
     }
   ]
