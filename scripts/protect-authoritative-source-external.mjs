@@ -2,17 +2,25 @@ import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { copyFile, mkdir, readFile, readdir, stat, writeFile } from 'node:fs/promises';
 import { basename, dirname, join, relative, resolve, sep } from 'node:path';
+import {
+  assertMatchingReleaseSourceProvenance,
+  captureReleaseSourceProvenance
+} from './lib/release-source-provenance.mjs';
 
 const mode = process.argv[2] ?? 'verify';
 const sourceRoot = resolve(process.cwd());
-const aymRoot = resolve(sourceRoot, '..', '..');
-if (sourceRoot !== resolve('C:\\PPT\\AYM', '06_KOD', 'app')) throw new Error(`Unsafe source root: ${sourceRoot}`);
+const initialSourceCapture = await captureReleaseSourceProvenance({ root: sourceRoot, expectedChannel: 'Bronze' });
+const aymRoot = dirname(initialSourceCapture.policy.codeRoot);
 const repositoryMetadata = JSON.parse(await readFile(resolve(sourceRoot, 'repository-metadata.json'), 'utf8'));
 const visibleRelease = String(repositoryMetadata.visibleRelease ?? '').trim();
-if (!/^(Bronze|Silver|Gold) \d{2}\.\d{2}\.\d{4}\.\d+$/u.test(visibleRelease)) throw new Error(`Unsafe visible release: ${visibleRelease}`);
+if (!/^Bronze \d{2}\.\d{2}\.\d{4}\.\d+$/u.test(visibleRelease)
+  || visibleRelease !== initialSourceCapture.policy.ledger.current?.visibleRelease
+  || repositoryMetadata.edition !== 'Bronze') {
+  throw new Error(`Bronze external source-protection release identity mismatch: ${visibleRelease}`);
+}
 const releaseRoot = join('D:\\AYM_LIBRARY', 'ParsYuva', 'ParsYuva Aile Yasam Merkezi', visibleRelease, 'authoritative-source');
-const localReceiptRoot = resolve(aymRoot, '05_TEST', '30Z_LOCAL_RECEIPT');
-const externalReceiptRoot = resolve(aymRoot, '05_TEST', '30Z_EXTERNAL_RECEIPT');
+const localReceiptRoot = resolve(aymRoot, '05_TEST', '30Z_LOCAL_RECEIPT', initialSourceCapture.provenance.channel);
+const externalReceiptRoot = resolve(aymRoot, '05_TEST', '30Z_EXTERNAL_RECEIPT', initialSourceCapture.provenance.channel);
 const truth = 'Bu teslim, yukarıdaki kanıtlarla sınırlıdır; çalıştırılmayan hiçbir kontrol PASS sayılmamıştır.';
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
 const readJson = async (path) => JSON.parse(await readFile(path, 'utf8'));
@@ -67,7 +75,15 @@ const localProtection = async () => {
   const liveEvidence = verifyLiveLocalSource();
   const latestPath = resolve(localReceiptRoot, 'LATEST.json');
   const protection = await readJson(latestPath);
-  assert(protection.source === '06_KOD/app' && protection.localReceiptStatus === 'LOCAL_RECEIPT_VERIFIED', 'Local source protection is not verified');
+  assert(protection.schemaVersion === 2
+    && protection.source === initialSourceCapture.provenance.source
+    && protection.localReceiptStatus === 'LOCAL_RECEIPT_VERIFIED', 'Local tracked-only source protection is not verified');
+  assertMatchingReleaseSourceProvenance(initialSourceCapture.provenance, protection.sourceProvenance, 'external protection source');
+  assert(protection.backup?.scope === 'TRACKED_FILES_AT_EXACT_COMMIT'
+    && protection.backup?.headCommit === protection.sourceProvenance.headCommit
+    && protection.backup?.headTree === protection.sourceProvenance.headTree
+    && protection.backup?.trackedCommitFingerprint?.sha256 === protection.sourceProvenance.trackedCommitFingerprint.sha256,
+  'Local backup is not bound to the exact tracked commit.');
   const receiptPath = resolve(aymRoot, ...protection.receipt.path.split('/'));
   const backupPath = resolve(aymRoot, ...protection.backup.path.split('/'));
   const [receiptBytes, backupBytes] = await Promise.all([readFile(receiptPath), readFile(backupPath)]);
@@ -89,7 +105,7 @@ const createExternal = async () => {
   const local = await localProtection();
   const { protection } = local;
   assert(protection.externalLibraryReceiptStatus === 'PENDING', 'External protection creation requires a fresh local PENDING receipt');
-  const targetRoot = resolve(releaseRoot, protection.treeSha256);
+  const targetRoot = resolve(releaseRoot, protection.sourceProvenance.headCommit, protection.treeSha256);
   const base = [
     { source: local.receiptPath, path: `source-receipt/${basename(local.receiptPath)}` },
     { source: local.receiptSidecar, path: `source-receipt/${basename(local.receiptSidecar)}` },
@@ -108,10 +124,12 @@ const createExternal = async () => {
     copied.push({ path: item.path, sourceSizeBytes: sourceBytes.length, externalSizeBytes: targetBytes.length, sourceSha256: sha256(sourceBytes), externalSha256: sha256(targetBytes), status: 'PASS' });
   }
   const receipt = {
-    schemaVersion: 1, release: visibleRelease, requirement: 'PR-233', decision: 'DEC-267',
+    schemaVersion: 2, release: visibleRelease, requirement: 'PR-233', decision: 'DEC-267',
     governanceRequirement: 'GOV-005',
     phase: 'AUTHORITATIVE_SOURCE_EXTERNAL_USB_PROTECTION', status: 'PASS', officialCompletionClaimed: true,
-    source: protection.source, treeSha256: protection.treeSha256, fileCount: protection.fileCount, totalBytes: protection.totalBytes,
+    source: protection.source, sourceProvenance: protection.sourceProvenance,
+    backupScope: 'TRACKED_FILES_AT_EXACT_COMMIT',
+    treeSha256: protection.treeSha256, fileCount: protection.fileCount, totalBytes: protection.totalBytes,
     storageBackend: 'EXTERNAL_USB_D_DRIVE', externalPath: targetRoot,
     localReceipt: protection.receipt, deterministicBackup: protection.backup,
     verificationBasis: 'EXACT_SIZE_AND_SHA256_READBACK', expected: copied.length, executed: copied.length,
@@ -127,10 +145,12 @@ const createExternal = async () => {
   const externalReceiptBytes = await readFile(externalReceiptPath);
   assert(sha256(externalReceiptBytes) === receiptBinding.sha256, 'D: external receipt self readback mismatch');
   const readback = {
-    schemaVersion: 1, release: receipt.release, requirement: 'PR-233', decision: 'DEC-267',
+    schemaVersion: 2, release: receipt.release, requirement: 'PR-233', decision: 'DEC-267',
     governanceRequirement: 'GOV-005',
     phase: 'AUTHORITATIVE_SOURCE_EXTERNAL_USB_FINAL_READBACK', status: 'PASS', countsAsPass: true,
     storageBackend: 'EXTERNAL_USB_D_DRIVE', externalPath: targetRoot,
+    sourceProvenance: protection.sourceProvenance,
+    backupScope: 'TRACKED_FILES_AT_EXACT_COMMIT',
     treeSha256: protection.treeSha256, baseExpected: copied.length, baseMatched: copied.length,
     receiptExpected: 2, receiptMatched: 2, failed: 0,
     expectedFinalFileCount: copied.length + 4, verifiedAt: new Date().toISOString(), mandatoryTruthSentence: truth
@@ -146,14 +166,15 @@ const createExternal = async () => {
     ...protection,
     externalLibraryReceiptStatus: 'PASS', officialCompletionClaimed: true,
     externalReceipt: {
-      path: `05_TEST/30Z_EXTERNAL_RECEIPT/${receiptName}`, sha256: receiptBinding.sha256,
-      readbackPath: `05_TEST/30Z_EXTERNAL_RECEIPT/${basename(localReadbackPath)}`,
+      path: `05_TEST/30Z_EXTERNAL_RECEIPT/${protection.sourceProvenance.channel}/${receiptName}`, sha256: receiptBinding.sha256,
+      readbackPath: `05_TEST/30Z_EXTERNAL_RECEIPT/${protection.sourceProvenance.channel}/${basename(localReadbackPath)}`,
       readbackSha256: readbackBinding.sha256, storageBackend: 'EXTERNAL_USB_D_DRIVE',
       externalPath: targetRoot, finalFileCount: names.length
     }
   };
   const finalLiveEvidence = verifyLiveLocalSource();
   assert(finalLiveEvidence.treeSha256 === protection.treeSha256, 'Live local source changed before external protection promotion');
+  assertMatchingReleaseSourceProvenance(finalLiveEvidence.sourceProvenance, protection.sourceProvenance, 'external promotion source');
   await writeBytes(local.latestPath, jsonBytes(completedProtection));
   await writeBytes(resolve(externalReceiptRoot, 'LATEST.json'), jsonBytes(receipt));
   console.log(JSON.stringify({ status: 'PASS', requirement: receipt.requirement, governanceRequirement: receipt.governanceRequirement, decision: receipt.decision, treeSha256: protection.treeSha256, externalPath: targetRoot, files: names.length }));
@@ -171,8 +192,10 @@ const verifyExternal = async () => {
   assert(sha256(readbackBytes) === protection.externalReceipt.readbackSha256, 'External readback local hash mismatch');
   const receipt = JSON.parse(receiptBytes.toString('utf8'));
   const readback = JSON.parse(readbackBytes.toString('utf8'));
-  assert(receipt.status === 'PASS' && receipt.release === visibleRelease && receipt.requirement === 'PR-233' && receipt.governanceRequirement === 'GOV-005' && receipt.decision === 'DEC-267' && receipt.treeSha256 === protection.treeSha256 && receipt.externalPath === protection.externalReceipt.externalPath, 'External receipt identity mismatch');
-  assert(readback.status === 'PASS' && readback.release === visibleRelease && readback.requirement === receipt.requirement && readback.governanceRequirement === receipt.governanceRequirement && readback.decision === receipt.decision && readback.treeSha256 === protection.treeSha256, 'External readback identity mismatch');
+  assert(receipt.schemaVersion === 2 && receipt.status === 'PASS' && receipt.release === visibleRelease && receipt.requirement === 'PR-233' && receipt.governanceRequirement === 'GOV-005' && receipt.decision === 'DEC-267' && receipt.treeSha256 === protection.treeSha256 && receipt.externalPath === protection.externalReceipt.externalPath && receipt.backupScope === 'TRACKED_FILES_AT_EXACT_COMMIT', 'External receipt identity mismatch');
+  assert(readback.schemaVersion === 2 && readback.status === 'PASS' && readback.release === visibleRelease && readback.requirement === receipt.requirement && readback.governanceRequirement === receipt.governanceRequirement && readback.decision === receipt.decision && readback.treeSha256 === protection.treeSha256 && readback.backupScope === receipt.backupScope, 'External readback identity mismatch');
+  assertMatchingReleaseSourceProvenance(receipt.sourceProvenance, protection.sourceProvenance, 'external receipt source');
+  assertMatchingReleaseSourceProvenance(readback.sourceProvenance, protection.sourceProvenance, 'external readback source');
   const names = await listFiles(protection.externalReceipt.externalPath);
   assert(names.length === protection.externalReceipt.finalFileCount && names.length === readback.expectedFinalFileCount, 'D: external inventory count mismatch');
   for (const artifact of receipt.artifacts) {
@@ -186,6 +209,7 @@ const verifyExternal = async () => {
   }
   const finalLiveEvidence = verifyLiveLocalSource();
   assert(finalLiveEvidence.treeSha256 === protection.treeSha256, 'Live local source changed during external protection verification');
+  assertMatchingReleaseSourceProvenance(finalLiveEvidence.sourceProvenance, protection.sourceProvenance, 'external verification source');
   console.log(JSON.stringify({ status: 'PASS', requirement: receipt.requirement, governanceRequirement: receipt.governanceRequirement, decision: receipt.decision, treeSha256: protection.treeSha256, externalPath: protection.externalReceipt.externalPath, files: names.length }));
 };
 

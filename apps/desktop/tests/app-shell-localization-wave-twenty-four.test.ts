@@ -2,7 +2,7 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { resolveUiLocalization, type FamilyAppSnapshot } from '@ppt/domain';
-import { AddRelationModal, DigitalLegacyScreen } from '../src/renderer/App';
+import { AddRelationModal, DigitalLegacyScreen, legacyPermissionActionLabel } from '../src/renderer/App';
 import { LocalizationProvider } from '../src/renderer/localization';
 
 const snapshot: FamilyAppSnapshot = {
@@ -40,5 +40,10 @@ describe('app shell English localization wave twenty-four', () => {
       onSave: async () => undefined
     }))).toContain('Aile ilişkisi ekle');
     expect(renderLocalized('tr-TR', createElement(DigitalLegacyScreen, { snapshot }))).toContain('Dijital Miras Yönetimi');
+  });
+
+  it('localizes every digital-legacy permission action without exposing raw values', () => {
+    expect(['read','create','update','delete','share','record','ai_process','administer'].map(action=>legacyPermissionActionLabel(action as never,'tr'))).toEqual(['Oku','Oluştur','Güncelle','Sil','Paylaş','Kaydet','Yapay zekâ ile işle','Yönet']);
+    expect(['read','create','update','delete','share','record','ai_process','administer'].map(action=>legacyPermissionActionLabel(action as never,'en'))).toEqual(['Read','Create','Update','Delete','Share','Record','Process with AI','Administer']);
   });
 });

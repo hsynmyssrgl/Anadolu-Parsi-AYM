@@ -19,3 +19,7 @@ WebRTC peer connection, SFU, STUN/TURN, kısa ömürlü relay credential, SFrame
 ## Yerel kanıt
 
 Migration 107 `communication_realtime_calling_accessible_ux` SHA-256 değeri `299024d7bd040343717abceb2ada6e543a95bea921c7ee6c7d34a10cf2b6515b` olarak doğrulanır. Altı hedef dosyada 26 test; domain, application, repository-contracts, database, repositories ve desktop typecheck zinciri; migration verifier ile PPK-015/021/022 ratchetleri yerel teknik kanıttır. Bunlar gerçek medya taşıma, fiziksel cihaz sertifikasyonu, gerçek cihaz UAT'si veya requirement kapanışı değildir. `countsAsRequirementPass=false` ve tüm dış/manual kanıtlar `NOT_RUN` kalır.
+
+## 24.08.2026 değişiklik-etki doğrulaması
+
+PR-235 kapsamında güncel kullanıcı dili ve renderer sözleşmesi bu karara yeniden bağlandı; 52/52 sınır-sözleşme-çalışma zamanı zinciri PASS oldu. Bu kayıt dış/manual kanıtları kapatmaz ve `countsAsRequirementPass=false` sınırını değiştirmez.

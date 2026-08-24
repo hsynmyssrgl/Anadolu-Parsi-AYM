@@ -22,3 +22,7 @@
 ## Açık kanıtlar
 
 Production signing trust, gerçek code-signing sertifikası, Authenticode, sandbox, işletim sistemi ağ izolasyonu, dokuz provider UAT'ı, zafiyet/lisans ve privacy/legal/security incelemeleri `NOT_RUN` durumundadır. Persistent governance receipt yoktur; registry ve roadmap kapanmamıştır. `33-Z` yalnız kısmi yerel teknik kanıttır ve `countsAsRequirementPass=false` kalır.
+
+## 24.08.2026 değişiklik-etki doğrulaması
+
+PR-235 kapsamında güncel kullanıcı dili ve renderer sözleşmesi bu tehdit modeline yeniden bağlandı; 52/52 sınır-sözleşme-çalışma zamanı zinciri PASS oldu. Sonuç imzalama, dış sağlayıcı veya production kabul kanıtı değildir.

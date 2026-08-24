@@ -50,7 +50,7 @@ const checks=[
     "setSegment:'communicationRecording:setSegment'","updateRetention:'communicationRecording:updateRetention'",
     "requestDeletion:'communicationRecording:requestDeletion'","channel.startsWith('communicationRecording:')"])],
   ['renderer preserves no-capture truth',has(panel,['CommunicationRecordingRetentionPanel','getCommunicationRecordingCenter',
-    'Kırmızı kayıt göstergesi','gerçek capture: hayır','setCommunicationRecordingSegment'])],
+    'Kırmızı kayıt göstergesi','gerçek kayıt: hayır','setCommunicationRecordingSegment'])],
   ['production media and legal claims remain false',scope.truth?.productionRecordingProviderConfigured===false
     &&scope.truth?.audioCapturePerformed===false&&scope.truth?.videoCapturePerformed===false
     &&scope.truth?.transcriptCapturePerformed===false&&scope.truth?.translationCapturePerformed===false

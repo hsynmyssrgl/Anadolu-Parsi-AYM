@@ -40,7 +40,12 @@ Durumlar: `TAMAMLANDI`, `DEVAM`, `ACIK`, `BLOCKED`, `NOT_RUN`.
 | IS-0207 | Fabrika ayarina donus | Codex | DEVAM | Yeniden kimlik, inventory, silme kaniti |
 | IS-0208 | Eski Windows installer artefaktlarini otomatik temizle | Codex | TAMAMLANDI | Prebuild/package temizligi, guncel-surum kapisi ve hedef test PASS |
 | IS-0209 | Temiz paket, paketli runtime ve cift yedek kabul zinciri | Codex | DEVAM | Tum workspace rebuild, installer/runtime/surum/hash/imza kaniti, GitHub + harici Git commit esitligi ve D: kaynak readback PASS |
-| IS-0210 | Bronze Silver Gold kurulum veri ve kaynak klasoru yalitimi | Codex | DEVAM | Kanal dizini, EXE, kisayol, appId, user-data, uninstall, Git worktree ve branch ayrimi; temiz final commit sonrasi uc worktree geri-okuma PASS |
+| IS-0210 | Bronze Silver Gold kardes program koku, veri ve kaynak yalitimi | Codex | DEVAM | `ParsYuva-<Kanal>` kardes program dizini, `ParsYuva/<Kanal>` AppData, EXE/kisayol/appId/uninstall/worktree ayrimi, legacy kanal dizininde fail-closed silme ve uc worktree geri-okuma PASS |
+| IS-0211 | Mutasyon sonrasi exact commit kanit ve taze kurulu EXE UAT kapisi | Codex | DEVAM | Kural ve kaynak kapilari mevcut; guncel exact commit etki analizi, hedefli test, tam regresyon, kaynak butunlugu ve paket sonrasi kurulu EXE UAT makbuzlari NOT_RUN |
+| IS-0212 | Acik tek seferli surum tahsisi ve onceden tahsisli paket kimligi | Codex | DEVAM | Yanlis veya ikinci expected release ID hicbir yazim/temizlik yapmadan FAIL; signed/local/dir ayni preallocated kimligi tuketir |
+| IS-0213 | Kanonik kurulu Windows yukseltme maintenance ve on yuz UAT zinciri | Codex | DEVAM | Gercek N->N+1 ve same-version metadata-only koruma UAT110, source/package bagli schema2 UAT111 ve exact installed/package/registry PASS |
+| IS-0214 | Adversarial Windows package kurulum ve final teslim kanit zinciri | Codex | DEVAM | Tracked TypeScript exact 4 modul/22 rota, tum uygun kontroller, 17 native dialog gercek CANCEL/ACCEPT, 8 durum, exact scroll, 50 gorsel yuzey ve exclusive reparse-korumali evidence root sozlesmesi var; guard kaybinda path cleanup yok, canli kosular NOT_RUN |
+| IS-0215 | En kucuk degisiklikte tum kayit ve test kapanisi | Codex | DEVAM | Tum bagimli kayit siniflari UPDATED veya kanitli NOT_AFFECTED; hedefli ve filtresiz tam regresyon, typecheck, sozdizimi, kaynak butunlugu ve UI etkisinde tum etkilesim/gorsel UAT PASS; gercek FAIL wip(rejected), ara installer yok |
 
 ## 3. Kimlik, lisans ve ticari guven
 
@@ -79,7 +84,7 @@ Durumlar: `TAMAMLANDI`, `DEVAM`, `ACIK`, `BLOCKED`, `NOT_RUN`.
 
 | ID | Is | Sorumlu | Durum | Kabul |
 |---|---|---|---|---|
-| IS-0601 | Tam regresyonu yeni kaynakta tekrar kos | Codex | TAMAMLANDI | 307/307 dosya ve 2053/2053 test PASS |
+| IS-0601 | Tam regresyonu yeni kaynakta tekrar kos | Codex | DEVAM | Onceki regresyon kaniti tarihsel; guncel V27 exact kaynak icin filtresiz tam Vitest ve mutation source-integrity makbuzlari NOT_RUN |
 | IS-0602 | SBOM ve lisans kapisi | Codex | TAMAMLANDI | Belirsiz/yasak lisans 0 |
 | IS-0603 | SAST/dependency/secret tarama | Codex | TAMAMLANDI | Kritik/yuksek 0 |
 | IS-0604 | Performans ve buyuk aile testi | Codex | DEVAM | Buyuk aile ve fresh-profile dogruluk PASS; paketlenmis Electron bellek/CPU/startup SLA baseline acik |

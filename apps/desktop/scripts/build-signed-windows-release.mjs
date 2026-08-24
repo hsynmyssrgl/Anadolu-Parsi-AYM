@@ -3,6 +3,7 @@ import { existsSync } from 'node:fs';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
+import { assertPreallocatedReleaseIdentity } from '../../../scripts/lib/monthly-release-version.mjs';
 
 const root = resolve(import.meta.dirname, '../../..');
 const node = process.execPath;
@@ -20,6 +21,8 @@ const run = ({ executable, args, cwd = root, allowedExitCodes = [0] }) => new Pr
 });
 const npm = (...args) => run({ executable: npmCommand.executable, args: [...npmCommand.prefix, ...args] });
 const script = (...args) => run({ executable: node, args, cwd: root });
+const expectedReleaseId = process.argv.find((argument) => argument.startsWith('--expected-release-id='))
+  ?.slice('--expected-release-id='.length) || process.env.PPT_EXPECTED_RELEASE_ID;
 
 if (process.argv.includes('--dir')) {
   console.error('package:win is a signed release authority and does not permit directory-only output. Use package:win:dir for an explicitly unsigned test candidate.');
@@ -53,8 +56,22 @@ if (activeDownloadOverrides.length > 0) {
   process.exit(1);
 }
 
+const [releaseLedger, rootManifest, desktopManifestBeforeBuild, repositoryMetadata, appMeta] = await Promise.all([
+  readFile(resolve(root, 'config/release-ledger.json'), 'utf8').then(JSON.parse),
+  readFile(resolve(root, 'package.json'), 'utf8').then(JSON.parse),
+  readFile(resolve(root, 'apps/desktop/package.json'), 'utf8').then(JSON.parse),
+  readFile(resolve(root, 'repository-metadata.json'), 'utf8').then(JSON.parse),
+  readFile(resolve(root, 'packages/domain/src/app-meta.ts'), 'utf8')
+]);
+const preallocatedRelease = assertPreallocatedReleaseIdentity({
+  expectedReleaseId,
+  ledger: releaseLedger,
+  rootManifest,
+  desktopManifest: desktopManifestBeforeBuild,
+  repositoryMetadata,
+  appMeta
+});
 await script('scripts/clean-stale-windows-installers.mjs');
-await script('scripts/allocate-monthly-release-version.mjs');
 await script('scripts/run-governed-preflight.mjs');
 await npm('run', 'pretypecheck');
 await script('scripts/verify-software-supply-chain-boundary.mjs');
@@ -95,7 +112,11 @@ if (
   process.exit(1);
 }
 
-await run({ executable: node, args: [resolve(import.meta.dirname, 'run-electron-builder.mjs')], cwd: resolve(root, 'apps/desktop') });
+await run({
+  executable: node,
+  args: [resolve(import.meta.dirname, 'run-electron-builder.mjs'), `--expected-release-id=${preallocatedRelease.releaseId}`],
+  cwd: resolve(root, 'apps/desktop')
+});
 const releaseRoot = resolve(root, 'apps/desktop/release');
 const activeRelease = JSON.parse(await readFile(resolve(root, 'config/release-ledger.json'), 'utf8')).current;
 const installerName = `ParsYuva-${activeRelease.channel}-${activeRelease.version}.exe`;

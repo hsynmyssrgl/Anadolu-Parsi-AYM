@@ -81,6 +81,7 @@ export const runPlatformPolicyAstGate = async (root = process.cwd(), options = {
 
 const main = async () => {
   const inventoryOnly = process.argv.includes('--inventory');
+  const noWrite = process.argv.includes('--no-write');
   const report = await runPlatformPolicyAstGate(process.cwd(), { inventoryOnly });
   if (inventoryOnly) {
     const kind = process.argv.find((item) => item.startsWith('--kind='))?.slice('--kind='.length);
@@ -98,8 +99,10 @@ const main = async () => {
     if (report.status === 'FAIL') process.exitCode = 1;
     return;
   }
-  await mkdir('artifacts/validation', { recursive: true });
-  await writeFile('artifacts/validation/platform-policy-ast-gate.json', `${JSON.stringify(report, null, 2)}\n`);
+  if (!noWrite) {
+    await mkdir('artifacts/validation', { recursive: true });
+    await writeFile('artifacts/validation/platform-policy-ast-gate.json', `${JSON.stringify(report, null, 2)}\n`);
+  }
   console.log(JSON.stringify(report, null, 2));
   if (report.status !== 'PASS') process.exitCode = 1;
 };

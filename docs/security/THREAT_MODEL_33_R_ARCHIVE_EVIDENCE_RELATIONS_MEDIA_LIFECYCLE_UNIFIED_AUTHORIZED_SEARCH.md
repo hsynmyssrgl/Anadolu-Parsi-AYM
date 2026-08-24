@@ -55,3 +55,7 @@ PPK-021/022 allowlist ve capability manifesti yalnız build/runtime surface ratc
 - 33-P/33-Q atomik yönetişim kapanışı tamamlanmadan 33-R gereksinim PASS sayılmaz.
 
 Bu açıklar nedeniyle yerel teknik testlerin tamamı geçse bile certification veya production acceptance iddiası yapılmaz.
+
+## 24.08.2026 değişiklik-etki doğrulaması
+
+PR-235 kapsamında güncel kullanıcı dili ve renderer sözleşmesi bu tehdit modeline yeniden bağlandı; 52/52 sınır-sözleşme-çalışma zamanı zinciri PASS oldu. Sonuç dış/manual kanıtları kapatmaz ve production kabulü değildir.

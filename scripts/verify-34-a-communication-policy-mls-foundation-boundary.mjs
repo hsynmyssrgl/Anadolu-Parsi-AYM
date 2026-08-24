@@ -67,9 +67,9 @@ const definitions = [
     "rekeyRoom:'communicationSecurity:rekeyRoom'", "setHistoryAccess:'communicationSecurity:setHistoryAccess'", "freezeRoom:'communicationSecurity:freezeRoom'",
     "channel.startsWith('communicationSecurity:')"])],
   ['renderer reuses system surface and states every cryptographic no-claim boundary', has(panel, ['CommunicationSecurityPanel',
-    'Bu ekran mesaj göndermez ve anahtar yönetmez.', 'const providerReady=false;', 'Production RFC 9420 sağlayıcısı',
-    'gerçek ağ teslimi doğrulanmadı', 'Kapsamlı kaynak yetkilendirmesi henüz uygulanmadı',
-    'otomatik retention ve kapasite kurtarma yoktur', 'replacementDeviceCredentialId',
+    'Bu ekran mesaj göndermez ve anahtar yönetmez.', 'const providerReady=false;', 'Gerçek ağ üzerinden güvenli mesajlaşma',
+    'kayıp cihaz sonrası güvenliği yenileme', 'mesaj doğrulama henüz hazır değildir', 'Kapsamlı kaynak yetkilendirmesi henüz uygulanmadı',
+    'otomatik saklama temizliği henüz yoktur', 'replacementDeviceCredentialId',
     "<strong>0</strong> {text('gönderilmiş mesaj','sent messages')}"])],
   ['provider conformance messages relay network and production guarantees stay false', scope.truth?.rfc9420ProviderConfigured === false
     && scope.truth?.rfc9420ConformanceVerified === false && scope.truth?.forwardSecrecyVerifiedInProduction === false

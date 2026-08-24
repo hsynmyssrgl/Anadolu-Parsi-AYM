@@ -15,12 +15,18 @@ await writeFile(helper, (await readFile(helper, 'utf8')).replace("[Environment]:
 const argsTamper = invoke('args-tamper');
 await cp(resolve(root, 'apps/desktop/src/main/windows-efs-protection.ts'), helper);
 const session = join(temp, 'apps/desktop/src/main/volatile-sqlite-session.ts');
-await writeFile(session, (await readFile(session, 'utf8')).replace("protectWindowsPathWithEfs(snapshotPath, 'Windows EFS SQLite snapshot placeholder');", '// tampered protection removed'));
-const plaintextTamper = invoke('plaintext-tamper');
+const sessionSource = await readFile(session, 'utf8');
+const snapshotProtectionMarker = "protectWindowsPathWithEfs(snapshotPath, 'Windows EFS SQLite snapshot placeholder');";
+const snapshotProtectionMarkerCount = sessionSource.split(snapshotProtectionMarker).length - 1;
+if (snapshotProtectionMarkerCount === 1) {
+  await writeFile(session, sessionSource.replace(snapshotProtectionMarker, '// tampered protection removed'));
+}
+const plaintextTamper = snapshotProtectionMarkerCount === 1 ? invoke('plaintext-tamper') : undefined;
 const results = [
   { id: 'valid-contract-pass', status: valid.status === 0 ? 'PASS' : 'FAIL', details: valid.stderr },
   { id: 'positional-args-tamper-rejected', status: argsTamper.status !== 0 ? 'PASS' : 'FAIL', details: argsTamper.stdout },
-  { id: 'plaintext-snapshot-tamper-rejected', status: plaintextTamper.status !== 0 ? 'PASS' : 'FAIL', details: plaintextTamper.stdout }
+  { id: 'snapshot-protection-marker-exactly-once', status: snapshotProtectionMarkerCount === 1 ? 'PASS' : 'FAIL', details: `count=${snapshotProtectionMarkerCount}` },
+  { id: 'plaintext-snapshot-tamper-rejected', status: plaintextTamper?.status !== 0 ? 'PASS' : 'FAIL', details: plaintextTamper?.stdout ?? 'tamper was not executed because the marker count was not exactly one' }
 ];
 const status = results.every((item) => item.status === 'PASS') ? 'PASS' : 'FAIL';
 await mkdir('artifacts/validation', { recursive: true });

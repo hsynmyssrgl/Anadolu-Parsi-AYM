@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { access, copyFile, mkdir, readFile, readdir, stat, writeFile } from 'node:fs/promises';
 import { basename, dirname, relative, resolve, sep } from 'node:path';
+import { verifyAymGovernanceSourceAuthority } from './lib/aym-source-authority.mjs';
 
 const sourceRoot = resolve(process.cwd());
 const aymRoot = resolve(sourceRoot, '..', '..');
@@ -31,8 +32,8 @@ const paths = {
   completion31E: resolve(sourceRoot, 'artifacts', 'checkpoints', '31-E_COMPLETION_RECORD.json'),
   completion31S: resolve(sourceRoot, 'artifacts', 'checkpoints', '31-S_COMPLETION_RECORD.json'),
   completion31T: resolve(sourceRoot, 'artifacts', 'checkpoints', '31-T_COMPLETION_RECORD.json'),
-  receipt: resolve(aymRoot, '05_TEST', '30Z_LOCAL_RECEIPT', 'LATEST.json'),
-  localReceiptRoot: resolve(aymRoot, '05_TEST', '30Z_LOCAL_RECEIPT'),
+  receipt: resolve(aymRoot, '05_TEST', '30Z_LOCAL_RECEIPT', 'Bronze', 'LATEST.json'),
+  localReceiptRoot: resolve(aymRoot, '05_TEST', '30Z_LOCAL_RECEIPT', 'Bronze'),
   activeSource: resolve(aymRoot, '06_KOD', 'AKTIF_KAYNAK.json'),
   backupRegister: resolve(aymRoot, '10_YEDEK', 'YEDEK_SICILI.json')
 };
@@ -43,7 +44,6 @@ const hashFile = async (path) => sha256(await readFile(path));
 const toPosix = (path) => path.split(sep).join('/');
 const toWindows = (path) => path.replaceAll('/', '\\');
 const rootRelative = (path) => toPosix(relative(aymRoot, path));
-
 const writeChecked = async (path, content) => {
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, content, 'utf8');
@@ -62,7 +62,7 @@ const exists = async (path) => {
   try { await access(path); return true; } catch { return false; }
 };
 
-const reconcileAuthoritativeSourceBackups = async (registeredBackups) => {
+const reconcileAuthoritativeSourceBackups = async (registeredBackups, authoritativeHeadCommit) => {
   const backups = [...registeredBackups];
   const knownPaths = new Set(backups.map((item) => String(item.path ?? '').replaceAll('\\', '/')));
   const protectionFiles = (await readdir(paths.localReceiptRoot, { withFileTypes: true }))
@@ -73,9 +73,16 @@ const reconcileAuthoritativeSourceBackups = async (registeredBackups) => {
     const protection = await readJson(resolve(paths.localReceiptRoot, entry.name));
     const backupPath = String(protection.backup?.path ?? '').replaceAll('\\', '/');
     if (knownPaths.has(backupPath)) continue;
-    if (protection.source !== '06_KOD/app'
+    if (protection.schemaVersion !== 2
+      || protection.source !== '06_KOD/kanallar/Bronze'
       || !/^[a-f0-9]{64}$/u.test(String(protection.treeSha256 ?? ''))
-      || !/^10_YEDEK\/AYM_AKTIF_KOD_[a-f0-9]{16}\.zip$/u.test(backupPath)
+      || !/^10_YEDEK\/Bronze\/AYM_BRONZE_[a-f0-9]{12}_[a-f0-9]{16}\.zip$/u.test(backupPath)
+      || protection.sourceProvenance?.channel !== 'Bronze'
+      || protection.sourceProvenance?.branch !== 'channel/bronze'
+      || protection.sourceProvenance?.headCommit !== protection.backup?.headCommit
+      || protection.sourceProvenance?.headTree !== protection.backup?.headTree
+      || protection.sourceProvenance?.trackedCommitFingerprint?.sha256 !== protection.treeSha256
+      || protection.sourceProvenance?.headCommit !== authoritativeHeadCommit
       || protection.localReceiptStatus !== 'LOCAL_RECEIPT_VERIFIED'
       || protection.readbackStatus !== 'PASS') {
       throw new Error(`Malformed immutable source-protection record: ${entry.name}`);
@@ -118,7 +125,7 @@ const reconcileAuthoritativeSourceBackups = async (registeredBackups) => {
       localReceiptStatus: protection.localReceiptStatus,
       externalLibraryReceiptStatus: protection.externalLibraryReceiptStatus,
       officialCompletionClaimed: protection.officialCompletionClaimed,
-      coverage: 'Exact 06_KOD/app authoritative source tree; deterministic fixed-timestamp ZIP.'
+      coverage: 'Exact clean 06_KOD/kanallar/Bronze commit; 06_KOD/app HEAD equality verified; deterministic fixed-timestamp ZIP.'
     });
     knownPaths.add(backupPath);
   }
@@ -281,7 +288,7 @@ const selectNextWork = (audit) => {
     ?? null;
 };
 
-const updateManagementRecords = async ({ audit, receipt, completion30Z, completion31A, completion31B, completion31C, completion31D, completion31E, completion31S, completion31T, decisions, rules }) => {
+const updateManagementRecords = async ({ audit, receipt, completion30Z, completion31A, completion31B, completion31C, completion31D, completion31E, completion31S, completion31T, decisions, rules, sourceAuthority }) => {
   if (receipt.localReceiptStatus !== 'LOCAL_RECEIPT_VERIFIED' || receipt.readbackStatus !== 'PASS') {
     throw new Error('Current authoritative source receipt is not locally verified.');
   }
@@ -610,7 +617,10 @@ const updateManagementRecords = async ({ audit, receipt, completion30Z, completi
     ...currentActive,
     schemaVersion: 3,
     generatedUtc,
-    path: '06_KOD/app',
+    path: receipt.source,
+    mainSourcePath: '06_KOD/app',
+    sourceCommit: receipt.sourceProvenance.headCommit,
+    mainSourceCommitEquality: 'PASS',
     sourceFiles: receipt.fileCount,
     sourceBytes: receipt.totalBytes,
     sourceTreeSha256: receipt.treeSha256,
@@ -636,10 +646,13 @@ const updateManagementRecords = async ({ audit, receipt, completion30Z, completi
     persistentReceiptStatus: 'PASS',
     localProtection: receipt
   });
-  await writeChecked(resolve(aymRoot, '06_KOD', 'AKTIF_KAYNAK.md'), `# AKTIF KAYNAK\n\n- Tek yetkili yol: \`06_KOD/app\`\n- Dosya: ${receipt.fileCount}\n- Bayt: ${receipt.totalBytes}\n- Agac SHA-256: \`${receipt.treeSha256}\`\n- Yerel receipt: **${receipt.localReceiptStatus}**\n- Deterministik yedek: \`${receipt.backup.path}\`\n- Dondurulmus 30-Z ve 31-A..31-T harici receipts: **PASS / COMPLETED**\n- Guncel checkpoint: **31-T**\n- PPK-002: **PARTIAL**\n- Guncel C kaynak agaci harici D: korumasi: **PASS**\n- Yeni Build: **Verilmedi**\n\n${truth}\n`);
+  await writeChecked(resolve(aymRoot, '06_KOD', 'AKTIF_KAYNAK.md'), `# AKTIF KAYNAK\n\n- Korunan teslim kaynagi: \`${receipt.source}\`\n- Ana gelistirme kaynagi: \`06_KOD/app\`\n- Exact commit: \`${receipt.sourceProvenance.headCommit}\`\n- Ana kaynak / Bronze kanal HEAD esitligi: **PASS**\n- Dosya: ${receipt.fileCount}\n- Bayt: ${receipt.totalBytes}\n- Agac SHA-256: \`${receipt.treeSha256}\`\n- Yerel receipt: **${receipt.localReceiptStatus}**\n- Deterministik yedek: \`${receipt.backup.path}\`\n- Dondurulmus 30-Z ve 31-A..31-T harici receipts: **PASS / COMPLETED**\n- Guncel checkpoint: **31-T**\n- PPK-002: **PARTIAL**\n- Guncel C kaynak agaci harici D: korumasi: **PASS**\n- Yeni Build: **Verilmedi**\n\n${truth}\n`);
 
   const backupRegister = await readJson(paths.backupRegister);
-  const backups = await reconcileAuthoritativeSourceBackups(Array.isArray(backupRegister.backups) ? backupRegister.backups : []);
+  const backups = await reconcileAuthoritativeSourceBackups(
+    Array.isArray(backupRegister.backups) ? backupRegister.backups : [],
+    sourceAuthority.app.provenance.headCommit
+  );
   const currentBackup = {
     path: receipt.backup.path,
     role: 'DETERMINISTIC_AUTHORITATIVE_SOURCE_LOCAL_PROTECTION',
@@ -650,7 +663,7 @@ const updateManagementRecords = async ({ audit, receipt, completion30Z, completi
     localReceiptStatus: receipt.localReceiptStatus,
     externalLibraryReceiptStatus: receipt.externalLibraryReceiptStatus,
     officialCompletionClaimed: receipt.officialCompletionClaimed,
-    coverage: 'Exact 06_KOD/app authoritative source tree; deterministic fixed-timestamp ZIP.'
+    coverage: 'Exact clean 06_KOD/kanallar/Bronze commit; 06_KOD/app HEAD equality verified; deterministic fixed-timestamp ZIP.'
   };
   const currentBackupIndex = backups.findIndex((item) => item.path === currentBackup.path);
   if (currentBackupIndex >= 0) backups[currentBackupIndex] = { ...backups[currentBackupIndex], ...currentBackup };
@@ -892,10 +905,11 @@ const updateManifestIncrementally = async ({ audit, decisions, receipt, completi
   return { manifest, evidence };
 };
 
+const sourceAuthority = await verifyAymGovernanceSourceAuthority({ sourceRoot, aymRoot });
 await createInitialSnapshot();
-const [audit, receipt, completion30Z, completion31A, completion31B, completion31C, completion31D, completion31E, completion31S, completion31T] = await Promise.all([
+const receipt = sourceAuthority.protection;
+const [audit, completion30Z, completion31A, completion31B, completion31C, completion31D, completion31E, completion31S, completion31T] = await Promise.all([
   readJson(paths.audit),
-  readJson(paths.receipt),
   readJson(paths.completion30Z),
   readJson(paths.completion31A),
   readJson(paths.completion31B),
@@ -907,7 +921,7 @@ const [audit, receipt, completion30Z, completion31A, completion31B, completion31
 ]);
 const decisions = await updateDecisionRegister(receipt);
 const rules = await updateRuleRegister();
-await updateManagementRecords({ audit, receipt, completion30Z, completion31A, completion31B, completion31C, completion31D, completion31E, completion31S, completion31T, decisions, rules });
+await updateManagementRecords({ audit, receipt, completion30Z, completion31A, completion31B, completion31C, completion31D, completion31E, completion31S, completion31T, decisions, rules, sourceAuthority });
 const { manifest, evidence } = await updateManifestIncrementally({ audit, decisions, receipt, completion30Z, completion31A, completion31B, completion31C, completion31D, completion31E, completion31S, completion31T });
 
 console.log(`AYM incremental governance update: PASS; files=${manifest.fileCount}; reused=${evidence.stats.unchangedHashesReused}; rehashed=${evidence.hashedPaths.length}; moved=${evidence.stats.movedFilesRehashed}; source=${receipt.treeSha256}.`);

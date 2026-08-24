@@ -36,3 +36,7 @@ Central policy, owner/participant eşliği veya geçerli optimistic revision yok
 ## Açık kanıtlar
 
 Gerçek audio/video, transcript/translation, kırmızı gösterge, sesli duyuru, late-joiner gerçek durdurma, E2EE recorder, media vault/hash/imza, erişim geçmişi, secure erase/backup propagation, retention execution, çocuk/veli/hukuk politikası ile privacy, legal, security ve accessibility incelemeleri `NOT_RUN` durumundadır.
+
+## 24.08.2026 değişiklik-etki doğrulaması
+
+PR-235 kapsamında güncel kullanıcı dili ve renderer sözleşmesi bu tehdit modeline yeniden bağlandı; 52/52 sınır-sözleşme-çalışma zamanı zinciri PASS oldu. Sonuç gerçek kayıt, fiziksel silme veya production kabul kanıtı değildir.

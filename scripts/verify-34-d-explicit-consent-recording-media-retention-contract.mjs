@@ -46,7 +46,7 @@ const checks=[
     &&has(content.main,['getCommunicationRecordingCenter','requestCommunicationRecordingDeletion'])
     &&has(content.preload,['getCommunicationRecordingCenter','requestCommunicationRecordingDeletion'])
     &&has(content.global,['CommunicationRecordingMutationReceiptView','requestCommunicationRecordingDeletion'])],
-  ['renderer reuses App surface without new route',has(content.panel,['CommunicationRecordingRetentionPanel','gerçek capture: hayır',
+  ['renderer reuses App surface without new route',has(content.panel,['CommunicationRecordingRetentionPanel','gerçek kayıt: hayır',
     'recording-indicator--inactive'])&&has(content.app,['<CommunicationRecordingRetentionPanel/>'])],
   ['governance documents preserve fail-honest residuals',has(content.decision,['countsAsRequirementPass=false','Gerçek ses/video yakalama',
     'E2EE recorder','NOT_RUN'])&&has(content.threat,['Renderer medya yakalama','fiziksel silme','guardian/legal policy'])],

@@ -21,17 +21,18 @@ describe('34-C realtime calling renderer surface',()=>{
   });
 
   it('states provider and delivery limits without claiming a real call or network use',()=>{
-    for(const marker of ['Bu sürüm gerçek çağrı başlatmaz ve ağ kullanmaz.','WebRTC, SFU, STUN/TURN, SFrame/MLS',
-      'production ortamında yapılandırılmadı','güvenli biçimde reddedilir','yalnız yerel planlama metadatasıdır',
-      'fiziksel kamera, mikrofon veya duyulabilir hoparlör işlevini sertifikalandırmaz'])
+    for(const marker of ['Bu sürüm gerçek çağrı başlatmaz ve ağ kullanmaz.','Canlı sesli veya görüntülü görüşme',
+      'henüz kullanıma hazır değildir','işlem güvenle durdurulur','yalnız bu bilgisayardaki görüşme planında saklanır',
+      'fiziksel kamera, mikrofon veya duyulabilir hoparlörün çalıştığını garanti etmez'])
       expect(panel).toContain(marker);
+    for(const technicalCopy of ['WebRTC, SFU, STUN/TURN, SFrame/MLS','production ortamında','main-process','canlı track','planlama metadatasıdır'])expect(panel).not.toContain(technicalCopy);
     for(const forbidden of ['providerEvidenceSha256','turnCredential','sframeKey','mediaStreamId','screenCaptureSourceId',
       'recordCommunicationCallQuality','navigator.mediaDevices','RTCPeerConnection'])expect(panel).not.toContain(forbidden);
   });
 
   it('provides accessible bounded local planning, preflight, fallback, caption, RTT and lifecycle controls',()=>{
-    for(const label of ['Yerel çağrı planı oluştur','Sade ve büyük görünümü aç','Yerel ön kontrolü çalıştır','Yalnız sese geç',
-      'Altyazı iste','RTT iste','Ekran paylaşımı iste','El kaldır','Yerel toplantı planını kilitle','Yerel olarak sabitle',
+    for(const label of ['Yerel çağrı planı oluştur','Sade ve büyük görünümü aç','Yerel cihaz kontrolünü çalıştır','Yalnız sese geç',
+      'Altyazı iste','Anlık yazışma iste','Ekran paylaşımı iste','El kaldır','Yerel toplantı planını kilitle','Yerel olarak sabitle',
       'İşaret dili konuşmacısı olarak sabitle','Yerel bekleme alanına geç',
       'Yerel sabitlemeyi kaldır','İşaret dili sabitlemesini kaldır','Planı sonlandır','Planı iptal et'])
       expect(panel).toContain(label);

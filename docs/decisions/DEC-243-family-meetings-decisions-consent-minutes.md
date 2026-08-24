@@ -33,3 +33,7 @@ Bu nedenle `countsAsRequirementPass=false`; gerçek katılımcı, kayıt rızas�
 - PPK-022: 568 dosya / 428 yüzey / `1bf21d23c862afbccb9611083c093f9ced703adadf7a170c29f53479d21397b1`
 
 Gerçek çok katılımcılı UAT, AI provider, dış takvim/hatırlatıcı, uzaktan işbirliği, gizlilik, hukuk, güvenlik, erişilebilirlik ve retention kanıtları `NOT_RUN` durumundadır.
+
+## 24.08.2026 değişiklik-etki doğrulaması
+
+PR-235 kapsamında güncel kullanıcı dili ve renderer sözleşmesi bu karara yeniden bağlandı; 52/52 sınır-sözleşme-çalışma zamanı zinciri PASS oldu. Bu kayıt dış/manual kanıtları kapatmaz ve `countsAsRequirementPass=false` sınırını değiştirmez.

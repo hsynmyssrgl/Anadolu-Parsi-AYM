@@ -31,6 +31,8 @@ describe('33-V places travel asset and pet renderer surface',()=>{
       "text('Gereksinim','Requirement')+': '","text('Sağlayıcı etiketi','Provider label')+': '"])expect(panel).toContain(marker);
     expect(panel).toContain("['travel_plan','reservation','shared_expense','expense_settlement']");
     expect(panel).toContain("['travel_plan','reservation','travel_budget']");
+    expect(panel).toContain('placesTravelStatusLabel(item.status,language)');
+    expect(panel).not.toContain(' · {item.status} · ');
   });
   it('states local-only no-claim boundaries in responsive accessible presentation',()=>{
     expect(panel).toContain('Harita, rezervasyon, ödeme, belge doğrulama, canlı takip veya dış paylaşım yapılmaz');

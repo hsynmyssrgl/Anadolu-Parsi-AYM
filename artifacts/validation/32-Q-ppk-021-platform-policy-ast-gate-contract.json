@@ -54,7 +54,7 @@
       "passed": true
     },
     {
-      "name": "manifest contains exactly 895 surfaces",
+      "name": "manifest contains exactly 897 surfaces",
       "passed": true
     },
     {
@@ -282,7 +282,7 @@
       "passed": true
     },
     {
-      "name": "scope records six rules and 895 exact surfaces",
+      "name": "scope records six rules and 897 exact surfaces",
       "passed": true
     },
     {
@@ -350,16 +350,16 @@
   "sourceGate": {
     "status": "PASS",
     "productionSourceZones": 18,
-    "scannedFiles": 588,
-    "privilegedSurfaces": 895,
-    "exactAllowlistEntries": 895,
-    "exactAllowlistSha256": "fad3ceeb9485bffc9d6f9878f7bb486f56a73b4aa5d045580471c70a49e59da6",
+    "scannedFiles": 590,
+    "privilegedSurfaces": 897,
+    "exactAllowlistEntries": 897,
+    "exactAllowlistSha256": "9ea5b846e552e760fbd8dd5f8bee7fb83988ef19bb93e3bbd4ac0465c4b71205",
     "surfaceCounts": {
       "CRYPTO_GLOBAL": 22,
-      "CRYPTO_IMPORT": 247,
+      "CRYPTO_IMPORT": 248,
       "DATABASE_IMPORT": 21,
       "NETWORK_IMPORT": 15,
-      "REPOSITORY_IMPORT": 70,
+      "REPOSITORY_IMPORT": 71,
       "ROLE_PRESENTATION": 2,
       "SQL_CALL": 79,
       "SQL_CONSTRUCTOR": 2,
@@ -372,13 +372,13 @@
     "findings": []
   },
   "protectedRuleCount": 6,
-  "exactAllowlistEntries": 895,
-  "exactAllowlistSha256": "fad3ceeb9485bffc9d6f9878f7bb486f56a73b4aa5d045580471c70a49e59da6",
+  "exactAllowlistEntries": 897,
+  "exactAllowlistSha256": "9ea5b846e552e760fbd8dd5f8bee7fb83988ef19bb93e3bbd4ac0465c4b71205",
   "directRoleAuthorizationBypasses": 0,
   "syntaxModel": "TYPESCRIPT_AST",
   "regexOnlyGateAccepted": false,
   "buildGateReplacesRuntimePolicy": false,
-  "latestDatabaseMigration": 117,
+  "latestDatabaseMigration": 121,
   "schemaMigrationRequired": false,
   "historicalBackfillPerformed": false,
   "legacyDesktopVaultPreserved": true,
@@ -387,5 +387,5 @@
   "cutoverAuthorityAttached": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-20T13:16:10.816Z"
+  "generatedAt": "2026-08-24T05:23:52.139Z"
 }

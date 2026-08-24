@@ -6,6 +6,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { FamilyDataStore } from '../.tmp/data-store-smoke/data-store.js';
 import { createArchivePolicyTestOptions } from './lib/archive-policy-test-harness.mjs';
 
+const noWrite = process.argv.includes('--no-write');
 const directory = mkdtempSync(join(tmpdir(), 'panthera-mvp44-smoke-'));
 const databasePath = join(directory, 'family.db');
 const backupPath = join(directory, 'backup.pptbackup');
@@ -35,12 +36,13 @@ try {
     ...policyOptions
   });
   assert.ok(migrationSummary, 'Migration özeti üretilmedi.');
-  assert.deepEqual(migrationSummary.appliedVersions, Array.from({ length: 117 }, (_unused, index) => index + 1));
+  assert.deepEqual(migrationSummary.appliedVersions, Array.from({ length: 121 }, (_unused, index) => index + 1));
   assert.equal(migrationSummary.schemaAfter.tableCount, 218);
 
   const initialState = store.getAuthState();
   if (!initialState.initialized) {
     store.setupAdmin({
+      familyName: 'Foundation Test Ailesi',
       displayName: 'Foundation Test Yöneticisi',
       email: 'foundation@example.com',
       password: 'GucluFoundationParolasi123!'
@@ -74,7 +76,7 @@ try {
   const probe = new DatabaseSync(databasePath, { readOnly: true });
   try {
     const migrations = probe.prepare('SELECT version,success FROM schema_migrations ORDER BY version').all();
-    assert.equal(migrations.length, 117, 'Migration kayıtları eksik.');
+    assert.equal(migrations.length, 121, 'Migration kayıtları eksik.');
     assert.equal(migrations.every((row) => Number(row.success) === 1), true, 'Başarısız migration kaydı bulundu.');
     assert.equal(Boolean(probe.prepare("SELECT 1 AS present FROM sqlite_master WHERE type='table' AND name='database_metadata'").get()), true);
     assert.equal(Boolean(probe.prepare("SELECT 1 AS present FROM sqlite_master WHERE type='table' AND name='local_governed_ocr_source_deletion_recovery_intents'").get()), true);
@@ -146,8 +148,10 @@ try {
     migrationVersions: migrationSummary.appliedVersions,
     schemaFingerprint: migrationSummary.schemaAfter.fingerprint
   };
-  mkdirSync('artifacts/manifests', { recursive: true });
-  writeFileSync('artifacts/manifests/DATA_STORE_SMOKE_MVP60.json', `${JSON.stringify(report, null, 2)}\n`);
+  if (!noWrite) {
+    mkdirSync('artifacts/manifests', { recursive: true });
+    writeFileSync('artifacts/manifests/DATA_STORE_SMOKE_MVP60.json', `${JSON.stringify(report, null, 2)}\n`);
+  }
   console.log(JSON.stringify(report, null, 2));
 } finally {
   store?.close();

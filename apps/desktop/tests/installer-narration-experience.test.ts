@@ -29,6 +29,7 @@ describe('installer progress, narration and Silver help experience', () => {
       '!define MUI_ABORTWARNING','!define MUI_ABORTWARNING_CANCEL_DEFAULT',
       '!define MUI_CUSTOMFUNCTION_ABORT AymStopInstallerNarration',
       '!define PPT_INSTALLER_RELEASE_CHANNEL "Bronze"',
+      '!define PPT_INSTALLER_PROGRAM_DIRECTORY "ParsYuva-${PPT_INSTALLER_RELEASE_CHANNEL}"',
       '!define PPT_INSTALLER_CHANNEL_COLOR "A5672F"',
       '!define PPT_INSTALLER_CHANNEL_BITMAP "installer-bronze-sidebar.bmp"',
       '!define PPT_INSTALLER_CHANNEL_COLOR "718494"',
@@ -44,7 +45,7 @@ describe('installer progress, narration and Silver help experience', () => {
       '${NSD_CreateBitmap} 0 0 108u 100% ""',
       'Ailenizi oluşturalım','Bilgileriniz bu bilgisayarda kalır',
       'Rehberli ve erişilebilir bir karşılama','1 / 3 · Aile alanı',
-      'kişisel veri aktarmaz','C:\\Program Files\\PPT\\ParsYuva',
+      'kişisel veri aktarmaz','C:\\Program Files\\PPT\\${PPT_INSTALLER_PROGRAM_DIRECTORY}',
       'CreateFont $1 "Segoe UI" 11 400','CreateFont $2 "Segoe UI" 10 600',
       'ParsYuva Aile Yaşam Merkezi kullanıma hazır','ParsYuva Family Life Center is ready',
       'F1 Sesli Yardım Merkezinden yeniden dinleyebilirsiniz','F1 Narrated Help Center',
@@ -140,6 +141,13 @@ describe('installer progress, narration and Silver help experience', () => {
     expect(uninstallerSource.indexOf('${If} ${isUpdated}')).toBeLessThan(
       uninstallerSource.indexOf('$(AymUninstallChoice)'),
     );
+    expect(uninstallerSource.indexOf('SetShellVarContext current')).toBeGreaterThan(
+      uninstallerSource.indexOf('Goto aym_uninstall_done'),
+    );
+    expect(uninstallerSource.indexOf('SetShellVarContext current')).toBeLessThan(
+      uninstallerSource.indexOf('$(AymUninstallChoice)'),
+    );
+    expect(uninstallerSource.match(/SetShellVarContext all/gu)).toHaveLength(2);
     expect(uninstallerSource).toContain(
       'ExecWait \'"$INSTDIR\\${PPT_INSTALLER_EXECUTABLE}" --uninstall-backup-assistant\' $0'
     );

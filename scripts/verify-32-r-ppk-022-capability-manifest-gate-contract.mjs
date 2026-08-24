@@ -3,6 +3,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { runPlatformCapabilityManifestGate } from './verify-platform-capability-manifest-gate.mjs';
 
 const candidateMode = process.argv.includes('--candidate');
+const noWrite = process.argv.includes('--no-write');
 const readText = (path) => readFile(path, 'utf8');
 const readJson = async (path) => JSON.parse(await readText(path));
 const [
@@ -113,7 +114,7 @@ check('bootstrap entries are bounded and Desktop-owned', pinnedEntries.length ==
 check('manifest preserves no-transfer ownership invariants', manifest.invariants?.realDataTransferPerformed === false && manifest.invariants?.sqliteOwnershipTransferred === false && manifest.invariants?.desktopVaultOwnershipPreserved === true);
 
 check('production capability gate passes', gate.status === 'PASS' && gate.findings.length === 0);
-check('gate scans all current production sources', gate.productionSourceZones === 18 && gate.scannedFiles === 588);
+check('gate scans all current production sources', gate.productionSourceZones === 18 && gate.scannedFiles === 590);
 check('gate and manifest cardinality are exact', gate.capabilitySurfaces === 447 && gate.exactManifestSurfaces === 447);
 check('gate manifest hash matches canonical file', gate.exactManifestSha256 === manifestSha256);
 check('gate reports seven families and fourteen applications', gate.protectedCapabilityFamilies === 7 && gate.canonicalApplications === 14);
@@ -177,7 +178,7 @@ check('policy tests cover signed hash and seven families', includesAll(policyTes
 check('policy tests cover malformed unverified and identity mismatch', includesAll(policyTest, ['MALFORMED_REQUEST', 'POLICY_PACKAGE_UNVERIFIED', 'POLICY_PACKAGE_HASH_MISMATCH', 'APPLICATION_ID_MISMATCH', 'APPLICATION_VERSION_MISMATCH', 'CAPABILITY_MANIFEST_HASH_MISMATCH']));
 check('policy tests cover missing unexpected and tampered capability', includesAll(policyTest, ['CAPABILITY_REQUIREMENT_MISSING', 'CAPABILITY_REQUIREMENT_UNEXPECTED', 'MALFORMED_AUTHORITY']));
 check('AST tests cover all seven resource families', includesAll(astTest, ['CAMERA_IMPORT', 'MICROPHONE_IMPORT', 'FILE_IMPORT', 'OCR_IMPORT', 'AI_IMPORT', 'LOCATION_API', 'NETWORK_API']));
-check('AST tests cover exact production dynamic execution and drift denial', includesAll(astTest, ['inventoryPlatformCapabilityManifestSurfaces()', 'inventory.files).toBe(588)', 'toHaveLength(447)', 'CAPABILITY_DYNAMIC_EXECUTION_UNRESOLVED', 'UNDECLARED_CAPABILITY_SURFACE', 'CAPABILITY_SURFACE_ENTRY_INVALID', 'APPLICATION_CAPABILITY_BASELINE_MISMATCH']));
+check('AST tests cover exact production dynamic execution and drift denial', includesAll(astTest, ['inventoryPlatformCapabilityManifestSurfaces()', 'inventory.files).toBe(590)', 'toHaveLength(447)', 'CAPABILITY_DYNAMIC_EXECUTION_UNRESOLVED', 'UNDECLARED_CAPABILITY_SURFACE', 'CAPABILITY_SURFACE_ENTRY_INVALID', 'APPLICATION_CAPABILITY_BASELINE_MISMATCH']));
 check('integration tests bind runtime startup and bootstrap', includesAll(integrationTest, ['applicationRuntimeCapabilities: PLATFORM_APPLICATION_RUNTIME_CAPABILITY_REQUIREMENTS', "source: 'authenticated-core-service-health'", 'assertPinnedBootstrapRuntimeCapability']));
 
 check('main composes exact capability policy and status use case', includesAll(desktopMain, ['new PlatformCapabilityManifestPolicy()', 'new GetPlatformCapabilityManifestGateBoundaryUseCase(platformCapabilityManifestPolicy)']));
@@ -186,7 +187,7 @@ check('preload exposes exact status channel', preload.includes("invoke('system:g
 check('renderer type exposes exact status method', globalTypes.includes('getPlatformCapabilityManifestGateBoundary():Promise<PlatformCapabilityManifestGateBoundaryView>'));
 check('IPC integration accepts only zero arguments', ipcPolicy.includes("case 'system:getPlatformCapabilityManifestGateBoundary':"));
 check('IPC sharing marks status no-cache', ipcCache.includes("'system:getPlatformCapabilityManifestGateBoundary'"));
-check('renderer explains seven families and runtime authority truth', includesAll(renderer, ['PPK-022 · capability manifest kapısı', 'Kamera, mikrofon, dosya, OCR, AI, konum ve ağ', 'Build manifesti tek başına runtime yetkisi vermez']));
+check('renderer explains seven families and runtime authority truth', includesAll(renderer, ['İzin bildirimi güvenlik kapısı', 'Kamera, mikrofon, dosya, metin tanıma, yapay zekâ, konum ve ağ', 'Derleme bildirimi tek başına çalışma anı yetkisi vermez']));
 check('renderer does not expose source or manifest hash material', !renderer.includes('exactCapabilityManifestSha256') && !renderer.includes('capabilitySurfaceKeys'));
 
 check('scope records all seven exact protected families', scope.boundaries?.protectedCapabilityFamilyCount === 7 && scope.boundaries?.protectedCapabilityFamilies?.join('|') === 'camera|microphone|file|ocr|ai|location|network');
@@ -254,8 +255,10 @@ const report = {
   generatedAt: new Date().toISOString()
 };
 
-await mkdir('artifacts/validation', { recursive: true });
-await writeFile('artifacts/validation/32-R-ppk-022-capability-manifest-gate-contract.json', `${JSON.stringify(report, null, 2)}\n`);
+if (!noWrite) {
+  await mkdir('artifacts/validation', { recursive: true });
+  await writeFile('artifacts/validation/32-R-ppk-022-capability-manifest-gate-contract.json', `${JSON.stringify(report, null, 2)}\n`);
+}
 if (failures.length) {
   console.error(`PPK-022${candidateMode ? ' candidate' : ''} contract: FAIL (${failures.length}/${checks.length}).`);
   failures.forEach((failure) => console.error(failure));

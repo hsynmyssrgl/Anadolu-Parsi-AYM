@@ -22,18 +22,19 @@ describe('34-D explicit-consent recording renderer surface',()=>{
   });
 
   it('states fail-closed media, encryption, deletion and child-policy truth without a false red indicator',()=>{
-    for(const marker of ['Varsayılan kapalıdır','gerçek ses, video, transkript veya çeviri kaydı oluşturmaz',
-      'Kırmızı kayıt göstergesi','şu an kayıt başlamadı','E2EE kayıt rolü','fiziksel güvenli silme',
-      'çocuk/veli hukuk politikası yapılandırılmadı','fail-closed'])expect(panel).toContain(marker);
+    for(const marker of ['Varsayılan kapalıdır','gerçek ses, video, konuşma dökümü veya çeviri kaydı oluşturmaz',
+      'Kırmızı kayıt göstergesi','şu an kayıt başlamadı','Uçtan uca şifreli kayıt','bütünlük doğrulaması',
+      'fiziksel güvenli silme','çocuk veya veli kuralları henüz hazır değildir','güvenle kapalı kalır'])expect(panel).toContain(marker);
+    for(const technicalCopy of ['Kayıt ve rıza metadata','gerçek capture','E2EE kayıt rolü','hash/imza','fail-closed'])expect(panel).not.toContain(technicalCopy);
     expect(panel).toContain('recording-indicator--inactive');expect(panel).not.toContain('recording-indicator--active');
     for(const forbidden of ['MediaRecorder','getUserMedia','RTCPeerConnection','mediaStreamId','recordingPath','providerEvidenceSha256'])
       expect(panel).not.toContain(forbidden);
   });
 
   it('offers explicit self-consent, refusal, withdrawal, late-joiner pause, off-record and retention controls',()=>{
-    for(const label of ['Rıza planı oluştur','Kendi açık rızamı ver','Kaydı reddet, görüşmeye off-record devam et',
-      'Gelecekteki kayıt rızamı geri çek','On-record bölümü iste','Off-record bölümüne geç',
-      'Ayrı saklama politikasını doğrula','Mantıksal silme iste','Kaydı duraklat ve rıza iste'])expect(panel).toContain(label);
+    for(const label of ['Rıza planı oluştur','Kendi açık rızamı ver','Kaydı reddet, görüşmeye kayıt dışı devam et',
+      'Gelecekteki kayıt rızamı geri çek','Kayıtlı bölüm iste','Kayıt dışı bölüme geç',
+      'Ayrı saklama politikasını doğrula','Kayıt bilgisini kaldırmayı iste','Kaydı duraklat ve rıza iste'])expect(panel).toContain(label);
     expect(panel).toContain('aria-labelledby="communication-recording-title"');
     expect(styles).toContain('.communication-recording');expect(styles).toContain('.recording-indicator--inactive');
   });

@@ -23,3 +23,7 @@ COM-002'nin oda türü ve yönetim temeli ile SEC-COM-003/007/008'in yerel metad
 ## Yerel kanıt
 
 Migration 105 `communication_policy_mls_foundation` SHA-256 değeri `7756e6e14267e84eb3c7643b4da3534178bf706a2ed551af6f9068451ecfb4f8` ile doğrulanır. Altı hedef dosyada 37 test geçer. PPK-015 568 dosya / `8ef8bf331b1c484c595c2639b9da313d8ae6e0cd5e8751fa921bef2fdcccee64` ve sıfır bulgu; PPK-021 568 dosya / 889 exact yüzey / `3a297f74d43d4675090a709d4359af9245c2971a7fc338afef2fb87b1c8608dd`; PPK-022 568 dosya / 428 exact yüzey / `1bf21d23c862afbccb9611083c093f9ced703adadf7a170c29f53479d21397b1` yerel teknik kanıttır. Bunlar production MLS, mesaj teslimi veya requirement kapanışı değildir.
+
+## 24.08.2026 değişiklik-etki doğrulaması
+
+PR-235 kapsamında güncel kullanıcı dili ve renderer sözleşmesi bu karara yeniden bağlandı; 52/52 sınır-sözleşme-çalışma zamanı zinciri PASS oldu. Bu kayıt dış/manual kanıtları kapatmaz ve `countsAsRequirementPass=false` sınırını değiştirmez.

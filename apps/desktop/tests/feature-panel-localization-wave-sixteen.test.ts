@@ -12,14 +12,14 @@ const renderPanel = (locale: 'tr-TR' | 'en-US'): string => renderToStaticMarkup(
 ));
 
 describe('feature-panel English localization wave sixteen', () => {
-  it('renders local OCR without visible Turkish copy in English', () => {
+  it('renders local text recognition without visible Turkish copy in English', () => {
     const html = renderPanel('en-US');
-    expect(html).toContain('Loading local OCR center');
+    expect(html).toContain('Loading the local text-recognition center');
     expect(html).toContain('Reading jobs and the local processing setting.');
     expect(html).not.toMatch(/[ÇĞİÖŞÜçğıöşü]/u);
   });
 
   it('preserves the Turkish product copy', () => {
-    expect(renderPanel('tr-TR')).toContain('Yerel OCR merkezi yükleniyor');
+    expect(renderPanel('tr-TR')).toContain('Yerel metin tanıma merkezi yükleniyor');
   });
 });

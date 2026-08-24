@@ -9,6 +9,7 @@ import type {
 } from '@ppt/domain';
 import { Button, EmptyState, SectionHeader, StatusMessage, Surface } from './ui';
 import { selectUiCopy, useLocalization } from './localization';
+import { toUserFacingErrorMessage } from './user-facing-error';
 
 interface FinanceImportPanelProps {
   readonly people: readonly FamilyMemberView[];
@@ -78,7 +79,7 @@ export function FinanceImportPanel({ people, workspace, onWorkspaceChange }: Fin
       if (result?.preview) installPreview(result.preview);
     } catch (error) {
       setMessageTone('danger');
-      setMessage(error instanceof Error ? error.message : text('Finans dosyası önizlenemedi.','The finance file could not be previewed.'));
+      setMessage(toUserFacingErrorMessage(error,text('Finans dosyası önizlenemedi.','The finance file could not be previewed.')));
     } finally { setBusy(false); }
   };
 
@@ -89,7 +90,7 @@ export function FinanceImportPanel({ people, workspace, onWorkspaceChange }: Fin
       if (result) installPreview(result);
     } catch (error) {
       setMessageTone('danger');
-      setMessage(error instanceof Error ? error.message : text('OHVPS sandbox önizlemesi oluşturulamadı.','The OHVPS sandbox preview could not be created.'));
+      setMessage(toUserFacingErrorMessage(error,text('OHVPS sandbox önizlemesi oluşturulamadı.','The OHVPS sandbox preview could not be created.')));
     } finally { setBusy(false); }
   };
 
@@ -127,7 +128,7 @@ export function FinanceImportPanel({ people, workspace, onWorkspaceChange }: Fin
         : text('Finans içe aktarma paketi kaydedildi.','The finance import package was saved.'));
     } catch (error) {
       setMessageTone('danger');
-      setMessage(error instanceof Error ? error.message : text('Finans hareketleri içe aktarılamadı.','Finance transactions could not be imported.'));
+      setMessage(toUserFacingErrorMessage(error,text('Finans hareketleri içe aktarılamadı.','Finance transactions could not be imported.')));
     } finally { setBusy(false); }
   };
 
@@ -140,7 +141,7 @@ export function FinanceImportPanel({ people, workspace, onWorkspaceChange }: Fin
 
   return <>
     <Surface className="span-2 workspace-summary">
-      <SectionHeader eyebrow="B4-13 · B4-14" title={text('Kontrollü hareket aktarımı ve OHVPS adapter sınırı','Controlled transaction import and OHVPS adapter boundary')}/>
+      <SectionHeader eyebrow={text('Kontrollü finans aktarımı','Controlled finance import')} title={text('Kontrollü hareket aktarımı ve banka bağlantısı sınırı','Controlled transaction import and bank-connection boundary')}/>
       <div className="notes-card">
         <strong>{text('Canlı banka bağlantısı yok; kimlik bilgisi, token veya harici onay toplanmaz.','There is no live bank connection; credentials, tokens and external authorization are not collected.')}</strong>
         <small>{text('OHVPS adapter: yerel sözleşme · Sandbox: sentetik veri · Manuel fallback: UTF-8 CSV/TSV/OFX/QFX ve XLSX · Ağ erişimi yapılmadı','OHVPS adapter: local contract · Sandbox: synthetic data · Manual fallback: UTF-8 CSV/TSV/OFX/QFX and XLSX · Network access was not used')}</small>

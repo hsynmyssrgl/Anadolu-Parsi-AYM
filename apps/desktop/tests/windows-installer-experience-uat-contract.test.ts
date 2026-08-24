@@ -28,7 +28,7 @@ describe('real Windows NSIS installer experience UAT contract', () => {
     expect(result.status).toBe(0);
   });
 
-  it('requires exact governed paths and refuses missing or pre-existing targets before launch', async () => {
+  it('requires exact governed paths and creates a fresh UUID run root below the category parent', async () => {
     const source = await readFile(uatScriptUrl, 'utf8');
     expect(source).toContain('[Parameter(Mandatory = $true)]');
     expect(source).toContain('[string]$InstallerPath');
@@ -40,7 +40,11 @@ describe('real Windows NSIS installer experience UAT contract', () => {
     expect(source).toContain("'apps\\desktop\\release'");
     expect(source).toContain("'artifacts\\validation'");
     expect(source).toContain('Installer does not exist; live UAT was not started');
-    expect(source).toContain('EvidenceRoot already exists; evidence is never overwritten');
+    expect(source).toContain("Join-Path $validationRoot 'installer-experience'");
+    expect(source).toContain("$runId = [guid]::NewGuid().ToString('D')");
+    expect(source).toContain('Join-Path $evidenceCategoryParent $runId');
+    expect(source).toContain('EvidenceRoot must be the exact installer-experience category parent');
+    expect(source).toContain('partial runs are never recovered or overwritten');
     expect(source).toContain('Installer UAT must run from an elevated PowerShell session; no installer was launched.');
     expect(source.indexOf('Installer UAT must run from an elevated PowerShell session')).toBeLessThan(
       source.indexOf('New-Item -ItemType Directory -Path $evidenceFullPath'),
@@ -102,11 +106,26 @@ describe('real Windows NSIS installer experience UAT contract', () => {
       'forcedCleanupSucceeded',
       'forcedCleanupSurvivorProcessIds',
       'Get-TreeSnapshot -Root $expectedInstalledRoot',
+      '$expectedInstalledRoot = "C:\\Program Files\\PPT\\ParsYuva-$releaseChannel"',
       'Stop-Process -Id $identity.ProcessId -Force',
       "'windows-installer-experience-uat.json'",
+      '[IO.FileShare]::Read',
+      'New-EvidenceRunGuard',
+      'Assert-EvidenceRunGuard',
+      'Close-EvidenceRunGuard',
+      'Assert-NoReparseAncestors -Candidate $reportPath -Boundary $evidenceFullPath',
+      '[System.IO.FileMode]::CreateNew',
+      '$reportStream.Flush($true)',
       '[System.IO.File]::Move($temporaryReportPath, $reportPath)',
+      'Installer experience receipt atomic readback mismatch.',
       "if ($status -ne 'PASS') { exit 1 }",
     ]) expect(source).toContain(marker);
+    expect(source.indexOf('New-EvidenceRunGuard -RunRoot $evidenceFullPath')).toBeLessThan(
+      source.indexOf('Start-Process -FilePath $installerFullPath'),
+    );
+    expect(source.indexOf('Close-EvidenceRunGuard -Guard $evidenceGuard')).toBeGreaterThan(
+      source.indexOf('[System.IO.File]::ReadAllBytes($reportPath)'),
+    );
     expect(source).toContain('Test-SameProcessIdentity');
     expect(source).toContain('$cancelConfirmationInvoked -and');
     expect(source).not.toMatch(/Remove-Item\s+[^\r\n]*(?:Program Files|EvidenceRoot|validationRoot)/iu);

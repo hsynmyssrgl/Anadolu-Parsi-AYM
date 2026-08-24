@@ -14,6 +14,7 @@ const familyAiPanelUrl = new URL('../src/renderer/FamilyAiAssistantPanel.tsx', i
 const memoryStudioPanelUrl = new URL('../src/renderer/MemoryStudioPanel.tsx', import.meta.url);
 const rendererDomainUrl = new URL('../../../packages/domain/src/renderer.ts', import.meta.url);
 const rendererDirectoryUrl = new URL('../src/renderer/', import.meta.url);
+const installerUrl = new URL('../build/installer.nsh', import.meta.url);
 
 const relativeLuminance = (hex: string): number => {
   const channels = [1, 3, 5].map((offset) => Number.parseInt(hex.slice(offset, offset + 2), 16) / 255)
@@ -28,6 +29,13 @@ const contrastRatio = (left: string, right: string): number => {
 };
 
 describe('approved brand and release-channel visual contract', () => {
+  it('keeps each branded channel in a sibling program root outside the legacy ParsYuva directory', async () => {
+    const installer = await readFile(installerUrl, 'utf8');
+    expect(installer).toContain('!define PPT_INSTALLER_PROGRAM_DIRECTORY "ParsYuva-${PPT_INSTALLER_RELEASE_CHANNEL}"');
+    expect(installer).toContain('StrCpy $INSTDIR "$PROGRAMFILES64\\PPT\\${PPT_INSTALLER_PROGRAM_DIRECTORY}"');
+    expect(installer).not.toContain('StrCpy $INSTDIR "$PROGRAMFILES64\\PPT\\ParsYuva\\${PPT_INSTALLER_CHANNEL_DIRECTORY}"');
+  });
+
   it('enforces one readable and proportional typography rhythm across the complete application shell', async () => {
     const [styles, typography] = await Promise.all([readFile(stylesUrl, 'utf8'), readFile(typographyUrl, 'utf8')]);
     expect(typography).toContain('--minimum-readable-copy: 16px');
@@ -400,8 +408,8 @@ describe('approved brand and release-channel visual contract', () => {
     });
     expect(manifest.minimumInteractionTargetPx).toBe(44);
     expect(main).toContain("backgroundColor: '#FDFDFC'");
-    expect(main).toContain('minWidth: 900');
-    expect(main).toContain('minHeight: 640');
+    expect(main).toContain('minWidth: 760');
+    expect(main).toContain('minHeight: 720');
     expect(main).toContain("titleBarStyle: 'hidden'");
     expect(main).toContain("color: '#F7F3ED'");
     expect(main).toContain("symbolColor: '#5B5148'");
@@ -441,6 +449,11 @@ describe('approved brand and release-channel visual contract', () => {
       '.auth-trust small{margin-top:5px;color:#a9bed1;font-size:13px',
       '.auth-heading h2{margin:9px 0 9px;font-size:38px',
       '.auth-heading p{margin:0;color:#aec1d3;font-size:16px',
+      '.desktop-titlebar strong { font-size:16px;line-height:1.2; }',
+      '.desktop-titlebar span { color:var(--release-muted);font-size:16px;line-height:1.2; }',
+      '.first-run-caption small { font-size:16px;line-height:24px; }',
+      '.secure-startup-version{display:block;margin-top:10px;color:var(--release-accent-strong);font-size:16px',
+      '.auth-heading p { font-size:16px;line-height:1.5; }',
       '.auth-fields label{display:grid;gap:9px;color:#e1eaf2;font-size:15px',
       '.auth-fields input{width:100%;height:54px',
       '.auth-form>.button{height:54px;font-size:16px}',

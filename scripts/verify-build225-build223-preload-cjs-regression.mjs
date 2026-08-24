@@ -1,58 +1,44 @@
-import { mkdtemp, mkdir, readFile, rm, writeFile, readdir } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-const reportPath=process.argv[2]??'artifacts/validation/build225-build223-preload-cjs-regression.json';
-const compiler=join('node_modules','typescript','lib','tsc.js');
-const sourceRoot='apps/desktop/src/main';
-const sourceNames=['preload.ts','ipc-transport-context.ts','ipc-request-lifecycle.ts','ipc-read-sharing.ts'];
-const transform=(source)=>source
- .replace(/from '((?:\.\/)ipc-[^']+)\.js'/g,"from '$1.cjs'")
- .replace(/=\s*<([A-Za-z_$][^>\n]*)>\s*\(/g,'= <$1,>(')
- .replace(/async\s+<([A-Za-z_$][^>\n]*)>\s*\(/g,'async <$1,>(');
-const temp=await mkdtemp(join(tmpdir(),'ppt-build223-cjs-'));
-const stage=join(temp,'stage'),out=join(temp,'out');await mkdir(stage);await mkdir(out);
-for(const name of sourceNames){await writeFile(join(stage,name.replace(/\.ts$/,'.cts')),transform(await readFile(`${sourceRoot}/${name}`,'utf8')));}
-const preloadSource=await readFile(`${sourceRoot}/preload.ts`,'utf8');
-const domainNames=[];
-for(const match of preloadSource.matchAll(/import type \{([^}]+)\} from '@ppt\/domain';/gs)){
- for(const part of match[1].split(',')){const name=part.trim().split(/\s+as\s+/).at(-1)?.trim();if(name&&/^[A-Za-z_$][\w$]*$/.test(name)&&!domainNames.includes(name))domainNames.push(name);}
+
+const reportPath = process.argv[2] ?? 'artifacts/validation/build225-build223-preload-cjs-regression.json';
+const temporaryRoot = await mkdtemp(join(tmpdir(), 'ppt-build225-build223-regression-'));
+const nestedReportPath = join(temporaryRoot, 'build223-runtime.json');
+try {
+  const run = spawnSync(process.execPath, [
+    'scripts/verify-build223-preload-cjs-graph-runtime.mjs',
+    nestedReportPath
+  ], { encoding: 'utf8' });
+  let nested = null;
+  try { nested = JSON.parse(await readFile(nestedReportPath, 'utf8')); } catch { /* Report absence is a failure below. */ }
+  const checks = [
+    { id: 'canonical-build223-runtime-exit-zero', status: run.status === 0 ? 'PASS' : 'FAIL', details: { exitCode: run.status, stdout: run.stdout?.trim(), stderr: run.stderr?.trim() } },
+    { id: 'canonical-build223-runtime-report-pass', status: nested?.status === 'PASS' ? 'PASS' : 'FAIL', details: nested?.status ?? 'MISSING' },
+    { id: 'canonical-build223-runtime-check-count', status: nested?.checks === 13 && nested?.passCount === 13 ? 'PASS' : 'FAIL', details: { checks: nested?.checks, passCount: nested?.passCount } },
+    { id: 'canonical-build223-tamper-detection-preserved', status: nested?.results?.some((item) => item.id === 'tamper-missing-sharing-detected' && item.status === 'PASS') === true ? 'PASS' : 'FAIL' }
+  ];
+  const status = checks.every((item) => item.status === 'PASS') ? 'PASS' : 'FAIL';
+  const report = {
+    schemaVersion: 2,
+    product: 'ParsYuva Aile Yaşam Merkezi',
+    featureBuild: 225,
+    regressionOfBuild: 223,
+    canonicalHarness: 'scripts/verify-build223-preload-cjs-graph-runtime.mjs',
+    status,
+    checks: checks.length,
+    passCount: checks.filter((item) => item.status === 'PASS').length,
+    results: checks,
+    generatedAt: new Date().toISOString()
+  };
+  await mkdir('artifacts/validation', { recursive: true });
+  await writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`);
+  console.log(`Build225 Build223 preload CJS regression: ${status} (${report.passCount}/${report.checks}).`);
+  if (status !== 'PASS') {
+    console.error(JSON.stringify(checks.filter((item) => item.status === 'FAIL'), null, 2));
+    process.exitCode = 1;
+  }
+} finally {
+  await rm(temporaryRoot, { recursive: true, force: true });
 }
-const stubs=[
- "declare module 'electron' { export const contextBridge: any; export const ipcRenderer: any; export type IpcMainInvokeEvent = any; }",
- "declare module 'node:crypto' { export const randomUUID: any; export const createHash: any; }",
- 'declare const Buffer: any;',
- 'declare function setTimeout(handler: (...args:any[])=>void, timeout?: number): any;',
- 'declare function clearTimeout(handle:any): void;',
- "declare module '@ppt/core-service-contracts' { export type CoreServiceHealthContract = any; }",
- "declare module '@ppt/domain' {",
- ...domainNames.map(name=>` export type ${name} = any;`),
- '}'
-].join('\n');
-const stubsPath=join(stage,'stubs.d.ts');await writeFile(stubsPath,stubs);
-const entries=sourceNames.map(name=>join(stage,name.replace(/\.ts$/,'.cts')));
-const baseArgs=['--ignoreConfig',...entries,stubsPath,'--target','ES2024','--module','NodeNext','--moduleResolution','NodeNext','--rootDir',stage,'--outDir',out,'--skipLibCheck','--strict','--sourceMap'];
-const run=(args)=>spawnSync(process.execPath,[compiler,...args],{encoding:'utf8'});
-const valid=run(baseArgs);const validOutput=`${valid.stdout??''}${valid.stderr??''}`;
-const outputNames=valid.status===0?await readdir(out):[];
-const preloadCjs=outputNames.includes('preload.cjs')?await readFile(join(out,'preload.cjs'),'utf8'):'';
-await rm(join(stage,'ipc-read-sharing.cts'),{force:true});await rm(out,{recursive:true,force:true});await mkdir(out);
-const tamperedEntries=entries.filter(path=>!path.endsWith('ipc-read-sharing.cts'));
-const tampered=run(['--ignoreConfig',...tamperedEntries,stubsPath,'--target','ES2024','--module','NodeNext','--moduleResolution','NodeNext','--rootDir',stage,'--outDir',out,'--skipLibCheck','--strict']);
-const tamperedOutput=`${tampered.stdout??''}${tampered.stderr??''}`;
-const checks=[];const add=(id,c,d)=>checks.push({id,status:c?'PASS':'FAIL',...(d!==undefined?{details:d}:{})});
-add('valid-compile-exit-zero',valid.status===0,{exitCode:valid.status,output:validOutput.trim()});
-add('no-ts2307-valid',!validOutput.includes('TS2307'),validOutput.trim());
-add('no-ts7060-valid',!validOutput.includes('TS7060'),validOutput.trim());
-for(const name of ['preload.cjs','ipc-transport-context.cjs','ipc-request-lifecycle.cjs','ipc-read-sharing.cjs'])add(`output-${name}`,outputNames.includes(name),outputNames);
-add('preload-requires-context-cjs',preloadCjs.includes('require("./ipc-transport-context.cjs")'));
-add('preload-requires-lifecycle-cjs',preloadCjs.includes('require("./ipc-request-lifecycle.cjs")'));
-add('preload-requires-sharing-cjs',preloadCjs.includes('require("./ipc-read-sharing.cjs")'));
-add('preload-no-local-js-require',!preloadCjs.includes('require("./ipc-transport-context.js")')&&!preloadCjs.includes('require("./ipc-request-lifecycle.js")')&&!preloadCjs.includes('require("./ipc-read-sharing.js")'));
-add('tamper-fails',tampered.status!==0,{exitCode:tampered.status});
-add('tamper-missing-sharing-detected',tamperedOutput.includes('TS2307')&&tamperedOutput.includes('ipc-read-sharing.cjs'),tamperedOutput.trim());
-const status=checks.every(x=>x.status==='PASS')?'PASS':'FAIL';
-await mkdir('artifacts/validation',{recursive:true});const version=spawnSync(process.execPath,[compiler,'-v'],{encoding:'utf8'});await writeFile(reportPath,JSON.stringify({schemaVersion:1,product:'Anadolu Parsı Aile Yaşam Merkezi',applicationVersion:'02.08.2026.225',build:225,regressionOfBuild:223,compiler:'workspace tsc',compilerVersion:(version.stdout??'unknown').trim(),status,checks:checks.length,passCount:checks.filter(x=>x.status==='PASS').length,results:checks,generatedAt:new Date().toISOString()},null,2)+'\n');
-await rm(temp,{recursive:true,force:true});
-console.log(`Build225 Build223 preload CJS regression: ${status} (${checks.filter(x=>x.status==='PASS').length}/${checks.length}).`);
-if(status!=='PASS'){console.error(JSON.stringify(checks.filter(x=>x.status==='FAIL'),null,2));process.exitCode=1;}

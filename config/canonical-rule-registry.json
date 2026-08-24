@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "PPT-CANONICAL-RULE-REGISTRY-V22",
+  "id": "PPT-CANONICAL-RULE-REGISTRY-V27",
   "product": "ParsYuva Aile Yaşam Merkezi",
   "upperBrand": "ParsYuva",
   "effectiveRelease": "Bronze 22.08.2026.50",
@@ -9,9 +9,9 @@
     "version": "PROJECT-RULES-2026-08-02-V6",
     "sha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
   },
-  "ruleCount": 234,
-  "activeRuleCount": 211,
-  "supersededRuleCount": 23,
+  "ruleCount": 240,
+  "activeRuleCount": 215,
+  "supersededRuleCount": 25,
   "rules": [
     {
       "id": "PR-001",
@@ -1670,10 +1670,54 @@
     {
       "id": "PR-234",
       "text": "Bronze, Silver ve Gold birbirinden yalıtılmış kurulum, kullanıcı verisi ve kaynak çalışma alanları kullanır. Her kanal C:\\Program Files\\PPT\\ParsYuva\\<Kanal> dizinine, ParsYuva-<Kanal>.exe ana dosyasıyla ve ParsYuva <Kanal> kısayoluyla kurulur; appId, productName, kaldırma kapsamı ve kullanıcı veri kökü kanal kimliğini taşır. Bir kanalın kurulumu, yükseltmesi veya kaldırılması diğer kanalın programını ya da verisini değiştiremez. Kanal kaynakları C:\\PPT\\AYM\\06_KOD\\kanallar\\<Kanal> altında ayrı Git worktree ve ayrı branch olarak tutulur; build çıktısı ile kullanıcı verisi kanallar arasında yeniden kullanılamaz. Dağıtım EXE adı ParsYuva-<Kanal>-GG.AA.YYYY.NN.exe olarak kalır; görünür ana ürün adı ParsYuva Aile Yaşam Merkezi'dir.",
-      "state": "ACTIVE",
+      "state": "SUPERSEDED",
       "source": "USER_DECISION_DEC-269",
+      "effectiveRelease": "Bronze 22.08.2026.50",
+      "replacedBy": "PR-236"
+    },
+    {
+      "id": "PR-235",
+      "text": "En küçük kaynak, yapılandırma veya belge mutasyonundan sonra kalıcı tamamlanma, Windows paketleme ya da installer teslimi iddiası; değişen dosyaların etki analizi kanonik kural, kullanıcı kararı, aktif belge, manifest, ratchet, hedefli test, tam regresyon, kaynak bütünlüğü ve UAT etkilerini tek tek güncellediğini veya gerekçeli olarak etkilenmediğini aynı exact commit üzerinde göstermeden kurulamaz. Paket yalnız temiz ve kanalına ait exact Git commitinden, bu commit ile aynı kural hash'i ve governed-source fingerprint'ine bağlı hedefli test, tam regresyon ve kaynak bütünlüğü PASS kanıtlarıyla üretilir. Installer teslimi yalnız paket üretiminden sonra aynı paket ve kaynak commitine bağlı kurulu ana EXE üzerinde taze UAT PASS kanıtıyla yapılır; eski, başka committen, kaynak-runtime, win-unpacked veya yalnız metadata kanıtı kabul edilmez. Eksik ya da eski bağ kalıcı completion, paketleme ve teslimi fail-closed engeller; waiver yoktur.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-270",
+      "effectiveRelease": "Bronze 22.08.2026.50"
+    },
+    {
+      "id": "PR-236",
+      "text": "Bronze, Silver ve Gold program kökleri legacy ParsYuva kökünün dışında C:\\Program Files\\PPT\\ParsYuva-<Kanal> kardeş dizinlerine kurulur; kanal AppData kökü ParsYuva/<Kanal> olarak ayrı kalır. Kanal appId, productName, ParsYuva-<Kanal>.exe ana dosyası, ParsYuva <Kanal> kısayolu, kaldırma kapsamı, kullanıcı verisi, Git worktree ve branch yalıtımı korunur; build çıktısı veya kullanıcı verisi kanallar arasında yeniden kullanılamaz. Yükseltme kişisel veriyi korur ve yalnız etkileşimli kaldırma signed-in kullanıcı AppData bağlamına geçip çıkışta tüm-kullanıcılar bağlamını geri yükleyebilir. Legacy 37-44 uygulama kökü altında Bronze, Silver veya Gold kanal dizini varsa recursive legacy program temizliği veri ve program silmeden fail-closed durur. Legacy kullanıcı verisi otomatik taşınamaz veya silinemez.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-271",
+      "effectiveRelease": "Bronze 22.08.2026.50"
+    },
+    {
+      "id": "PR-237",
+      "text": "Resmî aylık sürüm tahsisi yalnız açık ve tek seferlik bir işlem olarak, mutasyon modunda zorunlu beklenen release ID ile yapılır. Hesaplanan kimlik beklenenle uyuşmazsa lock, geçici dosya, kaynak yazımı veya installer temizliği başlamadan fail-closed durur; preview salt okunurdur. Signed, yerel imzasız ve dizin paketleme girişleri yeni sürüm tahsis edemez; yalnız önceden tahsis edilmiş current ledger, kök ve desktop manifest, repository metadata ve APP_META exact kimliğini tüketir. Signed paketleme zorunlu beklenen release ID doğrulamasını installer temizliğinden önce yapar. Tahsis; aktif kök/current/config/ticari sürüm taşıyıcılarını tek atomik planda senkronize eder, tarihsel UAT, evidence ve test fixture kayıtlarını değiştirmez. Aynı beklenen kimlikle ikinci tahsis girişimi sonraki sıra kimliğini hesapladığı anda hiçbir dosyayı değiştirmeden reddedilir.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-272",
+      "effectiveRelease": "Bronze 22.08.2026.50"
+    },
+    {
+      "id": "PR-238",
+      "text": "Windows installer teslimi; zorunlu explicit installer, packaged EXE, installed EXE, package provenance, governed preflight, yeni containment/reparse korumalı evidence root ve expected release ID girdileriyle çalışan tek kanonik üreticide gerçek N→N+1 yükseltme ile ayrı aynı-sürüm maintenance fazlarını kanıtlar. Üretici yalnız kendi sentetik Bronze markerını yazar; mevcut Bronze, Silver, Gold ve legacy kullanıcı verisi içeriğini okumadan ve adlarını makbuza kaydetmeden metadata hash manifestleri üretir. Yükseltme ve maintenance veri seçim diyaloğu açamaz; bütün kanal/legacy kullanıcı verisi manifestlerini ve sentetik markerı korur, Silver/Gold/legacy program ve registry sınırlarına sıfır yazım yapar, kurulu EXE packaged EXE ile SHA-256, boyut ve sürüm bakımından exact eşleşir ve sibling Bronze install root ile uninstall registry kimliği exact olur. Ardından gerçek kurulu EXE üzerinde schema2 installed frontend UAT çalışır ve installation-preservation SHA, package provenance, expected release ID ile source commit bağlarını taşır. Final local-test teslimi yalnız bu kanonik UAT110/UAT111 makbuzlarını aynı package provenance ve source commit bağlarıyla kabul eder; NotSigned yalnız yerel test sınıfıdır ve imzalı üretim iddiası kuramaz.",
+      "state": "SUPERSEDED",
+      "source": "USER_DECISION_DEC-273",
+      "effectiveRelease": "Bronze 22.08.2026.50",
+      "replacedBy": "PR-239"
+    },
+    {
+      "id": "PR-239",
+      "text": "Bronze Windows local-test teslim zinciri; temiz exact commit ve aynı commitin PR-235 hedefli test, tam regresyon, kaynak bütünlüğü, governed fingerprint ve kanonik kural hash'i canlı geri-okumasına bağlı schema-2 package provenance olmadan başlayamaz. Installer deneyimi schema-2 makbuzu aynı installer/package/source kimliğinde üç gerçek bilgi geçişi, sahte progress bulunmaması, anlatım child-process/dil kanıtı, güvenli iptal ve değişmemiş payloadı zorunlu olarak kanıtlar. Gerçek N→N+1 yükseltme yalnız current package parentRelease ile bağlı immutable arşivlenmiş önceki schema-2 package provenance ve kanonik sibling Bronze yolundaki canlı installed N runtime SHA-256, boyut ve FileVersion kimliği exact eşleştiğinde kabul edilir; aynı aylık sıra döneminde sequence tam bir artar, tarih monotoniktir. Legacy nested kurulum yalnız değişmezlik snapshot sınırıdır ve trusted predecessor değildir. UAT110 schema-2 yükseltme ile ayrı N+1→N+1 maintenance fazlarında bütün kanal/legacy kullanıcı verisi içerik eşitliğini, sentetik marker temizliği/absence readback'i, diğer kanal ve legacy program/registry sıfır yazımını ve installed==packaged canlı kimliğini kanıtlar. UAT111 schema-3 aynı UAT110 runId/SHA ve package/source/producer bağında yalnız sentetik profile çalışır; görünür uygun bütün kontroller rota/durum/yüzey bazlı dinamik keşif ve doğrulanmış outcome ile sınıflandırılır, sabit tıklama sayısı kabul değildir; ana süreç/renderer hatası, eksik erişilebilirlik-görsel durum, profil cleanup, screenshot hash/readback veya secret taraması PASS değilse kapanamaz. Final schema-3 teslim makbuzu zorunlu installer-experience, UAT110, UAT111, narration, packaged probe ve package provenance kanıtlarını distinct run/evidence kökleri, producer SHA, exact kronoloji ve canlı dosya geri-okumasıyla yeniden doğrular. NotSigned ve Kaspersky koruması kapalı test zararsızlık ya da üretim uygunluğu kanıtı değildir; imzalı ve koruma açık retest olmadan üretim engeli sürer.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-274",
+      "effectiveRelease": "Bronze 22.08.2026.50"
+    },
+    {
+      "id": "PR-240",
+      "text": "En küçük kod, yapılandırma, belge, test veya üretici değişikliği dahi etkilenen ana kaynak, Bronze/Silver/Gold kanal kaynakları, kanonik kural ve kullanıcı karar sicilleri, aktif belgeler, ticari kayıtlar, iş listesi, kapsam, envanter, ratchet, manifest, indeks, ana DOCX/PDF ve kanıt sözleşmeleri aynı mutasyon zincirinde güncellenmeden tamamlanamaz. Etki analizi her bağımlı kayıt sınıfını UPDATED ya da kanıtlı NOT_AFFECTED olarak göstermelidir. Her değişiklik hedefli test, filtresiz tam regresyon, typecheck, değişen komut dosyalarının sözdizimi ve kaynak bütünlüğü PASS gerektirir; kullanıcı arayüzü etkisinde bütün modül, rota, ana ve alt menü, görünür uygun kontrol, durum, erişilebilirlik ve görsel bütünlük UAT kapsamına alınır. Gerçek test hatası boş wip(rejected) checkpoint commit ile kalıcı kaydedilir. Ara installer üretilemez; paket yalnız tüm kaynak ve kayıt kapanışı tamamlanmış temiz exact committen, ana dal ve ilgili kanal kaynak eşitliği doğrulandıktan sonra üretilebilir.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-275",
       "effectiveRelease": "Bronze 22.08.2026.50"
     }
   ],
-  "rulesSha256": "67462d63e873b68a1eacfb358f904226d9199f99c81950645e05350df9963506"
+  "rulesSha256": "4c8a52f9adc2153177f1e504104e20ac5e9d3f7d780daa2c7d7bdb5d399a6050"
 }

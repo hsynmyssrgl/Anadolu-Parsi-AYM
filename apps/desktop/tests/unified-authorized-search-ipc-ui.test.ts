@@ -95,8 +95,8 @@ describe('33-R unified authorized search IPC and UI', () => {
     expect(app.match(/<UnifiedAuthorizedSearchPanel\b/gu)).toHaveLength(1);
     expect(app).not.toContain("id: 'unified-search'");
     expect(app).toContain('Aile, olay, belge, finans, sağlık ve yaşam kayıtları');
-    expect(app).toContain('Bir kaynak yetkilendirilemez veya yüklenemezse kısmi sonuç gösterilmez.');
-    expect(app).toContain('Sorgu IPC yanıtında yankılanmaz');
+    expect(app).toContain('Yalnız erişim izniniz olan kayıtlar aranır.');
+    expect(app).toContain('Aramanız kaydedilmez');
     expect(app).toContain("searchUnifiedAuthorizedRecords({query,limit:25})");
     expect(styles).toContain('.unified-authorized-search-results');
   });

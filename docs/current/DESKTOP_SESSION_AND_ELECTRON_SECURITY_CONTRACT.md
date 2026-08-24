@@ -45,7 +45,7 @@ Paketleme `afterPack` aşamasında tüm dokuz fuse'u
 imzalamadan önce gerçekleşir.
 
 Windows kurulum paketi tüm kullanıcılar için yükseltilmiş NSIS modunda çalışır
-ve uygulamayı etkin kanala göre `C:\Program Files\PPT\ParsYuva\<Kanal>` dizinine kurar. Kurulu ana dosya `ParsYuva-<Kanal>.exe`, masaüstü ve Başlat menüsü kısayolu `ParsYuva <Kanal>` adını taşır. appId, kullanıcı veri kökü ve kaldırma kapsamı aynı kanal kimliğiyle yalıtılır.
+ve uygulamayı etkin kanala göre legacy kökün dışındaki `C:\Program Files\PPT\ParsYuva-<Kanal>` kardeş dizinine kurar. Kurulu ana dosya `ParsYuva-<Kanal>.exe`, masaüstü ve Başlat menüsü kısayolu `ParsYuva <Kanal>` adını taşır. appId, `ParsYuva/<Kanal>` kullanıcı veri kökü ve kaldırma kapsamı aynı kanal kimliğiyle yalıtılır.
 
 ## Kanıtlar
 

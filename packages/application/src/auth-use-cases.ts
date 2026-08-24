@@ -415,7 +415,7 @@ export class SetupAdminUseCase {
   }): Result<UserId, AppError> {
     const displayName = input.command.displayName.trim();
     if (displayName.length < 2 || displayName.length > 120) return err(validationError(input.context.correlationId, 'Ad soyad 2 ile 120 karakter arasında olmalıdır.'));
-    const familyName = input.command.familyName?.trim() || 'Ailem';
+    const familyName = input.command.familyName?.trim() ?? '';
     if (familyName.length < 2 || familyName.length > 120) return err(validationError(input.context.correlationId, 'Aile adı 2 ile 120 karakter arasında olmalıdır.'));
     const passwordPolicy = validatePasswordPolicy(input.command.password, input.context.correlationId);
     if (!passwordPolicy.ok) return passwordPolicy;
@@ -429,7 +429,7 @@ export class SetupAdminUseCase {
     if (!deviceProofValid) {
       return err(createAppError({
         code: ERROR_CODES.AUTH_DEVICE_NOT_TRUSTED,
-        message: 'Ä°lk yÃ¶netici kurulumu iÃ§in yerel cihaz kimliÄŸi kanÄ±tlanamadÄ±.',
+        message: 'İlk yönetici kurulumu için yerel cihaz kimliği kanıtlanamadı.',
         category: 'security',
         correlationId: input.context.correlationId
       }));

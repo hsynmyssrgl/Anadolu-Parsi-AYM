@@ -11,15 +11,27 @@ const transform=(source)=>source
  .replace(/async\s+<([A-Za-z_$][^>\n]*)>\s*\(/g,'async <$1,>(');
 const temp=await mkdtemp(join(tmpdir(),'ppt-build223-cjs-'));
 const stage=join(temp,'stage'),out=join(temp,'out');await mkdir(stage);await mkdir(out);
-for(const name of sourceNames){await writeFile(join(stage,name.replace(/\.ts$/,'.cts')),transform(await readFile(`${sourceRoot}/${name}`,'utf8')));}
+const sourceByName=new Map();
+for(const name of sourceNames){const source=await readFile(`${sourceRoot}/${name}`,'utf8');sourceByName.set(name,source);await writeFile(join(stage,name.replace(/\.ts$/,'.cts')),transform(source));}
 const preloadSource=await readFile(`${sourceRoot}/preload.ts`,'utf8');
 const domainNames=[];
-for(const match of preloadSource.matchAll(/import type \{([^}]+)\} from '@ppt\/domain';/gs)){
+const stagedSource=[...sourceByName.values()].join('\n');
+for(const match of stagedSource.matchAll(/import type \{([^}]+)\} from '@ppt\/domain';/gs)){
  for(const part of match[1].split(',')){const name=part.trim().split(/\s+as\s+/).at(-1)?.trim();if(name&&/^[A-Za-z_$][\w$]*$/.test(name)&&!domainNames.includes(name))domainNames.push(name);}
 }
+const integrationNames=[];
+for(const match of preloadSource.matchAll(/import type \{([^}]+)\} from '\.\/ipc-integration-policy\.js';/gs)){
+ for(const part of match[1].split(',')){const name=part.trim().split(/\s+as\s+/).at(-1)?.trim();if(name&&/^[A-Za-z_$][\w$]*$/.test(name)&&!integrationNames.includes(name))integrationNames.push(name);}
+}
+const integrationStubPath=join(stage,'ipc-integration-policy.cts');
+await writeFile(integrationStubPath,integrationNames.map(name=>`export type ${name} = any;`).join('\n')+'\n');
 const stubs=[
  "declare module 'electron' { export const contextBridge: any; export const ipcRenderer: any; export type IpcMainInvokeEvent = any; }",
  "declare module 'node:crypto' { export const randomUUID: any; export const createHash: any; }",
+ "declare module '@ppt/core' { export const ERROR_CODES: any; }",
+ "declare module '@ppt/platform-policy' { export const OfflineCapabilityLeasePolicy: any; export const isOfflineCapabilityLeaseStructurallyValid: any; export type OfflineCapabilityLease = any; export type PlatformCapability = any; }",
+ "declare module '@ppt/core-service-contracts' { export type CoreServiceApiBoundaryStatusContract = any; export type CoreServiceHealthContract = any; }",
+ "declare module '@ppt/security' { export type WebAuthnAssertionInput = any; export type WebAuthnRegistrationInput = any; }",
  'declare const Buffer: any;',
  'declare function setTimeout(handler: (...args:any[])=>void, timeout?: number): any;',
  'declare function clearTimeout(handle:any): void;',
@@ -28,7 +40,7 @@ const stubs=[
  '}'
 ].join('\n');
 const stubsPath=join(stage,'stubs.d.ts');await writeFile(stubsPath,stubs);
-const entries=sourceNames.map(name=>join(stage,name.replace(/\.ts$/,'.cts')));
+const entries=[...sourceNames.map(name=>join(stage,name.replace(/\.ts$/,'.cts'))),integrationStubPath];
 const baseArgs=[...entries,stubsPath,'--target','ES2024','--module','NodeNext','--moduleResolution','NodeNext','--rootDir',stage,'--outDir',out,'--skipLibCheck','--strict','--sourceMap'];
 const compiler=join('node_modules','typescript','lib','tsc.js');
 const run=(args)=>spawnSync(process.execPath,[compiler,'--ignoreConfig',...args],{encoding:'utf8'});

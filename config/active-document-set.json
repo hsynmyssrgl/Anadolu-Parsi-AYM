@@ -31,16 +31,16 @@
     "docs/current/13_KURUMSALLASMA_VE_GLOBAL_MARKA_PLANI.md",
     "docs/current/14_TICARI_URUN_TEMEL_SURUMU.md",
     "docs/current/15_EK_KURAL_TOPLU_BIRLESTIRME_SICILI.md",
-    "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_20.08.2026_V4.docx",
-    "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_20.08.2026_V4.pdf"
+    "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.docx",
+    "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.pdf"
   ],
   "currentMasterDocumentation": {
-    "version": "GUNCEL-2026-08-20-V4",
-    "status": "ACTIVE_WORKING_REFERENCE_NOT_BUILD_CLOSURE",
+    "version": "GUNCEL-2026-08-24-V5",
+    "status": "ACTIVE_CURRENT_MASTER_REFERENCE",
     "source": "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
-    "docx": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_20.08.2026_V4.docx",
-    "pdf": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_20.08.2026_V4.pdf",
-    "asOf": "2026-08-20",
+    "docx": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.docx",
+    "pdf": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.pdf",
+    "asOf": "2026-08-24",
     "historicalBuildArtifactsImmutable": true
   },
   "supersededActiveReferences": [
@@ -51,7 +51,9 @@
     "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_18.08.2026_V2.docx",
     "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_18.08.2026_V2.pdf",
     "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_19.08.2026_V3.docx",
-    "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_19.08.2026_V3.pdf"
+    "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_19.08.2026_V3.pdf",
+    "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_20.08.2026_V4.docx",
+    "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_20.08.2026_V4.pdf"
   ],
   "historicalDocuments": "HISTORY_ONLY_DO_NOT_OVERRIDE_ACTIVE_DOCUMENTS",
   "exhaustiveInventory": "artifacts/manifests/ALL_DOCUMENTS_INDEX.json"

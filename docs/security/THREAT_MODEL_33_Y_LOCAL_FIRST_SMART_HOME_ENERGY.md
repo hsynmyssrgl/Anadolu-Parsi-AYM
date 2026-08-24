@@ -25,3 +25,7 @@
 ## Açık kanıtlar
 
 Gerçek Matter, sensör sağlayıcısı, enerji sayacı, kamera/kapı zili ve cihaz kontrolü UAT'ları ile otomatik retention tasarımı, privacy/safety ve legal incelemeler `NOT_RUN` durumundadır. Persistent governance receipt yoktur; registry ve roadmap kapanmamıştır. `33-Y` yalnız kısmi yerel teknik kanıttır ve `countsAsRequirementPass=false` kalır.
+
+## 24.08.2026 değişiklik-etki doğrulaması
+
+PR-235 kapsamında güncel kullanıcı dili ve renderer sözleşmesi bu tehdit modeline yeniden bağlandı; 52/52 sınır-sözleşme-çalışma zamanı zinciri PASS oldu. Sonuç dış/manual kanıtları kapatmaz ve production kabulü değildir.

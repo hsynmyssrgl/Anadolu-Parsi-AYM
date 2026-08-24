@@ -1,6 +1,8 @@
 import { createContext, useContext, type ReactNode } from 'react';
 import {
   DEFAULT_UI_LOCALIZATION,
+  PRODUCT_NAVIGATION_GROUPS,
+  PRODUCT_NAVIGATION_ROUTES,
   type SupportedUiLanguage,
   type ProductNavigationGroupId,
   type ProductScreenId,
@@ -218,19 +220,13 @@ export const getActiveUiLocale = (): string => activeLocalization.locale;
 export const selectUiCopy = (language: SupportedUiLanguage, turkish: string, english: string): string =>
   language === 'tr' ? turkish : english;
 
-const englishNavigationLabels: Record<ProductScreenId, string> = {
-  dashboard:'Dashboard', family:'Family', households:'Households and Branches',
-  'people-lifecycle':'Person Profiles', tree:'Family Tree', timeline:'Timeline',
-  'important-days':'Important Dates', archive:'Archive', finance:'Finance', health:'Health',
-  'life-center':'Life Center', automation:'Notifications and Automation', reports:'Reports',
-  location:'Location', invitations:'Invitations', 'data-repair':'Data Repair Center',
-  permissions:'Contextual Permissions', ai:'Artificial Intelligence', legacy:'Digital Legacy',
-  'windows-hello':'Windows Hello', security:'Security Center', settings:'System and Maintenance'
-};
+const englishNavigationLabels = Object.fromEntries(
+  PRODUCT_NAVIGATION_ROUTES.map((route) => [route.id, route.englishLabel])
+) as Record<ProductScreenId, string>;
 
-const englishNavigationGroups: Record<ProductNavigationGroupId, string> = {
-  main:'Main Center', 'family-memory':'Family Memory', life:'Life', 'privacy-system':'Privacy and System'
-};
+const englishNavigationGroups = Object.fromEntries(
+  PRODUCT_NAVIGATION_GROUPS.map((group) => [group.id, group.englishLabel])
+) as Record<ProductNavigationGroupId, string>;
 
 export const localizeNavigationLabel = (id: ProductScreenId, turkishLabel: string): string =>
   activeLocalization.language === 'tr' ? turkishLabel : englishNavigationLabels[id];

@@ -52,7 +52,7 @@ export interface FirstRunNarrationUtterance {
 }
 
 export interface NarrationVoice {readonly name:string;readonly lang:string;}
-const FEMALE_VOICE_HINTS=['emel','gülay','gulay','eda','ayşe','ayse','seda','selin','aylin','filiz','zeynep','zira','aria','jenny','hazel','susan','samantha','victoria','karen','moira','fiona','tessa','female','woman','kadın'] as const;
+const FEMALE_VOICE_HINTS=['emel','gülay','gulay','eda','seda','filiz','zira','aria','jenny','hazel','susan','samantha','victoria','karen','moira','fiona','tessa','female','woman','kadın'] as const;
 export const selectPreferredFemaleNarrationVoice=<TVoice extends NarrationVoice>(voices:readonly TVoice[],language:'tr'|'en'):TVoice|undefined=>{
   const localePrefix=language==='tr'?'tr':'en';
   const female=(voice:NarrationVoice)=>FEMALE_VOICE_HINTS.some((hint)=>voice.name.toLocaleLowerCase('tr-TR').includes(hint));

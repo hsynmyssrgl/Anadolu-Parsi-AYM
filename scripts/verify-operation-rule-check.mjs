@@ -1,3 +1,4 @@
+import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 
@@ -24,17 +25,56 @@ const stable = (value) => Array.isArray(value)
 check(operation.length >= 3 && operation.length <= 160 && !/[\r\n]/u.test(operation), 'Geçerli --operation açıklaması zorunludur.');
 check(allowedKinds.has(kind), `Geçerli --kind zorunludur: ${[...allowedKinds].join(', ')}.`);
 
-const [registry, acknowledgement, constitution, enforcement] = await Promise.all([
+const [registry, acknowledgement, constitution, enforcement, mutationReadinessPolicy, dependencyRegistryBytes, userDecisionLedger, dec275Bytes] = await Promise.all([
   readJson('config/canonical-rule-registry.json'),
   readJson('config/rule-acknowledgement.json'),
   readJson('config/project-constitution.json'),
-  readJson('config/rule-enforcement-registry.json')
+  readJson('config/rule-enforcement-registry.json'),
+  readJson('config/mutation-release-readiness-policy.json'),
+  readFile('config/change-impact-dependency-registry.json'),
+  readJson('config/user-decision-ledger.json'),
+  readFile('docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md')
 ]);
+const dependencyRegistry = JSON.parse(dependencyRegistryBytes.toString('utf8'));
+const dependencyRegistrySha256 = createHash('sha256').update(dependencyRegistryBytes).digest('hex');
 const canonical = { ...registry };
 delete canonical.rulesSha256;
 const calculatedHash = createHash('sha256').update(stable(canonical)).digest('hex');
 const activeRules = registry.rules.filter((rule) => rule.state === 'ACTIVE');
 const enforcementIds = new Set(enforcement.entries.map((entry) => entry.ruleId));
+const channelWorktreeEnforcement = enforcement.entries.find((entry) => entry.ruleId === 'PR-236');
+const mutationReadinessEnforcement = enforcement.entries.find((entry) => entry.ruleId === 'PR-235');
+const releaseAllocationEnforcement = enforcement.entries.find((entry) => entry.ruleId === 'PR-237');
+const installedReleaseUatEnforcement = enforcement.entries.find((entry) => entry.ruleId === 'PR-239');
+const mutationWideClosureEnforcement = enforcement.entries.find((entry) => entry.ruleId === 'PR-240');
+const dec275 = userDecisionLedger.decisions?.find((entry) => entry.id === 'DEC-275');
+const exactPr240ImpactAreas = ['mainSource', 'channelSources', 'canonicalRules', 'decisions', 'activeDocuments',
+  'commercialRecords', 'workList', 'scopesInventoriesRatchets', 'manifestsIndexes', 'masterDocumentation', 'ratchets', 'tests', 'uat'];
+const exactUniversalDependentRecords = ['SHA256SUMS.txt', 'artifacts/manifests/PROJECT_ARTIFACT_INDEX.csv',
+  'artifacts/manifests/PROJECT_ARTIFACT_INDEX.json', 'artifacts/manifests/PROJECT_ARTIFACT_INDEX.md',
+  'docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md',
+  'docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.docx',
+  'docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.pdf',
+  'docs/ticari-urun-temeli/00_TEMEL_SURUM_MANIFESTOSU.json',
+  'docs/ticari-urun-temeli/01_YONETIM/05_DEGISIKLIK_SICILI.json',
+  'docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json',
+  'docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md',
+  'docs/ticari-urun-temeli/08_IS_LISTESI/03_ANA_IS_SICILI.json', 'manifest.json'];
+const exactUniversalAffectedVitestFiles = ['apps/desktop/tests/mutation-release-evidence-producers.test.ts',
+  'apps/desktop/tests/mutation-release-readiness-contract.test.ts', 'apps/desktop/tests/operation-rule-check-policy.test.ts'];
+const exactDec275Documents = ['AGENTS.md', 'SHA256SUMS.txt', 'config/active-governance-ledger.json',
+  'config/canonical-rule-registry.json', 'config/change-impact-dependency-registry.json',
+  'config/mutation-release-readiness-policy.json', 'config/rule-acknowledgement.json',
+  'config/rule-enforcement-registry.json', 'config/project-constitution.json', 'docs/10_MASTER_DECISION_REGISTER.md',
+  'docs/current/06_KANONIK_KURAL_SICILI.md', 'docs/current/09_KULLANICI_KARARLARI_KAYDI.md',
+  'docs/current/10_TUM_KURALLAR_ASILAMAZ_YURUTME_SOZLESMESI.md',
+  'docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md',
+  'docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.docx',
+  'docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.pdf',
+  'docs/ticari-urun-temeli/00_OKU_BENI.md', 'docs/ticari-urun-temeli/00_TEMEL_SURUM_MANIFESTOSU.json',
+  'docs/ticari-urun-temeli/01_YONETIM/01_ASILAMAZ_KURALLAR.md',
+  'docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json',
+  'docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md', 'manifest.json'];
 
 check(registry.rulesSha256 === calculatedHash, 'Kanonik kural hash doğrulaması başarısız.');
 check(registry.ruleCount === registry.rules.length, 'Kanonik kural sayısı uyuşmuyor.');
@@ -48,6 +88,95 @@ check(activeRules.every((rule) => enforcementIds.has(rule.id)), 'En az bir aktif
 check(enforcement.entries.every((entry) => entry.failClosed === true && entry.waiverAllowed === false && entry.skipAllowed === false), 'Enforcement waiver veya atlama içeriyor.');
 check(enforcement.entries.every((entry) => entry.evidencePolicy === 'MISSING_EVIDENCE_NEVER_PASS'), 'Enforcement kanıt politikası fail-closed değil.');
 check(enforcement.entries.every((entry) => entry.violationEffect === 'BLOCK_CURRENT_REQUIRED_STAGE'), 'Enforcement ihlal etkisi kanonik engelleme değeriyle uyuşmuyor.');
+check(channelWorktreeEnforcement?.gateScripts?.includes('scripts/verify-release-channel-worktrees.mjs'),
+  'PR-236 release-channel worktree enforcement kapısı eksik.');
+check(mutationReadinessPolicy?.schemaVersion === 2
+  && mutationReadinessPolicy?.id === 'PPT-MUTATION-RELEASE-READINESS-V2'
+  && mutationReadinessPolicy?.requirement === 'PR-235'
+  && mutationReadinessPolicy?.decision === 'DEC-270'
+  && mutationReadinessPolicy?.strengthenedByRequirement === 'PR-240'
+  && mutationReadinessPolicy?.strengthenedByDecision === 'DEC-275'
+  && mutationReadinessPolicy?.failClosed === true
+  && mutationReadinessPolicy?.waiverAllowed === false
+  && JSON.stringify(mutationReadinessPolicy?.impactAreas) === JSON.stringify(exactPr240ImpactAreas)
+  && mutationReadinessPolicy?.dependencyRegistry?.path === 'config/change-impact-dependency-registry.json'
+  && mutationReadinessPolicy?.dependencyRegistry?.sha256 === dependencyRegistrySha256
+  && mutationReadinessPolicy?.dependencyRegistry?.unmatchedChangedPathEffect === 'BLOCK'
+  && mutationReadinessPolicy?.dependencyRegistry?.dependentRecordsMustBeChanged === true
+  && mutationReadinessPolicy?.dependencyRegistry?.targetedVitestMustEqualAffectedFiles === true
+  && dependencyRegistry?.schemaVersion === 1
+  && dependencyRegistry?.id === 'PPT-CHANGE-IMPACT-DEPENDENCY-REGISTRY-V1'
+  && dependencyRegistry?.requirement === 'PR-235'
+  && dependencyRegistry?.decision === 'DEC-270'
+  && dependencyRegistry?.strengthenedByRequirement === 'PR-240'
+  && dependencyRegistry?.strengthenedByDecision === 'DEC-275'
+  && dependencyRegistry?.failClosed === true
+  && dependencyRegistry?.unmatchedChangedPathEffect === 'BLOCK'
+  && JSON.stringify(dependencyRegistry?.universalDependentRecords) === JSON.stringify(exactUniversalDependentRecords)
+  && JSON.stringify(dependencyRegistry?.universalAffectedVitestFiles) === JSON.stringify(exactUniversalAffectedVitestFiles)
+  && dependencyRegistry?.pathRules?.filter((rule) => rule.id === 'governed-source-safety-net').length === 1
+  && dependencyRegistry.pathRules.find((rule) => rule.id === 'governed-source-safety-net')?.dependentRecords?.length > 0
+  && dependencyRegistry.pathRules.find((rule) => rule.id === 'governed-source-safety-net')?.affectedVitestFiles?.length > 0
+  && Array.isArray(dependencyRegistry?.pathRules) && dependencyRegistry.pathRules.length > 0
+  && ['targetedVitest', 'fullVitest', 'rootTypecheck', 'changedMjsSyntax', 'changedPs1Parser']
+    .every((id) => dependencyRegistry?.commandMatrix?.[id]?.nonMutating === true)
+  && Object.keys(dependencyRegistry?.affectedCommandCatalog ?? {}).length > 0
+  && Object.values(dependencyRegistry?.affectedCommandCatalog ?? {}).every((entry) => entry?.nonMutating === true),
+'PR-235 mutation-release readiness politikası eksik veya gevşetilmiş.');
+const exactPr235GateScripts = ['scripts/verify-operation-rule-check.mjs', 'scripts/lib/mutation-release-evidence.mjs',
+  'scripts/lib/release-source-provenance.mjs', 'scripts/record-mutation-baseline.mjs', 'scripts/create-mutation-impact-assessment.mjs',
+  'scripts/create-mutation-impact-analysis.mjs',
+  'scripts/run-mutation-test-evidence.mjs', 'scripts/verify-source-integrity.mjs',
+  'scripts/generate-project-artifact-index-v2.mjs', 'scripts/verify-project-artifact-index-v2.mjs',
+  'scripts/run-governed-postflight.mjs', 'apps/desktop/scripts/run-electron-builder.mjs',
+  'scripts/create-bronze-final-local-test-delivery.mjs'];
+check(JSON.stringify(mutationReadinessEnforcement?.gateScripts) === JSON.stringify(exactPr235GateScripts),
+'PR-235 kalıcı completion/paket/teslim enforcement kapıları eksik.');
+check(['scripts/allocate-monthly-release-version.mjs', 'scripts/verify-active-version-sweep.mjs',
+  'apps/desktop/scripts/build-signed-windows-release.mjs', 'apps/desktop/scripts/run-electron-builder.mjs']
+  .every((gate) => releaseAllocationEnforcement?.gateScripts?.includes(gate)),
+'PR-237 tek tahsis ve önceden tahsisli paket kimliği enforcement kapıları eksik.');
+const exactPr239GateScripts = ['apps/desktop/scripts/run-electron-builder.mjs', 'scripts/lib/windows-package-provenance.mjs',
+  'scripts/verify-windows-package-provenance.mjs',
+  'scripts/run-windows-installer-experience-uat.ps1', 'scripts/run-windows-installed-release-uat.ps1',
+  'scripts/run-installed-frontend-user-uat.mjs', 'scripts/lib/installed-ui-interaction-coverage.mjs',
+  'scripts/lib/windows-native-file-dialog-uat.mjs', 'scripts/lib/windows-native-file-dialog-uat.ps1',
+  'scripts/lib/exclusive-evidence-run-root-guard.mjs', 'scripts/lib/canonical-product-navigation.mjs',
+  'scripts/create-bronze-final-local-test-delivery.mjs'];
+check(JSON.stringify(installedReleaseUatEnforcement?.gateScripts) === JSON.stringify(exactPr239GateScripts),
+  'PR-239 adversarial Windows delivery evidence enforcement kapıları eksik.');
+const exactPr240GateScripts = ['scripts/verify-operation-rule-check.mjs',
+  'scripts/create-mutation-impact-assessment.mjs', 'scripts/create-mutation-impact-analysis.mjs',
+  'scripts/run-mutation-test-evidence.mjs', 'scripts/verify-source-integrity.mjs',
+  'scripts/verify-current-master-documentation-v5.mjs',
+  'docs/ticari-urun-temeli/11_OTOMASYON/dogrula-ticari-temel-alani.mjs',
+  'scripts/verify-release-channel-worktrees.mjs', 'scripts/run-installed-frontend-user-uat.mjs',
+  'scripts/run-governed-postflight.mjs', 'apps/desktop/scripts/run-electron-builder.mjs'];
+check(JSON.stringify(mutationWideClosureEnforcement?.gateScripts) === JSON.stringify(exactPr240GateScripts),
+  'PR-240 tum kayit ve test kapanisi enforcement kapilari eksik.');
+check(mutationWideClosureEnforcement?.trackedIn === 'docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md'
+  && dec275?.status === 'ACTIVE' && dec275?.syncStatus === 'SYNCHRONIZED'
+  && dec275?.document === mutationWideClosureEnforcement.trackedIn
+  && dec275?.documentSha256 === createHash('sha256').update(dec275Bytes).digest('hex')
+  && JSON.stringify(dec275?.documents) === JSON.stringify(exactDec275Documents)
+  && JSON.stringify(dec275?.requirements) === JSON.stringify(['PR-240'])
+  && dec275Bytes.toString('utf8').includes('En küçük değişiklikte tüm kayıt ve test kapanışı'),
+  'DEC-275 kullanici karari, belge hash/readback veya exact kayit kapsami eksik.');
+check(constitution.everyMutationDependentRecordAtomicSyncRequired === true
+  && constitution.everyMutationTargetedAndFullRegressionRequired === true
+  && constitution.uiMutationAllInteractiveAndVisualSurfacesUatRequired === true
+  && constitution.actualTestFailureRejectedCheckpointRequired === true
+  && constitution.intermediateInstallerBuildForbidden === true
+  && constitution.packageRequiresMainAndChannelSourceEquality === true,
+  'PR-240 Proje Anayasasi baglari eksik veya gevsetilmis.');
+
+if (failures.length === 0) {
+  const channelGate = spawnSync(process.execPath, [
+    'scripts/verify-release-channel-worktrees.mjs', '--kind', kind
+  ], { cwd: process.cwd(), encoding: 'utf8', windowsHide: true });
+  check(channelGate.status === 0,
+    `PR-236 release-channel worktree kapısı başarısız: ${(channelGate.stderr || channelGate.stdout || '').trim()}`);
+}
 
 if (failures.length > 0) {
   console.error(`İşlem kural kontrolü başarısız (${failures.length}):`);

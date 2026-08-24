@@ -9,11 +9,14 @@ const root = await mkdtemp(join(tmpdir(), 'ppt-build214-side-artifact-'));
 await writeFile(join(root, 'package.json'), '{"type":"module"}\n');
 const tsc = join('node_modules', 'typescript', 'lib', 'tsc.js');
 execFileSync(process.execPath, [tsc, '--ignoreConfig', 'packages/security/src/encryption.ts', '--target', 'es2022', '--module', 'esnext', '--moduleResolution', 'bundler', '--rootDir', 'packages/security/src', '--outDir', root, '--types', 'node', '--skipLibCheck', '--noCheck'], { stdio: 'pipe' });
+execFileSync(process.execPath, [tsc, '--ignoreConfig', 'packages/domain/src/app-meta.ts', '--target', 'es2022', '--module', 'esnext', '--moduleResolution', 'bundler', '--rootDir', 'packages/domain/src', '--outDir', root, '--types', 'node', '--skipLibCheck', '--noCheck'], { stdio: 'pipe' });
 execFileSync(process.execPath, [tsc, '--ignoreConfig', 'apps/desktop/src/main/protected-side-artifact-store.ts', '--target', 'es2022', '--module', 'esnext', '--moduleResolution', 'bundler', '--rootDir', 'apps/desktop/src/main', '--outDir', root, '--types', 'node', '--skipLibCheck', '--noCheck'], { stdio: 'pipe' });
 const encryptionModule = join(root, 'encryption.js');
 const storeModule = join(root, 'protected-side-artifact-store.js');
 let storeSource = await readFile(storeModule, 'utf8');
-storeSource = storeSource.replace("from '@ppt/security'", "from './encryption.js'");
+storeSource = storeSource
+  .replace("from '@ppt/domain'", "from './app-meta.js'")
+  .replace("from '@ppt/security'", "from './encryption.js'");
 const patchedStoreModule = join(root, 'protected-store.js');
 await writeFile(patchedStoreModule, storeSource);
 const { ProtectedSideArtifactStore } = await import(pathToFileURL(patchedStoreModule).href);

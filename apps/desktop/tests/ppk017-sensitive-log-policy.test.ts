@@ -344,7 +344,8 @@ describe('PPK-017 hassas log politikası', () => {
     expect(readSharing).toContain("'system:getSensitiveLoggingBoundary'");
     expect(main).toContain("registerIpcHandler('system:getSensitiveLoggingBoundary'");
     expect(preload).toContain('getSensitiveLoggingBoundary');
-    expect(renderer).toContain('PPK-017 · hassas log güvenliği');
+    expect(renderer).toContain('title="İçeriksiz kayıt ve tanı sınırı"');
+    expect(renderer).toContain('Güvenli retli hassas kayıt politikası etkin');
     expect(renderer).toContain('Hassas log güvenliği</button>');
   });
 

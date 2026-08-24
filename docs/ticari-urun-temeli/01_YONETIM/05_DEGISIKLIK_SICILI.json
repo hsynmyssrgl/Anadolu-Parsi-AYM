@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PARSYUVA-AILE-YASAM-MERKEZI-TICARI-DEGISIKLIK-SICILI-V2",
   "temelTarihi": "2026-08-19",
-  "sonKayit": "TICARI-009",
+  "sonKayit": "TICARI-015",
   "kayitlar": [
     {
       "id": "TICARI-001",
@@ -148,6 +148,110 @@
         "docs/ticari-urun-temeli"
       ],
       "isListesiEtkisi": "IS-0210 eklendi; kanal kurulum program veri kaldirma ve kaynak worktree kimlikleri ayrildi. Gercek worktree olusturma temiz final commit sonrasina baglidir.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-010",
+      "tarih": "2026-08-24",
+      "baslik": "Kardes kanal program kokleri ve legacy kaldirma guvenligi",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-271, PR-236 ve acik kullanici karari",
+      "etkilenenAlanlar": [
+        "apps/desktop/build/installer.nsh",
+        "apps/desktop/scripts/legacy-upgrade-data-preservation.mjs",
+        "scripts/run-windows-installer-experience-uat.ps1",
+        "config/canonical-rule-registry.json",
+        "docs/ticari-urun-temeli"
+      ],
+      "isListesiEtkisi": "IS-0210; program kokleri legacy dizinin disindaki kardes ParsYuva-<Kanal> yollarina alindi, AppData ve worktree yalitimi korundu, interactive kaldirma baglami geri yuklendi ve legacy kanal dizininde recursive silme fail-closed durduruldu. Otomatik legacy veri migration/silme eklenmedi.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-011",
+      "tarih": "2026-08-24",
+      "baslik": "Acik tek seferli surum tahsisi ve onceden tahsisli paket kimligi",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-272, PR-237 ve acik kullanici karari",
+      "etkilenenAlanlar": [
+        "scripts/allocate-monthly-release-version.mjs",
+        "scripts/lib/monthly-release-version.mjs",
+        "apps/desktop/scripts/build-signed-windows-release.mjs",
+        "apps/desktop/scripts/run-electron-builder.mjs",
+        "config/canonical-rule-registry.json",
+        "docs/ticari-urun-temeli"
+      ],
+      "isListesiEtkisi": "IS-0212 eklendi; allocator mutation modunda exact expected release ID olmadan yazmaz, preview salt okunur kalir ve tum paket girisleri yalniz onceden tahsisli kimligi tuketir. Gercek .51 tahsisi bu kodlama turunda yapilmamistir.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-012",
+      "tarih": "2026-08-24",
+      "baslik": "Kanonik kurulu Windows yukseltme maintenance ve on yuz UAT zinciri",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-273, PR-238 ve acik kullanici karari",
+      "etkilenenAlanlar": [
+        "scripts/run-windows-installed-release-uat.ps1",
+        "scripts/run-installed-frontend-user-uat.mjs",
+        "scripts/create-bronze-final-local-test-delivery.mjs",
+        "config/canonical-rule-registry.json",
+        "docs/ticari-urun-temeli"
+      ],
+      "isListesiEtkisi": "IS-0213 eklendi; gercek N->N+1 ve same-version maintenance tek metadata-only UAT110 makbuzunda, kurulu on yuz UAT111 onun SHA/source/package bagi ile kanitlanir. Bu turda installer veya uygulama calistirilmamistir.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-013",
+      "tarih": "2026-08-24",
+      "baslik": "Adversarial Windows package kurulum ve final teslim kanit zinciri",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-274, PR-239 ve acik kullanici karari",
+      "etkilenenAlanlar": [
+        "apps/desktop/scripts/run-electron-builder.mjs",
+        "scripts/verify-windows-package-provenance.mjs",
+        "scripts/run-windows-installer-experience-uat.ps1",
+        "scripts/run-windows-installed-release-uat.ps1",
+        "scripts/run-installed-frontend-user-uat.mjs",
+        "scripts/create-bronze-final-local-test-delivery.mjs",
+        "config/canonical-rule-registry.json",
+        "docs/ticari-urun-temeli"
+      ],
+      "isListesiEtkisi": "IS-0214 eklendi; stale schema1 veya degismis legacy nested .50 trusted predecessor sayilmaz. Temiz schema2 parent package ve canli sibling N exact eslesir; installer experience UAT110 V2 UAT111 V3 dinamik outcome ve final V3 canli readback tamamlanmadan teslim yoktur.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-014",
+      "tarih": "2026-08-24",
+      "baslik": "V26 ticari manifesto ve guncel kanit gercegi senkronu",
+      "durum": "SUPERSEDED_BY_TICARI_015",
+      "kaynak": "DEC-270/PR-235 ve DEC-274/PR-239 mevcut uygulama kapsami",
+      "etkilenenAlanlar": [
+        "docs/ticari-urun-temeli/00_TEMEL_SURUM_MANIFESTOSU.json",
+        "docs/ticari-urun-temeli/00_OKU_BENI.md",
+        "docs/ticari-urun-temeli/01_YONETIM/04_AKTIF_KURAL_SICILI.json",
+        "docs/ticari-urun-temeli/03_MIMARI/04_PLATFORM_VE_DAGITIM_MIMARISI.md",
+        "docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md",
+        "docs/ticari-urun-temeli/08_IS_LISTESI/03_ANA_IS_SICILI.json",
+        "docs/ticari-urun-temeli/11_OTOMASYON/dogrula-ticari-temel-alani.mjs"
+      ],
+      "isListesiEtkisi": "IS-0211 ve IS-0214 DEVAM kalir; exact commit mutasyon makbuzlari ile canli build/install/UAT110/UAT111/final teslim kosulari henuz PASS degildir. PR-239 kapsami tracked TypeScript exact rota, tum uygun kontroller, gercek native CANCEL/ACCEPT, exclusive reparse-korumali evidence root ve guard kaybinda sifir path tabanli cleanup siniriyla senkronlanmistir. IS-0601 guncel V26 kaynak icin filtresiz tam regresyon makbuzu bulunmadigindan DEVAM ve requirementPass=false olarak duzeltilmistir. Aktif manifesto yeni exact kaynak icin governedPreflight=NOT_RUN ve worktreeClean=false gercegini tasir.",
+      "senkronDurumu": "HISTORICAL_POINT_IN_TIME"
+    },
+    {
+      "id": "TICARI-015",
+      "tarih": "2026-08-24",
+      "baslik": "Her mutasyonda tum kayit ve test kapanisi",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-275, PR-240 ve acik kullanici karari",
+      "etkilenenAlanlar": [
+        "config/canonical-rule-registry.json",
+        "config/rule-enforcement-registry.json",
+        "config/project-constitution.json",
+        "config/user-decision-ledger.json",
+        "docs/current",
+        "docs/ticari-urun-temeli",
+        "scripts/verify-operation-rule-check.mjs"
+      ],
+      "isListesiEtkisi": "IS-0215 eklendi. Her degisiklik tum bagimli kayit siniflarini atomik kapatir; hedefli ve filtresiz tam regresyon, typecheck, sozdizimi, kaynak butunlugu ve UI etkisinde tam etkilesim/gorsel UAT PASS olmadan paket yoktur. Gercek test hatalari wip(rejected) checkpoint olarak korunur.",
       "senkronDurumu": "SYNCHRONIZED"
     }
   ]

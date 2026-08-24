@@ -86,6 +86,9 @@ describe('Ilk acilis deneyimi',()=>{
     expect(setupAdmin).not.toContain('bootstrapAuthenticatedSession');
     expect(setupAdmin).toContain('setAuth(state)');
     expect(renderer).toContain('autoComplete="current-password"');
+    const firstRunSecurity=renderer.slice(renderer.indexOf('function FirstRunSecuritySetup'),renderer.indexOf('export function InvitationAcceptancePanel'));
+    expect(firstRunSecurity).toContain("setMessageTone('danger')");
+    expect(firstRunSecurity).toContain('<StatusMessage tone={messageTone}>');
   });
 
   it('tamamlanmis ilk kurulumu bozmadan tanitimi gecici replay kipinde acar',()=>{

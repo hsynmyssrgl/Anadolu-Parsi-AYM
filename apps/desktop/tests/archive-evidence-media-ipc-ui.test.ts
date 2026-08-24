@@ -81,8 +81,8 @@ describe('33-R archive evidence/media IPC and UI',()=>{
     const app=readFileSync('apps/desktop/src/renderer/App.tsx','utf8');
     const styles=readFileSync('apps/desktop/src/renderer/styles.css','utf8');
     expect(app).toContain('İlişki kanıtı');
-    expect(app).toContain('Kaldırma fiziksel geçmiş silmez.');
-    expect(app).toContain('Dosya yolu yalnız ana süreç seçicisinde kalır.');
+    expect(app).toContain('Kaldırma işlemi önceki kopyaları kendiliğinden yok etmez.');
+    expect(app).toContain('Dosya seçimi güvenli uygulama alanında yapılır.');
     expect(app).toContain('pendingArchiveOperations.current.get(key)');
     expect(app).toContain('Aynı işlem kimliği ve revizyonla yeniden deneyebilirsiniz.');
     expect(app).not.toContain("id: 'archive-evidence'");

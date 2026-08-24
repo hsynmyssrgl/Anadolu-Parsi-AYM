@@ -35,16 +35,16 @@
   "activePredecessor": "33-P",
   "targetedTestRatchet": {
     "files": 20,
-    "tests": 147
+    "tests": 149
   },
   "migration94Sha256": "08fef61dc21062134716dfae8e78c2256eb5da275eedaf1fe3502a3c2450cb65",
   "migration95Sha256": "2a7206f2335ee24e5e6135867dbed5096530477a1e3d514ef2f0ce9683029c90",
   "ppkGateEvidence": {
     "ppk021": {
       "status": "PASS",
-      "scannedProductionFiles": 555,
-      "exactPrivilegedSurfaceCount": 874,
-      "exactAllowlistSha256": "930119485fa3459f55ed3f23909ba9846560e785030bb991b5fb3105383d5d1a",
+      "scannedProductionFiles": 590,
+      "exactPrivilegedSurfaceCount": 897,
+      "exactAllowlistSha256": "9ea5b846e552e760fbd8dd5f8bee7fb83988ef19bb93e3bbd4ac0465c4b71205",
       "targetedTestsPassed": 17,
       "contractChecksPassed": 84,
       "runtimeChecksPassed": 20,
@@ -52,11 +52,11 @@
     },
     "ppk022": {
       "status": "PASS",
-      "scannedProductionFiles": 555,
-      "exactCapabilitySurfaceCount": 392,
-      "exactCapabilityManifestSha256": "cb879c739cb8ef3a2e92d1f0e451cd21ba7e9d4b0fcd519f343cddd725c9745c",
+      "scannedProductionFiles": 590,
+      "exactCapabilitySurfaceCount": 447,
+      "exactCapabilityManifestSha256": "54061e189e7771868552efa869c69a75426f24e4edd846af1c62496c82f0e1d6",
       "targetedTestsPassed": 19,
-      "contractChecksPassed": 110,
+      "contractChecksPassed": 111,
       "runtimeChecksPassed": 24,
       "canonicalAvailabilityChecksPassed": 19,
       "findings": 0
@@ -115,5 +115,5 @@
       "status": "PASS"
     }
   ],
-  "generatedAt": "2026-08-16T23:38:53.668Z"
+  "generatedAt": "2026-08-24T04:03:35.589Z"
 }

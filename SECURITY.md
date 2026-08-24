@@ -1,6 +1,6 @@
 # Güvenlik Bildirimi
 
-**Aktif sürüm:** 02.08.2026.228
+**Aktif sürüm:** Bronze 22.08.2026.50
 
 Güvenlik açığı şüphesi kamuya açık hata kaydı olarak paylaşılmamalıdır. Üretim
 sürümünde ayrı ve güvenli bildirim kanalı tanımlanacaktır.

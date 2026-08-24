@@ -208,12 +208,12 @@ const definitions = [
       && scope.truth?.physicalSecureEraseGuaranteed === false
       && scope.truth?.externalCopyDestructionGuaranteed === false],
   ['decision and threat model preserve partial and no-claim markers',
-    decision.includes('20 dosya / 148 test PASS')
+    decision.includes('20 dosya / 149 test PASS')
       && decision.includes('PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED / ACCEPTANCE_INCOMPLETE')
       && decision.includes('- Requirement PASS: `false`')
       && decision.includes('- Persistent receipt: `NOT_RUN`')
       && decision.includes('requirement `PASS`')
-      && threat.includes('20 dosya / 148 test PASS')
+      && threat.includes('20 dosya / 149 test PASS')
       && threat.includes('iki fazlı run/cancel local kanıtı `PASS`')
       && threat.includes('authenticated restart auto-resume')]
 ];
@@ -232,7 +232,7 @@ const report = {
   countsAsRequirementPass: false,
   requirementGateStatus: 'BLOCKED_BY_33_P_AND_OPEN_TECHNICAL_EXTERNAL_MANUAL_EVIDENCE',
   activePredecessor: '33-P',
-  targetedTestRatchet: { files: 20, tests: 148 },
+  targetedTestRatchet: { files: 20, tests: 149 },
   migration94Sha256,
   migration95Sha256,
   ppkGateEvidence: ppk,

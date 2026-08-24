@@ -12,9 +12,9 @@
   },
   "networkUsed": false,
   "userOrDemoDataIncluded": false,
-  "sourceStylesCssSha256": "99835400d319fe97244a14608072a718f2894722d196f5199962eaafd46d77cc",
+  "sourceStylesCssSha256": "c7d9ee28dca5ad8fd977d2c470526b1e1b365338c54f5d7474ae1d0909d8570b",
   "sourceTypographyCssSha256": "29988b66afb8a1097db65948da7d5710de0d2232b6bc05b5b0c86918d522d5f5",
-  "combinedCssSha256": "48152e32a99bcf3741a64e06fbf0755a671401b302923418f849c1140c23a947",
+  "combinedCssSha256": "d0d978bba9b694f27655f8ccf9181b6feebc7de05f7e1736cb7a6598de4255e2",
   "visualManifestSha256": "b05c44c9b241320f9f23af2bd4f60fcffb0698480449497f360395c5671adaf2",
   "entries": [
     {
@@ -78,8 +78,8 @@
           ".sidebar nav": {
             "clientWidth": 253,
             "scrollWidth": 253,
-            "clientHeight": 176,
-            "scrollHeight": 176,
+            "clientHeight": 479,
+            "scrollHeight": 479,
             "horizontalOverflow": 0
           },
           ".sidebar-footer": {
@@ -216,8 +216,8 @@
           ".sidebar nav": {
             "clientWidth": 253,
             "scrollWidth": 253,
-            "clientHeight": 176,
-            "scrollHeight": 176,
+            "clientHeight": 479,
+            "scrollHeight": 479,
             "horizontalOverflow": 0
           },
           ".sidebar-footer": {
@@ -354,8 +354,8 @@
           ".sidebar nav": {
             "clientWidth": 253,
             "scrollWidth": 253,
-            "clientHeight": 176,
-            "scrollHeight": 176,
+            "clientHeight": 479,
+            "scrollHeight": 479,
             "horizontalOverflow": 0
           },
           ".sidebar-footer": {
@@ -492,8 +492,8 @@
           ".sidebar nav": {
             "clientWidth": 359,
             "scrollWidth": 359,
-            "clientHeight": 184,
-            "scrollHeight": 184,
+            "clientHeight": 472,
+            "scrollHeight": 472,
             "horizontalOverflow": 0
           },
           ".sidebar-footer": {
@@ -630,8 +630,8 @@
           ".sidebar nav": {
             "clientWidth": 253,
             "scrollWidth": 253,
-            "clientHeight": 176,
-            "scrollHeight": 176,
+            "clientHeight": 479,
+            "scrollHeight": 479,
             "horizontalOverflow": 0
           },
           ".sidebar-footer": {

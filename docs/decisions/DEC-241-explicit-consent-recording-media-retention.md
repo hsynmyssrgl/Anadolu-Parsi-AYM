@@ -19,3 +19,7 @@ Gerçek ses/video yakalama, transkript veya çeviri kaydı, kırmızı kayıt g�
 ## Yerel kanıt
 
 Migration 108 `explicit_consent_recording_media_retention` SHA-256 değeri `45f60e7ff16f505386a75a4737d5b6bc4e0bc4c07e4b042594e40418ff20626e` olarak doğrulanır. Kayıt talebi exact çağrı rosterına, geç katılımcı ise aktif çağrı ve aktif oda üyeliğine bağlanır; sona ermiş çağrıda veya rızası modellenmemiş çağrı katılımcısı varken bölüm değişimi reddedilir. Beş hedef dosyada 23 test; domain, application, repository-contracts, database, repositories ve desktop typecheck zinciri; migration verifier ile PPK-015/021/022 ratchetleri yerel teknik kanıttır. Bunlar gerçek kayıt, provider, medya şifreleme, güvenli fiziksel silme, hukuki uygunluk veya requirement kapanışı değildir.
+
+## 24.08.2026 değişiklik-etki doğrulaması
+
+PR-235 kapsamında güncel kullanıcı dili ve renderer sözleşmesi bu karara yeniden bağlandı; 52/52 sınır-sözleşme-çalışma zamanı zinciri PASS oldu. Bu kayıt dış/manual kanıtları kapatmaz ve `countsAsRequirementPass=false` sınırını değiştirmez.

@@ -1,14 +1,20 @@
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import { resolveUiLocalization, type ReportSummaryView } from '@ppt/domain';
+import { resolveUiLocalization, type AutomationRuleView, type HealthRecordView, type LifeRecordView, type ReportSummaryView } from '@ppt/domain';
 import { AutomationScreen, HealthScreen, LifeCenterScreen, ReportsScreen } from '../src/renderer/App';
 import { LocalizationProvider } from '../src/renderer/localization';
 const wrap=(node:ReturnType<typeof createElement>,locale:'tr-TR'|'en-US')=>renderToStaticMarkup(createElement(LocalizationProvider,{bootstrap:resolveUiLocalization(locale)},node));
 const noOpAsync=async()=>{};
 const report={generatedAt:'2026-08-19T12:00:00.000Z',peopleCount:0,upcomingEvents:0,activeTasks:0,expiringInsurance:0,activeMedicationPlans:0,financeByCurrency:[],overdueItems:[]} as unknown as ReportSummaryView;
+const healthRecord={id:'health-localized',ownerPersonId:'person-localized',title:'Yıllık kontrol',kind:'appointment',privacy:'selected_members',occurredAt:'2026-08-19T12:00:00.000Z',createdAt:'2026-08-19T12:00:00.000Z'} satisfies HealthRecordView;
+const automationRule={id:'automation-localized',title:'Yaşam kaydı hatırlatması',sourceType:'life_record',daysBefore:3,enabled:true,createdAt:'2026-08-19T12:00:00.000Z'} satisfies AutomationRuleView;
+const lifeRecord={id:'life-localized',ownerPersonId:'person-localized',category:'task',title:'Aile görevi',status:'active',privacy:'family',createdAt:'2026-08-19T12:00:00.000Z',updatedAt:'2026-08-19T12:00:00.000Z'} satisfies LifeRecordView;
 describe('app shell English localization wave thirty-two',()=>{
   it('renders health and life centers without visible Turkish copy in English',()=>{const html=[wrap(createElement(HealthScreen,{people:[],records:[],medications:[],history:[],onCreate:noOpAsync,onCreateMedication:noOpAsync,onCreateHistory:noOpAsync}),'en-US'),wrap(createElement(LifeCenterScreen,{people:[],records:[],onCreate:noOpAsync}),'en-US')].join('');expect(html).toContain('Health center');expect(html).toContain('Life center');expect(html).not.toMatch(/[ÇĞİÖŞÜçğıöşü]/u);});
   it('renders automation and reporting centers without visible Turkish copy in English',()=>{const html=[wrap(createElement(AutomationScreen,{rules:[],onCreate:noOpAsync,onToggle:noOpAsync}),'en-US'),wrap(createElement(ReportsScreen,{report}),'en-US')].join('');expect(html).toContain('Notification and automation center');expect(html).toContain('Reporting center');expect(html).not.toMatch(/[ÇĞİÖŞÜçğıöşü]/u);});
   it('preserves Turkish operations copy',()=>{expect(wrap(createElement(ReportsScreen,{report:undefined}),'tr-TR')).toContain('Rapor hazırlanıyor…');});
+  it('localizes health kind and privacy enum labels without exposing storage values',()=>{const tr=wrap(createElement(HealthScreen,{people:[],records:[healthRecord],medications:[],history:[],onCreate:noOpAsync,onCreateMedication:noOpAsync,onCreateHistory:noOpAsync}),'tr-TR');const en=wrap(createElement(HealthScreen,{people:[],records:[healthRecord],medications:[],history:[],onCreate:noOpAsync,onCreateMedication:noOpAsync,onCreateHistory:noOpAsync}),'en-US');expect(tr).toContain('Randevu · Seçili üyeler');expect(en).toContain('Appointment · Selected members');expect(`${tr}${en}`).not.toMatch(/>(?:[^<]* · )?(appointment|selected_members)(?: · [^<]*)?</u);});
+  it('localizes automation source enum labels without exposing storage values',()=>{const tr=wrap(createElement(AutomationScreen,{rules:[automationRule],onCreate:noOpAsync,onToggle:noOpAsync}),'tr-TR');const en=wrap(createElement(AutomationScreen,{rules:[automationRule],onCreate:noOpAsync,onToggle:noOpAsync}),'en-US');expect(tr).toContain('Yaşam kaydı · 3 gün önce');expect(en).toContain('Life record · 3 days before');expect(`${tr}${en}`).not.toMatch(/>(?:[^<]* · )?life_record(?: · [^<]*)?</u);});
+  it('localizes life status enum labels without exposing storage values',()=>{const tr=wrap(createElement(LifeCenterScreen,{people:[],records:[lifeRecord],onCreate:noOpAsync}),'tr-TR');const en=wrap(createElement(LifeCenterScreen,{people:[],records:[lifeRecord],onCreate:noOpAsync}),'en-US');expect(tr).toContain('Aktif');expect(en).toContain('Active');expect(`${tr}${en}`).not.toMatch(/>active(?: ·|<)/u);});
 });

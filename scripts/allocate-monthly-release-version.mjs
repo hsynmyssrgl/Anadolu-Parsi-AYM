@@ -1,11 +1,20 @@
+import { createHash } from 'node:crypto';
 import { open, readFile, readdir, rename, rm, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { createNextMonthlyRelease, installerArtifactTemplate } from './lib/monthly-release-version.mjs';
+import { assertExpectedReleaseId, createNextMonthlyRelease, installerArtifactTemplate } from './lib/monthly-release-version.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 const readJson = async (path) => JSON.parse(await readFile(resolve(root, path), 'utf8'));
 const jsonText = (value) => `${JSON.stringify(value, null, 2)}\n`;
+const stable = (value) => Array.isArray(value)
+  ? `[${value.map(stable).join(',')}]`
+  : value && typeof value === 'object'
+    ? `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${stable(value[key])}`).join(',')}}`
+    : JSON.stringify(value);
+const sha256 = (value) => createHash('sha256').update(value).digest('hex');
 const channelArgument = process.argv.find((argument) => argument.startsWith('--channel='))?.slice('--channel='.length);
+const expectedReleaseIdArgument = process.argv.find((argument) => argument.startsWith('--expected-release-id='))
+  ?.slice('--expected-release-id='.length);
 const previewOnly = process.argv.includes('--preview');
 const lockPath = resolve(root, '.monthly-release-version.lock');
 let lock;
@@ -55,14 +64,29 @@ const updateReleaseJson = (value, release) => {
   return visit(value);
 };
 
-try {
-  lock = await open(lockPath, 'wx');
-  const ledger = await readJson('config/release-ledger.json');
-  const release = createNextMonthlyRelease({ ledger, channel: channelArgument || ledger.current.channel });
-  if (previewOnly) {
-    console.log(jsonText(release).trimEnd());
-    process.exitCode = 0;
-  } else {
+const updateJsonReleaseField = (value, field, release) => ({ ...value, [field]: release.visibleRelease });
+
+const updateActiveText = (source, transformations, path) => transformations.reduce(
+  (current, [pattern, replacement, label]) => replaceRequired(current, pattern, replacement, `${path} ${label}`),
+  source
+);
+
+const previewLedger = await readJson('config/release-ledger.json');
+const previewRelease = createNextMonthlyRelease({
+  ledger: previewLedger,
+  channel: channelArgument || previewLedger.current.channel
+});
+if (previewOnly) {
+  console.log(jsonText(previewRelease).trimEnd());
+} else {
+  assertExpectedReleaseId(previewRelease, expectedReleaseIdArgument);
+  try {
+    lock = await open(lockPath, 'wx');
+    const ledger = await readJson('config/release-ledger.json');
+    const release = assertExpectedReleaseId(createNextMonthlyRelease({
+      ledger,
+      channel: channelArgument || ledger.current.channel
+    }), expectedReleaseIdArgument);
     const planned = new Map();
     const manifests = await packageManifestPaths();
     const manifestValues = await Promise.all(manifests.map(async (path) => [path, await readJson(path)]));
@@ -161,13 +185,140 @@ try {
     });
     planned.set('repository-metadata.json', jsonText(repositoryMetadata));
 
+    const canonicalRegistryPath = 'config/canonical-rule-registry.json';
+    const canonicalRegistry = await readJson(canonicalRegistryPath);
+    canonicalRegistry.effectiveRelease = release.visibleRelease;
+    const canonicalCore = { ...canonicalRegistry };
+    delete canonicalCore.rulesSha256;
+    canonicalRegistry.rulesSha256 = sha256(stable(canonicalCore));
+    planned.set(canonicalRegistryPath, jsonText(canonicalRegistry));
+
     const constitution = await readJson('config/project-constitution.json');
     constitution.effectiveRelease = release.visibleRelease;
+    constitution.canonicalRulesSha256 = canonicalRegistry.rulesSha256;
     planned.set('config/project-constitution.json', jsonText(constitution));
 
     const activeDocumentSet = await readJson('config/active-document-set.json');
     activeDocumentSet.release = release.visibleRelease;
     planned.set('config/active-document-set.json', jsonText(activeDocumentSet));
+
+    for (const [path, field] of [
+      ['config/mutation-release-readiness-policy.json', 'release'],
+      ['config/user-decision-ledger.json', 'release'],
+      ['config/work-segmentation-plan.json', 'release'],
+      ['config/documentation-synchronization-policy.json', 'release']
+    ]) planned.set(path, jsonText(updateJsonReleaseField(await readJson(path), field, release)));
+
+    const acknowledgement = await readJson('config/rule-acknowledgement.json');
+    acknowledgement.release = release.visibleRelease;
+    acknowledgement.rulesSha256 = canonicalRegistry.rulesSha256;
+    planned.set('config/rule-acknowledgement.json', jsonText(acknowledgement));
+
+    const enforcement = await readJson('config/rule-enforcement-registry.json');
+    enforcement.release = release.visibleRelease;
+    enforcement.canonicalRulesSha256 = canonicalRegistry.rulesSha256;
+    planned.set('config/rule-enforcement-registry.json', jsonText(enforcement));
+
+    const commercialManifest = await readJson('docs/ticari-urun-temeli/00_TEMEL_SURUM_MANIFESTOSU.json');
+    commercialManifest.sourceRelease = release.visibleRelease;
+    commercialManifest.canonicalRuleCount = canonicalRegistry.ruleCount;
+    commercialManifest.canonicalRuleSha256 = canonicalRegistry.rulesSha256;
+    planned.set('docs/ticari-urun-temeli/00_TEMEL_SURUM_MANIFESTOSU.json', jsonText(commercialManifest));
+
+    const commercialRuleBinding = await readJson('docs/ticari-urun-temeli/01_YONETIM/04_AKTIF_KURAL_SICILI.json');
+    commercialRuleBinding.anaKuralSiciliId = canonicalRegistry.id;
+    commercialRuleBinding.anaKuralSayisi = canonicalRegistry.ruleCount;
+    commercialRuleBinding.aktifKuralSayisi = canonicalRegistry.activeRuleCount;
+    commercialRuleBinding.degistirilmisKuralSayisi = canonicalRegistry.supersededRuleCount;
+    commercialRuleBinding.anaKuralSha256 = canonicalRegistry.rulesSha256;
+    planned.set('docs/ticari-urun-temeli/01_YONETIM/04_AKTIF_KURAL_SICILI.json', jsonText(commercialRuleBinding));
+
+    const activeGovernance = await readJson('config/active-governance-ledger.json');
+    activeGovernance.release = release.visibleRelease;
+    activeGovernance.releaseId = release.releaseId;
+    activeGovernance.canonicalRulesSha256 = canonicalRegistry.rulesSha256;
+    activeGovernance.persistentLibraryReleasePath = `/ParsYuva/ParsYuva Aile Yasam Merkezi/${release.visibleRelease}`;
+    planned.set('config/active-governance-ledger.json', jsonText(activeGovernance));
+
+    const activeTextPlans = new Map([
+      ['README.md', [
+        [/^- Application Version: `[^`]+`$/mu, `- Application Version: \`${release.version}\``, 'application version'],
+        [/^- Package Version: `[^`]+`$/mu, `- Package Version: \`${release.packageVersion}\``, 'package version'],
+        [/^- Monthly Sequence: \*\*\d+\*\*$/mu, `- Monthly Sequence: **${release.monthlySequence}**`, 'monthly sequence']
+      ]],
+      ['START_HERE_TR.md', [
+        [/^- Application Version: `[^`]+`$/mu, `- Application Version: \`${release.version}\``, 'application version'],
+        [/^- Package Version: `[^`]+`$/mu, `- Package Version: \`${release.packageVersion}\``, 'package version'],
+        [/^- Monthly Sequence: \*\*\d+\*\*$/mu, `- Monthly Sequence: **${release.monthlySequence}**`, 'monthly sequence']
+      ]],
+      ['PAKET_OZETI_TR.md', [
+        [/^# Paket Özeti — .*$/mu, `# Paket Özeti — ${release.visibleRelease}`, 'title'],
+        [/^- Application Version: `[^`]+`$/mu, `- Application Version: \`${release.version}\``, 'application version'],
+        [/^- Package Version: `[^`]+`$/mu, `- Package Version: \`${release.packageVersion}\``, 'package version'],
+        [/^- Monthly Sequence: \*\*\d+\*\*$/mu, `- Monthly Sequence: **${release.monthlySequence}**`, 'monthly sequence']
+      ]],
+      ['DELIVERY_SUMMARY_TR.md', [
+        [/^# Paket Özeti — .*$/mu, `# Paket Özeti — ${release.visibleRelease}`, 'title'],
+        [/^- Application Version: `[^`]+`$/mu, `- Application Version: \`${release.version}\``, 'application version'],
+        [/^- Package Version: `[^`]+`$/mu, `- Package Version: \`${release.packageVersion}\``, 'package version'],
+        [/^- Monthly Sequence: \*\*\d+\*\*$/mu, `- Monthly Sequence: **${release.monthlySequence}**`, 'monthly sequence']
+      ]],
+      ['VERIFICATION_REPORT.md', [
+        [/^# Doğrulama Durumu — .*$/mu, `# Doğrulama Durumu — ${release.visibleRelease}`, 'title'],
+        [/^- Application Version: `[^`]+`$/mu, `- Application Version: \`${release.version}\``, 'application version'],
+        [/^- Package Version: `[^`]+`$/mu, `- Package Version: \`${release.packageVersion}\``, 'package version'],
+        [/^- Monthly Sequence: \*\*\d+\*\*$/mu, `- Monthly Sequence: **${release.monthlySequence}**`, 'monthly sequence']
+      ]],
+      ['BUILD_STATUS.md', [
+        [/^- Application Version: `[^`]+`$/mu, `- Application Version: \`${release.version}\``, 'application version'],
+        [/^- Package Version: `[^`]+`$/mu, `- Package Version: \`${release.packageVersion}\``, 'package version'],
+        [/^- Monthly Sequence: \*\*\d+\*\*$/mu, `- Monthly Sequence: **${release.monthlySequence}**`, 'monthly sequence']
+      ]],
+      ...['SECURITY.md', 'CONTRIBUTING.md', 'COPYRIGHT.md'].map((path) => [path, [
+        [/^\*\*Aktif sürüm:\*\* .*$/mu, `**Aktif sürüm:** ${release.visibleRelease}`, 'active release']
+      ]]),
+      ['docs/current/00_AKTIF_ANA_KAPSAM.md', [[/^- Aktif kanal ve sürüm: .*$/mu, `- Aktif kanal ve sürüm: **${release.visibleRelease}**`, 'active release']]],
+      ['docs/current/04_AKTIF_BRONZE_YOL_HARITASI.md', [[/^- Aktif sürüm: .*$/mu, `- Aktif sürüm: ${release.visibleRelease}`, 'active release']]],
+      ['docs/current/06_KANONIK_KURAL_SICILI.md', [
+        [/^- Görünür sürüm: .*$/mu, `- Görünür sürüm: **${release.visibleRelease}**`, 'visible release'],
+        [/^- Kural SHA-256: `[^`]+`$/mu, `- Kural SHA-256: \`${canonicalRegistry.rulesSha256}\``, 'rule hash']
+      ]],
+      ['docs/current/07_TESLIM_SOHBET_VE_KALICI_KAYIT_SOZLESMESI.md', [
+        [/^- Görünür sürüm: .*$/mu, `- Görünür sürüm: **${release.visibleRelease}**`, 'visible release'],
+        [/^- Bu sürümün zorunlu Library dalı: `[^`]+`$/mu, `- Bu sürümün zorunlu Library dalı: \`/ParsYuva/ParsYuva Aile Yasam Merkezi/${release.visibleRelease}\``, 'library release path']
+      ]],
+      ['docs/current/08_TUM_BELGELER_DIZINI.md', [[/^- Sürüm: .*$/mu, `- Sürüm: **${release.visibleRelease}**`, 'release']]],
+      ['docs/current/09_KULLANICI_KARARLARI_KAYDI.md', [[/^- Görünür sürüm: .*$/mu, `- Görünür sürüm: **${release.visibleRelease}**`, 'visible release']]],
+      ['docs/current/10_TUM_KURALLAR_ASILAMAZ_YURUTME_SOZLESMESI.md', [
+        [/^- Sürüm: .*$/mu, `- Sürüm: **${release.visibleRelease}**`, 'release'],
+        [/^- Kural SHA-256: `[^`]+`$/mu, `- Kural SHA-256: \`${canonicalRegistry.rulesSha256}\``, 'rule hash']
+      ]],
+      ['docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md', [
+        [/^- Görünür ürün sürümü: .*$/mu, `- Görünür ürün sürümü: **${release.visibleRelease}**`, 'visible release'],
+        [
+          /^- Kural sicili: \*\*[^*]+\*\*, toplam \d+, aktif \d+, superseded \d+, SHA-256 `[^`]+`\.$/mu,
+          `- Kural sicili: **${canonicalRegistry.id}**, toplam ${canonicalRegistry.ruleCount}, aktif ${canonicalRegistry.activeRuleCount}, superseded ${canonicalRegistry.supersededRuleCount}, SHA-256 \`${canonicalRegistry.rulesSha256}\`.`,
+          'canonical rule identity'
+        ]
+      ]],
+      ['docs/current/13_KURUMSALLASMA_VE_GLOBAL_MARKA_PLANI.md', [[/^- Görünür sürüm: .*$/mu, `- Görünür sürüm: **${release.visibleRelease}**`, 'visible release']]],
+      ['docs/current/15_EK_KURAL_TOPLU_BIRLESTIRME_SICILI.md', [[/^- Görünür sürüm: .*$/mu, `- Görünür sürüm: **${release.visibleRelease}**`, 'visible release']]],
+      ['docs/ticari-urun-temeli/00_OKU_BENI.md', [
+        [
+          /^Guncel ust kayit (?:Bronze|Silver|Gold) \d{2}\.\d{2}\.\d{4}\.\d+ ve /mu,
+          `Guncel ust kayit ${release.visibleRelease} ve `,
+          'current upper record'
+        ],
+        [
+          /Kanonik V\d+, \d+ kural ve SHA-256 `[a-f0-9]{64}`/u,
+          `Kanonik V${String(canonicalRegistry.id).match(/V(\d+)$/u)?.[1]}, ${canonicalRegistry.ruleCount} kural ve SHA-256 \`${canonicalRegistry.rulesSha256}\``,
+          'canonical rule identity'
+        ]
+      ]]
+    ]);
+    for (const [path, transformations] of activeTextPlans) {
+      planned.set(path, updateActiveText(await readFile(resolve(root, path), 'utf8'), transformations, path));
+    }
 
     for (const path of [
       'config/32-u-ppk-025-signing-trust-policy.json',
@@ -189,8 +340,8 @@ try {
       throw error;
     }
     console.log(`Resmî sürüm ayrıldı: ${release.visibleRelease} (${release.packageVersion}).`);
+  } finally {
+    await lock?.close();
+    await rm(lockPath, { force: true });
   }
-} finally {
-  await lock?.close();
-  await rm(lockPath, { force: true });
 }

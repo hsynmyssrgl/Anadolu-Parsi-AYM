@@ -28,7 +28,7 @@ try {
   const payloads = [
     ['summary', 'build216-bronze-final-windows-validation-summary.json', {
       schemaVersion: 2,
-      product: 'Anadolu Parsı Aile Yaşam Merkezi',
+      product: 'ParsYuva Aile Yaşam Merkezi',
       applicationVersion,
       packageVersion,
       build: 216,
@@ -59,7 +59,7 @@ try {
   }
   const manifest = {
     schemaVersion: 1,
-    product: 'Anadolu Parsı Aile Yaşam Merkezi',
+    product: 'ParsYuva Aile Yaşam Merkezi',
     build: 216,
     applicationVersion,
     packageVersion,

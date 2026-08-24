@@ -16,7 +16,7 @@ describe('32-Q PPK-021 desktop content-free AST gate boundary', () => {
       enforcement: 'fail-closed',
       defaultDecision: 'DENY',
       protectedRuleCount: 6,
-      exactAllowlistEntries: 895,
+      exactAllowlistEntries: 897,
       directRoleAuthorizationBypasses: 0,
       wildcardsAllowed: false,
       buildGateReplacesRuntimePolicy: false,
@@ -51,7 +51,8 @@ describe('32-Q PPK-021 desktop content-free AST gate boundary', () => {
     const renderer = readFileSync('apps/desktop/src/renderer/App.tsx', 'utf8');
     expect(preload).toContain("invoke('system:getPlatformPolicyAstGateBoundary')");
     expect(global).toContain('getPlatformPolicyAstGateBoundary():Promise<PlatformPolicyAstGateBoundaryView>');
-    expect(renderer).toContain('AST gate runtime politikasının yerine geçmez');
+    expect(renderer).toContain('title="Ayrıcalıklı kod yüzeylerinde varsayılan ret denetimi"');
+    expect(renderer).toContain('bu kapı çalışma anı politikasının yerine geçmez');
     expect(renderer).toContain('doğrudan rol yetkilendirmesi:');
     expect(renderer).toContain('directRoleAuthorizationBypasses');
   });

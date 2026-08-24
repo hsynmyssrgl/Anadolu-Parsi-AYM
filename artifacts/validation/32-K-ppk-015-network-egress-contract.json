@@ -138,13 +138,13 @@
       "status": "PASS"
     },
     {
-      "name": "system UI states revocation OIDC token and JWKS allowlist truth",
+      "name": "system UI states revocation identity-token and verification-key allowlist truth",
       "status": "PASS"
     },
     {
       "name": "source gate scans the exact current production inventory",
       "status": "PASS",
-      "detail": "18/589/e71aba8c5297e67a766439d7689402ecdd03de7b93d012c90f4fafbb37858228"
+      "detail": "18/590/a739c17e51942946e2e6923d8ac7524630e36b56ec1078671eddf351b64e6f93"
     },
     {
       "name": "source gate keeps exact current malicious self-test and zero finding ratchets",
@@ -193,8 +193,8 @@
     "latestDatabaseMigration": 121,
     "sourceScan": {
       "zones": 18,
-      "files": 589,
-      "sourceInventorySha256": "e71aba8c5297e67a766439d7689402ecdd03de7b93d012c90f4fafbb37858228",
+      "files": 590,
+      "sourceInventorySha256": "a739c17e51942946e2e6923d8ac7524630e36b56ec1078671eddf351b64e6f93",
       "findings": []
     },
     "authorizedAdapters": [
@@ -214,5 +214,5 @@
   "sqliteOwnershipTransferred": false,
   "cutoverAuthorityAttached": false,
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-23T07:40:41.591Z"
+  "generatedAt": "2026-08-24T06:14:41.850Z"
 }

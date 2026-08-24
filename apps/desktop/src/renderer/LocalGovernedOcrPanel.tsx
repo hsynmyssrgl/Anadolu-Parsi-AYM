@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { AsyncStatePanel } from './form-ux';
 import { Button, EmptyState, StatusMessage } from './ui';
 import { selectUiCopy, useLocalization } from './localization';
+import { toUserFacingErrorMessage } from './user-facing-error';
 
 type LocalOcrBridge = NonNullable<Window['pardus']>;
 type LocalOcrCenter = Awaited<ReturnType<LocalOcrBridge['getLocalGovernedOcrCenter']>>;
@@ -30,7 +31,7 @@ type MutationIdentity = Pick<PendingOperation, 'clientOperationId' | 'expectedRe
 const MAX_INPUT_BYTES = 16 * 1_024 * 1_024;
 const SUPPORTED_MIME_TYPES = new Set(['image/png', 'image/jpeg']);
 const newOperationId = (): string => `ocr-${globalThis.crypto.randomUUID()}`;
-const errorMessage = (caught: unknown, fallback: string): string => caught instanceof Error ? caught.message : fallback;
+const errorMessage = (caught: unknown, fallback: string): string => toUserFacingErrorMessage(caught, fallback);
 const parsedLanguages = (value: string): readonly string[] => [...new Set(value.split(',').map((item) => item.trim()).filter(Boolean))];
 
 export function LocalGovernedOcrPanel({ selectedSource }: LocalGovernedOcrPanelProps) {
@@ -43,7 +44,7 @@ export function LocalGovernedOcrPanel({ selectedSource }: LocalGovernedOcrPanelP
   const failureLabels: Readonly<Record<NonNullable<LocalOcrJob['failureCode']>, string>> = {
     source_unavailable: text('Arşiv kaynağı kullanılamıyor.','The archive source is unavailable.'),
     consent_unavailable: text('Etkin hassas veri işleme izni bulunamadı.','No active sensitive-data processing consent was found.'),
-    engine_failed: text('Yerel OCR sağlayıcısı işlemi tamamlayamadı.','The local OCR provider could not complete the operation.'),
+    engine_failed: text('Yerel metin tanıma hizmeti işlemi tamamlayamadı.','The local text-recognition service could not complete the operation.'),
     integrity_mismatch: text('Kaynak veya sonuç bütünlüğü doğrulanamadı.','Source or result integrity could not be verified.')
   };
   const [center, setCenter] = useState<LocalOcrCenter>();
@@ -63,7 +64,7 @@ export function LocalGovernedOcrPanel({ selectedSource }: LocalGovernedOcrPanelP
 
   const refresh = async (showLoading = true): Promise<boolean> => {
     if (!window.pardus) {
-      setLoadError(text('Yerel OCR masaüstü köprüsü kullanılamıyor.','The local OCR desktop bridge is unavailable.'));
+      setLoadError(text('Yerel metin tanıma bağlantısı kullanılamıyor.','The local text-recognition connection is unavailable.'));
       setLoading(false);
       return false;
     }
@@ -74,7 +75,7 @@ export function LocalGovernedOcrPanel({ selectedSource }: LocalGovernedOcrPanelP
       setCenter(next);
       return true;
     } catch (caught) {
-      setLoadError(errorMessage(caught, text('Yerel OCR merkezi yüklenemedi.','The local OCR center could not be loaded.')));
+      setLoadError(errorMessage(caught, text('Yerel metin tanıma merkezi yüklenemedi.','The local text-recognition center could not be loaded.')));
       return false;
     } finally {
       if (showLoading) setLoading(false);
@@ -139,7 +140,7 @@ export function LocalGovernedOcrPanel({ selectedSource }: LocalGovernedOcrPanelP
       committed = true;
       setNotice(successMessage);
     } catch (caught) {
-      setOperationError(`${errorMessage(caught, text('Yerel OCR işlemi tamamlanamadı.','The local OCR operation could not be completed.'))} ${text('Aynı işlem kimliği ve özgün revizyonla yeniden deneyebilirsiniz.','You can retry with the same operation identifier and original revision.')}`);
+      setOperationError(`${errorMessage(caught, text('Yerel metin tanıma işlemi tamamlanamadı.','The local text-recognition action could not be completed.'))} ${text('Aynı işlemi yeniden deneyebilirsiniz.','You can retry the same action.')}`);
     } finally {
       setBusyKey('');
     }
@@ -157,14 +158,14 @@ export function LocalGovernedOcrPanel({ selectedSource }: LocalGovernedOcrPanelP
     if (!window.pardus || !selectedSource || !center || !sourceSupported || !languagesValid) return;
     await mutate(`create:${selectedSource.id}`, 0, (operation) => window.pardus!.createLocalGovernedOcrJob({
       ...operation, sourceResourceId: selectedSource.id, languageHints: languages
-    }), text('OCR işi merkezi yetki denetiminden sonra sıraya alındı.','The OCR job was queued after centralized authorization.'), languages.join(','));
+    }), text('Metin tanıma işi yetki denetiminden sonra sıraya alındı.','The text-recognition job was queued after authorization.'), languages.join(','));
   };
 
   const run = async (): Promise<void> => {
     if (!window.pardus || !selectedJob) return;
     await mutate(`run:${selectedJob.id}`, selectedJob.revision, (operation) => window.pardus!.runLocalGovernedOcrJob({
       ...operation, jobId: selectedJob.id
-    }), text('Yerel OCR çalışması tamamlandı.','Local OCR processing was completed.'));
+    }), text('Yerel metin tanıma çalışması tamamlandı.','Local text recognition was completed.'));
   };
 
   const cancel = async (): Promise<void> => {
@@ -183,7 +184,7 @@ export function LocalGovernedOcrPanel({ selectedSource }: LocalGovernedOcrPanelP
       setResult(next);
       setCorrectedText(next.text);
     } catch (caught) {
-      setOperationError(errorMessage(caught, text('OCR sonucu açılamadı.','The OCR result could not be opened.')));
+      setOperationError(errorMessage(caught, text('Metin tanıma sonucu açılamadı.','The text-recognition result could not be opened.')));
     } finally {
       setBusyKey('');
     }
@@ -198,7 +199,7 @@ export function LocalGovernedOcrPanel({ selectedSource }: LocalGovernedOcrPanelP
       setSearchResult(await window.pardus.searchLocalGovernedOcr({ query: searchQuery, limit: 10 }));
     } catch (caught) {
       setSearchResult(undefined);
-      setOperationError(errorMessage(caught, text('Şifreli OCR dizininde arama tamamlanamadı.','The encrypted OCR index search could not be completed.')));
+      setOperationError(errorMessage(caught, text('Şifreli metin tanıma kayıtlarında arama tamamlanamadı.','The encrypted text-recognition records could not be searched.')));
     } finally {
       setBusyKey('');
     }
@@ -219,10 +220,10 @@ export function LocalGovernedOcrPanel({ selectedSource }: LocalGovernedOcrPanelP
   };
 
   const remove = async (): Promise<void> => {
-    if (!window.pardus || !selectedJob || !globalThis.confirm(text('Yerel OCR sonucu ve iş kaydı silinsin mi? Arşiv kaynağı korunur.','Delete the local OCR result and job record? The archive source will be preserved.'))) return;
+    if (!window.pardus || !selectedJob || !globalThis.confirm(text('Yerel metin tanıma sonucu ve iş kaydı silinsin mi? Arşiv kaynağı korunur.','Delete the local text-recognition result and job record? The archive source will be preserved.'))) return;
     await mutate(`delete:${selectedJob.id}`, selectedJob.revision, (operation) => window.pardus!.deleteLocalGovernedOcrJob({
-      ...operation, jobId: selectedJob.id, reason: text('Kullanıcı yerel OCR sonucunu Doküman Merkezi üzerinden sildi.','The user deleted the local OCR result through the Document Center.')
-    }), text('Yerel OCR sonucu silindi; kaynak arşiv belgesi korundu.','The local OCR result was deleted and the source archive document was preserved.'));
+      ...operation, jobId: selectedJob.id, reason: text('Kullanıcı yerel metin tanıma sonucunu Doküman Merkezi üzerinden sildi.','The user deleted the local text-recognition result through the Document Center.')
+    }), text('Yerel metin tanıma sonucu silindi; kaynak arşiv belgesi korundu.','The local text-recognition result was deleted and the source archive document was preserved.'));
   };
 
   const setEnabled = async (enabled: boolean): Promise<void> => {
@@ -230,20 +231,20 @@ export function LocalGovernedOcrPanel({ selectedSource }: LocalGovernedOcrPanelP
     await mutate(`settings:${enabled ? 'enable' : 'disable'}`, center.settings.revision,
       (operation) => window.pardus!.setLocalGovernedOcrEnabled({
         ...operation, enabled,
-        reason: enabled ? text('Kullanıcı yerel OCR işlemeyi etkinleştirdi.','The user enabled local OCR processing.') : text('Kullanıcı yerel OCR işlemeyi devre dışı bıraktı.','The user disabled local OCR processing.')
-      }), enabled ? text('Yerel OCR işleme etkinleştirildi.','Local OCR processing was enabled.') : text('Yerel OCR işleme devre dışı bırakıldı.','Local OCR processing was disabled.'));
+        reason: enabled ? text('Kullanıcı yerel metin tanımayı etkinleştirdi.','The user enabled local text recognition.') : text('Kullanıcı yerel metin tanımayı devre dışı bıraktı.','The user disabled local text recognition.')
+      }), enabled ? text('Yerel metin tanıma etkinleştirildi.','Local text recognition was enabled.') : text('Yerel metin tanıma devre dışı bırakıldı.','Local text recognition was disabled.'));
   };
 
-  if (loading && !center) return <AsyncStatePanel state="loading" title={text('Yerel OCR merkezi yükleniyor','Loading local OCR center')} message={text('İşler ve yerel işleme ayarı okunuyor.','Reading jobs and the local processing setting.')} />;
-  if (loadError && !center) return <AsyncStatePanel state="error" title={text('Yerel OCR merkezi yüklenemedi','The local OCR center could not be loaded')} message={loadError} onRetry={async () => { await refresh(); }} />;
-  if (!center) return <AsyncStatePanel state="empty" title={text('Yerel OCR kullanılamıyor','Local OCR is unavailable')} message={text('Masaüstü yetki sınırı hazır değil.','The desktop authorization boundary is not ready.')} onRetry={async () => { await refresh(); }} />;
+  if (loading && !center) return <AsyncStatePanel state="loading" title={text('Yerel metin tanıma merkezi yükleniyor','Loading the local text-recognition center')} message={text('İşler ve yerel işleme ayarı okunuyor.','Reading jobs and the local processing setting.')} />;
+  if (loadError && !center) return <AsyncStatePanel state="error" title={text('Yerel metin tanıma merkezi yüklenemedi','The local text-recognition center could not be loaded')} message={loadError} onRetry={async () => { await refresh(); }} />;
+  if (!center) return <AsyncStatePanel state="empty" title={text('Yerel metin tanıma kullanılamıyor','Local text recognition is unavailable')} message={text('Güvenli masaüstü bağlantısı hazır değil.','The secure desktop connection is not ready.')} onRetry={async () => { await refresh(); }} />;
 
   return (
     <section className="panel local-ocr-center" aria-labelledby="local-ocr-center-title" aria-busy={Boolean(busyKey)}>
       <div className="panel-heading">
         <div>
           <span className="eyebrow">{text('Yerel ve yönetilen türetilmiş veri','Local governed derived data')}</span>
-          <h2 id="local-ocr-center-title">{text('Belge OCR merkezi','Document OCR center')}</h2>
+          <h2 id="local-ocr-center-title">{text('Belge metin tanıma merkezi','Document text-recognition center')}</h2>
           <p>{text('PNG ve JPEG belgeleri yalnız açık hassas veri işleme izni ve merkezi PEP kararıyla yerel olarak işler.','PNG and JPEG documents are processed locally only with explicit sensitive-data processing consent and a centralized PEP decision.')}</p>
         </div>
         <Button disabled={Boolean(busyKey)} onClick={() => void setEnabled(!center.settings.enabled)}>
@@ -251,22 +252,22 @@ export function LocalGovernedOcrPanel({ selectedSource }: LocalGovernedOcrPanelP
         </Button>
       </div>
 
-      {!networkOnline && <StatusMessage tone="info">{text('Ağ çevrimdışı görünüyor. Bu yalnız sunum bilgisidir; yerel OCR yetkisini tarayıcı ağ durumu belirlemez.','The network appears offline. This is presentation-only information; browser network state does not determine local OCR authorization.')}</StatusMessage>}
+      {!networkOnline && <StatusMessage tone="info">{text('Ağ çevrimdışı görünüyor. Bu yalnız bilgilendirmedir; yerel metin tanıma izni ağ durumuna göre değişmez.','The network appears offline. This is informational only; local text-recognition permission does not change with network status.')}</StatusMessage>}
       {loadError && <StatusMessage tone="warning">{text('İşlem kaydedilmiş olabilir ancak görünüm yenilenemedi:','The operation may have been saved, but the view could not be refreshed:')} {loadError}</StatusMessage>}
       {operationError && <StatusMessage tone="warning">{operationError}</StatusMessage>}
       {notice && <StatusMessage tone="success">{notice}</StatusMessage>}
 
-      <div className="local-ocr-truth" role="note" aria-label={text('Yerel OCR doğruluk sınırları','Local OCR truth boundaries')}>
+      <div className="local-ocr-truth" role="note" aria-label={text('Yerel metin tanıma doğruluk sınırları','Local text-recognition accuracy limits')}>
         <strong>{text('Açık iddia sınırı','Explicit claim boundary')}</strong>
-        <span>{text("İşleme ağ ve bulut kullanmaz; kaynak baytları renderer'a verilmez, açık metin repository tablosunda tutulmaz.","Processing uses neither network nor cloud; source bytes are not exposed to the renderer, and plaintext is not stored in a repository table.")}</span>
-        <span>{text('Çalışma ayrı ve kotalı bir child process içindedir; düşük ayrıcalıklı sandbox doğrulanmış değildir.','Processing runs in a separate quota-limited child process; a low-privilege sandbox has not been verified.')}</span>
-        <span>{text('PDF rasterizer ve kötü amaçlı yazılım sağlayıcısı yoksa işlem fail-closed reddedilir. Kaynak dosya imhasından sonra türetilmiş sonuç temizliği kalıcı iş günlüğünden otomatik ve aynı işlem kimliğiyle sürdürülür.','Processing fails closed when no PDF rasterizer or malware provider is available. After source-file destruction, derived-result cleanup resumes automatically from the durable job ledger with the same operation identifier.')}</span>
+        <span>{text('Metin tanıma bu bilgisayarda yapılır. Kaynak dosya içeriği bu ekrana taşınmaz ve tanınan açık metin kalıcı aile kayıtlarına eklenmez.','Text recognition runs on this computer. Source-file contents are not brought into this screen, and recognized plaintext is not added to permanent family records.')}</span>
+        <span>{text('İşlem ayrı ve kotalı bir çalışma alanında yürütülür; işletim sistemi düzeyindeki ek yalıtım doğrulanmamıştır.','Processing runs in a separate quota-limited workspace; additional operating-system isolation has not been verified.')}</span>
+        <span>{text('PDF hazırlama veya güvenlik taraması kullanılamıyorsa işlem güvenle durdurulur. Kaynak dosya silindiğinde ondan üretilen sonuçların temizliği de otomatik olarak sürdürülür.','Processing stops safely if PDF preparation or security scanning is unavailable. When the source file is deleted, cleanup of results derived from it also continues automatically.')}</span>
         <span>{text("Sıradaki veya çalışan iş iptal edilebilir; çalışan işte istek yerel worker'a iletilir ve kalıcı sonuç transactionı Cancel commit'inden sonra tamamlanır. Türetilmiş sonucu silmek kaynak belgeyi silmez.","A queued or running job can be canceled; for a running job, the request is sent to the local worker and the durable result transaction completes after the Cancel commit. Deleting a derived result does not delete the source document.")}</span>
-        <span>{text('Tam metin dizini sonuçla birlikte şifreli kasada tutulur; her aday için taze yetki ve izin denetimi yapılır, renderer yalnız maskelenmiş kısa parçaları görür.','The full-text index is kept with the result in the encrypted vault; fresh authorization and consent checks are performed for every candidate, and the renderer sees only short masked snippets.')}</span>
+        <span>{text('Tam metin dizini sonuçla birlikte şifreli alanda tutulur; her sonuç için yetki ve izin yeniden denetlenir, ekranda yalnız maskelenmiş kısa parçalar gösterilir.','The full-text index is stored with the result in the encrypted area; authorization and consent are checked again for each result, and only short masked snippets appear on screen.')}</span>
       </div>
 
       <form className="local-ocr-search" onSubmit={(event) => { event.preventDefault(); void search(); }}>
-        <label htmlFor="local-ocr-search-query">{text('OCR sonuçlarında güvenli ara','Search OCR results securely')}
+        <label htmlFor="local-ocr-search-query">{text('Metin tanıma sonuçlarında güvenli ara','Search text-recognition results securely')}
           <input id="local-ocr-search-query" value={searchQuery} maxLength={80}
             onChange={(event) => { setSearchQuery(event.target.value); setSearchResult(undefined); }}
             placeholder={text('En az iki karakter','At least two characters')} autoComplete="off" />
@@ -274,13 +275,13 @@ export function LocalGovernedOcrPanel({ selectedSource }: LocalGovernedOcrPanelP
         <Button type="submit" disabled={Boolean(busyKey) || searchQuery !== searchQuery.trim() || searchQuery.length < 2}>
           {busyKey === 'search' ? text('Yetkiler denetleniyor…','Checking authorization…') : text('Şifreli dizinde ara','Search encrypted index')}
         </Button>
-        <small>{text('Sorgu veya dizin renderer sonucunda yankılanmaz; e-posta, IBAN ve uzun sayı dizileri sorgu olarak reddedilir.','The query and index are not echoed in renderer results; email addresses, IBANs, and long number sequences are rejected as queries.')}</small>
+        <small>{text('Arama sözü ve tam dizin sonuç ekranında tekrarlanmaz; e-posta, IBAN ve uzun sayı dizileri arama olarak reddedilir.','The search text and full index are not repeated on the results screen; email addresses, IBANs, and long number sequences are rejected as searches.')}</small>
         {searchResult && <div className="local-ocr-search-results" aria-live="polite">
           <strong>{searchResult.matches.length ? `${searchResult.matches.length} ${text('yetkili eşleşme','authorized matches')}` : text('Yetkili eşleşme bulunamadı','No authorized matches found')}</strong>
           {searchResult.matches.map((match) => <button type="button" key={`${match.jobId}:${match.revision}`}
             onClick={() => setSelectedJobId(match.jobId)}>
             <span>{match.snippet}</span>
-            <small>{match.pageNumber ? `${text('Sayfa','Page')} ${match.pageNumber} · ` : ''}{match.corrected ? text('Düzeltilmiş sonuç','Corrected result') : text('Yerel sağlayıcı sonucu','Local provider result')}</small>
+            <small>{match.pageNumber ? `${text('Sayfa','Page')} ${match.pageNumber} · ` : ''}{match.corrected ? text('Düzeltilmiş sonuç','Corrected result') : text('Yerel metin tanıma sonucu','Local text-recognition result')}</small>
           </button>)}
           {searchResult.truncated && <small>{text('Sonuçlar güvenli üst sınırda kesildi.','Results were truncated at the safe upper limit.')}</small>}
         </div>}
@@ -290,20 +291,20 @@ export function LocalGovernedOcrPanel({ selectedSource }: LocalGovernedOcrPanelP
         <div>
           <small>{text('Seçili arşiv belgesi','Selected archive document')}</small>
           <strong>{selectedSource?.title ?? text('Belge seçilmedi','No document selected')}</strong>
-          <span>{selectedSource ? `${selectedSource.originalName} · ${selectedSource.mimeType} · ${(selectedSource.sizeBytes / 1_024).toFixed(1)} KB` : text('OCR işi oluşturmak için listeden bir belge seçin.','Choose a document in the list to create an OCR job.')}</span>
+          <span>{selectedSource ? `${selectedSource.originalName} · ${selectedSource.mimeType} · ${(selectedSource.sizeBytes / 1_024).toFixed(1)} KB` : text('Metin tanıma işi oluşturmak için listeden bir belge seçin.','Choose a document in the list to create a text-recognition job.')}</span>
         </div>
         <label>{text('Dil ipuçları','Language hints')}
           <input value={languageInput} onChange={(event) => setLanguageInput(event.target.value)} aria-invalid={!languagesValid} placeholder="tr-TR, en-US" />
         </label>
         <Button tone="primary" disabled={Boolean(busyKey) || !center.settings.enabled || !sourceSupported || !languagesValid} onClick={() => void create()}>
-          {busyKey.startsWith('create:') ? text('Sıraya alınıyor…','Queuing…') : text('Seçili belge için OCR işi oluştur','Create OCR job for selected document')}
+          {busyKey.startsWith('create:') ? text('Sıraya alınıyor…','Queuing…') : text('Seçili belge için metin tanıma işi oluştur','Create a text-recognition job for the selected document')}
         </Button>
       </div>
       {selectedSource && !sourceSupported && <small className="form-error">{text('Gerçek yerel sağlayıcı şu anda yalnız 16 MiB veya daha küçük PNG/JPEG kaynaklarını kabul eder; PDF desteklenmez.','The real local provider currently accepts only PNG/JPEG sources of 16 MiB or less; PDF is not supported.')}</small>}
 
       {center.jobs.length ? (
         <div className="local-ocr-workspace">
-          <label>{text('OCR işi','OCR job')}
+          <label>{text('Metin tanıma işi','Text-recognition job')}
             <select value={selectedJobId} onChange={(event) => setSelectedJobId(event.target.value)}>
               {center.jobs.map((item) => <option key={item.id} value={item.id}>{statusLabels[item.status]} · {item.source.resourceId}</option>)}
             </select>
@@ -321,7 +322,7 @@ export function LocalGovernedOcrPanel({ selectedSource }: LocalGovernedOcrPanelP
             </div>
             {selectedJob.failureCode && <StatusMessage tone="warning">{failureLabels[selectedJob.failureCode]}</StatusMessage>}
             <div className="button-row">
-              <Button tone="primary" disabled={Boolean(busyKey) || selectedJob.status !== 'queued'} onClick={() => void run()}>{text("Yerel OCR'ı çalıştır",'Run local OCR')}</Button>
+              <Button tone="primary" disabled={Boolean(busyKey) || selectedJob.status !== 'queued'} onClick={() => void run()}>{text('Yerel metin tanımayı çalıştır','Run local text recognition')}</Button>
               <Button disabled={Boolean(busyKey) || !['queued', 'running'].includes(selectedJob.status)} onClick={() => void cancel()}>
                 {selectedJob.status === 'running' ? text('Çalışan işi iptal et','Cancel running job') : text('Sıradaki işi iptal et','Cancel queued job')}
               </Button>
@@ -331,12 +332,12 @@ export function LocalGovernedOcrPanel({ selectedSource }: LocalGovernedOcrPanelP
             </div>
             {result && result.jobId === selectedJob.id && <div className="local-ocr-result">
               <div><strong>{text('Şifreli kasadan açılan sonuç','Result opened from encrypted vault')}</strong><span>{result.corrected ? text('Düzeltilmiş sürüm','Corrected revision') : text('Yerel sağlayıcı çıktısı','Local provider output')} · {text('ağ yok · bulut yok','no network · no cloud')}</span></div>
-              <textarea aria-label={text('OCR sonucu düzeltme metni','OCR result correction text')} value={correctedText} maxLength={250_000} onChange={(event) => setCorrectedText(event.target.value)} />
+              <textarea aria-label={text('Metin tanıma sonucu düzeltme alanı','Text-recognition result correction field')} value={correctedText} maxLength={250_000} onChange={(event) => setCorrectedText(event.target.value)} />
               <Button disabled={Boolean(busyKey) || correctedText.length < 1 || correctedText === result.text} onClick={() => void correct()}>{text('Düzeltmeyi yeni sürüm olarak kaydet','Save correction as new revision')}</Button>
             </div>}
           </article>}
         </div>
-      ) : <EmptyState title={text('OCR işi yok','No OCR jobs')} body={text('Desteklenen bir arşiv belgesi seçip merkezi yetki denetiminden geçen ilk işi oluşturun.','Select a supported archive document and create the first job authorized by the centralized policy check.')} />}
+      ) : <EmptyState title={text('Metin tanıma işi yok','No text-recognition jobs')} body={text('Desteklenen bir arşiv belgesi seçip yetki denetiminden geçen ilk işi oluşturun.','Select a supported archive document and create the first job that passes authorization.')} />}
     </section>
   );
 }

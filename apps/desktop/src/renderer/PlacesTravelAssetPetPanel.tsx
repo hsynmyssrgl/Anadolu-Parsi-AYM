@@ -6,13 +6,30 @@ import type {
   PlacesTravelCenterView,
   PlacesTravelItemView,
   PlacesTravelKind,
+  PlacesTravelStatus,
+  SupportedUiLanguage,
   PlacesTravelVisibility
 } from '@ppt/domain';
 import { Button, EmptyState, SectionHeader, StatusMessage, Surface } from './ui';
 import { selectUiCopy, useLocalization } from './localization';
+import { toUserFacingErrorMessage } from './user-facing-error';
 
 const iso=(value:string):string|undefined=>value?new Date(value).toISOString():undefined;
 type UiText=(turkish:string,english:string)=>string;
+const placesTravelStatusCopy:Readonly<Record<PlacesTravelStatus,readonly [turkish:string,english:string]>>={
+  planned:['Planlandı','Planned'],active:['Etkin','Active'],completed:['Tamamlandı','Completed'],
+  cancelled:['İptal edildi','Canceled'],expired:['Süresi doldu','Expired'],settled:['Hesap kapatıldı','Settled'],deleted:['Silindi','Deleted']
+};
+export const placesTravelStatusLabel=(status:PlacesTravelStatus,language:SupportedUiLanguage):string=>{
+  const [turkish,english]=placesTravelStatusCopy[status];return selectUiCopy(language,turkish,english);
+};
+const petWorkflowLabel=(value:NonNullable<PlacesTravelItemView['petWorkflow']>,text:UiText):string=>({
+  vaccination:text('Aşı','Vaccination'),veterinary:text('Veteriner','Veterinary'),microchip:text('Mikroçip','Microchip'),
+  food:text('Mama','Food'),insurance:text('Sigorta','Insurance'),travel_document:text('Seyahat belgesi','Travel document')
+})[value];
+const requirementKindLabel=(value:NonNullable<PlacesTravelItemView['requirementKind']>,text:UiText):string=>({
+  health:text('Sağlık','Health'),medication:text('İlaç','Medication'),child:text('Çocuk','Child'),pet:text('Evcil hayvan','Pet')
+})[value];
 const itemSummary=(item:PlacesTravelItemView,text:UiText):string=>{
   const details:string[]=[];
   if(item.offlineFallbackLabel||item.addressLabel)details.push(item.offlineFallbackLabel??item.addressLabel!);
@@ -22,8 +39,8 @@ const itemSummary=(item:PlacesTravelItemView,text:UiText):string=>{
   if(item.participantPersonIds)details.push(String(item.participantPersonIds.length)+' '+text('katılımcı','participants'));
   if(item.amountMinor!==undefined&&item.currency)details.push((item.amountMinor/100).toFixed(2)+' '+item.currency);
   if(item.checklistLabel)details.push((item.checklistCompleted?text('Tamamlandı','Completed'):text('Bekliyor','Pending'))+' · '+item.checklistLabel);
-  if(item.petWorkflow)details.push(text('Evcil hayvan akışı','Pet workflow')+': '+item.petWorkflow);
-  if(item.requirementKind)details.push(text('Gereksinim','Requirement')+': '+item.requirementKind);
+  if(item.petWorkflow)details.push(text('Evcil hayvan akışı','Pet workflow')+': '+petWorkflowLabel(item.petWorkflow,text));
+  if(item.requirementKind)details.push(text('Gereksinim','Requirement')+': '+requirementKindLabel(item.requirementKind,text));
   if(item.languageCode)details.push(text('Dil','Language')+': '+item.languageCode);
   if(item.providerLabel)details.push(text('Sağlayıcı etiketi','Provider label')+': '+item.providerLabel);
   const summary=details.join(' · ');
@@ -72,7 +89,7 @@ export function PlacesTravelAssetPetPanel({people}:{readonly people:readonly Fam
 
   const reload=async(personId=ownerPersonId)=>{if(!window.pardus||!personId){setCenter(undefined);return;}setLoading(true);
     try{setCenter(await window.pardus.getPlacesTravelCenter({ownerPersonId:personId}));setMessage('');}
-    catch(error){setCenter(undefined);setTone('danger');setMessage(error instanceof Error?error.message:text('Yer ve seyahat merkezi yüklenemedi.','Places and travel center could not be loaded.'));}
+    catch(error){setCenter(undefined);setTone('danger');setMessage(toUserFacingErrorMessage(error,text('Yer ve seyahat merkezi yüklenemedi.','Places and travel center could not be loaded.')));}
     finally{setLoading(false);}};
   useEffect(()=>{setParticipants((current)=>current.includes(ownerPersonId)?current:[ownerPersonId]);void reload();},[ownerPersonId]);
   const items=useMemo(()=>center?.items.filter((item)=>item.area===area&&item.status!=='deleted')??[],[area,center]);
@@ -114,19 +131,19 @@ export function PlacesTravelAssetPetPanel({people}:{readonly people:readonly Fam
       clientOperationId:'places-travel:'+crypto.randomUUID(),itemId:'places-travel-item:'+crypto.randomUUID()};
     setBusy(true);setMessage('');try{await window.pardus.createPlacesTravelItem({...command,...pendingCreate.current} as CreatePlacesTravelItemInput);
       pendingCreate.current=undefined;setTitle('');setNote('');await reload();setTone('success');setMessage(text('Kayıt yalnız bu cihazda oluşturuldu.','The record was created on this device only.'));}
-    catch(error){setTone('danger');setMessage((error instanceof Error?error.message:text('Kayıt oluşturulamadı.','The record could not be created.'))+' '+text('Değişiklik yapmazsanız aynı işlem kimliğiyle yeniden deneyebilirsiniz.','If you make no changes, you can retry with the same operation identifier.'));}
+    catch(error){setTone('danger');setMessage(toUserFacingErrorMessage(error,text('Kayıt oluşturulamadı.','The record could not be created.'))+' '+text('Değişiklik yapmazsanız aynı işlem kimliğiyle yeniden deneyebilirsiniz.','If you make no changes, you can retry with the same operation identifier.'));}
     finally{setBusy(false);}};
   const identity=(key:string,item:PlacesTravelItemView,fingerprint:string)=>{const current=pendingMutations.current.get(key);
     if(current?.fingerprint===fingerprint)return current;const next={fingerprint,clientOperationId:'places-travel:'+crypto.randomUUID(),expectedRevision:item.revision};
     pendingMutations.current.set(key,next);return next;};
   const complete=async(item:PlacesTravelItemView)=>{if(!window.pardus||busy)return;const key='update:'+item.id;const op=identity(key,item,'completed');setBusy(true);
     try{await window.pardus.updatePlacesTravelItem({...op,itemId:item.id,ownerPersonId:item.ownerPersonId,status:'completed'});pendingMutations.current.delete(key);await reload();setTone('success');setMessage(text('Durum yerel olarak güncellendi.','The state was updated locally.'));}
-    catch(error){setTone('danger');setMessage((error instanceof Error?error.message:text('Güncellenemedi.','The record could not be updated.'))+' '+text('Aynı işlem kimliğiyle yeniden deneyebilirsiniz.','You can retry with the same operation identifier.'));}finally{setBusy(false);}};
+    catch(error){setTone('danger');setMessage(toUserFacingErrorMessage(error,text('Güncellenemedi.','The record could not be updated.'))+' '+text('Aynı işlem kimliğiyle yeniden deneyebilirsiniz.','You can retry with the same operation identifier.'));}finally{setBusy(false);}};
   const remove=async(item:PlacesTravelItemView)=>{if(!window.pardus||busy)return;const reason=text('Kullanıcı yer/seyahat kaydını yerel merkezden kaldırdı.','The user removed the places/travel record from the local center.');const key='delete:'+item.id;const op=identity(key,item,reason);setBusy(true);
     try{await window.pardus.deletePlacesTravelItem({...op,itemId:item.id,ownerPersonId:item.ownerPersonId,reason});pendingMutations.current.delete(key);await reload();setTone('success');setMessage(text('Kayıt yerel olarak silindi.','The record was deleted locally.'));}
-    catch(error){setTone('danger');setMessage((error instanceof Error?error.message:text('Silinemedi.','The record could not be deleted.'))+' '+text('Aynı işlem kimliğiyle yeniden deneyebilirsiniz.','You can retry with the same operation identifier.'));}finally{setBusy(false);}};
+    catch(error){setTone('danger');setMessage(toUserFacingErrorMessage(error,text('Silinemedi.','The record could not be deleted.'))+' '+text('Aynı işlem kimliğiyle yeniden deneyebilirsiniz.','You can retry with the same operation identifier.'));}finally{setBusy(false);}};
 
-  return <Surface className="child-education-panel places-travel-panel"><SectionHeader eyebrow={text('33-V · yerel yer, varlık, evcil hayvan ve seyahat','33-V · local places, assets, pets and travel')} title={text('Yer ve seyahat merkezi','Places and travel center')}/>
+  return <Surface className="child-education-panel places-travel-panel"><SectionHeader eyebrow={text('Yerel yer, varlık, evcil hayvan ve seyahat','Local places, assets, pets and travel')} title={text('Yer ve seyahat merkezi','Places and travel center')}/>
     <div className="child-education-truth" role="note"><strong>{text('Harita, rezervasyon, ödeme, belge doğrulama, canlı takip veya dış paylaşım yapılmaz.','Maps, reservations, payments, document verification, live tracking and external sharing are not performed.')}</strong>
       <span>{text('Koordinat/adres geri dönüşü ve paketler yalnız yereldir. OCR kimliği sadece öneri referansıdır; sonuç otomatik kabul edilmez. Evcil hayvan kaydı sağlık tavsiyesi değildir.','Coordinate/address fallback and packs are local only. An OCR identifier is a suggestion reference only; results are never accepted automatically. A pet record is not health advice.')}</span></div>
     {activePeople.length===0?<EmptyState title={text('Etkin kişi bulunamadı','No active person found')} body={text('Yerel kayıt sahibi için etkin aile kişisi gerekir.','A local record owner requires an active family person.')}/>:<>
@@ -153,7 +170,7 @@ export function PlacesTravelAssetPetPanel({people}:{readonly people:readonly Fam
         <label className="span-2">{text('Not','Note')}<input value={note} onChange={(event)=>setNote(event.target.value)} maxLength={1000}/></label>
       </div><Button tone="primary" onClick={()=>void create()} disabled={!ready||busy}>{busy?text('Kaydediliyor…','Saving…'):text('Yerel kayıt oluştur','Create local record')}</Button></section>
       <section className="child-education-list" aria-live="polite"><div className="child-education-list-heading"><h3>{areas.find((entry)=>entry.value===area)?.label}</h3><Button onClick={()=>void reload()} disabled={loading||busy}>{loading?text('Yükleniyor…','Loading…'):text('Yenile','Refresh')}</Button></div>
-        {message&&<StatusMessage tone={tone}>{message}</StatusMessage>}{!loading&&items.length===0?<EmptyState title={text('Bu alanda kayıt yok','No records in this area')} body={text('Soldaki formdan yalnız yerel bir kayıt ekleyin.','Add a local-only record with the form on the left.')}/>:<div className="stack-list">{items.map((item)=><div className="child-education-row" key={item.id}><div><strong>{item.title}</strong><small>{kindLabel.get(item.kind)} · {item.status} · {text('revizyon','revision')} {item.revision}</small><small>{itemSummary(item,text)}</small></div><div className="child-education-actions"><Button onClick={()=>void complete(item)} disabled={busy||item.status==='completed'}>{text('Tamamla','Complete')}</Button><Button tone="danger" onClick={()=>void remove(item)} disabled={busy}>{text('Sil','Delete')}</Button></div></div>)}</div>}
+        {message&&<StatusMessage tone={tone}>{message}</StatusMessage>}{!loading&&items.length===0?<EmptyState title={text('Bu alanda kayıt yok','No records in this area')} body={text('Soldaki formdan yalnız yerel bir kayıt ekleyin.','Add a local-only record with the form on the left.')}/>:<div className="stack-list">{items.map((item)=><div className="child-education-row" key={item.id}><div><strong>{item.title}</strong><small>{kindLabel.get(item.kind)} · {placesTravelStatusLabel(item.status,language)} · {text('revizyon','revision')} {item.revision}</small><small>{itemSummary(item,text)}</small></div><div className="child-education-actions"><Button onClick={()=>void complete(item)} disabled={busy||item.status==='completed'}>{text('Tamamla','Complete')}</Button><Button tone="danger" onClick={()=>void remove(item)} disabled={busy}>{text('Sil','Delete')}</Button></div></div>)}</div>}
       </section></div></>}
   </Surface>;
 }

@@ -179,9 +179,13 @@ export class VolatileSqliteSession {
     this.assertOpen();
     const snapshotPath = join(this.stagingDirectory, `snapshot-${randomUUID()}.sqlite`);
     try {
+      const snapshotDescriptor = openSync(snapshotPath, 'wx', 0o600);
+      closeSync(snapshotDescriptor);
+      if (process.platform === 'win32') {
+        protectWindowsPathWithEfs(snapshotPath, 'Windows EFS SQLite snapshot placeholder');
+      }
       this.nativeDatabase.exec(`VACUUM main INTO ${quoteSqlLiteral(snapshotPath)};`);
       if (process.platform === 'win32') {
-        protectWindowsPathWithEfs(snapshotPath, 'Windows EFS SQLite snapshot');
         assertWindowsEfsEncrypted(snapshotPath, 'Windows EFS SQLite snapshot');
         assertWindowsEfsTreeEncrypted(this.stagingDirectory, 'Windows EFS snapshot staging tree');
       }

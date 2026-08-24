@@ -30,3 +30,7 @@ PPK-021 güncel ratchet’i 568 dosya / 889 yüzey / `3a297f74d43d4675090a709d43
 ## Sonuç
 
 33-R `PLANNED / LOCAL_IMPLEMENTATION_STARTED` olarak kalır. Teknik kaynak zinciri bir sonraki kapanış adımına hazırdır; `countsAsRequirementPass=false` gerçeği dış/manual kanıtlar ve öncül yönetişim kapanışları tamamlanana kadar korunur.
+
+## 24.08.2026 değişiklik-etki doğrulaması
+
+PR-235 kapsamında güncel kullanıcı dili ve renderer sözleşmesi bu karara yeniden bağlandı; 52/52 sınır-sözleşme-çalışma zamanı zinciri PASS oldu. Bu kayıt dış/manual kanıtları kapatmaz ve `countsAsRequirementPass=false` sınırını değiştirmez.

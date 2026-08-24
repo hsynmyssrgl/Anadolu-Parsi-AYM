@@ -51,7 +51,7 @@ const checks=[
     &&has(content.global,['FamilyMeetingCenterIpcView','finalizeFamilyMeetingMinutes'])],
   ['renderer reuses Life center and every safe bridge',has(content.panel,['FamilyMeetingPanel','createFamilyMeeting',
     'castFamilyMeetingVote','recordFamilyMeetingDecision','prepareFamilyMeetingAiMinutes','finalizeFamilyMeetingMinutes'])
-    &&has(content.app,['<FamilyMeetingPanel people={snapshot.people}/>'])],
+    &&has(content.app,['<FamilyMeetingPanel people={people}/>'])],
   ['documents preserve fail-honest residuals',has(content.decision,['countsAsRequirementPass=false','Production AI provider','NOT_RUN'])
     &&has(content.threat,['Plaintext sızıntısı','Sahte AI başarısı','Kalıcı kota DoS'])],
   ['targeted package command is exact',pkg.scripts?.['verify:34-f:targeted']===

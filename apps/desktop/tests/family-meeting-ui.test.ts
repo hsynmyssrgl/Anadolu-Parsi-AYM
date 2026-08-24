@@ -39,9 +39,10 @@ describe('34-F family meeting renderer surface',()=>{
   it('requires human approval and states local encryption and provider truth without claims',()=>{
     for(const marker of ['İnsan onaylı şifreli tutanak','Tutanağı okudum; insan onayıyla mühürlemeyi açıkça kabul ediyorum.',
       'Şifrele ve mühürle','Tutanak yalnız katılımcılara açık ayrı bir yerel kasada şifrelenir.',
-      'üretim AI sağlayıcısı yapılandırılmadığından varsayılan yol fail-closed kalır',
+      'canlı hizmet yapılandırılmadığında özellik güvenli biçimde kapalı kalır',
       'Takvim daveti, harici hatırlatma, uzaktan ortak çalışma, ağ veya bulut aktarımı yapılmaz',
-      'Transkript renderer’a alınmaz'])expect(panel).toContain(marker);
+      'Konuşma dökümü ekrana aktarılmaz'])expect(panel).toContain(marker);
+    for(const technical of ['Rızalı AI tutanak önerisi','yerel metadata','fail-closed','Transkript renderer'])expect(panel).not.toContain(technical);
     expect(panel).toContain('explicitHumanApproval:true as const');
     expect(panel).toContain('machineGeneratedSource:selected.minutes.aiSuggestionGenerated');
     for(const forbidden of ['sealedPayloadReference','payloadSha256','ledgerReference','providerEvidenceSha256','filePath'])

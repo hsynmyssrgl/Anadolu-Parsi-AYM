@@ -31,7 +31,8 @@ describe('32-W B0-03/B0-04 desktop product surface integration', () => {
   });
 
   it('renders the verified counts and classifies the exact current 14 API set', () => {
-    expect(app).toContain('B0-03 / B0-04 · ürün yüzeyi gerçeklik kapısı');
+    expect(app).toContain('eyebrow="Ürün yüzeyi gerçeklik kapısı"');
+    expect(app).not.toContain('B0-03 / B0-04 · ürün yüzeyi gerçeklik kapısı');
     expect(app).toContain('getProductSurfaceGovernance()');
     expect(app).toContain('setProductSurfaceGovernance(');
     expect(inventory.unusedRendererApis).toHaveLength(14);

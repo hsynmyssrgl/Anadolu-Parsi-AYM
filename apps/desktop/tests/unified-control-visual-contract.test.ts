@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 const app = readFileSync(new URL('../src/renderer/App.tsx', import.meta.url), 'utf8');
 const styles = readFileSync(new URL('../src/renderer/styles.css', import.meta.url), 'utf8');
+const main = readFileSync(new URL('../src/main/main.ts', import.meta.url), 'utf8');
 
 describe('unified rounded control visual contract', () => {
   it('uses one scalable radius language across fields, actions, surfaces and dialogs', () => {
@@ -52,8 +53,53 @@ describe('unified rounded control visual contract', () => {
     expect(styles).toContain('font-size:var(--font-size-subheadline)!important;');
     expect(styles).toContain('grid-template-columns:minmax(170px,1fr) max-content max-content;');
     expect(styles).toContain('.app-shell .help-trigger>span,.app-shell .help-trigger kbd { flex:0 0 auto;white-space:nowrap; }');
+    expect(styles).toContain('.sidebar nav { display:block; min-height:0; flex:1 1 auto; scrollbar-width:thin; }');
+    expect(styles).toContain('.sidebar-footer { flex:0 0 auto; }');
+    expect(styles).toContain('body {\n  min-width:0;\n  min-height:0;');
     expect(styles).toContain('.app-shell :is(.profile-popover>button,.command-results>button,.notification-row>button:first-child) {');
     expect(styles).toContain('@media(max-width:1600px)');
     expect(styles).toContain('@media(max-width:800px)');
+  });
+
+  it('collapses family and important grids before the packaged 900px window becomes cramped', () => {
+    expect(styles).toMatch(
+      /@media \(max-width: 1280px\) \{[\s\S]*?\.app-shell :is\(\.family-layout, \.important-layout\) \{\s*grid-template-columns: minmax\(0, 1fr\);\s*\}/u
+    );
+    expect(styles.indexOf('.app-shell :is(.family-layout, .important-layout)')).toBeGreaterThan(
+      styles.indexOf('.important-layout { display: grid;')
+    );
+  });
+
+  it('binds the real desktop minimum to the responsive 760x720 contract', () => {
+    const restrictiveBodyIndex = styles.indexOf('body { margin: 0; min-width: 1180px; min-height: 760px;');
+    const flexibleBodyIndex = styles.lastIndexOf('body {\n  min-width:0;\n  min-height:0;');
+    const compactAppShellIndex = styles.indexOf('@media (max-width: 800px) {');
+    const compactHeightIndex = styles.lastIndexOf('@media(max-height:760px) {');
+    const compactWidthIndex = styles.lastIndexOf('@media(max-width:760px) {');
+
+    expect(styles).toContain('.app-shell {\n  max-width: 100%;\n  overflow-x: clip;\n}');
+    expect(main).toContain('minWidth: 760');
+    expect(main).toContain('minHeight: 720');
+    expect(styles).toContain(
+      '.app-shell :is(main, section, article, aside, header, footer, div, form, fieldset) {\n  min-width: 0;\n}'
+    );
+    expect(styles).toContain('.main-area { min-width: 0; min-height: 0; display: grid; grid-template-rows: 58px 1fr; }');
+    expect(styles).toContain('.page-content { min-height: 0; overflow: auto; padding: 24px 28px 34px; }');
+    expect(styles).toMatch(
+      /@media \(max-width: 800px\) \{\s*\.app-shell \{ grid-template-columns: minmax\(0, 1fr\); \}\s*\.app-shell \.sidebar \{ position: relative; width: 100%; max-height: none; \}/u
+    );
+    expect(styles).toMatch(
+      /\.desktop-window-content \{\s*height:calc\(100vh - 42px\);\s*min-width:0;\s*min-height:0;\s*overflow:hidden;\s*\}[\s\S]*?\.desktop-window-content>\.first-run-shell,\s*\.desktop-window-content>\.first-run-security-shell \{ overflow:auto; \}/u
+    );
+    expect(styles).toMatch(
+      /@media\(max-height:760px\) \{[\s\S]*?\.auth-entry \{ align-content:start;padding-block:18px; \}[\s\S]*?\.auth-fields input,\.auth-form>\.button \{ height:48px; \}\s*\}/u
+    );
+    expect(styles).toMatch(
+      /@media\(max-width:760px\) \{\s*\.desktop-titlebar span \{ display:none; \}\s*\.auth-shell \{ grid-template-columns:1fr;overflow:auto; \}\s*\.auth-story \{ min-height:420px; \}\s*\.auth-entry \{ overflow:visible; \}\s*\}/u
+    );
+    expect(flexibleBodyIndex).toBeGreaterThan(restrictiveBodyIndex);
+    expect(compactAppShellIndex).toBeGreaterThan(styles.indexOf('.app-shell { height: 100vh;'));
+    expect(compactHeightIndex).toBeGreaterThan(styles.indexOf('.auth-shell {\n  grid-template-columns:minmax(340px,.98fr)'));
+    expect(compactWidthIndex).toBeGreaterThan(compactHeightIndex);
   });
 });

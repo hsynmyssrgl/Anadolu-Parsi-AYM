@@ -19,3 +19,7 @@ Uygulanan yüzey yerel aday manifest doğrulaması, minimum-host ve kapasite kap
 ## Yerel kanıt
 
 Migration 104 `signed_plugin_external_provider_platform` SHA-256 değeri `6380b0fde34fd54d9743d234ad7915f4ddd81564a90681164596e77691f9edf5` ile doğrulanır. Altı hedef dosyada 30 test geçer. Güncel ratchet altında PPK-015 568 dosya / `8ef8bf331b1c484c595c2639b9da313d8ae6e0cd5e8751fa921bef2fdcccee64` ve sıfır bulgu; PPK-021 568 dosya / 889 exact yüzey / `3a297f74d43d4675090a709d4359af9245c2971a7fc338afef2fb87b1c8608dd`; PPK-022 568 dosya / 428 exact yüzey / `1bf21d23c862afbccb9611083c093f9ced703adadf7a170c29f53479d21397b1` yerel teknik kanıttır. Bunlar production code-signing, eklenti yürütme, sağlayıcı bağlantısı veya requirement kapanışı değildir.
+
+## 24.08.2026 değişiklik-etki doğrulaması
+
+PR-235 kapsamında güncel kullanıcı dili ve renderer sözleşmesi bu karara yeniden bağlandı; 52/52 sınır-sözleşme-çalışma zamanı zinciri PASS oldu. Bu kayıt dış/manual kanıtları kapatmaz ve `countsAsRequirementPass=false` sınırını değiştirmez.

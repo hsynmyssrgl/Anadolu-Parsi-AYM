@@ -41,9 +41,9 @@
     "targetedTestFiles": 6,
     "targetedTests": 34,
     "migration111Sha256": "7d87d405a85196a2f76a765899adf7b734858f7dc2b1715c59577d0048838700",
-    "ppk015": {"status":"PASS","scannedFiles":588,"sourceInventorySha256":"e83ccc2f1c9eaec4848ce47135f666c17cad167e51c7d678006ab93972c34a21"},
-    "ppk021": {"status":"PASS","scannedFiles":588,"exactSurfaces":895,"sha256":"fad3ceeb9485bffc9d6f9878f7bb486f56a73b4aa5d045580471c70a49e59da6"},
-    "ppk022": {"status":"PASS","scannedFiles":588,"exactSurfaces":447,"sha256":"2ac32190c1b40c455093841eb2456c06a168c9aaf519068a14f570705b8a177a"}
+    "ppk015": {"status":"PASS","scannedFiles":590,"sourceInventorySha256":"a739c17e51942946e2e6923d8ac7524630e36b56ec1078671eddf351b64e6f93"},
+    "ppk021": {"status":"PASS","scannedFiles":590,"exactSurfaces":897,"sha256":"9ea5b846e552e760fbd8dd5f8bee7fb83988ef19bb93e3bbd4ac0465c4b71205"},
+    "ppk022": {"status":"PASS","scannedFiles":590,"exactSurfaces":447,"sha256":"54061e189e7771868552efa869c69a75426f24e4edd846af1c62496c82f0e1d6"}
   },
   "manualEvidence": {"realE2eeTransferUat":"NOT_RUN","realMalwareScannerUat":"NOT_RUN","safePreviewUat":"NOT_RUN","remoteAssistanceUat":"NOT_RUN","sharePlayUat":"NOT_RUN","voiceExecutionUat":"NOT_RUN","accessibilityReview":"NOT_RUN","securityReview":"NOT_RUN","privacyRetentionReview":"NOT_RUN"},
   "persistentReceiptStatus": "NOT_RUN"

@@ -122,7 +122,7 @@ export const scanPolicyConformanceBoundary = async (root = process.cwd()) => {
     [MAIN, "system:getPolicyConformanceSuiteBoundary", 'MAIN_IPC_HANDLER_MISSING'],
     [PRELOAD, "system:getPolicyConformanceSuiteBoundary", 'PRELOAD_API_MISSING'],
     [GLOBAL, 'getPolicyConformanceSuiteBoundary()', 'RENDERER_GLOBAL_API_MISSING'],
-    [RENDERER, 'Native Apple çalıştırması tamamlandı iddiası yoktur', 'UI_DEPLOYMENT_TRUTH_MISSING'],
+    [RENDERER, 'Yerel Apple çalıştırması tamamlandı iddiası yoktur', 'UI_DEPLOYMENT_TRUTH_MISSING'],
     [IPC_POLICY, "case 'system:getPolicyConformanceSuiteBoundary':", 'IPC_ARGUMENT_POLICY_MISSING'],
     [IPC_CACHE, "'system:getPolicyConformanceSuiteBoundary'", 'IPC_NO_CACHE_MISSING']
   ];

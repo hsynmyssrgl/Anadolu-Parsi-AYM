@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import type { SmartHomeCameraConsentCenterItemView, SmartHomeEnergyCenterView } from '@ppt/domain';
 import { selectUiCopy, useLocalization } from './localization';
+import { toUserFacingErrorMessage } from './user-facing-error';
 
 const deviceLabels:Record<string,string>={matter_bridge:'Matter köprüsü',smoke_sensor:'Duman sensörü',
   carbon_monoxide_sensor:'CO sensörü',water_leak_sensor:'Su kaçağı sensörü',door_sensor:'Kapı sensörü',
@@ -26,8 +27,8 @@ export function SmartHomeEnergyPanel(){
   const reload=async()=>{if(!window.pardus)return;const next=await window.pardus.getSmartHomeEnergyCenter();
     setCenter(next);if(!deviceId){const first=next.devices.find(item=>['camera','doorbell'].includes(item.kind)&&item.status==='active');
       if(first)setDeviceId(first.id);}};
-  const refresh=async()=>{setError('');try{await reload();}catch(caught){setError(caught instanceof Error?caught.message:text('Akıllı ev merkezi yüklenemedi.','Smart home center could not be loaded.'));}};
-  useEffect(()=>{void reload().catch(caught=>setError(caught instanceof Error?caught.message:text('Akıllı ev merkezi yüklenemedi.','Smart home center could not be loaded.')));},[]);
+  const refresh=async()=>{setError('');try{await reload();}catch(caught){setError(toUserFacingErrorMessage(caught,text('Akıllı ev merkezi yüklenemedi.','Smart home center could not be loaded.')));}};
+  useEffect(()=>{void reload().catch(caught=>setError(toUserFacingErrorMessage(caught,text('Akıllı ev merkezi yüklenemedi.','Smart home center could not be loaded.'))));},[]);
   const cameras=useMemo(()=>center?.devices.filter(item=>['camera','doorbell'].includes(item.kind)&&item.status==='active')??[],[center]);
   const selectedCamera=useMemo(()=>cameras.find(item=>item.id===deviceId),[cameras,deviceId]);
   const activeConsents=useMemo(()=>center?.cameraConsents.filter(item=>item.effectiveStatus==='active')??[],[center]);
@@ -35,10 +36,8 @@ export function SmartHomeEnergyPanel(){
   const writesBlocked=center?.storageCapacity.mutations.limitReached===true;
   const mutate=async(key:string,run:(clientOperationId:string)=>Promise<unknown>,fixedClientOperationId?:string):Promise<boolean>=>{
     setBusy(true);setError('');try{await run(fixedClientOperationId??operation(key));
-    operationIds.current.delete(key);try{await reload();}catch(caught){setError(caught instanceof Error
-      ?`${text('İşlem kaydedildi; görünüm yenilenemedi:','The operation was saved; the view could not be refreshed:')} ${caught.message}`:text('İşlem kaydedildi; görünüm yenilenemedi.','The operation was saved; the view could not be refreshed.'));}return true;
-    }catch(caught){setError(caught instanceof Error?`${caught.message} ${text('Aynı işlem kimliğiyle yeniden deneyebilirsiniz.','You can retry with the same operation ID.')}`
-      :text('Akıllı ev işlemi tamamlanamadı; aynı işlem kimliğiyle yeniden deneyebilirsiniz.','The smart-home operation could not be completed; you can retry with the same operation ID.'));return false;}finally{setBusy(false);}};
+    operationIds.current.delete(key);try{await reload();}catch(caught){setError(`${text('İşlem kaydedildi; görünüm yenilenemedi:','The operation was saved; the view could not be refreshed:')} ${toUserFacingErrorMessage(caught,text('Lütfen yeniden deneyin.','Please try again.'))}`);}return true;
+    }catch(caught){setError(`${toUserFacingErrorMessage(caught,text('Akıllı ev işlemi tamamlanamadı.','The smart-home operation could not be completed.'))} ${text('Aynı işlem kimliğiyle yeniden deneyebilirsiniz.','You can retry with the same operation ID.')}`);return false;}finally{setBusy(false);}};
   const grant=async(event:FormEvent)=>{event.preventDefault();if(!window.pardus||!deviceId)return;
     if(!Number.isInteger(minutes)||minutes<5||minutes>60){setError(text('İzin süresi 5 ile 60 dakika arasında tam sayı olmalıdır.','Consent duration must be a whole number between 5 and 60 minutes.'));return;}
     if(purpose==='doorbell_answer'&&selectedCamera?.kind!=='doorbell'){setError(text('Kapı zilini yanıtlama amacı yalnız kapı zili cihazında kullanılabilir.','Doorbell answering may be used only with a doorbell device.'));return;}
@@ -55,26 +54,26 @@ export function SmartHomeEnergyPanel(){
     await mutate(`processing:${center.settings.revision}:${enabled}`,id=>window.pardus!.setSmartHomeProcessing({clientOperationId:id,
       expectedRevision:center.settings.revision,enabled,reason:enabled?'Kullanıcı yerel sensör metadatası işlemeyi açtı.':'Kullanıcı yerel işlemeyi kapattı.'}));};
   return <section className="smart-home-energy panel" aria-labelledby="smart-home-energy-title">
-    <div className="panel-heading"><div><span className="eyebrow">{text('Yerel ve güvenli kapalı','Local and fail-closed')}</span><h2 id="smart-home-energy-title">{text('Akıllı ev ve enerji','Smart home and energy')}</h2></div>
+    <div className="panel-heading"><div><span className="eyebrow">{text('Yerel ve güvenli biçimde kapalı','Local and safely restricted')}</span><h2 id="smart-home-energy-title">{text('Akıllı ev ve enerji','Smart home and energy')}</h2></div>
       <button type="button" onClick={()=>void refresh()} disabled={busy}>{text('Yenile','Refresh')}</button></div>
     <div className="smart-home-truth" role="note"><strong>{text('Gizli gözetim yasaktır.','Hidden surveillance is prohibited.')}</strong><span>{text('Ham kamera/ses saklanmaz; kamera ve kapı zili erişimi görünür, varsayılan kapalı ve en çok 60 dakikadır.','Raw camera/audio is not stored; camera and doorbell access is visible, off by default and limited to 60 minutes.')}</span>
-      <span>{text('Matter eşleme, canlı sağlayıcı bağlantısı, cihaz kontrolü, bulut ve haricî teslimat bu pakette yapılmadı.','Matter pairing, live provider connectivity, device control, cloud services and external delivery are not implemented in this package.')}</span></div>
+      <span>{text('Akıllı ev eşleme, canlı hizmet bağlantısı, cihaz kontrolü, bulut ve haricî teslimat bu sürümde kullanılmaz.','Smart-home pairing, live service connections, device control, cloud services, and external delivery are unavailable in this release.')}</span></div>
     {error&&<p className="status-message danger">{error}</p>}
     {!center?<p>{text('Yerel merkez yükleniyor…','Loading local center…')}</p>:<>
-      <div className="smart-home-summary"><span><strong>{center.devices.length}</strong> {text('cihaz metadatası','device metadata records')}</span>
+      <div className="smart-home-summary"><span><strong>{center.devices.length}</strong> {text('cihaz kaydı','device records')}</span>
         <span><strong>{center.observationTotal}</strong> {text('sensör/enerji gözlemi','sensor/energy observations')}</span><span><strong>{activeConsents.length}</strong> {text('etkin süreli izin','active time-bound consents')}</span>
         <button type="button" disabled={busy||writesBlocked} onClick={()=>void toggleProcessing()}>{center.settings.processingEnabled?text('Yerel işlemeyi kapat','Disable local processing'):text('Yerel işlemeyi aç','Enable local processing')}</button></div>
       <div className="smart-home-summary" aria-label={text('Akıllı ev güvenli yerel kapasitesi','Smart-home safe local capacity')}><span>{text('Cihaz','Device')}: {center.storageCapacity.devices.remaining}/{center.storageCapacity.devices.maximum}</span>
         <span>{text('Gözlem','Observation')}: {center.storageCapacity.observations.remaining}/{center.storageCapacity.observations.maximum}</span>
         <span>{text('İzin','Consent')}: {center.storageCapacity.cameraConsents.remaining}/{center.storageCapacity.cameraConsents.maximum}</span>
         <span>{text('İşlem','Operation')}: {center.storageCapacity.mutations.remaining}/{center.storageCapacity.mutations.maximum}</span></div>
-      {Object.values(center.storageCapacity).some(item=>item.limitReached)&&<p className="status-message danger">{text('Güvenli yerel kapasite sınırına ulaşılan türde yeni yazım fail‑closed kapatıldı; otomatik retention kurtarması uygulanmadı.','New writes for the type that reached its safe local capacity were disabled fail-closed; automatic retention recovery was not applied.')}</p>}
+      {Object.values(center.storageCapacity).some(item=>item.limitReached)&&<p className="status-message danger">{text('Güvenli yerel kapasite sınırına ulaşıldı; yeni kayıt güvenli biçimde durduruldu ve eski kayıtlar otomatik silinmedi.','The safe local capacity limit was reached; new records were safely stopped and older records were not deleted automatically.')}</p>}
       {center.observationsTruncated&&<p className="status-message warning">{text('Son 500 gözlem gösteriliyor; toplam sayı ayrıca korunur.','The latest 500 observations are shown; the total count is preserved separately.')}</p>}
       {center.cameraConsentsTruncated&&<p className="status-message warning">{text('Son 500 kamera izni gösteriliyor; toplam','The latest 500 camera consents are shown; a total of')} {center.cameraConsentTotal} {text('kayıt korunur.','records is preserved.')}</p>}
       <div className="smart-home-grid"><article aria-labelledby="smart-home-devices-title"><h3 id="smart-home-devices-title">{text('Cihaz envanteri','Device inventory')}</h3>
         {center.devices.length===0?<p>{text('İmzalı bir yerel adapter tarafından doğrulanmış cihaz yok.','No device has been verified by a signed local adapter.')}</p>:center.devices.map(device=><div className="smart-home-row" key={device.id}>
           <div><strong>{device.label}</strong><small>{deviceLabel(device.kind)}{device.room?` · ${device.room}`:''}</small>
-            <small>{text('Sağlayıcı','Provider')}: {device.providerId} · {text('Adapter','Adapter')}: {device.adapterId}</small></div><span>{device.status==='active'?text('Etkin','Active'):device.status==='offline'?text('Çevrimdışı','Offline'):text('Emekli','Retired')}</span></div>)}</article>
+            <small>{text('Bağlantı ayrıntıları yalnız yerel cihaz kaydında tutulur.','Connection details are kept only in the local device record.')}</small></div><span>{device.status==='active'?text('Etkin','Active'):device.status==='offline'?text('Çevrimdışı','Offline'):text('Kullanımdan kaldırıldı','Retired')}</span></div>)}</article>
         <article aria-labelledby="smart-home-observations-title"><h3 id="smart-home-observations-title">{text('Son yerel gözlemler','Recent local observations')}</h3>
           {center.observations.length===0?<p>{text('Gerçek sensör sağlayıcı verisi alınmadı.','No real sensor-provider data has been received.')}</p>:center.observations.slice(0,12).map(item=><div className="smart-home-row" key={item.id}>
             <div><strong>{observationLabel(item.kind)}</strong><small>{new Date(item.observedAt).toLocaleString(locale)}</small></div>

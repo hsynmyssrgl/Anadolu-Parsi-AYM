@@ -291,9 +291,12 @@ export const runApplicationSecurityProfileGate = async (root = process.cwd()) =>
 };
 
 if (process.argv[1] && resolve(process.argv[1]) === resolve('scripts/verify-application-security-profile-gate.mjs')) {
+  const noWrite = process.argv.includes('--no-write');
   const report = await runApplicationSecurityProfileGate();
-  await mkdir('artifacts/validation', { recursive: true });
-  await writeFile('artifacts/validation/application-security-profile-gate.json', `${JSON.stringify(report, null, 2)}\n`);
+  if (!noWrite) {
+    await mkdir('artifacts/validation', { recursive: true });
+    await writeFile('artifacts/validation/application-security-profile-gate.json', `${JSON.stringify(report, null, 2)}\n`);
+  }
   if (report.status !== 'PASS') {
     console.error(JSON.stringify(report, null, 2));
     process.exit(1);

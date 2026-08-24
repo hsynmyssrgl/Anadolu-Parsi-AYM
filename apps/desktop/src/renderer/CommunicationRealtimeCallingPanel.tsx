@@ -5,14 +5,26 @@ import type {
   CommunicationRoomView
 } from '@ppt/domain';
 import { selectUiCopy, useLocalization } from './localization';
+import { toUserFacingErrorMessage } from './user-facing-error';
 
 const stateLabels:Record<CommunicationCallSessionView['state'],string>={
   planned:'Planlandı',preflight_ready:'Yerel ön kontrol hazır',waiting_local:'Yerel bekleme alanı',ended:'Sona erdi',cancelled:'İptal edildi'
 };
+type CallParticipant=CommunicationCallSessionView['participants'][number];
+type CallDeviceCheck=CommunicationCallSessionView['preflight']['microphone'];
 
 export function CommunicationRealtimeCallingPanel(){
   const {language}=useLocalization();const text=(turkish:string,english:string)=>selectUiCopy(language,turkish,english);
   const stateText=(state:CommunicationCallSessionView['state'])=>language==='tr'?stateLabels[state]:({planned:'Planned',preflight_ready:'Local preflight ready',waiting_local:'Local waiting room',ended:'Ended',cancelled:'Cancelled'} as const)[state];
+  const networkStateLabels:Readonly<Record<CommunicationCallSessionView['networkState'],string>>={
+    not_started:text('Başlatılmadı','Not started'),local_waiting_only:text('Yalnız yerel bekleme','Local waiting only'),ended:text('Sona erdi','Ended')
+  };
+  const deviceCheckLabels:Readonly<Record<CallDeviceCheck,string>>={
+    not_run:text('Çalıştırılmadı','Not run'),passed:text('Başarılı','Passed'),failed:text('Başarısız','Failed'),not_available:text('Kullanılamıyor','Unavailable')
+  };
+  const participantStateLabels:Readonly<Record<CallParticipant['state'],string>>={
+    invited:text('Davet edildi','Invited'),local_ready:text('Yerel olarak hazır','Ready locally'),left:text('Ayrıldı','Left')
+  };
   const [center,setCenter]=useState<CommunicationRealtimeCallingCenterView>();
   const [rooms,setRooms]=useState<readonly CommunicationRoomView[]>([]);
   const [selectedRoomId,setSelectedRoomId]=useState('');
@@ -27,7 +39,7 @@ export function CommunicationRealtimeCallingPanel(){
       window.pardus.getCommunicationRealtimeCallingCenter(),window.pardus.getCommunicationSecurityCenter()
     ]);setCenter(calling);const active=security.rooms.filter(room=>room.status==='active');setRooms(active);
     setSelectedRoomId(current=>current&&active.some(room=>room.id===current)?current:active[0]?.id??'');
-  }catch(caught){setError(caught instanceof Error?caught.message:text('Çağrı çalışma alanı yüklenemedi.','Call workspace could not be loaded.'));}};
+  }catch(caught){setError(toUserFacingErrorMessage(caught,text('Çağrı çalışma alanı yüklenemedi.','Call workspace could not be loaded.')));}};
   useEffect(()=>{void refresh();},[]);
   const selectedRoom=useMemo(()=>rooms.find(room=>room.id===selectedRoomId),[rooms,selectedRoomId]);
   const invitedPersonIds=useMemo(()=>selectedRoom?.memberships.filter(row=>row.status==='active'
@@ -37,8 +49,7 @@ export function CommunicationRealtimeCallingPanel(){
     &&invitedPersonIds.length<=15;
   const mutate=async(key:string,run:(clientOperationId:string)=>Promise<unknown>)=>{setBusy(key);setError('');try{
     await run(operationId(key));operations.current.delete(key);await refresh();
-  }catch(caught){setError(caught instanceof Error?`${caught.message} ${text('Aynı işlem kimliğiyle yeniden deneyebilirsiniz.','You can retry with the same operation ID.')}`
-    :text('Çağrı metadata değişikliği tamamlanamadı.','The call metadata change could not be completed.'));}finally{setBusy('');}};
+  }catch(caught){setError(`${toUserFacingErrorMessage(caught,text('Çağrı planı güncellenemedi.','The call plan could not be updated.'))} ${text('Aynı işlem kimliğiyle yeniden deneyebilirsiniz.','You can retry with the same operation ID.')}`);}finally{setBusy('');}};
   const createCall=()=>window.pardus&&selectedRoom&&createAllowed&&mutate(
     `create:${selectedRoom.id}:${topology}:${mediaMode}:${invitedPersonIds.join(',')}`,clientOperationId=>
       window.pardus!.createCommunicationCall({clientOperationId,expectedRevision:0,roomId:selectedRoom.id,topology,
@@ -72,10 +83,10 @@ export function CommunicationRealtimeCallingPanel(){
       <h2 id="communication-calling-title">{text('Gerçek zamanlı çağrı hazırlığı','Real-time call preparation')}</h2></div>
       <button type="button" onClick={()=>void refresh()} disabled={Boolean(busy)}>{text('Yenile','Refresh')}</button></div>
     <div className="communication-calling-truth" role="note"><strong>{text('Bu sürüm gerçek çağrı başlatmaz ve ağ kullanmaz.','This release does not start real calls or use the network.')}</strong>
-      <span>{text('WebRTC, SFU, STUN/TURN, SFrame/MLS, ekran paylaşımı, canlı altyazı, RTT taşıması ve işletim sistemi çağrı bildirimleri production ortamında yapılandırılmadı.','WebRTC, SFU, STUN/TURN, SFrame/MLS, screen sharing, live captions, RTT transport and operating-system call notifications are not configured in production.')}</span>
-      <span>{text('Yerel cihaz ön kontrolü:','Local device preflight:')} {center?.truth.localMediaPreflightProviderConfigured?text('güvenilir main-process sağlayıcısı hazır','trusted main-process provider ready'):text('sağlayıcı yok; güvenli biçimde reddedilir','no provider; safely rejected')}.</span>
-      <span>{text('Bu ön kontrol yalnız işletim sistemi erişimini, canlı track durumunu ve yerel ses çıkış yolunu sınar; fiziksel kamera, mikrofon veya duyulabilir hoparlör işlevini sertifikalandırmaz.','This preflight checks only operating-system access, live track state and the local audio output path; it does not certify physical camera, microphone or audible speaker operation.')}</span>
-      <span>{text('Bekleme alanı, el kaldırma, sabitleme, erişilebilirlik ve arka plan seçenekleri yalnız yerel planlama metadatasıdır.','Waiting room, hand raising, pinning, accessibility and background options are local planning metadata only.')}</span></div>
+      <span>{text('Canlı sesli veya görüntülü görüşme, ekran paylaşımı, canlı altyazı, anlık yazışma ve işletim sistemi çağrı bildirimleri henüz kullanıma hazır değildir.','Live audio or video calls, screen sharing, live captions, real-time text, and operating-system call notifications are not ready for use yet.')}</span>
+      <span>{text('Yerel cihaz kontrolü:','Local device check:')} {center?.truth.localMediaPreflightProviderConfigured?text('güvenilir denetim hizmeti hazır','trusted checking service ready'):text('denetim hizmeti yok; işlem güvenle durdurulur','checking service unavailable; the action stops safely')}.</span>
+      <span>{text('Bu kontrol yalnız işletim sistemi erişimini ve yerel ses çıkış yolunu sınar; fiziksel kamera, mikrofon veya duyulabilir hoparlörün çalıştığını garanti etmez.','This check tests only operating-system access and the local audio output path; it does not guarantee that the physical camera, microphone, or audible speaker works.')}</span>
+      <span>{text('Bekleme alanı, el kaldırma, sabitleme, erişilebilirlik ve arka plan seçenekleri yalnız bu bilgisayardaki görüşme planında saklanır.','Waiting room, hand raising, pinning, accessibility, and background options are stored only in the call plan on this computer.')}</span></div>
     {error&&<p className="status-message danger" role="alert">{error}</p>}
     {!center?<p>{text('Çağrı çalışma alanı yükleniyor…','Loading call workspace…')}</p>:<>
       <div className="communication-calling-summary"><span><strong>{center.sessions.length}</strong> {text('çağrı planı','call plans')}</span>
@@ -93,10 +104,10 @@ export function CommunicationRealtimeCallingPanel(){
       </div>
       <div className="communication-calling-list">{center.sessions.length===0?<p>{text('Henüz yerel çağrı planı yok.','There are no local call plans yet.')}</p>:
         center.sessions.map(session=><article key={session.id}>
-          <header><strong>{stateText(session.state)}</strong><small>{text('sürüm','revision')} {session.revision} · {session.requestedMediaMode==='audio'?text('ses','audio'):text('görüntü','video')}</small></header>
-          <p>{session.participants.length} {text('katılımcı · ağ durumu:','participants · network state:')} {session.networkState} · {text('ön kontrol: mikrofon','preflight: microphone')} {session.preflight.microphone}, {text('kamera','camera')} {session.preflight.camera}, {text('hoparlör','speaker')} {session.preflight.speaker}</p>
+          <header><strong>{stateText(session.state)}</strong><small>{text('değişiklik no','change no.')} {session.revision} · {session.requestedMediaMode==='audio'?text('ses','audio'):text('görüntü','video')}</small></header>
+          <p>{session.participants.length} {text('katılımcı · bağlantı durumu:','participants · connection state:')} {networkStateLabels[session.networkState]} · {text('cihaz kontrolü: mikrofon','device check: microphone')} {deviceCheckLabels[session.preflight.microphone]}, {text('kamera','camera')} {deviceCheckLabels[session.preflight.camera]}, {text('hoparlör','speaker')} {deviceCheckLabels[session.preflight.speaker]}</p>
           <ul className="communication-calling-participants" aria-label={text('Yerel katılımcı planı','Local participant plan')}>{session.participants.map(participant=><li key={participant.personId}>
-            <span>{participant.role==='host'?text('Yerel ev sahibi','Local host'):text('Davetli','Invitee')} · {participant.state}</span>
+            <span>{participant.role==='host'?text('Yerel ev sahibi','Local host'):text('Davetli','Invitee')} · {participantStateLabels[participant.state]}</span>
             <button type="button" disabled={Boolean(busy)||['ended','cancelled'].includes(session.state)}
               aria-pressed={session.pinnedPersonId===participant.personId}
               onClick={()=>void pinParticipant(session,participant.personId,false)}>{session.pinnedPersonId===participant.personId
@@ -107,12 +118,12 @@ export function CommunicationRealtimeCallingPanel(){
                 ?text('İşaret dili sabitlemesini kaldır','Remove sign-language pin'):text('İşaret dili konuşmacısı olarak sabitle','Pin as sign-language speaker')}</button>
           </li>)}</ul>
           <div className="communication-calling-actions">
-            <button type="button" disabled={Boolean(busy)||['ended','cancelled'].includes(session.state)} onClick={()=>void preflight(session)}>{text('Yerel ön kontrolü çalıştır','Run local preflight')}</button>
+            <button type="button" disabled={Boolean(busy)||['ended','cancelled'].includes(session.state)} onClick={()=>void preflight(session)}>{text('Yerel cihaz kontrolünü çalıştır','Run local device check')}</button>
             <button type="button" disabled={Boolean(busy)||['ended','cancelled'].includes(session.state)
               ||session.requestedMediaMode==='audio'} onClick={()=>void control(session,'audioOnly')}>{session.requestedMediaMode==='audio'
                 ?text('Yalnız ses planı','Audio-only plan'):session.audioOnly?text('Görüntü iste','Request video'):text('Yalnız sese geç','Switch to audio only')}</button>
             <button type="button" disabled={Boolean(busy)||['ended','cancelled'].includes(session.state)} onClick={()=>void control(session,'captionsRequested')}>{session.captionsRequested?text('Altyazı isteğini kapat','Turn off caption request'):text('Altyazı iste','Request captions')}</button>
-            <button type="button" disabled={Boolean(busy)||['ended','cancelled'].includes(session.state)} onClick={()=>void control(session,'realtimeTextRequested')}>{session.realtimeTextRequested?text('RTT isteğini kapat','Turn off RTT request'):text('RTT iste','Request RTT')}</button>
+            <button type="button" disabled={Boolean(busy)||['ended','cancelled'].includes(session.state)} onClick={()=>void control(session,'realtimeTextRequested')}>{session.realtimeTextRequested?text('Anlık yazışma isteğini kapat','Turn off real-time text request'):text('Anlık yazışma iste','Request real-time text')}</button>
             <button type="button" disabled={Boolean(busy)||['ended','cancelled'].includes(session.state)} onClick={()=>void control(session,'screenShareRequested')}>{session.screenShareRequested?text('Ekran paylaşımı isteğini kapat','Turn off screen-sharing request'):text('Ekran paylaşımı iste','Request screen sharing')}</button>
             <button type="button" disabled={Boolean(busy)||['ended','cancelled'].includes(session.state)} onClick={()=>void control(session,'localHandRaised')}>{session.localHandRaised?text('Elini indir','Lower hand'):text('El kaldır','Raise hand')}</button>
             <button type="button" disabled={Boolean(busy)||['ended','cancelled'].includes(session.state)} onClick={()=>void control(session,'meetingLocked')}>{session.meetingLocked?text('Yerel kilidi aç','Unlock locally'):text('Yerel toplantı planını kilitle','Lock local meeting plan')}</button>

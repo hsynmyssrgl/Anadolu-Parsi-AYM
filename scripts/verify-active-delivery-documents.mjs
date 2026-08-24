@@ -19,12 +19,12 @@ const readJson = async (path) => JSON.parse(await read(path));
 const exists = async (path) => { try { await stat(resolve(root, path)); return true; } catch { return false; } };
 const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-const ledger = await readJson('artifacts/manifests/VERSION_LEDGER.json');
-const current = ledger.entries?.at(-1);
-verify(Boolean(current), 'VERSION_LEDGER current entry is missing');
+const ledger = await readJson('config/release-ledger.json');
+const current = ledger.current;
+verify(Boolean(current), 'release ledger current entry is missing');
 const displayVersion = current?.version ?? '';
 const packageVersion = current?.packageVersion ?? '';
-const build = current?.sequence;
+const build = current?.monthlySequence;
 verify(Number.isInteger(build) && build > 0, `invalid build=${build}`);
 
 const documents = ['README.md', 'START_HERE_TR.md', 'PAKET_OZETI_TR.md', 'DELIVERY_SUMMARY_TR.md', 'VERIFICATION_REPORT.md'];
@@ -36,11 +36,11 @@ for (const path of documents) {
   contents.set(path, content);
   verify(content.includes('docs/17_MASTER_BUILD_LEDGER.md'), `master ledger reference missing=${path}`);
   for (const marker of [
-    '- Product: Anadolu Parsı Aile Yaşam Merkezi',
+    '- Product: ParsYuva Aile Yaşam Merkezi',
     `- Application Version: \`${displayVersion}\``,
     `- Package Version: \`${packageVersion}\``,
-    '- Stage: **Bronze RC2 Active Development**',
-    `- Build: **${build}**`
+    '- Stage: **Bronze Active Development**',
+    `- Monthly Sequence: **${build}**`
   ]) verify(content.includes(marker), `${path} marker missing=${marker}`);
 
   const displayVersions = [...content.matchAll(/\b\d{2}\.\d{2}\.\d{4}\.\d+\b/g)].map((match) => match[0]);
@@ -51,22 +51,16 @@ for (const path of documents) {
 }
 
 const requiredReferenceFiles = [
-  `BUILD_STATUS_BRONZE_RC2_BUILD${build}.md`,
-  `RELEASE_NOTES_BRONZE_RC2_BUILD${build}.md`,
-  `BUILD${build}_ARCHITECTURE_VALIDATION_REPORT.md`,
-  `BUILD${build}_DELIVERY_VALIDATION_REPORT.md`
+  'config/release-ledger.json',
+  'config/canonical-rule-registry.json',
+  'docs/current/00_AKTIF_ANA_KAPSAM.md',
+  'docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md'
 ];
 for (const reference of requiredReferenceFiles) verify(await exists(reference), `current referenced document missing=${reference}`);
 for (const path of ['README.md', 'START_HERE_TR.md', 'PAKET_OZETI_TR.md', 'DELIVERY_SUMMARY_TR.md', 'VERIFICATION_REPORT.md']) {
   const content = contents.get(path) ?? '';
   for (const reference of requiredReferenceFiles) verify(content.includes(`\`${reference}\``), `${path} current reference missing=${reference}`);
-  const activeFileReferences = [...content.matchAll(/`((?:BUILD_STATUS_BRONZE_RC2_BUILD|RELEASE_NOTES_BRONZE_RC2_BUILD|BUILD)(\d+)[^`]*)`/g)];
-  for (const match of activeFileReferences) {
-    const reference = match[1];
-    const number = Number(match[2]);
-    verify(number === build, `${path} stale active build reference=${reference}`);
-  }
-  verify(!/`(?:BUILD_STATUS_MVP|RELEASE_NOTES_BRONZE_MVP)\d+\.md`/.test(content), `${path} contains an obsolete MVP active reference`);
+  verify(!/`(?:BUILD_STATUS_(?:BRONZE_RC2_BUILD|MVP)|RELEASE_NOTES_BRONZE_(?:RC2_BUILD|MVP)|BUILD\d+_)[^`]*`/.test(content), `${path} contains a historical build reference as active authority`);
 }
 
 verify((contents.get('PAKET_OZETI_TR.md') ?? '') === (contents.get('DELIVERY_SUMMARY_TR.md') ?? ''), 'package and delivery summaries diverged');
@@ -93,7 +87,7 @@ for (const label of statusLabels) {
 
 const evidence = {
   schemaVersion: 1,
-  product: 'Anadolu Parsı Aile Yaşam Merkezi',
+  product: 'ParsYuva Aile Yaşam Merkezi',
   version: displayVersion,
   packageVersion,
   build,

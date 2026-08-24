@@ -11,6 +11,7 @@ import type {
 } from '@ppt/domain';
 import { Button, EmptyState, SectionHeader, StatusMessage, Surface } from './ui';
 import { selectUiCopy, useLocalization } from './localization';
+import { toUserFacingErrorMessage } from './user-facing-error';
 
 const isoOrUndefined=(value:string):string|undefined=>{
   if(!value)return undefined;
@@ -24,6 +25,10 @@ const ageAt=(birthDate:string):number=>{
   return age;
 };
 type UiText=(turkish:string,english:string)=>string;
+const transportModeLabel=(mode:NonNullable<ChildEducationItemView['transportMode']>,text:UiText):string=>({
+  school_service:text('Okul servisi','School service'),family_dropoff:text('Aile bırakacak','Family drop-off'),
+  public_transport:text('Toplu taşıma','Public transport'),walking:text('Yürüyüş','Walking'),other:text('Diğer','Other')
+})[mode];
 const itemSummary=(entry:ChildEducationItemView,text:UiText,locale:string):string=>[
   entry.institutionLabel,entry.classLabel,entry.subjectLabel,
   entry.scheduledAt?`${text('başlangıç','start')} ${new Date(entry.scheduledAt).toLocaleString(locale)}`:undefined,
@@ -31,7 +36,7 @@ const itemSummary=(entry:ChildEducationItemView,text:UiText,locale:string):strin
   entry.recurrence?`${text('tekrar','recurrence')} ${entry.recurrence}`:undefined,
   entry.amountMinor!==undefined?`${(entry.amountMinor/100).toLocaleString(locale,{minimumFractionDigits:2})} ${entry.currency}`:undefined,
   entry.progressBasisPoints!==undefined?`${text('ilerleme','progress')} %${entry.progressBasisPoints/100}`:undefined,
-  entry.transportMode?`${text('ulaşım','transport')} ${entry.transportMode}`:undefined,
+  entry.transportMode?`${text('ulaşım','transport')} ${transportModeLabel(entry.transportMode,text)}`:undefined,
   entry.note
 ].filter((value):value is string=>Boolean(value)).join(' · ');
 interface PendingCreate{readonly fingerprint:string;readonly clientOperationId:string;readonly itemId:string}
@@ -86,7 +91,7 @@ export function ChildEducationCoordinationPanel({people}:{readonly people:readon
     if(!window.pardus||!personId){setCenter(undefined);return;}
     setLoading(true);
     try{setCenter(await window.pardus.getChildEducationCenter({childPersonId:personId}));setMessage('');}
-    catch(error){setCenter(undefined);setTone('danger');setMessage(error instanceof Error?error.message:text('Çocuk eğitim merkezi yüklenemedi.','Child education center could not be loaded.'));}
+    catch(error){setCenter(undefined);setTone('danger');setMessage(toUserFacingErrorMessage(error,text('Çocuk eğitim merkezi yüklenemedi.','Child education center could not be loaded.')));}
     finally{setLoading(false);}
   };
   useEffect(()=>{void reload();},[childPersonId]);
@@ -129,7 +134,7 @@ export function ChildEducationCoordinationPanel({people}:{readonly people:readon
     try{
       await window.pardus.createChildEducationItem({...payload,...identity} as CreateChildEducationItemInput);
       pendingCreate.current=undefined;setTitle('');setNote('');await reload();setTone('success');setMessage(text('Çocuk eğitim kaydı yalnız bu cihazda kaydedildi.','The child education record was saved on this device only.'));
-    }catch(error){setTone('danger');setMessage(`${error instanceof Error?error.message:text('Kayıt oluşturulamadı.','The record could not be created.')} ${text('Değişiklik yapmazsanız aynı işlem kimliğiyle yeniden deneyebilirsiniz.','If you make no changes, you can retry with the same operation identifier.')}`);}
+    }catch(error){setTone('danger');setMessage(`${toUserFacingErrorMessage(error,text('Kayıt oluşturulamadı.','The record could not be created.'))} ${text('Değişiklik yapmazsanız aynı işlem kimliğiyle yeniden deneyebilirsiniz.','If you make no changes, you can retry with the same operation identifier.')}`);}
     finally{setBusy(false);}
   };
   const mutationIdentity=(key:string,item:ChildEducationItemView,fingerprint:string)=>{
@@ -140,19 +145,19 @@ export function ChildEducationCoordinationPanel({people}:{readonly people:readon
   const updateStatus=async(item:ChildEducationItemView,next:Exclude<ChildEducationStatus,'deleted'>)=>{
     if(!window.pardus||busy)return;const key=`update:${item.id}`;const identity=mutationIdentity(key,item,next);setBusy(true);setMessage('');
     try{await window.pardus.updateChildEducationItem({...identity,itemId:item.id,childPersonId:item.childPersonId,status:next});pendingMutations.current.delete(key);await reload();setTone('success');setMessage(text('Durum yerel olarak güncellendi.','The state was updated locally.'));}
-    catch(error){setTone('danger');setMessage(`${error instanceof Error?error.message:text('Durum güncellenemedi.','The state could not be updated.')} ${text('Aynı işlem kimliğiyle yeniden deneyebilirsiniz.','You can retry with the same operation identifier.')}`);}
+    catch(error){setTone('danger');setMessage(`${toUserFacingErrorMessage(error,text('Durum güncellenemedi.','The state could not be updated.'))} ${text('Aynı işlem kimliğiyle yeniden deneyebilirsiniz.','You can retry with the same operation identifier.')}`);}
     finally{setBusy(false);}
   };
   const remove=async(item:ChildEducationItemView)=>{
     if(!window.pardus||busy)return;const reason=text('Kullanıcı çocuk eğitim kaydını yerel görünümden kaldırdı.','The user removed the child education record from the local view.');const key=`delete:${item.id}`;
     const identity=mutationIdentity(key,item,reason);setBusy(true);setMessage('');
     try{await window.pardus.deleteChildEducationItem({...identity,itemId:item.id,childPersonId:item.childPersonId,reason});pendingMutations.current.delete(key);await reload();setTone('success');setMessage(text('Kayıt yerel olarak silindi.','The record was deleted locally.'));}
-    catch(error){setTone('danger');setMessage(`${error instanceof Error?error.message:text('Kayıt silinemedi.','The record could not be deleted.')} ${text('Aynı işlem kimliğiyle yeniden deneyebilirsiniz.','You can retry with the same operation identifier.')}`);}
+    catch(error){setTone('danger');setMessage(`${toUserFacingErrorMessage(error,text('Kayıt silinemedi.','The record could not be deleted.'))} ${text('Aynı işlem kimliğiyle yeniden deneyebilirsiniz.','You can retry with the same operation identifier.')}`);}
     finally{setBusy(false);}
   };
 
   return <Surface className="child-education-panel">
-    <SectionHeader eyebrow={text('33-U · yerel çocuk eğitim koordinasyonu','33-U · local child education coordination')} title={text('Çocuk eğitim merkezi','Child education center')}/>
+    <SectionHeader eyebrow={text('Yerel çocuk eğitim koordinasyonu','Local child education coordination')} title={text('Çocuk eğitim merkezi','Child education center')}/>
     <div className="child-education-truth" role="note">
       <strong>{text('Bu ekran yalnız yerel koordinasyon içindir; okul portalına bağlanmaz, öğretmene mesaj göndermez ve servisi canlı izlemez.','This screen is for local coordination only; it does not connect to a school portal, message teachers or track transport live.')}</strong>
       <span>{text('Harçlık kaydı ödeme yapmaz. Sertifika doğrulanmış sayılmaz. Teslim yetkisi yalnız Kimlik Merkezi’ndeki ayrı, opak referansa bağlanır.','An allowance record does not make payments. A certificate is not treated as verified. Pickup authority is bound only to a separate opaque reference in the Identity Center.')}</span>

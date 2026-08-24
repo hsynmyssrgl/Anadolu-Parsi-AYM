@@ -38,3 +38,7 @@ Central policy veya `ProtectedSideArtifactStore` yoksa mesaj okuma/yazma durur. 
 ## Açık kanıtlar
 
 Gerçek cihaz medya UAT'si, çoklu cihaz, relay, remote receipt, signature, scheduled reminder, physical erase, backup propagation, privacy/legal/security/accessibility incelemeleri ve kalıcı governance receipt `NOT_RUN` durumundadır. Yerel retention/presence executor ile crash recovery/orphan sweep otomatik testlidir; dış/manual kabul kanıtı değildir.
+
+## 24.08.2026 değişiklik-etki doğrulaması
+
+PR-235 kapsamında güncel kullanıcı dili ve renderer sözleşmesi bu tehdit modeline yeniden bağlandı; 52/52 sınır-sözleşme-çalışma zamanı zinciri PASS oldu. Sonuç gerçek teslimat, fiziksel silme veya production kabul kanıtı değildir.

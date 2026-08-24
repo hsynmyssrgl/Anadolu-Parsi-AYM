@@ -62,7 +62,7 @@ const definitions = [
     "setDesiredState:'signedPluginPlatform:setDesiredState'", "emergencyDisable:'signedPluginPlatform:emergencyDisable'", "rollback:'signedPluginPlatform:rollback'",
     "channel.startsWith('signedPluginPlatform:')"])],
   ['renderer reuses the system surface and states candidate-only truth', has(panel, ['SignedPluginPlatformPanel', 'getSignedPluginPlatformCenter',
-    'setSignedPluginDesiredState', 'emergencyDisableSignedPlugin', 'rollbackSignedPlugin', 'signed-plugin-truth', 'Production imza'])],
+    'setSignedPluginDesiredState', 'emergencyDisableSignedPlugin', 'rollbackSignedPlugin', 'signed-plugin-truth', 'Canlı sürüm imza güveni'])],
   ['execution provider credentials signing trust sandbox and network claims stay false', scope.truth?.thirdPartyCodeExecutionPerformed === false
     && scope.truth?.externalProviderConnectionPerformed === false && scope.truth?.providerCredentialsStored === false
     && scope.truth?.productionSigningTrustProvisioned === false && scope.truth?.productionReleaseEligible === false

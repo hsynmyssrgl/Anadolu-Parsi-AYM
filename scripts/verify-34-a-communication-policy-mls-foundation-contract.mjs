@@ -92,10 +92,10 @@ const definitions = [
   ['decision and threat model deny production MLS messages relay network and acceptance claims', has(decision, ['countsAsRequirementPass=false',
     'Production `CommunicationMlsFoundationPort`', 'NOT_RUN']) && has(threat, ['Sahte sağlayıcı kanıtı', 'Renderer anahtar veya mesaj otoritesi',
     'İptal edilmiş cihazla epoch ilerletme', 'NOT_RUN'])],
-  ['PPK-015 021 and 022 ratchets are exact PASS', p15.status === 'PASS' && p15.files === 588
-    && p15.sourceSha256 === 'e83ccc2f1c9eaec4848ce47135f666c17cad167e51c7d678006ab93972c34a21' && p15.findings === 0
-    && p21.status === 'PASS' && p21.files === 588 && p21.surfaces === 895 && p21.sha256 === 'fad3ceeb9485bffc9d6f9878f7bb486f56a73b4aa5d045580471c70a49e59da6'
-    && p22.status === 'PASS' && p22.files === 588 && p22.surfaces === 447 && p22.sha256 === '2ac32190c1b40c455093841eb2456c06a168c9aaf519068a14f570705b8a177a'],
+  ['PPK-015 021 and 022 ratchets are exact PASS', p15.status === 'PASS' && p15.files === 590
+    && p15.sourceSha256 === 'a739c17e51942946e2e6923d8ac7524630e36b56ec1078671eddf351b64e6f93' && p15.findings === 0
+    && p21.status === 'PASS' && p21.files === 590 && p21.surfaces === 897 && p21.sha256 === '9ea5b846e552e760fbd8dd5f8bee7fb83988ef19bb93e3bbd4ac0465c4b71205'
+    && p22.status === 'PASS' && p22.files === 590 && p22.surfaces === 447 && p22.sha256 === '54061e189e7771868552efa869c69a75426f24e4edd846af1c62496c82f0e1d6'],
   ['production provider conformance delivery and requirement acceptance remain closed', scope.truth?.rfc9420ProviderConfigured === false
     && scope.truth?.rfc9420ConformanceVerified === false && scope.truth?.messageContentStoredOrProcessed === false
     && scope.truth?.relayDeliveryServiceImplemented === false && scope.truth?.requirementsClosed === false

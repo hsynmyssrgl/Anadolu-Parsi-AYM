@@ -306,7 +306,8 @@ describe('32-T PPK-024 Policy Service availability integration', () => {
     expect(main).toContain("registerIpcHandler('system:getPolicyServiceAvailabilityBoundary'");
     expect(preload).toContain("invoke('system:getPolicyServiceAvailabilityBoundary')");
     expect(global).toContain('getPolicyServiceAvailabilityBoundary():Promise<PolicyServiceAvailabilityBoundaryView>');
-    expect(renderer).toContain('PPK-024');
+    expect(renderer).toContain('<h2>Politika hizmeti çalışma modu</h2>');
+    expect(renderer).toContain('Güvenli erişim sınırı');
     expect(renderer).not.toContain('policyPackageSha256');
   });
 });

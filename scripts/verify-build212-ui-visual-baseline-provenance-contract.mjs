@@ -14,7 +14,7 @@ const actualHash=bytes?createHash('sha256').update(bytes).digest('hex'):null;
 check(actualHash===expectedHash,'approved image hash',actualHash);
 check(manifest.imageSha256===expectedHash,'manifest pinned hash',manifest.imageSha256);
 check(manifest.imageDimensions?.width===1491 && manifest.imageDimensions?.height===1055,'approved dimensions',JSON.stringify(manifest.imageDimensions));
-check(manifest.logoSubject==='Anadolu parsı','Anadolu parsı logo subject',manifest.logoSubject);
+check(manifest.logoSubject==='Anadolu parsı esintili ParsYuva işareti','approved ParsYuva mark subject',manifest.logoSubject);
 check(manifest.approvedReferenceCharacteristics?.theme==='light','approved light theme',manifest.approvedReferenceCharacteristics?.theme);
 check(manifest.shell?.background==='#F4F3F0','light baseline shell background',manifest.shell?.background);
 check(manifest.shell?.panel==='#FDFDFC','light baseline panel',manifest.shell?.panel);

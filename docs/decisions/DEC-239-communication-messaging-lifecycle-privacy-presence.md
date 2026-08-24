@@ -21,3 +21,7 @@ COM-007 için zamanlama ve sessiz metadata ile authoritative yerel saate bağlı
 ## Yerel kanıt
 
 Migration 106 `communication_messaging_lifecycle_privacy_presence` SHA-256 değeri `5b088bb6d759403044f84ad9f2a82be1823e33a17334d7122beed92af56cce50` olarak tarihsel temel; migration 117 `communication_scheduled_message_release` SHA-256 değeri `9602df3d935441f033eb45d89d7403e09d8dbed3849873cfe68a098ff754dde3` olarak güncel zamanlayıcı kanıtıdır. Beş hedef dosyada 30 test; application, repository-contracts, repositories, database ve desktop typecheck/build zinciri; migration verifier ve PPK ratchetleri yerel teknik kanıttır. Bunlar dış mesaj teslimi, gerçek çoklu cihaz presence, fiziksel silme veya requirement kapanışı değildir.
+
+## 24.08.2026 değişiklik-etki doğrulaması
+
+PR-235 kapsamında güncel kullanıcı dili ve renderer sözleşmesi bu karara yeniden bağlandı; 52/52 sınır-sözleşme-çalışma zamanı zinciri PASS oldu. Bu kayıt dış/manual kanıtları kapatmaz ve `countsAsRequirementPass=false` sınırını değiştirmez.

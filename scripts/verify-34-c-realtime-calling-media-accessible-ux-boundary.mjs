@@ -52,7 +52,7 @@ const checks=[
     &&!ipc.includes("communicationCalling:recordQuality")],
   ['renderer reuses existing surface and preserves no-call truth',has(panel,['CommunicationRealtimeCallingPanel',
     'getCommunicationRealtimeCallingCenter','runCommunicationCallPreflight','meetingLocked','pinnedPersonId',
-    'signLanguagePinnedPersonId','production ortamında'])],
+    'signLanguagePinnedPersonId','Bu sürüm gerçek çağrı başlatmaz ve ağ kullanmaz.'])],
   ['production media and OS integrations remain explicitly false',scope.truth?.productionMediaProviderConfigured===false
     &&scope.truth?.localMediaPreflightProviderConfigured===true&&scope.truth?.localMediaPreflightExecuted===false
     &&scope.truth?.physicalMediaDeviceFunctionalityCertified===false
@@ -70,9 +70,9 @@ const checks=[
   ['local ratchet is exact without granting requirement pass',scope.validation?.targetedTestFileRatchet===6
     &&scope.validation?.targetedTestRatchet===26&&scope.validation?.migrationVersion===107
     &&scope.validation?.migrationSha256==='299024d7bd040343717abceb2ada6e543a95bea921c7ee6c7d34a10cf2b6515b'
-    &&scope.validation?.ppk015?.files===588&&scope.validation?.ppk015?.sourceSha256==='e83ccc2f1c9eaec4848ce47135f666c17cad167e51c7d678006ab93972c34a21'
-    &&scope.validation?.ppk021?.surfaces===895&&scope.validation?.ppk021?.sha256==='fad3ceeb9485bffc9d6f9878f7bb486f56a73b4aa5d045580471c70a49e59da6'
-    &&scope.validation?.ppk022?.surfaces===447&&scope.validation?.ppk022?.sha256==='2ac32190c1b40c455093841eb2456c06a168c9aaf519068a14f570705b8a177a'
+    &&scope.validation?.ppk015?.files===590&&scope.validation?.ppk015?.sourceSha256==='a739c17e51942946e2e6923d8ac7524630e36b56ec1078671eddf351b64e6f93'
+    &&scope.validation?.ppk021?.surfaces===897&&scope.validation?.ppk021?.sha256==='9ea5b846e552e760fbd8dd5f8bee7fb83988ef19bb93e3bbd4ac0465c4b71205'
+    &&scope.validation?.ppk022?.surfaces===447&&scope.validation?.ppk022?.sha256==='54061e189e7771868552efa869c69a75426f24e4edd846af1c62496c82f0e1d6'
     &&scope.validation?.countsAsRequirementPass===false&&inventory.validation?.countsAsRequirementPass===false]
 ];
 const results=checks.map(([name,passed])=>({name,status:passed?'PASS':'FAIL'}));

@@ -2,7 +2,7 @@
 
 > **Tek yetkili devam noktası:** Yeni bir sohbet veya geliştirme oturumu bu dosyayı okuyarak başlar. Geçmiş buildleri yeniden araştırmak yerine `Güncel devam noktası` ve `Kalan işler` bölümleri esas alınır.
 
-- Ürün: **Anadolu Parsı Aile Yaşam Merkezi**
+- Ürün: **ParsYuva Aile Yaşam Merkezi**
 - Güncel build: **228**
 - Güncel sürüm: **02.08.2026.228**
 - Aşama: **Bronze RC2 Active Development**

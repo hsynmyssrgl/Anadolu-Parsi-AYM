@@ -61,7 +61,8 @@ describe('32-R PPK-022 Desktop/Core Service capability manifest integration', ()
     const renderer = readFileSync('apps/desktop/src/renderer/App.tsx', 'utf8');
     expect(preload).toContain("invoke('system:getPlatformCapabilityManifestGateBoundary')");
     expect(global).toContain('getPlatformCapabilityManifestGateBoundary():Promise<PlatformCapabilityManifestGateBoundaryView>');
-    expect(renderer).toContain('Build manifesti tek başına runtime yetkisi vermez');
-    expect(renderer).toContain('manifest hash\'i verilmez');
+    expect(renderer).toContain('title="Kamera, mikrofon, dosya, metin tanıma, yapay zekâ, konum ve ağ için çift katmanlı ret"');
+    expect(renderer).toContain('Derleme bildirimi tek başına çalışma anı yetkisi vermez');
+    expect(renderer).toContain('bildirim özeti verilmez');
   });
 });

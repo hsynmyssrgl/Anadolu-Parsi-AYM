@@ -131,12 +131,15 @@ fileInventory.sort((left, right) => left.path.localeCompare(right.path, 'en'));
 const sourceFingerprintSha256 = sha256(fileInventory.map((item) => `${item.path}|${item.bytes}|${item.sha256}`).join('\n'));
 
 const manifest = await readJson(resolve(ROOT, '00_TEMEL_SURUM_MANIFESTOSU.json'));
-check(manifest.id === 'PARSYUVA-AILE-YASAM-MERKEZI-TICARI-TEMEL-20260823-05', 'manifesto kimligi degisti');
-check(manifest.baselineDate === '2026-08-23', 'temel tarihi degisti');
+check(manifest.id === 'PARSYUVA-AILE-YASAM-MERKEZI-TICARI-TEMEL-20260824-08', 'manifesto kimligi degisti');
+check(manifest.baselineDate === '2026-08-24', 'temel tarihi degisti');
 check(manifest.product === 'ParsYuva Aile Yaşam Merkezi', 'urun adi tam ParsYuva Aile Yaşam Merkezi olmali');
 check(manifest.commercialReleaseEligible === false, 'ticari yayin uygunlugu kanitsiz true olamaz');
 check(manifest.evidenceRequiredForCompletion === true, 'tamamlama icin kanit zorunlu olmali');
 check(manifest.externalEvidenceDefaultsToNotRun === true, 'dis kanit varsayilani NOT_RUN olmali');
+check(['PASS', 'NOT_RUN'].includes(manifest.governedPreflight), 'manifesto governed preflight durumu gecersiz');
+check(typeof manifest.worktreeClean === 'boolean', 'manifesto worktree temizligi boolean olmali');
+check(manifest.governedPreflight !== 'PASS' || manifest.worktreeClean === true, 'kirli calisma agaci governed preflight PASS sayilamaz');
 check(JSON.stringify(manifest.rootSections) === JSON.stringify(expectedSections), 'manifesto klasor sirasi degisti');
 
 const ruleBinding = await readJson(resolve(ROOT, '01_YONETIM', '04_AKTIF_KURAL_SICILI.json'));
@@ -146,6 +149,9 @@ delete canonicalCore.rulesSha256;
 const calculatedRuleHash = sha256(stable(canonicalCore));
 check(canonicalRules.exceptionless === true, 'kanonik kurallar istisnasiz olmali');
 check(canonicalRules.rulesSha256 === calculatedRuleHash, 'kanonik kural SHA hesaplamasi uyusmuyor');
+check(manifest.canonicalRuleRegistry === canonicalRules.id, 'manifesto kanonik kural sicili kimligi drift etti');
+check(manifest.canonicalRuleCount === canonicalRules.ruleCount, 'manifesto kanonik kural sayisi drift etti');
+check(manifest.canonicalRuleSha256 === canonicalRules.rulesSha256, 'manifesto kanonik kural SHA bagi stale');
 check(ruleBinding.istisnaIzinli === false, 'ticari kural bagi istisna kabul edemez');
 check(ruleBinding.anaKuralSiciliId === canonicalRules.id, 'kural sicili kimligi drift etti');
 check(ruleBinding.anaKuralSayisi === canonicalRules.ruleCount, 'kural sayisi drift etti');
@@ -157,7 +163,7 @@ for (const rule of ruleBinding.kurallar ?? []) {
   check(/^TK-[0-9]{3}$/.test(rule.id), `yerel ticari kural ID gecersiz: ${rule.id}`);
   check(!localRuleIds.has(rule.id), `yerel ticari kural ID tekrarli: ${rule.id}`);
   localRuleIds.add(rule.id);
-  check(rule.durum === 'ACTIVE' || (rule.id === 'TK-010' && rule.durum === 'SUPERSEDED'), `${rule.id} durum gecersiz`);
+  check(rule.durum === 'ACTIVE' || (['TK-010', 'TK-012'].includes(rule.id) && rule.durum === 'SUPERSEDED'), `${rule.id} durum gecersiz`);
   check(rule.yurutme === 'FAIL_CLOSED', `${rule.id} fail-closed olmali`);
   check(rule.kanitZorunlu === true, `${rule.id} kanit zorunlulugu eksik`);
 }
@@ -187,6 +193,12 @@ const decision266 = decisionLedger.decisions.find((decision) => decision.id === 
 const decision267 = decisionLedger.decisions.find((decision) => decision.id === 'DEC-267');
 const decision268 = decisionLedger.decisions.find((decision) => decision.id === 'DEC-268');
 const decision269 = decisionLedger.decisions.find((decision) => decision.id === 'DEC-269');
+const decision270 = decisionLedger.decisions.find((decision) => decision.id === 'DEC-270');
+const decision271 = decisionLedger.decisions.find((decision) => decision.id === 'DEC-271');
+const decision272 = decisionLedger.decisions.find((decision) => decision.id === 'DEC-272');
+const decision273 = decisionLedger.decisions.find((decision) => decision.id === 'DEC-273');
+const decision274 = decisionLedger.decisions.find((decision) => decision.id === 'DEC-274');
+const decision275 = decisionLedger.decisions.find((decision) => decision.id === 'DEC-275');
 check(decisionLedger.decisionCount === decisionLedger.decisions.length, 'karar defteri sayisi uyusmuyor');
 check(decision259?.status === 'ACTIVE', 'DEC-259 aktif karar defterinde yok');
 check(decision259?.syncStatus === 'SYNCHRONIZED', 'DEC-259 senkron degil');
@@ -194,7 +206,7 @@ check(decision260?.status === 'ACTIVE', 'DEC-260 aktif karar defterinde yok');
 check(decision260?.syncStatus === 'SYNCHRONIZED', 'DEC-260 senkron degil');
 check(decision261?.status === 'ACTIVE', 'DEC-261 aktif karar defterinde yok');
 check(decision261?.syncStatus === 'SYNCHRONIZED', 'DEC-261 senkron degil');
-check(decision262?.status === 'SUPERSEDED' && decision262?.supersededBy === 'DEC-269', 'DEC-262 DEC-269 ile superseded degil');
+check(decision262?.status === 'SUPERSEDED' && decision262?.supersededBy === 'DEC-271', 'DEC-262 DEC-271 ile superseded degil');
 check(decision262?.syncStatus === 'SYNCHRONIZED', 'DEC-262 senkron degil');
 check(decision263?.status === 'ACTIVE', 'DEC-263 aktif karar defterinde yok');
 check(decision263?.syncStatus === 'SYNCHRONIZED', 'DEC-263 senkron degil');
@@ -208,8 +220,20 @@ check(decision267?.status === 'ACTIVE', 'DEC-267 aktif karar defterinde yok');
 check(decision267?.syncStatus === 'SYNCHRONIZED', 'DEC-267 senkron degil');
 check(decision268?.status === 'ACTIVE', 'DEC-268 aktif karar defterinde yok');
 check(decision268?.syncStatus === 'SYNCHRONIZED', 'DEC-268 senkron degil');
-check(decision269?.status === 'ACTIVE', 'DEC-269 aktif karar defterinde yok');
+check(decision269?.status === 'SUPERSEDED' && decision269?.supersededBy === 'DEC-271', 'DEC-269 DEC-271 ile superseded degil');
 check(decision269?.syncStatus === 'SYNCHRONIZED', 'DEC-269 senkron degil');
+check(decision270?.status === 'ACTIVE', 'DEC-270 aktif karar defterinde yok');
+check(decision270?.syncStatus === 'SYNCHRONIZED', 'DEC-270 senkron degil');
+check(decision271?.status === 'ACTIVE', 'DEC-271 aktif karar defterinde yok');
+check(decision271?.syncStatus === 'SYNCHRONIZED', 'DEC-271 senkron degil');
+check(decision272?.status === 'ACTIVE', 'DEC-272 aktif karar defterinde yok');
+check(decision272?.syncStatus === 'SYNCHRONIZED', 'DEC-272 senkron degil');
+check(decision273?.status === 'ACTIVE', 'DEC-273 aktif karar defterinde yok');
+check(decision273?.syncStatus === 'SYNCHRONIZED', 'DEC-273 senkron degil');
+check(decision274?.status === 'ACTIVE', 'DEC-274 aktif karar defterinde yok');
+check(decision274?.syncStatus === 'SYNCHRONIZED', 'DEC-274 senkron degil');
+check(decision275?.status === 'ACTIVE', 'DEC-275 aktif karar defterinde yok');
+check(decision275?.syncStatus === 'SYNCHRONIZED', 'DEC-275 senkron degil');
 const currentDecisionSummary = await readText(resolve(REPO, 'docs', 'current', '09_KULLANICI_KARARLARI_KAYDI.md'));
 const currentMaster = await readText(resolve(REPO, 'docs', 'current', '11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md'));
 const currentCommercial = await readText(resolve(REPO, 'docs', 'current', '14_TICARI_URUN_TEMEL_SURUMU.md'));
@@ -235,12 +259,32 @@ check(currentDecisionSummary.includes('DEC-268'), 'DEC-268 kullanici kararlari k
 check(currentMaster.includes('DEC-268'), 'DEC-268 guncel ana sicilde yok');
 check(currentDecisionSummary.includes('DEC-269'), 'DEC-269 kullanici kararlari kaydinda yok');
 check(currentMaster.includes('DEC-269'), 'DEC-269 guncel ana sicilde yok');
+check(currentDecisionSummary.includes('DEC-270'), 'DEC-270 kullanici kararlari kaydinda yok');
+check(currentMaster.includes('DEC-270'), 'DEC-270 guncel ana sicilde yok');
+check(currentDecisionSummary.includes('DEC-271'), 'DEC-271 kullanici kararlari kaydinda yok');
+check(currentMaster.includes('DEC-271'), 'DEC-271 guncel ana sicilde yok');
+check(currentDecisionSummary.includes('DEC-272'), 'DEC-272 kullanici kararlari kaydinda yok');
+check(currentMaster.includes('DEC-272'), 'DEC-272 guncel ana sicilde yok');
+check(currentDecisionSummary.includes('DEC-273'), 'DEC-273 kullanici kararlari kaydinda yok');
+check(currentMaster.includes('DEC-273'), 'DEC-273 guncel ana sicilde yok');
+check(currentDecisionSummary.includes('DEC-274'), 'DEC-274 kullanici kararlari kaydinda yok');
+check(currentMaster.includes('DEC-274'), 'DEC-274 guncel ana sicilde yok');
+check(currentDecisionSummary.includes('DEC-275'), 'DEC-275 kullanici kararlari kaydinda yok');
+check(currentMaster.includes('DEC-275'), 'DEC-275 guncel ana sicilde yok');
 check(currentCommercial.includes('verify:commercial-baseline'), 'ticari aktif belge dogrulama komutunu gostermiyor');
 
 const workRegistry = await readJson(resolve(ROOT, '08_IS_LISTESI', '03_ANA_IS_SICILI.json'));
 const workMarkdown = await readText(resolve(ROOT, '08_IS_LISTESI', '01_ANA_IS_LISTESI.md'));
 const markdownRows = [...workMarkdown.matchAll(/^\| (IS-[0-9]{4}) \| ([^|]+) \| ([^|]+) \| (TAMAMLANDI|DEVAM|ACIK|BLOCKED|NOT_RUN) \| ([^|]+) \|$/gm)];
-check(workRegistry.toplamIs === 55, `makine is sayisi 55 olmali: ${workRegistry.toplamIs}`);
+check(workRegistry.toplamIs === 60, `makine is sayisi 60 olmali: ${workRegistry.toplamIs}`);
+check(localRuleIds.has('TK-015'), 'TK-015 acik tek seferli surum tahsisi kurali eksik');
+check(workRegistry.isler.some((item) => item.id === 'IS-0212'), 'IS-0212 surum tahsisi is kaydi eksik');
+check(localRuleIds.has('TK-016'), 'TK-016 kanonik Windows kurulu UAT kurali eksik');
+check(workRegistry.isler.some((item) => item.id === 'IS-0213'), 'IS-0213 kanonik Windows kurulu UAT is kaydi eksik');
+check(localRuleIds.has('TK-017'), 'TK-017 adversarial Windows teslim kanit kurali eksik');
+check(workRegistry.isler.some((item) => item.id === 'IS-0214'), 'IS-0214 adversarial Windows teslim kaniti is kaydi eksik');
+check(localRuleIds.has('TK-018'), 'TK-018 tum kayit ve test kapanisi kurali eksik');
+check(workRegistry.isler.some((item) => item.id === 'IS-0215'), 'IS-0215 tum kayit ve test kapanisi is kaydi eksik');
 check(workRegistry.isler.length === workRegistry.toplamIs, `is sicili sayisi uyusmuyor: ${workRegistry.isler.length}/${workRegistry.toplamIs}`);
 check(markdownRows.length === workRegistry.toplamIs, `markdown is sayisi uyusmuyor: ${markdownRows.length}/${workRegistry.toplamIs}`);
 check(workRegistry.tamamlandi === workRegistry.isler.filter((item) => item.durum === 'TAMAMLANDI').length, 'tamamlanan is sayisi drift etti');
@@ -293,6 +337,27 @@ const packageJson = await readJson(resolve(REPO, 'package.json'));
 const preflightSource = await readText(resolve(REPO, 'scripts', 'run-governed-preflight.mjs'));
 check(packageJson.scripts?.['verify:commercial-baseline'] === 'node docs/ticari-urun-temeli/11_OTOMASYON/dogrula-ticari-temel-alani.mjs', 'npm ticari temel dogrulama komutu eksik veya drift etti');
 check(preflightSource.includes('docs/ticari-urun-temeli/11_OTOMASYON/dogrula-ticari-temel-alani.mjs'), 'governed preflight ticari temel kapisini calistirmiyor');
+const mutationPolicy = await readJson(resolve(REPO, 'config', 'mutation-release-readiness-policy.json'));
+const mutationDependencyRegistryBytes = await readFile(resolve(REPO, 'config', 'change-impact-dependency-registry.json'));
+const mutationDependencyRegistry = JSON.parse(mutationDependencyRegistryBytes.toString('utf8'));
+const mutationDependencyRegistrySha256 = sha256(mutationDependencyRegistryBytes);
+check(mutationPolicy.schemaVersion === 2 && mutationPolicy.id === 'PPT-MUTATION-RELEASE-READINESS-V2'
+  && mutationPolicy.requirement === 'PR-235' && mutationPolicy.decision === 'DEC-270'
+  && mutationPolicy.strengthenedByRequirement === 'PR-240' && mutationPolicy.strengthenedByDecision === 'DEC-275'
+  && mutationPolicy.failClosed === true && mutationPolicy.waiverAllowed === false
+  && mutationPolicy.dependencyRegistry?.path === 'config/change-impact-dependency-registry.json'
+  && mutationPolicy.dependencyRegistry?.sha256 === mutationDependencyRegistrySha256
+  && mutationDependencyRegistry.strengthenedByRequirement === 'PR-240'
+  && mutationDependencyRegistry.strengthenedByDecision === 'DEC-275'
+  && mutationDependencyRegistry.failClosed === true
+  && mutationDependencyRegistry.unmatchedChangedPathEffect === 'BLOCK'
+  && Array.isArray(mutationDependencyRegistry.universalDependentRecords)
+  && mutationDependencyRegistry.universalDependentRecords.length === 13
+  && Array.isArray(mutationDependencyRegistry.universalAffectedVitestFiles)
+  && mutationDependencyRegistry.universalAffectedVitestFiles.length === 3
+  && mutationDependencyRegistry.pathRules?.some((rule) => rule.id === 'governed-source-safety-net'
+    && rule.dependentRecords?.length > 0 && rule.affectedVitestFiles?.length > 0),
+'PR-235 mutation-release readiness politikasi eksik veya gevsetilmis');
 
 const rootReadme = await readText(resolve(ROOT, '00_OKU_BENI.md'));
 check(rootReadme.startsWith('# ParsYuva Aile Yasam Merkezi Ticari Urun Temel Surumu'), 'ana baslik tam marka kuralina uymuyor');
@@ -312,6 +377,10 @@ const report = {
   canonicalRuleCount: canonicalRules.ruleCount,
   canonicalRuleSha256: canonicalRules.rulesSha256,
   decision: 'DEC-259',
+  decisions: ['DEC-259', 'DEC-270', 'DEC-274', 'DEC-275'],
+  requirements: ['PR-235', 'PR-239', 'PR-240'],
+  mutationWideRecordAndTestClosureVerified: failures.length === 0,
+  mutationDependencyRegistrySha256,
   workItemCount: workRegistry.isler.length,
   fileCount: allFiles.length,
   sourceFileCount: fileInventory.length,

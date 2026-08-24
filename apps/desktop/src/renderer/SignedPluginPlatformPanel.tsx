@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import type { SignedPluginInstallationView, SignedPluginPlatformCenterView } from '@ppt/domain';
 import { selectUiCopy, useLocalization } from './localization';
+import { toUserFacingErrorMessage } from './user-facing-error';
 
-const providerLabels:Record<string,string>={bank:'Banka',school:'Okul',matter:'Matter',fhir:'FHIR',onedrive:'OneDrive',
-  maps:'Harita',ocr:'OCR',ai:'AI',browser:'Tarayıcı'};
+const providerLabels:Readonly<Record<string,readonly [string,string]>>={bank:['Banka','Bank'],school:['Okul','School'],matter:['Akıllı ev','Smart home'],fhir:['Sağlık','Health'],onedrive:['Dosya depolama','File storage'],
+  maps:['Harita','Maps'],ocr:['Metin tanıma','Text recognition'],ai:['Yapay zekâ','AI'],browser:['Tarayıcı','Browser']};
+export const signedPluginProviderLabel=(kind:string,language:'tr'|'en'):string=>(providerLabels[kind]??['Haricî hizmet','External service'])[language==='tr'?0:1];
 const desiredStateLabel:Record<string,string>={enabled:'Etkin olması istendi',disabled:'Kapalı',emergency_disabled:'Acil kapatıldı'};
 
 export function SignedPluginPlatformPanel(){
@@ -14,12 +16,11 @@ export function SignedPluginPlatformPanel(){
     operations.current.set(key,next);return next;};
   const refresh=async():Promise<boolean>=>{if(!window.pardus)return false;setError('');
     try{setCenter(await window.pardus.getSignedPluginPlatformCenter());return true;}
-    catch(caught){setError(caught instanceof Error?caught.message:text('İmzalı eklenti merkezi yüklenemedi.','Signed plugin center could not be loaded.'));return false;}};
+    catch(caught){setError(toUserFacingErrorMessage(caught,text('İmzalı eklenti merkezi yüklenemedi.','Signed plugin center could not be loaded.')));return false;}};
   useEffect(()=>{void refresh();},[]);
   const mutate=async(key:string,run:(clientOperationId:string)=>Promise<unknown>)=>{setBusy(key);setError('');
     try{await run(operationId(key));operations.current.delete(key);if(!await refresh())setError(text('Değişiklik kaydedildi; güncel merkez yeniden yüklenemedi. Yenileyin.','The change was saved, but the current center could not be reloaded. Refresh the page.'));}
-    catch(caught){setError(caught instanceof Error?`${caught.message} ${text('Aynı işlem kimliğiyle yeniden deneyebilirsiniz.','You can retry with the same operation ID.')}`
-      :text('Eklenti durumu değiştirilemedi. Aynı işlem kimliği korunuyor.','Plugin state could not be changed. The same operation ID is preserved.'));}finally{setBusy('');}};
+    catch(caught){setError(`${toUserFacingErrorMessage(caught,text('Eklenti durumu değiştirilemedi.','Plugin state could not be changed.'))} ${text('Aynı işlem kimliğiyle yeniden deneyebilirsiniz.','You can retry with the same operation ID.')}`);}finally{setBusy('');}};
   const toggle=async(item:SignedPluginInstallationView)=>{if(!window.pardus)return;const enabled=item.desiredState!=='enabled';
     await mutate(`desired:${item.id}:${item.revision}:${enabled}`,clientOperationId=>window.pardus!.setSignedPluginDesiredState({
       clientOperationId,pluginId:item.id,expectedRevision:item.revision,enabled,
@@ -33,11 +34,11 @@ export function SignedPluginPlatformPanel(){
       clientOperationId,pluginId:item.id,expectedRevision:item.revision,targetVersion:item.previousVersion!,confirmation:'ONCEKI SURUME DON'}));};
   return <section className="signed-plugin-platform panel" aria-labelledby="signed-plugin-platform-title">
     <div className="panel-heading"><div><span className="eyebrow">{text('İmzalı aday kaydı','Signed candidate registry')}</span>
-      <h2 id="signed-plugin-platform-title">{text('Eklenti ve dış sağlayıcı platformu','Plugin and external provider platform')}</h2></div>
+      <h2 id="signed-plugin-platform-title">{text('Eklenti ve haricî hizmetler','Plugins and external services')}</h2></div>
       <button type="button" onClick={()=>void refresh()} disabled={Boolean(busy)}>{text('Yenile','Refresh')}</button></div>
     <div className="signed-plugin-truth" role="note"><strong>{text('Bu ekran eklenti kodu çalıştırmaz.','This screen does not execute plugin code.')}</strong>
-      <span>{text('Ed25519 manifesti, minimum yetki, veri amacı, retention, egress allowlist, SBOM, lisans ve provenance kanıtı kayıt sınırıdır.','The Ed25519 manifest, minimum permissions, data purpose, retention, egress allowlist, SBOM, license and provenance evidence form the registry boundary.')}</span>
-      <span>{text('Production imza güveni, gerçek sandbox/ağ izolasyonu ve banka, okul, Matter, FHIR, OneDrive, harita, OCR, AI veya tarayıcı bağlantısı doğrulanmadı.','Production signature trust, real sandbox/network isolation, and bank, school, Matter, FHIR, OneDrive, map, OCR, AI or browser connectivity have not been verified.')}</span></div>
+      <span>{text('Her eklenti için imza, en az yetki, veri amacı, saklama süresi, izinli bağlantılar, lisans ve kaynak doğrulaması aranır.','Each plugin requires a verified signature, minimum permissions, a data purpose, a retention period, allowed connections, a license, and source verification.')}</span>
+      <span>{text('Canlı sürüm imza güveni, çalışma alanı yalıtımı ve banka, okul, sağlık, akıllı ev, dosya, harita, metin tanıma, yapay zekâ veya tarayıcı bağlantıları doğrulanmamıştır.','Live-release signature trust, workspace isolation, and connections to banking, school, health, smart-home, file, map, text-recognition, AI, or browser services have not been verified.')}</span></div>
     {error&&<p className="status-message danger">{error}</p>}
     {!center?<p>{text('Yerel eklenti merkezi yükleniyor…','Loading the local plugin center…')}</p>:<>
       <div className="signed-plugin-summary"><span><strong>{center.installationTotal}</strong> {text('yerel aday','local candidates')}</span>
@@ -48,10 +49,10 @@ export function SignedPluginPlatformPanel(){
       {center.installations.length===0?<p>{text('Yerel güvenilen imza anahtarıyla doğrulanmış eklenti adayı yok.','No plugin candidate has been verified with a locally trusted signing key.')}</p>:center.installations.map(item=><article className="signed-plugin-card" key={item.id}>
         <div className="signed-plugin-card-heading"><div><strong>{item.displayName}</strong><small>{item.id} · {item.currentRelease.version}</small></div>
           <span>{language==='tr'?desiredStateLabel[item.desiredState]:({enabled:'Enable requested',disabled:'Disabled',emergency_disabled:'Emergency disabled'} as const)[item.desiredState]}</span></div>
-        <p>{item.currentRelease.providerKinds.map(kind=>language==='tr'?(providerLabels[kind]??kind):({bank:'Bank',school:'School',matter:'Matter',fhir:'FHIR',onedrive:'OneDrive',maps:'Maps',ocr:'OCR',ai:'AI',browser:'Browser'} as Record<string,string>)[kind]??kind).join(', ')}</p>
-        <small>{item.currentRelease.capabilityCodes.join(' · ')} · {item.currentRelease.egressMode==='none'?text('Ağ yok','No network'):`${item.currentRelease.egressHostCount} ${text('exact egress hostu','exact egress hosts')}`}</small>
-        <small>{text('Minimum uygulama','Minimum application')} {item.currentRelease.minimumHostVersion} · {text('manifest','manifest')} {item.currentRelease.manifestStatus==='valid'?text('geçerli','valid'):text('süresi dolmuş','expired')} · {text('sürüm geçmişi','release history')} {item.releaseHistoryCount}/64.</small>
-        <small>{text('İmza, SBOM, lisans ve provenance hash kanıtları mevcut · sandbox beyanı var; runtime doğrulaması yok. Otomatik retention kurtarma yok.','Signature, SBOM, license and provenance hash evidence are present · a sandbox declaration exists, but runtime verification does not. There is no automatic retention recovery.')}</small>
+        <p>{item.currentRelease.providerKinds.map(kind=>signedPluginProviderLabel(kind,language)).join(', ')}</p>
+        <small>{item.currentRelease.capabilityCodes.length} {text('izin alanı','permission areas')} · {item.currentRelease.egressMode==='none'?text('Ağ bağlantısı yok','No network connection'):`${item.currentRelease.egressHostCount} ${text('izinli ağ hedefi','allowed network destinations')}`}</small>
+        <small>{text('En düşük uygulama sürümü','Minimum application version')} {item.currentRelease.minimumHostVersion} · {text('kayıt belgesi','registry document')} {item.currentRelease.manifestStatus==='valid'?text('geçerli','valid'):text('süresi dolmuş','expired')} · {text('sürüm geçmişi','release history')} {item.releaseHistoryCount}/64.</small>
+        <small>{text('İmza, lisans ve kaynak bütünlüğü kayıtları mevcut · çalışma alanı yalıtımı bildirilmiş, ancak canlı çalışmada doğrulanmamıştır. Eski kayıtlar otomatik silinmez.','Signature, license, and source-integrity records are present. Workspace isolation is declared but has not been verified during live operation. Older records are not deleted automatically.')}</small>
         <div className="signed-plugin-actions"><button type="button" disabled={Boolean(busy)||item.desiredState==='emergency_disabled'
           ||(item.desiredState!=='enabled'&&item.currentRelease.manifestStatus==='expired')} onClick={()=>void toggle(item)}>
           {item.desiredState==='enabled'?text('Kapat','Disable'):text('Etkin olmasını iste','Request enablement')}</button>

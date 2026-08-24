@@ -2,9 +2,10 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 
 const node = process.execPath;
+const noWrite = process.argv.includes('--no-write');
 const ratchet = JSON.parse(await readFile('config/ppk-015-network-egress-current-ratchet.json', 'utf8'));
 const tasks = [
-  { id: 'historical-current-contract-ratchet', args: ['scripts/verify-32-k-ppk-015-network-egress-contract.mjs'], expect: 'historical/current contract: PASS' },
+  { id: 'historical-current-contract-ratchet', args: ['scripts/verify-32-k-ppk-015-network-egress-contract.mjs', ...(noWrite ? ['--no-write'] : [])], expect: 'historical/current contract: PASS' },
   { id: 'network-egress-source-gate', args: ['scripts/verify-network-egress-boundary.mjs'], expect: '"status": "PASS"' },
   { id: 'ppk015-targeted-policy-use-case', args: ['node_modules/vitest/vitest.mjs', 'run', 'apps/desktop/tests/ppk015-network-egress-policy.test.ts', '--maxWorkers=1'], expect: '19 passed' },
   { id: 'ppk015-secure-oidc-network-adapter', args: ['node_modules/vitest/vitest.mjs', 'run', 'apps/desktop/tests/secure-oidc-network-adapter.test.ts', '--maxWorkers=1'], expect: '12 passed' },
@@ -12,7 +13,7 @@ const tasks = [
   { id: 'ppk014-versioned-api-regression', args: ['node_modules/vitest/vitest.mjs', 'run', 'apps/core-service/tests/ppk014-versioned-core-service-api-boundary.test.ts', '--maxWorkers=1'], expect: '18 passed' },
   { id: 'ppk013-data-access-regression', args: ['node_modules/vitest/vitest.mjs', 'run', 'apps/desktop/tests/ppk013-client-data-access-boundary.test.ts', '--maxWorkers=1'], expect: '20 passed' },
   { id: 'ppk012-offline-cache-regression', args: ['node_modules/vitest/vitest.mjs', 'run', 'apps/desktop/tests/ppk012-offline-capability-lease-cache-fence.test.ts', '--maxWorkers=1'], expect: '12 passed' },
-  { id: 'current-migration-ratchet', before: [['node_modules/typescript/bin/tsc', '-p', 'packages/database/tsconfig.json']], args: ['scripts/verify-database-migrations.mjs'], expect: `"version": ${ratchet.currentBoundary.latestDatabaseMigration}` },
+  { id: 'current-migration-ratchet', before: [['node_modules/typescript/bin/tsc', '-p', 'packages/database/tsconfig.json']], args: ['scripts/verify-database-migrations.mjs', ...(noWrite ? ['--no-write'] : [])], expect: `"version": ${ratchet.currentBoundary.latestDatabaseMigration}` },
   { id: 'root-typescript', args: ['node_modules/typescript/bin/tsc', '-p', 'tsconfig.json', '--noEmit'], expect: '' }
 ];
 
@@ -50,8 +51,10 @@ const report = {
   realDataTransferPerformed: false,
   generatedAt: new Date().toISOString()
 };
-await mkdir('artifacts/validation', { recursive: true });
-await writeFile('artifacts/validation/32-K-ppk-015-network-egress-runtime.json', `${JSON.stringify(report, null, 2)}\n`);
+if (!noWrite) {
+  await mkdir('artifacts/validation', { recursive: true });
+  await writeFile('artifacts/validation/32-K-ppk-015-network-egress-runtime.json', `${JSON.stringify(report, null, 2)}\n`);
+}
 if (failures.length) {
   console.error(`32-K PPK-015 runtime: FAIL (${failures.length}/${checks.length}).`);
   for (const failure of failures) console.error(`- ${failure.id}`);

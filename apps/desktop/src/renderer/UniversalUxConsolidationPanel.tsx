@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import type { UnifiedAuthorizedSearchView } from '@ppt/domain';
 import { selectUiCopy, useLocalization } from './localization';
+import { toUserFacingErrorMessage } from './user-facing-error';
 
 const modes = ['standard','easy_read','guest','child','senior','caregiver','kitchen_tablet'] as const;
 const modeLabel:Record<(typeof modes)[number],string> = {
@@ -10,6 +11,8 @@ const modeLabel:Record<(typeof modes)[number],string> = {
 const moduleLabel:Record<UnifiedAuthorizedSearchView['items'][number]['module'],string> = {
   family:'Aile',event:'Olay',archive:'Belge',finance:'Finans',health:'Sağlık',life:'Yaşam'
 };
+const homeCards = ['today','inbox','tasks','health'] as const;
+type HomeCard = (typeof homeCards)[number];
 
 export function UniversalUxConsolidationPanel() {
   const {language}=useLocalization();
@@ -19,7 +22,10 @@ export function UniversalUxConsolidationPanel() {
   const [searchError,setSearchError] = useState('');
   const [searching,setSearching] = useState(false);
   const [mode,setMode] = useState<(typeof modes)[number]>('standard');
-  const [cards,setCards] = useState(['today','inbox','tasks','health']);
+  const [cards,setCards] = useState<HomeCard[]>([...homeCards]);
+  const cardLabels:Record<HomeCard,string> = {
+    today:text('Bugün','Today'),inbox:text('Gelenler','Inbox'),tasks:text('Görevler','Tasks'),health:text('Sağlık','Health')
+  };
   const searchGeneration = useRef(0);
   useEffect(() => () => { searchGeneration.current += 1; }, []);
 
@@ -36,7 +42,7 @@ export function UniversalUxConsolidationPanel() {
     } catch (caught) {
       if (generation === searchGeneration.current) {
         setResult(undefined);
-        setSearchError(caught instanceof Error ? caught.message : text('Yetkili evrensel arama tamamlanamadı.','Authorized universal search could not be completed.'));
+        setSearchError(toUserFacingErrorMessage(caught,text('Yetkili evrensel arama tamamlanamadı.','Authorized universal search could not be completed.')));
       }
     } finally {
       if (generation === searchGeneration.current) setSearching(false);
@@ -56,10 +62,10 @@ export function UniversalUxConsolidationPanel() {
     <div className="communication-recording-truth" role="note">
       <strong>{text('Bu yüzeydeki veri araması üretim kaynaklarının çağrı anındaki merkezi okuma yetkileriyle çalışır.','Search on this surface uses the centralized read permissions of production sources at call time.')}</strong>
       <span>{text('Aile, olay, belge, finans, sağlık ve yaşam kaynaklarından biri yetkilendirilemezse kısmi sonuç gösterilmez.','No partial result is shown if any family, event, document, finance, health or life source cannot be authorized.')}</span>
-      <span>{text('Arama sorgusu IPC yanıtında yankılanmaz ve kalıcı arama geçmişine yazılmaz; ağ kullanılmaz.','The search query is not echoed in the IPC response or written to persistent history; the network is not used.')}</span>
-      <span>{text('Gerçek Windows installer yaşam döngüsü ve 7 günlük soak kanıtı henüz yoktur.','Real Windows installer lifecycle and seven-day soak evidence are not yet available.')}</span>
-      <span>{text('QR/barkod, kamera kırpma, sesle form, Windows mini paneli ve Apple widget sağlayıcıları yapılandırılmamıştır.','QR/barcode, camera cropping, voice form, Windows mini-panel and Apple widget providers are not configured.')}</span>
-      <span>{text('Politika zayıflatma otomatik etkinleşmez; açık kullanıcı kararı, yeni sürüm, risk analizi ve rollback kanıtı gerekir.','Policy weakening is never enabled automatically; it requires an explicit user decision, a new release, risk analysis and rollback evidence.')}</span>
+      <span>{text('Aramanız kaydedilmez ve bu bilgisayardan dışarı gönderilmez.','Your search is not saved or sent outside this computer.')}</span>
+      <span>{text('Kurulum deneyimi uzun süreli kullanım doğrulaması tamamlanana kadar geliştirme aşamasındadır.','The installation experience remains in development until long-term usage verification is complete.')}</span>
+      <span>{text('QR ve barkod okuma, kamera kırpma, sesle form doldurma, mini panel ve Apple araçları henüz kullanıma hazır değildir.','QR and barcode scanning, camera cropping, voice form entry, the mini panel, and Apple tools are not yet ready to use.')}</span>
+      <span>{text('Güvenlik düzeyi kendiliğinden düşürülmez; böyle bir değişiklik yalnız açık kullanıcı kararı ve doğrulanmış geri dönüş planıyla yapılabilir.','The security level is never lowered automatically; such a change requires an explicit user decision and a verified rollback plan.')}</span>
     </div>
     <div className="workspace-grid"><section><h3>{text('Yetki filtreli evrensel arama','Permission-filtered universal search')}</h3>
       <form onSubmit={event => void search(event)}><label htmlFor="universal-ux-search">{text('Tüm modüllerde ara','Search all modules')}</label>
@@ -81,11 +87,11 @@ export function UniversalUxConsolidationPanel() {
         <option key={item} value={item}>{language==='tr'?modeLabel[item]:({standard:'Standard',easy_read:'Easy read',guest:'Guest',child:'Child',senior:'Senior',caregiver:'Caregiver',kitchen_tablet:'Kitchen tablet'} as const)[item]}</option>)}</select></label>
       <p>{text('Seçili mod:','Selected mode:')} <strong>{language==='tr'?modeLabel[mode]:({standard:'Standard',easy_read:'Easy read',guest:'Guest',child:'Child',senior:'Senior',caregiver:'Caregiver',kitchen_tablet:'Kitchen tablet'} as const)[mode]}</strong>. {text('Bu oturumdaki önizleme kalıcı tercih olarak kaydedilmez.','The preview in this session is not saved as a persistent preference.')}</p>
     </section></div>
-    <section><h3>{text('Ana ekran kart sırası','Home card order')}</h3><ol>{cards.map((card,index) => <li key={card}><span>{card}</span>{' '}
-      <button type="button" onClick={() => move(index,-1)} disabled={index === 0} aria-label={`${card} ${text('yukarı','up')}`}>↑</button>{' '}
-      <button type="button" onClick={() => move(index,1)} disabled={index === cards.length - 1} aria-label={`${card} ${text('aşağı','down')}`}>↓</button>
+    <section><h3>{text('Ana ekran kart sırası','Home card order')}</h3><ol>{cards.map((card,index) => <li key={card}><span>{cardLabels[card]}</span>{' '}
+      <button type="button" onClick={() => move(index,-1)} disabled={index === 0} aria-label={`${cardLabels[card]} ${text('yukarı','up')}`}>↑</button>{' '}
+      <button type="button" onClick={() => move(index,1)} disabled={index === cards.length - 1} aria-label={`${cardLabels[card]} ${text('aşağı','down')}`}>↓</button>
     </li>)}</ol><small>{text('Sürükle-bırak sözleşmesinin klavye erişilebilir sıralama eşdeğeri; kalıcılık/API bileşimi henüz kapalıdır.','Keyboard-accessible ordering equivalent for the drag-and-drop contract; persistence and API composition are not yet enabled.')}</small></section>
-    <div className="communication-recording-truth"><span>{text('Çevrimdışı gösterge: yerel veri · son doğrulanmış senkronizasyon: yok','Offline indicator: local data · last verified synchronization: none')}</span>
-      <span>{text('Haftalık özet ve sessiz saatler 34-G yerel politika modeline bağlıdır; gerçek bildirim teslimi yapılmaz.','Weekly summaries and quiet hours are governed by the 34-G local policy model; no real notification delivery is performed.')}</span></div>
+    <div className="communication-recording-truth"><span>{text('Çevrimdışı gösterge: yerel veri · son doğrulanmış eşitleme: yok','Offline indicator: local data · last verified synchronization: none')}</span>
+      <span>{text('Haftalık özet ve sessiz saatler yalnız yerel ayarlara göre çalışır; bildirimler dış bir hizmet üzerinden gönderilmez.','Weekly summaries and quiet hours follow local settings only; notifications are not delivered through an external service.')}</span></div>
   </section>;
 }

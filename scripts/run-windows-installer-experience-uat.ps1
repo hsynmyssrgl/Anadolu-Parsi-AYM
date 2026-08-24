@@ -6,7 +6,11 @@ param(
 
   [Parameter(Mandatory = $true)]
   [ValidateNotNullOrEmpty()]
-  [string]$EvidenceRoot
+  [string]$EvidenceRoot,
+
+  [Parameter(Mandatory = $true)][ValidateNotNullOrEmpty()][string]$PackageProvenance,
+  [Parameter(Mandatory = $true)][ValidateNotNullOrEmpty()][string]$GovernedPreflight,
+  [Parameter(Mandatory = $true)][ValidateNotNullOrEmpty()][string]$ExpectedReleaseId
 )
 
 Set-StrictMode -Version Latest
@@ -15,6 +19,9 @@ $ErrorActionPreference = 'Stop'
 $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $releaseRoot = [System.IO.Path]::GetFullPath((Join-Path $repositoryRoot 'apps\desktop\release'))
 $validationRoot = [System.IO.Path]::GetFullPath((Join-Path $repositoryRoot 'artifacts\validation'))
+$canonicalEvidenceCategoryParent = [System.IO.Path]::GetFullPath((Join-Path $validationRoot 'installer-experience'))
+$packageVerifierPath = [System.IO.Path]::GetFullPath((Join-Path $repositoryRoot 'scripts\verify-windows-package-provenance.mjs'))
+$producerPath = [System.IO.Path]::GetFullPath($PSCommandPath)
 
 function Test-StrictDescendantPath {
   param(
@@ -87,6 +94,62 @@ function Assert-NoReparseAncestors {
   }
 }
 
+function Assert-EvidenceRunGuard {
+  param(
+    [Parameter(Mandatory = $true)]$Guard,
+    [Parameter(Mandatory = $true)][string]$RunRoot,
+    [Parameter(Mandatory = $true)][string]$Boundary
+  )
+  Assert-NoReparseAncestors -Candidate $RunRoot -Boundary $Boundary
+  $item = Get-Item -LiteralPath $Guard.Path -Force
+  if ($item.PSIsContainer -or (($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) -ne 0)) {
+    throw 'Evidence run guard is not a regular non-reparse file.'
+  }
+  $Guard.Stream.Flush($true)
+  $position = $Guard.Stream.Position
+  $Guard.Stream.Position = 0
+  $readback = [byte[]]::new($Guard.Bytes.Length)
+  $offset = 0
+  while ($offset -lt $readback.Length) {
+    $count = $Guard.Stream.Read($readback, $offset, $readback.Length - $offset)
+    if ($count -eq 0) { break }
+    $offset += $count
+  }
+  $Guard.Stream.Position = $position
+  if ($offset -ne $Guard.Bytes.Length -or
+      [Convert]::ToBase64String($readback) -cne [Convert]::ToBase64String($Guard.Bytes)) {
+    throw 'Evidence run guard readback changed.'
+  }
+}
+
+function New-EvidenceRunGuard {
+  param(
+    [Parameter(Mandatory = $true)][string]$RunRoot,
+    [Parameter(Mandatory = $true)][string]$Boundary
+  )
+  Assert-NoReparseAncestors -Candidate $RunRoot -Boundary $Boundary
+  $guardPath = Join-Path $RunRoot '.ppt-evidence-run.guard'
+  $guardBytes = [Text.UTF8Encoding]::new($false).GetBytes("PPT-EXCLUSIVE-EVIDENCE-RUN-ROOT-GUARD-V1|$PID|$([guid]::NewGuid().ToString('D'))`n")
+  $guardStream = [IO.File]::Open($guardPath, [IO.FileMode]::CreateNew, [IO.FileAccess]::ReadWrite, [IO.FileShare]::Read)
+  $guardStream.Write($guardBytes, 0, $guardBytes.Length)
+  $guardStream.Flush($true)
+  $guard = [pscustomobject]@{ Path = $guardPath; Bytes = $guardBytes; Stream = $guardStream }
+  Assert-EvidenceRunGuard -Guard $guard -RunRoot $RunRoot -Boundary $Boundary
+  return $guard
+}
+
+function Close-EvidenceRunGuard {
+  param(
+    [Parameter(Mandatory = $true)]$Guard,
+    [Parameter(Mandatory = $true)][string]$RunRoot,
+    [Parameter(Mandatory = $true)][string]$Boundary
+  )
+  Assert-EvidenceRunGuard -Guard $Guard -RunRoot $RunRoot -Boundary $Boundary
+  $Guard.Stream.Dispose()
+  Remove-Item -LiteralPath $Guard.Path -Force
+  if (Test-Path -LiteralPath $Guard.Path) { throw 'Evidence run guard cleanup absence readback failed.' }
+}
+
 if (-not (Test-IsExplicitWindowsAbsolutePath -Path $InstallerPath)) {
   throw 'InstallerPath must be an explicit absolute path.'
 }
@@ -95,7 +158,11 @@ if (-not (Test-IsExplicitWindowsAbsolutePath -Path $EvidenceRoot)) {
 }
 
 $installerFullPath = [System.IO.Path]::GetFullPath($InstallerPath)
-$evidenceFullPath = [System.IO.Path]::GetFullPath($EvidenceRoot)
+$evidenceCategoryParent = [System.IO.Path]::GetFullPath($EvidenceRoot)
+$runId = [guid]::NewGuid().ToString('D')
+$evidenceFullPath = [System.IO.Path]::GetFullPath((Join-Path $evidenceCategoryParent $runId))
+$packageFullPath = [System.IO.Path]::GetFullPath($PackageProvenance)
+$preflightFullPath = [System.IO.Path]::GetFullPath($GovernedPreflight)
 
 # Refuse before creating evidence or starting a process when the exact installer is absent.
 if (-not (Test-Path -LiteralPath $installerFullPath -PathType Leaf)) {
@@ -112,13 +179,24 @@ $installerItem = Get-Item -LiteralPath $installerFullPath
 if (($installerItem.Attributes -band [System.IO.FileAttributes]::ReparsePoint) -ne 0) {
   throw 'InstallerPath cannot be a reparse point.'
 }
-if (-not (Test-StrictDescendantPath -Candidate $evidenceFullPath -Parent $validationRoot)) {
-  throw "EvidenceRoot must remain inside the governed validation directory: $validationRoot"
+if (-not $evidenceCategoryParent.Equals($canonicalEvidenceCategoryParent, [System.StringComparison]::OrdinalIgnoreCase)) {
+  throw "EvidenceRoot must be the exact installer-experience category parent: $canonicalEvidenceCategoryParent"
 }
+Assert-NoReparseAncestors -Candidate $evidenceCategoryParent -Boundary $validationRoot
 Assert-NoReparseAncestors -Candidate $evidenceFullPath -Boundary $validationRoot
 if (Test-Path -LiteralPath $evidenceFullPath) {
-  throw "EvidenceRoot already exists; evidence is never overwritten: $evidenceFullPath"
+  throw "Generated UUID evidence run root already exists; partial runs are never recovered or overwritten: $evidenceFullPath"
 }
+foreach ($bindingPath in @($packageFullPath, $preflightFullPath)) {
+  if (-not (Test-StrictDescendantPath -Candidate $bindingPath -Parent $validationRoot)) { throw "Evidence binding must remain under validation: $bindingPath" }
+  Assert-NoReparseAncestors -Candidate $bindingPath -Boundary $validationRoot
+}
+if (-not $packageFullPath.Equals((Join-Path $validationRoot 'windows-package-provenance.json'), [System.StringComparison]::OrdinalIgnoreCase)) { throw 'PackageProvenance must use the canonical fixed validation path.' }
+if (-not $preflightFullPath.Equals((Join-Path $validationRoot 'governed-preflight.json'), [System.StringComparison]::OrdinalIgnoreCase)) { throw 'GovernedPreflight must use the canonical fixed validation path.' }
+$verifiedPackageJson = & (Get-Command node -ErrorAction Stop).Source $packageVerifierPath --package-provenance $packageFullPath --governed-preflight $preflightFullPath --expected-release-id $ExpectedReleaseId
+if ($LASTEXITCODE -ne 0) { throw 'Installer experience package provenance schema2/PR-235 live verification failed.' }
+$verifiedPackage = $verifiedPackageJson | ConvertFrom-Json
+if ($verifiedPackage.status -ne 'PASS') { throw 'Installer experience package provenance verification did not PASS.' }
 
 $runnerIsAdministrator = ([Security.Principal.WindowsPrincipal]::new(
   [Security.Principal.WindowsIdentity]::GetCurrent()
@@ -136,7 +214,11 @@ if (-not $channelMatch.Success) {
   throw "Installer filename does not match the governed channel/version format: $($installerItem.Name)"
 }
 $releaseChannel = $channelMatch.Groups[1].Value
-$expectedInstalledRoot = "C:\Program Files\PPT\ParsYuva\$releaseChannel"
+$expectedInstalledRoot = "C:\Program Files\PPT\ParsYuva-$releaseChannel"
+if ($releaseChannel -ne 'Bronze') { throw 'Installer experience final-delivery UAT currently accepts only the Bronze channel.' }
+$expectedApplicationVersion = ([string]$verifiedPackage.release).Substring('Bronze '.Length)
+$expectedInstallerPath = [System.IO.Path]::GetFullPath((Join-Path $releaseRoot "ParsYuva-Bronze-$expectedApplicationVersion.exe"))
+if (-not $installerFullPath.Equals($expectedInstallerPath, [System.StringComparison]::OrdinalIgnoreCase)) { throw 'InstallerPath is not the canonical exact-release Bronze installer.' }
 Add-Type -AssemblyName UIAutomationClient
 Add-Type -AssemblyName UIAutomationTypes
 Add-Type -AssemblyName System.Drawing
@@ -582,9 +664,24 @@ $installerIdentity = [ordered]@{
   authenticodeStatus = $installerSignature.Status.ToString()
   signerSubject = if ($null -ne $installerSignature.SignerCertificate) { $installerSignature.SignerCertificate.Subject } else { $null }
 }
+$packageReceipt = Get-Content -LiteralPath $packageFullPath -Raw -Encoding UTF8 | ConvertFrom-Json
+if ($packageReceipt.schemaVersion -ne 2 -or $packageReceipt.id -ne 'PPT-WINDOWS-PACKAGE-PROVENANCE-V2' -or
+    $packageReceipt.artifacts.installer.sha256 -ne $installerIdentity.sha256 -or
+    [long]$packageReceipt.artifacts.installer.sizeBytes -ne [long]$installerIdentity.sizeBytes) {
+  throw 'Installer experience artifact is not bound to the verified package provenance.'
+}
+if ([DateTimeOffset]::Parse([string]$packageReceipt.generatedAt) -ge $runStartedAt) { throw 'Installer experience UAT is not fresh after package generation.' }
+$packageBinding = [ordered]@{ path = $packageFullPath; sizeBytes = (Get-Item -LiteralPath $packageFullPath).Length; sha256 = Get-DotNetFileSha256 -Path $packageFullPath }
+$preflightBinding = [ordered]@{ path = $preflightFullPath; sizeBytes = (Get-Item -LiteralPath $preflightFullPath).Length; sha256 = Get-DotNetFileSha256 -Path $preflightFullPath }
+$producerBinding = [ordered]@{ path = 'scripts/run-windows-installer-experience-uat.ps1'; sizeBytes = (Get-Item -LiteralPath $producerPath).Length; sha256 = Get-DotNetFileSha256 -Path $producerPath }
 
+if (-not (Test-Path -LiteralPath $evidenceCategoryParent)) {
+  New-Item -ItemType Directory -Path $evidenceCategoryParent | Out-Null
+}
+Assert-NoReparseAncestors -Candidate $evidenceCategoryParent -Boundary $validationRoot
 New-Item -ItemType Directory -Path $evidenceFullPath | Out-Null
 Assert-NoReparseAncestors -Candidate $evidenceFullPath -Boundary $validationRoot
+$evidenceGuard = New-EvidenceRunGuard -RunRoot $evidenceFullPath -Boundary $validationRoot
 
 try {
   $rootProcess = Start-Process -FilePath $installerFullPath -PassThru
@@ -705,13 +802,28 @@ $status = if (
   $installationUnchanged
 ) { 'PASS' } else { 'FAIL' }
 
+$completedAt = [System.DateTimeOffset]::UtcNow
 $report = [ordered]@{
-  schemaVersion = 1
+  schemaVersion = 2
+  id = 'PPT-WINDOWS-INSTALLER-EXPERIENCE-UAT-V2'
+  evidenceKind = 'WINDOWS_INSTALLER_EXPERIENCE_UAT'
   product = 'ParsYuva Aile Yaşam Merkezi'
   purpose = 'Real NSIS custom welcome transition and narration invocation UAT'
   status = $status
+  exitCode = if ($status -eq 'PASS') { 0 } else { 1 }
+  runId = $runId
+  evidenceRoot = $evidenceFullPath
   startedAt = $runStartedAt.ToString('O')
-  completedAt = [System.DateTimeOffset]::UtcNow.ToString('O')
+  completedAt = $completedAt.ToString('O')
+  generatedAt = $completedAt.ToString('O')
+  release = [string]$verifiedPackage.release
+  releaseId = $ExpectedReleaseId
+  sourceCommit = [string]$verifiedPackage.sourceCommit
+  governedSourceFingerprintSha256 = [string]$verifiedPackage.governedSourceFingerprintSha256
+  canonicalRuleRegistrySha256 = [string]$verifiedPackage.canonicalRuleRegistrySha256
+  packageProvenance = $packageBinding
+  governedPreflight = $preflightBinding
+  producer = $producerBinding
   installer = $installerIdentity
   environment = [ordered]@{
     osVersion = [System.Environment]::OSVersion.VersionString
@@ -754,9 +866,20 @@ $report = [ordered]@{
 
 $reportPath = Join-Path $evidenceFullPath 'windows-installer-experience-uat.json'
 $temporaryReportPath = Join-Path $evidenceFullPath ".windows-installer-experience-uat.$PID.tmp"
-$json = $report | ConvertTo-Json -Depth 12
-[System.IO.File]::WriteAllText($temporaryReportPath, "$json`n", [System.Text.UTF8Encoding]::new($false))
+$reportBytes = [System.Text.UTF8Encoding]::new($false).GetBytes(($report | ConvertTo-Json -Depth 12) + "`n")
+Assert-EvidenceRunGuard -Guard $evidenceGuard -RunRoot $evidenceFullPath -Boundary $validationRoot
+Assert-NoReparseAncestors -Candidate $reportPath -Boundary $evidenceFullPath
+$reportStream = [System.IO.File]::Open($temporaryReportPath, [System.IO.FileMode]::CreateNew, [System.IO.FileAccess]::Write, [System.IO.FileShare]::None)
+try { $reportStream.Write($reportBytes, 0, $reportBytes.Length); $reportStream.Flush($true) } finally { $reportStream.Dispose() }
 [System.IO.File]::Move($temporaryReportPath, $reportPath)
+Assert-EvidenceRunGuard -Guard $evidenceGuard -RunRoot $evidenceFullPath -Boundary $validationRoot
+Assert-NoReparseAncestors -Candidate $reportPath -Boundary $evidenceFullPath
+$reportReadback = [System.IO.File]::ReadAllBytes($reportPath)
+if ($reportReadback.Length -ne $reportBytes.Length -or
+    [Convert]::ToBase64String($reportReadback) -cne [Convert]::ToBase64String($reportBytes)) {
+  throw 'Installer experience receipt atomic readback mismatch.'
+}
+Close-EvidenceRunGuard -Guard $evidenceGuard -RunRoot $evidenceFullPath -Boundary $validationRoot
 
 Write-Host "Windows installer experience UAT: $status"
 Write-Host "Evidence: $reportPath"

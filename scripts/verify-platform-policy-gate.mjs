@@ -4,6 +4,7 @@ import { join, relative } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const baseline = JSON.parse(await readFile('config/platform-policy-legacy-bypass-baseline.json', 'utf8'));
+const noWrite = process.argv.includes('--no-write');
 const authorizationFindings = [];
 const presentationConditions = [];
 const pattern = /role\s*[!=]==?\s*['"]family_admin['"]|roles\.includes\(['"]family_admin['"]\)/u;
@@ -35,9 +36,9 @@ await walk('apps');
 await walk('packages');
 
 const runtime = spawnSync(process.execPath, ['--experimental-strip-types', 'scripts/verify-platform-policy-runtime.mjs'], { encoding: 'utf8' });
-const astGate = spawnSync(process.execPath, ['scripts/verify-platform-policy-ast-gate.mjs'], { encoding: 'utf8' });
-const capabilityManifestGate = spawnSync(process.execPath, ['scripts/verify-platform-capability-manifest-gate.mjs'], { encoding: 'utf8' });
-const applicationSecurityProfileGate = spawnSync(process.execPath, ['scripts/verify-application-security-profile-gate.mjs'], { encoding: 'utf8' });
+const astGate = spawnSync(process.execPath, ['scripts/verify-platform-policy-ast-gate.mjs', ...(noWrite ? ['--no-write'] : [])], { encoding: 'utf8' });
+const capabilityManifestGate = spawnSync(process.execPath, ['scripts/verify-platform-capability-manifest-gate.mjs', ...(noWrite ? ['--no-write'] : [])], { encoding: 'utf8' });
+const applicationSecurityProfileGate = spawnSync(process.execPath, ['scripts/verify-application-security-profile-gate.mjs', ...(noWrite ? ['--no-write'] : [])], { encoding: 'utf8' });
 const policyServiceAvailabilityGate = spawnSync(process.execPath, ['scripts/verify-policy-service-availability-boundary.mjs'], { encoding: 'utf8' });
 const failures = [];
 if (authorizationFindings.length > 0) failures.push(`direct authorization role bypasses=${authorizationFindings.length}`);
@@ -63,8 +64,10 @@ const report = {
   authorizationFindings,
   generatedAt: new Date().toISOString()
 };
-await mkdir('artifacts/validation', { recursive: true });
-await writeFile('artifacts/validation/platform-policy-gate.json', `${JSON.stringify(report, null, 2)}\n`);
+if (!noWrite) {
+  await mkdir('artifacts/validation', { recursive: true });
+  await writeFile('artifacts/validation/platform-policy-gate.json', `${JSON.stringify(report, null, 2)}\n`);
+}
 if (failures.length) {
   console.error(failures.join('\n'));
   process.exit(1);

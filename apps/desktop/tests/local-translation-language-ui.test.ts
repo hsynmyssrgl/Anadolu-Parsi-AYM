@@ -40,5 +40,7 @@ describe('34-E local-first translation renderer surface', () => {
     expect(styles).toContain('.local-translation');
     expect(styles).toContain('.local-translation-truth');
     expect(styles).toContain('.local-translation-grid');
+    expect(panel).toContain("text('Tercih ayarını kaydet','Save preference')");
+    for(const technical of ['Tercih metadata’sını kaydet','Onay yalnız metadata’dır','metadata işlemi','Sağlayıcı modu','Dış sağlayıcı önizlemesi'])expect(panel).not.toContain(technical);
   });
 });

@@ -85,12 +85,12 @@ const definitions = [
   ['decision and threat model record bounded restart recovery without false atomicity or acceptance claim', hasAll(decision,
     ['countsAsRequirementPass=false', 'Process restart sonrası renderer kimliği değişse bile', 'genel filesystem/SQLite crash atomikliği', 'NOT_RUN'])
       && hasAll(threat, ['filesystem ile SQLite arasında sahte atomiklik', 'kısmi sonuç dönmez', 'certification'])],
-  ['PPK ratchets are pinned exactly while requirement remains open', scope.validation?.ppk021?.scannedProductionFiles === 588
-    && scope.validation?.ppk021?.exactPrivilegedSurfaceCount === 895
-    && scope.validation?.ppk021?.exactAllowlistSha256 === 'fad3ceeb9485bffc9d6f9878f7bb486f56a73b4aa5d045580471c70a49e59da6'
-    && scope.validation?.ppk022?.scannedProductionFiles === 588
+  ['PPK ratchets are pinned exactly while requirement remains open', scope.validation?.ppk021?.scannedProductionFiles === 590
+    && scope.validation?.ppk021?.exactPrivilegedSurfaceCount === 897
+    && scope.validation?.ppk021?.exactAllowlistSha256 === '9ea5b846e552e760fbd8dd5f8bee7fb83988ef19bb93e3bbd4ac0465c4b71205'
+    && scope.validation?.ppk022?.scannedProductionFiles === 590
     && scope.validation?.ppk022?.exactCapabilitySurfaceCount === 447
-    && scope.validation?.ppk022?.exactCapabilityManifestSha256 === '2ac32190c1b40c455093841eb2456c06a168c9aaf519068a14f570705b8a177a'
+    && scope.validation?.ppk022?.exactCapabilityManifestSha256 === '54061e189e7771868552efa869c69a75426f24e4edd846af1c62496c82f0e1d6'
     && scope.validation?.countsAsRequirementPass === false && inventory.validation?.countsAsRequirementPass === false]
 ];
 

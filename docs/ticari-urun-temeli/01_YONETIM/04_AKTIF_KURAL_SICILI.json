@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "id": "PARSYUVA-AILE-YASAM-MERKEZI-TICARI-KURAL-BAGI-V5",
+  "id": "PARSYUVA-AILE-YASAM-MERKEZI-TICARI-KURAL-BAGI-V10",
   "durum": "ACTIVE",
   "istisnaIzinli": false,
   "anaKuralKaynagi": "../06_KOD/app/config/canonical-rule-registry.json",
-  "anaKuralSiciliId": "PPT-CANONICAL-RULE-REGISTRY-V22",
-  "anaKuralSayisi": 234,
-  "aktifKuralSayisi": 211,
-  "degistirilmisKuralSayisi": 23,
-  "anaKuralSha256": "67462d63e873b68a1eacfb358f904226d9199f99c81950645e05350df9963506",
+  "anaKuralSiciliId": "PPT-CANONICAL-RULE-REGISTRY-V27",
+  "anaKuralSayisi": 240,
+  "aktifKuralSayisi": 215,
+  "degistirilmisKuralSayisi": 25,
+  "anaKuralSha256": "4c8a52f9adc2153177f1e504104e20ac5e9d3f7d780daa2c7d7bdb5d399a6050",
   "yurutmeKapisi": "../06_KOD/app/scripts/run-governed-preflight.mjs",
   "temelAlanDogrulamaKapisi": "11_OTOMASYON/dogrula-ticari-temel-alani.mjs",
   "kurallar": [
@@ -113,10 +113,64 @@
     },
     {
       "id": "TK-012",
-      "baslik": "Surum kanallari program veri ve kaynakta yalitilir",
-      "metin": "Bronze Silver ve Gold ayri Program Files klasoru EXE kisayol appId kullanici veri koku kaldirma kapsami Git worktree ve branch kullanir; kanal disi program veri ve build ciktisi paylasilamaz.",
-      "durum": "ACTIVE",
+      "baslik": "Nested kanal program yolu tarihsel kayittir",
+      "metin": "DEC-269 ve PR-234 altindaki ParsYuva/<Kanal> nested program yolu DEC-271 ve PR-236 ile degistirilmistir.",
+      "durum": "SUPERSEDED",
       "kaynak": "PR-234 ve DEC-269",
+      "yurutme": "FAIL_CLOSED",
+      "kanitZorunlu": true
+    },
+    {
+      "id": "TK-013",
+      "baslik": "Mutasyon sonrasi exact commit kanit zinciri",
+      "metin": "Her mutasyon exact etki analizine baglanir; baseline Bronze kanalina sabit harici append-only SHA-256 zincirinde ve repo icinde yalniz hash-bagli pointer olarak tutulur; kanonik producer arguman ve readback zorunludur; kalici completion ve paket ayni temiz committe hedefli test tam regresyon ve kaynak butunlugu PASS, installer teslimi paket sonrasi ayni paket committe gercek kurulu ana EXE taze UAT PASS gerektirir.",
+      "durum": "ACTIVE",
+      "kaynak": "PR-235 ve DEC-270",
+      "yurutme": "FAIL_CLOSED",
+      "kanitZorunlu": true
+    },
+    {
+      "id": "TK-014",
+      "baslik": "Kardes kanal program kokleri ve legacy silme guvenligi",
+      "metin": "Bronze Silver ve Gold legacy kokun disindaki ParsYuva-<Kanal> kardes program dizinlerini kullanir; AppData ParsYuva/<Kanal> kalir. Interactive kaldirma shell baglamini geri yukler, legacy kanal dizini gorurse recursive silme durur ve otomatik legacy veri migration veya silme yapilmaz.",
+      "durum": "ACTIVE",
+      "kaynak": "PR-236 ve DEC-271",
+      "yurutme": "FAIL_CLOSED",
+      "kanitZorunlu": true
+    },
+    {
+      "id": "TK-015",
+      "baslik": "Acik tek seferli surum tahsisi",
+      "metin": "Surum tahsisi exact expected release ID ile ayri ve tek mutasyondur; preview yazmaz, mismatch lock temp yazim veya temizlige gecmeden durur ve signed local dir paket girisleri yalniz onceden tahsisli exact current kimligini tuketir.",
+      "durum": "ACTIVE",
+      "kaynak": "PR-237 ve DEC-272",
+      "yurutme": "FAIL_CLOSED",
+      "kanitZorunlu": true
+    },
+    {
+      "id": "TK-016",
+      "baslik": "Kanonik kurulu Windows yukseltme maintenance ve on yuz UAT",
+      "metin": "UAT110 gercek N arti bir yukseltme ve ayri ayni surum maintenance fazlarinda metadata-only kanal ve legacy korumasini, exact installed packaged ve sibling registry bagini kanitlar; schema2 UAT111 ayni preservation SHA package provenance expected release ID ve source commit bagini tasir.",
+      "durum": "ACTIVE",
+      "kaynak": "PR-238 ve DEC-273",
+      "yurutme": "FAIL_CLOSED",
+      "kanitZorunlu": true
+    },
+    {
+      "id": "TK-017",
+      "baslik": "Adversarial Windows teslim kanit zinciri",
+      "metin": "Schema2 exact-commit package provenance ve immutable previous package archive ile canli sibling N exact eslesmeden Windows local-test teslimi kapanmaz. Installer-experience V2, UAT110 V2, parent-run bagli UAT111 V3 ve final V3; Git'te izlenen TypeScript kaynagindan exact 4 modul 22 rota, gorunur uygun butun kontroller, gercek owned native CANCEL ve ACCEPT, exclusive reparse-korumali evidence root, guard kaybinda sifir path tabanli cleanup ve source producer path hash chronology screenshot secret readback kapilarini PASS kanitlamalidir.",
+      "durum": "ACTIVE",
+      "kaynak": "PR-239 ve DEC-274",
+      "yurutme": "FAIL_CLOSED",
+      "kanitZorunlu": true
+    },
+    {
+      "id": "TK-018",
+      "baslik": "En kucuk degisiklikte tum kayit ve test kapanisi",
+      "metin": "Her mutasyon butun bagimli kaynak sicil belge is manifest indeks ana DOCX PDF ve kanit kayitlarini UPDATED veya kanitli NOT_AFFECTED olarak kapatir; hedefli ve tam test ile UI etkisinde butun etkilesim ve gorsel UAT zorunludur. Gercek hata wip(rejected) checkpoint olur ve kapanistan once ara installer uretilmez.",
+      "durum": "ACTIVE",
+      "kaynak": "PR-240 ve DEC-275",
       "yurutme": "FAIL_CLOSED",
       "kanitZorunlu": true
     }

@@ -184,7 +184,7 @@ export const verifyHomeInventoryUtilityBelongingsBoundary = async () => {
     'financeExpenseId', 'amountCurrencyPairValid'
   ]));
   check('renderer covers seven variants and masked serial display', itemTypes.every((item) => panel.includes(`${item}:`))
-    && includesAll(panel, ['serialNumberMasked', 'managed-home-inventory-tabs', 'Opak arşiv']));
+    && includesAll(panel, ['serialNumberMasked', 'managed-home-inventory-tabs', 'Arşiv belge bağlantısı']));
   check('renderer visibly declares manual no-lookup no-OCR no-payment truth', includesAll(panel, [
     'smartMeterLookup', 'warrantyLookup', 'ocr', 'paymentExecution', 'documentContentExposure'
   ]));

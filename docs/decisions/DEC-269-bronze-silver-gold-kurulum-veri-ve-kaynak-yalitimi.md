@@ -1,8 +1,8 @@
 # DEC-269 — Bronze, Silver ve Gold kurulum, veri ve kaynak yalıtımı
 
 - Tarih: 23.08.2026
-- Durum: ACTIVE
-- Bağlayıcı kural: PR-234
+- Durum: SUPERSEDED_BY_DEC-271
+- Tarihsel kural: PR-234 (PR-236 ile superseded)
 
 ## Karar
 
@@ -27,3 +27,7 @@ Bu karar DEC-262 ve PR-228'in ortak kurulum dosyası, ortak appId ve ortak kulla
 - apps/desktop/tests/release-channel-isolation.test.ts
 
 Gerçek worktree oluşturma temiz çalışma ağacı ve final kaynak commit'i sonrasında çalıştırılır. Oluşturulmamış worktree mevcut sayılmaz.
+
+## Supersession
+
+Bu kararın `C:\Program Files\PPT\ParsYuva\<Kanal>` biçimindeki nested program kökü DEC-271 ve PR-236 ile superseded edilmiştir. appId, productName, kanal EXE/kısayol kimliği, `ParsYuva/<Kanal>` kullanıcı verisi ve ayrı Git worktree/branch yalıtımı DEC-271 içinde korunmuştur.

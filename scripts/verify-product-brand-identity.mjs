@@ -39,7 +39,10 @@ check(main.includes("const currentProductName = APP_META.name;"), 'Main görüne
 check(main.includes("join(appDataPath, ...releaseUserDataDirectoryName(APP_META.edition).split('/'))"), 'Main kullanıcı verisini sürüm kanalına göre yalıtmıyor.');
 check(installer.includes('LangString AymFinishTitle ${AYM_LANG_TURKISH} "ParsYuva Aile Yaşam Merkezi kullanıma hazır"'), 'Kurulum bitiş başlığı tam ürün adını kullanmıyor.');
 check(!installer.includes('ParsYuva AYM'), 'Kurulum metninde kaldırılan ürün kısaltması bulunuyor.');
-check(installer.includes('StrCpy $INSTDIR "$PROGRAMFILES64\\PPT\\ParsYuva\\\${PPT_INSTALLER_CHANNEL_DIRECTORY}"'), 'Kurulum hedefi sürüm kanalına göre yalıtılmış değil.');
+check(installer.includes('!define PPT_INSTALLER_PROGRAM_DIRECTORY "ParsYuva-${PPT_INSTALLER_RELEASE_CHANNEL}"')
+  && installer.includes('StrCpy $INSTDIR "$PROGRAMFILES64\\PPT\\${PPT_INSTALLER_PROGRAM_DIRECTORY}"')
+  && !installer.includes('StrCpy $INSTDIR "$PROGRAMFILES64\\PPT\\ParsYuva\\\${PPT_INSTALLER_CHANNEL_DIRECTORY}"'),
+'Kurulum hedefi legacy kökün dışındaki kardeş sürüm kanalı dizinine yalıtılmış değil.');
 check(installer.includes('$INSTDIR\\\${PPT_INSTALLER_EXECUTABLE}'), 'Kaldırıcı kanal program dosyasını kullanmıyor.');
 check(installer.includes('$APPDATA\\ParsYuva\\\${PPT_INSTALLER_CHANNEL_DIRECTORY}'), 'Kaldırıcı yalnız etkin kanalın kullanıcı verisini hedeflemiyor.');
 check(artifactStore.includes('ACCEPTED_PERSISTED_PRODUCT_NAMES'), 'Eski korumalı artifact okuma uyumluluğu yok.');

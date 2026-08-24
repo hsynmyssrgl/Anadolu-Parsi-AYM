@@ -24,3 +24,7 @@
 ## Açık kanıtlar
 
 Production RFC 9420 sağlayıcısı, conformance suite, gerçek çok cihazlı forward secrecy/post-compromise security, kayıp cihaz recovery, mesaj/ek/tepki/düzenleme imzası, relay içerik körlüğü, ağ teslimi, trafik analizi, retention/privacy/legal/security incelemeleri `NOT_RUN` durumundadır. Özel anahtar ve sealed MLS state için üretim kasası bu pakette compose edilmemiştir. Persistent governance receipt yoktur; registry ve roadmap kapanmamıştır. `34-A` yalnız kısmi yerel metadata ve policy temelidir; `countsAsRequirementPass=false` kalır.
+
+## 24.08.2026 değişiklik-etki doğrulaması
+
+PR-235 kapsamında güncel kullanıcı dili ve renderer sözleşmesi bu tehdit modeline yeniden bağlandı; 52/52 sınır-sözleşme-çalışma zamanı zinciri PASS oldu. Sonuç production MLS, ağ teslimi veya production kabul kanıtı değildir.

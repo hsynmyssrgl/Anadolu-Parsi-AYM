@@ -10,6 +10,7 @@ import type {
 } from '@ppt/domain';
 import { Button, EmptyState, SectionHeader, StatusMessage, Surface } from './ui';
 import { selectUiCopy, useLocalization } from './localization';
+import { toUserFacingErrorMessage } from './user-facing-error';
 
 const splitText = (value:string):readonly string[] => [...new Set(value.split(',').map((part)=>part.normalize('NFKC').trim()).filter(Boolean))];
 const isoOrUndefined = (value:string):string|undefined => {
@@ -84,7 +85,7 @@ export function HouseholdOperationsPanel({people}:{readonly people:readonly Fami
     if(!window.pardus)return;
     setLoading(true);
     try{setCenter(await window.pardus.getHouseholdOperationsCenter());setMessage('');}
-    catch(error){setCenter(undefined);setTone('danger');setMessage(error instanceof Error?error.message:text('Hane operasyonları yüklenemedi.','Household operations could not be loaded.'));}
+    catch(error){setCenter(undefined);setTone('danger');setMessage(toUserFacingErrorMessage(error,text('Hane operasyonları yüklenemedi.','Household operations could not be loaded.')));}
     finally{setLoading(false);}
   };
   useEffect(()=>{void reload();},[]);
@@ -149,7 +150,7 @@ export function HouseholdOperationsPanel({people}:{readonly people:readonly Fami
         ...payload,expectedCenterRevision:identity.expectedCenterRevision,clientOperationId:identity.clientOperationId,itemId:identity.itemId
       } as CreateHouseholdOperationItemInput);
       pendingCreate.current=undefined;setTitle('');setNote('');await reload();setTone('success');setMessage(text('Yerel hane operasyonu kaydedildi.','The local household operation was saved.'));
-    }catch(error){setTone('danger');setMessage(`${error instanceof Error?error.message:text('Kayıt oluşturulamadı.','The record could not be created.')} ${text('Değişiklik yapmazsanız aynı işlem kimliğiyle yeniden deneyebilirsiniz.','If you make no changes, you can retry with the same operation identifier.')}`);}
+    }catch(error){setTone('danger');setMessage(`${toUserFacingErrorMessage(error,text('Kayıt oluşturulamadı.','The record could not be created.'))} ${text('Değişiklik yapmazsanız aynı işlem kimliğiyle yeniden deneyebilirsiniz.','If you make no changes, you can retry with the same operation identifier.')}`);}
     finally{setBusy(false);}
   };
 
@@ -163,7 +164,7 @@ export function HouseholdOperationsPanel({people}:{readonly people:readonly Fami
     if(!window.pardus||busy)return;
     const key=`update:${item.id}`;const identity=mutationIdentity(key,item,next);setBusy(true);setMessage('');
     try{await window.pardus.updateHouseholdOperationItem({...identity,itemId:item.id,status:next});pendingMutations.current.delete(key);await reload();setTone('success');setMessage(text('Durum yerel olarak güncellendi.','The state was updated locally.'));}
-    catch(error){setTone('danger');setMessage(`${error instanceof Error?error.message:text('Durum güncellenemedi.','The state could not be updated.')} ${text('Aynı işlem kimliğiyle yeniden deneyebilirsiniz.','You can retry with the same operation identifier.')}`);}
+    catch(error){setTone('danger');setMessage(`${toUserFacingErrorMessage(error,text('Durum güncellenemedi.','The state could not be updated.'))} ${text('Aynı işlem kimliğiyle yeniden deneyebilirsiniz.','You can retry with the same operation identifier.')}`);}
     finally{setBusy(false);}
   };
   const remove=async(item:HouseholdOperationItemView)=>{
@@ -171,12 +172,12 @@ export function HouseholdOperationsPanel({people}:{readonly people:readonly Fami
     const reason=text('Kullanıcı hane operasyonunu yerel görünümden kaldırdı.','The user removed the household operation from the local view.');const key=`delete:${item.id}`;
     const identity=mutationIdentity(key,item,reason);setBusy(true);setMessage('');
     try{await window.pardus.deleteHouseholdOperationItem({...identity,itemId:item.id,reason});pendingMutations.current.delete(key);await reload();setTone('success');setMessage(text('Kayıt yerel olarak silindi.','The record was deleted locally.'));}
-    catch(error){setTone('danger');setMessage(`${error instanceof Error?error.message:text('Kayıt silinemedi.','The record could not be deleted.')} ${text('Aynı işlem kimliğiyle yeniden deneyebilirsiniz.','You can retry with the same operation identifier.')}`);}
+    catch(error){setTone('danger');setMessage(`${toUserFacingErrorMessage(error,text('Kayıt silinemedi.','The record could not be deleted.'))} ${text('Aynı işlem kimliğiyle yeniden deneyebilirsiniz.','You can retry with the same operation identifier.')}`);}
     finally{setBusy(false);}
   };
 
   return <Surface className="household-operations-panel">
-    <SectionHeader eyebrow={text('33-T · yerel hane koordinasyonu','33-T · local household coordination')} title={text('Hane operasyonları merkezi','Household operations center')}/>
+    <SectionHeader eyebrow={text('Yerel hane koordinasyonu','Local household coordination')} title={text('Hane operasyonları merkezi','Household operations center')}/>
     <div className="household-operations-truth" role="note">
       <strong>{text('Bu merkez kayıt tutar; dış sipariş, ödeme, kargo senkronizasyonu veya uzaktan anahtar kontrolü yapmaz.','This center stores records; it does not place external orders, process payments, synchronize shipments, or control remote keys.')}</strong>
       <span>{text('Tam takip numarası ve anahtar kodu saklanmaz. Tarif filtresi tıbbi tavsiye değildir; evcil hayvan bakımı dış hizmet teslimi oluşturmaz.','Full tracking numbers and access codes are not stored. Recipe filtering is not medical advice, and pet-care records do not create an external service delivery.')}</span>

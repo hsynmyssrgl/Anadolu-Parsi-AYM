@@ -7,7 +7,7 @@ const packageJson = JSON.parse(await readFile(resolve(desktopRoot, 'package.json
 const build = packageJson.build ?? {};
 const artifactTemplate = build.win?.artifactName ?? build.artifactName ?? '';
 const artifactChannel = /-(Bronze|Silver|Gold)-/u.exec(artifactTemplate)?.[1];
-const expectedInstallDirectory = '$PROGRAMFILES64\\PPT\\ParsYuva\\${PPT_INSTALLER_CHANNEL_DIRECTORY}';
+const expectedInstallDirectory = '$PROGRAMFILES64\\PPT\\${PPT_INSTALLER_PROGRAM_DIRECTORY}';
 const expectedApplicationId = artifactChannel
   ? `tr.anadoluparsi.aileyasammerkezi.${artifactChannel.toLowerCase()}`
   : '';
@@ -80,6 +80,7 @@ try {
     '!macro customPageAfterChangeDir',
     `!define PPT_INSTALLER_RELEASE_CHANNEL "${artifactChannel}"`,
     '!define PPT_INSTALLER_CHANNEL_DIRECTORY "${PPT_INSTALLER_RELEASE_CHANNEL}"',
+    '!define PPT_INSTALLER_PROGRAM_DIRECTORY "ParsYuva-${PPT_INSTALLER_RELEASE_CHANNEL}"',
     '!define PPT_INSTALLER_EXECUTABLE "ParsYuva-${PPT_INSTALLER_RELEASE_CHANNEL}.exe"',
     '!define MUI_FONT "Segoe UI"',
     '!define MUI_FONTSIZE 10',
@@ -108,7 +109,7 @@ try {
     'ParsYuva Aile Yaşam Merkezi',
     'Kuruluma hazır',
     'Sesli Yardım Merkezi',
-    'C:\\Program Files\\PPT\\ParsYuva',
+    'C:\\Program Files\\PPT\\${PPT_INSTALLER_PROGRAM_DIRECTORY}',
     'CreateFont $1 "Segoe UI" 11 400',
     'CreateFont $2 "Segoe UI" 10 600',
     '!define AYM_LANG_ENGLISH 1033',
@@ -192,9 +193,15 @@ try {
   const silentGuardIndex = uninstallerOnly.indexOf('${OrIf} ${Silent}');
   const dataChoiceIndex = uninstallerOnly.indexOf('$(AymUninstallChoice)');
   const preserveJumpIndex = uninstallerOnly.indexOf('Goto aym_uninstall_done');
+  const currentContextIndex = uninstallerOnly.indexOf('SetShellVarContext current');
+  const allContextIndexes = [...uninstallerOnly.matchAll(/SetShellVarContext all/gu)].map((match) => match.index ?? -1);
   if (upgradeGuardIndex < 0 || silentGuardIndex < upgradeGuardIndex
     || preserveJumpIndex < silentGuardIndex || dataChoiceIndex < preserveJumpIndex) {
     failures.push('Yükseltme ve sessiz bakım eski uygulama dosyalarını kaldırırken kullanıcı verisi seçim akışını atlamalı.');
+  }
+  if (currentContextIndex < preserveJumpIndex || currentContextIndex > dataChoiceIndex
+    || allContextIndexes.length !== 2 || allContextIndexes.some((index) => index < dataChoiceIndex)) {
+    failures.push('Etkileşimli kaldırma kullanıcı AppData bağlamına geçmeli ve iptal/tamamlama çıkışlarında tüm-kullanıcılar bağlamını geri yüklemeli.');
   }
   if (!uninstallerOnly.includes(expectedUninstallHelper)) {
     failures.push('Kaldırıcı yalnız doğrulanmış yerel yedek yardımcısını tam sabit komutla çağırmalı.');
@@ -249,6 +256,9 @@ try {
     || !legacyUpgradeGuard.includes("'22.8.2026-44'")
     || !legacyUpgradeGuard.includes('DisplayVersion')
     || !legacyUpgradeGuard.includes('$installationDir != \"$PROGRAMFILES64\\\\PPT\\\\ParsYuva\"')
+    || !legacyUpgradeGuard.includes('$installationDir\\\\Bronze\\\\*.*')
+    || !legacyUpgradeGuard.includes('$installationDir\\\\Silver\\\\*.*')
+    || !legacyUpgradeGuard.includes('$installationDir\\\\Gold\\\\*.*')
     || !legacyUpgradeGuard.includes('RMDir /r \"$installationDir\"')) {
     failures.push('İmzasız dizin provası ile imzalı NSIS release yolları kesin ayrılmamış.');
   }

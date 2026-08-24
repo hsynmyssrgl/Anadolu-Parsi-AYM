@@ -37,3 +37,7 @@ Central policy, repository, trusted preflight provider veya production media pro
 ## Açık kanıtlar
 
 Gerçek cihaz, gerçek ağ, bire bir ve grup araması, media encryption, SFU/relay, screen share, background, caption/RTT, OS çağrı entegrasyonları, host kick, retention/prune, privacy/legal/security/accessibility incelemeleri ve kalıcı governance receipt `NOT_RUN` durumundadır.
+
+## 24.08.2026 değişiklik-etki doğrulaması
+
+PR-235 kapsamında güncel kullanıcı dili ve renderer sözleşmesi bu tehdit modeline yeniden bağlandı; 52/52 sınır-sözleşme-çalışma zamanı zinciri PASS oldu. Sonuç gerçek medya, gerçek ağ veya production kabul kanıtı değildir.

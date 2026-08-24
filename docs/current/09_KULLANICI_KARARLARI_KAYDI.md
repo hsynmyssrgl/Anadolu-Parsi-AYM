@@ -73,14 +73,20 @@ Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağ
 - `DEC-259` — Ticari temel çalışma alanı; aşılamaz kural bağı, makine şemaları, tek ana iş listesi ve governed preflight belge kapısı
 - `DEC-260` — EK-001–EK-019 karar tamponunun çatışma denetimiyle ana sicillere birleştirilmesi; tam regresyon, kurulum yaşam döngüsü ve iki Git uzak deposunda aynı commit teslimi
 - `DEC-261` — Güncel ürün, kurulum, kısayol, yardım, sesli anlatım ve belge başlıklarında yalnız tam `ParsYuva Aile Yaşam Merkezi` adı; `AYM` yalnız tarihsel veya zorunlu teknik uyumluluk kimliği
-- `DEC-262` — `DEC-269` ile superseded edilen ortak Windows kurulum, appId ve veri kimliği kararı; dağıtım adı ile uzun ürün adı tarihsel kayıttır
+- `DEC-262` — Önce `DEC-269`, güncel olarak `DEC-271` ile superseded edilen ortak Windows kurulum, appId ve veri kimliği kararı; dağıtım adı ile uzun ürün adı tarihsel kayıttır
 - `DEC-263` — Kod veya Windows paketleme değişikliğinde önceki ParsYuva installer EXE, blockmap ve SHA-256 dosyaları yeni build öncesinde silinir; release klasöründe yalnız güncel sürüm seti kalabilir
 - `DEC-264` — Bronze, Silver ve Gold görünür sürüm satırlarında kanal adı yalnız bir kez gösterilir; `stage` kanal adını yineleyemez
 - `DEC-265` — Her durum değiştiren işlemden önce güncel kural sicili, hash, kullanıcı onayı ve enforcement bağı doğrulanır; PASS olmadan işlem başlayamaz
 - `DEC-266` — `DEC-267` ile superseded edilen önceki üç pars ve statik kurulum kabul zinciridir
 - `DEC-267` — İlk kullanıcı oluşturma görsel dilinde üç bilgi kartı arasında geçişli fakat sahte ilerlemesiz özel kurulum; Türkçe/İngilizce kadın sesi önceliği ve aynı dilde erkek/kurulu ses yedeği; eski tek pars; kilitli kasa yeniden doğrulaması; ilk 2FA/güvenilir cihaz bootstrap sınırı ve temiz teslim kanıtları tek kabul zinciridir
 - `DEC-268` — `.46` NSIS callback, `.47` stale dahili payload, `.48` ilk 2FA policy authority ve `.49` kayıtsız iç checkpoint/kasa mühürleme FAIL kayıtlarını korur; `.50` kayıtlı checkpoint, ilk güven töreni ertelemesi, temiz installer ve 22 yüzey sentetik ön yüz UAT zincirini yetkilendirir
-- `DEC-269` — Bronze, Silver ve Gold için ayrı kurulum dizini, EXE, kısayol, appId, kullanıcı veri kökü, Git worktree ve branch; kanallar arası program, veri ve build çıktısı paylaşımı yasaktır
+- `DEC-269` — `DEC-271` ile superseded edilen nested kanal program yolu kararı; kanal kimliği, AppData ve worktree yalıtımı DEC-271 içinde korunur
+- `DEC-270` — Her mutasyon sonrası exact changed-file etki analizi; Bronze kanalına sabit harici append-only baseline hash zinciri ve repo-içi pointer; kanonik producer/test argümanı/readback bağları; aynı temiz committe hedefli test, tam regresyon ve kaynak bütünlüğü; paket sonrası aynı paket/committe gerçek kurulu ana EXE taze UAT teslim kapısı
+- `DEC-271` — Program kökleri legacy dizinin dışındaki `ParsYuva-<Kanal>` kardeş yollarına taşınır; AppData kanal ayrımı korunur, interactive kaldırma bağlamı geri yüklenir, legacy kanal dizini görülürse silme fail-closed durur ve otomatik veri migration/silme yapılmaz
+- `DEC-272` — Sürüm tahsisi zorunlu expected release ID ile açık ve tek seferli mutasyondur; preview yazmaz, mismatch yazım/temizlik öncesi durur ve signed/local/dir paket girişleri yalnız önceden tahsisli exact current kimliği tüketir
+- `DEC-273` — Windows teslimi kanonik UAT110 gerçek N→N+1 ve same-version maintenance korumasını metadata-only kanıtlar; schema2 UAT111 aynı installation-preservation SHA, package provenance, expected release ID ve source commit bağını taşır
+- `DEC-274` — Windows teslimi schema2 package lineage, zorunlu installer-experience, UAT110 V2, parent-run bağlı UAT111 V3, exact kanonik rota, tüm uygun kontroller, gerçek native CANCEL/ACCEPT, exclusive reparse-korumalı kanıt kökü ve final V3 canlı geri-okuma zinciri olmadan kapanamaz
+- `DEC-275` — En küçük değişiklik dahi etkilenen tüm kaynak, sicil, belge, iş listesi, manifest/indeks, ana DOCX/PDF ve kanıt sözleşmelerini aynı zincirde günceller; hedefli ve tam test ile UI etkisinde bütün etkileşim/görsel UAT tamamlanmadan ve gerçek hatalar `wip(rejected)` kaydedilmeden paket üretilemez
 
 ## Bundan sonraki kararlar için zorunlu eşzamanlılık kuralı
 
@@ -88,4 +94,4 @@ Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağ
 
 `DEC-252` gereği bu yenilemedeki kapsamlı tarihsel tarama son temeldir. Bundan sonra eski build, arşiv ve checkpoint belgelerinin içeriği yeniden denetlenmez veya güncel karar kaynağı sayılmaz; yalnız değişmez `HISTORICAL` kayıt olarak korunur. Yeni denetimler aktif ve yeni belgelere uygulanır.
 
-Makine defteri yalnız açık kullanıcı kararlarını tutar. Türetilmiş paket/mimari kararlarının eksiksiz DEC-090–DEC-269 dizini ve dosya yolları `docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md` içindedir.
+Makine defteri yalnız açık kullanıcı kararlarını tutar. Türetilmiş paket/mimari kararlarının eksiksiz DEC-090–DEC-275 dizini ve dosya yolları `docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md` içindedir.

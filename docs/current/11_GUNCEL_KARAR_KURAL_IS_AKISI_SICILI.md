@@ -1,22 +1,22 @@
 # ParsYuva Aile Yaşam Merkezi — Güncel Karar, Kural ve İş Akışı Sicili
 
-- Belge sürümü: **GUNCEL-2026-08-23-V6**
-- Tarih: **23.08.2026**
+- Belge sürümü: **GUNCEL-2026-08-24-V5**
+- Tarih: **24.08.2026**
 - Görünür ürün sürümü: **Bronze 22.08.2026.50**
-- Kaynak HEAD: `19a5c84d02ad0700315bc67873a19d5e1fed9945`
-- Statü: **ACTIVE_WORKING_REFERENCE_NOT_BUILD_CLOSURE**
-- Kararlar: **DEC-250–DEC-269**
+- Kaynak HEAD: `cf2a16155597a8951818b0fd1318bdf1b8461d35`
+- Statü: **ACTIVE_CURRENT_MASTER_REFERENCE**
+- Kararlar: **DEC-250–DEC-275**
 
 > Bu sürüm geçmiş PDF/DOCX ve build kapanış belgelerinin üzerine yazmaz. Yerel PASS ile dış kabul kanıtını ayırır; NOT_RUN/PARTIAL/BLOCKED sonuçlarını tamamlanmış göstermez.
 
 ## 1. Denetim sonucu
 
-- Aktif repo Word/PDF tarihsel taraması: **48 dosya / 24 çift / 48 okunabilir**.
-- `C:\PPT\AYM` tüm belge türü taraması: **30412 dosya / 30412 okunabilir / 0 sorun**.
-- Office/RTF/PDF: **716**; benzersiz içerik hash'i: **5401**; tekrar kopya: **25011**.
+- Aktif repo Word/PDF tarihsel taraması: **50 dosya / 25 çift / 50 okunabilir**.
+- `C:\PPT\AYM` tüm belge türü taraması: **37023 dosya / 36854 okunabilir / 0 sorun**.
+- Office/RTF/PDF: **872**; benzersiz içerik hash'i: **7585**; tekrar kopya: **29269**.
 - Build209–228 master çiftleri ve eski Bronze aktif referans çifti tarihsel olarak korunmuştur.
-- Karar dosyası: **171**; ADR: **106**; security/threat belgesi: **72**.
-- Mevcut tam belge/config/kanıt envanteri: **3789** (yeni sürümden önceki indeks).
+- Karar dosyası: **184**; ADR: **106**; security/threat belgesi: **72**.
+- Mevcut tam belge/config/kanıt envanteri: **3865** (yeni sürümden önceki indeks).
 
 ## 2. Yetki ve öncelik
 
@@ -30,8 +30,8 @@
 ## 3. Kapsam ve kural özeti
 
 - Gereksinim: **358** — COMPLETE 109, PARTIAL 25, FOUNDATION_STARTED 1, NOT_IMPLEMENTED 223.
-- Kural sicili: **PPT-CANONICAL-RULE-REGISTRY-V22**, toplam 234, aktif 211, superseded 23, SHA-256 `67462d63e873b68a1eacfb358f904226d9199f99c81950645e05350df9963506`.
-- Kullanıcı karar defteri: **98** kayıtlı kullanıcı kararı.
+- Kural sicili: **PPT-CANONICAL-RULE-REGISTRY-V27**, toplam 240, aktif 215, superseded 25, SHA-256 `4c8a52f9adc2153177f1e504104e20ac5e9d3f7d780daa2c7d7bdb5d399a6050`.
+- Kullanıcı karar defteri: **104** açık kullanıcı kararı.
 
 ## 4. İş akışları
 
@@ -141,13 +141,15 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - Bu kapsamlı tarama tarihsel kayıtların son içerik temelidir; DEC-252 gereği gelecekte eski build/arşiv/checkpoint içeriği yeniden denetlenmeyecek, yalnız değişmez HISTORICAL kayıt olarak korunacaktır.
 - Core Service companion ASAR paketine bağlandı; güncel tam regresyonda 350/350 test dosyası ve 2187/2187 test, root typecheck/build ve aynı profilde iki ardışık normal win-unpacked açılışı PASS verdi. Production Authenticode sertifikası bulunmadığından signed installer/kurulu yaşam döngüsü açık bırakıldı.
 - EK-001–EK-019 tarihsel karar tamponu DEC-260 ile ana sicillere bağlandı; daha yeni ParsYuva, dil ve kurulum kararları çatışmada üstün tutuldu.
-- Kanonik kural sicili V19/231/210 durumuna yükseltildi; tam ParsYuva Aile Yaşam Merkezi adı, sürüm paleti, parola görünürlüğü, installer yaşam döngüsü, aylık build, deneme/Gold, kaldırma-sıfırlama, tepsi, migration/rollback, görünür kanal tekilleştirme ve her işlem öncesi kural kontrolü fail-closed kapılara bağlandı.
+- Kanonik kural sicili V16/228/207 durumuna yükseltildi; tam ParsYuva Aile Yaşam Merkezi adı, sürüm paleti, parola görünürlüğü, installer yaşam döngüsü, aylık build, deneme/Gold, kaldırma-sıfırlama, tepsi ve migration/rollback kararları fail-closed kapılara bağlandı.
 - DEC-261 ile AYM kısaltması güncel kullanıcı yüzeylerinden kaldırıldı; yalnız tarihsel kayıtlar ve değiştirilemeyen teknik uyumluluk yolları güncel marka olmadığı açıkça belirtilerek korunur.
-- DEC-262 ortak kurulum, appId ve veri kimliği kararıydı; DEC-269 ile superseded edildi.
-- DEC-269 ile Bronze, Silver ve Gold kurulum dizini, EXE, kısayol, appId, kullanıcı veri kökü, Git worktree ve branch düzeyinde ayrıldı; kanal dışı program, veri ve build çıktısı etkisi yasaklandı.
-- DEC-263 ile kod veya Windows paketleme değişikliğinde önceki installer EXE, blockmap ve SHA-256 dosyalarının yeni build öncesinde silinmesi zorunlu ve otomatik hale getirildi.
-- DEC-264 ile Bronze, Silver ve Gold görünür sürüm satırlarında kanal adının yalnız bir kez gösterilmesi zorunlu hale getirildi; `stage` kanal adını yineleyemez.
-- DEC-265 ile her durum değiştiren işlemden önce güncel kural, hash, onay ve enforcement kontrolünün PASS olması zorunlu hale getirildi; waiver ve atlama yasaktır.
+- DEC-262 ile Windows kurulum hedefi C:\Program Files\PPT\ParsYuva, ana program ve kısayol adı ParsYuva, teslim adı ParsYuva-<Kanal>-GG.AA.YYYY.NN.exe olarak sabitlendi.
+- DEC-271 ile güncel kanal program kökleri legacy dizinin dışındaki C:\Program Files\PPT\ParsYuva-<Kanal> kardeş yollarına taşındı; AppData ParsYuva/<Kanal> ve diğer kanal yalıtımı korunurken otomatik legacy veri migration veya silme yasaklandı.
+- DEC-272 ile sürüm tahsisi exact expected release ID alan açık tek mutasyon oldu; preview yazmaz, uyuşmazlık yazım ve temizliğe geçmeden durur, signed/local/dir yalnız önceden tahsisli exact current kimliğini tüketir.
+- DEC-273 ile Windows installer teslimi metadata-only kanonik UAT110 gerçek N→N+1 ve same-version maintenance koruması ile source/package/expected release bağlı schema2 kurulu ön yüz UAT111 makbuzuna bağlandı.
+- DEC-274/PR-239 ile Windows teslim zinciri canlı PR-235 readback, schema2 package provenance, canlı sibling predecessor, installer-experience V2, UAT110 V2, parent-run bağlı UAT111 V3 ve final V3 geri-okuma kapılarıyla adversarial olarak güçlendirildi.
+- PR-235 ile en küçük değişiklik dahi exact değişen yol, bağımlı kural/karar/belge/manifest/ratchet/test/UAT kayıtları ve aynı temiz committe hedefli-tam-bütünlük kanıtlarıyla fail-closed eşlemeye bağlandı.
+- PR-239 UAT111 kapsamı Git'te izlenen TypeScript kanonik rota otoritesi, tüm görünür ve uygun kontrollerin dinamik outcome matrisi, gerçek native CANCEL/ACCEPT ve exclusive reparse-korumalı kanıt köküyle güncellendi.
 
 ## 9. Görsel kimlik ve erişilebilirlik
 
@@ -159,16 +161,16 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 
 ## 10. Tüm belge türü denetimi
 
-- `.csv`: 118
-- `.docx`: 345
-- `.html`: 15
-- `.json`: 11653
-- `.md`: 17509
-- `.pdf`: 356
-- `.rtf`: 15
-- `.txt`: 361
-- `.yaml`: 12
-- `.yml`: 28
+- `.csv`: 128
+- `.docx`: 420
+- `.html`: 21
+- `.json`: 14126
+- `.md`: 21398
+- `.pdf`: 431
+- `.rtf`: 21
+- `.txt`: 429
+- `.yaml`: 15
+- `.yml`: 34
 - Bulunmayan Office türleri: .doc, .odp, .ods, .odt, .ppt, .pptx, .xls, .xlsx.
 - Tam yol/hash/okuma sonucu: `artifacts/manifests/ALL_PROJECT_DOCUMENT_FORMAT_AUDIT.json`.
 
@@ -179,19 +181,19 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - `DEC-092` — DEC-092 — Clean backup rewrite propagation reference permanence — KAYITLI — `docs/decisions/DEC-092-clean-backup-rewrite-propagation-reference-permanence.md`
 - `DEC-093` — DEC-093 — Bağlı propagation kanıtının değiştirilemezliği — KAYITLI — `docs/decisions/DEC-093-clean-backup-rewrite-propagation-evidence-immutability.md`
 - `DEC-094` — DEC-094 — Bağlı propagation kanıtında REPLACE kaçışını kapatma — KAYITLI — `docs/decisions/DEC-094-clean-backup-rewrite-propagation-replace-bypass-protection.md`
-- `DEC-097` — DEC-097 — Her build sonrası sohbet kapasitesi ölçülür; %90 kullanımda yeni build durur — ** Aktif — `docs/decisions/DEC-097-conversation-context-capacity-handoff-gate.md`
+- `DEC-097` — DEC-097 — Her build sonrası sohbet kapasitesi ölçülür; %90 kullanımda yeni build durur — Aktif — `docs/decisions/DEC-097-conversation-context-capacity-handoff-gate.md`
 - `DEC-098` — DEC-098 — Proje Anayasası V3 ve kaynak/kimlik/görsel yönetişimi — Kabul edildi — `docs/decisions/DEC-098-project-constitution-v3.md`
 - `DEC-099` — DEC-099 — Güvenli ilk kurulum ve kullanıcı veri kasası — KAYITLI — `docs/decisions/DEC-099-secure-onboarding-and-user-data-vault.md`
 - `DEC-100` — DEC-100 — Terminal temiz-yedek çalışma defteri değişmezliği — KAYITLI — `docs/decisions/DEC-100-clean-backup-terminal-ledger-immutability.md`
 - `DEC-101` — DEC-101 - Temiz kurulum dış erişim handoff kararı — KAYITLI — `docs/decisions/DEC-101-clean-install-external-access-handoff.md`
-- `DEC-102` — DEC-102 — Onaylı UI görsel baseline düzeltmesi — ** KABUL EDİLDİ — `docs/decisions/DEC-102-approved-ui-visual-baseline-correction.md`
-- `DEC-103` — DEC-103 — Bellek-içi aktif kullanıcı verisi oturumu — ** KABUL EDİLDİ — `docs/decisions/DEC-103-memory-resident-user-data-session.md`
-- `DEC-104` — DEC-104 — Hassas yan-artifactlar varsayılan şifreli kapsayıcıdır — ** KABUL EDİLDİ — `docs/decisions/DEC-104-protected-side-artifact-encryption.md`
-- `DEC-105` — DEC-105 — Uzun işler bağımsız doğrulanabilir adımlara bölünür — ** KABUL EDİLDİ — `docs/decisions/DEC-105-pr171-atomic-work-segmentation.md`
-- `DEC-106` — DEC-106 — OPEN-021/022 kapanışı gerçek Windows kanıt zinciri gerektirir — ** KABUL EDİLDİ — `docs/decisions/DEC-106-windows-security-evidence-harness.md`
-- `DEC-107` — DEC-107 — Windows kanıt kabulü exact kaynak snapshotına bağlanır — ** KABUL EDİLDİ — `docs/decisions/DEC-107-windows-evidence-intake-source-binding.md`
-- `DEC-108` — DEC-108 — OPEN-021 gerçek Windows kapanışı ayrı ve dar bir kapıdır — ** Kabul edildi — `docs/decisions/DEC-108-open021-isolated-windows-closure-gate.md`
-- `DEC-109` — DEC-109 — OPEN-022 gerçek Windows kapanışı ayrı ve dar bir kapıdır — ** Kabul edildi — `docs/decisions/DEC-109-open022-isolated-windows-closure-gate.md`
+- `DEC-102` — DEC-102 — Onaylı UI görsel baseline düzeltmesi — KABUL EDİLDİ — `docs/decisions/DEC-102-approved-ui-visual-baseline-correction.md`
+- `DEC-103` — DEC-103 — Bellek-içi aktif kullanıcı verisi oturumu — KABUL EDİLDİ — `docs/decisions/DEC-103-memory-resident-user-data-session.md`
+- `DEC-104` — DEC-104 — Hassas yan-artifactlar varsayılan şifreli kapsayıcıdır — KABUL EDİLDİ — `docs/decisions/DEC-104-protected-side-artifact-encryption.md`
+- `DEC-105` — DEC-105 — Uzun işler bağımsız doğrulanabilir adımlara bölünür — KABUL EDİLDİ — `docs/decisions/DEC-105-pr171-atomic-work-segmentation.md`
+- `DEC-106` — DEC-106 — OPEN-021/022 kapanışı gerçek Windows kanıt zinciri gerektirir — KABUL EDİLDİ — `docs/decisions/DEC-106-windows-security-evidence-harness.md`
+- `DEC-107` — DEC-107 — Windows kanıt kabulü exact kaynak snapshotına bağlanır — KABUL EDİLDİ — `docs/decisions/DEC-107-windows-evidence-intake-source-binding.md`
+- `DEC-108` — DEC-108 — OPEN-021 gerçek Windows kapanışı ayrı ve dar bir kapıdır — Kabul edildi — `docs/decisions/DEC-108-open021-isolated-windows-closure-gate.md`
+- `DEC-109` — DEC-109 — OPEN-022 gerçek Windows kapanışı ayrı ve dar bir kapıdır — Kabul edildi — `docs/decisions/DEC-109-open022-isolated-windows-closure-gate.md`
 - `DEC-110` — DEC-110 — OPEN-021 ve OPEN-022 tek Build219 Windows güvenlik kapanışında birleştirilir — KAYITLI — `docs/decisions/DEC-110-unified-bronze-windows-security-closure.md`
 - `DEC-111` — DEC-111 — Build219 gerçek Windows failure evidence ve Build220 bootstrap düzeltmesi — KAYITLI — `docs/decisions/DEC-111-build219-windows-failure-bootstrap-remediation.md`
 - `DEC-112` — DEC-112 — Build220 gerçek Windows failure evidence ve Build221 workspace-build düzeltmesi — KAYITLI — `docs/decisions/DEC-112-build220-windows-failure-workspace-build-remediation.md`
@@ -279,7 +281,7 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - `DEC-194` — DEC-194 — PPK-013 istemci veri erişim güvenlik çiti — KAYITLI — `docs/decisions/DEC-194-ppk-013-client-data-access-boundary.md`
 - `DEC-195` — DEC-195 — PPK-014 sürümlü Core Service API güvenlik sınırı — KAYITLI — `docs/decisions/DEC-195-ppk-014-versioned-core-service-api-boundary.md`
 - `DEC-196` — DEC-196 — PPK-015 allowlist ve TLS/mTLS ağ çıkış sınırı — KAYITLI — `docs/decisions/DEC-196-ppk-015-network-egress-policy.md`
-- `DEC-197` — DEC-197 — PPK-016 türetilmiş veri politika mirası — completed}`, `resultHash` ve işlem kimliği taşır. Retry, exact güncel kalıcı receipt kaydedildikten sonra yalnız content-free conflict metadata döndürür; semantik replay yasaktır. — `docs/decisions/DEC-197-ppk-016-derived-data-policy-inheritance.md`
+- `DEC-197` — DEC-197 — PPK-016 türetilmiş veri politika mirası — KAYITLI — `docs/decisions/DEC-197-ppk-016-derived-data-policy-inheritance.md`
 - `DEC-198` — DEC-198 — PPK-017 hassas log ve content-free tanı sınırı — KAYITLI — `docs/decisions/DEC-198-ppk-017-sensitive-log-policy.md`
 - `DEC-199` — DEC-199 — PPK-018 değişmez policy karar audit zinciri — KAYITLI — `docs/decisions/DEC-199-ppk-018-immutable-policy-decision-audit.md`
 - `DEC-200` — DEC-200 — PPK-019 kaynak silme ve retention yayılımı — KAYITLI — `docs/decisions/DEC-200-ppk-019-source-deletion-propagation.md`
@@ -310,12 +312,12 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - `DEC-225` — DEC-225 — Taslak, geri alma ve asenkron ekran durumu UX'i — COMPLETED — `docs/decisions/DEC-225-draft-async-state-ux.md`
 - `DEC-226` — DEC-226 — Gizlilik, sahiplik, veri hakları ve olay kontrol merkezi — COMPLETED — `docs/decisions/DEC-226-privacy-ownership-data-rights-incident-control.md`
 - `DEC-227` — DEC-227 — Passkey, federated kimlik ve doğrulanabilir geçici yetki belgeleri — IN_PROGRESS — `docs/decisions/DEC-227-passkeys-federated-identity-verifiable-temporary-credentials.md`
-- `DEC-228` — DEC-228 — Yerel, yönetişimli OCR ve türetilmiş veri hattı — `PLANNED / LOCAL_IMPLEMENTATION_STARTED` — `docs/decisions/DEC-228-local-governed-ocr-derived-data-pipeline.md`
+- `DEC-228` — DEC-228 — Yerel, yönetişimli OCR ve türetilmiş veri hattı — PLANNED / LOCAL_IMPLEMENTATION_STARTED — `docs/decisions/DEC-228-local-governed-ocr-derived-data-pipeline.md`
 - `DEC-229` — DEC-229 — Arşiv kanıt ilişkileri, medya yaşam döngüsü ve birleşik yetkili arama — KAYITLI — `docs/decisions/DEC-229-archive-evidence-relations-media-lifecycle-unified-authorized-search.md`
 - `DEC-230` — DEC-230 — Sağlık koordinasyonu ve yaşlı desteği günlüğü — KAYITLI — `docs/decisions/DEC-230-health-care-coordination-elderly-support-ledger.md`
 - `DEC-231` — DEC-231 — Hane operasyonları merkezi — KAYITLI — `docs/decisions/DEC-231-household-operations-center.md`
 - `DEC-232` — DEC-232 — Çocuk eğitim koordinasyonu — KAYITLI — `docs/decisions/DEC-232-child-education-coordination.md`
-- `DEC-233` — DEC-233 — Yer, seyahat, taşınma ve evcil hayvan iş akışları — `PLANNED / LOCAL_IMPLEMENTATION_STARTED`. Bu karar 33‑V’nin yerel bileşen modelini kaydeder; gereksinimleri kapatmaz ve `countsAsRequirementPass=false` kalır. — `docs/decisions/DEC-233-places-travel-asset-pet.md`
+- `DEC-233` — DEC-233 — Yer, seyahat, taşınma ve evcil hayvan iş akışları — PLANNED / LOCAL_IMPLEMENTATION_STARTED — `docs/decisions/DEC-233-places-travel-asset-pet.md`
 - `DEC-234` — DEC-234 — Onaya bağlı aile AI asistanı — KAYITLI — `docs/decisions/DEC-234-consent-bound-family-ai-assistant.md`
 - `DEC-235` — DEC-235 — Hafıza stüdyosu ve zaman kapsülü — KAYITLI — `docs/decisions/DEC-235-memory-studio-time-capsule.md`
 - `DEC-236` — DEC-236 — Yerel-first akıllı ev ve enerji adapterleri — KAYITLI — `docs/decisions/DEC-236-local-first-smart-home-energy-adapters.md`
@@ -344,14 +346,20 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - `DEC-259` — DEC-259 — Ticari Temel Alani ve Asilamaz Belge Kapisi — ACTIVE — `docs/decisions/DEC-259-ticari-temel-alani-ve-asilamaz-belge-kapisi.md`
 - `DEC-260` — DEC-260 — Ek kural toplu birleştirme ve doğrulanmış Git teslimi — ACTIVE — `docs/decisions/DEC-260-ek-kural-toplu-birlestirme-ve-dogrulanmis-git-teslimi.md`
 - `DEC-261` — DEC-261 — AYM Kısaltmasının Güncel Ürün Yüzeylerinden Kaldırılması — ACTIVE — `docs/decisions/DEC-261-aym-kisaltmasinin-guncel-urun-yuzeylerinden-kaldirilmasi.md`
-- `DEC-262` — DEC-262 — ParsYuva kurulum yolu, program dosyası ve kısa teslim adı — SUPERSEDED_BY_DEC_269 — `docs/decisions/DEC-262-parsyuva-kurulum-yolu-program-dosyasi-ve-kisa-teslim-adi.md`
+- `DEC-262` — DEC-262 — ParsYuva kurulum yolu, program dosyası ve kısa teslim adı — ACTIVE — `docs/decisions/DEC-262-parsyuva-kurulum-yolu-program-dosyasi-ve-kisa-teslim-adi.md`
 - `DEC-263` — DEC-263 — Kod değişikliğinde eski Windows kurulum artefaktlarının silinmesi — ACTIVE — `docs/decisions/DEC-263-kod-degisikliginde-eski-windows-kurulum-artefaktlarinin-silinmesi.md`
 - `DEC-264` — DEC-264 — Görünür sürüm kanalının tek kez gösterilmesi — ACTIVE — `docs/decisions/DEC-264-gorunur-surum-kanalinin-tek-kez-gosterilmesi.md`
 - `DEC-265` — DEC-265 — Her işlem öncesi zorunlu kural kontrolü — ACTIVE — `docs/decisions/DEC-265-her-islem-oncesi-zorunlu-kural-kontrolu.md`
-- `DEC-266` — DEC-266 — Özel kurulum, ilk aile, temiz paket ve çift yedek kabul zinciri — SUPERSEDED — `docs/decisions/DEC-266-ozel-kurulum-ilk-aile-temiz-paket-ve-cift-yedek-kabul-zinciri.md`
+- `DEC-266` — DEC-266 — Özel kurulum, ilk aile, temiz paket ve çift yedek kabul zinciri — ACTIVE — `docs/decisions/DEC-266-ozel-kurulum-ilk-aile-temiz-paket-ve-cift-yedek-kabul-zinciri.md`
 - `DEC-267` — DEC-267 — Geçişli sesli kurulum, tek pars ve kasa kilidi düzeltmesi — ACTIVE — `docs/decisions/DEC-267-gecisli-sesli-kurulum-tek-pars-ve-kasa-kilidi-duzeltmesi.md`
 - `DEC-268` — DEC-268 — Windows installer timer callback ve tam ön yüz kullanıcı UAT teslimi — ACTIVE — `docs/decisions/DEC-268-windows-installer-timer-callback-ve-tam-on-yuz-kullanici-uat-teslimi.md`
-- `DEC-269` — DEC-269 — Bronze Silver Gold kurulum veri ve kaynak çalışma alanı yalıtımı — ACTIVE — `docs/decisions/DEC-269-bronze-silver-gold-kurulum-veri-ve-kaynak-yalitimi.md`
+- `DEC-269` — DEC-269 — Bronze, Silver ve Gold kurulum, veri ve kaynak yalıtımı — SUPERSEDED_BY_DEC-271 — `docs/decisions/DEC-269-bronze-silver-gold-kurulum-veri-ve-kaynak-yalitimi.md`
+- `DEC-270` — DEC-270 — Her mutasyon sonrası exact commit kanıtı ve taze kurulu EXE UAT teslim kapısı — ACTIVE — `docs/decisions/DEC-270-her-mutasyon-sonrasi-exact-commit-kaniti-ve-taze-kurulu-exe-uat-teslim-kapisi.md`
+- `DEC-271` — DEC-271 — Kardeş kanal program kökleri ve legacy kaldırma güvenliği — ACTIVE — `docs/decisions/DEC-271-sibling-channel-program-roots-and-legacy-uninstall-safety.md`
+- `DEC-272` — DEC-272 — Açık tek seferli sürüm tahsisi ve önceden tahsisli paket kimliği — ACTIVE — `docs/decisions/DEC-272-explicit-single-release-allocation-and-preallocated-package-identity.md`
+- `DEC-273` — DEC-273 — Kanonik Windows kurulu yükseltme, maintenance ve ön yüz UAT zinciri — ACTIVE — `docs/decisions/DEC-273-canonical-windows-installed-upgrade-maintenance-and-frontend-uat.md`
+- `DEC-274` — DEC-274 — Adversarial Windows paket, kurulum ve final teslim kanıt zinciri — ACTIVE — `docs/decisions/DEC-274-adversarial-windows-delivery-evidence-chain.md`
+- `DEC-275` — DEC-275 — En küçük değişiklikte tüm kayıt ve test kapanışı — ACTIVE — `docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md`
 
 ## 12. ADR dizini
 
@@ -691,13 +699,19 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - **PR-225 [ACTIVE]** — Ana pencerenin X düğmesi ve Alt+F4 normal kullanımda uygulamayı sonlandırmaz; hassas ekranı gizleyip sistem tepsisine taşır. Tepsi Aç, Kilitle ve onaylı Tamamen kapat eylemlerini sunar; Windows kapanışı, güvenli güncelleme ve kaldırma kontrollü gerçek çıkış yapabilir.
 - **PR-226 [ACTIVE]** — Her güncelleme mevcut kişisel veriyi, ayarı, arşivi ve yedek bağlarını korur. Şema veya altyapı değişimi doğrulanmış şifreli geri dönüş yedeği, atomik migration, başarısızlıkta rollback ve kayıt sayısı, hash, sahiplik ile şifreleme bağı doğrulaması olmadan tamamlanamaz; dönüştürülemeyen kayıt açıkça raporlanır.
 - **PR-227 [ACTIVE]** — Geçici ek-kural dosyasında tutulan kararlar toplu birleştirmede tek tek kanonik kurala, karara, iş listesine, kaynak/test kanıtına veya açık dış bağımlılık nedenine eşlenir. Daha yeni kararla değişen eski metin yeniden etkinleştirilemez; birleştirme kaydı korunur ve GitHub/yerel yedek eşitliği canlı commit kanıtı olmadan güncel gösterilemez.
-- **PR-228 [SUPERSEDED]** — Ortak kurulum dosyası, appId ve kullanıcı veri kimliği PR-234 ile değiştirilmiştir.
+- **PR-228 [SUPERSEDED]** — Windows kurulum hedefi C:\Program Files\PPT\ParsYuva, kurulu ana program dosyası ParsYuva.exe ve masaüstü ile Başlat menüsü kısayolu ParsYuva olur. Dağıtım EXE dosya adı yalnız ParsYuva, güvenilir sürüm kanalı ve GG.AA.YYYY.NN sürümünü ParsYuva-<Kanal>-GG.AA.YYYY.NN.exe biçiminde taşır; mimari, Kurulum, AYM, tam uzun ürün adı veya yerel test eki dosya adına eklenmez. Uygulama içindeki görünür tam ürün adı ParsYuva Aile Yaşam Merkezi olarak kalır; kararlı appId ve eski kullanıcı-veri dizini yalnız yükseltme uyumluluğu için korunur.
 - **PR-229 [ACTIVE]** — Kaynak kodda veya Windows paketleme davranışında değişiklik yapıldığında apps/desktop/release altındaki önceki kurulum artefaktları geçersiz olur ve yeni derleme başlamadan önce silinir. Temizlik ParsYuva kurulum EXE dosyalarını ve bunlara bağlı .blockmap ile .sha256 yan dosyalarını kapsar; paketleme sonrasında klasörde yalnız güncel görünür sürüme ait en fazla bir kurulum seti kalabilir. Kullanıcı verisi, kurulu uygulama, kaynak arşivi ve tarihsel yönetişim kanıtları bu temizliğin dışındadır.
 - **PR-230 [ACTIVE]** — Kullanıcıya görünür sürüm satırlarında Bronze, Silver veya Gold kanal adı tam bir kez gösterilir. Kanal adı yalnız kanonik releaseLabel alanında bulunur; kanal-bağımsız yaşam döngüsü durumu olan stage alanı kanal adı içeremez. İlk kurulum, güvenli başlangıç, ana uygulama, Türkçe ve İngilizce yüzeyler kanal ile kanal içeren sürüm etiketini yeniden birleştiremez.
 - **PR-231 [ACTIVE]** — Her durum değiştiren işlem başlamadan önce güncel kanonik kural sicili, yeniden hesaplanan kural hash'i, kullanıcı onayı, Proje Anayasası bağı ve tüm aktif kuralların fail-closed enforcement kayıtları doğrulanır. Kod, dosya, yapılandırma, belge, test, derleme, paketleme, kurulum, silme, yayımlama veya dış sisteme yazma işlemi kontrol PASS olmadan başlayamaz. Salt okunur inceleme yalnız uygulanacak kuralları belirleyebilir; kural veya hash değişirse sonraki mutasyondan önce kontrol yeniden çalışır. Waiver, sessiz atlama ve eski makbuz kullanımı yasaktır.
-- **PR-232 [SUPERSEDED]** — Üç pars ve önceki kurulum kabul zinciri PR-233 ile değiştirilmiştir.
-- **PR-233 [ACTIVE]** — Üç bilgi kartı arasında geçişli fakat sahte ilerlemesiz özel Windows installer, aynı dilde kadın sesi önceliği ve erkek/kurulu ses yedeği, eski tek pars, 900x640 reflow, kilitli kasayı koruyan yeniden doğrulama, ilk güvenlik kurulumu bootstrap sınırı ve temiz çift yedek teslim zinciri fail-closed uygulanır.
-- **PR-234 [ACTIVE]** — Bronze, Silver ve Gold ayrı Program Files alt klasörü, EXE, kısayol, appId, productName, kullanıcı veri kökü, kaldırma kapsamı, Git worktree ve branch kullanır; kanal programı, verisi ve build çıktısı diğer kanalla paylaşılamaz.
+- **PR-232 [SUPERSEDED]** — Özel Windows kurulum karşılama yüzeyi, ilk aile oluşturma ekranı ve temiz paket teslim zinciri tek bağlayıcı kabul kapsamıdır. Kurulum sayfası ParsYuva marka/paletini kullanır; dekoratif hareket gerçek ilerleme gibi gösterilemez. İlk aile ekranı 900x640 görünümde yatay taşmadan çalışır, üç pars ailesi hareket azaltma tercihine uyar, pencere ve tepsi simgeleri küçük yüzeyde seçilir. Türkçe ve İngilizce anlatımda aynı dilde kadın sesi önceliklidir; bulunamazsa aynı dilde erkek ses yedeği kullanılır ve ses çıkışı doğrulanmadan duyuldu iddiası kurulamaz. Güncelleme kişisel veriyi korur ve yıkıcı kaldırma seçimini açmaz. Teslimden önce tüm çalışma alanları sıfırdan derlenir, eski installer artefaktları silinir, paketlenmiş gerçek uygulama sürümü ve açılışı sınanır, SHA-256 ile imza durumu kaydedilir; kesin kaynak commit’i GitHub ve haricî Git yedeğine gönderilip haricî disk kaynak arşivi geri-okumayla doğrulanmadan paket teslimi tamamlanmış sayılamaz.
+- **PR-233 [ACTIVE]** — Özel Windows kurulum karşılama yüzeyi, ilk kullanıcı ve aile oluşturma ekranının sakin görsel diliyle üç gerçek tanıtım adımı arasında geçiş yapar; bu bilgi geçişi kurulum ilerlemesi değildir, yüzde veya sahte ilerleme çubuğu gösteremez ve gerçek dosya kurulumu yalnız NSIS yerel ilerlemesiyle sunulur. Kurulum anlatımı Türkçe ve İngilizcede aynı dilde kadın sesi önceliğiyle, bulunamazsa aynı dilde erkek veya kurulu ilk ses yedeğiyle çalışır; görünür metin her zaman asıl kaynaktır. İlk aile ve güvenlik yüzeyleri 900x640 görünümde yatay taşmadan, eski tek pars marka görseliyle ve hareket azaltma tercihiyle çalışır. Oturum kilidi açık ilk kurulum veri kasasını yok edemez; yeniden doğrulama yolu kasayı kullanılabilir tutar ve ilk aile oluşturulduktan sonra iki aşamalı doğrulama başlatma çağrısı kilitli kasa hatası veremez. Güncelleme kişisel veriyi korur; eski installer setleri silinir; temiz tam derleme, paketli sürüm/açılış, SHA-256/imza kaydı, GitHub ve haricî Git eşitliği ile geri-okumalı haricî kaynak arşivi tamamlanmadan paket teslimi kabul edilemez.
+- **PR-234 [SUPERSEDED]** — Bronze, Silver ve Gold birbirinden yalıtılmış kurulum, kullanıcı verisi ve kaynak çalışma alanları kullanır. Her kanal C:\Program Files\PPT\ParsYuva\<Kanal> dizinine, ParsYuva-<Kanal>.exe ana dosyasıyla ve ParsYuva <Kanal> kısayoluyla kurulur; appId, productName, kaldırma kapsamı ve kullanıcı veri kökü kanal kimliğini taşır. Bir kanalın kurulumu, yükseltmesi veya kaldırılması diğer kanalın programını ya da verisini değiştiremez. Kanal kaynakları C:\PPT\AYM\06_KOD\kanallar\<Kanal> altında ayrı Git worktree ve ayrı branch olarak tutulur; build çıktısı ile kullanıcı verisi kanallar arasında yeniden kullanılamaz. Dağıtım EXE adı ParsYuva-<Kanal>-GG.AA.YYYY.NN.exe olarak kalır; görünür ana ürün adı ParsYuva Aile Yaşam Merkezi'dir.
+- **PR-235 [ACTIVE]** — En küçük kaynak, yapılandırma veya belge mutasyonundan sonra kalıcı tamamlanma, Windows paketleme ya da installer teslimi iddiası; değişen dosyaların etki analizi kanonik kural, kullanıcı kararı, aktif belge, manifest, ratchet, hedefli test, tam regresyon, kaynak bütünlüğü ve UAT etkilerini tek tek güncellediğini veya gerekçeli olarak etkilenmediğini aynı exact commit üzerinde göstermeden kurulamaz. Paket yalnız temiz ve kanalına ait exact Git commitinden, bu commit ile aynı kural hash'i ve governed-source fingerprint'ine bağlı hedefli test, tam regresyon ve kaynak bütünlüğü PASS kanıtlarıyla üretilir. Installer teslimi yalnız paket üretiminden sonra aynı paket ve kaynak commitine bağlı kurulu ana EXE üzerinde taze UAT PASS kanıtıyla yapılır; eski, başka committen, kaynak-runtime, win-unpacked veya yalnız metadata kanıtı kabul edilmez. Eksik ya da eski bağ kalıcı completion, paketleme ve teslimi fail-closed engeller; waiver yoktur.
+- **PR-236 [ACTIVE]** — Bronze, Silver ve Gold program kökleri legacy ParsYuva kökünün dışında C:\Program Files\PPT\ParsYuva-<Kanal> kardeş dizinlerine kurulur; kanal AppData kökü ParsYuva/<Kanal> olarak ayrı kalır. Kanal appId, productName, ParsYuva-<Kanal>.exe ana dosyası, ParsYuva <Kanal> kısayolu, kaldırma kapsamı, kullanıcı verisi, Git worktree ve branch yalıtımı korunur; build çıktısı veya kullanıcı verisi kanallar arasında yeniden kullanılamaz. Yükseltme kişisel veriyi korur ve yalnız etkileşimli kaldırma signed-in kullanıcı AppData bağlamına geçip çıkışta tüm-kullanıcılar bağlamını geri yükleyebilir. Legacy 37-44 uygulama kökü altında Bronze, Silver veya Gold kanal dizini varsa recursive legacy program temizliği veri ve program silmeden fail-closed durur. Legacy kullanıcı verisi otomatik taşınamaz veya silinemez.
+- **PR-237 [ACTIVE]** — Resmî aylık sürüm tahsisi yalnız açık ve tek seferlik bir işlem olarak, mutasyon modunda zorunlu beklenen release ID ile yapılır. Hesaplanan kimlik beklenenle uyuşmazsa lock, geçici dosya, kaynak yazımı veya installer temizliği başlamadan fail-closed durur; preview salt okunurdur. Signed, yerel imzasız ve dizin paketleme girişleri yeni sürüm tahsis edemez; yalnız önceden tahsis edilmiş current ledger, kök ve desktop manifest, repository metadata ve APP_META exact kimliğini tüketir. Signed paketleme zorunlu beklenen release ID doğrulamasını installer temizliğinden önce yapar. Tahsis; aktif kök/current/config/ticari sürüm taşıyıcılarını tek atomik planda senkronize eder, tarihsel UAT, evidence ve test fixture kayıtlarını değiştirmez. Aynı beklenen kimlikle ikinci tahsis girişimi sonraki sıra kimliğini hesapladığı anda hiçbir dosyayı değiştirmeden reddedilir.
+- **PR-238 [SUPERSEDED]** — Windows installer teslimi; zorunlu explicit installer, packaged EXE, installed EXE, package provenance, governed preflight, yeni containment/reparse korumalı evidence root ve expected release ID girdileriyle çalışan tek kanonik üreticide gerçek N→N+1 yükseltme ile ayrı aynı-sürüm maintenance fazlarını kanıtlar. Üretici yalnız kendi sentetik Bronze markerını yazar; mevcut Bronze, Silver, Gold ve legacy kullanıcı verisi içeriğini okumadan ve adlarını makbuza kaydetmeden metadata hash manifestleri üretir. Yükseltme ve maintenance veri seçim diyaloğu açamaz; bütün kanal/legacy kullanıcı verisi manifestlerini ve sentetik markerı korur, Silver/Gold/legacy program ve registry sınırlarına sıfır yazım yapar, kurulu EXE packaged EXE ile SHA-256, boyut ve sürüm bakımından exact eşleşir ve sibling Bronze install root ile uninstall registry kimliği exact olur. Ardından gerçek kurulu EXE üzerinde schema2 installed frontend UAT çalışır ve installation-preservation SHA, package provenance, expected release ID ile source commit bağlarını taşır. Final local-test teslimi yalnız bu kanonik UAT110/UAT111 makbuzlarını aynı package provenance ve source commit bağlarıyla kabul eder; NotSigned yalnız yerel test sınıfıdır ve imzalı üretim iddiası kuramaz.
+- **PR-239 [ACTIVE]** — Bronze Windows local-test teslim zinciri; temiz exact commit ve aynı commitin PR-235 hedefli test, tam regresyon, kaynak bütünlüğü, governed fingerprint ve kanonik kural hash'i canlı geri-okumasına bağlı schema-2 package provenance olmadan başlayamaz. Installer deneyimi schema-2 makbuzu aynı installer/package/source kimliğinde üç gerçek bilgi geçişi, sahte progress bulunmaması, anlatım child-process/dil kanıtı, güvenli iptal ve değişmemiş payloadı zorunlu olarak kanıtlar. Gerçek N→N+1 yükseltme yalnız current package parentRelease ile bağlı immutable arşivlenmiş önceki schema-2 package provenance ve kanonik sibling Bronze yolundaki canlı installed N runtime SHA-256, boyut ve FileVersion kimliği exact eşleştiğinde kabul edilir; aynı aylık sıra döneminde sequence tam bir artar, tarih monotoniktir. Legacy nested kurulum yalnız değişmezlik snapshot sınırıdır ve trusted predecessor değildir. UAT110 schema-2 yükseltme ile ayrı N+1→N+1 maintenance fazlarında bütün kanal/legacy kullanıcı verisi içerik eşitliğini, sentetik marker temizliği/absence readback'i, diğer kanal ve legacy program/registry sıfır yazımını ve installed==packaged canlı kimliğini kanıtlar. UAT111 schema-3 aynı UAT110 runId/SHA ve package/source/producer bağında yalnız sentetik profile çalışır; görünür uygun bütün kontroller rota/durum/yüzey bazlı dinamik keşif ve doğrulanmış outcome ile sınıflandırılır, sabit tıklama sayısı kabul değildir; ana süreç/renderer hatası, eksik erişilebilirlik-görsel durum, profil cleanup, screenshot hash/readback veya secret taraması PASS değilse kapanamaz. Final schema-3 teslim makbuzu zorunlu installer-experience, UAT110, UAT111, narration, packaged probe ve package provenance kanıtlarını distinct run/evidence kökleri, producer SHA, exact kronoloji ve canlı dosya geri-okumasıyla yeniden doğrular. NotSigned ve Kaspersky koruması kapalı test zararsızlık ya da üretim uygunluğu kanıtı değildir; imzalı ve koruma açık retest olmadan üretim engeli sürer.
+- **PR-240 [ACTIVE]** — En küçük kod, yapılandırma, belge, test veya üretici değişikliği dahi etkilenen ana kaynak, Bronze/Silver/Gold kanal kaynakları, kanonik kural ve kullanıcı karar sicilleri, aktif belgeler, ticari kayıtlar, iş listesi, kapsam, envanter, ratchet, manifest, indeks, ana DOCX/PDF ve kanıt sözleşmeleri aynı mutasyon zincirinde güncellenmeden tamamlanamaz. Etki analizi her bağımlı kayıt sınıfını UPDATED ya da kanıtlı NOT_AFFECTED olarak göstermelidir. Her değişiklik hedefli test, filtresiz tam regresyon, typecheck, değişen komut dosyalarının sözdizimi ve kaynak bütünlüğü PASS gerektirir; kullanıcı arayüzü etkisinde bütün modül, rota, ana ve alt menü, görünür uygun kontrol, durum, erişilebilirlik ve görsel bütünlük UAT kapsamına alınır. Gerçek test hatası boş wip(rejected) checkpoint commit ile kalıcı kaydedilir. Ara installer üretilemez; paket yalnız tüm kaynak ve kayıt kapanışı tamamlanmış temiz exact committen, ana dal ve ilgili kanal kaynak eşitliği doğrulandıktan sonra üretilebilir.
 
 ## 14. Aktif repo Word/PDF tarihsel denetim envanteri
 
@@ -709,6 +723,8 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - `MASTER_PROJE_DOKUMANTASYONU_GUNCEL_18.08.2026_V2.pdf` — PDF — 479923 bayt, 21 sayfa — OKUNABİLİR
 - `MASTER_PROJE_DOKUMANTASYONU_GUNCEL_19.08.2026_V3.docx` — DOCX — 349713 bayt, 1 sayfa — OKUNABİLİR
 - `MASTER_PROJE_DOKUMANTASYONU_GUNCEL_19.08.2026_V3.pdf` — PDF — 481003 bayt, 21 sayfa — OKUNABİLİR
+- `MASTER_PROJE_DOKUMANTASYONU_GUNCEL_20.08.2026_V4.docx` — DOCX — 352628 bayt, 1 sayfa — OKUNABİLİR
+- `MASTER_PROJE_DOKUMANTASYONU_GUNCEL_20.08.2026_V4.pdf` — PDF — 489570 bayt, 25 sayfa — OKUNABİLİR
 - `MASTER_PROJECT_DOCUMENTATION_BUILD209.docx` — DOCX — 295186 bayt, 1 sayfa — OKUNABİLİR
 - `MASTER_PROJECT_DOCUMENTATION_BUILD209.pdf` — PDF — 391597 bayt, 11 sayfa — OKUNABİLİR
 - `MASTER_PROJECT_DOCUMENTATION_BUILD210.docx` — DOCX — 295232 bayt, 1 sayfa — OKUNABİLİR

@@ -53,3 +53,61 @@ export const installerArtifactTemplate = (release) =>
 
 export const installerFileName = (release, _arch = 'x64', extension = 'exe') =>
   `ParsYuva-${release.channel}-${release.version}.${extension}`;
+
+export const assertExpectedReleaseId = (release, expectedReleaseId) => {
+  if (typeof expectedReleaseId !== 'string' || expectedReleaseId.trim() === '') {
+    throw new Error('Sürüm tahsisi için --expected-release-id zorunludur.');
+  }
+  if (release.releaseId !== expectedReleaseId) {
+    throw new Error(`Beklenen sürüm kimliği uyuşmuyor: beklenen=${expectedReleaseId}; hesaplanan=${release.releaseId}.`);
+  }
+  return release;
+};
+
+export const assertPreallocatedReleaseIdentity = ({
+  expectedReleaseId,
+  ledger,
+  rootManifest,
+  desktopManifest,
+  repositoryMetadata,
+  appMeta
+}) => {
+  const current = ledger?.current;
+  if (!current || typeof current !== 'object') throw new Error('Önceden tahsis edilmiş güncel sürüm kaydı eksik.');
+  if (typeof expectedReleaseId !== 'string' || expectedReleaseId.trim() === '') {
+    throw new Error('Paketleme için beklenen release ID zorunludur.');
+  }
+  if (current.releaseId !== expectedReleaseId) {
+    throw new Error(`Paketleme release ID uyuşmazlığı: beklenen=${expectedReleaseId}; güncel=${String(current.releaseId)}.`);
+  }
+  if (!ledger.entries?.some((entry) =>
+    entry.releaseId === current.releaseId
+    && entry.version === current.version
+    && entry.packageVersion === current.packageVersion
+    && entry.monthlySequence === current.monthlySequence
+  )) throw new Error('Güncel sürüm kaydı kanonik sürüm geçmişine exact bağlı değil.');
+  if (rootManifest?.version !== current.packageVersion) throw new Error('Kök paket sürümü güncel tahsisle uyuşmuyor.');
+  if (desktopManifest?.version !== current.packageVersion) throw new Error('Desktop paket sürümü güncel tahsisle uyuşmuyor.');
+  const artifactTemplate = `ParsYuva-${current.channel}-${current.version}.\${ext}`;
+  if (desktopManifest?.build?.artifactName !== artifactTemplate
+    || desktopManifest?.build?.win?.artifactName !== artifactTemplate) {
+    throw new Error('Windows installer adı güncel tahsisle uyuşmuyor.');
+  }
+  if (repositoryMetadata?.repositoryVersion !== current.version
+    || repositoryMetadata?.applicationVersion !== current.version
+    || repositoryMetadata?.visibleRelease !== current.visibleRelease
+    || repositoryMetadata?.packageVersion !== current.packageVersion
+    || repositoryMetadata?.releaseId !== current.releaseId) {
+    throw new Error('Repository metadata güncel tahsisle uyuşmuyor.');
+  }
+  for (const marker of [
+    `version: '${current.version}'`,
+    `packageVersion: '${current.packageVersion}'`,
+    `releaseLabel: '${current.visibleRelease}'`,
+    `releaseId: '${current.releaseId}'`,
+    `monthlySequence: ${current.monthlySequence}`
+  ]) {
+    if (!appMeta?.includes(marker)) throw new Error(`APP_META güncel tahsis işareti eksik: ${marker}`);
+  }
+  return Object.freeze({ ...current });
+};

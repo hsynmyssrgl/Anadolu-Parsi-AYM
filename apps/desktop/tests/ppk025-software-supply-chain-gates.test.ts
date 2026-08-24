@@ -42,6 +42,13 @@ describe('32-U PPK-025 Desktop software supply-chain release boundary', () => {
     expect(desktopPackage.scripts['package:win:dir']).not.toContain('build-signed-windows-release.mjs');
     expect(desktopPackage.build.forceCodeSigning).toBe(true);
     expect(desktopPackage.build.win.artifactName).toContain(`${activeRelease.channel}-${activeRelease.version}`);
+    const signedSource = readSource('apps/desktop/scripts/build-signed-windows-release.mjs');
+    expect(signedSource).not.toContain('allocate-monthly-release-version.mjs');
+    const identityCheck = signedSource.indexOf('assertPreallocatedReleaseIdentity');
+    const cleanup = signedSource.indexOf('clean-stale-windows-installers.mjs');
+    expect(identityCheck).toBeGreaterThan(-1);
+    expect(identityCheck).toBeLessThan(cleanup);
+    expect(signedSource).toContain('--expected-release-id=');
   });
 
   it('fails before packaging when external production signing trust is absent', () => {

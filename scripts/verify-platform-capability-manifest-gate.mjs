@@ -282,14 +282,17 @@ export const runPlatformCapabilityManifestGate = async (root = process.cwd(), op
 
 const main = async () => {
   const inventoryOnly = process.argv.includes('--inventory');
+  const noWrite = process.argv.includes('--no-write');
   const report = await runPlatformCapabilityManifestGate(process.cwd(), { inventoryOnly });
   if (inventoryOnly) {
     console.log(JSON.stringify(process.argv.includes('--keys') ? report.observations.map((item) => item.key) : report, null, 2));
     if (report.status === 'FAIL') process.exitCode = 1;
     return;
   }
-  await mkdir('artifacts/validation', { recursive: true });
-  await writeFile('artifacts/validation/platform-capability-manifest-gate.json', `${JSON.stringify(report, null, 2)}\n`);
+  if (!noWrite) {
+    await mkdir('artifacts/validation', { recursive: true });
+    await writeFile('artifacts/validation/platform-capability-manifest-gate.json', `${JSON.stringify(report, null, 2)}\n`);
+  }
   console.log(JSON.stringify(report, null, 2));
   if (report.status !== 'PASS') process.exitCode = 1;
 };

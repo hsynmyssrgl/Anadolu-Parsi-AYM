@@ -2,22 +2,22 @@
   "schemaVersion": 1,
   "id": "PPT-ACTIVE-GOVERNANCE-LEDGER-V1",
   "product": "ParsYuva Aile Yaşam Merkezi",
-  "release": "Bronze 22.08.2026.43",
-  "releaseId": "bronze-2026-08-20-r37",
+  "release": "Bronze 22.08.2026.50",
+  "releaseId": "bronze-2026-08-22-r50",
   "status": "GOVERNED_BRONZE_DEVELOPMENT_IN_PROGRESS",
   "startedAt": "2026-08-04T12:55:00+03:00",
   "parentRelease": "Bronze 20.08.2026.36",
   "canonicalRules": "config/canonical-rule-registry.json",
-  "canonicalRulesSha256": "07f19ad3f1ad3d23e0d900e9cd37665fede518b3e825b86902715a6d465bc6d5",
+  "canonicalRulesSha256": "4c8a52f9adc2153177f1e504104e20ac5e9d3f7d780daa2c7d7bdb5d399a6050",
   "acceptedScope": "config/accepted-scope-registry.json",
   "decisionLedger": "config/user-decision-ledger.json",
   "documentInventory": "artifacts/manifests/ALL_DOCUMENTS_INDEX.json",
   "artifactInventory": "artifacts/manifests/PROJECT_ARTIFACT_INDEX.json",
   "persistentLibraryRoot": "/ParsYuva/ParsYuva Aile Yasam Merkezi",
-  "persistentLibraryReleasePath": "/ParsYuva/ParsYuva Aile Yasam Merkezi/Bronze 22.08.2026.43",
-  "preflightStatus": "PENDING_33_P",
-  "postflightStatus": "NOT_RUN",
-  "libraryUploadStatus": "33-P_PENDING",
+  "persistentLibraryReleasePath": "/ParsYuva/ParsYuva Aile Yasam Merkezi/Bronze 22.08.2026.50",
+  "preflightStatus": "NOT_RUN_CURRENT_PR240_MUTATION_DIRTY",
+  "postflightStatus": "NOT_RUN_CURRENT_PR240_MUTATION_DIRTY",
+  "libraryUploadStatus": "BLOCKED_UNTIL_CLEAN_EXACT_COMMIT",
   "conversationCapacity": {
     "method": "platform_actual_or_unavailable",
     "actualUsedPercent": null,
@@ -32,8 +32,8 @@
     "canonicalPR172Unchanged": true,
     "recordedAt": "2026-08-06T07:45:38.3898625+03:00"
   },
-  "nextOfficialTask": "33-P_DEC-227_IMPLEMENTATION_VALIDATION_AND_RECEIPT",
-  "activeMicroStep": "33-P",
+  "nextOfficialTask": "PR-240_MUTATION_WIDE_RECORD_TEST_AND_UI_UAT_CLOSURE",
+  "activeMicroStep": "33-P_PR240_CLOSURE",
   "supersessions": [
     {
       "id": "GOV-SUP-29-D3-001",
@@ -713,7 +713,7 @@
       "status": "RESOLVED_AFTER_PERSISTENT_RECEIPT_FULL_AUTO_SELECTION_AUTHORIZED"
     }
   ],
-  "updatedAt": "2026-08-14T03:37:34.276Z",
+  "updatedAt": "2026-08-24T10:30:00.000Z",
   "externalLibraryAuthority": {
     "step": "30-Z",
     "status": "PASS",

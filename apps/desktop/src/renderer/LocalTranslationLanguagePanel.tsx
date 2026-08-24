@@ -3,9 +3,11 @@ import type {
   LocalTranslationCenterView,
   LocalTranslationDictionaryCategory,
   LocalTranslationProviderMode,
+  LocalTranslationRequestState,
   LocalTranslationSourceKind
 } from '@ppt/domain';
 import { selectUiCopy, useLocalization } from './localization';
+import { toUserFacingErrorMessage } from './user-facing-error';
 
 const categoryLabels:Record<LocalTranslationDictionaryCategory,string>={
   family_name:'Aile adı',nickname:'Lakap',place:'Yer',medical_term:'Tıbbi terim'
@@ -18,6 +20,9 @@ export function LocalTranslationLanguagePanel(){
   const {language}=useLocalization();const text=(turkish:string,english:string)=>selectUiCopy(language,turkish,english);
   const categoryLabel=(value:LocalTranslationDictionaryCategory)=>language==='tr'?categoryLabels[value]:({family_name:'Family name',nickname:'Nickname',place:'Place',medical_term:'Medical term'} as const)[value];
   const sourceLabel=(value:LocalTranslationSourceKind)=>language==='tr'?sourceLabels[value]:({message:'Message',live_caption:'Live caption',document:'Document',meeting_summary:'Meeting summary'} as const)[value];
+  const requestStateLabels:Readonly<Record<LocalTranslationRequestState,string>>={
+    provider_unavailable:text('Sağlayıcı kullanılamıyor','Provider unavailable'),correction_recorded:text('Düzeltme kaydedildi','Correction recorded'),cancelled:text('İptal edildi','Canceled')
+  };
   const [center,setCenter]=useState<LocalTranslationCenterView>();
   const [busy,setBusy]=useState('');const [error,setError]=useState('');
   const [preferredLanguage,setPreferredLanguage]=useState('tr');const [secondaryLanguage,setSecondaryLanguage]=useState('en');
@@ -34,11 +39,10 @@ export function LocalTranslationLanguagePanel(){
     const created=crypto.randomUUID();operations.current.set(key,created);return created;};
   const refresh=async()=>{if(!window.pardus)return;setError('');try{const value=await window.pardus.getLocalTranslationCenter();
     setCenter(value);setPreferredLanguage(value.profile.preferredLanguage);setSecondaryLanguage(value.profile.secondaryLanguages[0]??'en');
-  }catch(caught){setError(caught instanceof Error?caught.message:text('Dil ve çeviri merkezi yüklenemedi.','Language and translation center could not be loaded.'));}};
+  }catch(caught){setError(toUserFacingErrorMessage(caught,text('Dil ve çeviri merkezi yüklenemedi.','Language and translation center could not be loaded.')));}};
   useEffect(()=>{void refresh();},[]);
   const mutate=async(key:string,run:(id:string)=>Promise<unknown>)=>{setBusy(key);setError('');try{await run(operationId(key));
-    operations.current.delete(key);await refresh();}catch(caught){setError(caught instanceof Error
-      ?`${caught.message} ${text('Aynı işlem kimliğiyle yeniden deneyebilirsiniz.','You can retry with the same operation ID.')}`:text('Dil ve çeviri metadata işlemi tamamlanamadı.','The language and translation metadata operation could not be completed.'));}finally{setBusy('');}};
+    operations.current.delete(key);await refresh();}catch(caught){setError(`${toUserFacingErrorMessage(caught,text('Dil ve çeviri tercih kaydı tamamlanamadı.','The language and translation preference could not be saved.'))} ${text('Aynı işlemi yeniden deneyebilirsiniz.','You can retry the same action.')}`);}finally{setBusy('');}};
   const profile=center?.profile;
   const saveProfile=()=>window.pardus&&profile&&mutate(`profile:${profile.revision}`,clientOperationId=>
     window.pardus!.updateLocalTranslationProfile({clientOperationId,expectedRevision:profile.revision,
@@ -72,20 +76,20 @@ export function LocalTranslationLanguagePanel(){
       <h2 id="local-translation-title">{text('Çeviri, altyazı ve kişisel sözlük','Translation, captions and personal dictionary')}</h2></div>
       <button type="button" onClick={()=>void refresh()} disabled={Boolean(busy)}>{text('Yenile','Refresh')}</button></div>
     <div className="local-translation-truth" role="note"><strong>{text('Bu sürüm gerçek çeviri veya konuşma çözümü çalıştırmaz.','This release does not run a real translation or speech solution.')}</strong>
-      <span>{text('Orijinali koruma, ayrı makine çevirisi etiketi, düşük güven işareti, yerel paket önceliği ve ortak sağlayıcı sözleşmesi modellenmiştir.','Original-content preservation, a separate machine-translation label, low-confidence marking, local-package priority and a common provider contract are modeled.')}</span>
-      <span>{text('Yerel dil paketi, canlı altyazı, konuşmacı ayrımı, seslendirme ve dış sağlayıcı yapılandırılmadı; ağ ve bulut kullanılmaz.','No local language pack, live captions, speaker separation, speech output or external provider is configured; network and cloud services are not used.')}</span>
-      <span>{text('Dış sağlayıcı seçimi yalnız önizleme ve ayrı açık onay metadata’sı oluşturur; hiçbir içerik gönderilmez.','Selecting an external provider creates preview and separate explicit-consent metadata only; no content is sent.')}</span></div>
+      <span>{text('Orijinali koruma, makine çevirisi etiketi, düşük güven işareti ve yerel dil paketi önceliği uygulanır.','Original-content preservation, a machine-translation label, low-confidence marking, and local language-package priority are applied.')}</span>
+      <span>{text('Yerel dil paketi, canlı altyazı, konuşmacı ayrımı, seslendirme ve dış çeviri hizmeti yapılandırılmadı; ağ ve bulut kullanılmaz.','No local language package, live captions, speaker separation, speech output, or external translation service is configured; network and cloud services are not used.')}</span>
+      <span>{text('Dış hizmet seçimi yalnız önizleme ve ayrı açık onay kaydı oluşturur; hiçbir içerik gönderilmez.','Selecting an external service creates only a preview and a separate explicit-approval record; no content is sent.')}</span></div>
     {error&&<p className="status-message danger" role="alert">{error}</p>}
     {profile&&<div className="local-translation-grid"><fieldset><legend>{text('Dil tercihleri','Language preferences')}</legend>
       <label>{text('Ana dil','Primary language')}<input value={preferredLanguage} maxLength={40} onChange={event=>setPreferredLanguage(event.target.value)}/></label>
       <label>{text('İkinci dil','Secondary language')}<input value={secondaryLanguage} maxLength={40} onChange={event=>setSecondaryLanguage(event.target.value)}/></label>
-      <label>{text('Sağlayıcı modu','Provider mode')}<select value={providerMode} onChange={event=>{const value=event.target.value as LocalTranslationProviderMode;
-        setProviderMode(value);if(value==='local_offline')setExternalConsent(false);}}><option value="local_offline">{text('Yerel/offline — paket yok','Local/offline — no package')}</option>
-        <option value="external_preview">{text('Dış sağlayıcı önizlemesi — sağlayıcı yok','External provider preview — no provider')}</option></select></label>
+      <label>{text('Çeviri hizmeti','Translation service')}<select value={providerMode} onChange={event=>{const value=event.target.value as LocalTranslationProviderMode;
+        setProviderMode(value);if(value==='local_offline')setExternalConsent(false);}}><option value="local_offline">{text('Yerel/çevrimdışı — paket yok','Local/offline — no package')}</option>
+        <option value="external_preview">{text('Dış hizmet önizlemesi — hizmet bağlı değil','External service preview — service not connected')}</option></select></label>
       {providerMode==='external_preview'&&<label className="toggle-row"><input type="checkbox" checked={externalConsent}
         onChange={event=>setExternalConsent(event.target.checked)}/><span><strong>{text('Önizlemeyi gördüm ve ayrı açık onay veriyorum','I reviewed the preview and give separate explicit consent')}</strong>
-        <small>{text('Onay yalnız metadata’dır; içerik aktarımı ve ağ kullanımı yapılmaz.','Consent is metadata only; no content transfer or network use occurs.')}</small></span></label>}
-      <button type="button" disabled={Boolean(busy)} onClick={()=>void saveProfile()}>{text('Tercih metadata’sını kaydet','Save preference metadata')}</button>
+        <small>{text('Onay yalnız bu bilgisayarda kaydedilir; içerik aktarımı ve ağ kullanımı yapılmaz.','Approval is recorded only on this computer; no content transfer or network use occurs.')}</small></span></label>}
+      <button type="button" disabled={Boolean(busy)} onClick={()=>void saveProfile()}>{text('Tercih ayarını kaydet','Save preference')}</button>
       <small>{text('Şifreli cihazlar arası eşitleme henüz çalıştırılmadı.','Encrypted cross-device synchronization has not been run.')}</small></fieldset>
       <fieldset><legend>{text('Kişisel sözlük','Personal dictionary')}</legend><label>{text('Kategori','Category')}<select value={category}
         onChange={event=>setCategory(event.target.value as LocalTranslationDictionaryCategory)}>{Object.entries(categoryLabels)
@@ -111,10 +115,10 @@ export function LocalTranslationLanguagePanel(){
         onChange={event=>setSourceResourceId(event.target.value)}/></label>
       <label>{text('Hedef dil','Target language')}<input value={targetLanguage} maxLength={40} onChange={event=>setTargetLanguage(event.target.value)}/></label>
       <button type="button" disabled={Boolean(busy)||!sourceResourceId.trim()||(providerMode==='external_preview'&&!externalConsent)}
-        onClick={()=>void prepare()}>{text('Sağlayıcı kullanmadan hazırlık kaydı oluştur','Create a preparation record without using a provider')}</button></fieldset>
+        onClick={()=>void prepare()}>{text('Dış hizmet kullanmadan hazırlık kaydı oluştur','Create a preparation record without an external service')}</button></fieldset>
     <div className="local-translation-list">{center?.requests.length===0?<p>{text('Henüz çeviri hazırlık talebi yok.','There are no translation preparation requests yet.')}</p>:center?.requests.map(request=><article key={request.id}>
       <header><strong>{sourceLabel(request.sourceKind)} · {request.targetLanguage}</strong><small>{text('sürüm','revision')} {request.revision}</small></header>
-      <p>{request.state} · {text('makine çevirisi etiketi zorunlu · kalite: değerlendirilmedi · ağ: hayır','machine-translation label required · quality: not evaluated · network: no')}</p>
+      <p>{requestStateLabels[request.state]} · {text('makine çevirisi etiketi zorunlu · kalite: değerlendirilmedi · ağ: hayır','machine-translation label required · quality: not evaluated · network: no')}</p>
       <label>{text('Kullanıcı düzeltmesi','User correction')}<input value={correction} maxLength={10_000} onChange={event=>setCorrection(event.target.value)}/></label>
       <div><button type="button" disabled={Boolean(busy)||request.state==='cancelled'||!correction.trim()}
         onClick={()=>void correct(request.id,request.revision)}>{text('Açık izinle düzeltme özetini kaydet','Save correction summary with explicit permission')}</button>

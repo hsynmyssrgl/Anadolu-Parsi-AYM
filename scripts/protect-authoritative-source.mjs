@@ -4,22 +4,26 @@ import {
   mkdir,
   open,
   readFile,
-  readdir,
   rename,
   stat,
   unlink,
   writeFile
 } from 'node:fs/promises';
-import { basename, dirname, relative, resolve, sep } from 'node:path';
+import { basename, dirname, resolve, sep } from 'node:path';
 import { DERIVED_DOCUMENT_INDEX_PATHS, resolveCurrentDeliveryOutputBoundary } from './lib/governance-utils.mjs';
+import {
+  assertMatchingReleaseSourceProvenance,
+  captureReleaseSourceProvenance
+} from './lib/release-source-provenance.mjs';
 
 const mode = process.argv[2] ?? 'verify';
 const sourceRoot = resolve(process.cwd());
-const aymRoot = resolve(sourceRoot, '..', '..');
-const receiptRoot = resolve(aymRoot, '05_TEST', '30Z_LOCAL_RECEIPT');
-const backupRoot = resolve(aymRoot, '10_YEDEK');
 const releaseLedger = JSON.parse(await readFile(resolve(sourceRoot, 'config', 'release-ledger.json'), 'utf8'));
 const repositoryMetadata = JSON.parse(await readFile(resolve(sourceRoot, 'repository-metadata.json'), 'utf8'));
+const initialSourceCapture = await captureReleaseSourceProvenance({ root: sourceRoot, expectedChannel: 'Bronze' });
+const aymRoot = dirname(initialSourceCapture.policy.codeRoot);
+const receiptRoot = resolve(aymRoot, '05_TEST', '30Z_LOCAL_RECEIPT', initialSourceCapture.provenance.channel);
+const backupRoot = resolve(aymRoot, '10_YEDEK', initialSourceCapture.provenance.channel);
 const currentDeliveryBoundary = resolveCurrentDeliveryOutputBoundary(releaseLedger.current, repositoryMetadata);
 const excludedDirectoryNames = new Set([
   '.git', '.cache', '.tmp', '.turbo', 'coverage', 'dist', 'node_modules', 'temp', 'tmp'
@@ -37,7 +41,6 @@ const utf8Flag = 0x0800;
 
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
 const hashFile = async (path) => sha256(await readFile(path));
-const normalizePath = (path) => path.split(sep).join('/');
 
 const crcTable = Array.from({ length: 256 }, (_, index) => {
   let value = index;
@@ -54,33 +57,20 @@ const crc32 = (buffer) => {
 };
 
 const scan = async () => {
-  const files = [];
-  const visit = async (directory) => {
-    const entries = await readdir(directory, { withFileTypes: true });
-    entries.sort((left, right) => left.name.localeCompare(right.name, 'en'));
-    for (const entry of entries) {
-      if (entry.isDirectory() && excludedDirectoryNames.has(entry.name)) continue;
-      const absolute = resolve(directory, entry.name);
-      const rel = normalizePath(relative(sourceRoot, absolute));
-      if (entry.isSymbolicLink()) throw new Error(`Symbolic link is forbidden in authoritative source: ${rel}`);
-      if (excludedRelativePaths.has(rel)) continue;
-      if (entry.isDirectory()) {
-        await visit(absolute);
-      } else if (entry.isFile()) {
-        const info = await stat(absolute);
-        const digest = await hashFile(absolute);
-        files.push({ path: rel, bytes: info.size, sha256: digest, absolute });
-      }
-    }
-  };
-  await visit(sourceRoot);
-  files.sort((left, right) => left.path.localeCompare(right.path, 'en'));
-  const canonical = files.map((file) => `${file.sha256}\t${file.bytes}\t${file.path}\n`).join('');
+  const capture = await captureReleaseSourceProvenance({ root: sourceRoot, expectedChannel: 'Bronze' });
   return {
-    files,
-    fileCount: files.length,
-    totalBytes: files.reduce((sum, file) => sum + file.bytes, 0),
-    treeSha256: sha256(Buffer.from(canonical, 'utf8'))
+    files: capture.entries.map((entry) => ({
+      path: entry.path,
+      mode: entry.mode,
+      oid: entry.oid,
+      bytes: entry.sizeBytes,
+      sha256: entry.sha256,
+      data: entry.bytes
+    })),
+    fileCount: capture.provenance.trackedCommitFingerprint.fileCount,
+    totalBytes: capture.provenance.trackedCommitFingerprint.totalBytes,
+    treeSha256: capture.provenance.trackedCommitFingerprint.sha256,
+    sourceProvenance: capture.provenance
   };
 };
 
@@ -112,7 +102,7 @@ const buildDeterministicZip = async (inventory, target) => {
   let offset = 0;
   try {
     for (const file of inventory.files) {
-      const data = await readFile(file.absolute);
+      const data = file.data;
       if (data.length !== file.bytes || sha256(data) !== file.sha256) {
         throw new Error(`Source changed during backup: ${file.path}`);
       }
@@ -211,13 +201,18 @@ const createProtection = async () => {
   await mkdir(receiptRoot, { recursive: true });
   await mkdir(backupRoot, { recursive: true });
   const inventory = await scan();
-  const publicFiles = inventory.files.map(({ path, bytes, sha256: digest }) => ({ path, bytes, sha256: digest }));
+  const publicFiles = inventory.files.map(({ path, mode: fileMode, oid, bytes, sha256: digest }) => ({
+    path, mode: fileMode, oid, bytes, sha256: digest
+  }));
   const receipt = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     id: `AYM-AUTHORITATIVE-SOURCE-${inventory.treeSha256}`,
-    source: '06_KOD/app',
-    exclusions: [...excludedDirectoryNames].sort(),
-    excludedDerivedDeliveryFiles: [...excludedRelativePaths].sort(),
+    source: inventory.sourceProvenance.source,
+    sourceProvenance: inventory.sourceProvenance,
+    backupScope: 'TRACKED_FILES_AT_EXACT_COMMIT',
+    governedFingerprintExcludedDirectoryNames: [...excludedDirectoryNames].sort(),
+    governedFingerprintExclusions: [...DERIVED_DOCUMENT_INDEX_PATHS].sort(),
+    governedFingerprintExcludedDerivedDeliveryFiles: [...excludedRelativePaths].sort(),
     fileCount: inventory.fileCount,
     totalBytes: inventory.totalBytes,
     treeSha256: inventory.treeSha256,
@@ -233,29 +228,34 @@ const createProtection = async () => {
   await writeImmutable(receiptPath, receiptBytes);
   await writeImmutable(`${receiptPath}.sha256`, Buffer.from(`${receiptHash}  ${receiptName}\n`, 'ascii'));
 
-  const backupName = `AYM_AKTIF_KOD_${inventory.treeSha256.slice(0, 16)}.zip`;
+  const backupName = `AYM_BRONZE_${inventory.sourceProvenance.headCommit.slice(0, 12)}_${inventory.treeSha256.slice(0, 16)}.zip`;
   const backupPath = resolve(backupRoot, backupName);
   const backup = await buildDeterministicZip(inventory, backupPath);
   await verifyZipEnvelope(backupPath, inventory.fileCount);
   await writeImmutable(`${backupPath}.sha256`, Buffer.from(`${backup.sha256}  ${backupName}\n`, 'ascii'));
 
   const protection = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     id: `AYM-LOCAL-PROTECTION-${inventory.treeSha256}`,
-    source: '06_KOD/app',
+    source: inventory.sourceProvenance.source,
+    sourceProvenance: inventory.sourceProvenance,
     treeSha256: inventory.treeSha256,
     fileCount: inventory.fileCount,
     totalBytes: inventory.totalBytes,
-    excludedDerivedDeliveryFiles: [...excludedRelativePaths].sort(),
+    governedFingerprintExcludedDerivedDeliveryFiles: [...excludedRelativePaths].sort(),
     receipt: {
-      path: `05_TEST/30Z_LOCAL_RECEIPT/${receiptName}`,
+      path: `05_TEST/30Z_LOCAL_RECEIPT/${inventory.sourceProvenance.channel}/${receiptName}`,
       sha256: receiptHash
     },
     backup: {
-      path: `10_YEDEK/${backupName}`,
+      path: `10_YEDEK/${inventory.sourceProvenance.channel}/${backupName}`,
       bytes: backup.bytes,
       sha256: backup.sha256,
-      format: 'DETERMINISTIC_ZIP_STORE_FIXED_1980_TIMESTAMP'
+      format: 'DETERMINISTIC_ZIP_STORE_FIXED_1980_TIMESTAMP',
+      scope: 'TRACKED_FILES_AT_EXACT_COMMIT',
+      headCommit: inventory.sourceProvenance.headCommit,
+      headTree: inventory.sourceProvenance.headTree,
+      trackedCommitFingerprint: inventory.sourceProvenance.trackedCommitFingerprint
     },
     readbackStatus: 'PASS',
     localReceiptStatus: 'LOCAL_RECEIPT_VERIFIED',
@@ -280,11 +280,21 @@ const verifyProtection = async () => {
   const receiptHash = sha256(receiptBytes);
   if (receiptHash !== protection.receipt.sha256) throw new Error('Receipt SHA-256 mismatch.');
   const expectedDerivedExclusions = JSON.stringify([...excludedRelativePaths].sort());
-  if (JSON.stringify(receipt.excludedDerivedDeliveryFiles) !== expectedDerivedExclusions
-    || JSON.stringify(protection.excludedDerivedDeliveryFiles) !== expectedDerivedExclusions) {
-    throw new Error('Derived delivery report exclusion boundary mismatch.');
+  if (JSON.stringify(receipt.governedFingerprintExcludedDerivedDeliveryFiles) !== expectedDerivedExclusions
+    || JSON.stringify(protection.governedFingerprintExcludedDerivedDeliveryFiles) !== expectedDerivedExclusions) {
+    throw new Error('Governed fingerprint derived-delivery exclusion boundary mismatch.');
   }
   const inventory = await scan();
+  if (receipt.schemaVersion !== 2 || protection.schemaVersion !== 2) throw new Error('Tracked-only source protection schema is stale.');
+  assertMatchingReleaseSourceProvenance(inventory.sourceProvenance, receipt.sourceProvenance, 'source receipt');
+  assertMatchingReleaseSourceProvenance(inventory.sourceProvenance, protection.sourceProvenance, 'local protection');
+  if (receipt.backupScope !== 'TRACKED_FILES_AT_EXACT_COMMIT'
+    || protection.backup.scope !== 'TRACKED_FILES_AT_EXACT_COMMIT'
+    || protection.backup.headCommit !== inventory.sourceProvenance.headCommit
+    || protection.backup.headTree !== inventory.sourceProvenance.headTree
+    || protection.backup.trackedCommitFingerprint?.sha256 !== inventory.treeSha256) {
+    throw new Error('Tracked-only exact-commit backup binding mismatch.');
+  }
   if (inventory.treeSha256 !== receipt.treeSha256) throw new Error('Authoritative source tree mismatch.');
   if (inventory.fileCount !== receipt.fileCount || inventory.totalBytes !== receipt.totalBytes) {
     throw new Error('Authoritative source count or byte total mismatch.');
@@ -294,6 +304,7 @@ const verifyProtection = async () => {
   const result = {
     status: protection.externalLibraryReceiptStatus === 'PASS' ? 'EXTERNAL_RECEIPT_VERIFIED' : 'LOCAL_RECEIPT_VERIFIED',
     source: protection.source,
+    sourceProvenance: protection.sourceProvenance,
     treeSha256: inventory.treeSha256,
     fileCount: inventory.fileCount,
     backup: protection.backup.path,
@@ -305,9 +316,6 @@ const verifyProtection = async () => {
   return result;
 };
 
-if (basename(sourceRoot) !== 'app' || basename(dirname(sourceRoot)) !== '06_KOD') {
-  throw new Error(`Run from AYM/06_KOD/app; received ${sourceRoot}`);
-}
 if (!sourceRoot.startsWith(`${aymRoot}${sep}`)) throw new Error('Source is outside AYM root.');
 
 if (mode === 'create') {

@@ -10,10 +10,12 @@
 !define AYM_LANG_TURKISH 1055
 
 ; Release channels are separate installed products. The channel token binds the
-; installer directory, executable, shortcuts, uninstall scope and user-data
-; root so development/testing can never mutate a Gold profile.
+; program directory, executable, shortcuts, uninstall scope and user-data root
+; so development/testing can never mutate a Gold profile. Program roots are
+; siblings outside the legacy ParsYuva root; user data stays ParsYuva/<Channel>.
 !define PPT_INSTALLER_RELEASE_CHANNEL "Bronze"
 !define PPT_INSTALLER_CHANNEL_DIRECTORY "${PPT_INSTALLER_RELEASE_CHANNEL}"
+!define PPT_INSTALLER_PROGRAM_DIRECTORY "ParsYuva-${PPT_INSTALLER_RELEASE_CHANNEL}"
 !define PPT_INSTALLER_EXECUTABLE "ParsYuva-${PPT_INSTALLER_RELEASE_CHANNEL}.exe"
 
 ; Keep the complete installer readable at normal and high-DPI Windows scales.
@@ -76,8 +78,8 @@ LangString AymWelcomeStepTwo ${AYM_LANG_ENGLISH} "2 of 3 · Local privacy"
 LangString AymWelcomeStepTwo ${AYM_LANG_TURKISH} "2 / 3 · Yerel gizlilik"
 LangString AymWelcomeStepThree ${AYM_LANG_ENGLISH} "3 of 3 · Narrated guidance"
 LangString AymWelcomeStepThree ${AYM_LANG_TURKISH} "3 / 3 · Sesli rehberlik"
-LangString AymWelcomeBody ${AYM_LANG_ENGLISH} "The ${PPT_INSTALLER_RELEASE_CHANNEL} application will be installed in C:\Program Files\PPT\ParsYuva\${PPT_INSTALLER_CHANNEL_DIRECTORY}. Setup does not create family records, sign in to an online account or transmit personal data."
-LangString AymWelcomeBody ${AYM_LANG_TURKISH} "${PPT_INSTALLER_RELEASE_CHANNEL} uygulaması C:\Program Files\PPT\ParsYuva\${PPT_INSTALLER_CHANNEL_DIRECTORY} klasörüne kurulacak. Kurulum aile kaydı oluşturmaz, çevrimiçi hesaba giriş yapmaz ve kişisel veri aktarmaz."
+LangString AymWelcomeBody ${AYM_LANG_ENGLISH} "The ${PPT_INSTALLER_RELEASE_CHANNEL} application will be installed in C:\Program Files\PPT\${PPT_INSTALLER_PROGRAM_DIRECTORY}. Setup does not create family records, sign in to an online account or transmit personal data."
+LangString AymWelcomeBody ${AYM_LANG_TURKISH} "${PPT_INSTALLER_RELEASE_CHANNEL} uygulaması C:\Program Files\PPT\${PPT_INSTALLER_PROGRAM_DIRECTORY} klasörüne kurulacak. Kurulum aile kaydı oluşturmaz, çevrimiçi hesaba giriş yapmaz ve kişisel veri aktarmaz."
 LangString AymReadyTitle ${AYM_LANG_ENGLISH} "Ready to install"
 LangString AymReadyTitle ${AYM_LANG_TURKISH} "Kuruluma hazır"
 LangString AymReadyBody ${AYM_LANG_ENGLISH} "Everything is ready. Continuing will place the verified application files and create Desktop and Start menu shortcuts for all users."
@@ -355,7 +357,7 @@ FunctionEnd
 
 !macro customInit
   Call AymApplySystemUiLanguage
-  StrCpy $INSTDIR "$PROGRAMFILES64\PPT\ParsYuva\${PPT_INSTALLER_CHANNEL_DIRECTORY}"
+  StrCpy $INSTDIR "$PROGRAMFILES64\PPT\${PPT_INSTALLER_PROGRAM_DIRECTORY}"
 !macroend
 !endif
 
@@ -386,6 +388,12 @@ FunctionEnd
     DetailPrint "ParsYuva user data preserved during upgrade or silent maintenance."
     Goto aym_uninstall_done
   ${EndIf}
+  ; A per-machine uninstaller starts in the all-users shell context. Personal
+  ; data belongs to the signed-in user, so switch only for the interactive
+  ; data choice and restore the original context on every exit path.
+  ${If} $installMode == "all"
+    SetShellVarContext current
+  ${EndIf}
   MessageBox MB_YESNOCANCEL|MB_ICONQUESTION "$(AymUninstallChoice)" IDYES aym_uninstall_backup IDNO aym_uninstall_delete
   Goto aym_uninstall_cancel
 aym_uninstall_backup:
@@ -403,10 +411,16 @@ aym_uninstall_remove_data:
   RMDir /r "$APPDATA\ParsYuva\${PPT_INSTALLER_CHANNEL_DIRECTORY}"
   ${If} ${FileExists} "$APPDATA\ParsYuva\${PPT_INSTALLER_CHANNEL_DIRECTORY}\*.*"
     MessageBox MB_OK|MB_ICONSTOP "$(AymDeleteFailed)"
-    Abort
+    Goto aym_uninstall_cancel
   ${EndIf}
   Goto aym_uninstall_done
 aym_uninstall_cancel:
+  ${If} $installMode == "all"
+    SetShellVarContext all
+  ${EndIf}
   Abort
 aym_uninstall_done:
+  ${If} $installMode == "all"
+    SetShellVarContext all
+  ${EndIf}
 !macroend

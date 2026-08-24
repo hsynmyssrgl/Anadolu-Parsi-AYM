@@ -4,6 +4,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 
 const ANSI = /\u001b\[[0-?]*[ -/]*[@-~]/gu;
 const candidateMode = process.argv.includes('--candidate');
+const noWrite = process.argv.includes('--no-write');
 const normalize = (value) => String(value ?? '').replace(ANSI, '').replace(/\r\n/gu, '\n').trim();
 const sha256 = (value) => createHash('sha256').update(value).digest('hex');
 const changedPackageBuilds = [
@@ -13,20 +14,20 @@ const changedPackageBuilds = [
 ];
 
 const commands = [
-  { id: 'ppk-021-contract', args: ['scripts/verify-32-q-ppk-021-platform-policy-ast-gate-contract.mjs', ...(candidateMode ? ['--candidate'] : [])], expectOutput: `PPK-021${candidateMode ? ' candidate' : ''} contract: PASS` },
-  { id: 'typescript-ast-production-source-gate', args: ['scripts/verify-platform-policy-ast-gate.mjs'], expectOutput: '"status": "PASS"' },
-  { id: 'combined-platform-policy-gate', before: changedPackageBuilds, args: ['scripts/verify-platform-policy-gate.mjs'], expectOutput: 'AST gate PASS' },
+  { id: 'ppk-021-contract', args: ['scripts/verify-32-q-ppk-021-platform-policy-ast-gate-contract.mjs', ...(candidateMode ? ['--candidate'] : []), ...(noWrite ? ['--no-write'] : [])], expectOutput: `PPK-021${candidateMode ? ' candidate' : ''} contract: PASS` },
+  { id: 'typescript-ast-production-source-gate', args: ['scripts/verify-platform-policy-ast-gate.mjs', ...(noWrite ? ['--no-write'] : [])], expectOutput: '"status": "PASS"' },
+  { id: 'combined-platform-policy-gate', before: changedPackageBuilds, args: ['scripts/verify-platform-policy-gate.mjs', ...(noWrite ? ['--no-write'] : [])], expectOutput: 'AST gate PASS' },
   { id: 'ppk-021-targeted-ast-policy-ipc', args: ['node_modules/vitest/vitest.mjs', 'run', 'packages/platform-policy/platform-policy-ast-gate-policy.test.ts', 'apps/desktop/tests/ppk021-platform-policy-ast-gate.test.ts', 'apps/desktop/tests/ppk021-platform-policy-ast-gate-integration.test.ts', '--reporter=dot', '--maxWorkers=1'], minimumTests: 17 },
   { id: 'ppk-012-through-ppk-021-security-regression', args: ['node_modules/vitest/vitest.mjs', 'run', 'apps/desktop/tests/ppk012-offline-capability-lease-cache-fence.test.ts', 'apps/desktop/tests/ppk013-client-data-access-boundary.test.ts', 'apps/core-service/tests/ppk014-versioned-core-service-api-boundary.test.ts', 'apps/desktop/tests/ppk015-network-egress-policy.test.ts', 'apps/desktop/tests/ppk016-derived-data-policy-inheritance.test.ts', 'apps/desktop/tests/ppk017-sensitive-log-policy.test.ts', 'apps/desktop/tests/ppk018-immutable-policy-decision-audit.test.ts', 'apps/desktop/tests/ppk019-source-deletion-propagation.test.ts', 'packages/platform-policy/policy-conformance-suite.test.ts', 'apps/desktop/tests/ppk020-policy-conformance-integration.test.ts', 'packages/platform-policy/platform-policy-ast-gate-policy.test.ts', 'apps/desktop/tests/ppk021-platform-policy-ast-gate.test.ts', 'apps/desktop/tests/ppk021-platform-policy-ast-gate-integration.test.ts', '--reporter=dot', '--maxWorkers=1'], minimumTests: 245 },
   { id: 'client-data-access-boundary-regression', args: ['scripts/verify-client-data-access-boundary.mjs'], expectOutput: '"status": "PASS"' },
   { id: 'network-egress-boundary-regression', args: ['scripts/verify-network-egress-boundary.mjs'], expectOutput: '"status": "PASS"' },
-  { id: 'data-store-smoke', before: [['node_modules/typescript/bin/tsc', '-p', 'tests/smoke/tsconfig.data-store.json']], args: ['scripts/verify-data-store-smoke.mjs'], expectOutput: '"checks": 14' },
-  { id: 'migration-77-no-ppk021-schema-change', before: [['node_modules/typescript/bin/tsc', '-p', 'packages/database/tsconfig.json'], ['node_modules/typescript/bin/tsc', '-p', 'tests/smoke/tsconfig.data-store.json']], args: ['scripts/verify-database-migrations.mjs'], expectOutput: '"version": 77' },
+  { id: 'data-store-smoke', before: [['node_modules/typescript/bin/tsc', '-p', 'tests/smoke/tsconfig.data-store.json']], args: ['scripts/verify-data-store-smoke.mjs', ...(noWrite ? ['--no-write'] : [])], expectOutput: '"checks": 14' },
+  { id: 'migration-77-no-ppk021-schema-change', before: [['node_modules/typescript/bin/tsc', '-p', 'packages/database/tsconfig.json'], ['node_modules/typescript/bin/tsc', '-p', 'tests/smoke/tsconfig.data-store.json']], args: ['scripts/verify-database-migrations.mjs', ...(noWrite ? ['--no-write'] : [])], expectOutput: '"version": 77' },
   { id: 'foundation-regression', args: ['scripts/verify-foundation.mjs'], expectOutput: '"checks": 14' },
   { id: 'runtime-foundation-regression', before: [['node_modules/typescript/bin/tsc', '-p', 'tests/smoke/tsconfig.runtime-foundation.json']], args: ['scripts/verify-runtime-foundation.mjs'], expectOutput: '"checks": 6' },
   { id: 'platform-policy-enforcement-runtime', args: ['--experimental-strip-types', '--experimental-loader', './scripts/ts-workspace-loader.mjs', 'scripts/verify-30-m-policy-enforcement-runtime.mjs', '--no-report'], expectOutput: 'PASS (43 controlled checks' },
-  { id: 'core-service-boundary', args: ['scripts/verify-core-service-boundary.mjs'], expectOutput: 'Core Service boundary: PASS (8 checks).' },
-  { id: 'core-service-entrypoint-runtime', args: ['--experimental-strip-types', '--experimental-loader', './scripts/ts-workspace-loader.mjs', 'scripts/verify-30-o-core-service-entrypoint-runtime.mjs'], expectOutput: '30-O Core Service Entrypoint Runtime: PASS (24 assertions).' },
+  { id: 'core-service-boundary', args: ['scripts/verify-core-service-boundary.mjs', ...(noWrite ? ['--no-write'] : [])], expectOutput: 'Core Service boundary: PASS (8 checks).' },
+  { id: 'core-service-entrypoint-runtime', args: ['--experimental-strip-types', '--experimental-loader', './scripts/ts-workspace-loader.mjs', 'scripts/verify-30-o-core-service-entrypoint-runtime.mjs', ...(noWrite ? ['--no-write'] : [])], expectOutput: '30-O Core Service Entrypoint Runtime: PASS (24 assertions).' },
   { id: 'platform-policy-typescript', args: ['node_modules/typescript/bin/tsc', '-p', 'packages/platform-policy/tsconfig.json', '--noEmit'], expectOutput: '' },
   { id: 'domain-typescript', args: ['node_modules/typescript/bin/tsc', '-p', 'packages/domain/tsconfig.json', '--noEmit'], expectOutput: '' },
   { id: 'application-typescript', args: ['node_modules/typescript/bin/tsc', '-p', 'packages/application/tsconfig.json', '--noEmit'], expectOutput: '' },
@@ -98,7 +99,7 @@ const report = {
   securityRegressionTestsMinimum: 245,
   productionSourceZones: 18,
   scannedProductionFiles: 568,
-  exactAllowlistEntries: 895,
+  exactAllowlistEntries: 897,
   maliciousAstSelfTests: 17,
   benignAstSelfTests: 4,
   directRoleAuthorizationBypasses: 0,
@@ -117,8 +118,10 @@ const report = {
   generatedAt: new Date().toISOString()
 };
 
-await mkdir('artifacts/validation', { recursive: true });
-await writeFile('artifacts/validation/32-Q-ppk-021-platform-policy-ast-gate-runtime.json', `${JSON.stringify(report, null, 2)}\n`);
+if (!noWrite) {
+  await mkdir('artifacts/validation', { recursive: true });
+  await writeFile('artifacts/validation/32-Q-ppk-021-platform-policy-ast-gate-runtime.json', `${JSON.stringify(report, null, 2)}\n`);
+}
 if (failed.length) {
   console.error(`32-Q PPK-021${candidateMode ? ' candidate' : ''} runtime: FAIL (${failed.length}/${results.length}).`);
   for (const item of failed) console.error(`${item.id}: ${item.outputTail}`);

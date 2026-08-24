@@ -51,10 +51,10 @@
   },
   "expectedSurfaceCounts": {
     "CRYPTO_GLOBAL": 22,
-    "CRYPTO_IMPORT": 247,
+    "CRYPTO_IMPORT": 248,
     "DATABASE_IMPORT": 21,
     "NETWORK_IMPORT": 15,
-    "REPOSITORY_IMPORT": 70,
+    "REPOSITORY_IMPORT": 71,
     "ROLE_PRESENTATION": 2,
     "SQL_CALL": 79,
     "SQL_CONSTRUCTOR": 2,

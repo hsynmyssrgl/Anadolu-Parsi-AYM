@@ -8,12 +8,14 @@ import type {
   FinancePlanningWorkspaceView,
   FinanceRecurringFrequency,
   FinanceRecurringStatus,
+  FinanceUpcomingPaymentSource,
   RecordFinancePlanningItemInput,
   RecordPrivacy
 } from '@ppt/domain';
 import { Button, EmptyState, SectionHeader, StatusMessage, Surface } from './ui';
 import { FinanceImportPanel } from './FinanceImportPanel';
 import { selectUiCopy, useLocalization } from './localization';
+import { toUserFacingErrorMessage } from './user-facing-error';
 
 interface FinancePlanningPanelProps {
   readonly people: readonly FamilyMemberView[];
@@ -55,6 +57,10 @@ export function FinancePlanningPanel({ people, workspace, onRecord, onWorkspaceC
     pension: text('Bireysel emeklilik','Private pension'), real_estate: text('Gayrimenkul','Real estate'), vehicle: text('Araç','Vehicle')
   };
   const privacyLabels: Record<RecordPrivacy, string> = { private: text('Özel','Private'), selected_members: text('Seçili üyeler','Selected members'), family: text('Aile','Family') };
+  const upcomingPaymentSourceLabels:Record<FinanceUpcomingPaymentSource,string> = {
+    payment_card:text('Ödeme kartı','Payment card'),loan:text('Kredi','Loan'),finance_record:text('Finans kaydı','Finance record'),
+    recurring_rule:text('Yinelenen işlem','Recurring transaction'),planned_cash_flow:text('Planlanan nakit akışı','Planned cash flow')
+  };
   const money = (value: number, currency: string): string => formatMoney(value, currency, locale);
   const date = (value: string): string => formatDate(value, locale);
   const [mode, setMode] = useState<FinancePlanningItemType>('category');
@@ -194,7 +200,7 @@ export function FinancePlanningPanel({ people, workspace, onRecord, onWorkspaceC
       setNote('');
     } catch (error) {
       setMessageTone('danger');
-      setMessage(error instanceof Error ? error.message : text('Finans planlama kaydı eklenemedi.','The finance planning record could not be added.'));
+      setMessage(toUserFacingErrorMessage(error,text('Finans planlama kaydı eklenemedi.','The finance planning record could not be added.')));
     }
   };
 
@@ -215,7 +221,7 @@ export function FinancePlanningPanel({ people, workspace, onRecord, onWorkspaceC
 
   return <>
     <Surface className="span-2 workspace-summary">
-      <SectionHeader eyebrow="B4-10 · B4-11 · B4-12" title={text('Bütçe, hedef, portföy ve net değer merkezi','Budget, goals, portfolio, and net worth center')}/>
+      <SectionHeader eyebrow={text('Finans planlama ve portföy','Financial planning and portfolio')} title={text('Bütçe, hedef, portföy ve net değer merkezi','Budget, goals, portfolio, and net worth center')}/>
       <div className="notes-card">
         <strong>{text('Her para birimi ayrı hesaplanır; yapay kur dönüşümü yapılmaz.','Each currency is calculated separately; no artificial exchange-rate conversion is performed.')}</strong>
         <small>{text('Veri kaynağı manuel · Banka eşitlemesi yapılmadı · Dış fiyat doğrulaması yapılmadı · Ödeme icrası yapılmadı','Data source: manual · Bank synchronization: not performed · External price verification: not performed · Payment execution: not performed')}</small>
@@ -300,7 +306,7 @@ export function FinancePlanningPanel({ people, workspace, onRecord, onWorkspaceC
       <SectionHeader eyebrow={text('Yaklaşan ödemeler','Upcoming payments')} title={`${visibleUpcoming.length} ${text('kayıt','records')}`}/>
       {visibleUpcoming.length === 0 ? <EmptyState title={text('Yaklaşan ödeme yok','No upcoming payments')} body={text('Kart, kredi, borç, yinelenen gider veya planlı nakit akışı vadeleri burada birleşir.','Due dates for cards, loans, debts, recurring expenses, and planned cash flows are combined here.')}/> : visibleUpcoming.slice(0, 20).map((item) => <div className="context-stat" key={`${item.source}-${item.id}`}>
         <strong>{item.title} · {money(item.amount, item.currency)}</strong>
-        <span>{date(item.dueAt)} · {item.source.replaceAll('_', ' ')}</span>
+        <span>{date(item.dueAt)} · {upcomingPaymentSourceLabels[item.source]}</span>
         <small>{text('Ödeme icrası yapılmadı; yalnız takip görünümüdür.','No payment was executed; this is a tracking view only.')}</small>
       </div>)}
     </Surface>

@@ -56,7 +56,7 @@
   ],
   "targetedTestRatchet": {
     "files": 20,
-    "tests": 147
+    "tests": 149
   },
   "migration94Sha256": "08fef61dc21062134716dfae8e78c2256eb5da275eedaf1fe3502a3c2450cb65",
   "migration95Sha256": "2a7206f2335ee24e5e6135867dbed5096530477a1e3d514ef2f0ce9683029c90",
@@ -128,5 +128,5 @@
       "status": "PASS"
     }
   ],
-  "generatedAt": "2026-08-16T23:38:53.780Z"
+  "generatedAt": "2026-08-24T04:03:35.707Z"
 }

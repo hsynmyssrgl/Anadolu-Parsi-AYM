@@ -9,10 +9,10 @@
     "parserVersion": "7.29.8",
     "syntaxModel": "TYPESCRIPT_AST",
     "productionSourceZones": 18,
-    "scannedFiles": 589,
+    "scannedFiles": 590,
     "privilegedSurfaces": 897,
     "exactAllowlistEntries": 897,
-    "exactAllowlistSha256": "e461c8898c083d7fbd3c7eb6986f345f18f2938bf2c51ec85acdb1d5c36f9aa5",
+    "exactAllowlistSha256": "9ea5b846e552e760fbd8dd5f8bee7fb83988ef19bb93e3bbd4ac0465c4b71205",
     "maliciousSelfTests": 17,
     "benignSelfTests": 4,
     "findings": 0
@@ -63,7 +63,7 @@
   ],
   "closureSummary": {
     "reviewedProductionSourceZones": 18,
-    "reviewedProductionFiles": 589,
+    "reviewedProductionFiles": 590,
     "reviewedPrivilegedSurfaces": 897,
     "exactAllowlistEntries": 897,
     "directRoleAuthorizationBypasses": 0,

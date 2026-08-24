@@ -16,9 +16,9 @@ const renderPanel = (Panel: ComponentType, locale: 'tr-TR' | 'en-US'): string =>
 
 describe('feature-panel English localization wave three', () => {
   const panels = [
-    [CommunicationAuditArchivePanel, 'Loading audit chain', 'Denetim zinciri yükleniyor'],
+    [CommunicationAuditArchivePanel, 'Loading activity history', 'İşlem geçmişi yükleniyor'],
     [CommunicationRecordingRetentionPanel, 'Call recording consent plan', 'Görüşme kaydı rıza planı'],
-    [CommunicationSecurityPanel, 'Room, device and MLS epoch foundation', 'Oda, cihaz ve MLS dönem temeli']
+    [CommunicationSecurityPanel, 'Local foundation for room and device security', 'Oda ve cihaz güvenliğinin yerel temeli']
   ] as const;
 
   it.each(panels)('renders %p without visible Turkish copy in English', (Panel, englishMarker) => {

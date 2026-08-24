@@ -15,8 +15,8 @@ describe('collapsed module navigation',()=>{
   });
 
   it('binds every canonical group to an accessible toggle and every route to a hidden submenu',()=>{
-    expect(PRODUCT_NAVIGATION_GROUPS.length).toBeGreaterThan(1);
-    expect(PRODUCT_NAVIGATION_ROUTES.length).toBeGreaterThan(20);
+    expect(PRODUCT_NAVIGATION_GROUPS.length).toBe(4);
+    expect(PRODUCT_NAVIGATION_ROUTES.length).toBe(22);
     expect(appSource).toContain('className="nav-module-toggle" aria-expanded={expanded} aria-controls={groupItemsId}');
     expect(appSource).toContain('className="nav-module-items" hidden={!expanded}');
     expect(appSource).toContain('data-navigation-route={item.id}');

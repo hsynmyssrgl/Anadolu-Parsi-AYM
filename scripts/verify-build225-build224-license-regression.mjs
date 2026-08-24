@@ -13,8 +13,11 @@ await mkdir(join(desktop,'dist/main'),{recursive:true});
 await mkdir(join(desktop,'dist/renderer'),{recursive:true});
 await mkdir(join(desktop,'docs'),{recursive:true});
 for (const file of ['package.json']) await cp(`apps/desktop/${file}`,join(desktop,file));
-for (const file of ['license-rtf-lib.mjs','generate-license-rtf.mjs','verify-license-rtf-sync.mjs','verify-installer.mjs']) await cp(`apps/desktop/scripts/${file}`,join(desktop,'scripts',file));
-for (const file of ['LICENSE_TR.rtf','icon.ico']) await cp(`apps/desktop/build/${file}`,join(desktop,'build',file));
+for (const file of ['license-rtf-lib.mjs','generate-license-rtf.mjs','verify-license-rtf-sync.mjs','verify-installer.mjs','run-electron-builder.mjs','legacy-upgrade-data-preservation.mjs']) await cp(`apps/desktop/scripts/${file}`,join(desktop,'scripts',file));
+for (const file of [
+  'LICENSE_TR.rtf','LICENSE_en.rtf','icon.ico','installer.nsh','installer-narration.ps1','extractAppPackage.nsh',
+  'installer-bronze-sidebar.bmp','installer-silver-sidebar.bmp','installer-gold-sidebar.bmp'
+]) await cp(`apps/desktop/build/${file}`,join(desktop,'build',file));
 await cp('apps/desktop/docs/LISANS_TR_KAYNAK.txt',join(desktop,'docs/LISANS_TR_KAYNAK.txt'));
 await writeFile(join(desktop,'dist/main/main.mjs'),'x'.repeat(1200));
 await writeFile(join(desktop,'dist/main/preload.cjs'),'x'.repeat(1200));

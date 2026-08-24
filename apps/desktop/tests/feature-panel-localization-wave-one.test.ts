@@ -20,7 +20,7 @@ describe('feature-panel English localization wave one', () => {
   const panels = [
     [DistributedOperationsPanel, 'Cluster and device center', 'Dağıtık temel hizmet'],
     [UniversalUxConsolidationPanel, 'Unified family view', 'Tek aile görünümü'],
-    [SignedPluginPlatformPanel, 'Plugin and external provider platform', 'İmzalı aday kaydı']
+    [SignedPluginPlatformPanel, 'Plugins and external services', 'İmzalı aday kaydı']
   ] as const;
 
   it.each(panels)('renders %p without visible Turkish copy in English', (Panel, englishMarker) => {

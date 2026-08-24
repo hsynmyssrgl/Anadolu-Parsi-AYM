@@ -36,3 +36,7 @@ Requirement kabulü: false
 - Gizlilik, hukuk, güvenlik, erişilebilirlik ve retention incelemeleri `NOT_RUN` durumundadır.
 
 Bu açıklar kapanmadan requirement PASS, AI doğruluğu, teslimat, dış takvim entegrasyonu, uzaktan işbirliği veya sertifikasyon iddiası üretilemez.
+
+## 24.08.2026 değişiklik-etki doğrulaması
+
+PR-235 kapsamında güncel kullanıcı dili ve renderer sözleşmesi bu tehdit modeline yeniden bağlandı; 52/52 sınır-sözleşme-çalışma zamanı zinciri PASS oldu. Sonuç dış/manual kanıtları kapatmaz ve production kabulü değildir.

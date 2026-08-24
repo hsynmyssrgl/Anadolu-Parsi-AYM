@@ -11,8 +11,10 @@ const files={
   release:await readFile('RELEASE_NOTES_BRONZE_RC2_BUILD210.md','utf8'),
   packageJson:await readFile('package.json','utf8'),
   appMeta:await readFile('packages/domain/src/app-meta.ts','utf8'),
+  releaseLedger:await readFile('config/release-ledger.json','utf8'),
   preflight:await readFile('config/source-preflight-checks.json','utf8')
 };
+const activeRelease=JSON.parse(files.releaseLedger).current;
 const assertions=[
   ['migration 49 definition',/createMigrationDefinition\(49, 'clean_backup_rewrite_terminal_ledger_immutability'/.test(files.migration)],
   ['terminal UPDATE trigger',files.migration.includes('trg_backup_clean_rewrite_runs_terminal_immutable_update')&&files.migration.includes('BEFORE UPDATE ON backup_clean_rewrite_runs')],
@@ -30,14 +32,14 @@ const assertions=[
   ['technical spec',files.spec.includes('Terminal Ledger Immutability V1')&&files.spec.includes('running → terminal')],
   ['build status version',files.status.includes('01.08.2026.210')&&files.status.includes('1.8.2026-210')&&files.status.includes('Migrasyon: **49**')],
   ['release notes behavior',files.release.includes('UPDATE')&&files.release.includes('DELETE')&&files.release.includes('INSERT OR REPLACE')&&files.release.includes('no-op')],
-  ['package version remains Build210 or later',Number(JSON.parse(files.packageJson).version.split('-').at(-1))>=210],
-  ['APP_META display version remains Build210 or later',/version: '\d{2}\.\d{2}\.\d{4}\.(\d+)'/.test(files.appMeta)&&Number(files.appMeta.match(/version: '\d{2}\.\d{2}\.\d{4}\.(\d+)'/)[1])>=210],
-  ['APP_META build stage remains Build210 or later',/Build (\d+)/.test(files.appMeta)&&Number(files.appMeta.match(/Build (\d+)/)[1])>=210],
+  ['package version matches active monthly release',JSON.parse(files.packageJson).version===activeRelease.packageVersion],
+  ['APP_META display version matches active monthly release',files.appMeta.includes(`version: '${activeRelease.version}'`)],
+  ['APP_META preserves active Bronze development stage',files.appMeta.includes("stage: 'Aktif Geliştirme'")],
   ['preflight includes Build210 contract',files.preflight.includes('build210-clean-rewrite-terminal-ledger-immutability-contract')],
   ['preflight includes Build210 sqlite runtime',files.preflight.includes('build210-clean-rewrite-terminal-ledger-immutability-sqlite-runtime')]
 ];
 const failures=assertions.filter(([,ok])=>!ok).map(([label])=>label);
-const report={schemaVersion:1,product:'Anadolu Parsı Aile Yaşam Merkezi',featureBuild:210,applicationVersion:'01.08.2026.210',packageVersion:'1.8.2026-210',status:failures.length?'FAIL':'PASS',passed:assertions.length-failures.length,total:assertions.length,assertions:assertions.map(([label,ok])=>({label,status:ok?'PASS':'FAIL'})),failures,generatedAt:new Date().toISOString()};
+const report={schemaVersion:2,product:'ParsYuva Aile Yaşam Merkezi',featureBuild:210,historicalFeatureVersion:'01.08.2026.210',activeRelease:activeRelease.visibleRelease,activeReleaseId:activeRelease.releaseId,packageVersion:activeRelease.packageVersion,status:failures.length?'FAIL':'PASS',passed:assertions.length-failures.length,total:assertions.length,assertions:assertions.map(([label,ok])=>({label,status:ok?'PASS':'FAIL'})),failures,generatedAt:new Date().toISOString()};
 await mkdir(dirname(output),{recursive:true});await writeFile(output,JSON.stringify(report,null,2)+'\n');
 if(failures.length){console.error(`Build 210 contract FAIL (${report.passed}/${report.total})`,failures);process.exit(1)}
 console.log(`Build 210 contract PASS (${report.passed}/${report.total})`);

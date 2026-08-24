@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { readFile, readdir, stat } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { verifyAymGovernanceSourceAuthority } from './lib/aym-source-authority.mjs';
 
 const sourceRoot = resolve(process.cwd());
 const aymRoot = resolve(sourceRoot, '..', '..');
@@ -13,9 +14,10 @@ const check = (condition, message) => {
 };
 const readJson = async (path) => JSON.parse(await readFile(path, 'utf8'));
 const hashFile = async (path) => createHash('sha256').update(await readFile(path)).digest('hex');
-
 check(aymRoot === expectedRoot, `workspace root mismatch: ${aymRoot}`);
-const [manifest, summary, evidence, decisions, status, scope, authority, plan, active, backups, receipt, completion30Z, completion31A, completion31B, completion31C, completion31D, completion31E, completion31S, completion31T] = await Promise.all([
+const sourceAuthority = await verifyAymGovernanceSourceAuthority({ sourceRoot, aymRoot });
+const receipt = sourceAuthority.protection;
+const [manifest, summary, evidence, decisions, status, scope, authority, plan, active, backups, completion30Z, completion31A, completion31B, completion31C, completion31D, completion31E, completion31S, completion31T] = await Promise.all([
   readJson(resolve(aymRoot, '00_PROJE', 'MASTER_MANIFEST.json')),
   readJson(resolve(aymRoot, '00_PROJE', 'MANIFEST_OZETI.json')),
   readJson(resolve(aymRoot, '00_PROJE', 'ARTIMLI_MANIFEST_GUNCELLEME_KANITI.json')),
@@ -26,7 +28,6 @@ const [manifest, summary, evidence, decisions, status, scope, authority, plan, a
   readJson(resolve(aymRoot, '01_YONETIM', 'TEK_PLAN.json')),
   readJson(resolve(aymRoot, '06_KOD', 'AKTIF_KAYNAK.json')),
   readJson(resolve(aymRoot, '10_YEDEK', 'YEDEK_SICILI.json')),
-  readJson(resolve(aymRoot, '05_TEST', '30Z_LOCAL_RECEIPT', 'LATEST.json')),
   readJson(resolve(sourceRoot, 'artifacts', 'checkpoints', '30-Z_COMPLETION_RECORD.json')),
   readJson(resolve(sourceRoot, 'artifacts', 'checkpoints', '31-A_COMPLETION_RECORD.json')),
   readJson(resolve(sourceRoot, 'artifacts', 'checkpoints', '31-B_COMPLETION_RECORD.json')),
@@ -71,6 +72,18 @@ check(scope.workspaceRoot === 'C:\\PPT\\AYM', 'KAPSAM root mismatch');
 check(authority.workspaceRoot === 'C:\\PPT\\AYM', 'YONETISIM_SICILI root mismatch');
 check(plan.current.newBuildAssigned === false, 'TEK_PLAN assigned a new Build');
 check(receipt.localReceiptStatus === 'LOCAL_RECEIPT_VERIFIED', 'latest local receipt is not verified');
+check(receipt.schemaVersion === 2 && receipt.source === '06_KOD/kanallar/Bronze', 'latest receipt is not the Bronze channel exact-commit schema');
+check(receipt.sourceProvenance?.channel === 'Bronze' && receipt.sourceProvenance?.branch === 'channel/bronze', 'latest receipt channel provenance mismatch');
+check(receipt.sourceProvenance?.headCommit === sourceAuthority.app.provenance.headCommit
+  && receipt.backup?.headCommit === sourceAuthority.app.provenance.headCommit,
+'protected Bronze commit does not equal the clean exact authoritative app source');
+check(sourceAuthority.status === 'PASS'
+  && sourceAuthority.appDiskReadback.status === 'PASS'
+  && sourceAuthority.bronzeDiskReadback.status === 'PASS'
+  && sourceAuthority.appDiskReadback.sha256 === sourceAuthority.bronzeDiskReadback.sha256
+  && sourceAuthority.canonicalLatest.noReparseReadbackVerified === true,
+'authoritative app / Bronze disk readback or canonical LATEST path verification failed');
+check(/^10_YEDEK\/Bronze\/AYM_BRONZE_[a-f0-9]{12}_[a-f0-9]{16}\.zip$/u.test(receipt.backup?.path ?? ''), 'Bronze backup path/name contract mismatch');
 check(receipt.externalLibraryReceiptStatus === 'PASS', 'current-source external protection is not PASS');
 check(receipt.officialCompletionClaimed === true && receipt.externalReceipt?.storageBackend === 'EXTERNAL_USB_D_DRIVE' && String(receipt.externalReceipt?.externalPath ?? '').startsWith('D:\\AYM_LIBRARY\\'), 'current-source D: receipt truth boundary mismatch');
 check(completion30Z.status === 'PASS' && completion30Z.officialStepStatus === 'COMPLETED', 'frozen 30-Z checkpoint is not completed');
@@ -127,6 +140,8 @@ check(summary.sourceProtection?.external31EReceiptStatus === 'PASS', 'manifest s
 check(summary.sourceProtection?.external31SReceiptStatus === 'PASS', 'manifest summary 31-S receipt mismatch');
 check(summary.sourceProtection?.external31TReceiptStatus === 'PASS', 'manifest summary 31-T receipt mismatch');
 check(active.sourceTreeSha256 === receipt.treeSha256, 'AKTIF_KAYNAK tree hash mismatch');
+check(active.path === '06_KOD/kanallar/Bronze' && active.mainSourcePath === '06_KOD/app', 'AKTIF_KAYNAK source path isolation mismatch');
+check(active.sourceCommit === mainHeadCommit && active.mainSourceCommitEquality === 'PASS', 'AKTIF_KAYNAK main/channel exact commit equality mismatch');
 check(active.sourceFiles === receipt.fileCount, 'AKTIF_KAYNAK file count mismatch');
 check(active.official30ZCheckpointStatus === 'COMPLETED' && active.official30ZPersistentReceiptStatus === 'PASS', 'AKTIF_KAYNAK does not expose completed frozen checkpoint');
 check(active.official31ACheckpointStatus === 'COMPLETED' && active.official31APersistentReceiptStatus === 'PASS', 'AKTIF_KAYNAK does not expose completed focused checkpoint');

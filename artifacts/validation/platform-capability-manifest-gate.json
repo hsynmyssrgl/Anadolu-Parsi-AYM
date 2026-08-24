@@ -1,10 +1,10 @@
 {
   "status": "PASS",
   "productionSourceZones": 18,
-  "scannedFiles": 589,
+  "scannedFiles": 590,
   "capabilitySurfaces": 447,
   "exactManifestSurfaces": 447,
-  "exactManifestSha256": "2ac32190c1b40c455093841eb2456c06a168c9aaf519068a14f570705b8a177a",
+  "exactManifestSha256": "54061e189e7771868552efa869c69a75426f24e4edd846af1c62496c82f0e1d6",
   "surfaceCounts": {
     "CAMERA_API": 1,
     "FILE_DIALOG": 2,

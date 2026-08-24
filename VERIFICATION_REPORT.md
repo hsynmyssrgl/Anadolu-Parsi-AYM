@@ -1,29 +1,28 @@
-# Doğrulama Durumu — Bronze RC2 Build 228
+# Doğrulama Durumu — Bronze 22.08.2026.50
 
-- Product: Anadolu Parsı Aile Yaşam Merkezi
-- Application Version: `02.08.2026.228`
-- Package Version: `2.8.2026-228`
-- Stage: **Bronze RC2 Active Development**
-- Build: **228**
+- Product: ParsYuva Aile Yaşam Merkezi
+- Application Version: `22.08.2026.50`
+- Package Version: `22.8.2026-50`
+- Stage: **Bronze Active Development**
+- Monthly Sequence: **50**
 
 ## Kaynak ve zorunlu kapılar
 
-- Source preflight gate: **PASS**
-- Source integrity: **PASS**
-- Clean install gate: **PASS** — Build227 sonucu korunur
-- Full root `tsc --noEmit`: **FAIL** — Build227 sonucu korunur
-- Unit and integration tests: **FAIL** — Build227 sonucu korunur
-- Electron production build: **PASS** — Build227 sonucu korunur
-- Blocking smoke chain: **FAIL** — Build227 sonucu korunur
-- Windows launch / installer: **PASS** — Build227 exact-source OPEN-021/022 closure evidence
+- Source preflight gate: **NOT_RUN**
+- Source integrity: **NOT_RUN**
+- Clean install gate: **NOT_RUN**
+- Full root `tsc --noEmit`: **NOT_RUN**
+- Unit and integration tests: **NOT_RUN**
+- Electron production build: **NOT_RUN**
+- Blocking smoke chain: **NOT_RUN**
+- Windows launch / installer: **NOT_RUN**
 
-OPEN-021 ve OPEN-022 Build228'de resmen `CLOSED` durumundadır. Silver sonuçları yeniden çalıştırılmamış ve değiştirilmemiştir. Çalıştırılmayan bir kapı PASS olarak gösterilemez.
+Bu durumlar yalnız güncel kaynak üzerinde ilgili doğrulama gerçekten çalıştırıldıktan sonra güncellenir. `NOT_RUN`, `PASS` değildir.
 
 ## Yetkili belgeler
 
-- Güncel durum: `BUILD_STATUS_BRONZE_RC2_BUILD228.md`
-- Sürüm notları: `RELEASE_NOTES_BRONZE_RC2_BUILD228.md`
-- Mimari doğrulama: `BUILD228_ARCHITECTURE_VALIDATION_REPORT.md`
-- Teslim doğrulaması: `BUILD228_DELIVERY_VALIDATION_REPORT.md`
-- Ayrık teslim kanıt tasdiki: `Anadolu_Parsi_Aile_Yasam_Merkezi_Bronze_RC2_Build228_Teslim_Kanit_Tasdiki_02.08.2026.228.json`
-- Ana devam defteri: `docs/17_MASTER_BUILD_LEDGER.md`
+- `config/release-ledger.json`
+- `config/canonical-rule-registry.json`
+- `docs/current/00_AKTIF_ANA_KAPSAM.md`
+- `docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md`
+- `docs/17_MASTER_BUILD_LEDGER.md`

@@ -1,24 +1,21 @@
-# Paket Özeti — Build 228
+# Paket Özeti — Bronze 22.08.2026.50
 
-- Product: Anadolu Parsı Aile Yaşam Merkezi
-- Application Version: `02.08.2026.228`
-- Package Version: `2.8.2026-228`
-- Stage: **Bronze RC2 Active Development**
-- Build: **228**
+- Product: ParsYuva Aile Yaşam Merkezi
+- Application Version: `22.08.2026.50`
+- Package Version: `22.8.2026-50`
+- Stage: **Bronze Active Development**
+- Monthly Sequence: **50**
 
 ## Kapsam
 
-Build228 is the Bronze governance-only closure build: OPEN-021 and OPEN-022 are formally closed against exact Build227 real-Windows evidence; no security feature or Silver validation result is changed.
-
-- Milestone: **Bronze OPEN-021/OPEN-022 official governance closure**
+Güncel kaynak; özel ve anlatımlı kurulum deneyimi, güvenli ilk açılış, Türkçe kullanıcı arayüzü, kanal ayrımı ve kurulu uygulama UAT kapılarını kapsar. Sonuç yalnız güncel kaynakla yeniden çalıştırılmış kanıtlarla kabul edilir.
 
 ## Yetkili belgeler
 
-- Güncel durum: `BUILD_STATUS_BRONZE_RC2_BUILD228.md`
-- Sürüm notları: `RELEASE_NOTES_BRONZE_RC2_BUILD228.md`
-- Mimari doğrulama: `BUILD228_ARCHITECTURE_VALIDATION_REPORT.md`
-- Teslim doğrulaması: `BUILD228_DELIVERY_VALIDATION_REPORT.md`
-- Ayrık teslim kanıt tasdiki: `Anadolu_Parsi_Aile_Yasam_Merkezi_Bronze_RC2_Build228_Teslim_Kanit_Tasdiki_02.08.2026.228.json`
-- Ana devam defteri: `docs/17_MASTER_BUILD_LEDGER.md`
+- `config/release-ledger.json`
+- `config/canonical-rule-registry.json`
+- `docs/current/00_AKTIF_ANA_KAPSAM.md`
+- `docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md`
+- `docs/17_MASTER_BUILD_LEDGER.md`
 
-Bu teslim Bronze geliştirme kanalındadır. Silver yalnız mevcut altyapının iyileştirilmesi ve bütün testlerin yürütülmesi için kullanılır; başarılı Silver sonrasında Gold üretim sürümü hazırlanır.
+Bronze geliştirme, Silver doğrulama ve düzeltme, Gold ise üretim kanalıdır. Çalıştırılmayan hiçbir kontrol `PASS` sayılmaz; `NotSigned` yerel-test paketi üretim teslimi değildir.

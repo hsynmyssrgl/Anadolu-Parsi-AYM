@@ -14,6 +14,7 @@ import {
   CoreServiceLocalAdminClientError
 } from '../packages/core-service-client/src/index.ts';
 
+const noWrite = process.argv.includes('--no-write');
 const mandatoryTruth = 'Bu teslim, yukarıdaki kanıtlarla sınırlıdır; çalıştırılmayan hiçbir kontrol PASS sayılmamıştır.';
 const assertions = [];
 const canonicalMandatoryTruth = 'Bu teslim, yukarıdaki kanıtlarla sınırlıdır; çalıştırılmayan hiçbir kontrol PASS sayılmamıştır.';
@@ -233,8 +234,10 @@ const report = {
   mandatoryTruth: canonicalMandatoryTruth,
   generatedAt: new Date().toISOString()
 };
-await mkdir('artifacts/validation', { recursive: true });
-await writeFile('artifacts/validation/30-O-core-service-entrypoint-runtime.json', `${JSON.stringify(report, null, 2)}\n`);
+if (!noWrite) {
+  await mkdir('artifacts/validation', { recursive: true });
+  await writeFile('artifacts/validation/30-O-core-service-entrypoint-runtime.json', `${JSON.stringify(report, null, 2)}\n`);
+}
 if (failures.length > 0) {
   console.error(failures.map((failure) => failure.id).join('\n'));
   process.exit(1);

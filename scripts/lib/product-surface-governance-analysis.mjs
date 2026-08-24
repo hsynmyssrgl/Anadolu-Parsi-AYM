@@ -101,7 +101,7 @@ export const analyzeProductSurfaceGovernance = async (root = process.cwd()) => {
   check((inventory.unusedRendererApis ?? []).every((item) => domainSource.includes(`method: '${item.method}'`) && domainSource.includes(`channel: '${item.channel}'`) && domainSource.includes(`classification: '${item.classification}'`)), 'domain classification contract must contain every inventory API');
   check(mainSource.includes("registerIpcHandler('system:getProductSurfaceGovernance'") && preloadSource.includes("getProductSurfaceGovernance:():Promise<ProductSurfaceGovernanceView>=>invoke('system:getProductSurfaceGovernance')"), 'product governance IPC chain must be complete');
   check(ipcPolicySource.includes("case 'system:getProductSurfaceGovernance':"), 'product governance IPC must be zero-argument policy guarded');
-  check(appSource.includes('getProductSurfaceGovernance()') && appSource.includes('setProductSurfaceGovernance(') && appSource.includes('B0-03 / B0-04 · ürün yüzeyi gerçeklik kapısı'), 'renderer must consume and display the governance boundary');
+  check(appSource.includes('getProductSurfaceGovernance()') && appSource.includes('setProductSurfaceGovernance(') && appSource.includes('eyebrow="Ürün yüzeyi gerçeklik kapısı"'), 'renderer must consume and display the governance boundary with user-facing copy');
 
   const b003 = registry.requirements?.find((item) => item.id === 'B0-03');
   const b004 = registry.requirements?.find((item) => item.id === 'B0-04');

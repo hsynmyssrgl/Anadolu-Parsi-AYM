@@ -24,13 +24,14 @@ check(main.includes("oidcDeepLinkProtocolRegistered?oidcFederatedIdentity?.listV
 check(main.includes('openArchiveInSecurePreview'),'secure archive preview missing');check(!/shell\.openPath\s*\(/.test(main),'external decrypted archive open is still reachable');
 check(main.includes('sealUserDataSession()'),'vault reseal flow missing');check(main.includes('startVaultSessionGuard()'),'session expiry guard missing');
 const renderer=await text('apps/desktop/src/renderer/App.tsx');
-for(const token of ['FirstRunIntroduction','startFirstRunNarration','FIRST_RUN_NARRATION_TEXT','persistFirstRunIntroductionComplete','audioMuted={accessibility.audioMuted}','onAudioMutedChange','speechSynthesis','playParsBrandSound','FirstRunSecuritySetup','beginTwoFactorSetup','recoveryCodes','getExternalIdentityProviders','ppt-replay-intro'])check(renderer.includes(token),`renderer onboarding token missing=${token}`);
+for(const token of ['FirstRunIntroduction','startFirstRunNarration','firstRunNarrationContent','persistFirstRunIntroductionComplete','audioMuted={accessibility.audioMuted}','onAudioMutedChange','speechSynthesis','playParsBrandSound','FirstRunSecuritySetup','beginTwoFactorSetup','recoveryCodes','getExternalIdentityProviders','ppt-replay-intro'])check(renderer.includes(token),`renderer onboarding token missing=${token}`);
 check(/auth\.authenticated&&sessionOverlay\s*\?\s*sessionOverlay\s*:\s*<FirstRunIntroduction/u.test(renderer),'locked session must suppress hidden onboarding narration');
-check(renderer.indexOf('if(!firstRunIntroCompleted)')<renderer.indexOf('if(loading)return <main className="first-run-shell">'),'introduction must be the first visible startup surface');
-check(renderer.includes('Kimlik durumu doğrulanmadan aile verileri ve normal uygulama ekranı açılmaz.'),'pre-auth neutral loading truth missing');
-check(renderer.includes("auth.authenticated && !auth.twoFactorEnabled"),'first-run security completion gate missing');
+check(renderer.indexOf('if(loading)return <main className="first-run-shell">')<renderer.indexOf('if(!firstRunIntroCompleted)'),'neutral secure startup must precede the interactive introduction');
+const localization=await text('apps/desktop/src/renderer/localization.tsx');
+check(localization.includes("'shell.loadingBody':'Kimlik durumu doğrulanmadan aile verileri ve normal uygulama ekranı açılmaz.'"),'pre-auth neutral loading truth missing');
+check(renderer.includes("auth.authenticated && (!auth.twoFactorEnabled||auth.trustedDevice!==true)"),'first-run security completion gate missing');
 const accessibility=await text('apps/desktop/src/renderer/accessibility.ts');
-for(const token of ['FIRST_RUN_INTRO_STORAGE_KEY','BRAND_AUDIO_DISABLED_STORAGE_KEY','readBootstrapPreference','writeBootstrapPreference','startFirstRunNarration',"utterance.lang = 'tr-TR'","input.onStatus('unavailable')"]){check(accessibility.includes(token),`safe onboarding controller token missing=${token}`)}
+for(const token of ['FIRST_RUN_INTRO_STORAGE_KEY','BRAND_AUDIO_DISABLED_STORAGE_KEY','readBootstrapPreference','writeBootstrapPreference','startFirstRunNarration','utterance.lang = narration.locale',"input.onStatus('unavailable')"]){check(accessibility.includes(token),`safe onboarding controller token missing=${token}`)}
 const accessibilityTest=await text('apps/desktop/tests/accessibility-preference-center.test.ts');
 for(const token of ['keeps the introduction visible and never crashes when bootstrap storage is denied','starts narration immediately after an explicit unmute','falls back to the visible caption when speech is unavailable or fails'])check(accessibilityTest.includes(token),`onboarding regression test missing=${token}`);
 const domain=await text('packages/domain/src/app-data.ts');check(domain.includes("'apple' | 'google' | 'microsoft'"),'domain identity provider union incomplete');

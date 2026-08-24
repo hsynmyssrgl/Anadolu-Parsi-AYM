@@ -14,7 +14,7 @@ const renderPanel = (locale: 'tr-TR' | 'en-US'): string => renderToStaticMarkup(
 describe('feature-panel English localization wave six', () => {
   it('renders the finance import panel without visible Turkish copy in English', () => {
     const html = renderPanel('en-US');
-    expect(html).toContain('Controlled transaction import and OHVPS adapter boundary');
+    expect(html).toContain('Controlled transaction import and bank-connection boundary');
     expect(html).not.toMatch(/[ÇĞİÖŞÜçğıöşü]/u);
   });
 

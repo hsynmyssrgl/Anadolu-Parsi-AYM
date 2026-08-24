@@ -23,7 +23,7 @@ describe('app shell English localization wave twenty-eight',()=>{
     expect(html).not.toMatch(/[ÇĞİÖŞÜçğıöşü]/u);
   });
   it('preserves fail-honest destruction and external-evidence wording',()=>{
-    expect(translateDataLifecycleCopy('SQLite güvenli silme ve WAL temizliği en iyi çaba yaklaşımıdır. SSD, dosya sistemi, bulut eşitlemesi ve yedekler fiziksel kopyaları bir süre tutabilir.','en')).toContain('best-effort');
+    expect(translateDataLifecycleCopy('Güvenli silme mümkün olan en kapsamlı şekilde uygulanır. Depolama aygıtı, eşitlenen klasörler veya yönetilmeyen yedekler fiziksel kopyaları bir süre daha tutabilir.','en')).toContain('as thoroughly as possible');
     expect(translateDataLifecycleCopy('Kullanıcı beyanı ile sağlayıcı imzalı makbuz ayrı güven seviyeleridir. Geçerli imza yalnız güvenilen açık anahtar, kopya kimliği, makbuz kimliği, zaman ve SHA-256 değerinin değiştirilmediğini kanıtlar; fiziksel medyanın mutlak yok oluşunu tek başına garanti etmez.','en')).toContain('does not by itself guarantee');
   });
   it('preserves Turkish data-lifecycle copy',()=>{

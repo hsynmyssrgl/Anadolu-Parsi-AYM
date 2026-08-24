@@ -9,6 +9,7 @@ import type {
 } from '@ppt/domain';
 import { Button, EmptyState, SectionHeader, Surface } from './ui';
 import { selectUiCopy, useLocalization } from './localization';
+import { toUserFacingErrorMessage } from './user-facing-error';
 
 const measurementKinds = new Set<HealthCareEntryKind>([
   'blood_pressure','blood_glucose','weight','nutrition','hydration'
@@ -42,6 +43,11 @@ export function HealthCareCoordinationPanel({ people }: { readonly people: reado
     { value:'alerts',label:text('Düşme ve acil gözlemler','Fall and emergency observations') },{ value:'contacts',label:text('Kişi arama kayıtları','Contact action records') },
     { value:'documents',label:text('Belgeler ve aşılar','Documents and vaccines') }
   ];
+  const entryLabel=(value:HealthCareEntryKind):string=>entryLabels.find((item)=>item.value===value)!.label;
+  const statusLabels:Readonly<Record<HealthCareEntryStatus,string>>={
+    active:text('Etkin','Active'),scheduled:text('Planlandı','Scheduled'),completed:text('Tamamlandı','Completed'),
+    cancelled:text('İptal edildi','Canceled'),needs_help:text('Yardım gerekiyor','Needs help'),observed:text('Gözlendi','Observed'),not_performed:text('Yapılmadı','Not performed')
+  };
   const [ownerPersonId,setOwnerPersonId]=useState(people[0]?.id??'');
   const [center,setCenter]=useState<HealthCareCoordinationCenterView>();
   const [accounts,setAccounts]=useState<readonly FamilyAccountView[]>([]);
@@ -68,7 +74,7 @@ export function HealthCareCoordinationPanel({ people }: { readonly people: reado
     try{
       const next=await window.pardus.getHealthCareCoordinationCenter({ownerPersonId:preferredOwner});
       setCenter(next);setMessage('');
-    }catch(error){setCenter(undefined);setMessageTone('warning');setMessage(error instanceof Error?error.message:text('Bakım merkezi yüklenemedi.','Care center could not be loaded.'));}
+    }catch(error){setCenter(undefined);setMessageTone('warning');setMessage(toUserFacingErrorMessage(error,text('Bakım merkezi yüklenemedi.','Care center could not be loaded.')));}
     finally{setLoading(false);}
   };
 
@@ -108,7 +114,7 @@ export function HealthCareCoordinationPanel({ people }: { readonly people: reado
       });
       pending.current.delete('entry');setTitle('');setNote('');setMeasurementValue('');setMeasurementSecondary('');setMeasurementUnit('');
       await reload();setMessageTone('success');setMessage(text('Yerel sağlık/bakım kaydı eklendi.','The local health/care record was added.'));
-    }catch(error){setMessageTone('warning');setMessage(`${error instanceof Error?error.message:text('Kayıt eklenemedi.','The record could not be added.')} ${text('Aynı işlem kimliği ve revizyonla yeniden deneyebilirsiniz.','You can retry with the same operation identifier and revision.')}`);}
+    }catch(error){setMessageTone('warning');setMessage(`${toUserFacingErrorMessage(error,text('Kayıt eklenemedi.','The record could not be added.'))} ${text('Aynı işlem kimliği ve revizyonla yeniden deneyebilirsiniz.','You can retry with the same operation identifier and revision.')}`);}
     finally{setBusy(false);}
   };
 
@@ -125,7 +131,7 @@ export function HealthCareCoordinationPanel({ people }: { readonly people: reado
         actions:caregiverCanRecord?['read','record']:['read'],startsAt:new Date().toISOString()
       });
       pending.current.delete(`grant:${caregiverAccountId}`);await reload();setMessageTone('success');setMessage(text('Minimum-gerekli bakım veren izni kaydedildi.','The minimum-necessary caregiver permission was recorded.'));
-    }catch(error){setMessageTone('warning');setMessage(`${error instanceof Error?error.message:text('İzin kaydedilemedi.','The permission could not be saved.')} ${text('Aynı işlem kimliği ve revizyonla yeniden deneyebilirsiniz.','You can retry with the same operation identifier and revision.')}`);}
+    }catch(error){setMessageTone('warning');setMessage(`${toUserFacingErrorMessage(error,text('İzin kaydedilemedi.','The permission could not be saved.'))} ${text('Aynı işlem kimliği ve revizyonla yeniden deneyebilirsiniz.','You can retry with the same operation identifier and revision.')}`);}
     finally{setBusy(false);}
   };
 
@@ -135,14 +141,14 @@ export function HealthCareCoordinationPanel({ people }: { readonly people: reado
     try{
       await window.pardus.revokeHealthCareAccessGrant({ownerPersonId,expectedRevision:operation.expectedRevision,clientOperationId:operation.clientOperationId,grantId});
       pending.current.delete(`revoke:${grantId}`);await reload();setMessageTone('success');setMessage(text('Bakım veren erişimi yerel olarak iptal edildi.','Caregiver access was revoked locally.'));
-    }catch(error){setMessageTone('warning');setMessage(`${error instanceof Error?error.message:text('İzin iptal edilemedi.','The permission could not be revoked.')} ${text('Aynı işlem kimliği ve revizyonla yeniden deneyebilirsiniz.','You can retry with the same operation identifier and revision.')}`);}
+    }catch(error){setMessageTone('warning');setMessage(`${toUserFacingErrorMessage(error,text('İzin iptal edilemedi.','The permission could not be revoked.'))} ${text('Aynı işlem kimliği ve revizyonla yeniden deneyebilirsiniz.','You can retry with the same operation identifier and revision.')}`);}
     finally{setBusy(false);}
   };
 
   const measurementRequired=measurementKinds.has(kind);
   const measurementReady=!measurementRequired||(measurementValue!==''&&measurementUnit.trim()!==''&&(kind!=='blood_pressure'||measurementSecondary!==''));
   return <Surface className={`health-care-coordination ${largeText?'health-care-large-text':''}`}>
-    <SectionHeader eyebrow={text('33-S · yerel ve minimum-gerekli','33-S · local and minimum necessary')} title={text('Sağlık koordinasyonu ve yaşlı desteği','Health coordination and elder support')}/>
+    <SectionHeader eyebrow={text('Yerel ve yalnız gerekli bilgi','Local and minimum necessary')} title={text('Sağlık koordinasyonu ve yaşlı desteği','Health coordination and elder support')}/>
     <div className="health-care-truth" role="note">
       <strong>{text('Tıbbi doğrulama veya sağlık kayıt sistemi sorgusu yapılmaz.','Medical verification and health-record system queries are not performed.')}</strong>
       <span>{text('Sensör, uzaktan yardım, acil servis araması ve dış yardım teslimi yapılandırılmadı; bu ekran yalnız yerel kayıt ve görünüm sağlar.','Sensors, remote assistance, emergency-service calls and external assistance delivery are not configured; this screen provides local records and views only.')}</span>
@@ -175,7 +181,7 @@ export function HealthCareCoordinationPanel({ people }: { readonly people: reado
           {accounts.length?<><label>{text('Bakım veren','Caregiver')}<select value={caregiverAccountId} onChange={(event)=>setCaregiverAccountId(event.target.value)}>{accounts.map((account)=><option key={account.id} value={account.id}>{account.displayName}</option>)}</select></label><fieldset><legend>{text('Görülebilecek kapsamlar','Visible scopes')}</legend><div className="health-care-scopes">{scopeLabels.map((scope)=><label key={scope.value}><input type="checkbox" checked={selectedScopes.includes(scope.value)} onChange={()=>toggleScope(scope.value)}/>{scope.label}</label>)}</div></fieldset><label><input type="checkbox" checked={caregiverCanRecord} onChange={(event)=>setCaregiverCanRecord(event.target.checked)}/> {text('Seçili kapsamlarda kayıt ekleyebilsin','Allow adding records in selected scopes')}</label><Button disabled={busy||!caregiverAccountId||selectedScopes.length===0} onClick={()=>void grant()}>{text('İzni kaydet','Save permission')}</Button></>:<EmptyState title={text('Etkin bakım veren hesabı yok','No active caregiver account')} body={text('Bakım veren rolündeki etkin hesaplar bulunduğunda minimum kapsam seçebilirsiniz.','You can select a minimum scope when active accounts with the caregiver role are available.')}/>}
         </section>
       </div>
-      <section aria-labelledby="health-care-visible-title"><h3 id="health-care-visible-title">{text('Yetkiniz kapsamında görünen kayıtlar','Records visible within your authorization')}</h3>{center?.entries.length?center.entries.map((item)=><div className="list-row" key={item.id}><div><strong>{item.title}</strong><small>{entryLabels.find((entryLabel)=>entryLabel.value===item.kind)?.label??item.kind} · {item.status} · {new Date(item.occurredAt).toLocaleString(locale)}</small>{item.note&&<span>{item.note}</span>}</div>{item.measurement&&<b>{item.measurement.value}{item.measurement.secondaryValue===undefined?'':` / ${item.measurement.secondaryValue}`} {item.measurement.unit}</b>}</div>):<EmptyState title={text('Görünür bakım kaydı yok','No visible care records')} body={text('Kayıtlar sahiplik ve minimum-gerekli bakım kapsamına göre filtrelenir.','Records are filtered by ownership and the minimum-necessary care scope.')}/>}</section>
+      <section aria-labelledby="health-care-visible-title"><h3 id="health-care-visible-title">{text('Yetkiniz kapsamında görünen kayıtlar','Records visible within your authorization')}</h3>{center?.entries.length?center.entries.map((item)=><div className="list-row" key={item.id}><div><strong>{item.title}</strong><small>{entryLabel(item.kind)} · {statusLabels[item.status]} · {new Date(item.occurredAt).toLocaleString(locale)}</small>{item.note&&<span>{item.note}</span>}</div>{item.measurement&&<b>{item.measurement.value}{item.measurement.secondaryValue===undefined?'':` / ${item.measurement.secondaryValue}`} {item.measurement.unit}</b>}</div>):<EmptyState title={text('Görünür bakım kaydı yok','No visible care records')} body={text('Kayıtlar sahiplik ve minimum-gerekli bakım kapsamına göre filtrelenir.','Records are filtered by ownership and the minimum-necessary care scope.')}/>}</section>
       <section aria-labelledby="health-care-grants-title"><h3 id="health-care-grants-title">{text('Bakım veren izinleri','Caregiver permissions')}</h3>{center?.caregiverGrants.length?center.caregiverGrants.map((item)=><div className="list-row" key={item.id}><div><strong>{accounts.find((account)=>account.id===item.caregiverAccountId)?.displayName??item.caregiverAccountId}</strong><small>{item.allowedScopes.map((scope)=>scopeLabels.find((label)=>label.value===scope)?.label??scope).join(' · ')} · {item.actions.includes('record')?text('Okuma ve kayıt','Read and record'):text('Salt okuma','Read only')} · {item.state==='active'?text('Etkin','Active'):text('İptal edildi','Revoked')}</small></div>{item.state==='active'&&<Button tone="danger" disabled={busy} onClick={()=>void revoke(item.id)}>{text('İptal et','Revoke')}</Button>}</div>):<EmptyState title={text('Bakım veren izni yok','No caregiver permissions')} body={text('Genel sağlık verisi otomatik açılmaz; yalnız seçtiğiniz kapsamlar paylaşılır.','General health data is never opened automatically; only the scopes you select are shared.')}/>}</section>
     </>}
   </Surface>;

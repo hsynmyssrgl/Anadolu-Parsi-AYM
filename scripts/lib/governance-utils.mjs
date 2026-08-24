@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { readFile, readdir, stat } from 'node:fs/promises';
 import { extname, join, relative } from 'node:path';
+import { computeGovernedFingerprintFromEntries } from './release-source-provenance.mjs';
 
 export const SELF_INDEX_PATHS = new Set([
   'artifacts/manifests/PROJECT_ARTIFACT_INDEX.json',
@@ -113,9 +114,7 @@ export async function computeGovernedSourceFingerprint() {
   const prefixes=['apps/','packages/','scripts/','config/','docs/current/','docs/decisions/','docs/adr/'];
   const exact=new Set(['package.json','package-lock.json','repository-metadata.json','tsconfig.base.json']);
   const files=(await walkFiles('.')).filter(path => exact.has(path) || prefixes.some(prefix=>path.startsWith(prefix))).filter(path=>!SELF_INDEX_PATHS.has(path));
-  const hash=createHash('sha256');
-  for(const path of files.sort()){
-    hash.update(path);hash.update('\0');hash.update(await readFile(path));hash.update('\0');
-  }
-  return { sha256:hash.digest('hex'), fileCount:files.length };
+  const entries=[];
+  for(const path of files.sort()) entries.push({path,bytes:await readFile(path)});
+  return computeGovernedFingerprintFromEntries(entries);
 }

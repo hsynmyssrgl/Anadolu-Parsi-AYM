@@ -746,7 +746,7 @@ describe('FamilyDataStore', () => {
 
   it('beş başarısız girişten sonra hesabı geçici kilitler', () => {
     const { store } = makeStore();
-    store.setupAdmin({ displayName: 'Test Yöneticisi', email: 'test@example.com', password: 'GucluTestParolasi123!' });
+    store.setupAdmin({ familyName: 'Test Ailesi', displayName: 'Test Yöneticisi', email: 'test@example.com', password: 'GucluTestParolasi123!' });
     store.logout();
     for (let index = 0; index < 5; index += 1) expect(() => store.login({ email: 'test@example.com', password: 'yanlis-parola-123' })).toThrow();
     expect(() => store.login({ email: 'test@example.com', password: 'GucluTestParolasi123!' })).toThrow(/kilitli/);

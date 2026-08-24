@@ -3,7 +3,7 @@
 - Durum: `PLANNED / LOCAL_IMPLEMENTATION_STARTED`
 - Yerel uygulama: `PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED / ACCEPTANCE_INCOMPLETE`
 - Requirement PASS: `false`
-- Yerel otomatik bileşen kanıtı: boundary `12/12`, contract `16/16`, runtime `12/12` ve `20 dosya / 148 test PASS`
+- Yerel otomatik bileşen kanıtı: boundary `12/12`, contract `16/16`, runtime `12/12` ve `20 dosya / 149 test PASS`
 - Production runtime ve dış/manuel kanıt: `NOT_RUN`
 
 | Tehdit | Zorunlu fail-closed kontrol | Mevcut gerçek / açık risk |
@@ -50,7 +50,7 @@
 
 ## Kalan kanıt ve iddia sınırı
 
-Yerel domain/contract, migration 94-95, PEP/UoW, sealed vault/runtime, policy-filtered şifreli tam metin indeks ve maskeli snippet, Windows child-process adapter, DataStore facade, IPC, UI, legacy sahiplik yeniden doğrulaması ve sentetik zararlı-belge fail-closed matrisi `20 dosya / 148 test PASS` ile composition’a bağlıdır; bu yalnız `PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED / ACCEPTANCE_INCOMPLETE` kanıtıdır. Aynı cihazdaki durable source-delete auto-resume, permission/rıza iptalindeki current sealed-result/index auto-reconcile, retention expiry purge ve distinct-maintenance-PEP orphan sweep gerçek temp SQLite/production adapter testlerinde vardır. Sentetik matris bozuk/poliglot görüntüleri, aktif/kaçışlı PDF işaretlerini, kotaları ve temiz olmayan tarayıcı kararlarını worker öncesinde reddeder; gerçek malware providerı veya PDF rasterizerı sayılmaz. Legacy v1 sonuçlar rerun/correction olmadan aramada fail-closed kalır. Gerçek cihazda kabul edilmiş Windows OCR, Apple Vision, denetlenmiş offline fallback, doğrulanmış düşük yetkili sandbox, tam gerçek-belge matrisi, cross-device ve dış provider kanıtı yoktur. Privacy, legal, security, accessibility ve human UAT `NOT_RUN` durumundadır.
+Yerel domain/contract, migration 94-95, PEP/UoW, sealed vault/runtime, policy-filtered şifreli tam metin indeks ve maskeli snippet, Windows child-process adapter, DataStore facade, IPC, UI, legacy sahiplik yeniden doğrulaması ve sentetik zararlı-belge fail-closed matrisi `20 dosya / 149 test PASS` ile composition’a bağlıdır; bu yalnız `PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED / ACCEPTANCE_INCOMPLETE` kanıtıdır. Aynı cihazdaki durable source-delete auto-resume, permission/rıza iptalindeki current sealed-result/index auto-reconcile, retention expiry purge ve distinct-maintenance-PEP orphan sweep gerçek temp SQLite/production adapter testlerinde vardır. Sentetik matris bozuk/poliglot görüntüleri, aktif/kaçışlı PDF işaretlerini, kotaları ve temiz olmayan tarayıcı kararlarını worker öncesinde reddeder; gerçek malware providerı veya PDF rasterizerı sayılmaz. Legacy v1 sonuçlar rerun/correction olmadan aramada fail-closed kalır. Gerçek cihazda kabul edilmiş Windows OCR, Apple Vision, denetlenmiş offline fallback, doğrulanmış düşük yetkili sandbox, tam gerçek-belge matrisi, cross-device ve dış provider kanıtı yoktur. Privacy, legal, security, accessibility ve human UAT `NOT_RUN` durumundadır.
 
 Ham belge dışarı gönderilmez; sessiz cloud fallback yasaktır. Bununla birlikte üretim OCR hattı henüz çalışmadığı için bu ifade bir canlı sistem teslim kanıtı değildir. Remote delivery, provider availability, fiziksel secure erase, harici kopya imhası, resmî belge doğruluğu, sağlık/finans doğruluğu veya hukuki sertifikasyon garanti edilmez.
 

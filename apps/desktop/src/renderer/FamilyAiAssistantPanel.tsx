@@ -10,6 +10,7 @@ import type {
 } from '@ppt/domain';
 import { Button, EmptyState, StatusMessage, Surface } from './ui';
 import { selectUiCopy, useLocalization } from './localization';
+import { toUserFacingErrorMessage } from './user-facing-error';
 
 const kindLabels:Readonly<Record<FamilyAiAssistantKind,string>>=Object.freeze({
   authorized_search:'İzinli yerel arama',daily_summary:'Günlük özet',weekly_summary:'Haftalık özet',
@@ -46,8 +47,8 @@ export function FamilyAiAssistantPanel(){
   const reload=async()=>{if(!window.pardus)return;const [nextCenter,nextModelStatus]=await Promise.all([
     window.pardus.getFamilyAiAssistantCenter(),window.pardus.getFamilyAiLocalModelStatus()]);
     setCenter(nextCenter);setModelStatus(nextModelStatus);};
-  const refresh=async()=>{setError('');try{await reload();}catch(value){setError(value instanceof Error?value.message:text('Aile asistanı yüklenemedi.','Family assistant could not be loaded.'));}};
-  useEffect(()=>{void reload().catch(value=>setError(value instanceof Error?value.message:text('Aile asistanı yüklenemedi.','Family assistant could not be loaded.')));},[]);
+  const refresh=async()=>{setError('');try{await reload();}catch(value){setError(toUserFacingErrorMessage(value,text('Aile asistanı yüklenemedi.','Family assistant could not be loaded.')));}};
+  useEffect(()=>{void reload().catch(value=>setError(toUserFacingErrorMessage(value,text('Aile asistanı yüklenemedi.','Family assistant could not be loaded.'))));},[]);
   const generate=async()=>{
     if(!window.pardus)return;setBusy('generate');setError('');
     const normalized=kind==='authorized_search'?query.trim():'';const prior=pendingGenerate.current;
@@ -56,13 +57,13 @@ export function FamilyAiAssistantPanel(){
     };
     pendingGenerate.current=command;
     try{await window.pardus.generateFamilyAiSuggestion(command);pendingGenerate.current=undefined;await reload();}
-    catch(value){setError(value instanceof Error?value.message:text('Öneri üretilemedi; aynı işlem kimliğiyle yeniden deneyebilirsiniz.','The suggestion could not be generated; you can retry with the same operation ID.'));}
+    catch(value){setError(toUserFacingErrorMessage(value,text('Öneri üretilemedi; aynı işlem kimliğiyle yeniden deneyebilirsiniz.','The suggestion could not be generated; you can retry with the same operation ID.')));}
     finally{setBusy('');}
   };
   const runLocalModel=async()=>{
     if(!window.pardus)return;setBusy('local-model');setError('');setModelResponse(undefined);
     try{setModelResponse(await window.pardus.runFamilyAiLocalModel({kind,prompt:modelPrompt.trim()}));}
-    catch(value){setError(value instanceof Error?value.message:text('Yerel model yanıt üretemedi.','The local model could not generate a response.'));}
+    catch(value){setError(toUserFacingErrorMessage(value,text('Yerel model yanıt üretemedi.','The local model could not generate a response.')));}
     finally{setBusy('');}
   };
   const review=async(suggestion:Pick<FamilyAiSuggestionView,'id'|'revision'>,decision:FamilyAiSuggestionReviewDecision)=>{
@@ -72,7 +73,7 @@ export function FamilyAiAssistantPanel(){
     };
     pendingReviews.current.set(key,command);
     try{await window.pardus.reviewFamilyAiSuggestion(command);pendingReviews.current.delete(key);await reload();}
-    catch(value){setError(value instanceof Error?value.message:text('İnceleme kaydedilemedi; aynı işlem kimliğiyle yeniden deneyebilirsiniz.','The review could not be saved; you can retry with the same operation ID.'));}
+    catch(value){setError(toUserFacingErrorMessage(value,text('İnceleme kaydedilemedi; aynı işlem kimliğiyle yeniden deneyebilirsiniz.','The review could not be saved; you can retry with the same operation ID.')));}
     finally{setBusy('');}
   };
   return <Surface className="family-ai-assistant" aria-labelledby="family-ai-assistant-title">

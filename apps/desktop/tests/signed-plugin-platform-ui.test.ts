@@ -24,14 +24,16 @@ describe('33-Z signed plugin platform renderer surface', () => {
     expect(panel).toContain('Aynı işlem kimliğiyle yeniden deneyebilirsiniz');
     expect(panel).toContain('Değişiklik kaydedildi; güncel merkez yeniden yüklenemedi');
     expect(panel.indexOf('operations.current.delete(key)')).toBeGreaterThan(panel.indexOf('await run(operationId(key))'));
+    expect(panel).toContain('signedPluginProviderLabel(kind,language)');
   });
 
   it('states every non-execution and external-provider no-claim boundary', () => {
     for (const marker of [
-      'Bu ekran eklenti kodu çalıştırmaz', 'Production imza güveni', 'gerçek sandbox/ağ izolasyonu',
-      'banka, okul, Matter, FHIR, OneDrive, harita, OCR, AI veya tarayıcı bağlantısı doğrulanmadı',
-      "<strong>0</strong> {text('çalıştırılmış eklenti','executed plugins')}", 'Otomatik retention kurtarma yok', 'Minimum uygulama'
+      'Bu ekran eklenti kodu çalıştırmaz', 'Canlı sürüm imza güveni', 'çalışma alanı yalıtımı',
+      'banka, okul, sağlık, akıllı ev, dosya, harita, metin tanıma, yapay zekâ veya tarayıcı bağlantıları doğrulanmamıştır',
+      "<strong>0</strong> {text('çalıştırılmış eklenti','executed plugins')}", 'Eski kayıtlar otomatik silinmez', 'En düşük uygulama sürümü'
     ]) expect(panel).toContain(marker);
+    for(const technical of ['Production imza güveni','sandbox/ağ izolasyonu','SBOM','provenance hash','retention kurtarma','capabilityCodes.join','exact egress hostu'])expect(panel).not.toContain(technical);
     expect(panel).not.toMatch(/eklenti kodunu çalıştırır|production için uygundur|sağlayıcı bağlantısı hazırdır/iu);
   });
 

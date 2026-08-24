@@ -4,6 +4,7 @@ import type { MemoryStudioCenterView, MemoryStudioRecordKind,
   MemoryTimeCapsuleCenterItemView } from '@ppt/domain';
 import { Button, EmptyState, StatusMessage, Surface } from './ui';
 import { selectUiCopy, useLocalization } from './localization';
+import { toUserFacingErrorMessage } from './user-facing-error';
 
 const splitIds=(value:string):readonly string[]=>[...new Set(value.split(',').map(item=>item.trim()).filter(Boolean))];
 const futureDefault=():string=>{const value=new Date(Date.now()+8*86_400_000);value.setSeconds(0,0);return value.toISOString().slice(0,16);};
@@ -29,13 +30,13 @@ export function MemoryStudioPanel(){
   const [selectedRecords,setSelectedRecords]=useState<readonly string[]>([]);const [unlockAt,setUnlockAt]=useState(futureDefault);
   const [busy,setBusy]=useState('');const [error,setError]=useState('');const pending=useRef(new Map<string,PendingOperation>());
   const reload=async()=>{if(window.pardus)setCenter(await window.pardus.getMemoryStudioCenter());};
-  const refresh=async()=>{setError('');try{await reload();}catch(value){setError(value instanceof Error?value.message:text('Hafıza stüdyosu yüklenemedi.','Memory studio could not be loaded.'));}};
-  useEffect(()=>{void reload().catch(value=>setError(value instanceof Error?value.message:text('Hafıza stüdyosu yüklenemedi.','Memory studio could not be loaded.')));},[]);
+  const refresh=async()=>{setError('');try{await reload();}catch(value){setError(toUserFacingErrorMessage(value,text('Hafıza stüdyosu yüklenemedi.','Memory studio could not be loaded.')));}};
+  useEffect(()=>{void reload().catch(value=>setError(toUserFacingErrorMessage(value,text('Hafıza stüdyosu yüklenemedi.','Memory studio could not be loaded.'))));},[]);
   const operation=(key:string,signature:string):PendingOperation=>{const prior=pending.current.get(key);if(prior?.signature===signature)return prior;
     const next={clientOperationId:crypto.randomUUID(),resourceId:crypto.randomUUID(),signature};pending.current.set(key,next);return next;};
   const run=async(key:string,task:()=>Promise<unknown>):Promise<boolean>=>{setBusy(key);setError('');try{await task();pending.current.delete(key);
-      try{await reload();}catch(value){setError(value instanceof Error?`${text('İşlem kaydedildi; görünüm yenilenemedi:','The operation was saved, but the view could not be refreshed:')} ${value.message}`:text('İşlem kaydedildi; görünüm yenilenemedi.','The operation was saved, but the view could not be refreshed.'));}
-      return true;}catch(value){setError(value instanceof Error?value.message:text('İşlem kaydedilemedi; aynı işlem kimliğiyle yeniden deneyebilirsiniz.','The operation could not be saved; you can retry with the same operation identifier.'));return false;}finally{setBusy('');}};
+      try{await reload();}catch(value){setError(`${text('İşlem kaydedildi; görünüm yenilenemedi:','The operation was saved, but the view could not be refreshed:')} ${toUserFacingErrorMessage(value,text('Lütfen yeniden deneyin.','Please try again.'))}`);}
+      return true;}catch(value){setError(toUserFacingErrorMessage(value,text('İşlem kaydedilemedi; aynı işlem kimliğiyle yeniden deneyebilirsiniz.','The operation could not be saved; you can retry with the same operation identifier.')));return false;}finally{setBusy('');}};
   const createRecord=async(event:FormEvent<HTMLFormElement>)=>{event.preventDefault();if(!window.pardus)return;
     const payload={kind,title:title.trim(),summary:summary.trim(),archiveItemIds:splitIds(archiveIds),personIds:splitIds(personIds),
       ocrJobId:ocrJobId.trim(),manualFaceGroupingApproved:faceApproved};const signature=JSON.stringify(payload);const key='create-record';const op=operation(key,signature);

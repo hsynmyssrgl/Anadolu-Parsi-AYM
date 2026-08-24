@@ -41,3 +41,7 @@
 ## Gerçeklik sınırı
 
 Bu paket gerçek internete doğrulama verisi göndermemiş, gerçek kullanıcı verisi taşımamış ve cutover yapmamıştır. Mevcut migration 23 endpoint allowlist/çift-pin şeması kullanılır; migration 77 eklenmez. Desktop kasa yapısı ve SQLite sahipliği korunur. DEC-171, PPK-012 policy-sensitive IPC no-cache, PPK-013 doğrudan veri erişim yasağı ve PPK-014 sürümlü Core API sınırı aynen yürürlüktedir.
+
+## 24.08.2026 değişiklik-etki doğrulaması
+
+PR-235 kapsamında güncel kullanıcı dili ve renderer sözleşmesi bu tehdit modeline yeniden bağlandı; 52/52 sınır-sözleşme-çalışma zamanı zinciri PASS oldu. Sonuç gerçek ağ, dış sağlayıcı veya production kabul kanıtı değildir.

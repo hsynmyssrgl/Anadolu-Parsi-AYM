@@ -2,17 +2,17 @@
   "schemaVersion": 1,
   "id": "PARSYUVA-AILE-YASAM-MERKEZI-TICARI-TEMEL-DOGRULAMA-V2",
   "product": "ParsYuva Aile Yaşam Merkezi",
-  "baselineDate": "2026-08-22",
-  "documentSetVersion": "1.4.0-belge.20260822.2",
-  "canonicalRuleRegistry": "PPT-CANONICAL-RULE-REGISTRY-V21",
-  "canonicalRuleCount": 233,
-  "canonicalRuleSha256": "b57ed6bf996709e1522c71e6b61a835ec48df9f0c52b1671dca61f914fab7a5f",
+  "baselineDate": "2026-08-24",
+  "documentSetVersion": "1.8.0-belge.20260824.1",
+  "canonicalRuleRegistry": "PPT-CANONICAL-RULE-REGISTRY-V27",
+  "canonicalRuleCount": 240,
+  "canonicalRuleSha256": "4c8a52f9adc2153177f1e504104e20ac5e9d3f7d780daa2c7d7bdb5d399a6050",
   "decision": "DEC-259",
-  "workItemCount": 54,
+  "workItemCount": 60,
   "fileCount": 87,
   "sourceFileCount": 86,
-  "sourceFingerprintSha256": "91a950168aaff27096603bb9492c387232ef3225bcb14c197183092f4d98859b",
-  "checks": 1114,
+  "sourceFingerprintSha256": "fe3bcc6e861e18691ccb59bc3c3fd87d5f54c5149b6f412578a4f8956fc70d3c",
+  "checks": 1234,
   "status": "PASS",
   "commercialReleaseEligible": false,
   "externalEvidenceDefaultsToNotRun": true,
@@ -20,18 +20,18 @@
   "fileInventory": [
     {
       "path": "00_OKU_BENI.md",
-      "bytes": 5347,
-      "sha256": "82d3d4f39ea74bde226ad9d634301e1c0c02dd804dc399d617b58db4ad26529f"
+      "bytes": 7762,
+      "sha256": "4e02fd3dd32b2df7d2fb8ad9e64a1186a74ced95891ba94692ac57433de8a020"
     },
     {
       "path": "00_TEMEL_SURUM_MANIFESTOSU.json",
-      "bytes": 1130,
-      "sha256": "bc028503526c663ba8c3b6945fe65fb4a10846919154a03923b346bc1a8c083c"
+      "bytes": 1196,
+      "sha256": "4fa304cae9d0c74074b5246933bfc1c70ffcc66cb13fc4640d71c5bb36af7d41"
     },
     {
       "path": "01_YONETIM/01_ASILAMAZ_KURALLAR.md",
-      "bytes": 5055,
-      "sha256": "b8199d71682b8f422e476f8dd732e32f8c93ef9aaf312d2ef52538e8dd2dd695"
+      "bytes": 7546,
+      "sha256": "a024f701e405c9ce97d01be28ff841bb9886ad7b153f3a12df0a7d0258a89acb"
     },
     {
       "path": "01_YONETIM/02_KARAR_VE_DEGISIKLIK_YONETIMI.md",
@@ -45,13 +45,13 @@
     },
     {
       "path": "01_YONETIM/04_AKTIF_KURAL_SICILI.json",
-      "bytes": 4719,
-      "sha256": "3480e0b15a562bba14443a037cbbb8482009b6b05a6b7b7ed5e181f7e686c577"
+      "bytes": 8585,
+      "sha256": "1d9727ec886c7e03807c4cc076b6bb8f2365b09cd2dc1221764a5875df7ba323"
     },
     {
       "path": "01_YONETIM/05_DEGISIKLIK_SICILI.json",
-      "bytes": 5991,
-      "sha256": "34c8caa1db38b34ed57d187ee734afe95bbc988ff972305cf890a621125355ce"
+      "bytes": 12664,
+      "sha256": "f731b173558da8ddea8413c76469dce2cc5b6a77f2a7f6fa75d12673cfd21418"
     },
     {
       "path": "01_YONETIM/06_RISK_SICILI.md",
@@ -90,8 +90,8 @@
     },
     {
       "path": "03_MIMARI/04_PLATFORM_VE_DAGITIM_MIMARISI.md",
-      "bytes": 2431,
-      "sha256": "be6bfc4b5b42c6ca01ac6e23e266cfe31241ef55a571426252ad6b4e96ac7531"
+      "bytes": 4596,
+      "sha256": "9ee7d6b651203c400d164eddbd859bc73917c891f9fa83a25555a44c5cb1ad77"
     },
     {
       "path": "03_MIMARI/05_ORTAM_VE_YAYIN_TOPOLOJISI.md",
@@ -400,8 +400,8 @@
     },
     {
       "path": "08_IS_LISTESI/01_ANA_IS_LISTESI.md",
-      "bytes": 7780,
-      "sha256": "f46614441215a6c26b2b54d25e078432f95785c7546640bb86ef7f697620ffe3"
+      "bytes": 9540,
+      "sha256": "8a366c62101bd6e66ca01a032336a126286c2d32263e04f540f5b656dfbb3ebe"
     },
     {
       "path": "08_IS_LISTESI/02_DIS_KAYNAK_GEREKTIREN_ISLER.md",
@@ -410,8 +410,8 @@
     },
     {
       "path": "08_IS_LISTESI/03_ANA_IS_SICILI.json",
-      "bytes": 23863,
-      "sha256": "ab3608f3a23625e71ec7d8b1db5e1cbb6f4195190b5e4ce369c436d528ff5452"
+      "bytes": 30120,
+      "sha256": "ab2c4caaaab7d6794b8f6078ae5dc65edd62b52f77b78d0a201390dbc7f13732"
     },
     {
       "path": "08_IS_LISTESI/04_IS_YURUTME_SIRASI.md",
@@ -445,9 +445,9 @@
     },
     {
       "path": "11_OTOMASYON/dogrula-ticari-temel-alani.mjs",
-      "bytes": 19274,
-      "sha256": "08ad51265beb422e53d2b532934fa3a9a49967d40daaf146140a1f5b2659469f"
+      "bytes": 24265,
+      "sha256": "cbdfb72a8bf1e3be62aba41e45f1c28123ca3191cd0e1dc43a930f6a7bad3468"
     }
   ],
-  "generatedAt": "2026-08-23T15:39:25.700Z"
+  "generatedAt": "2026-08-24T07:00:41.917Z"
 }

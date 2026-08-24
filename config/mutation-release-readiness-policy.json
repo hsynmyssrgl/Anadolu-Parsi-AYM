@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 2,
+  "id": "PPT-MUTATION-RELEASE-READINESS-V2",
+  "release": "Bronze 22.08.2026.50",
+  "requirement": "PR-235",
+  "decision": "DEC-270",
+  "strengthenedByRequirement": "PR-240",
+  "strengthenedByDecision": "DEC-275",
+  "failClosed": true,
+  "waiverAllowed": false,
+  "impactAreas": [
+    "mainSource",
+    "channelSources",
+    "canonicalRules",
+    "decisions",
+    "activeDocuments",
+    "commercialRecords",
+    "workList",
+    "scopesInventoriesRatchets",
+    "manifestsIndexes",
+    "masterDocumentation",
+    "ratchets",
+    "tests",
+    "uat"
+  ],
+  "allowedImpactStatus": ["UPDATED", "NOT_IMPACTED_WITH_REASON", "DEFERRED_TO_FRESH_INSTALLED_EXE_UAT"],
+  "defaultEvidence": {
+    "baseline": "artifacts/validation/mutation-baseline.json",
+    "impactAnalysis": "artifacts/validation/mutation-impact-analysis.json",
+    "targetedTest": "artifacts/validation/mutation-targeted-test-pass.json",
+    "fullRegression": "artifacts/validation/full-vitest-pass.json",
+    "sourceIntegrity": "artifacts/validation/mutation-source-integrity.json"
+  },
+  "defaultInput": {
+    "impactAssessment": "artifacts/validation/mutation-impact-assessment.json"
+  },
+  "canonicalProducers": {
+    "baseline": "scripts/record-mutation-baseline.mjs",
+    "impactAnalysis": "scripts/create-mutation-impact-analysis.mjs",
+    "targetedTest": "scripts/run-mutation-test-evidence.mjs",
+    "fullRegression": "scripts/run-mutation-test-evidence.mjs",
+    "sourceIntegrity": "scripts/verify-source-integrity.mjs"
+  },
+  "dependencyRegistry": {
+    "path": "config/change-impact-dependency-registry.json",
+    "schemaVersion": 1,
+    "id": "PPT-CHANGE-IMPACT-DEPENDENCY-REGISTRY-V1",
+    "sha256": "acb69d6b05994b455b18f9210afd4583a290c384ef3fb47d386b35284a565b48",
+    "unmatchedChangedPathEffect": "BLOCK",
+    "dependentRecordsMustBeChanged": true,
+    "targetedVitestMustEqualAffectedFiles": true
+  },
+  "externalBaselineChain": {
+    "root": "D:/AYM_LIBRARY/ParsYuva/ParsYuva Aile Yasam Merkezi/governance/PR-235/Bronze/mutation-baseline-chain",
+    "channel": "Bronze",
+    "appendOnlyExclusiveCreateRequired": true,
+    "fullHashChainReadbackRequired": true,
+    "repositoryReceiptContainsPointerOnly": true,
+    "bootstrapAdoption": {
+      "allowed": true,
+      "type": "BOOTSTRAP_ADOPTION",
+      "baseCommit": "440d5c7a9fbbd840faef58d1e1ef2048f8a989b4",
+      "decision": "DEC-270_INITIAL_ACTIVATION_ONLY",
+      "requiredSequence": 1,
+      "fullDiffRequired": true,
+      "generalWaiver": false
+    }
+  },
+  "baseline": {
+    "recordedOnCleanBronzeWorktreeBeforeMutation": true,
+    "exactCommitTreeAndFingerprintReadbackRequired": true,
+    "impactBaseOverrideAllowed": false
+  },
+  "impactAssessment": {
+    "assessmentReadbackRequiredAtPackage": true,
+    "actualChangedFileMappingRequired": true,
+    "updatedPathsMustBeActualChangedFiles": true,
+    "notImpactedReasonCodeRequired": true,
+    "evidencePathsRequired": true
+  },
+  "evidenceExecution": {
+    "targetedCommandMustActuallyRun": true,
+    "fullRegressionCommandFixedAndUnfiltered": true,
+    "fullRegressionRootTypecheckRequired": true,
+    "fullRegressionChangedMjsNodeCheckRequired": true,
+    "fullRegressionChangedPs1ParserRequired": true,
+    "commandMatrixMustMatchDependencyRegistry": true,
+    "sourceMustRemainUnchangedDuringTests": true,
+    "receiptDirectory": "artifacts/validation",
+    "canonicalProducerSha256Required": true,
+    "canonicalArgumentsRequired": true,
+    "previousReceiptHashChainRequired": true,
+    "validationDirectoryAndToolchainStableDuringTestRequired": true,
+    "targetedArguments": {
+      "repositoryRelativeTestFilesOnly": true,
+      "requiredSuffix": ".test.ts",
+      "fixedWorkerArgument": "--maxWorkers=1",
+      "forbiddenOptions": ["--config", "--root", "--dir", "--project", "--changed", "--related", "--testNamePattern", "-t", "--passWithNoTests", "--reporter", "--outputFile"]
+    }
+  },
+  "postflight": {
+    "trackedFileWritesAllowed": false,
+    "artifactIndexGenerationAllowed": false,
+    "artifactIndexReadOnlyVerificationRequired": true,
+    "artifactIndexInventory": "EXACT_GIT_HEAD_TRACKED_FILES"
+  },
+  "package": {
+    "preMutationBaselineReceiptRequired": true,
+    "cleanChannelWorktreeRequired": true,
+    "exactCommitRequired": true,
+    "sameCanonicalRuleHashRequired": true,
+    "sameGovernedSourceFingerprintRequired": true,
+    "targetedTestPassRequired": true,
+    "fullRegressionPassRequired": true,
+    "sourceIntegrityPassRequired": true
+  },
+  "installerDelivery": {
+    "runtimeKind": "INSTALLED_EXECUTABLE",
+    "freshAfterPackageRequired": true,
+    "samePackageProvenanceSha256Required": true,
+    "sameSourceCommitRequired": true,
+    "sourceOrWinUnpackedUatForbidden": true
+  }
+}

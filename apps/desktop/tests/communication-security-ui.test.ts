@@ -31,16 +31,16 @@ describe('34-A communication policy and MLS foundation renderer surface', () => 
   it('keeps provider-dependent cryptographic writes fail-closed and states every no-claim boundary', () => {
     expect(panel).toContain('const providerReady=false;');
     for (const marker of [
-      'Bu ekran mesaj göndermez ve anahtar yönetmez.', 'Production RFC 9420 sağlayıcısı',
-      'ileri gizlilik', 'saldırı sonrası güvenlik', 'relay içerik körlüğü',
-      'mesaj imzası', 'gerçek ağ teslimi doğrulanmadı',
-      'Yeni üyeler katılım öncesi geçmişi varsayılan göremez',
-      'explicit snapshot kararı bu foundation içinde içerik paylaşmaz',
+      'Bu ekran mesaj göndermez ve anahtar yönetmez.', 'Gerçek ağ üzerinden güvenli mesajlaşma',
+      'geçmişi koruma', 'kayıp cihaz sonrası güvenliği yenileme', 'mesaj doğrulama henüz hazır değildir',
+      'Yeni üyeler katılmadan önceki geçmişi varsayılan olarak göremez',
+      'ayrı geçmiş paylaşımı seçilse bile bu ekran içerik aktarmaz',
       'Kapsamlı kaynak yetkilendirmesi henüz uygulanmadı',
-      'otomatik retention ve kapasite kurtarma yoktur',
+      'otomatik saklama temizliği henüz yoktur',
       "<strong>0</strong> {text('gönderilmiş mesaj','sent messages')}"
     ]) expect(panel).toContain(marker);
     expect(panel).toContain('disabled={Boolean(busy)||!providerReady');
+    for(const technicalCopy of ['MLS dönem temeli','politika receipt','güvenli metadata','Production RFC 9420','relay içerik körlüğü','explicit snapshot','Metadata kotaları','fail-closed','Production MLS'])expect(panel).not.toContain(technicalCopy);
     expect(panel).not.toMatch(/RFC 9420 uyumludur|ileri gizlilik sağlanır|relay içeriği göremez|mesaj teslim edildi/iu);
   });
 

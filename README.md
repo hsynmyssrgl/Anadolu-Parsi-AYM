@@ -1,25 +1,22 @@
-# Anadolu Parsı Aile Yaşam Merkezi
+# ParsYuva Aile Yaşam Merkezi
 
-- Product: Anadolu Parsı Aile Yaşam Merkezi
-- Application Version: `02.08.2026.228`
-- Package Version: `2.8.2026-228`
-- Stage: **Bronze RC2 Active Development**
-- Build: **228**
+- Product: ParsYuva Aile Yaşam Merkezi
+- Application Version: `22.08.2026.50`
+- Package Version: `22.8.2026-50`
+- Stage: **Bronze Active Development**
+- Monthly Sequence: **50**
 
-## Güncel kaynak teslimi
+## Current source delivery
 
-Build228 is the Bronze governance-only closure build: OPEN-021 and OPEN-022 are formally closed against exact Build227 real-Windows evidence; no security feature or Silver validation result is changed.
+This repository is the active Bronze development source for the local-first ParsYuva family application. Bronze, Silver and Gold identities, installation directories, user-data roots, shortcuts and source worktrees are isolated from one another.
 
-- Milestone: **Bronze OPEN-021/OPEN-022 official governance closure**
+## Start here
 
-## Başlangıç
+- `config/release-ledger.json`
+- `config/canonical-rule-registry.json`
+- `docs/current/00_AKTIF_ANA_KAPSAM.md`
+- `docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md`
+- `docs/17_MASTER_BUILD_LEDGER.md`
+- `BUILD_STATUS.md`
 
-- Güncel durum: `BUILD_STATUS_BRONZE_RC2_BUILD228.md`
-- Sürüm notları: `RELEASE_NOTES_BRONZE_RC2_BUILD228.md`
-- Mimari doğrulama: `BUILD228_ARCHITECTURE_VALIDATION_REPORT.md`
-- Teslim doğrulaması: `BUILD228_DELIVERY_VALIDATION_REPORT.md`
-- Ayrık teslim kanıt tasdiki: `Anadolu_Parsi_Aile_Yasam_Merkezi_Bronze_RC2_Build228_Teslim_Kanit_Tasdiki_02.08.2026.228.json`
-- Ana devam defteri: `docs/17_MASTER_BUILD_LEDGER.md`
-- Kaynak kod: `apps/` ve `packages/`
-
-Bu paket Bronze geliştirme sürümüdür. Yeni özellik ve ürün geliştirmeleri Bronze kanalında tamamlanır; kapsam tamamlandığında Silver doğrulama ve altyapı iyileştirme kanalına geçilir.
+This is an active-development source. A local unsigned installer is evidence only for local testing; it is not a signed production release.

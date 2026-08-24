@@ -1439,3 +1439,29 @@ Build228 governance-only kapanış buildidir. `OPEN-021 = CLOSED` ve `OPEN-022 =
 ## DEC-269 — Bronze, Silver ve Gold kurulum, veri ve kaynak yalıtımı
 
 23.08.2026 tarihinde Bronze, Silver ve Gold kanallarının kurulum dizini, ana EXE, kısayol, appId, productName, kullanıcı veri kökü ve kaldırma kapsamı ayrılmıştır. Kaynak kod her kanal için C:\PPT\AYM\06_KOD\kanallar\<Kanal> altında ayrı Git worktree ve branch kullanır. Bir kanal diğer kanalın programını, verisini veya build çıktısını değiştiremez. DEC-262 ve PR-228'in ortak kimlik hükümleri superseded edilmiştir; dağıtım EXE adı ParsYuva-<Kanal>-GG.AA.YYYY.NN.exe ve görünür ana ürün adı korunur. DEC-269 ve PR-234 bağlayıcıdır.
+
+## DEC-270 — Her mutasyon sonrası exact commit kanıtı ve taze kurulu EXE UAT teslim kapısı
+
+23.08.2026 tarihinde en küçük kaynak, yapılandırma veya belge mutasyonundan sonra değişen dosyaların kanonik kural, karar, aktif belge, manifest, ratchet, test ve UAT etkileriyle eşlenmesi kararlaştırılmıştır. Kalıcı completion ve Windows paketi yalnız temiz kanal worktree'sindeki aynı exact commit, kural hash'i ve governed-source fingerprint'ine bağlı hedefli test, tam regresyon ve kaynak bütünlüğü PASS kanıtlarıyla oluşturulur. Installer teslimi ancak paket üretiminden sonra aynı paket provenance SHA-256'sı ve kaynak commitine bağlı gerçek kurulu ana EXE UAT PASS ile yapılır; kaynak/win-unpacked veya stale UAT kabul edilmez. DEC-270 ve PR-235 bağlayıcıdır.
+
+Uygulama bağı mutasyondan önce kaydedilen clean Bronze baseline receipt'i, immutable Git tree/fingerprint readback'i, gerçek Vitest komutunu çalıştıran hedefli ve filtresiz tam regresyon receipt üreticileri ile tracked dosya yazmayan read-only postflight olarak güçlendirilmiştir. Baseline commit sonradan CLI ile seçilemez.
+
+## DEC-271 — Kardeş kanal program kökleri ve legacy kaldırma güvenliği
+
+24.08.2026 tarihinde Bronze, Silver ve Gold program kökleri legacy `C:\Program Files\PPT\ParsYuva` dizininin dışındaki `C:\Program Files\PPT\ParsYuva-<Kanal>` kardeş dizinlerine taşınmıştır. AppData `ParsYuva/<Kanal>` olarak ayrı kalır; kanal appId, EXE, kısayol, productName, kaldırma kapsamı ve worktree/branch yalıtımı korunur. Interactive per-machine kaldırma signed-in kullanıcı AppData bağlamına geçer ve her çıkışta all-users bağlamını geri yükler. Legacy 37–44 kökünde Bronze, Silver veya Gold dizini varsa recursive silme veri ve programı koruyarak fail-closed durur. Otomatik legacy kullanıcı verisi migration veya silme yoktur. DEC-269/PR-234'ün exact nested-path hükmü superseded, DEC-271 ve PR-236 bağlayıcıdır.
+
+## DEC-272 — Açık tek seferli sürüm tahsisi ve önceden tahsisli paket kimliği
+
+24.08.2026 tarihinde resmî aylık sürüm tahsisi paketlemenin örtük yan etkisi olmaktan çıkarılmıştır. Mutasyon tahsisi zorunlu expected release ID ister; hesaplanan kimlik uyuşmazsa lock/temp/yazım/installer temizliği başlamaz. Preview salt okunur, signed/local/dir paket girişleri allocator çalıştırmaz ve aynı önceden tahsisli current kimliğini tüketir. Aktif sürüm taşıyıcıları tek atomik planda güncellenirken tarihsel UAT/evidence/fixture kayıtları korunur. Bağlayıcı kayıt DEC-272 ve PR-237'dir.
+
+## DEC-273 — Kanonik Windows kurulu yükseltme, maintenance ve ön yüz UAT zinciri
+
+24.08.2026 tarihinde Windows installer teslimi tek kanonik iki-makbuz zincirine bağlandı. UAT110 gerçek N→N+1 yükseltme ve ayrı same-version maintenance fazlarında sentetik marker ile metadata-only Bronze/Silver/Gold/legacy veri korumasını, diğer kanal sıfır yazımını, exact installed/package kimliğini ve sibling registry yolunu kanıtlar. Schema2 UAT111 aynı installation-preservation SHA, package provenance, expected release ID ve source commit bağını taşır. NotSigned yalnız local-test sınırıdır. Bağlayıcı kayıt DEC-273 ve PR-238'dir.
+
+## DEC-274 — Adversarial Windows paket, kurulum ve final teslim kanıt zinciri
+
+24.08.2026 tarihinde PR-238, PR-239 ile superseded edildi. Teslim; canlı PR-235 geri-okumalı schema2 package provenance, immutable parent package arşiviyle exact canlı sibling N, zorunlu installer-experience V2, UAT110 V2, parent-run bağlı UAT111 V3 ve final V3 kanıtlarını source/producer/path/hash/kronoloji/screenshot/secret bağlarıyla yeniden doğrular. Sabit tıklama sayısı kabul değildir; dinamik outcome matrisi sıfır residual ile kapanır. Legacy nested runtime predecessor sayılmaz. NotSigned veya Kaspersky koruması kapalı test üretim uygunluğu değildir.
+
+## DEC-275 — En küçük değişiklikte tüm kayıt ve test kapanışı
+
+24.08.2026 tarihinde her küçük mutasyonun etkilenen ana/kanal kaynakları, kural ve karar sicilleri, aktif/ticari belgeler, iş listesi, kapsam-envanter-ratchet-manifest-indeks, güncel ana DOCX/PDF ve kanıt sözleşmelerini aynı zincirde kapatması bağlandı. Hedefli ve filtresiz tam regresyon, typecheck, sözdizimi, kaynak bütünlüğü ile UI etkisinde bütün etkileşim ve görsel UAT zorunludur. Gerçek hata `wip(rejected)` checkpoint olarak kaydedilir; tam kapanıştan önce ara installer üretilemez. Bağlayıcı kayıt DEC-275 ve PR-240'tır.

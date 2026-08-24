@@ -2,13 +2,13 @@ import { useEffect, useId, useRef, type ButtonHTMLAttributes, type ReactNode } f
 import { USER_VISIBLE_APP_INFO } from '@ppt/domain/renderer';
 import { useLocalization } from './localization';
 
-const INTERNAL_RULE_TOKEN = /^(?:PPK-\d+|DEC-\d+|EXT-\d+|LTP-\d+(?:[–-]\d+)?|B\d+-\d+|\d{2}[-‑][A-Z](?:\/[A-Z])?)(?:\s*(?:\/|\+)\s*(?:PPK-\d+|DEC-\d+|EXT-\d+|LTP-\d+(?:[–-]\d+)?|B\d+-\d+|\d{2}[-‑][A-Z](?:\/[A-Z])?))*$/i;
+const INTERNAL_RULE_TOKEN = /^(?:PPK-\d+|DEC-\d+|EXT-\d+|LTP-\d+(?:[–-]\d+)?|B\d+(?:-\d+)?|\d{2}[-‑][A-Z](?:\/[A-Z])?)(?:\s*(?:\/|\+)\s*(?:PPK-\d+|DEC-\d+|EXT-\d+|LTP-\d+(?:[–-]\d+)?|B\d+(?:-\d+)?|\d{2}[-‑][A-Z](?:\/[A-Z])?))*$/i;
 
 export function userFacingEyebrow(value?: string): string | undefined {
   if (!value) return undefined;
   const segments = value.split('·').map((segment) => segment.trim());
   while (segments.length > 0 && INTERNAL_RULE_TOKEN.test(segments[0] ?? '')) segments.shift();
-  const cleaned = segments.join(' · ').replace(/^(?:PPK-\d+|DEC-\d+|EXT-\d+|LTP-\d+(?:[–-]\d+)?|B\d+-\d+|\d{2}[-‑][A-Z](?:\/[A-Z])?)\s+/i, '').trim();
+  const cleaned = segments.join(' · ').replace(/^(?:PPK-\d+|DEC-\d+|EXT-\d+|LTP-\d+(?:[–-]\d+)?|B\d+(?:-\d+)?|\d{2}[-‑][A-Z](?:\/[A-Z])?)\s+/i, '').trim();
   return cleaned || undefined;
 }
 

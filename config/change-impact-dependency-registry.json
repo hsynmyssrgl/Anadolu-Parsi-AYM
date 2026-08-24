@@ -1,0 +1,838 @@
+{
+  "schemaVersion": 1,
+  "id": "PPT-CHANGE-IMPACT-DEPENDENCY-REGISTRY-V1",
+  "requirement": "PR-235",
+  "decision": "DEC-270",
+  "strengthenedByRequirement": "PR-240",
+  "strengthenedByDecision": "DEC-275",
+  "failClosed": true,
+  "unmatchedChangedPathEffect": "BLOCK",
+  "universalDependentRecords": [
+    "SHA256SUMS.txt",
+    "artifacts/manifests/PROJECT_ARTIFACT_INDEX.csv",
+    "artifacts/manifests/PROJECT_ARTIFACT_INDEX.json",
+    "artifacts/manifests/PROJECT_ARTIFACT_INDEX.md",
+    "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
+    "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.docx",
+    "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.pdf",
+    "docs/ticari-urun-temeli/00_TEMEL_SURUM_MANIFESTOSU.json",
+    "docs/ticari-urun-temeli/01_YONETIM/05_DEGISIKLIK_SICILI.json",
+    "docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json",
+    "docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md",
+    "docs/ticari-urun-temeli/08_IS_LISTESI/03_ANA_IS_SICILI.json",
+    "manifest.json"
+  ],
+  "universalAffectedVitestFiles": [
+    "apps/desktop/tests/mutation-release-evidence-producers.test.ts",
+    "apps/desktop/tests/mutation-release-readiness-contract.test.ts",
+    "apps/desktop/tests/operation-rule-check-policy.test.ts"
+  ],
+  "pathRules": [
+    {
+      "id": "governance-control-plane",
+      "match": {
+        "exactPaths": [
+          "AGENTS.md",
+          "config/change-impact-dependency-registry.json",
+          "config/mutation-release-readiness-policy.json",
+          "scripts/verify-operation-rule-check.mjs"
+        ],
+        "pathPrefixes": ["config/", "docs/current/", "docs/decisions/", "docs/ticari-urun-temeli/"],
+        "pathSuffixes": []
+      },
+      "dependentRecords": [
+        "config/canonical-rule-registry.json",
+        "config/project-constitution.json",
+        "config/rule-acknowledgement.json",
+        "config/rule-enforcement-registry.json",
+        "config/user-decision-ledger.json",
+        "docs/10_MASTER_DECISION_REGISTER.md",
+        "docs/current/06_KANONIK_KURAL_SICILI.md",
+        "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
+        "docs/current/10_TUM_KURALLAR_ASILAMAZ_YURUTME_SOZLESMESI.md",
+        "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md"
+      ],
+      "affectedVitestFiles": [
+        "apps/desktop/tests/operation-rule-check-policy.test.ts",
+        "apps/desktop/tests/release-source-provenance.test.ts"
+      ],
+      "includeChangedTestFile": false
+    },
+    {
+      "id": "documentation-and-indexes",
+      "match": {
+        "exactPaths": [
+          "BUILD_STATUS.md",
+          "CONTRIBUTING.md",
+          "COPYRIGHT.md",
+          "DELIVERY_SUMMARY_TR.md",
+          "PAKET_OZETI_TR.md",
+          "README.md",
+          "SECURITY.md",
+          "START_HERE_TR.md",
+          "VERIFICATION_REPORT.md"
+        ],
+        "pathPrefixes": ["docs/", "artifacts/manifests/"],
+        "pathSuffixes": []
+      },
+      "dependentRecords": [
+        "artifacts/manifests/ALL_DOCUMENTS_INDEX.csv",
+        "artifacts/manifests/ALL_DOCUMENTS_INDEX.json",
+        "artifacts/manifests/ALL_DOCUMENTS_INDEX.md",
+        "docs/current/08_TUM_BELGELER_DIZINI.md"
+      ],
+      "affectedVitestFiles": ["apps/desktop/tests/b0-product-surface-governance-integration.test.ts"],
+      "includeChangedTestFile": false
+    },
+    {
+      "id": "desktop-renderer-runtime",
+      "match": {
+        "exactPaths": [],
+        "pathPrefixes": ["apps/desktop/src/renderer/"],
+        "pathSuffixes": []
+      },
+      "dependentRecords": ["BUILD_STATUS.md", "docs/17_MASTER_BUILD_LEDGER.md"],
+      "affectedVitestFiles": [
+        "apps/desktop/tests/b0-product-surface-governance-integration.test.ts",
+        "apps/desktop/tests/final-user-surface-natural-copy.test.ts",
+        "apps/desktop/tests/unified-control-visual-contract.test.ts"
+      ],
+      "includeChangedTestFile": false
+    },
+    {
+      "id": "desktop-main-and-application-runtime",
+      "match": {
+        "exactPaths": [],
+        "pathPrefixes": ["apps/desktop/src/main/", "packages/application/", "packages/domain/", "packages/infrastructure/"],
+        "pathSuffixes": []
+      },
+      "dependentRecords": ["BUILD_STATUS.md", "docs/17_MASTER_BUILD_LEDGER.md"],
+      "affectedVitestFiles": [
+        "apps/desktop/tests/data-store.test.ts",
+        "apps/desktop/tests/ppk020-policy-conformance-integration.test.ts"
+      ],
+      "includeChangedTestFile": false
+    },
+    {
+      "id": "windows-package-installer-and-uat",
+      "match": {
+        "exactPaths": [],
+        "pathPrefixes": ["apps/desktop/build/", "apps/desktop/scripts/", "scripts/lib/windows-", "scripts/run-installed-", "scripts/run-windows-", "scripts/create-bronze-final-"],
+        "pathSuffixes": []
+      },
+      "dependentRecords": ["BUILD_STATUS.md", "docs/17_MASTER_BUILD_LEDGER.md"],
+      "affectedVitestFiles": [
+        "apps/desktop/tests/bronze-final-local-test-delivery-contract.test.ts",
+        "apps/desktop/tests/installed-frontend-user-uat-contract.test.ts",
+        "apps/desktop/tests/installed-ui-native-file-dialog-harness.test.ts",
+        "apps/desktop/tests/windows-installed-release-uat-contract.test.ts",
+        "apps/desktop/tests/windows-installer-experience-uat-contract.test.ts",
+        "apps/desktop/tests/windows-package-provenance-history.test.ts"
+      ],
+      "includeChangedTestFile": false
+    },
+    {
+      "id": "repository-scripts",
+      "match": {
+        "exactPaths": [],
+        "pathPrefixes": ["scripts/"],
+        "pathSuffixes": []
+      },
+      "dependentRecords": ["BUILD_STATUS.md", "docs/17_MASTER_BUILD_LEDGER.md"],
+      "affectedVitestFiles": [
+        "apps/desktop/tests/mutation-release-evidence-producers.test.ts",
+        "apps/desktop/tests/release-source-provenance.test.ts"
+      ],
+      "includeChangedTestFile": false
+    },
+    {
+      "id": "vitest-contract-self-coverage",
+      "match": {
+        "exactPaths": [],
+        "pathPrefixes": ["apps/", "packages/"],
+        "pathSuffixes": [".test.ts"]
+      },
+      "dependentRecords": ["BUILD_STATUS.md", "docs/17_MASTER_BUILD_LEDGER.md"],
+      "affectedVitestFiles": [],
+      "includeChangedTestFile": true
+    },
+    {
+      "id": "data-store-migration-and-policy-ratchets",
+      "match": {
+        "exactPaths": [
+          "apps/desktop/src/main/volatile-sqlite-session.ts",
+          "apps/desktop/tests/data-store.test.ts",
+          "scripts/verify-32-q-ppk-021-platform-policy-ast-gate-runtime.mjs",
+          "scripts/verify-data-store-smoke.mjs"
+        ],
+        "pathPrefixes": ["packages/database/", "packages/repositories/"],
+        "pathSuffixes": []
+      },
+      "dependentRecords": [
+        "artifacts/validation/platform-policy-ast-gate.json",
+        "config/32-q-ppk-021-platform-policy-ast-gate-inventory.json",
+        "config/32-q-ppk-021-platform-policy-ast-gate-scope.json"
+      ],
+      "affectedVitestFiles": [
+        "apps/desktop/tests/data-store.test.ts",
+        "packages/database/family-database-authoritative-receipt-time.test.ts",
+        "packages/repositories/accessibility-preferences-repository-policy.test.ts"
+      ],
+      "affectedCommandIds": ["dataStoreSmoke", "platformPolicyAstRuntime"],
+      "includeChangedTestFile": true
+    },
+    {
+      "id": "ppk015-network-egress-policy-full-chain",
+      "match": {
+        "exactPaths": [
+          "apps/desktop/src/renderer/App.tsx",
+          "config/32-k-ppk-015-network-egress-policy-scope.json",
+          "config/ppk-015-network-egress-current-ratchet.json",
+          "scripts/verify-32-k-ppk-015-network-egress-contract.mjs",
+          "scripts/verify-32-k-ppk-015-network-egress-runtime.mjs",
+          "docs/current/PPK-015_NETWORK_EGRESS_CURRENT_RATCHET.md",
+          "docs/security/PPK-015_NETWORK_EGRESS_POLICY_THREAT_MODEL.md",
+          "artifacts/validation/32-K-ppk-015-network-egress-contract.json",
+          "artifacts/validation/32-K-ppk-015-network-egress-runtime.json"
+        ],
+        "pathPrefixes": [],
+        "pathSuffixes": []
+      },
+      "dependentRecords": [
+        "config/32-k-ppk-015-network-egress-policy-scope.json",
+        "config/ppk-015-network-egress-current-ratchet.json",
+        "docs/current/PPK-015_NETWORK_EGRESS_CURRENT_RATCHET.md",
+        "docs/security/PPK-015_NETWORK_EGRESS_POLICY_THREAT_MODEL.md",
+        "artifacts/validation/32-K-ppk-015-network-egress-contract.json",
+        "artifacts/validation/32-K-ppk-015-network-egress-runtime.json"
+      ],
+      "affectedVitestFiles": [
+        "apps/desktop/tests/ppk015-network-egress-governance-ratchet.test.ts",
+        "apps/desktop/tests/ppk015-network-egress-policy.test.ts"
+      ],
+      "affectedCommandIds": ["ppk015NetworkEgressContract", "ppk015NetworkEgressRuntime"],
+      "includeChangedTestFile": false
+    },
+    {
+      "id": "ppk022-capability-manifest-full-chain",
+      "match": {
+        "exactPaths": [
+          "apps/desktop/src/renderer/App.tsx",
+          "scripts/verify-32-r-ppk-022-capability-manifest-gate-contract.mjs"
+        ],
+        "pathPrefixes": ["config/32-r-ppk-022-", "artifacts/validation/platform-capability-manifest-gate"],
+        "pathSuffixes": []
+      },
+      "dependentRecords": [
+        "artifacts/validation/platform-capability-manifest-gate.json",
+        "config/32-r-ppk-022-capability-manifest-gate-inventory.json"
+      ],
+      "affectedVitestFiles": [
+        "apps/desktop/tests/ppk022-capability-manifest-gate.test.ts",
+        "apps/desktop/tests/ppk022-capability-manifest-integration.test.ts"
+      ],
+      "affectedCommandIds": ["ppk022CapabilityManifestContract"],
+      "includeChangedTestFile": false
+    },
+    {
+      "id": "33-q-local-governed-ocr-derived-data-pipeline-full-chain",
+      "match": {
+        "exactPaths": [
+          "config/33-q-local-governed-ocr-derived-data-pipeline-scope.json",
+          "config/33-q-local-governed-ocr-derived-data-pipeline-inventory.json",
+          "scripts/verify-33-q-local-governed-ocr-derived-data-pipeline-boundary.mjs",
+          "scripts/verify-33-q-local-governed-ocr-derived-data-pipeline-contract.mjs",
+          "scripts/verify-33-q-local-governed-ocr-derived-data-pipeline-runtime.mjs",
+          "docs/decisions/DEC-228-local-governed-ocr-derived-data-pipeline.md",
+          "docs/security/THREAT_MODEL_33_Q_LOCAL_GOVERNED_OCR_DERIVED_DATA_PIPELINE.md",
+          "artifacts/validation/33-Q-local-governed-ocr-derived-data-pipeline-boundary.json",
+          "artifacts/validation/33-Q-local-governed-ocr-derived-data-pipeline-contract.json",
+          "artifacts/validation/33-Q-local-governed-ocr-derived-data-pipeline-runtime.json"
+        ],
+        "pathPrefixes": [],
+        "pathSuffixes": []
+      },
+      "dependentRecords": [
+        "config/33-q-local-governed-ocr-derived-data-pipeline-scope.json",
+        "config/33-q-local-governed-ocr-derived-data-pipeline-inventory.json",
+        "docs/decisions/DEC-228-local-governed-ocr-derived-data-pipeline.md",
+        "docs/security/THREAT_MODEL_33_Q_LOCAL_GOVERNED_OCR_DERIVED_DATA_PIPELINE.md",
+        "artifacts/validation/33-Q-local-governed-ocr-derived-data-pipeline-boundary.json",
+        "artifacts/validation/33-Q-local-governed-ocr-derived-data-pipeline-contract.json",
+        "artifacts/validation/33-Q-local-governed-ocr-derived-data-pipeline-runtime.json"
+      ],
+      "affectedVitestFiles": [],
+      "affectedCommandIds": [
+        "localGovernedOcrBoundary",
+        "localGovernedOcrContract",
+        "localGovernedOcrRuntime"
+      ],
+      "includeChangedTestFile": false
+    },
+    {
+      "id": "33-r-archive-evidence-relations-full-chain",
+      "match": {
+        "exactPaths": [
+          "config/33-r-archive-evidence-relations-media-lifecycle-unified-authorized-search-scope.json",
+          "config/33-r-archive-evidence-relations-media-lifecycle-unified-authorized-search-inventory.json",
+          "scripts/verify-33-r-archive-evidence-relations-media-lifecycle-unified-authorized-search-boundary.mjs",
+          "scripts/verify-33-r-archive-evidence-relations-media-lifecycle-unified-authorized-search-contract.mjs",
+          "scripts/verify-33-r-archive-evidence-relations-media-lifecycle-unified-authorized-search-runtime.mjs",
+          "docs/decisions/DEC-229-archive-evidence-relations-media-lifecycle-unified-authorized-search.md",
+          "docs/security/THREAT_MODEL_33_R_ARCHIVE_EVIDENCE_RELATIONS_MEDIA_LIFECYCLE_UNIFIED_AUTHORIZED_SEARCH.md",
+          "artifacts/validation/33-R-archive-evidence-relations-media-lifecycle-unified-authorized-search-boundary.json",
+          "artifacts/validation/33-R-archive-evidence-relations-media-lifecycle-unified-authorized-search-contract.json",
+          "artifacts/validation/33-R-archive-evidence-relations-media-lifecycle-unified-authorized-search-runtime.json"
+        ],
+        "pathPrefixes": [],
+        "pathSuffixes": []
+      },
+      "dependentRecords": [
+        "config/33-r-archive-evidence-relations-media-lifecycle-unified-authorized-search-scope.json",
+        "config/33-r-archive-evidence-relations-media-lifecycle-unified-authorized-search-inventory.json",
+        "docs/decisions/DEC-229-archive-evidence-relations-media-lifecycle-unified-authorized-search.md",
+        "docs/security/THREAT_MODEL_33_R_ARCHIVE_EVIDENCE_RELATIONS_MEDIA_LIFECYCLE_UNIFIED_AUTHORIZED_SEARCH.md",
+        "artifacts/validation/33-R-archive-evidence-relations-media-lifecycle-unified-authorized-search-boundary.json",
+        "artifacts/validation/33-R-archive-evidence-relations-media-lifecycle-unified-authorized-search-contract.json",
+        "artifacts/validation/33-R-archive-evidence-relations-media-lifecycle-unified-authorized-search-runtime.json"
+      ],
+      "affectedVitestFiles": [],
+      "affectedCommandIds": [
+        "archiveEvidenceRelationsBoundary",
+        "archiveEvidenceRelationsContract",
+        "archiveEvidenceRelationsRuntime"
+      ],
+      "includeChangedTestFile": false
+    },
+    {
+      "id": "33-y-local-first-smart-home-energy-full-chain",
+      "match": {
+        "exactPaths": [
+          "config/33-y-local-first-smart-home-energy-scope.json",
+          "config/33-y-local-first-smart-home-energy-inventory.json",
+          "scripts/verify-33-y-local-first-smart-home-energy-boundary.mjs",
+          "scripts/verify-33-y-local-first-smart-home-energy-contract.mjs",
+          "scripts/verify-33-y-local-first-smart-home-energy-runtime.mjs",
+          "docs/decisions/DEC-236-local-first-smart-home-energy-adapters.md",
+          "docs/security/THREAT_MODEL_33_Y_LOCAL_FIRST_SMART_HOME_ENERGY.md",
+          "artifacts/validation/33-Y-local-first-smart-home-energy-boundary.json",
+          "artifacts/validation/33-Y-local-first-smart-home-energy-contract.json",
+          "artifacts/validation/33-Y-local-first-smart-home-energy-runtime.json"
+        ],
+        "pathPrefixes": [],
+        "pathSuffixes": []
+      },
+      "dependentRecords": [
+        "config/33-y-local-first-smart-home-energy-scope.json",
+        "config/33-y-local-first-smart-home-energy-inventory.json",
+        "docs/decisions/DEC-236-local-first-smart-home-energy-adapters.md",
+        "docs/security/THREAT_MODEL_33_Y_LOCAL_FIRST_SMART_HOME_ENERGY.md",
+        "artifacts/validation/33-Y-local-first-smart-home-energy-boundary.json",
+        "artifacts/validation/33-Y-local-first-smart-home-energy-contract.json",
+        "artifacts/validation/33-Y-local-first-smart-home-energy-runtime.json"
+      ],
+      "affectedVitestFiles": [
+        "apps/desktop/tests/smart-home-energy-data-store.test.ts",
+        "apps/desktop/tests/smart-home-energy-ipc-integration.test.ts",
+        "apps/desktop/tests/smart-home-energy-ui.test.ts"
+      ],
+      "affectedCommandIds": [
+        "smartHomeEnergyBoundary",
+        "smartHomeEnergyContract",
+        "smartHomeEnergyRuntime"
+      ],
+      "includeChangedTestFile": false
+    },
+    {
+      "id": "33-z-signed-plugin-external-provider-platform-full-chain",
+      "match": {
+        "exactPaths": [
+          "config/33-z-signed-plugin-external-provider-platform-scope.json",
+          "config/33-z-signed-plugin-external-provider-platform-inventory.json",
+          "scripts/verify-33-z-signed-plugin-external-provider-platform-boundary.mjs",
+          "scripts/verify-33-z-signed-plugin-external-provider-platform-contract.mjs",
+          "scripts/verify-33-z-signed-plugin-external-provider-platform-runtime.mjs",
+          "docs/decisions/DEC-237-signed-plugin-external-provider-platform.md",
+          "docs/security/THREAT_MODEL_33_Z_SIGNED_PLUGIN_EXTERNAL_PROVIDER_PLATFORM.md",
+          "artifacts/validation/33-Z-signed-plugin-external-provider-platform-boundary.json",
+          "artifacts/validation/33-Z-signed-plugin-external-provider-platform-contract.json",
+          "artifacts/validation/33-Z-signed-plugin-external-provider-platform-runtime.json"
+        ],
+        "pathPrefixes": [],
+        "pathSuffixes": []
+      },
+      "dependentRecords": [
+        "config/33-z-signed-plugin-external-provider-platform-scope.json",
+        "config/33-z-signed-plugin-external-provider-platform-inventory.json",
+        "docs/decisions/DEC-237-signed-plugin-external-provider-platform.md",
+        "docs/security/THREAT_MODEL_33_Z_SIGNED_PLUGIN_EXTERNAL_PROVIDER_PLATFORM.md",
+        "artifacts/validation/33-Z-signed-plugin-external-provider-platform-boundary.json",
+        "artifacts/validation/33-Z-signed-plugin-external-provider-platform-contract.json",
+        "artifacts/validation/33-Z-signed-plugin-external-provider-platform-runtime.json"
+      ],
+      "affectedVitestFiles": [],
+      "affectedCommandIds": [
+        "signedPluginProviderBoundary",
+        "signedPluginProviderContract",
+        "signedPluginProviderRuntime"
+      ],
+      "includeChangedTestFile": false
+    },
+    {
+      "id": "34-a-communication-policy-mls-foundation-full-chain",
+      "match": {
+        "exactPaths": [
+          "config/34-a-communication-policy-mls-foundation-scope.json",
+          "config/34-a-communication-policy-mls-foundation-inventory.json",
+          "scripts/verify-34-a-communication-policy-mls-foundation-boundary.mjs",
+          "scripts/verify-34-a-communication-policy-mls-foundation-contract.mjs",
+          "scripts/verify-34-a-communication-policy-mls-foundation-runtime.mjs",
+          "docs/decisions/DEC-238-communication-policy-mls-foundation.md",
+          "docs/security/THREAT_MODEL_34_A_COMMUNICATION_POLICY_MLS_FOUNDATION.md",
+          "artifacts/validation/34-A-communication-policy-mls-foundation-boundary.json",
+          "artifacts/validation/34-A-communication-policy-mls-foundation-contract.json",
+          "artifacts/validation/34-A-communication-policy-mls-foundation-runtime.json"
+        ],
+        "pathPrefixes": [],
+        "pathSuffixes": []
+      },
+      "dependentRecords": [
+        "config/34-a-communication-policy-mls-foundation-scope.json",
+        "config/34-a-communication-policy-mls-foundation-inventory.json",
+        "docs/decisions/DEC-238-communication-policy-mls-foundation.md",
+        "docs/security/THREAT_MODEL_34_A_COMMUNICATION_POLICY_MLS_FOUNDATION.md",
+        "artifacts/validation/34-A-communication-policy-mls-foundation-boundary.json",
+        "artifacts/validation/34-A-communication-policy-mls-foundation-contract.json",
+        "artifacts/validation/34-A-communication-policy-mls-foundation-runtime.json"
+      ],
+      "affectedVitestFiles": [],
+      "affectedCommandIds": [
+        "communicationPolicyMlsBoundary",
+        "communicationPolicyMlsContract",
+        "communicationPolicyMlsRuntime"
+      ],
+      "includeChangedTestFile": false
+    },
+    {
+      "id": "34-b-communication-messaging-lifecycle-full-chain",
+      "match": {
+        "exactPaths": [
+          "config/34-b-communication-messaging-lifecycle-privacy-presence-scope.json",
+          "config/34-b-communication-messaging-lifecycle-privacy-presence-inventory.json",
+          "scripts/verify-34-b-communication-messaging-lifecycle-privacy-presence-boundary.mjs",
+          "scripts/verify-34-b-communication-messaging-lifecycle-privacy-presence-contract.mjs",
+          "scripts/verify-34-b-communication-messaging-lifecycle-privacy-presence-runtime.mjs",
+          "docs/decisions/DEC-239-communication-messaging-lifecycle-privacy-presence.md",
+          "docs/security/THREAT_MODEL_34_B_COMMUNICATION_MESSAGING_LIFECYCLE_PRIVACY_PRESENCE.md",
+          "artifacts/validation/34-B-communication-messaging-lifecycle-privacy-presence-boundary.json",
+          "artifacts/validation/34-B-communication-messaging-lifecycle-privacy-presence-contract.json",
+          "artifacts/validation/34-B-communication-messaging-lifecycle-privacy-presence-runtime.json"
+        ],
+        "pathPrefixes": [],
+        "pathSuffixes": []
+      },
+      "dependentRecords": [
+        "config/34-b-communication-messaging-lifecycle-privacy-presence-scope.json",
+        "config/34-b-communication-messaging-lifecycle-privacy-presence-inventory.json",
+        "docs/decisions/DEC-239-communication-messaging-lifecycle-privacy-presence.md",
+        "docs/security/THREAT_MODEL_34_B_COMMUNICATION_MESSAGING_LIFECYCLE_PRIVACY_PRESENCE.md",
+        "artifacts/validation/34-B-communication-messaging-lifecycle-privacy-presence-boundary.json",
+        "artifacts/validation/34-B-communication-messaging-lifecycle-privacy-presence-contract.json",
+        "artifacts/validation/34-B-communication-messaging-lifecycle-privacy-presence-runtime.json"
+      ],
+      "affectedVitestFiles": [],
+      "affectedCommandIds": [
+        "communicationMessagingBoundary",
+        "communicationMessagingContract",
+        "communicationMessagingRuntime"
+      ],
+      "includeChangedTestFile": false
+    },
+    {
+      "id": "34-c-realtime-calling-media-accessible-ux-full-chain",
+      "match": {
+        "exactPaths": [
+          "config/34-c-realtime-calling-media-accessible-ux-scope.json",
+          "config/34-c-realtime-calling-media-accessible-ux-inventory.json",
+          "scripts/verify-34-c-realtime-calling-media-accessible-ux-boundary.mjs",
+          "scripts/verify-34-c-realtime-calling-media-accessible-ux-contract.mjs",
+          "scripts/verify-34-c-realtime-calling-media-accessible-ux-runtime.mjs",
+          "docs/decisions/DEC-240-realtime-calling-media-accessible-ux.md",
+          "docs/security/THREAT_MODEL_34_C_REALTIME_CALLING_MEDIA_ACCESSIBLE_UX.md",
+          "artifacts/validation/34-C-realtime-calling-media-accessible-ux-boundary.json",
+          "artifacts/validation/34-C-realtime-calling-media-accessible-ux-contract.json",
+          "artifacts/validation/34-C-realtime-calling-media-accessible-ux-runtime.json"
+        ],
+        "pathPrefixes": [],
+        "pathSuffixes": []
+      },
+      "dependentRecords": [
+        "config/34-c-realtime-calling-media-accessible-ux-scope.json",
+        "config/34-c-realtime-calling-media-accessible-ux-inventory.json",
+        "docs/decisions/DEC-240-realtime-calling-media-accessible-ux.md",
+        "docs/security/THREAT_MODEL_34_C_REALTIME_CALLING_MEDIA_ACCESSIBLE_UX.md",
+        "artifacts/validation/34-C-realtime-calling-media-accessible-ux-boundary.json",
+        "artifacts/validation/34-C-realtime-calling-media-accessible-ux-contract.json",
+        "artifacts/validation/34-C-realtime-calling-media-accessible-ux-runtime.json"
+      ],
+      "affectedVitestFiles": ["apps/desktop/tests/communication-realtime-calling-ui.test.ts"],
+      "affectedCommandIds": [
+        "realtimeCallingBoundary",
+        "realtimeCallingContract",
+        "realtimeCallingRuntime"
+      ],
+      "includeChangedTestFile": false
+    },
+    {
+      "id": "34-d-explicit-consent-recording-retention-full-chain",
+      "match": {
+        "exactPaths": [
+          "config/34-d-explicit-consent-recording-media-retention-scope.json",
+          "config/34-d-explicit-consent-recording-media-retention-inventory.json",
+          "scripts/verify-34-d-explicit-consent-recording-media-retention-boundary.mjs",
+          "scripts/verify-34-d-explicit-consent-recording-media-retention-contract.mjs",
+          "scripts/verify-34-d-explicit-consent-recording-media-retention-runtime.mjs",
+          "docs/decisions/DEC-241-explicit-consent-recording-media-retention.md",
+          "docs/security/THREAT_MODEL_34_D_EXPLICIT_CONSENT_RECORDING_MEDIA_RETENTION.md",
+          "artifacts/validation/34-D-explicit-consent-recording-media-retention-boundary.json",
+          "artifacts/validation/34-D-explicit-consent-recording-media-retention-contract.json",
+          "artifacts/validation/34-D-explicit-consent-recording-media-retention-runtime.json"
+        ],
+        "pathPrefixes": [],
+        "pathSuffixes": []
+      },
+      "dependentRecords": [
+        "config/34-d-explicit-consent-recording-media-retention-scope.json",
+        "config/34-d-explicit-consent-recording-media-retention-inventory.json",
+        "docs/decisions/DEC-241-explicit-consent-recording-media-retention.md",
+        "docs/security/THREAT_MODEL_34_D_EXPLICIT_CONSENT_RECORDING_MEDIA_RETENTION.md",
+        "artifacts/validation/34-D-explicit-consent-recording-media-retention-boundary.json",
+        "artifacts/validation/34-D-explicit-consent-recording-media-retention-contract.json",
+        "artifacts/validation/34-D-explicit-consent-recording-media-retention-runtime.json"
+      ],
+      "affectedVitestFiles": ["apps/desktop/tests/communication-recording-retention-ui.test.ts"],
+      "affectedCommandIds": [
+        "recordingRetentionBoundary",
+        "recordingRetentionContract",
+        "recordingRetentionRuntime"
+      ],
+      "includeChangedTestFile": false
+    },
+    {
+      "id": "34-f-family-meetings-decisions-consent-minutes-full-chain",
+      "match": {
+        "exactPaths": [
+          "config/34-f-family-meetings-decisions-consent-minutes-scope.json",
+          "config/34-f-family-meetings-decisions-consent-minutes-inventory.json",
+          "scripts/verify-34-f-family-meetings-decisions-consent-minutes-boundary.mjs",
+          "scripts/verify-34-f-family-meetings-decisions-consent-minutes-contract.mjs",
+          "scripts/verify-34-f-family-meetings-decisions-consent-minutes-runtime.mjs",
+          "docs/decisions/DEC-243-family-meetings-decisions-consent-minutes.md",
+          "docs/security/THREAT_MODEL_34_F_FAMILY_MEETINGS_DECISIONS_CONSENT_MINUTES.md",
+          "artifacts/validation/34-F-family-meetings-decisions-consent-minutes-boundary.json",
+          "artifacts/validation/34-F-family-meetings-decisions-consent-minutes-contract.json",
+          "artifacts/validation/34-F-family-meetings-decisions-consent-minutes-runtime.json"
+        ],
+        "pathPrefixes": [],
+        "pathSuffixes": []
+      },
+      "dependentRecords": [
+        "config/34-f-family-meetings-decisions-consent-minutes-scope.json",
+        "config/34-f-family-meetings-decisions-consent-minutes-inventory.json",
+        "docs/decisions/DEC-243-family-meetings-decisions-consent-minutes.md",
+        "docs/security/THREAT_MODEL_34_F_FAMILY_MEETINGS_DECISIONS_CONSENT_MINUTES.md",
+        "artifacts/validation/34-F-family-meetings-decisions-consent-minutes-boundary.json",
+        "artifacts/validation/34-F-family-meetings-decisions-consent-minutes-contract.json",
+        "artifacts/validation/34-F-family-meetings-decisions-consent-minutes-runtime.json"
+      ],
+      "affectedVitestFiles": ["apps/desktop/tests/family-meeting-ui.test.ts"],
+      "affectedCommandIds": [
+        "familyMeetingsBoundary",
+        "familyMeetingsContract",
+        "familyMeetingsRuntime"
+      ],
+      "includeChangedTestFile": false
+    },
+    {
+      "id": "governed-source-safety-net",
+      "match": {
+        "exactPaths": ["manifest.json", "package-lock.json", "package.json", "repository-metadata.json", "SHA256SUMS.txt", "tsconfig.base.json"],
+        "pathPrefixes": ["apps/", "packages/", "scripts/", "config/", "docs/", "artifacts/manifests/", "artifacts/validation/"],
+        "pathSuffixes": []
+      },
+      "dependentRecords": ["SHA256SUMS.txt", "manifest.json"],
+      "affectedVitestFiles": [
+        "apps/desktop/tests/mutation-release-evidence-producers.test.ts",
+        "apps/desktop/tests/mutation-release-readiness-contract.test.ts",
+        "apps/desktop/tests/operation-rule-check-policy.test.ts"
+      ],
+      "includeChangedTestFile": true
+    }
+  ],
+  "affectedCommandCatalog": {
+    "dataStoreSmoke": {
+      "phase": "full",
+      "mode": "EXACT_NODE_SCRIPT",
+      "executable": "node",
+      "arguments": ["scripts/verify-data-store-smoke.mjs", "--no-write"],
+      "nonMutating": true
+    },
+    "platformPolicyAstRuntime": {
+      "phase": "full",
+      "mode": "EXACT_NODE_SCRIPT",
+      "executable": "node",
+      "arguments": ["scripts/verify-32-q-ppk-021-platform-policy-ast-gate-runtime.mjs", "--no-write"],
+      "nonMutating": true
+    },
+    "ppk015NetworkEgressContract": {
+      "phase": "full",
+      "mode": "EXACT_NODE_SCRIPT",
+      "executable": "node",
+      "arguments": ["scripts/verify-32-k-ppk-015-network-egress-contract.mjs", "--no-write"],
+      "nonMutating": true
+    },
+    "ppk015NetworkEgressRuntime": {
+      "phase": "full",
+      "mode": "EXACT_NODE_SCRIPT",
+      "executable": "node",
+      "arguments": ["scripts/verify-32-k-ppk-015-network-egress-runtime.mjs", "--no-write"],
+      "nonMutating": true
+    },
+    "ppk022CapabilityManifestContract": {
+      "phase": "full",
+      "mode": "EXACT_NODE_SCRIPT",
+      "executable": "node",
+      "arguments": ["scripts/verify-32-r-ppk-022-capability-manifest-gate-contract.mjs", "--no-write"],
+      "nonMutating": true
+    },
+    "localGovernedOcrBoundary": {
+      "phase": "full",
+      "mode": "EXACT_NODE_SCRIPT",
+      "executable": "node",
+      "arguments": ["scripts/verify-33-q-local-governed-ocr-derived-data-pipeline-boundary.mjs", "--no-write"],
+      "nonMutating": true
+    },
+    "localGovernedOcrContract": {
+      "phase": "full",
+      "mode": "EXACT_NODE_SCRIPT",
+      "executable": "node",
+      "arguments": ["scripts/verify-33-q-local-governed-ocr-derived-data-pipeline-contract.mjs", "--no-write"],
+      "nonMutating": true
+    },
+    "localGovernedOcrRuntime": {
+      "phase": "full",
+      "mode": "EXACT_NODE_SCRIPT",
+      "executable": "node",
+      "arguments": ["scripts/verify-33-q-local-governed-ocr-derived-data-pipeline-runtime.mjs", "--no-write"],
+      "nonMutating": true
+    },
+    "archiveEvidenceRelationsBoundary": {
+      "phase": "full",
+      "mode": "EXACT_NODE_SCRIPT",
+      "executable": "node",
+      "arguments": ["scripts/verify-33-r-archive-evidence-relations-media-lifecycle-unified-authorized-search-boundary.mjs", "--no-write"],
+      "nonMutating": true
+    },
+    "archiveEvidenceRelationsContract": {
+      "phase": "full",
+      "mode": "EXACT_NODE_SCRIPT",
+      "executable": "node",
+      "arguments": ["scripts/verify-33-r-archive-evidence-relations-media-lifecycle-unified-authorized-search-contract.mjs", "--no-write"],
+      "nonMutating": true
+    },
+    "archiveEvidenceRelationsRuntime": {
+      "phase": "full",
+      "mode": "EXACT_NODE_SCRIPT",
+      "executable": "node",
+      "arguments": ["scripts/verify-33-r-archive-evidence-relations-media-lifecycle-unified-authorized-search-runtime.mjs", "--no-write"],
+      "nonMutating": true
+    },
+    "smartHomeEnergyBoundary": {
+      "phase": "full",
+      "mode": "EXACT_NODE_SCRIPT",
+      "executable": "node",
+      "arguments": ["scripts/verify-33-y-local-first-smart-home-energy-boundary.mjs", "--no-write"],
+      "nonMutating": true
+    },
+    "smartHomeEnergyContract": {
+      "phase": "full",
+      "mode": "EXACT_NODE_SCRIPT",
+      "executable": "node",
+      "arguments": ["scripts/verify-33-y-local-first-smart-home-energy-contract.mjs", "--no-write"],
+      "nonMutating": true
+    },
+    "smartHomeEnergyRuntime": {
+      "phase": "full",
+      "mode": "EXACT_NODE_SCRIPT",
+      "executable": "node",
+      "arguments": ["scripts/verify-33-y-local-first-smart-home-energy-runtime.mjs", "--no-write"],
+      "nonMutating": true
+    },
+    "signedPluginProviderBoundary": {
+      "phase": "full",
+      "mode": "EXACT_NODE_SCRIPT",
+      "executable": "node",
+      "arguments": ["scripts/verify-33-z-signed-plugin-external-provider-platform-boundary.mjs", "--no-write"],
+      "nonMutating": true
+    },
+    "signedPluginProviderContract": {
+      "phase": "full",
+      "mode": "EXACT_NODE_SCRIPT",
+      "executable": "node",
+      "arguments": ["scripts/verify-33-z-signed-plugin-external-provider-platform-contract.mjs", "--no-write"],
+      "nonMutating": true
+    },
+    "signedPluginProviderRuntime": {
+      "phase": "full",
+      "mode": "EXACT_NODE_SCRIPT",
+      "executable": "node",
+      "arguments": ["scripts/verify-33-z-signed-plugin-external-provider-platform-runtime.mjs", "--no-write"],
+      "nonMutating": true
+    },
+    "communicationPolicyMlsBoundary": {
+      "phase": "full",
+      "mode": "EXACT_NODE_SCRIPT",
+      "executable": "node",
+      "arguments": ["scripts/verify-34-a-communication-policy-mls-foundation-boundary.mjs", "--no-write"],
+      "nonMutating": true
+    },
+    "communicationPolicyMlsContract": {
+      "phase": "full",
+      "mode": "EXACT_NODE_SCRIPT",
+      "executable": "node",
+      "arguments": ["scripts/verify-34-a-communication-policy-mls-foundation-contract.mjs", "--no-write"],
+      "nonMutating": true
+    },
+    "communicationPolicyMlsRuntime": {
+      "phase": "full",
+      "mode": "EXACT_NODE_SCRIPT",
+      "executable": "node",
+      "arguments": ["scripts/verify-34-a-communication-policy-mls-foundation-runtime.mjs", "--no-write"],
+      "nonMutating": true
+    },
+    "communicationMessagingBoundary": {
+      "phase": "full",
+      "mode": "EXACT_NODE_SCRIPT",
+      "executable": "node",
+      "arguments": ["scripts/verify-34-b-communication-messaging-lifecycle-privacy-presence-boundary.mjs", "--no-write"],
+      "nonMutating": true
+    },
+    "communicationMessagingContract": {
+      "phase": "full",
+      "mode": "EXACT_NODE_SCRIPT",
+      "executable": "node",
+      "arguments": ["scripts/verify-34-b-communication-messaging-lifecycle-privacy-presence-contract.mjs", "--no-write"],
+      "nonMutating": true
+    },
+    "communicationMessagingRuntime": {
+      "phase": "full",
+      "mode": "EXACT_NODE_SCRIPT",
+      "executable": "node",
+      "arguments": ["scripts/verify-34-b-communication-messaging-lifecycle-privacy-presence-runtime.mjs", "--no-write"],
+      "nonMutating": true
+    },
+    "realtimeCallingBoundary": {
+      "phase": "full",
+      "mode": "EXACT_NODE_SCRIPT",
+      "executable": "node",
+      "arguments": ["scripts/verify-34-c-realtime-calling-media-accessible-ux-boundary.mjs", "--no-write"],
+      "nonMutating": true
+    },
+    "realtimeCallingContract": {
+      "phase": "full",
+      "mode": "EXACT_NODE_SCRIPT",
+      "executable": "node",
+      "arguments": ["scripts/verify-34-c-realtime-calling-media-accessible-ux-contract.mjs", "--no-write"],
+      "nonMutating": true
+    },
+    "realtimeCallingRuntime": {
+      "phase": "full",
+      "mode": "EXACT_NODE_SCRIPT",
+      "executable": "node",
+      "arguments": ["scripts/verify-34-c-realtime-calling-media-accessible-ux-runtime.mjs", "--no-write"],
+      "nonMutating": true
+    },
+    "recordingRetentionBoundary": {
+      "phase": "full",
+      "mode": "EXACT_NODE_SCRIPT",
+      "executable": "node",
+      "arguments": ["scripts/verify-34-d-explicit-consent-recording-media-retention-boundary.mjs", "--no-write"],
+      "nonMutating": true
+    },
+    "recordingRetentionContract": {
+      "phase": "full",
+      "mode": "EXACT_NODE_SCRIPT",
+      "executable": "node",
+      "arguments": ["scripts/verify-34-d-explicit-consent-recording-media-retention-contract.mjs", "--no-write"],
+      "nonMutating": true
+    },
+    "recordingRetentionRuntime": {
+      "phase": "full",
+      "mode": "EXACT_NODE_SCRIPT",
+      "executable": "node",
+      "arguments": ["scripts/verify-34-d-explicit-consent-recording-media-retention-runtime.mjs", "--no-write"],
+      "nonMutating": true
+    },
+    "familyMeetingsBoundary": {
+      "phase": "full",
+      "mode": "EXACT_NODE_SCRIPT",
+      "executable": "node",
+      "arguments": ["scripts/verify-34-f-family-meetings-decisions-consent-minutes-boundary.mjs", "--no-write"],
+      "nonMutating": true
+    },
+    "familyMeetingsContract": {
+      "phase": "full",
+      "mode": "EXACT_NODE_SCRIPT",
+      "executable": "node",
+      "arguments": ["scripts/verify-34-f-family-meetings-decisions-consent-minutes-contract.mjs", "--no-write"],
+      "nonMutating": true
+    },
+    "familyMeetingsRuntime": {
+      "phase": "full",
+      "mode": "EXACT_NODE_SCRIPT",
+      "executable": "node",
+      "arguments": ["scripts/verify-34-f-family-meetings-decisions-consent-minutes-runtime.mjs", "--no-write"],
+      "nonMutating": true
+    }
+  },
+  "commandMatrix": {
+    "targetedVitest": {
+      "phase": "targeted",
+      "mode": "AFFECTED_EXACT_FILES",
+      "executable": "node",
+      "argumentPrefix": ["node_modules/vitest/vitest.mjs", "run"],
+      "fixedArguments": ["--maxWorkers=1", "--reporter=json"],
+      "nonMutating": true
+    },
+    "fullVitest": {
+      "phase": "full",
+      "mode": "UNFILTERED",
+      "executable": "node",
+      "arguments": ["node_modules/vitest/vitest.mjs", "run", "--maxWorkers=1", "--reporter=json"],
+      "nonMutating": true
+    },
+    "rootTypecheck": {
+      "phase": "full",
+      "mode": "ALWAYS",
+      "executable": "node",
+      "arguments": ["node_modules/typescript/bin/tsc", "--noEmit"],
+      "nonMutating": true
+    },
+    "changedMjsSyntax": {
+      "phase": "full",
+      "mode": "EACH_CHANGED_SUFFIX",
+      "pathSuffix": ".mjs",
+      "executable": "node",
+      "argumentPrefix": ["--check"],
+      "nonMutating": true
+    },
+    "changedPs1Parser": {
+      "phase": "full",
+      "mode": "EACH_CHANGED_SUFFIX",
+      "pathSuffix": ".ps1",
+      "executable": "powershell.exe",
+      "arguments": ["-NoProfile", "-NonInteractive", "-Command", "& { param([string]$Target) $ErrorActionPreference='Stop'; $tokens=$null; $errors=$null; [void][System.Management.Automation.Language.Parser]::ParseFile($Target,[ref]$tokens,[ref]$errors); if($errors.Count -ne 0){$errors | ForEach-Object { [Console]::Error.WriteLine($_.Message) }; exit 1} }", "{changedPath}"],
+      "nonMutating": true
+    }
+  }
+}

@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { inspectNetworkEgressStaticRatchet, scanNetworkEgressBoundary } from './verify-network-egress-boundary.mjs';
 
+const noWrite = process.argv.includes('--no-write');
 const checks = [];
 const failures = [];
 const check = (name, condition, detail = undefined) => {
@@ -141,8 +142,8 @@ check('main has no direct electron network fetch or raw client secret path', !so
 check('typed IPC remains posture-only and no-cache', sources.main.includes("registerIpcHandler('system:getNetworkEgressBoundary'")
   && sources.ipcPolicy.includes("case 'system:getNetworkEgressBoundary':")
   && sources.sensitiveCache.includes("'system:getNetworkEgressBoundary'"));
-check('system UI states revocation OIDC token and JWKS allowlist truth', includesAll(sources.renderer, [
-  'PPK-015', 'OIDC token', 'JWKS', 'directPrimitiveExceptionCount'
+check('system UI states revocation identity-token and verification-key allowlist truth', includesAll(sources.renderer, [
+  'Ağ çıkış güvenliği', 'Yalnız kayıtlı iptal listesi, kimlik belirteci ve doğrulama anahtarı uç noktaları', 'directPrimitiveExceptionCount'
 ]));
 
 check('source gate scans the exact current production inventory', sourceScan.zones === ratchet.currentBoundary.productionSourceZones
@@ -211,8 +212,10 @@ const report = {
   requirementCompletionClaimed: failures.length === 0,
   generatedAt: new Date().toISOString()
 };
-await mkdir('artifacts/validation', { recursive: true });
-await writeFile('artifacts/validation/32-K-ppk-015-network-egress-contract.json', `${JSON.stringify(report, null, 2)}\n`);
+if (!noWrite) {
+  await mkdir('artifacts/validation', { recursive: true });
+  await writeFile('artifacts/validation/32-K-ppk-015-network-egress-contract.json', `${JSON.stringify(report, null, 2)}\n`);
+}
 if (failures.length) {
   console.error(`32-K PPK-015 historical/current contract: FAIL (${failures.length}/${checks.length}).`);
   for (const failure of failures) console.error(`- ${failure}`);

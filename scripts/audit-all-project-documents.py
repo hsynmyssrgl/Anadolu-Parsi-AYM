@@ -22,6 +22,13 @@ SELF_GENERATED_OUTPUTS = {
     (REPO_ROOT / "docs" / "current" / "MASTER_PROJE_DOKUMANTASYONU_GUNCEL_17.08.2026_V1.docx").resolve(),
     (REPO_ROOT / "docs" / "current" / "MASTER_PROJE_DOKUMANTASYONU_GUNCEL_17.08.2026_V1.pdf").resolve(),
 }
+ACTIVE_DOCUMENT_SET = REPO_ROOT / "config" / "active-document-set.json"
+if ACTIVE_DOCUMENT_SET.exists():
+    current_master = json.loads(ACTIVE_DOCUMENT_SET.read_text(encoding="utf-8")).get("currentMasterDocumentation", {})
+    for key in ("docx", "pdf"):
+        relative_path = current_master.get(key)
+        if relative_path:
+            SELF_GENERATED_OUTPUTS.add((REPO_ROOT / relative_path).resolve())
 
 DOCUMENT_EXTENSIONS = {
     ".doc", ".docx", ".pdf", ".rtf", ".odt",
@@ -181,7 +188,7 @@ report = {
     "root": str(PROJECT_ROOT),
     "generatedAt": datetime.now(timezone.utc).isoformat(),
     "exclusions": sorted(EXCLUDED_DIRECTORY_NAMES),
-    "scopeNote": "Generated current-output folder and this audit's own generated files are excluded to prevent self-referential inventory; final DOCX/PDF/package contents are separately checksummed after packaging.",
+    "scopeNote": "This audit's own outputs and the active current-master DOCX/PDF are excluded to prevent a self-referential hash cycle; current-master files are validated by their dedicated verifier and artifact/source manifests.",
     "documentFileCount": len(files),
     "readableCount": readable_count,
     "unreadableCount": len(unreadable),

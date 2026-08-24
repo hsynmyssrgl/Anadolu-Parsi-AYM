@@ -28,11 +28,18 @@ describe('Windows installer retention policy', () => {
     };
     for (const scriptName of ['package:win:local-test', 'package:win:dir']) {
       const script = manifest.scripts[scriptName] ?? '';
+      expect(script).not.toMatch(/allocate-monthly-release-version|release:allocate-version/u);
       expect(script).toContain('npm --prefix ../.. run build:packages');
       expect(script.indexOf('npm --prefix ../.. run build:packages')).toBeLessThan(
         script.indexOf('npm run build'),
       );
     }
+    expect(manifest.scripts['package:win']).not.toMatch(/allocate-monthly-release-version|release:allocate-version/u);
+    const signedSource = await readFile('apps/desktop/scripts/build-signed-windows-release.mjs', 'utf8');
+    expect(signedSource).not.toContain('allocate-monthly-release-version.mjs');
+    expect(signedSource.indexOf('assertPreallocatedReleaseIdentity')).toBeLessThan(
+      signedSource.indexOf('clean-stale-windows-installers.mjs'),
+    );
   });
 
   it('rejects installer artifacts from an older visible version', async () => {

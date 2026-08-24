@@ -3427,8 +3427,8 @@ function createWindow(): void {
   const window = new BrowserWindow({
     width: 1600,
     height: 980,
-    minWidth: 900,
-    minHeight: 640,
+    minWidth: 760,
+    minHeight: 720,
     icon: join(currentDir, 'window-icon.ico'),
     titleBarStyle: 'hidden',
     titleBarOverlay: {

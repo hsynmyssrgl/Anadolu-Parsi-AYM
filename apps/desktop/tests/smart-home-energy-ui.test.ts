@@ -28,8 +28,9 @@ describe('33-Y smart home and energy renderer surface', () => {
 
   it('enforces visible time-bounded consent and states every no-claim boundary', () => {
     for (const marker of ['min={5}', 'max={60}', 'Number.isInteger(minutes)', "purpose==='doorbell_answer'", 'Gizli gözetim yasaktır',
-      'Ham kamera/ses saklanmaz', 'varsayılan kapalı', 'Matter eşleme', 'canlı sağlayıcı bağlantısı',
-      'cihaz kontrolü', 'bulut ve haricî teslimat bu pakette yapılmadı']) expect(panel).toContain(marker);
+      'Ham kamera/ses saklanmaz', 'varsayılan kapalı', 'Akıllı ev eşleme', 'canlı hizmet bağlantısı',
+      'cihaz kontrolü', 'bulut ve haricî teslimat bu sürümde kullanılmaz']) expect(panel).toContain(marker);
+    for(const technical of ['Local and fail-closed','cihaz metadatası','fail‑closed','retention kurtarması','{device.providerId}','{device.adapterId}'])expect(panel).not.toContain(technical);
     expect(panel).not.toMatch(/Matter cihazlarını eşler|kamerayı uzaktan açar|buluta yükler|sağlayıcı kullanılabilirliği garanti/iu);
   });
 

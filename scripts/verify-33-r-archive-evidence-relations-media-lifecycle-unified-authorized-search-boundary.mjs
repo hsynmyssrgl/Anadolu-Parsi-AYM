@@ -63,7 +63,7 @@ const definitions = [
     ["'archive:listRelationEvidence'", "'archive:listRelationEvidenceHistory'", "'archive:addRelationEvidence'",
       "'archive:removeRelationEvidence'", "'archive:addVersion'", "'unifiedSearch:search'"])],
   ['renderer discloses immutable history and no filesystem authority', hasAll(renderer,
-    ['Kaldırma fiziksel geçmiş silmez', 'Dosya yolu yalnız ana süreç seçicisinde kalır', 'politika filtreli ve tam kaynak yanıtı'])],
+    ['Kaldırma işlemi önceki kopyaları kendiliğinden yok etmez', 'Hesap, sahip ve dosya konumu gibi özel bilgiler bu ekrana aktarılmaz', 'politika filtreli ve tam kaynak yanıtı'])],
   ['truth and manual evidence remain fail honest', scope.truth?.requirementsClosed === false
     && scope.truth?.countsAsRequirementPass === false && inventory.countsAsRequirementPass === false
     && manualNotRun && scope.manualEvidence?.certificationClaimed === false && scope.persistentReceiptStatus === 'NOT_RUN']

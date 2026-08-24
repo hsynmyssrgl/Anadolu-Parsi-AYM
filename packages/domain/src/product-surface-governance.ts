@@ -1,39 +1,40 @@
 export const PRODUCT_NAVIGATION_GROUPS = Object.freeze([
-  Object.freeze({ id: 'main', label: 'Ana Merkez' }),
-  Object.freeze({ id: 'family-memory', label: 'Aile Hafızası' }),
-  Object.freeze({ id: 'life', label: 'Yaşam' }),
-  Object.freeze({ id: 'privacy-system', label: 'Gizlilik ve Sistem' })
+  Object.freeze({ id: 'main', label: 'Ana Merkez', englishLabel: 'Main Center' }),
+  Object.freeze({ id: 'family-memory', label: 'Aile Hafızası', englishLabel: 'Family Memory' }),
+  Object.freeze({ id: 'life', label: 'Yaşam', englishLabel: 'Life' }),
+  Object.freeze({ id: 'privacy-system', label: 'Gizlilik ve Sistem', englishLabel: 'Privacy and System' })
 ] as const);
 
 export type ProductNavigationGroupId = (typeof PRODUCT_NAVIGATION_GROUPS)[number]['id'];
 export type ProductSurfaceKind = 'product-module' | 'governance-surface';
 
 export const PRODUCT_NAVIGATION_ROUTES = Object.freeze([
-  Object.freeze({ id: 'dashboard', label: 'Gösterge Paneli', icon: '⌂', groupId: 'main', kind: 'product-module' }),
-  Object.freeze({ id: 'family', label: 'Aile', icon: '♙', groupId: 'family-memory', kind: 'product-module' }),
-  Object.freeze({ id: 'households', label: 'Haneler ve Dallar', icon: '⌑', groupId: 'family-memory', kind: 'product-module' }),
-  Object.freeze({ id: 'people-lifecycle', label: 'Kişi Profilleri', icon: '♙', groupId: 'family-memory', kind: 'product-module' }),
-  Object.freeze({ id: 'tree', label: 'Soy Ağacı', icon: '⌘', groupId: 'family-memory', kind: 'product-module' }),
-  Object.freeze({ id: 'timeline', label: 'Zaman Tüneli', icon: '◷', groupId: 'family-memory', kind: 'product-module' }),
-  Object.freeze({ id: 'important-days', label: 'Önemli Günler', icon: '□', groupId: 'family-memory', kind: 'product-module' }),
-  Object.freeze({ id: 'archive', label: 'Arşiv', icon: '▣', groupId: 'family-memory', kind: 'product-module' }),
-  Object.freeze({ id: 'finance', label: 'Finans', icon: '₺', groupId: 'life', kind: 'product-module' }),
-  Object.freeze({ id: 'health', label: 'Sağlık', icon: '♡', groupId: 'life', kind: 'product-module' }),
-  Object.freeze({ id: 'life-center', label: 'Yaşam Merkezi', icon: '◇', groupId: 'life', kind: 'product-module' }),
-  Object.freeze({ id: 'automation', label: 'Bildirim ve Otomasyon', icon: '◉', groupId: 'life', kind: 'product-module' }),
-  Object.freeze({ id: 'reports', label: 'Raporlama', icon: '▤', groupId: 'life', kind: 'product-module' }),
-  Object.freeze({ id: 'location', label: 'Konum', icon: '⌖', groupId: 'life', kind: 'product-module' }),
-  Object.freeze({ id: 'invitations', label: 'Davetler', icon: '✉', groupId: 'privacy-system', kind: 'product-module' }),
-  Object.freeze({ id: 'data-repair', label: 'Veri Onarma Merkezi', icon: '⌁', groupId: 'privacy-system', kind: 'governance-surface' }),
-  Object.freeze({ id: 'permissions', label: 'Bağlamsal Yetkiler', icon: '♧', groupId: 'privacy-system', kind: 'governance-surface' }),
-  Object.freeze({ id: 'ai', label: 'Yapay Zekâ', icon: '✣', groupId: 'privacy-system', kind: 'product-module' }),
-  Object.freeze({ id: 'legacy', label: 'Dijital Miras', icon: '♜', groupId: 'privacy-system', kind: 'product-module' }),
-  Object.freeze({ id: 'windows-hello', label: 'Windows Hello', icon: '◎', groupId: 'privacy-system', kind: 'governance-surface' }),
-  Object.freeze({ id: 'security', label: 'Güvenlik Merkezi', icon: '⛨', groupId: 'privacy-system', kind: 'governance-surface' }),
-  Object.freeze({ id: 'settings', label: 'Sistem ve Bakım', icon: '⚙', groupId: 'privacy-system', kind: 'governance-surface' })
+  Object.freeze({ id: 'dashboard', label: 'Gösterge Paneli', englishLabel: 'Dashboard', icon: '⌂', groupId: 'main', kind: 'product-module' }),
+  Object.freeze({ id: 'family', label: 'Aile', englishLabel: 'Family', icon: '♙', groupId: 'family-memory', kind: 'product-module' }),
+  Object.freeze({ id: 'households', label: 'Haneler ve Dallar', englishLabel: 'Households and Branches', icon: '⌑', groupId: 'family-memory', kind: 'product-module' }),
+  Object.freeze({ id: 'people-lifecycle', label: 'Kişi Profilleri', englishLabel: 'Person Profiles', icon: '♙', groupId: 'family-memory', kind: 'product-module' }),
+  Object.freeze({ id: 'tree', label: 'Soy Ağacı', englishLabel: 'Family Tree', icon: '⌘', groupId: 'family-memory', kind: 'product-module' }),
+  Object.freeze({ id: 'timeline', label: 'Zaman Tüneli', englishLabel: 'Timeline', icon: '◷', groupId: 'family-memory', kind: 'product-module' }),
+  Object.freeze({ id: 'important-days', label: 'Önemli Günler', englishLabel: 'Important Dates', icon: '□', groupId: 'family-memory', kind: 'product-module' }),
+  Object.freeze({ id: 'archive', label: 'Arşiv', englishLabel: 'Archive', icon: '▣', groupId: 'family-memory', kind: 'product-module' }),
+  Object.freeze({ id: 'finance', label: 'Finans', englishLabel: 'Finance', icon: '₺', groupId: 'life', kind: 'product-module' }),
+  Object.freeze({ id: 'health', label: 'Sağlık', englishLabel: 'Health', icon: '♡', groupId: 'life', kind: 'product-module' }),
+  Object.freeze({ id: 'life-center', label: 'Yaşam Merkezi', englishLabel: 'Life Center', icon: '◇', groupId: 'life', kind: 'product-module' }),
+  Object.freeze({ id: 'automation', label: 'Bildirim ve Otomasyon', englishLabel: 'Notifications and Automation', icon: '◉', groupId: 'life', kind: 'product-module' }),
+  Object.freeze({ id: 'reports', label: 'Raporlama', englishLabel: 'Reports', icon: '▤', groupId: 'life', kind: 'product-module' }),
+  Object.freeze({ id: 'location', label: 'Konum', englishLabel: 'Location', icon: '⌖', groupId: 'life', kind: 'product-module' }),
+  Object.freeze({ id: 'invitations', label: 'Davetler', englishLabel: 'Invitations', icon: '✉', groupId: 'privacy-system', kind: 'product-module' }),
+  Object.freeze({ id: 'data-repair', label: 'Veri Onarma Merkezi', englishLabel: 'Data Repair Center', icon: '⌁', groupId: 'privacy-system', kind: 'governance-surface' }),
+  Object.freeze({ id: 'permissions', label: 'Bağlamsal Yetkiler', englishLabel: 'Contextual Permissions', icon: '♧', groupId: 'privacy-system', kind: 'governance-surface' }),
+  Object.freeze({ id: 'ai', label: 'Yapay Zekâ', englishLabel: 'Artificial Intelligence', icon: '✣', groupId: 'privacy-system', kind: 'product-module' }),
+  Object.freeze({ id: 'legacy', label: 'Dijital Miras', englishLabel: 'Digital Legacy', icon: '♜', groupId: 'privacy-system', kind: 'product-module' }),
+  Object.freeze({ id: 'windows-hello', label: 'Windows Hello', englishLabel: 'Windows Hello', icon: '◎', groupId: 'privacy-system', kind: 'governance-surface' }),
+  Object.freeze({ id: 'security', label: 'Güvenlik Merkezi', englishLabel: 'Security Center', icon: '⛨', groupId: 'privacy-system', kind: 'governance-surface' }),
+  Object.freeze({ id: 'settings', label: 'Sistem ve Bakım', englishLabel: 'System and Maintenance', icon: '⚙', groupId: 'privacy-system', kind: 'governance-surface' })
 ] as const satisfies readonly {
   readonly id: string;
   readonly label: string;
+  readonly englishLabel: string;
   readonly icon: string;
   readonly groupId: ProductNavigationGroupId;
   readonly kind: ProductSurfaceKind;

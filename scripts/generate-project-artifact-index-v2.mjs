@@ -1,10 +1,14 @@
 import { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
 import { extname } from 'node:path';
 import { classifyPath, csvEscape, DOCUMENT_EXTENSIONS, SELF_INDEX_PATHS, sha256File, walkFiles, readJson } from './lib/governance-utils.mjs';
 const release=(await readJson('config/release-ledger.json')).current;
 const activeSet=await readJson('config/active-document-set.json');
 const activeAuthority=new Set(activeSet.authorityOrder??[]);
-const paths=await walkFiles('.');
+const gitIndex=process.argv.includes('--git-index');
+if(process.argv.slice(2).some(arg=>arg!=='--git-index'))throw new Error('Only --git-index is supported.');
+const gitPaths=()=>execFileSync('git',['-c',`safe.directory=${process.cwd().replaceAll('\\','/')}`,'ls-files','-z'],{cwd:process.cwd()}).toString('utf8').split('\0').filter(Boolean).sort();
+const paths=gitIndex?gitPaths():await walkFiles('.');
 const entries=[];
 for(const path of paths){
   if(SELF_INDEX_PATHS.has(path)) continue;

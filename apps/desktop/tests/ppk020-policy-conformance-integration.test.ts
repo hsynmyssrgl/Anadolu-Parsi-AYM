@@ -51,7 +51,8 @@ describe('32-P PPK-020 desktop content-free conformance status boundary', () => 
     const renderer = readFileSync('apps/desktop/src/renderer/App.tsx', 'utf8');
     expect(preload).toContain("invoke('system:getPolicyConformanceSuiteBoundary')");
     expect(global).toContain('getPolicyConformanceSuiteBoundary():Promise<PolicyConformanceSuiteBoundaryView>');
-    expect(renderer).toContain('Native Apple çalıştırması tamamlandı iddiası yoktur');
-    expect(renderer).toContain('profile-only/not-deployed');
+    expect(renderer).toContain('title="Windows, Apple profilleri ve hizmetler için tek doğrulama matrisi"');
+    expect(renderer).toContain('Yerel Apple çalıştırması tamamlandı iddiası yoktur');
+    expect(renderer).toContain('yalnız profilli ve yayımlanmamış hedef');
   });
 });

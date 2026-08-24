@@ -25,9 +25,9 @@ from reportlab.lib.units import inch
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import (
+    CondPageBreak,
     Image,
     KeepTogether,
-    LongTable,
     PageBreak,
     Paragraph,
     SimpleDocTemplate,
@@ -37,11 +37,11 @@ from reportlab.platypus import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
-AS_OF = "20.08.2026"
-VERSION = "GUNCEL-2026-08-20-V4"
+AS_OF = "24.08.2026"
+VERSION = "GUNCEL-2026-08-24-V5"
 SOURCE = ROOT / "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md"
-DOCX_OUT = ROOT / "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_20.08.2026_V4.docx"
-PDF_OUT = ROOT / "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_20.08.2026_V4.pdf"
+DOCX_OUT = ROOT / "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.docx"
+PDF_OUT = ROOT / "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.pdf"
 LOGO = ROOT / "apps/desktop/src/renderer/assets/brand-mark.png"
 
 BRONZE = "7C4D20"
@@ -74,9 +74,17 @@ def first_heading(path: Path) -> str:
 
 
 def status_from_markdown(path: Path) -> str:
-    text = path.read_text(encoding="utf-8-sig", errors="replace")
-    match = re.search(r"(?:Durum|Status)\s*:\s*([^\n]+)", text, flags=re.I)
-    return match.group(1).strip() if match else "KAYITLI"
+    for line in path.read_text(encoding="utf-8-sig", errors="replace").splitlines():
+        normalized = line.replace("**", "").strip()
+        match = re.match(r"^(?:[-•]\s*)?(?:Durum|Status)\s*:\s*(.+)$", normalized, flags=re.I)
+        if not match:
+            continue
+        value = match.group(1).strip().strip("`").strip()
+        if ". " in value:
+            value = value.split(". ", 1)[0].strip()
+        value = value.replace("`", "").strip()
+        return value or "KAYITLI"
+    return "KAYITLI"
 
 
 def decision_number(path: Path) -> int:
@@ -201,6 +209,12 @@ DRIFT_FIXES = [
     "Kanonik kural sicili V16/228/207 durumuna yükseltildi; tam ParsYuva Aile Yaşam Merkezi adı, sürüm paleti, parola görünürlüğü, installer yaşam döngüsü, aylık build, deneme/Gold, kaldırma-sıfırlama, tepsi ve migration/rollback kararları fail-closed kapılara bağlandı.",
     "DEC-261 ile AYM kısaltması güncel kullanıcı yüzeylerinden kaldırıldı; yalnız tarihsel kayıtlar ve değiştirilemeyen teknik uyumluluk yolları güncel marka olmadığı açıkça belirtilerek korunur.",
     "DEC-262 ile Windows kurulum hedefi C:\\Program Files\\PPT\\ParsYuva, ana program ve kısayol adı ParsYuva, teslim adı ParsYuva-<Kanal>-GG.AA.YYYY.NN.exe olarak sabitlendi.",
+    "DEC-271 ile güncel kanal program kökleri legacy dizinin dışındaki C:\\Program Files\\PPT\\ParsYuva-<Kanal> kardeş yollarına taşındı; AppData ParsYuva/<Kanal> ve diğer kanal yalıtımı korunurken otomatik legacy veri migration veya silme yasaklandı.",
+    "DEC-272 ile sürüm tahsisi exact expected release ID alan açık tek mutasyon oldu; preview yazmaz, uyuşmazlık yazım ve temizliğe geçmeden durur, signed/local/dir yalnız önceden tahsisli exact current kimliğini tüketir.",
+    "DEC-273 ile Windows installer teslimi metadata-only kanonik UAT110 gerçek N→N+1 ve same-version maintenance koruması ile source/package/expected release bağlı schema2 kurulu ön yüz UAT111 makbuzuna bağlandı.",
+    "DEC-274/PR-239 ile Windows teslim zinciri canlı PR-235 readback, schema2 package provenance, canlı sibling predecessor, installer-experience V2, UAT110 V2, parent-run bağlı UAT111 V3 ve final V3 geri-okuma kapılarıyla adversarial olarak güçlendirildi.",
+    "PR-235 ile en küçük değişiklik dahi exact değişen yol, bağımlı kural/karar/belge/manifest/ratchet/test/UAT kayıtları ve aynı temiz committe hedefli-tam-bütünlük kanıtlarıyla fail-closed eşlemeye bağlandı.",
+    "PR-239 UAT111 kapsamı Git'te izlenen TypeScript kanonik rota otoritesi, tüm görünür ve uygun kontrollerin dinamik outcome matrisi, gerçek native CANCEL/ACCEPT ve exclusive reparse-korumalı kanıt köküyle güncellendi.",
 ]
 
 
@@ -223,8 +237,8 @@ def build_markdown() -> str:
         f"- Tarih: **{AS_OF}**",
         f"- Görünür ürün sürümü: **{ledger['release']}**",
         f"- Kaynak HEAD: `{git_head()}`",
-        "- Statü: **ACTIVE_WORKING_REFERENCE_NOT_BUILD_CLOSURE**",
-        "- Kararlar: **DEC-250–DEC-262**",
+        "- Statü: **ACTIVE_CURRENT_MASTER_REFERENCE**",
+        "- Kararlar: **DEC-250–DEC-275**",
         "",
         "> Bu sürüm geçmiş PDF/DOCX ve build kapanış belgelerinin üzerine yazmaz. Yerel PASS ile dış kabul kanıtını ayırır; NOT_RUN/PARTIAL/BLOCKED sonuçlarını tamamlanmış göstermez.",
         "",
@@ -337,6 +351,16 @@ def set_cell_text(cell, text: str, *, bold=False, color=INK, size=8.2):
     cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
 
 
+def set_row_pagination(row, *, repeat_header=False):
+    row_properties = row._tr.get_or_add_trPr()
+    cannot_split = OxmlElement("w:cantSplit")
+    row_properties.append(cannot_split)
+    if repeat_header:
+        header = OxmlElement("w:tblHeader")
+        header.set(qn("w:val"), "true")
+        row_properties.append(header)
+
+
 def set_table_fixed(table, widths: list[int]):
     table.autofit = False
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
@@ -408,6 +432,7 @@ def add_doc_paragraph(document, text: str, *, bold_prefix=None, italic=False):
     p = document.add_paragraph()
     p.paragraph_format.space_after = Pt(6)
     p.paragraph_format.line_spacing = 1.25
+    p.paragraph_format.keep_together = True
     if bold_prefix and text.startswith(bold_prefix):
         first = p.add_run(bold_prefix)
         set_run_font(first, bold=True)
@@ -422,11 +447,14 @@ def add_doc_paragraph(document, text: str, *, bold_prefix=None, italic=False):
 def add_doc_table(document, headers: list[str], rows: list[list[str]], widths: list[int], font_size=7.8):
     table = document.add_table(rows=1, cols=len(headers))
     table.style = "Table Grid"
+    set_row_pagination(table.rows[0], repeat_header=True)
     for cell, value in zip(table.rows[0].cells, headers):
         set_cell_shading(cell, BRONZE)
         set_cell_text(cell, value, bold=True, color="FFFFFF", size=font_size)
     for values in rows:
-        cells = table.add_row().cells
+        row = table.add_row()
+        set_row_pagination(row)
+        cells = row.cells
         for cell, value in zip(cells, values):
             set_cell_text(cell, value, size=font_size)
     set_table_fixed(table, widths)
@@ -438,12 +466,12 @@ def build_docx():
     section = doc.sections[0]
     section.page_width = Inches(8.5)
     section.page_height = Inches(11)
-    section.top_margin = Inches(0.8)
-    section.bottom_margin = Inches(0.75)
+    section.top_margin = Inches(1.0)
+    section.bottom_margin = Inches(0.95)
     section.left_margin = Inches(0.8)
     section.right_margin = Inches(0.8)
-    section.header_distance = Inches(0.35)
-    section.footer_distance = Inches(0.35)
+    section.header_distance = Inches(0.28)
+    section.footer_distance = Inches(0.28)
 
     normal = doc.styles["Normal"]
     normal.font.name = "Calibri"
@@ -467,6 +495,9 @@ def build_docx():
         style.font.color.rgb = RGBColor.from_string(color)
         style.paragraph_format.space_before = Pt(before)
         style.paragraph_format.space_after = Pt(after)
+        style.paragraph_format.line_spacing = 1.0
+        style.paragraph_format.keep_with_next = True
+        style.paragraph_format.keep_together = True
 
     header = section.header.paragraphs[0]
     header.alignment = WD_ALIGN_PARAGRAPH.RIGHT
@@ -480,7 +511,9 @@ def build_docx():
     if LOGO.exists():
         p = doc.add_paragraph()
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        p.add_run().add_picture(str(LOGO), width=Inches(1.25))
+        logo_shape = p.add_run().add_picture(str(LOGO), width=Inches(1.25))
+        logo_shape._inline.docPr.set("title", "ParsYuva logosu")
+        logo_shape._inline.docPr.set("descr", "Sıcak bronz tonlarda Anadolu parsı başı biçimindeki ParsYuva logosu")
     kicker = doc.add_paragraph()
     kicker.alignment = WD_ALIGN_PARAGRAPH.CENTER
     set_run_font(kicker.add_run("GÜNCEL ÇALIŞMA REFERANSI"), size=10, color=GOLD, bold=True)
@@ -529,13 +562,9 @@ def build_docx():
     add_doc_heading(doc, "4. Güncel altyapı ve mimari", 1)
     add_doc_table(doc, ["Katman", "Güncel altyapı gerçeği"], [[a, b] for a, b in INFRASTRUCTURE], [2100, 7260], 8.1)
 
-    doc.add_page_break()
     add_doc_heading(doc, "5. Bağlayıcı iş akışları", 1)
-    for title_text, detail in WORKFLOWS:
-        add_doc_heading(doc, title_text, 2)
-        add_doc_paragraph(doc, detail)
+    add_doc_table(doc, ["İş akışı", "Bağlayıcı yürütme"], [[title, detail] for title, detail in WORKFLOWS], [2300, 7060], 8.4)
 
-    doc.add_page_break()
     add_doc_heading(doc, "6. Paket iş listesi — açık/kapalı/neden", 1)
     add_doc_paragraph(doc, "Kullanıcı kuralı gereği her açık paket; yerel olarak neyin bulunduğunu, neden açık kaldığını, eksik kanıtı ve requirement PASS sayılıp sayılmadığını birlikte gösterir.")
     package_rows = []
@@ -562,12 +591,10 @@ def build_docx():
     add_doc_table(doc, ["Kapı", "Sonuç", "Kanıt"], validation_rows, [2100, 1400, 5860], 8.1)
 
     add_doc_heading(doc, "8. Dış bağımlılıklar ve neden açık", 1)
-    for title_text, detail in EXTERNAL_DEPENDENCIES:
-        add_doc_heading(doc, title_text, 2)
-        add_doc_paragraph(doc, detail)
+    add_doc_table(doc, ["Dış bağımlılık", "Açık kalma nedeni"], [[title, detail] for title, detail in EXTERNAL_DEPENDENCIES], [2300, 7060], 8.4)
 
     add_doc_heading(doc, "9. Installer ve çalıştırma gerçeği", 1)
-    add_doc_paragraph(doc, "Kurulum hedefi C:\\Program Files\\PPT\\ParsYuva, kurulu program ve kısayol adı ParsYuva, teslim EXE adı ParsYuva-<Kanal>-GG.AA.YYYY.NN.exe biçimindedir; kullanıcıya görünen tam ürün adı ParsYuva Aile Yaşam Merkezidir. ParsYuva-Bronze-20.08.2026.37.exe yerel test installerı üretildi; SHA-256 7F77D09364ACCDF9B4DC548A7AB25BF806E51DAA7588B1491B855900BB575EB5 ve aynı win-unpacked paketinin iki ardışık Windows açılışı PASS'tir. Yükseltilmiş gerçek kurulum yaşam döngüsü PASS olmadıkça ve Production Authenticode sertifikası ile temiz harici Windows makinesi kanıtı tamamlanmadıkça 'ticari dağıtıma hazır' iddiası kurulmaz.")
+    add_doc_paragraph(doc, "Güncel kanal program hedefi legacy kökün dışındaki C:\\Program Files\\PPT\\ParsYuva-<Kanal> kardeş dizinidir; ana dosya ParsYuva-<Kanal>.exe, kısayol ParsYuva <Kanal>, AppData kökü ParsYuva/<Kanal> ve teslim EXE adı ParsYuva-<Kanal>-GG.AA.YYYY.NN.exe biçimindedir. Otomatik legacy veri migration veya silme yoktur. ParsYuva-Bronze-20.08.2026.37.exe tarihsel yerel test installerı ile aynı win-unpacked paketin iki açılış kaydı güncel N->N+1 kabul kanıtı değildir. Yükseltilmiş gerçek kurulum yaşam döngüsü PASS olmadıkça ve Production Authenticode sertifikası ile temiz harici Windows makinesi kanıtı tamamlanmadıkça 'ticari dağıtıma hazır' iddiası kurulmaz.")
 
     add_doc_heading(doc, "10. Görsel kimlik ve erişilebilirlik", 1)
     palette_rows = [[channel, value["text"], value["strong"], value["icon"], value["edge"]] for channel, value in visual["releaseChannelNavigationColors"].items()]
@@ -577,18 +604,19 @@ def build_docx():
     add_doc_heading(doc, "11. Belge sapmaları ve düzeltmeler", 1)
     for item in DRIFT_FIXES:
         p = doc.add_paragraph(style="List Bullet")
+        p.paragraph_format.space_after = Pt(3)
+        p.paragraph_format.line_spacing = 1.15
+        p.paragraph_format.keep_together = True
         set_run_font(p.add_run(item), size=9.5)
 
     add_doc_heading(doc, "12. Tüm belge türü denetimi", 1)
     add_doc_table(doc, ["Uzantı", "Dosya"], [[extension, str(count)] for extension, count in full_document_audit["extensionCounts"].items()], [2800, 6560], 8.2)
     add_doc_paragraph(doc, f"Kök taramada {full_document_audit['documentFileCount']} belge/config/metin dosyası bulundu; {full_document_audit['readableCount']} okunabilir, {full_document_audit['unreadableCount']} sorunlu. Tam yol ve SHA-256 listesi artifacts/manifests/ALL_PROJECT_DOCUMENT_FORMAT_AUDIT.json içindedir.")
 
-    doc.add_page_break()
     add_doc_heading(doc, "13. DEC karar dizini — eksiksiz", 1)
     decision_rows = [[f"DEC-{decision_number(path):03d}", first_heading(path), status_from_markdown(path), path.relative_to(ROOT).as_posix()] for path in decision_files]
     add_doc_table(doc, ["ID", "Karar", "Durum", "Dosya"], decision_rows, [850, 4140, 1500, 2870], 6.5)
 
-    doc.add_page_break()
     add_doc_heading(doc, "14. ADR dizini — eksiksiz", 1)
     adr_rows = [[f"ADR-{adr_number(path):03d}", first_heading(path), path.relative_to(ROOT).as_posix()] for path in adr_files]
     add_doc_table(doc, ["ID", "Mimari karar", "Dosya"], adr_rows, [900, 5000, 3460], 6.8)
@@ -646,7 +674,7 @@ def build_pdf():
         data = [[Paragraph(pdf_escape(value), ParagraphStyle("TH", parent=small, fontName=bold, fontSize=font_size, leading=font_size + 1.5, textColor=colors.white)) for value in headers]]
         for row in rows:
             data.append([Paragraph(pdf_escape(value), ParagraphStyle("TD", parent=small, fontSize=font_size, leading=font_size + 1.5)) for value in row])
-        table = LongTable(data, colWidths=widths, repeatRows=1, splitByRow=1)
+        table = Table(data, colWidths=widths, repeatRows=1, splitByRow=1, splitInRow=0, longTableOptimize=False)
         table.setStyle(TableStyle([
             ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor(f"#{BRONZE}")),
             ("GRID", (0, 0), (-1, -1), 0.35, colors.HexColor("#C8B8A8")),
@@ -693,30 +721,37 @@ def build_pdf():
     ]:
         story.append(p(text))
     story += [Paragraph("3. Kanonik kapsam ve kural tabanı", h1), p(f"Kapsam sicilinde {requirements['requirementCount']} gereksinim vardır. Dağılım: COMPLETE {requirement_counts.get('COMPLETE',0)}, PARTIAL {requirement_counts.get('PARTIAL',0)}, FOUNDATION_STARTED {requirement_counts.get('FOUNDATION_STARTED',0)}, NOT_IMPLEMENTED {requirement_counts.get('NOT_IMPLEMENTED',0)}."), p(f"Kural sicili {rules['id']}: {rules['ruleCount']} toplam, {rules['activeRuleCount']} aktif, {rules['supersededRuleCount']} superseded. SHA-256 {rules['rulesSha256']}.")]
-    story += [Paragraph("4. Güncel altyapı ve mimari", h1), pdf_table(["Katman", "Güncel altyapı gerçeği"], [[a, b] for a, b in INFRASTRUCTURE], [1.55 * inch, 5.45 * inch], 7.6), PageBreak(), Paragraph("5. Bağlayıcı iş akışları", h1)]
+    # Bu tablo tek bir kısa devam satırı için yeni sayfa üretmemeli. Biraz daha
+    # sıkı tipografi, bütün mimari özetini aynı sayfada okunaklı biçimde tutar.
+    story += [Paragraph("4. Güncel altyapı ve mimari", h1), pdf_table(["Katman", "Güncel altyapı gerçeği"], [[a, b] for a, b in INFRASTRUCTURE], [1.55 * inch, 5.45 * inch], 7.2), PageBreak(), Paragraph("5. Bağlayıcı iş akışları", h1)]
     for title_text, detail in WORKFLOWS:
-        story += [Paragraph(pdf_escape(title_text), h2), p(detail)]
+        story.append(KeepTogether([Paragraph(pdf_escape(title_text), h2), p(detail)]))
     package_rows = [[item["step"], item["status"], item.get("localImplementationStatus") or "-", "EVET" if item.get("countsAsRequirementPass") else "HAYIR", package_status_reason(item)] for item in roadmap["packages"]]
     story += [PageBreak(), Paragraph("6. Paket iş listesi — açık/kapalı/neden", h1), p("Her açık paket yerel durum, açık kalma nedeni, eksik kanıt ve requirement PASS gerçeğiyle birlikte gösterilir."), pdf_table(["Paket", "Resmî", "Yerel", "PASS", "Açık kalma nedeni"], package_rows, [0.45*inch, 0.8*inch, 1.3*inch, 0.45*inch, 4.0*inch], 5.8)]
     validation = closure["validation"]
     validation_rows = [["Boundary", validation["localPackageBoundaries"]["status"], str(validation["localPackageBoundaries"]["checks"])], ["Contract", validation["localPackageContracts"]["status"], str(validation["localPackageContracts"]["checks"])], ["Runtime", validation["localPackageRuntimes"]["status"], str(validation["localPackageRuntimes"]["checks"])], ["Targeted", validation["targeted"]["status"], f"{validation['targeted']['files']} dosya / {validation['targeted']['tests']} test"], ["Full regression", validation["fullRegression"]["status"], f"{validation['fullRegression']['files']} dosya / {validation['fullRegression']['tests']} test"], ["Production builds", validation["productionBuilds"]["status"], f"{validation['productionBuilds']['workspaces']} workspace"], ["Requirement kabul", "HAYIR", "requirementsClosed=false / countsAsRequirementPass=false"]]
     story += [Paragraph("7. Yerel doğrulama ve kabul sınırı", h1), pdf_table(["Kapı", "Sonuç", "Kanıt"], validation_rows, [1.6*inch, 1.1*inch, 4.3*inch], 7.6), Paragraph("8. Dış bağımlılıklar ve neden açık", h1)]
     for title_text, detail in EXTERNAL_DEPENDENCIES:
-        story += [Paragraph(pdf_escape(title_text), h2), p(detail)]
-    story += [Paragraph("9. Installer ve çalıştırma gerçeği", h1), p("Kurulum hedefi C:\\Program Files\\PPT\\ParsYuva, kurulu program ve kısayol adı ParsYuva, teslim EXE adı ParsYuva-<Kanal>-GG.AA.YYYY.NN.exe biçimindedir; kullanıcıya görünen tam ürün adı ParsYuva Aile Yaşam Merkezidir. ParsYuva-Bronze-20.08.2026.37.exe yerel test installerı üretildi; SHA-256 7F77D09364ACCDF9B4DC548A7AB25BF806E51DAA7588B1491B855900BB575EB5 ve aynı win-unpacked paketinin iki ardışık Windows açılışı PASS'tir. Yükseltilmiş gerçek kurulum yaşam döngüsü PASS olmadıkça ve Production Authenticode sertifikası ile temiz harici Windows makinesi kanıtı tamamlanmadıkça ticari dağıtım hazır sayılmaz."), Paragraph("10. Görsel kimlik ve erişilebilirlik", h1), pdf_table(["Kanal", "Text", "Strong", "Icon", "Edge"], [[c, v['text'], v['strong'], v['icon'], v['edge']] for c, v in visual['releaseChannelNavigationColors'].items()], [1.0*inch,1.5*inch,1.5*inch,1.5*inch,1.5*inch],7.5), p(f"Logo {visual['brandMark']['width']}×{visual['brandMark']['height']} şeffaf PNG; SHA-256 {visual['brandMark']['sha256']}. Body {visual['typography']['bodyPx']} px, control {visual['typography']['controlPx']} px, minimum {visual['typography']['minimumPx']} px.")]
-    story += [Paragraph("11. Belge sapmaları ve düzeltmeler", h1)] + [p(f"• {item}") for item in DRIFT_FIXES]
+        story.append(KeepTogether([Paragraph(pdf_escape(title_text), h2), p(detail)]))
+    visual_table = pdf_table(["Kanal", "Text", "Strong", "Icon", "Edge"], [[c, v['text'], v['strong'], v['icon'], v['edge']] for c, v in visual['releaseChannelNavigationColors'].items()], [1.0*inch,1.5*inch,1.5*inch,1.5*inch,1.5*inch],7.5)
+    story += [KeepTogether([Paragraph("9. Installer ve çalıştırma gerçeği", h1), p("Güncel kanal program hedefi legacy kökün dışındaki C:\\Program Files\\PPT\\ParsYuva-<Kanal> kardeş dizinidir; ana dosya ParsYuva-<Kanal>.exe, kısayol ParsYuva <Kanal>, AppData kökü ParsYuva/<Kanal> ve teslim EXE adı ParsYuva-<Kanal>-GG.AA.YYYY.NN.exe biçimindedir. Otomatik legacy veri migration veya silme yoktur. ParsYuva-Bronze-20.08.2026.37.exe tarihsel yerel test installerı güncel N->N+1 kabul kanıtı değildir. Yükseltilmiş gerçek kurulum yaşam döngüsü PASS olmadıkça ve Production Authenticode sertifikası ile temiz harici Windows makinesi kanıtı tamamlanmadıkça ticari dağıtım hazır sayılmaz.")]), KeepTogether([Paragraph("10. Görsel kimlik ve erişilebilirlik", h1), visual_table, p(f"Logo {visual['brandMark']['width']}×{visual['brandMark']['height']} şeffaf PNG; SHA-256 {visual['brandMark']['sha256']}. Body {visual['typography']['bodyPx']} px, control {visual['typography']['controlPx']} px, minimum {visual['typography']['minimumPx']} px.")])]
+    story += [KeepTogether([Paragraph("11. Belge sapmaları ve düzeltmeler", h1), p(f"• {DRIFT_FIXES[0]}")])] + [p(f"• {item}") for item in DRIFT_FIXES[1:]]
     story += [Paragraph("12. Tüm belge türü denetimi", h1), pdf_table(["Uzantı", "Dosya"], [[extension, str(count)] for extension, count in full_document_audit["extensionCounts"].items()], [2.0*inch,5.0*inch], 8.0), p(f"Kök taramada {full_document_audit['documentFileCount']} belge/config/metin dosyası bulundu; {full_document_audit['readableCount']} okunabilir, {full_document_audit['unreadableCount']} sorunlu. Tam yol ve SHA-256 listesi artifacts/manifests/ALL_PROJECT_DOCUMENT_FORMAT_AUDIT.json içindedir.")]
     decision_rows = [[f"DEC-{decision_number(path):03d}", first_heading(path), status_from_markdown(path), path.relative_to(ROOT).as_posix()] for path in decision_files]
-    story += [PageBreak(), Paragraph("13. DEC karar dizini — eksiksiz", h1), pdf_table(["ID", "Karar", "Durum", "Dosya"], decision_rows, [0.65*inch,3.1*inch,1.0*inch,2.25*inch], 5.5)]
+    story += [CondPageBreak(1.5*inch), Paragraph("13. DEC karar dizini — eksiksiz", h1), pdf_table(["ID", "Karar", "Durum", "Dosya"], decision_rows, [0.65*inch,3.1*inch,1.0*inch,2.25*inch], 5.5)]
     adr_rows = [[f"ADR-{adr_number(path):03d}", first_heading(path), path.relative_to(ROOT).as_posix()] for path in adr_files]
-    story += [PageBreak(), Paragraph("14. ADR dizini — eksiksiz", h1), pdf_table(["ID", "Mimari karar", "Dosya"], adr_rows, [0.7*inch,3.9*inch,2.4*inch], 5.8)]
+    story += [CondPageBreak(1.2*inch), Paragraph("14. ADR dizini — eksiksiz", h1), pdf_table(["ID", "Mimari karar", "Dosya"], adr_rows, [0.7*inch,3.9*inch,2.4*inch], 5.8)]
     rule_rows = [[rule["id"], rule["state"], rule["text"]] for rule in rules["rules"]]
-    story += [PageBreak(), Paragraph(f"15. Kanonik kurallar — {rules['ruleCount']} kayıt", h1), pdf_table(["ID", "Durum", "Kural"], rule_rows, [0.65*inch,0.85*inch,5.5*inch], 6.0)]
+    story += [CondPageBreak(1.2*inch), Paragraph(f"15. Kanonik kurallar — {rules['ruleCount']} kayıt", h1), pdf_table(["ID", "Durum", "Kural"], rule_rows, [0.65*inch,0.85*inch,5.5*inch], 6.0)]
     audit_rows = [[row["name"], row["type"].upper(), str(row["bytes"]), str(row.get("pages", "-")), "OK" if row["readable"] else "HATA"] for row in word_pdf_scan]
-    story += [PageBreak(), Paragraph("16. Aktif repo Word/PDF tarihsel envanter denetimi", h1), pdf_table(["Dosya", "Tür", "Bayt", "Sayfa", "Okuma"], audit_rows, [4.1*inch,0.55*inch,0.8*inch,0.6*inch,0.95*inch], 6.1), p("Yeni sürüm tarihsel dosyaların yerine geçmez; yalnız aktif çalışma gerçeğini tek yerde toplar.")]
+    story += [CondPageBreak(1.2*inch), Paragraph("16. Aktif repo Word/PDF tarihsel envanter denetimi", h1), pdf_table(["Dosya", "Tür", "Bayt", "Sayfa", "Okuma"], audit_rows, [4.1*inch,0.55*inch,0.8*inch,0.6*inch,0.95*inch], 6.1), p("Yeni sürüm tarihsel dosyaların yerine geçmez; yalnız aktif çalışma gerçeğini tek yerde toplar.")]
     PDF_OUT.parent.mkdir(parents=True, exist_ok=True)
-    document = SimpleDocTemplate(str(PDF_OUT), pagesize=letter, leftMargin=0.65*inch, rightMargin=0.65*inch, topMargin=0.6*inch, bottomMargin=0.58*inch, title="ParsYuva Aile Yaşam Merkezi Güncel Master Dokümantasyon", author="ParsYuva")
-    document.build(story, onFirstPage=footer, onLaterPages=footer)
+    class FooterAfterContentDocument(SimpleDocTemplate):
+        def afterPage(self):
+            footer(self.canv, self)
+
+    document = FooterAfterContentDocument(str(PDF_OUT), pagesize=letter, leftMargin=0.65*inch, rightMargin=0.65*inch, topMargin=0.68*inch, bottomMargin=0.78*inch, title="ParsYuva Aile Yaşam Merkezi Güncel Master Dokümantasyon", author="ParsYuva")
+    document.build(story)
 
 
 build_docx()

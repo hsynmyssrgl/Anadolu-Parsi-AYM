@@ -44,8 +44,9 @@ describe('32-S PPK-023 Desktop application-security profile integration', () => 
     expect(main).toContain("registerIpcHandler('system:getApplicationSecurityProfileGateBoundary'");
     expect(preload).toContain("invoke('system:getApplicationSecurityProfileGateBoundary')");
     expect(global).toContain('getApplicationSecurityProfileGateBoundary():Promise<ApplicationSecurityProfileGateBoundaryView>');
-    expect(renderer).toContain('Eşleme uygunluk sertifikası veya runtime yetkisi değildir');
-    expect(renderer).toContain("tehdit modeli hash'i verilmez");
+    expect(renderer).toContain('title="ASVS, MASVS, SSDF eşlemesi ve uygulama başına tehdit modeli"');
+    expect(renderer).toContain('Eşleme uygunluk sertifikası veya çalışma anı yetkisi değildir');
+    expect(renderer).toContain('tehdit modeli özeti verilmez');
   });
 
   it('is a root pretypecheck/prebuild gate and part of combined Platform Policy validation', () => {

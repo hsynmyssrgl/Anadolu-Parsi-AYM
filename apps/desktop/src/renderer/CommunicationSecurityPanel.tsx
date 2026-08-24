@@ -2,10 +2,13 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type {
   CommunicationDeviceCredentialView,
   CommunicationRoomType,
+  CommunicationMembershipRole,
+  CommunicationRoomStatus,
   CommunicationRoomView,
   CommunicationSecurityCenterView
 } from '@ppt/domain';
 import { selectUiCopy, useLocalization } from './localization';
+import { toUserFacingErrorMessage } from './user-facing-error';
 
 const roomLabels:Record<CommunicationRoomType,string>={
   direct:'Bire bir',family:'Aile',household:'Hane',family_branch:'Aile dalı',event:'Etkinlik',care:'Bakım',private_topic:'Özel konu'
@@ -14,6 +17,8 @@ const roomLabels:Record<CommunicationRoomType,string>={
 export function CommunicationSecurityPanel(){
   const {language}=useLocalization();const text=(turkish:string,english:string)=>selectUiCopy(language,turkish,english);
   const roomLabel=(value:CommunicationRoomType)=>language==='tr'?roomLabels[value]:({direct:'One-to-one',family:'Family',household:'Household',family_branch:'Family branch',event:'Event',care:'Care',private_topic:'Private topic'} as const)[value];
+  const roomStatusLabels:Readonly<Record<CommunicationRoomStatus,string>>={active:text('Etkin','Active'),frozen:text('Donduruldu','Frozen'),closed:text('Kapatıldı','Closed')};
+  const membershipRoleLabels:Readonly<Record<CommunicationMembershipRole,string>>={owner:text('Sahip','Owner'),administrator:text('Yönetici','Administrator'),member:text('Üye','Member')};
   const [center,setCenter]=useState<CommunicationSecurityCenterView>();
   const [error,setError]=useState('');
   const [busy,setBusy]=useState('');
@@ -30,12 +35,11 @@ export function CommunicationSecurityPanel(){
   const refresh=async()=>{if(!window.pardus)return;setError('');try{
     const next=await window.pardus.getCommunicationSecurityCenter();setCenter(next);
     setOwnerCredentialId(current=>current||next.deviceCredentials.find(item=>item.status==='active')?.id||'');
-  }catch(caught){setError(caught instanceof Error?caught.message:text('İletişim güvenlik merkezi yüklenemedi.','Communication security center could not be loaded.'));}};
+  }catch(caught){setError(toUserFacingErrorMessage(caught,text('İletişim güvenlik merkezi yüklenemedi.','Communication security center could not be loaded.')));}};
   useEffect(()=>{void refresh();},[]);
   const mutate=async(key:string,run:(clientOperationId:string)=>Promise<unknown>)=>{setBusy(key);setError('');try{
     await run(operationId(key));operations.current.delete(key);await refresh();
-  }catch(caught){setError(caught instanceof Error?`${caught.message} ${text('Aynı işlem kimliğiyle yeniden deneyebilirsiniz.','You can retry with the same operation ID.')}`
-    :text('İletişim güvenliği değişikliği tamamlanamadı.','The communication security change could not be completed.'));}finally{setBusy('');}};
+  }catch(caught){setError(`${toUserFacingErrorMessage(caught,text('İletişim güvenliği değişikliği tamamlanamadı.','The communication security change could not be completed.'))} ${text('Aynı işlem kimliğiyle yeniden deneyebilirsiniz.','You can retry with the same operation ID.')}`);}finally{setBusy('');}};
   const registerDevice=()=>window.pardus&&mutate('register-current-device',clientOperationId=>
     window.pardus!.registerCommunicationDeviceCredential({clientOperationId,expectedRevision:0}));
   const createRoom=()=>window.pardus&&ownerCredentialId&&roomName.trim()&&mutate(`create:${roomType}:${roomName.trim()}`,
@@ -70,14 +74,14 @@ export function CommunicationSecurityPanel(){
       roomId:room.id,confirmation:'ILETISIM ODASINI DONDUR',reason:'Kullanıcı odayı yerel olarak dondurdu.'}));
   return <section className="communication-security panel" aria-labelledby="communication-security-title">
     <div className="panel-heading"><div><span className="eyebrow">{text('İletişim güvenliği','Communication security')}</span>
-      <h2 id="communication-security-title">{text('Oda, cihaz ve MLS dönem temeli','Room, device and MLS epoch foundation')}</h2></div>
+      <h2 id="communication-security-title">{text('Oda ve cihaz güvenliğinin yerel temeli','Local foundation for room and device security')}</h2></div>
       <button type="button" onClick={()=>void refresh()} disabled={Boolean(busy)}>{text('Yenile','Refresh')}</button></div>
     <div className="communication-security-truth" role="note"><strong>{text('Bu ekran mesaj göndermez ve anahtar yönetmez.','This screen does not send messages or manage keys.')}</strong>
-      <span>{text('Yalnız merkezî politika receipt’iyle bağlı oda, üyelik, cihaz kimliği ve şifreli sağlayıcı durumuna ait güvenli metadata gösterilir.','Only safe metadata for rooms, memberships, device credentials and encrypted provider state bound to a central policy receipt is shown.')}</span>
-      <span>{text('Production RFC 9420 sağlayıcısı, ileri gizlilik, saldırı sonrası güvenlik, relay içerik körlüğü, mesaj imzası ve gerçek ağ teslimi doğrulanmadı.','A production RFC 9420 provider, forward secrecy, post-compromise security, relay content blindness, message signatures and real network delivery have not been verified.')}</span>
-      <span>{text('Yeni üyeler katılım öncesi geçmişi varsayılan göremez; explicit snapshot kararı bu foundation içinde içerik paylaşmaz.','New members cannot see pre-join history by default; an explicit snapshot decision shares no content within this foundation.')}</span>
+      <span>{text('Yalnız merkezî izin kaydıyla bağlı oda, üyelik, güvenilir cihaz ve şifreli hizmet durumu gösterilir.','Only rooms, memberships, trusted devices, and encrypted-service status linked to the central permission record are shown.')}</span>
+      <span>{text('Gerçek ağ üzerinden güvenli mesajlaşma, geçmişi koruma, kayıp cihaz sonrası güvenliği yenileme ve mesaj doğrulama henüz hazır değildir.','Secure messaging over a real network, history protection, security renewal after a lost device, and message verification are not ready yet.')}</span>
+      <span>{text('Yeni üyeler katılmadan önceki geçmişi varsayılan olarak göremez; ayrı geçmiş paylaşımı seçilse bile bu ekran içerik aktarmaz.','New members cannot see history from before they joined by default; this screen transfers no content even if separate history sharing is selected.')}</span>
       <span>{text('Kapsamlı kaynak yetkilendirmesi henüz uygulanmadı; kapsam bağlı oda oluşturma reddedilir.','Comprehensive resource authorization is not implemented yet; scope-bound room creation is rejected.')}</span>
-      <span>{text('Metadata kotaları fail-closed uygulanır; otomatik retention ve kapasite kurtarma yoktur.','Metadata quotas are enforced fail-closed; automatic retention and capacity recovery are unavailable.')}</span></div>
+      <span>{text('Yerel kayıt sınırlarına ulaşıldığında yeni işlemler güvenle durdurulur; otomatik saklama temizliği henüz yoktur.','New actions stop safely when local record limits are reached; automatic retention cleanup is not available yet.')}</span></div>
     {error&&<p className="status-message danger">{error}</p>}
     {!center?<p>{text('İletişim güvenlik merkezi yükleniyor…','Loading communication security center…')}</p>:<>
       <div className="communication-security-summary"><span><strong>{center.deviceCredentials.length}</strong> {text('cihaz kimliği','device credentials')}</span>
@@ -87,8 +91,8 @@ export function CommunicationSecurityPanel(){
         <span>{text('İşlem','Operation')} {center.storageCapacity.mutations.current}/{center.storageCapacity.mutations.limit}</span></div>
       <div className="communication-security-actions">
         <button type="button" disabled={Boolean(busy)||!providerReady||center.storageCapacity.deviceCredentials.limitReached
-          ||center.storageCapacity.mutations.limitReached} onClick={()=>void registerDevice()}>{text('Bu cihaz için MLS kimliği oluştur','Create an MLS credential for this device')}</button>
-        <small>{text('Production MLS sağlayıcısı yapılandırılmadığı için kriptografik yazmalar fail-closed kapalıdır.','Cryptographic writes are disabled fail-closed because a production MLS provider is not configured.')}</small>
+          ||center.storageCapacity.mutations.limitReached} onClick={()=>void registerDevice()}>{text('Bu cihaz için güvenli iletişim kimliği oluştur','Create a secure communication identity for this device')}</button>
+        <small>{text('Gerçek şifreli iletişim hizmeti hazır olmadığı için güvenlik anahtarlarıyla yapılan değişiklikler kapalıdır.','Changes that require security keys are disabled because the real encrypted communication service is not ready.')}</small>
       </div>
       <div className="communication-security-create" aria-label={text('İletişim odası oluşturma','Create communication room')}>
         <input aria-label={text('Oda adı','Room name')} value={roomName} maxLength={160} onChange={event=>setRoomName(event.target.value)} />
@@ -104,21 +108,21 @@ export function CommunicationSecurityPanel(){
         const used=center.rooms.some(room=>room.status==='active'&&room.memberships.some(member=>
           member.status==='active'&&member.deviceCredentialId===device.id));
         return <article key={device.id}><strong>{device.trustedDeviceId}</strong><span>{device.status==='active'?text('Etkin','Active'):text('İptal edildi','Revoked')}</span>
-          <small>{text('Sağlayıcı kanıtı doğrulandı; key package uygulama veritabanında tutulmaz.','Provider evidence is verified; the key package is not stored in the application database.')}</small>
+          <small>{text('Hizmet doğrulaması tamamlandı; güvenlik anahtarı paketi uygulama kayıtlarında tutulmaz.','Service verification is complete; the security key package is not stored in application records.')}</small>
           <button type="button" disabled={Boolean(busy)||device.status!=='active'||center.storageCapacity.mutations.limitReached
             ||(used&&!providerReady)}
             onClick={()=>void revokeDevice(device)}>{text('Cihaz kimliğini iptal et','Revoke device credential')}</button></article>;})}</div>
       {center.rooms.map(room=><article className="communication-security-room" key={room.id}>
-        <div><strong>{room.displayName}</strong><small>{roomLabel(room.roomType)} · {text('dönem','epoch')} {room.currentEpoch} · {room.status}</small></div>
-        <p>{room.historyAccessMode==='new_members_no_history'?text('Yeni üyeler geçmişi göremez.','New members cannot see history.'):text('Geçmiş için ayrı snapshot kararı seçili; içerik aktarımı yok.','A separate snapshot decision is selected for history; no content is transferred.')}</p>
-        <small>{text('Üyelik','Membership')} {room.storageCapacity.memberships.current}/{room.storageCapacity.memberships.limit} · {text('dönem kanıtı','epoch evidence')} {room.storageCapacity.epochs.current}/{room.storageCapacity.epochs.limit}</small>
-        <ul>{room.memberships.map(member=><li key={member.id}><span>{member.memberPersonId} · {member.role} · {text('dönem','epoch')} {member.joinedAtEpoch}</span>
+        <div><strong>{room.displayName}</strong><small>{roomLabel(room.roomType)} · {text('güvenlik sürümü','security version')} {room.currentEpoch} · {roomStatusLabels[room.status]}</small></div>
+        <p>{room.historyAccessMode==='new_members_no_history'?text('Yeni üyeler geçmişi göremez.','New members cannot see history.'):text('Geçmiş için ayrı paylaşım kararı seçili; içerik aktarımı yok.','A separate sharing decision is selected for history; no content is transferred.')}</p>
+        <small>{text('Üyelik','Membership')} {room.storageCapacity.memberships.current}/{room.storageCapacity.memberships.limit} · {text('güvenlik değişikliği','security changes')} {room.storageCapacity.epochs.current}/{room.storageCapacity.epochs.limit}</small>
+        <ul>{room.memberships.map(member=><li key={member.id}><span>{member.memberPersonId} · {membershipRoleLabels[member.role]} · {text('katıldığı güvenlik sürümü','security version at joining')} {member.joinedAtEpoch}</span>
           {member.status==='active'&&<>{member.role!=='owner'&&<button type="button" disabled={Boolean(busy)||!providerReady
             ||room.storageCapacity.epochs.limitReached||center.storageCapacity.mutations.limitReached}
-            onClick={()=>void removeMember(room,member.id)}>{text('Üyeyi dönem yenileyerek çıkar','Remove member and rotate epoch')}</button>}
+            onClick={()=>void removeMember(room,member.id)}>{text('Üyeyi güvenliği yenileyerek çıkar','Remove member and renew security')}</button>}
             <button type="button" disabled={Boolean(busy)||!providerReady||room.storageCapacity.epochs.limitReached
               ||center.storageCapacity.mutations.limitReached||(member.role==='owner'&&!activeCredentials.some(item=>item.id!==member.deviceCredentialId))}
-              onClick={()=>void rekeyRoom(room,member.deviceCredentialId,member.memberPersonId)}>{text('Kayıp cihaz sonrası rekey','Rekey after lost device')}</button></>}</li>)}</ul>
+              onClick={()=>void rekeyRoom(room,member.deviceCredentialId,member.memberPersonId)}>{text('Kayıp cihaz sonrası güvenliği yenile','Renew security after a lost device')}</button></>}</li>)}</ul>
         <div className="communication-security-member-form"><input aria-label={text('Üye kişi kimliği','Member person ID')} value={memberPersonId}
           onChange={event=>setMemberPersonId(event.target.value)} /><input aria-label={text('Üye cihaz kimliği','Member device credential')} value={memberCredentialId}
           onChange={event=>setMemberCredentialId(event.target.value)} /><button type="button"
