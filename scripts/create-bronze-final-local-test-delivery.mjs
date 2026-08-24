@@ -773,6 +773,8 @@ const validateInstalledUiDynamicCoverage = (uiChecks, {
     ['EMPTY_FIRST_FAMILY_FORM_REJECTED', ['onboarding', 'first-family-form']],
     ['FIRST_FAMILY_FORM_POPULATED', ['onboarding', 'first-family-form']],
     ['VISIBLE_LOADING_STATE_OBSERVED', ['onboarding', 'initial-document']],
+    ['FIRST_RUN_TWO_FACTOR_IPC_REJECTION_NATURAL_UI', ['onboarding', 'first-run-two-factor-rejection']],
+    ['NETWORK_OFFLINE_LOCAL_SHELL_READBACK', ['dashboard', 'offline-local-shell']],
     ['AUTHENTICATED_TRUSTED_DEVICE_READBACK', ['dashboard', 'authenticated-shell']]
   ].map(([assertion, [routeId, logicalControlId]]) => {
     const controlIdentity = canonicalJsonSha256({ routeId, logicalControlId });

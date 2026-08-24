@@ -348,7 +348,10 @@ const baseInput = () => {
   const stateAssertions = {
     EMPTY: 'FIRST_FAMILY_FORM_EMPTY', POPULATED: 'FIRST_FAMILY_FORM_POPULATED',
     LOADING: 'VISIBLE_LOADING_STATE_OBSERVED', VALIDATION_ERROR: 'EMPTY_FIRST_FAMILY_FORM_REJECTED',
-    PERMISSION_DENIED: 'VISIBLE_PERMISSION_DENIAL_AFTER_GESTURE', SUCCESS: 'AUTHENTICATED_TRUSTED_DEVICE_READBACK',
+    PERMISSION_DENIED: 'VISIBLE_PERMISSION_DENIAL_AFTER_GESTURE',
+    OFFLINE: 'NETWORK_OFFLINE_LOCAL_SHELL_READBACK',
+    ERROR: 'FIRST_RUN_TWO_FACTOR_IPC_REJECTION_NATURAL_UI',
+    SUCCESS: 'AUTHENTICATED_TRUSTED_DEVICE_READBACK',
     CONFIRM_CANCEL: 'JAVASCRIPT_CONFIRMATION_AND_TERMINAL_POSTCONDITION',
     CONFIRM_ACCEPT: 'JAVASCRIPT_CONFIRMATION_AND_TERMINAL_POSTCONDITION'
   } as const;
@@ -359,6 +362,12 @@ const baseInput = () => {
   const rawStateEvidence = (binding: { routeId: string; controlIdentity: string; stateKey: string }, outcomeKind: string, snapshot: Record<string, unknown>) => ({
     ...binding, outcomeKind, snapshot, snapshotSha256: jsonSha(snapshot)
   });
+  const firstRunTwoFactorBinding = logicalStateBinding('onboarding', 'first-run-two-factor-rejection');
+  const firstRunTwoFactorGesture = {
+    routeId: 'onboarding', runtimeId: 'first-run-two-factor-rejection', activationMethod: 'POINTER_MOUSE_PRESS_RELEASE',
+    expectedPointerActivation: 'POINTER_CLICK', button: 'left', pointerSequence: ['mouseMoved', 'mousePressed', 'mouseReleased'],
+    hitTestPassed: true, focusVisible: true, x: 640, y: 680
+  };
   const applicationStateMatrix = Object.entries(stateAssertions).map(([scenario, assertion]) => {
     const rawEvidence = scenario === 'LOADING' ? (() => {
       const visibleSelector = '[aria-busy="true"],[data-async-state="loading"],.loading,.loading-state';
@@ -389,6 +398,34 @@ const baseInput = () => {
                 gestureSha256: jsonSha(permissionGesture)
               }
             })
+            : scenario === 'OFFLINE'
+              ? rawStateEvidence(logicalStateBinding('dashboard', 'offline-local-shell'), 'OFFLINE_LOCAL_OPERATION_READBACK', {
+                navigatorOnLine: false,
+                authenticatedShellVisible: true,
+                canonicalRouteCount: 22,
+                preloadIpcReadbackVerified: true,
+                authIpcReadbackVerified: true,
+                dashboardIpcReadbackVerified: true,
+                beforeIpcSummarySha256: digest(482),
+                offlineIpcSummarySha256: digest(482)
+              })
+              : scenario === 'ERROR'
+                ? rawStateEvidence(firstRunTwoFactorBinding, 'AUTHENTICATION_REJECTION', {
+                  rejected: true,
+                  ipcAttempted: true,
+                  securityShellVisible: true,
+                  actionReenabled: true,
+                  twoFactorEnabled: false,
+                  trustedDevice: false,
+                  visibleAlertCount: 1,
+                  messageSha256: digest(483),
+                  technicalLeakDetected: false,
+                  actionCorrelation: {
+                    controlIdentity: firstRunTwoFactorBinding.controlIdentity,
+                    stateKey: firstRunTwoFactorBinding.stateKey,
+                    gestureSha256: jsonSha(firstRunTwoFactorGesture)
+                  }
+                })
             : scenario === 'SUCCESS'
               ? rawStateEvidence(logicalStateBinding('dashboard', 'authenticated-shell'), 'AUTHENTICATED_TRUSTED_DEVICE', { initialized: true, authenticated: true, twoFactorEnabled: true, trustedDevice: true })
               : scenario === 'CONFIRM_CANCEL'
