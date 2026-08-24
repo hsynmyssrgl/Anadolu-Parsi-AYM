@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PARSYUVA-AILE-YASAM-MERKEZI-TICARI-DEGISIKLIK-SICILI-V2",
   "temelTarihi": "2026-08-19",
-  "sonKayit": "TICARI-023",
+  "sonKayit": "TICARI-024",
   "kayitlar": [
     {
       "id": "TICARI-001",
@@ -405,6 +405,24 @@
         "docs/ticari-urun-temeli"
       ],
       "isListesiEtkisi": "IS-0211 ve IS-0215 DEVAM kalir. Etki degerlendirmesi ve analizi 577 degisen yol ile 94 hedefli test dosyasini PASS hesapladiktan sonra hedefli test ureticisi zorunlu -- -- <repo-ici-testler> listesi verilmeden cagrildi ve test baslamadan fail-closed durdu. 4c8b6b7d gercek ret olarak korunur; test kodu veya hesaplanan kapsam degistirilmeden yeni exact kosu analizden turetilen 94 dosyayi exact sirayla acikca aktarir. Hedefli/tam regresyon, kaynak butunlugu ve kurulu UI UAT tamamlanmadan paket yoktur.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-024",
+      "tarih": "2026-08-25",
+      "baslik": "Kanonik artifact indeks dogrulama modu kapanisi",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-275, PR-240 ve 47f441e1 reddedilmis indeks modu checkpointi",
+      "etkilenenAlanlar": [
+        "artifacts/manifests/PROJECT_ARTIFACT_INDEX.json",
+        "artifacts/manifests/ALL_DOCUMENTS_INDEX.json",
+        "scripts/generate-project-artifact-index-v2.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs",
+        "manifest.json",
+        "SHA256SUMS.txt",
+        "docs/ticari-urun-temeli"
+      ],
+      "isListesiEtkisi": "IS-0211 ve IS-0215 DEVAM kalir. Git-index ile uretilen kanonik indeksin varsayilan canli-agac modunda dogrulanmasi ignored tarihsel artifact kapsam farkinda fail-closed durdu ve 47f441e1 ile gercek ret kaydedildi. Ureticiyle ayni --git-index --no-report dogrulamasi 13146 kontrol/4407 dosya/2143 belge; kaynak butunlugu 4868/4868 dosya ve 4869 SHA PASS verdi. Yanlis-mod ret PASS sayilmaz; yeni exact hedefli/tam regresyon, kaynak butunlugu ve kurulu UI UAT tamamlanmadan paket yoktur.",
       "senkronDurumu": "SYNCHRONIZED"
     }
   ]

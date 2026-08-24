@@ -39,4 +39,6 @@ Yeni kimlik kapısının ilk gerçek koşusu, tarihsel ADR/DEC başlıklarında 
 
 Son exact kapanışta etki değerlendirmesi ve bağımlılık analizi `3b06fe51` için 577 değişen yol ile 94 hedefli test dosyasını PASS hesaplamış, ancak hedefli test üreticisi zorunlu açık `-- -- <repo-içi-testler>` argümanları verilmeden çağrıldığı için test başlamadan fail-closed durmuştur. Bu gerçek komut sözleşmesi ihlali `4c8b6b7d` boş `wip(rejected)` checkpointiyle korunur. Test kodu ve hesaplanan kapsam değiştirilmez; yeni koşu analizden türetilen 94 dosyayı exact sırayla açıkça aktarır. Bu ret hedefli veya tam regresyon PASS değildir.
 
+Kanonik proje indeksi `--git-index` ile üretildikten sonra doğrulayıcının varsayılan canlı çalışma ağacı modunda çağrılması, ignored tarihsel artefaktların doğal kapsam farkında fail-closed durmuştur; `47f441e1` bu yanlış-mod çağrıyı boş `wip(rejected)` checkpoint olarak korur. Üreticiyle aynı salt-okunur `--git-index --no-report` modu 13.146 kontrol, 4.407 dosya ve 2.143 belge PASS; kaynak manifesti 4.868/4.868 dosya ve 4.869 SHA PASS vermiştir. Yanlış-mod ret bu doğru-mod PASS ile silinmez veya PASS sayılmaz.
+
 Bu karar `DEC-270/PR-235` exact-commit etki ve test zincirini kaldırmaz; kapsamını bütün kayıt sınıfları ve tüm kullanıcı etkileşimi/görsel bütünlük yüzeyleri için açıkça güçlendirir.

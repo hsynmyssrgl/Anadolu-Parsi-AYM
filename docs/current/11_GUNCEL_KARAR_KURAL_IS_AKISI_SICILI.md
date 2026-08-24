@@ -3,7 +3,7 @@
 - Belge sürümü: **GUNCEL-2026-08-24-V5**
 - Tarih: **24.08.2026**
 - Görünür ürün sürümü: **Bronze 22.08.2026.50**
-- Kaynak HEAD: `5a1a6968ce7769bc4dd4ad39ec907cdc30831175`
+- Kaynak HEAD: `6f033bdfad32b836a1408c676e06f2fe158c326b`
 - Statü: **ACTIVE_CURRENT_MASTER_REFERENCE**
 - Kararlar: **DEC-250–DEC-275**
 
@@ -152,7 +152,8 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - PR-235 BOOTSTRAP_ADOPTION diff tabanı sabit kalırken producer yalnız pointer sourceCommit kayıt commitinde external-pointer exact eşitliği ve baseCommit → pointer.sourceCommit → HEAD ancestry ile; normal PRE_MUTATION producer ise kendi baseline commitinde doğrulanır.
 - PR-239 UAT111 kapsamı Git'te izlenen TypeScript kanonik rota otoritesi, tüm görünür ve uygun kontrollerin dinamik outcome matrisi, gerçek native CANCEL/ACCEPT ve exclusive reparse-korumalı kanıt köküyle güncellendi.
 - PR-240 filtresiz tam regresyon guard hatası 4c6652e0 ile korunmuştur. PPK-022 masaüstü başlangıç zincirinde --no-write aktarımı çağrı, sarmalayıcı ve son makbuz üreticilerinde kapatılmış; kaynak regresyonu 1 dosya/6 test, çalışma 51/51, sözleşme 41/41 ve uçtan uca PPK-022 24/24 PASS verirken 1.571 doğrulama dosyasında sıfır değişiklik kanıtlanmıştır. Bundled render aracının yinelenen LibreOffice PATH hatası 6ec632c8 ile korunmuş, mutlak LibreOffice/Poppler yollarıyla ana belge 28/28 sayfa görsel QA PASS vermiştir.
-- PR-240 hedefli test çağrı sözleşmesi ihlali 4c8b6b7d ile fail-closed korunmuştur. 577 değişen yol/94 test dosyası PASS analizinden sonra zorunlu açık test listesi aktarılmadan yapılan çağrı test başlamadan reddedilmiş; sonraki exact koşu aynı 94 dosyayı makine türetimli sırayla açıkça aktaracaktır.
+- PR-240 hedefli test üreticisinin zorunlu açık test listesi verilmeden çağrılması 4c8b6b7d ile fail-closed korunmuştur. Etki değerlendirmesi ve analizi 577 değişen yol ile 94 test dosyasını PASS hesaplamıştır; yeni exact koşu bu 94 dosyayı analizden türetilen sırayla açıkça aktarır ve ret PASS olarak yorumlanmaz.
+- PR-240 kanonik indeks modu uyuşmazlığı 47f441e1 ile fail-closed korunmuştur. Git-index üretimiyle aynı `--git-index --no-report` doğrulaması 13.146 kontrol/4.407 dosya/2.143 belge; kaynak bütünlüğü 4.868/4.868 dosya ve 4.869 SHA PASS vermiştir. Varsayılan canlı-ağaç ret sonucu PASS sayılmaz.
 
 ## 9. Görsel kimlik ve erişilebilirlik
 

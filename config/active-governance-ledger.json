@@ -26,7 +26,7 @@
     "bootstrapBaselineProducerBinding": "POINTER_SOURCE_COMMIT_WITH_BASE_POINTER_HEAD_ANCESTRY",
     "preflightStatus": "NOT_RUN_CURRENT_MUTATION",
     "postflightStatus": "NOT_RUN_CURRENT_MUTATION",
-    "latestRejectedCheckpoint": "4c8b6b7d",
+    "latestRejectedCheckpoint": "47f441e1",
     "fullRegressionStatus": "FAIL_TRACKED_TARGETED_INVOCATION_MISSING_EXPLICIT_94_FILE_LIST_PENDING_EXACT_RERUN",
     "noWriteRegressionStatus": "PASS_34_B_13_OF_13_SIX_RECEIPTS_UNCHANGED_34_G_37_OF_37_THREE_RECEIPTS_UNCHANGED_PPK022_24_OF_24_1571_VALIDATION_FILES_UNCHANGED",
     "packageStatus": "BLOCKED_UNTIL_CLEAN_EXACT_COMMIT",
@@ -34,7 +34,8 @@
     "documentationRejectedCheckpoints": ["47af84bd", "b34e951b", "6ec632c8", "10282bf4", "9f2aaf86"],
     "adrIdentityRemediation": "BUILD_164_ADR_039_PRESERVED_BUILD_169_MOVED_TO_ADR_107",
     "governanceIdentifierGateStatus": "PASS_TWO_FILES_TWELVE_TESTS",
-    "latestDocumentationRenderStatus": "PASS_28_OF_28_AFTER_6EC632C8_ABSOLUTE_LIBREOFFICE_POPPLER_RETRY"
+    "latestDocumentationRenderStatus": "PASS_28_OF_28_AFTER_6EC632C8_ABSOLUTE_LIBREOFFICE_POPPLER_RETRY",
+    "artifactIndexQaStatus": "FAIL_47F441E1_DEFAULT_LIVE_TREE_MODE_THEN_PASS_GIT_INDEX_13146_CHECKS_4407_FILES_2143_DOCUMENTS_SOURCE_4868_OF_4868_SHA_4869"
   },
   "conversationCapacity": {
     "method": "platform_actual_or_unavailable",
