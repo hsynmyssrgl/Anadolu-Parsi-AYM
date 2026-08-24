@@ -375,7 +375,7 @@
       "tarih": "2026-08-25",
       "baslik": "PPK-022 masaustu baslangic no-write zinciri kapanisi",
       "durum": "ACTIVE",
-      "kaynak": "DEC-275, PR-240 ve 4c6652e0 tam regresyon koruma FAIL checkpointi",
+      "kaynak": "DEC-275, PR-240 ve 4c6652e0/6ec632c8 tam regresyon ve belge QA FAIL checkpointleri",
       "etkilenenAlanlar": [
         "scripts/verify-32-r-ppk-022-capability-manifest-gate-runtime.mjs",
         "scripts/verify-desktop-core-service-startup-runtime-wrapper.mjs",
@@ -385,7 +385,7 @@
         "scripts/generate-current-master-documentation.py",
         "docs/ticari-urun-temeli"
       ],
-      "isListesiEtkisi": "IS-0211 ve IS-0215 DEVAM kalir. Exact Bronze tam regresyon tum Vitest ve 47 ek komutu tamamladiktan sonra desktop-core-service-startup-runtime makbuzunun yeni olusmasi guard kapisini dusurdu; 4c6652e0 ile gercek FAIL kaydedildi. Kesin 34-D -> PPK-022 -> sarmalayici -> calisma dogrulayicisi zincirinde --no-write aktarimi kapatildi. Kaynak regresyonu 1 dosya/6 test, masaustu calisma 51/51, sozlesme 41/41, uctan uca PPK-022 24/24 PASS verdi ve 1.571 dogrulama dosyasinda sifir ekleme veya degisiklik kanitlandi. Yeni exact hedefli/tam regresyon, kaynak butunlugu ve kurulu UI UAT tamamlanmadan paket yoktur.",
+      "isListesiEtkisi": "IS-0211 ve IS-0215 DEVAM kalir. Exact Bronze tam regresyon tum Vitest ve 47 ek komutu tamamladiktan sonra desktop-core-service-startup-runtime makbuzunun yeni olusmasi guard kapisini dusurdu; 4c6652e0 ile gercek FAIL kaydedildi. Kesin 34-D -> PPK-022 -> sarmalayici -> calisma dogrulayicisi zincirinde --no-write aktarimi kapatildi. Kaynak regresyonu 1 dosya/6 test, masaustu calisma 51/51, sozlesme 41/41, uctan uca PPK-022 24/24 PASS verdi ve 1.571 dogrulama dosyasinda sifir degisiklik kanitlandi. Bundled DOCX render LibreOffice PATH hatasi 6ec632c8 ile FAIL kaydedildi; mutlak LibreOffice/Poppler yollariyla 28/28 sayfa render ve gorsel QA PASS verdi. Yeni exact hedefli/tam regresyon, kaynak butunlugu ve kurulu UI UAT tamamlanmadan paket yoktur.",
       "senkronDurumu": "SYNCHRONIZED"
     }
   ]
