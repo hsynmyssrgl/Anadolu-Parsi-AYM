@@ -3,7 +3,7 @@
 - Belge sürümü: **GUNCEL-2026-08-24-V5**
 - Tarih: **24.08.2026**
 - Görünür ürün sürümü: **Bronze 22.08.2026.50**
-- Kaynak HEAD: `41c16c13bcffbf80f24aca48706160af5f3e5da6`
+- Kaynak HEAD: `90b5ad40c44edcbc8ae590afc94b67bd21cae684`
 - Statü: **ACTIVE_CURRENT_MASTER_REFERENCE**
 - Kararlar: **DEC-250–DEC-275**
 
@@ -402,7 +402,6 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - `ADR-036` — ADR-036 — İptal edilebilir IPC istek yaşam döngüsü — `docs/adr/ADR-036-cancellable-ipc-request-lifecycle.md`
 - `ADR-037` — ADR-037 — Revizyon kapsamlı IPC salt okuma paylaşımı — `docs/adr/ADR-037-revision-scoped-ipc-read-sharing.md`
 - `ADR-038` — ADR-038 — Gizlilik Güvenli IPC Performans Telemetrisi — `docs/adr/ADR-038-privacy-safe-ipc-performance-telemetry.md`
-- `ADR-039` — ADR-039 — Adaptif IPC bakımında güçlü yeniden doğrulama — `docs/adr/ADR-039-adaptive-ipc-maintenance-strong-reauthentication.md`
 - `ADR-039` — ADR-039 — Fail-Closed Adaptif IPC Kaynak Bütçeleri — `docs/adr/ADR-039-fail-closed-adaptive-ipc-resource-budgets.md`
 - `ADR-040` — ADR-040 — Crash-Safe Adaptive Budget State and Tamper-Evident Decision Journal — `docs/adr/ADR-040-crash-safe-adaptive-budget-state-and-decision-journal.md`
 - `ADR-041` — ADR-041 — Yetkili Adaptif Bütçe Sıfırlama ve Gizlilik Güvenli Tanı Paketi — `docs/adr/ADR-041-authenticated-adaptive-budget-reset-and-privacy-safe-diagnostics.md`
@@ -470,6 +469,7 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - `ADR-104` — ADR-104 — Monthly Channel Release Identity — `docs/adr/ADR-104-monthly-channel-release-identity.md`
 - `ADR-105` — ADR-105 — Single Platform Policy Kernel — `docs/adr/ADR-105-platform-policy-kernel.md`
 - `ADR-106` — ADR-106 — Headless Core Service Boundary — `docs/adr/ADR-106-headless-core-service-boundary.md`
+- `ADR-107` — ADR-107 — Adaptif IPC bakımında güçlü yeniden doğrulama — `docs/adr/ADR-107-adaptive-ipc-maintenance-strong-reauthentication.md`
 
 ## 13. Kanonik kurallar — eksiksiz
 

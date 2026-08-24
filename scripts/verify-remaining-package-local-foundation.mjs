@@ -101,22 +101,23 @@ if(mode==='contract'||mode==='runtime'){
 }
 const run=(name,args)=>{const result=spawnSync(process.execPath,args,{cwd:root,encoding:'utf8',stdio:'pipe',maxBuffer:64*1024*1024});
   const output=`${result.error?.stack??''}${result.stdout??''}${result.stderr??''}`;checks.push({name,status:result.status===0?'PASS':'FAIL',exitCode:result.status??1,output:output.slice(-16000)});return{result,output};};
+const governedNodeScript=path=>[resolve(root,path),...(noWrite?['--no-write']:[])];
 if(mode==='runtime'){
   const targeted=run('targeted tests',[resolve(root,'node_modules/vitest/vitest.mjs'),'run',...selected.tests,'--maxWorkers=1']);
   if(selected.expectedTestFiles&&selected.expectedTests)check('targeted runtime ratchet is exact',
     targeted.result.status===0&&targeted.output.includes(`Test Files  ${selected.expectedTestFiles} passed (${selected.expectedTestFiles})`)
       &&targeted.output.includes(`Tests  ${selected.expectedTests} passed (${selected.expectedTests})`));
   if(selected.validation){
-    const migrations=run('database migration verification',[resolve(root,'scripts/verify-database-migrations.mjs')]);
+    const migrations=run('database migration verification',governedNodeScript('scripts/verify-database-migrations.mjs'));
     check('migration checksum is current',migrations.result.status===0&&migrations.output.includes(selected.validation.migrationSha256));
     const ppk015=run('PPK-015 raw current boundary',[resolve(root,'scripts/verify-network-egress-boundary.mjs')]);
     let ppk015Report;try{ppk015Report=JSON.parse(ppk015.output);}catch{ppk015Report=undefined;}
     const ppk015Current=json('config/ppk-015-network-egress-current-ratchet.json').currentBoundary;
     check('PPK-015 source ratchet is current',ppk015.result.status===0
       &&networkEgressReportMatchesCurrentRatchet(ppk015Report,ppk015Current));
-    const ppk021=run('PPK-021 raw current gate',[resolve(root,'scripts/verify-platform-policy-ast-gate.mjs')]);
+    const ppk021=run('PPK-021 raw current gate',governedNodeScript('scripts/verify-platform-policy-ast-gate.mjs'));
     check('PPK-021 exact surface ratchet is current',ppk021.result.status===0&&ppk021.output.includes(`"privilegedSurfaces": ${selected.validation.ppk021Count}`)&&ppk021.output.includes(selected.validation.ppk021Sha256));
-    const ppk022=run('PPK-022 raw current gate',[resolve(root,'scripts/verify-platform-capability-manifest-gate.mjs')]);
+    const ppk022=run('PPK-022 raw current gate',governedNodeScript('scripts/verify-platform-capability-manifest-gate.mjs'));
     check('PPK-022 exact surface ratchet is current',ppk022.result.status===0&&ppk022.output.includes(`"capabilitySurfaces": ${selected.validation.ppk022Count}`)&&ppk022.output.includes(selected.validation.ppk022Sha256));
   }
   if(step==='34-I'){

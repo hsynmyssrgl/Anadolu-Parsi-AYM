@@ -1,4 +1,4 @@
-# ADR-039 — Adaptif IPC bakımında güçlü yeniden doğrulama
+# ADR-107 — Adaptif IPC bakımında güçlü yeniden doğrulama
 
 **Durum:** Kabul edildi  
 **Tarih:** 29.07.2026  

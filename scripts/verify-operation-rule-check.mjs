@@ -1,6 +1,6 @@
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 
 const valueAfter = (flag) => {
   const index = process.argv.indexOf(flag);
@@ -25,7 +25,8 @@ const stable = (value) => Array.isArray(value)
 check(operation.length >= 3 && operation.length <= 160 && !/[\r\n]/u.test(operation), 'Geçerli --operation açıklaması zorunludur.');
 check(allowedKinds.has(kind), `Geçerli --kind zorunludur: ${[...allowedKinds].join(', ')}.`);
 
-const [registry, acknowledgement, constitution, enforcement, mutationReadinessPolicy, dependencyRegistryBytes, userDecisionLedger, dec275Bytes] = await Promise.all([
+const [registry, acknowledgement, constitution, enforcement, mutationReadinessPolicy, dependencyRegistryBytes,
+  userDecisionLedger, dec275Bytes, workLedger, commercialLedger, adrNames, decisionNames] = await Promise.all([
   readJson('config/canonical-rule-registry.json'),
   readJson('config/rule-acknowledgement.json'),
   readJson('config/project-constitution.json'),
@@ -33,7 +34,11 @@ const [registry, acknowledgement, constitution, enforcement, mutationReadinessPo
   readJson('config/mutation-release-readiness-policy.json'),
   readFile('config/change-impact-dependency-registry.json'),
   readJson('config/user-decision-ledger.json'),
-  readFile('docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md')
+  readFile('docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md'),
+  readJson('docs/ticari-urun-temeli/08_IS_LISTESI/03_ANA_IS_SICILI.json'),
+  readJson('docs/ticari-urun-temeli/01_YONETIM/05_DEGISIKLIK_SICILI.json'),
+  readdir('docs/adr'),
+  readdir('docs/decisions')
 ]);
 const dependencyRegistry = JSON.parse(dependencyRegistryBytes.toString('utf8'));
 const dependencyRegistrySha256 = createHash('sha256').update(dependencyRegistryBytes).digest('hex');
@@ -48,6 +53,26 @@ const releaseAllocationEnforcement = enforcement.entries.find((entry) => entry.r
 const installedReleaseUatEnforcement = enforcement.entries.find((entry) => entry.ruleId === 'PR-239');
 const mutationWideClosureEnforcement = enforcement.entries.find((entry) => entry.ruleId === 'PR-240');
 const dec275 = userDecisionLedger.decisions?.find((entry) => entry.id === 'DEC-275');
+const exactIds = (values, pattern) => Array.isArray(values)
+  && values.every((value) => pattern.test(value))
+  && new Set(values).size === values.length;
+const ruleIds = registry.rules?.map((entry) => entry.id) ?? [];
+const enforcementRuleIds = enforcement.entries?.map((entry) => entry.ruleId) ?? [];
+const decisionIds = userDecisionLedger.decisions?.map((entry) => entry.id) ?? [];
+const workIds = workLedger.isler?.map((entry) => entry.id) ?? [];
+const commercialIds = commercialLedger.kayitlar?.map((entry) => entry.id) ?? [];
+const adrFiles = adrNames.filter((name) => /^ADR-\d{3}-.+\.md$/u.test(name));
+const decisionFiles = decisionNames.filter((name) => /^DEC-\d{3}-.+\.md$/u.test(name));
+const adrIds = adrFiles.map((name) => name.slice(0, 7));
+const decisionFileIds = decisionFiles.map((name) => name.slice(0, 7));
+const adrHeadings = await Promise.all(adrFiles.map(async (name) => ({
+  id: name.slice(0, 7),
+  text: await readFile(`docs/adr/${name}`, 'utf8')
+})));
+const decisionHeadings = await Promise.all(decisionFiles.map(async (name) => ({
+  id: name.slice(0, 7),
+  text: await readFile(`docs/decisions/${name}`, 'utf8')
+})));
 const exactPr240ImpactAreas = ['mainSource', 'channelSources', 'canonicalRules', 'decisions', 'activeDocuments',
   'commercialRecords', 'workList', 'scopesInventoriesRatchets', 'manifestsIndexes', 'masterDocumentation', 'ratchets', 'tests', 'uat'];
 const exactUniversalDependentRecords = ['SHA256SUMS.txt', 'artifacts/manifests/PROJECT_ARTIFACT_INDEX.csv',
@@ -77,6 +102,19 @@ const exactDec275Documents = ['AGENTS.md', 'SHA256SUMS.txt', 'config/active-gove
   'docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md', 'manifest.json'];
 
 check(registry.rulesSha256 === calculatedHash, 'Kanonik kural hash doğrulaması başarısız.');
+check(exactIds(ruleIds, /^PR-\d{3}$/u), 'Kanonik PR kimlikleri tekil ve PR-xxx biçiminde değil.');
+check(exactIds(enforcementRuleIds, /^PR-\d{3}$/u), 'Enforcement PR kimlikleri tekil ve PR-xxx biçiminde değil.');
+check(exactIds(decisionIds, /^DEC-\d{3}$/u), 'Kullanıcı DEC kimlikleri tekil ve DEC-xxx biçiminde değil.');
+check(exactIds(adrIds, /^ADR-\d{3}$/u)
+  && adrHeadings.every(({ id, text }) => text.startsWith(`# ${id}`)),
+  'ADR dosya kimlikleri tekil değil veya dosya adı ile başlık uyuşmuyor.');
+check(exactIds(decisionFileIds, /^DEC-\d{3}$/u)
+  && decisionHeadings.every(({ id, text }) => text.startsWith(`# ${id}`)),
+  'DEC dosya kimlikleri tekil değil veya dosya adı ile başlık uyuşmuyor.');
+check(exactIds(workIds, /^IS-\d{4}$/u), 'İş sicili kimlikleri tekil ve IS-xxxx biçiminde değil.');
+check(exactIds(commercialIds, /^TICARI-\d{3}$/u)
+  && commercialLedger.sonKayit === commercialIds.at(-1),
+  'Ticari kayıt kimlikleri tekil değil veya sonKayit son kayıtla uyuşmuyor.');
 check(registry.ruleCount === registry.rules.length, 'Kanonik kural sayısı uyuşmuyor.');
 check(registry.activeRuleCount === activeRules.length, 'Aktif kural sayısı uyuşmuyor.');
 check(acknowledgement.release === registry.effectiveRelease, 'Kural onayı sürümü eski.');

@@ -21,6 +21,15 @@ describe('operation rule check policy', () => {
     expect(source).toContain("readJson('config/rule-acknowledgement.json')");
     expect(source).toContain("readJson('config/user-decision-ledger.json')");
     expect(source).toContain("readFile('docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md')");
+    expect(source).toContain("readdir('docs/adr')");
+    expect(source).toContain("readdir('docs/decisions')");
+    expect(source).toContain("readJson('docs/ticari-urun-temeli/08_IS_LISTESI/03_ANA_IS_SICILI.json')");
+    expect(source).toContain("readJson('docs/ticari-urun-temeli/01_YONETIM/05_DEGISIKLIK_SICILI.json')");
+    expect(source).toContain("exactIds(ruleIds, /^PR-\\d{3}$/u)");
+    expect(source).toContain("exactIds(decisionIds, /^DEC-\\d{3}$/u)");
+    expect(source).toContain("text.startsWith(`# ${id}`)");
+    expect(source).toContain("exactIds(workIds, /^IS-\\d{4}$/u)");
+    expect(source).toContain("exactIds(commercialIds, /^TICARI-\\d{3}$/u)");
     expect(source).toContain('registry.rulesSha256 === calculatedHash');
     expect(source).toContain('activeRules.every((rule) => enforcementIds.has(rule.id))');
     expect(source).toContain('entry.waiverAllowed === false && entry.skipAllowed === false');

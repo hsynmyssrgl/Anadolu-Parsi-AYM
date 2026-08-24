@@ -26,7 +26,14 @@
     "bootstrapBaselineProducerBinding": "POINTER_SOURCE_COMMIT_WITH_BASE_POINTER_HEAD_ANCESTRY",
     "preflightStatus": "NOT_RUN_CURRENT_MUTATION",
     "postflightStatus": "NOT_RUN_CURRENT_MUTATION",
-    "packageStatus": "BLOCKED_UNTIL_CLEAN_EXACT_COMMIT"
+    "latestRejectedCheckpoint": "90b5ad40",
+    "fullRegressionStatus": "FAIL_TRACKED_RECEIPT_WRITE_LEAK_FIX_PENDING_EXACT_RERUN",
+    "noWriteRegressionStatus": "PASS_34_B_13_OF_13_SIX_RECEIPTS_UNCHANGED_AND_34_G_37_OF_37_THREE_RECEIPTS_UNCHANGED",
+    "packageStatus": "BLOCKED_UNTIL_CLEAN_EXACT_COMMIT",
+    "documentationQaStatus": "FINAL_RENDER_28_OF_28_VISUAL_QA_PASS_24_HASH_IDENTICAL_4_FRESH_INSPECTION",
+    "documentationRejectedCheckpoints": ["47af84bd", "b34e951b", "10282bf4", "9f2aaf86"],
+    "adrIdentityRemediation": "BUILD_164_ADR_039_PRESERVED_BUILD_169_MOVED_TO_ADR_107",
+    "governanceIdentifierGateStatus": "PASS_TWO_FILES_TWELVE_TESTS"
   },
   "conversationCapacity": {
     "method": "platform_actual_or_unavailable",

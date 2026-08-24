@@ -128,6 +128,7 @@ describe('PR-235 canonical mutation evidence producers', () => {
       'scripts/verify-data-store-smoke.mjs',
       'scripts/verify-32-q-ppk-021-platform-policy-ast-gate-runtime.mjs',
       'scripts/verify-32-r-ppk-022-capability-manifest-gate-contract.mjs',
+      'scripts/verify-32-r-ppk-022-capability-manifest-gate-runtime.mjs',
       'scripts/verify-32-k-ppk-015-network-egress-contract.mjs',
       'scripts/verify-32-k-ppk-015-network-egress-runtime.mjs',
       'scripts/verify-platform-policy-ast-gate.mjs',
@@ -141,6 +142,36 @@ describe('PR-235 canonical mutation evidence producers', () => {
       const source = await readFile(path, 'utf8');
       expect(source).toContain("process.argv.includes('--no-write')");
       expect(source).toContain('if (!noWrite)');
+    }
+    for (const path of [
+      'scripts/verify-34-b-communication-messaging-lifecycle-privacy-presence-runtime.mjs',
+      'scripts/verify-34-c-realtime-calling-media-accessible-ux-runtime.mjs',
+      'scripts/verify-34-d-explicit-consent-recording-media-retention-runtime.mjs',
+      'scripts/verify-34-e-local-first-translation-caption-language-provider-runtime.mjs',
+      'scripts/verify-34-f-family-meetings-decisions-consent-minutes-runtime.mjs'
+    ]) {
+      const source = await readFile(path, 'utf8');
+      expect(source).toContain("const governedNpmRun=script=>npmArgs(['run',script,...(noWrite?['--','--no-write']:[])]);");
+      for (const script of [
+        'verify:migrations',
+        'verify:ppk021:runtime',
+        'verify:ppk022:runtime',
+        'verify:ppk015:egress:runtime'
+      ]) expect(source).toContain(`governedNpmRun('${script}')`);
+      if (source.includes("'verify:data-store-smoke'")) {
+        expect(source).toContain("governedNpmRun('verify:data-store-smoke')");
+      }
+      expect(source).not.toMatch(/npmArgs\(\['run','verify:(?:migrations|data-store-smoke|ppk021:runtime|ppk022:runtime|ppk015:egress:runtime)'\]\)/u);
+    }
+    const remainingFoundationSource = await readFile('scripts/verify-remaining-package-local-foundation.mjs', 'utf8');
+    expect(remainingFoundationSource).toContain("const governedNodeScript=path=>[resolve(root,path),...(noWrite?['--no-write']:[])];");
+    for (const script of [
+      'scripts/verify-database-migrations.mjs',
+      'scripts/verify-platform-policy-ast-gate.mjs',
+      'scripts/verify-platform-capability-manifest-gate.mjs'
+    ]) {
+      expect(remainingFoundationSource).toContain(`governedNodeScript('${script}')`);
+      expect(remainingFoundationSource).not.toContain(`[resolve(root,'${script}')]`);
     }
   });
 

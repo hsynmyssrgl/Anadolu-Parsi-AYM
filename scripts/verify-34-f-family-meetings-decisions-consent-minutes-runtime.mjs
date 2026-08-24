@@ -6,6 +6,7 @@ import { assertGovernedSourceRoot } from './lib/governed-source-root.mjs';
 const noWrite=process.argv.includes('--no-write');const root=assertGovernedSourceRoot({allowReleaseChannel:noWrite});
 const node=process.execPath;
 const npmCli=process.env.npm_execpath??resolve(root,'.tmp','npm-10.9.2','package','bin','npm-cli.js');const npmArgs=args=>[npmCli,...args];
+const governedNpmRun=script=>npmArgs(['run',script,...(noWrite?['--','--no-write']:[])]);
 const run=(name,command,args)=>{const result=spawnSync(command,args,{cwd:root,encoding:'utf8',stdio:'pipe',maxBuffer:32*1024*1024});
   const output=`${result.error?.stack??''}${result.stdout??''}${result.stderr??''}`;return {name,status:result.status===0?'PASS':'FAIL',
     exitCode:result.status??1,output:output.slice(-12000)};};
@@ -15,12 +16,12 @@ results.push(run('contract',node,['scripts/verify-34-f-family-meetings-decisions
 results.push(run('targeted 6 files 32 tests',node,npmArgs(['run','verify:34-f:targeted'])));
 for(const workspace of ['@ppt/domain','@ppt/repository-contracts','@ppt/application','@ppt/database','@ppt/repositories','@ppt/desktop'])
   results.push(run(`typecheck ${workspace}`,node,npmArgs(['run','typecheck','--workspace',workspace])));
-results.push(run('migration verifier',node,npmArgs(['run','verify:migrations'])));
-results.push(run('data store smoke',node,npmArgs(['run','verify:data-store-smoke'])));
+results.push(run('migration verifier',node,governedNpmRun('verify:migrations')));
+results.push(run('data store smoke',node,governedNpmRun('verify:data-store-smoke')));
 results.push(run('PPK-019 boundary',node,npmArgs(['run','verify:ppk019:propagation-boundary'])));
-results.push(run('PPK-021 runtime',node,npmArgs(['run','verify:ppk021:runtime'])));
-results.push(run('PPK-022 runtime',node,npmArgs(['run','verify:ppk022:runtime'])));
-results.push(run('PPK-015 current runtime',node,npmArgs(['run','verify:ppk015:egress:runtime'])));
+results.push(run('PPK-021 runtime',node,governedNpmRun('verify:ppk021:runtime')));
+results.push(run('PPK-022 runtime',node,governedNpmRun('verify:ppk022:runtime')));
+results.push(run('PPK-015 current runtime',node,governedNpmRun('verify:ppk015:egress:runtime')));
 const failures=results.filter(item=>item.status==='FAIL');
 const report={schemaVersion:1,step:'34-F',decision:'DEC-243',status:failures.length?'FAIL':'PASS',governanceState:'PLANNED',
   countsAsRequirementPass:false,targetedTestFiles:6,targetedTests:32,checkCount:results.length,

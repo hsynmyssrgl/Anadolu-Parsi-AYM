@@ -1065,7 +1065,7 @@ Ham parola ve TOTP kodu yalnız kısa ömürlü IPC girdisidir; bakım oturumuna
 parmak izine, denetim metadatasına, performans telemetrisine veya tanı paketine
 yazılmaz. Renderer alanları sonuçtan bağımsız olarak temizler. Build 167'nin tek
 kullanımlık 90 saniyelik işlem oturumu ve Build 168'in rol/güvenilir cihaz
-politikası korunur. Karar ADR-039,
+politikası korunur. Karar ADR-107,
 `docs/IPC_ADAPTIVE_BUDGET_MAINTENANCE_REAUTHENTICATION_V1.md` ve Build 169
 sözleşme/runtime kanıtlarıyla izlenir.
 
@@ -1464,4 +1464,4 @@ Uygulama bağı mutasyondan önce kaydedilen clean Bronze baseline receipt'i, im
 
 ## DEC-275 — En küçük değişiklikte tüm kayıt ve test kapanışı
 
-24.08.2026 tarihinde her küçük mutasyonun etkilenen ana/kanal kaynakları, kural ve karar sicilleri, aktif/ticari belgeler, iş listesi, kapsam-envanter-ratchet-manifest-indeks, güncel ana DOCX/PDF ve kanıt sözleşmelerini aynı zincirde kapatması bağlandı. Hedefli ve filtresiz tam regresyon, typecheck, sözdizimi, kaynak bütünlüğü ile UI etkisinde bütün etkileşim ve görsel UAT zorunludur. Gerçek hata `wip(rejected)` checkpoint olarak kaydedilir; tam kapanıştan önce ara installer üretilemez. Bağlayıcı kayıt DEC-275 ve PR-240'tır.
+24.08.2026 tarihinde her küçük mutasyonun etkilenen ana/kanal kaynakları, kural ve karar sicilleri, aktif/ticari belgeler, iş listesi, kapsam-envanter-ratchet-manifest-indeks, güncel ana DOCX/PDF ve kanıt sözleşmelerini aynı zincirde kapatması bağlandı. Hedefli ve filtresiz tam regresyon, typecheck, sözdizimi, kaynak bütünlüğü ile UI etkisinde bütün etkileşim ve görsel UAT zorunludur. Gerçek hata `wip(rejected)` checkpoint olarak kaydedilir; tam kapanıştan önce ara installer üretilemez. `65db62ad`, 34-B–34-F zincirinde altı PPK makbuzuna yazma sızıntısını; `90b5ad40` ise 34-G–34-K remaining-package zincirindeki migration/PPK-021/PPK-022 no-write aktarım boşluğunu kaydeder. Düzeltmelerden sonra gerçek 34-B 13/13 ve altı makbuz 6/6, gerçek 34-G 37/37 ve üç makbuz 3/3 SHA-256 değişmezlik PASS vermiştir. `47af84bd` ve `b34e951b` ana DOCX render altyapısındaki LibreOffice/Poppler PATH çözümleme hatalarını, `10282bf4` ise iki kararın aynı `ADR-039` kimliğini taşımasını reddedilmiş checkpoint olarak korur. Nihai ana belge 28/28 görsel QA PASS vermiştir; Build 164 kararı `ADR-039` kalırken Build 169 güçlü yeniden doğrulama kararı `ADR-107` olmuştur. İlk kimlik kapısının tarihsel başlık ayraçlarını yanlış reddetmesi `9f2aaf86` ile kaydedilmiş; kapı biçim yerine kimlik eşliği/tekilliğine daraltılmış ve 2 dosya/12 test PASS vermiştir. Yeni exact tam regresyon olmadan paket yoktur. Bağlayıcı kayıt DEC-275 ve PR-240'tır.

@@ -8,6 +8,7 @@ const root=assertGovernedSourceRoot({allowReleaseChannel:noWrite});
 const node=process.execPath;
 const npmCli=process.env.npm_execpath??resolve(root,'.tmp','npm-10.9.2','package','bin','npm-cli.js');
 const npmArgs=args=>[npmCli,...args];
+const governedNpmRun=script=>npmArgs(['run',script,...(noWrite?['--','--no-write']:[])]);
 const run=(name,command,args)=>{const result=spawnSync(command,args,{cwd:root,encoding:'utf8',stdio:'pipe',maxBuffer:32*1024*1024});
   const output=`${result.error?.stack??''}${result.stdout??''}${result.stderr??''}`;return {name,status:result.status===0?'PASS':'FAIL',
     exitCode:result.status??1,output:output.slice(-12000)};};
@@ -17,11 +18,11 @@ results.push(run('contract',node,['scripts/verify-34-d-explicit-consent-recordin
 results.push(run('targeted 5 files 23 tests',node,npmArgs(['run','verify:34-d:targeted'])));
 for(const workspace of ['@ppt/domain','@ppt/repository-contracts','@ppt/application','@ppt/database','@ppt/repositories','@ppt/desktop'])
   results.push(run(`typecheck ${workspace}`,node,npmArgs(['run','typecheck','--workspace',workspace])));
-results.push(run('migration verifier',node,npmArgs(['run','verify:migrations'])));
-results.push(run('data store smoke',node,npmArgs(['run','verify:data-store-smoke'])));
-results.push(run('PPK-021 runtime',node,npmArgs(['run','verify:ppk021:runtime'])));
-results.push(run('PPK-022 runtime',node,npmArgs(['run','verify:ppk022:runtime'])));
-results.push(run('PPK-015 current runtime',node,npmArgs(['run','verify:ppk015:egress:runtime'])));
+results.push(run('migration verifier',node,governedNpmRun('verify:migrations')));
+results.push(run('data store smoke',node,governedNpmRun('verify:data-store-smoke')));
+results.push(run('PPK-021 runtime',node,governedNpmRun('verify:ppk021:runtime')));
+results.push(run('PPK-022 runtime',node,governedNpmRun('verify:ppk022:runtime')));
+results.push(run('PPK-015 current runtime',node,governedNpmRun('verify:ppk015:egress:runtime')));
 const failures=results.filter(item=>item.status==='FAIL');
 const report={schemaVersion:1,step:'34-D',decision:'DEC-241',status:failures.length?'FAIL':'PASS',governanceState:'PLANNED',
   countsAsRequirementPass:false,targetedTestFiles:5,targetedTests:23,checkCount:results.length,
