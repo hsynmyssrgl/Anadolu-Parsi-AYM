@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "release": "Bronze 22.08.2026.50",
   "releaseId": "bronze-2026-08-22-r50",
-  "generatedAt": "2026-08-24T08:46:01.748Z",
+  "generatedAt": "2026-08-24T09:01:05.799Z",
   "selfIndexedPaths": [
     "SHA256SUMS.txt",
     "artifacts/inventory/TESLIMAT_CALISMA_AGACI_ENVANTERI.json",
@@ -2429,7 +2429,7 @@
     {
       "path": "artifacts/validation/32-K-ppk-015-network-egress-contract.json",
       "bytes": 6450,
-      "sha256": "c9a00b9f5daf8dac96ee4958a3c4ffbd2bc1c5924e8a38ddd8087f4d16d3a7ea",
+      "sha256": "69fc91d1b0b5f893b520436ad00e69d2992ed80004f92e910cb67dd5329b8fa3",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -3685,7 +3685,7 @@
     {
       "path": "artifacts/validation/feature-reality-gate.json",
       "bytes": 673,
-      "sha256": "62407a7954246d750fa9c8fdda864973478d27a49416b53ec3cb9f24a1ba46e0",
+      "sha256": "3ce550aeb47c351fec5eb52e81258b3d0e3edb3c9a41a154c27e81451cacbfb9",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -3708,8 +3708,8 @@
     },
     {
       "path": "artifacts/validation/governed-preflight.json",
-      "bytes": 4231,
-      "sha256": "cf225c30bc0f7683172738837d72a2dc2f01297c5a560666cda4a294abfc350a",
+      "bytes": 9554,
+      "sha256": "dfa177f5e516e87fc5f569176faaceb1e19de4d727f400cbced70e778fe444df",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -9085,7 +9085,7 @@
     {
       "path": "config/ppk-015-network-egress-current-ratchet.json",
       "bytes": 2021,
-      "sha256": "4f0be188b6ed82199d08a0f97e70ee9a35520ae006559fd8d567b4de3b29d987",
+      "sha256": "808f1f5e88856e3cf1d558722fc40d4448621f0139a0757c946fb4ce628a4a61",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -14333,7 +14333,7 @@
     {
       "path": "docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json",
       "bytes": 17394,
-      "sha256": "c29891f0056221086374be6733fe84c6fd85d69da51cc4996e9fab2f742ad2a8",
+      "sha256": "69cce460033b1a0e77e8f28b5d6563826938c1f938d497a8dfcc0da11493d00f",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
