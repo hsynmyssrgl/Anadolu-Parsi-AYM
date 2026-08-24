@@ -3,7 +3,7 @@
 - Belge sürümü: **GUNCEL-2026-08-24-V5**
 - Tarih: **24.08.2026**
 - Görünür ürün sürümü: **Bronze 22.08.2026.50**
-- Kaynak HEAD: `59ca9327fe3f8a0fd362bc53e822febc8ec6dfc0`
+- Kaynak HEAD: `5a1a6968ce7769bc4dd4ad39ec907cdc30831175`
 - Statü: **ACTIVE_CURRENT_MASTER_REFERENCE**
 - Kararlar: **DEC-250–DEC-275**
 
@@ -16,7 +16,7 @@
 - Office/RTF/PDF: **872**; benzersiz içerik hash'i: **7585**; tekrar kopya: **29269**.
 - Build209–228 master çiftleri ve eski Bronze aktif referans çifti tarihsel olarak korunmuştur.
 - Karar dosyası: **184**; ADR: **106**; security/threat belgesi: **72**.
-- Mevcut tam belge/config/kanıt envanteri: **3866** (yeni sürümden önceki indeks).
+- Mevcut tam belge/config/kanıt envanteri: **2143** (yeni sürümden önceki indeks).
 
 ## 2. Yetki ve öncelik
 
@@ -151,6 +151,7 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - PR-235 ile en küçük değişiklik dahi exact değişen yol, bağımlı kural/karar/belge/manifest/ratchet/test/UAT kayıtları ve aynı temiz committe hedefli-tam-bütünlük kanıtlarıyla fail-closed eşlemeye bağlandı.
 - PR-235 BOOTSTRAP_ADOPTION diff tabanı sabit kalırken producer yalnız pointer sourceCommit kayıt commitinde external-pointer exact eşitliği ve baseCommit → pointer.sourceCommit → HEAD ancestry ile; normal PRE_MUTATION producer ise kendi baseline commitinde doğrulanır.
 - PR-239 UAT111 kapsamı Git'te izlenen TypeScript kanonik rota otoritesi, tüm görünür ve uygun kontrollerin dinamik outcome matrisi, gerçek native CANCEL/ACCEPT ve exclusive reparse-korumalı kanıt köküyle güncellendi.
+- PR-240 filtresiz tam regresyon guard hatası 4c6652e0 ile korunmuştur. PPK-022 masaüstü başlangıç zincirinde --no-write aktarımı çağrı, sarmalayıcı ve son makbuz üreticilerinde kapatılmış; kaynak regresyonu 1 dosya/6 test, çalışma 51/51, sözleşme 41/41 ve uçtan uca PPK-022 24/24 PASS verirken 1.571 doğrulama dosyasında sıfır değişiklik kanıtlanmıştır. Bundled render aracının yinelenen LibreOffice PATH hatası 6ec632c8 ile korunmuş, mutlak LibreOffice/Poppler yollarıyla ana belge 28/28 sayfa görsel QA PASS vermiştir.
 
 ## 9. Görsel kimlik ve erişilebilirlik
 
