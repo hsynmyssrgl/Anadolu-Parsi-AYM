@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "step": "34-F",
+  "decision": "DEC-243",
+  "status": "PASS",
+  "governanceState": "PLANNED",
+  "countsAsRequirementPass": false,
+  "checkCount": 15,
+  "passed": 15,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "governance identities and no-pass truth are exact",
+      "status": "PASS"
+    },
+    {
+      "name": "domain publishes safe views and false provider truth",
+      "status": "PASS"
+    },
+    {
+      "name": "repository contract exposes exact governed persistence and payload-free resolution",
+      "status": "PASS"
+    },
+    {
+      "name": "application requires recording consent and explicit human approval",
+      "status": "PASS"
+    },
+    {
+      "name": "migration 110 owns eleven tables and immutable ledgers",
+      "status": "PASS"
+    },
+    {
+      "name": "migration forces local-only minutes and exact consent/provider states",
+      "status": "PASS"
+    },
+    {
+      "name": "repository and adapter require central policy context",
+      "status": "PASS"
+    },
+    {
+      "name": "minutes vault is bounded encrypted and no-overwrite",
+      "status": "PASS"
+    },
+    {
+      "name": "IPC lifecycle bridge and preload expose fourteen bounded channels",
+      "status": "PASS"
+    },
+    {
+      "name": "renderer reuses Life center and every safe bridge",
+      "status": "PASS"
+    },
+    {
+      "name": "documents preserve fail-honest residuals",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted package command is exact",
+      "status": "PASS"
+    },
+    {
+      "name": "governance verifier commands are wired",
+      "status": "PASS"
+    },
+    {
+      "name": "migration and PPK ratchets are exact",
+      "status": "PASS"
+    },
+    {
+      "name": "governance sources are nonempty and uniquely bound",
+      "status": "PASS"
+    }
+  ],
+  "generatedAt": "2026-08-24T12:15:32.718Z"
+}

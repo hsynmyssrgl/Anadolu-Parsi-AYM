@@ -272,6 +272,24 @@
       ],
       "isListesiEtkisi": "IS-0211 DEVAM kalir. BOOTSTRAP_ADOPTION diff tabani 440d5c7a olarak korunur; o committe producer bulunmadigi icin producer pointer sourceCommit kayit commitinde external-pointer exact esitligi ve base-pointer-HEAD ancestry ile dogrulanir. PRE_MUTATION producer bagi kendi baseline commitinde kalir. Tam diffte fail-closed yakalanan .gitattributes governed-source safety-net dependency kuralina, manifest/SHA256SUMS ve universal hedefli test bagiyla eklenmistir. Hedefli, tam regresyon, paket ve kurulu UAT kanitlari tamamlanmadan PASS yoktur.",
       "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-017",
+      "tarih": "2026-08-24",
+      "baslik": "PR-240 degismez tarihsel kayit ve guncel makbuz ayrimi",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-275, PR-240 ve fail-closed tam diff bulgusu",
+      "etkilenenAlanlar": [
+        "config/change-impact-dependency-registry.json",
+        "config/mutation-release-readiness-policy.json",
+        "apps/desktop/tests/mutation-release-evidence-producers.test.ts",
+        "artifacts/validation/34-F-family-meetings-decisions-consent-minutes-boundary.json",
+        "artifacts/validation/34-F-family-meetings-decisions-consent-minutes-contract.json",
+        "artifacts/validation/34-F-family-meetings-decisions-consent-minutes-runtime.json",
+        "docs/ticari-urun-temeli"
+      ],
+      "isListesiEtkisi": "IS-0215 DEVAM kalir. Byte-exact 32-K tarihsel scope dependentRecords listesinden cikarildi fakat exact trigger ve SHA degismezlik kapisi olarak korundu. Guncel PPK-015 ratchet/contract/runtime kayitlari bagimli kalir. 34-F boundary/contract/runtime PASS makbuzlari resmi ureticilerden uretilip Git teslim kapsaminda izlenir. Exact commit hedefli/tam regresyon, kaynak butunlugu ve kurulu UI UAT tamamlanmadan PASS yoktur.",
+      "senkronDurumu": "SYNCHRONIZED"
     }
   ]
 }

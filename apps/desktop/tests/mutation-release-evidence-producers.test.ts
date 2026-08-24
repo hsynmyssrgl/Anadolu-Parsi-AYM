@@ -131,6 +131,12 @@ describe('PR-235 canonical mutation evidence producers', () => {
     const registry = validateChangeImpactDependencyRegistry(JSON.parse(
       await readFile('config/change-impact-dependency-registry.json', 'utf8')
     ));
+    const ppk015Rule = registry.pathRules.find((rule: { id: string }) => rule.id === 'ppk015-network-egress-policy-full-chain');
+    expect(ppk015Rule).toBeDefined();
+    expect(ppk015Rule.match.exactPaths).toContain('config/32-k-ppk-015-network-egress-policy-scope.json');
+    expect(ppk015Rule.dependentRecords).not.toContain('config/32-k-ppk-015-network-egress-policy-scope.json');
+    expect(ppk015Rule.dependentRecords).toContain('config/ppk-015-network-egress-current-ratchet.json');
+    expect(ppk015Rule.affectedVitestFiles).toContain('apps/desktop/tests/ppk015-network-egress-governance-ratchet.test.ts');
     const plan = resolveChangeImpactDependencies({
       registry,
       changedFiles: [

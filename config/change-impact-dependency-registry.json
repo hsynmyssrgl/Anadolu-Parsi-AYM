@@ -200,7 +200,6 @@
         "pathSuffixes": []
       },
       "dependentRecords": [
-        "config/32-k-ppk-015-network-egress-policy-scope.json",
         "config/ppk-015-network-egress-current-ratchet.json",
         "docs/current/PPK-015_NETWORK_EGRESS_CURRENT_RATCHET.md",
         "docs/security/PPK-015_NETWORK_EGRESS_POLICY_THREAT_MODEL.md",

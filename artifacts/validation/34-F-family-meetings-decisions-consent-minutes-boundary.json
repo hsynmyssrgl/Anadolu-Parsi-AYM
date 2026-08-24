@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "step": "34-F",
+  "decision": "DEC-243",
+  "status": "PASS",
+  "governanceState": "PLANNED",
+  "implementationStatus": "PARTIAL_LOCAL_COMPOSED_AND_TESTED_ACCEPTANCE_INCOMPLETE",
+  "countsAsRequirementPass": false,
+  "checkCount": 12,
+  "passed": 12,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "scope inventory roadmap and dependencies are exact",
+      "status": "PASS"
+    },
+    {
+      "name": "registry plan and ledger remain open behind predecessor",
+      "status": "PASS"
+    },
+    {
+      "name": "domain keeps local-only provider truth explicit",
+      "status": "PASS"
+    },
+    {
+      "name": "application exposes governed meeting lifecycle and consent-bound minutes",
+      "status": "PASS"
+    },
+    {
+      "name": "repository is owner scoped and does not persist minutes plaintext",
+      "status": "PASS"
+    },
+    {
+      "name": "desktop composes central Life PEP, recording consent and encrypted vault",
+      "status": "PASS"
+    },
+    {
+      "name": "IPC exposes fourteen safe channels",
+      "status": "PASS"
+    },
+    {
+      "name": "renderer preserves retry identity and has no provider or network authority",
+      "status": "PASS"
+    },
+    {
+      "name": "production external execution claims remain false",
+      "status": "PASS"
+    },
+    {
+      "name": "manual evidence receipt and requirement acceptance remain closed",
+      "status": "PASS"
+    },
+    {
+      "name": "local test and migration ratchets are exact",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK ratchets are closed without requirement pass",
+      "status": "PASS"
+    }
+  ],
+  "generatedAt": "2026-08-24T12:15:32.598Z"
+}
