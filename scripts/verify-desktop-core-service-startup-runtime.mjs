@@ -7,6 +7,7 @@ import { CoreServiceRuntime } from '../apps/core-service/src/core-service-runtim
 import { CoreServiceLocalAdminServer } from '../apps/core-service/src/local-admin-server.ts';
 import { connectCoreServiceAtStartup, CoreServiceStartupConnectionError } from '../apps/desktop/src/main/core-service-startup-connection.ts';
 
+const noWrite = process.argv.includes('--no-write');
 const failures=[];let checks=0;const check=(condition,message)=>{checks++;if(!condition)failures.push(message)};
 const expectCode=async(fn,code,label)=>{try{await fn();check(false,`${label}: expected ${code}`)}catch(error){check(error instanceof CoreServiceStartupConnectionError,`${label}: wrong error type`);check(error?.code===code,`${label}: expected ${code}, got ${String(error?.code)}`)}};
 const root=await mkdtemp(join(tmpdir(),'ppt-desktop-core-startup-'));
@@ -110,6 +111,8 @@ try{
  await expectCode(()=>connectCoreServiceAtStartup({authorityPath:'/protected/stopped.pptsecret',authorityReader:{readText:()=>JSON.stringify(stoppedAuthority)},platform:process.platform}),'SERVICE_NOT_READY','stopped service');
 } finally {await stoppedServer.stop();await rm(root,{recursive:true,force:true});}
 const report={schemaVersion:1,release:'Bronze 04.08.2026.29',checks,status:failures.length?'FAIL':'PASS',failures,generatedAt:new Date().toISOString()};
-const {mkdir,writeFile}=await import('node:fs/promises');await mkdir('artifacts/validation',{recursive:true});await writeFile('artifacts/validation/desktop-core-service-startup-runtime.json',JSON.stringify(report,null,2)+'\n');
+if (!noWrite) {
+ const {mkdir,writeFile}=await import('node:fs/promises');await mkdir('artifacts/validation',{recursive:true});await writeFile('artifacts/validation/desktop-core-service-startup-runtime.json',JSON.stringify(report,null,2)+'\n');
+}
 if(failures.length){console.error(failures.join('\n'));process.exit(1)}
-console.log(`Desktop Core Service Startup Runtime: PASS (${checks} checks).`);
+console.log(`Desktop Core Service Startup Runtime: PASS (${checks} checks; write=${!noWrite}).`);

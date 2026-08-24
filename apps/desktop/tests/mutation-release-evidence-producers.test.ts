@@ -137,7 +137,9 @@ describe('PR-235 canonical mutation evidence producers', () => {
       'scripts/verify-application-security-profile-gate.mjs',
       'scripts/verify-database-migrations.mjs',
       'scripts/verify-core-service-boundary.mjs',
-      'scripts/verify-30-o-core-service-entrypoint-runtime.mjs'
+      'scripts/verify-30-o-core-service-entrypoint-runtime.mjs',
+      'scripts/verify-desktop-core-service-startup-contract.mjs',
+      'scripts/verify-desktop-core-service-startup-runtime.mjs'
     ]) {
       const source = await readFile(path, 'utf8');
       expect(source).toContain("process.argv.includes('--no-write')");
@@ -163,6 +165,11 @@ describe('PR-235 canonical mutation evidence producers', () => {
       }
       expect(source).not.toMatch(/npmArgs\(\['run','verify:(?:migrations|data-store-smoke|ppk021:runtime|ppk022:runtime|ppk015:egress:runtime)'\]\)/u);
     }
+    const ppk022RuntimeSource = await readFile('scripts/verify-32-r-ppk-022-capability-manifest-gate-runtime.mjs', 'utf8');
+    expect(ppk022RuntimeSource).toContain("['scripts/verify-desktop-core-service-startup-runtime-wrapper.mjs', ...noWriteArgs]");
+    const startupRuntimeWrapperSource = await readFile('scripts/verify-desktop-core-service-startup-runtime-wrapper.mjs', 'utf8');
+    expect(startupRuntimeWrapperSource).toContain("process.argv.includes('--no-write')");
+    expect(startupRuntimeWrapperSource).toContain("...(noWrite ? ['--no-write'] : [])");
     const remainingFoundationSource = await readFile('scripts/verify-remaining-package-local-foundation.mjs', 'utf8');
     expect(remainingFoundationSource).toContain("const governedNodeScript=path=>[resolve(root,path),...(noWrite?['--no-write']:[])];");
     for (const script of [

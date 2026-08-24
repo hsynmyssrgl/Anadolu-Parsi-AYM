@@ -1,4 +1,6 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
+
+const noWrite = process.argv.includes('--no-write');
 const failures=[];let checks=0;const check=(condition,message)=>{checks++;if(!condition)failures.push(message)};
 const [main, connector, adapter] = await Promise.all([
   readFile('apps/desktop/src/main/main.ts','utf8'),
@@ -47,6 +49,8 @@ check(adapter.includes('getDeviceSecretProtectionStatus()'),'Desktop adapter doe
 check(adapter.includes('getFamilyDataCutoverStatus()'),'Desktop adapter does not expose family-data cutover status');
 check(adapter.includes('getFamilyDataCutoverReadinessStatus()'),'Desktop adapter does not expose family-data cutover readiness status');
 const report={schemaVersion:1,release:'Bronze 04.08.2026.29',checks,status:failures.length?'FAIL':'PASS',failures,generatedAt:new Date().toISOString()};
-await mkdir('artifacts/validation',{recursive:true});await writeFile('artifacts/validation/desktop-core-service-startup-contract.json',JSON.stringify(report,null,2)+'\n');
+if (!noWrite) {
+ await mkdir('artifacts/validation',{recursive:true});await writeFile('artifacts/validation/desktop-core-service-startup-contract.json',JSON.stringify(report,null,2)+'\n');
+}
 if(failures.length){console.error(failures.join('\n'));process.exit(1)}
-console.log(`Desktop Core Service Startup Contract: PASS (${checks} checks).`);
+console.log(`Desktop Core Service Startup Contract: PASS (${checks} checks; write=${!noWrite}).`);

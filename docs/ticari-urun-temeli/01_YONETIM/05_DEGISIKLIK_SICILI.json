@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PARSYUVA-AILE-YASAM-MERKEZI-TICARI-DEGISIKLIK-SICILI-V2",
   "temelTarihi": "2026-08-19",
-  "sonKayit": "TICARI-021",
+  "sonKayit": "TICARI-022",
   "kayitlar": [
     {
       "id": "TICARI-001",
@@ -368,6 +368,23 @@
         "artifacts/manifests"
       ],
       "isListesiEtkisi": "IS-0211 ve IS-0215 DEVAM kalir. LibreOffice ve Poppler PATH arizalari 47af84bd/b34e951b ile, iki ayri kararin ADR-039 kimligini paylasmasi 10282bf4 ile FAIL kaydedildi. Ilk kimlik kapisinin tarihsel baslik ayraclarini yanlis reddetmesi 9f2aaf86 ile kaydedildi; kapinin kimlik esligi ve ad alani tekilligine daraltilmis hali 2 dosya/12 test PASS verdi. Nihai ana belge QA 28/28 PASS: 24 sayfa onceki onayli render ile SHA-256 ozdes, degisen 1/15/16/17. sayfalar ozgun cozunurlukte yeniden incelendi. Build 164 kaynak butcesi ADR-039 kalir; Build 169 guclu yeniden dogrulama karari ADR-107 olarak benzersizlestirildi. Exact regresyon ve kurulu tam UI UAT tamamlanmadan paket yoktur.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-022",
+      "tarih": "2026-08-25",
+      "baslik": "PPK-022 masaustu baslangic no-write zinciri kapanisi",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-275, PR-240 ve 4c6652e0 tam regresyon koruma FAIL checkpointi",
+      "etkilenenAlanlar": [
+        "scripts/verify-32-r-ppk-022-capability-manifest-gate-runtime.mjs",
+        "scripts/verify-desktop-core-service-startup-runtime-wrapper.mjs",
+        "scripts/verify-desktop-core-service-startup-runtime.mjs",
+        "scripts/verify-desktop-core-service-startup-contract.mjs",
+        "apps/desktop/tests/mutation-release-evidence-producers.test.ts",
+        "docs/ticari-urun-temeli"
+      ],
+      "isListesiEtkisi": "IS-0211 ve IS-0215 DEVAM kalir. Exact Bronze tam regresyon tum Vitest ve 47 ek komutu tamamladiktan sonra desktop-core-service-startup-runtime makbuzunun yeni olusmasi guard kapisini dusurdu; 4c6652e0 ile gercek FAIL kaydedildi. Kesin 34-D -> PPK-022 -> sarmalayici -> calisma dogrulayicisi zincirinde --no-write aktarimi kapatildi. Kaynak regresyonu 1 dosya/6 test, masaustu calisma 51/51, sozlesme 41/41, uctan uca PPK-022 24/24 PASS verdi ve 1.571 dogrulama dosyasinda sifir ekleme veya degisiklik kanitlandi. Yeni exact hedefli/tam regresyon, kaynak butunlugu ve kurulu UI UAT tamamlanmadan paket yoktur.",
       "senkronDurumu": "SYNCHRONIZED"
     }
   ]

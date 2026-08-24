@@ -26,7 +26,7 @@ const commands = [
   { id: 'platform-policy-enforcement-runtime', args: ['--experimental-strip-types', '--experimental-loader', './scripts/ts-workspace-loader.mjs', 'scripts/verify-30-m-policy-enforcement-runtime.mjs', '--no-report'], expectOutput: 'PASS (43 controlled checks' },
   { id: 'core-service-boundary', args: ['scripts/verify-core-service-boundary.mjs', ...noWriteArgs], expectOutput: 'Core Service boundary: PASS (8 checks).' },
   { id: 'core-service-entrypoint-runtime', args: ['--experimental-strip-types', '--experimental-loader', './scripts/ts-workspace-loader.mjs', 'scripts/verify-30-o-core-service-entrypoint-runtime.mjs', ...noWriteArgs], expectOutput: '30-O Core Service Entrypoint Runtime: PASS (24 assertions).' },
-  { id: 'desktop-core-service-startup-runtime', args: ['scripts/verify-desktop-core-service-startup-runtime-wrapper.mjs'], expectOutput: 'Desktop Core Service Startup Runtime: PASS' },
+  { id: 'desktop-core-service-startup-runtime', args: ['scripts/verify-desktop-core-service-startup-runtime-wrapper.mjs', ...noWriteArgs], expectOutput: 'Desktop Core Service Startup Runtime: PASS' },
   { id: 'platform-policy-typescript', args: ['node_modules/typescript/bin/tsc', '-p', 'packages/platform-policy/tsconfig.json', '--noEmit'], expectOutput: '' },
   { id: 'domain-typescript', args: ['node_modules/typescript/bin/tsc', '-p', 'packages/domain/tsconfig.json', '--noEmit'], expectOutput: '' },
   { id: 'application-typescript', args: ['node_modules/typescript/bin/tsc', '-p', 'packages/application/tsconfig.json', '--noEmit'], expectOutput: '' },

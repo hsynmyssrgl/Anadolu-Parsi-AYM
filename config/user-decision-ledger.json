@@ -2847,7 +2847,7 @@
       "status": "ACTIVE",
       "source": "Acik kullanici karari: bundan sonra en ufak degisiklik bile her yerde tum kayitlari guncellemeli ve testi yapilmali; kullaniciya aylar surecek eksik test yuku birakilmamali",
       "document": "docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md",
-      "documentSha256": "aa82e2fdb5745983080428d20462a478c2ab62f3b71ecea85bc902b3ea87195f",
+      "documentSha256": "d0ba42f5f2c7150cea47cc3f25d2490ae1008d75b32b1356dcaa862c05ed59b0",
       "documents": [
         "AGENTS.md",
         "SHA256SUMS.txt",
@@ -2872,7 +2872,7 @@
         "docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md",
         "manifest.json"
       ],
-      "workListImpact": "IS-0215 eklendi ve temiz kanal regresyon bulgusuyla guclendirildi. Her mutasyon tum bagimli kayit siniflarini UPDATED veya baseline diff yoklugu, gerekce ve assessment/analysis/readback SHA bagi ile kanitli NOT_AFFECTED olarak kapatir; sahte/no-op degisiklik yasaktir. Byte-exact tarihsel kayitlar degistirilmez; guncel ratchet, belge ve resmi makbuzlar Git teslimine girer. Ignored eski uretici ciktisi test gercegi olamaz; test canli yapilandirilmis ciktiyi ve aktif build metasini kullanir. Salt-okunur verifier exact Git app/Bronze/Silver/Gold kokunde, yazan mod yalniz ana app kokunde calisir. Data-store smoke tekrarlanabilir wrapper ile derlenir. PPK-015 canli raporu tarihsel scope kopyasina degil kanonik currentBoundary kaydinin tum alanlarina baglidir; degistirilmis sayi veya ozet reddedilir. 34-G-34-K dahil 47/47 ek komut katalog on kosumu PASS olmustur. Ana build ledger ureticisinin cift satir sonu 284545ff gercek FAIL checkpointiyle korunmus ve cikti yerine kanonik uretici duzeltilmistir. Bronze exact hedefli regresyonda 598 test PASS olmustur. Sonraki tam regresyonda alti PPK makbuzuna yazma sizintisi `65db62ad` gercek FAIL checkpointiyle korunmustur; 34-B-34-F alt npm no-write aktarimi, PPK-022 runtime no-write uygulamasi ve 34-E kanal-kok kabul siniri duzeltilmistir. Gercek 34-B no-write zinciri 13/13 ve alti makbuz hash degismezligi 6/6 PASS vermistir. Son denetimde 34-G-34-K remaining-package alt komut no-write aktarim boslugu `90b5ad40` ile FAIL kaydedildi; duzeltme sonrasi gercek 34-G 37/37 ve migration/PPK-021/PPK-022 makbuz hash degismezligi 3/3 PASS verdi. Bu odakli sonuclar tam regresyon PASS sayilmaz. 5d56bcac, a7d50f72, 925d25d1, e42f9b58, 4894345b, 88fb84f8, 447eb103, 90b0fb0f, 5490c2b4, 284545ff, 41c16c13, 65db62ad ve 90b5ad40 gercek FAIL checkpointleri korunur. Hedefli ve filtresiz tam regresyon, typecheck, sozdizimi, kaynak butunlugu ve UI etkisinde tam UAT zorunludur; kapanis bitmeden ara installer uretilmez.",
+      "workListImpact": "IS-0215 eklendi ve temiz kanal regresyon bulgusuyla guclendirildi. Her mutasyon tum bagimli kayit siniflarini UPDATED veya baseline diff yoklugu, gerekce ve assessment/analysis/readback SHA bagi ile kanitli NOT_AFFECTED olarak kapatir; sahte/no-op degisiklik yasaktir. Byte-exact tarihsel kayitlar degistirilmez; guncel ratchet, belge ve resmi makbuzlar Git teslimine girer. Ignored eski uretici ciktisi test gercegi olamaz; test canli yapilandirilmis ciktiyi ve aktif build metasini kullanir. Salt-okunur verifier exact Git app/Bronze/Silver/Gold kokunde, yazan mod yalniz ana app kokunde calisir. Data-store smoke tekrarlanabilir wrapper ile derlenir. PPK-015 canli raporu tarihsel scope kopyasina degil kanonik currentBoundary kaydinin tum alanlarina baglidir; degistirilmis sayi veya ozet reddedilir. 34-G-34-K dahil 47/47 ek komut katalog on kosumu PASS olmustur. Ana build ledger ureticisinin cift satir sonu 284545ff gercek FAIL checkpointiyle korunmus ve cikti yerine kanonik uretici duzeltilmistir. Bronze exact hedefli regresyonda 598 test PASS olmustur. 65db62ad 34-B-34-F alt npm no-write sizintisini, 90b5ad40 34-G-34-K remaining-package aktarim boslugunu ve 4c6652e0 PPK-022 icindeki masaustu baslangic sarmalayicisinin son calisma dogrulayicisina --no-write aktarmamasini gercek FAIL olarak korur. Son bosluk PPK-022 cagrisi, sarmalayici ve masaustu baslangic calisma/sozlesme ureticilerinde kapatildi. Kaynak regresyonu 1 dosya/6 test, masaustu calisma 51/51, sozlesme 41/41 ve uctan uca PPK-022 matrisi 24/24 PASS verdi; 1.571 dogrulama dosyasinin sifiri eklendi veya degisti. Onceki gercek 34-B 13/13 + alti makbuz 6/6 ve 34-G 37/37 + uc makbuz 3/3 hash degismezlik sonuclari korunur. Bu odakli sonuclar tam regresyon PASS sayilmaz. 5d56bcac, a7d50f72, 925d25d1, e42f9b58, 4894345b, 88fb84f8, 447eb103, 90b0fb0f, 5490c2b4, 284545ff, 41c16c13, 65db62ad, 90b5ad40 ve 4c6652e0 gercek FAIL checkpointleri korunur. Hedefli ve filtresiz tam regresyon, typecheck, sozdizimi, kaynak butunlugu ve UI etkisinde tam UAT zorunludur; kapanis bitmeden ara installer uretilmez.",
       "syncStatus": "SYNCHRONIZED",
       "requirements": ["PR-240"],
       "codeAreas": [
@@ -2892,6 +2892,9 @@
         "scripts/run-data-store-smoke-regression.mjs",
         "scripts/verify-network-egress-boundary.mjs",
         "scripts/verify-32-r-ppk-022-capability-manifest-gate-runtime.mjs",
+        "scripts/verify-desktop-core-service-startup-contract.mjs",
+        "scripts/verify-desktop-core-service-startup-runtime-wrapper.mjs",
+        "scripts/verify-desktop-core-service-startup-runtime.mjs",
         "scripts/verify-34-b-communication-messaging-lifecycle-privacy-presence-runtime.mjs",
         "scripts/verify-34-c-realtime-calling-media-accessible-ux-runtime.mjs",
         "scripts/verify-34-d-explicit-consent-recording-media-retention-runtime.mjs",
