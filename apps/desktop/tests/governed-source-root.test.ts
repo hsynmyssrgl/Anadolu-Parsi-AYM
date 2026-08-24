@@ -6,10 +6,19 @@ import {
 
 describe('governed source root', () => {
   it('ana kaynağı yazan ve salt-okunur doğrulamalar için kabul eder', () => {
+    const authoritativeRoot = 'C:\\PPT\\AYM\\06_KOD\\app';
     expect(classifyGovernedSourceRoot({
-      root: 'C:\\PPT\\AYM\\06_KOD\\app'
+      root: authoritativeRoot
     })).toMatchObject({ kind: 'AUTHORITATIVE', channel: null });
-    expect(assertGovernedSourceRoot()).toBe(process.cwd());
+    expect(assertGovernedSourceRoot({ root: authoritativeRoot })).toBe(authoritativeRoot);
+  });
+
+  it('mevcut exact worktree kökünü ana kaynakta veya kanal checkoutunda kabul eder', () => {
+    expect(classifyGovernedSourceRoot({
+      root: process.cwd(),
+      allowReleaseChannel: true
+    })).toMatchObject({ root: process.cwd() });
+    expect(assertGovernedSourceRoot({ allowReleaseChannel: true })).toBe(process.cwd());
   });
 
   it.each(['Bronze', 'Silver', 'Gold'])('%s kanalını yalnız açık salt-okunur yetkiyle kabul eder', (channel) => {
