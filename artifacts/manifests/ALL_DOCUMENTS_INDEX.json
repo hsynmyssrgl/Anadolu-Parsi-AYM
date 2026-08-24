@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "release": "Bronze 22.08.2026.50",
   "releaseId": "bronze-2026-08-22-r50",
-  "generatedAt": "2026-08-24T20:50:23.962Z",
+  "generatedAt": "2026-08-24T20:54:27.362Z",
   "selfIndexedPaths": [
     "SHA256SUMS.txt",
     "artifacts/inventory/TESLIMAT_CALISMA_AGACI_ENVANTERI.json",
@@ -17300,8 +17300,8 @@
     },
     {
       "path": "artifacts/validation/operation-rule-check.json",
-      "bytes": 454,
-      "sha256": "1e14311f5bde7cf63fca5c5664b9f3cf82c0077893dbb13fff1f9c8ad6b67065",
+      "bytes": 435,
+      "sha256": "b2df678ef747727ce9c643e7029921c96645aa3a2ff98d0da49b3a640adca572",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -25237,7 +25237,7 @@
     {
       "path": "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
       "bytes": 139187,
-      "sha256": "1303255bbadddb7feb4f3167703187bf2a115e6752ea115fc1a01cd2c1029d94",
+      "sha256": "bf45722e875947bbe04281c3ee7d2f69314c026abc8ddba66607020fec0f8e17",
       "extension": ".md",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -25445,15 +25445,15 @@
     {
       "path": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.docx",
       "bytes": 359672,
-      "sha256": "4161ef475b652013554e411112f3e72a564110480cdbf0bb05b6bae0ad96d49f",
+      "sha256": "725ce8c34e33ab53816cf2621bbafe738c75a93a29a29083191298eb1ef0deda",
       "extension": ".docx",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
     },
     {
       "path": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.pdf",
-      "bytes": 501400,
-      "sha256": "395b5b8d3eb71946c2c2ca68c4566dd8cf16c14f06c4dd9962a52a76d26bebff",
+      "bytes": 501397,
+      "sha256": "4e35b693a5843a986156dd89f2808dc0faa3f4f2d7c763f43e60d1c18f1486a8",
       "extension": ".pdf",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -28141,7 +28141,7 @@
     {
       "path": "docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json",
       "bytes": 17395,
-      "sha256": "c4a6b6457e1b26cb937662712d39d7ce0e9970609c084f6fd96abfe5c58ced6e",
+      "sha256": "be057247ec338fe2bd229dd4f61811490c57ca39a9bf2e73d945da6da5572354",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true

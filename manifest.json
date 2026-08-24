@@ -1,7 +1,7 @@
 {
   "schemaVersion": 3,
   "packageVersion": "22.8.2026-50",
-  "generatedAt": "2026-08-24T20:50:32.625Z",
+  "generatedAt": "2026-08-24T20:54:35.915Z",
   "fileCount": 4868,
   "files": [
     {
@@ -6396,17 +6396,17 @@
     },
     {
       "path": "artifacts/manifests/ALL_DOCUMENTS_INDEX.csv",
-      "sha256": "35c502b5b393a14e5eef579badae0bd75606995377d61963d6532eb80b53209a",
+      "sha256": "754fbf757bfdaeede5e1de440b196fa99a64bbb4ef6dff842490f4cb55a6effa",
       "bytes": 584108
     },
     {
       "path": "artifacts/manifests/ALL_DOCUMENTS_INDEX.json",
-      "sha256": "581a26edd2f0e6f34196eb5b5ce53e9e6924a730d5c35f59d61b86beb60ebf25",
+      "sha256": "1ddac25edfc8b95a5d2544c8e9eb3fb388c993d0b5582f858c915a9f97263cc6",
       "bytes": 1102891
     },
     {
       "path": "artifacts/manifests/ALL_DOCUMENTS_INDEX.md",
-      "sha256": "78bc133ca1a1d344dc0c20145077ad264e53d2221ec6f402eb12ce1cf00792f8",
+      "sha256": "28b06be04739d67bbacd122fdf36f88e13597aa66e83837885c3f1edb456d6fd",
       "bytes": 633422
     },
     {
@@ -7181,17 +7181,17 @@
     },
     {
       "path": "artifacts/manifests/PROJECT_ARTIFACT_INDEX.csv",
-      "sha256": "5d6d9256a8b5c30da12b1d254685ffce9ef82076eb2ad48619faed7c179180bd",
+      "sha256": "cc6cb3e34f796e8e486cd7c466bdc78bc8e74c6668d1182a94b62458d07da64d",
       "bytes": 973405
     },
     {
       "path": "artifacts/manifests/PROJECT_ARTIFACT_INDEX.json",
-      "sha256": "13e78af9202fca910e172094e2e3b982966459ff1a5ed7f57021bb64656a46a3",
+      "sha256": "788e1db90ed3acbdedcec376dd70490d67744918f9097b78e74e9998e46f239f",
       "bytes": 1835892
     },
     {
       "path": "artifacts/manifests/PROJECT_ARTIFACT_INDEX.md",
-      "sha256": "9da60558ddaaa17f9f0de0489b17bc1e32ec15cbf50134b0bce3bc25422dabde",
+      "sha256": "c7dd62d0c2c60cbfd52d6afdc848182dc4bfd188e72123d5a1f70bd893ff67f6",
       "bytes": 1053703
     },
     {
@@ -12606,7 +12606,7 @@
     },
     {
       "path": "docs/current/08_TUM_BELGELER_DIZINI.md",
-      "sha256": "78bc133ca1a1d344dc0c20145077ad264e53d2221ec6f402eb12ce1cf00792f8",
+      "sha256": "28b06be04739d67bbacd122fdf36f88e13597aa66e83837885c3f1edb456d6fd",
       "bytes": 633422
     },
     {
@@ -12621,7 +12621,7 @@
     },
     {
       "path": "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
-      "sha256": "1303255bbadddb7feb4f3167703187bf2a115e6752ea115fc1a01cd2c1029d94",
+      "sha256": "bf45722e875947bbe04281c3ee7d2f69314c026abc8ddba66607020fec0f8e17",
       "bytes": 139187
     },
     {
@@ -12751,13 +12751,13 @@
     },
     {
       "path": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.docx",
-      "sha256": "4161ef475b652013554e411112f3e72a564110480cdbf0bb05b6bae0ad96d49f",
+      "sha256": "725ce8c34e33ab53816cf2621bbafe738c75a93a29a29083191298eb1ef0deda",
       "bytes": 359672
     },
     {
       "path": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.pdf",
-      "sha256": "395b5b8d3eb71946c2c2ca68c4566dd8cf16c14f06c4dd9962a52a76d26bebff",
-      "bytes": 501400
+      "sha256": "4e35b693a5843a986156dd89f2808dc0faa3f4f2d7c763f43e60d1c18f1486a8",
+      "bytes": 501397
     },
     {
       "path": "docs/current/MASTER_PROJECT_DOCUMENTATION_BUILD209.docx",
@@ -14436,7 +14436,7 @@
     },
     {
       "path": "docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json",
-      "sha256": "c4a6b6457e1b26cb937662712d39d7ce0e9970609c084f6fd96abfe5c58ced6e",
+      "sha256": "be057247ec338fe2bd229dd4f61811490c57ca39a9bf2e73d945da6da5572354",
       "bytes": 17395
     },
     {
