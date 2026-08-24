@@ -154,6 +154,24 @@ describe('operation rule check policy', () => {
     expect(deliveryReport).toContain('...DERIVED_DOCUMENT_INDEX_PATHS');
   });
 
+  it('keeps the active product lifecycle separate from the PR-240 delivery closure', async () => {
+    const ledger = JSON.parse(await readSource('config/active-governance-ledger.json')) as any;
+    expect(ledger).toMatchObject({
+      activeMicroStep: '33-P',
+      nextOfficialTask: '33-P_DEC-227_IMPLEMENTATION_VALIDATION_AND_RECEIPT',
+      libraryUploadStatus: '33-P_PENDING',
+      activeDeliveryClosure: {
+        requirement: 'PR-240',
+        decision: 'DEC-275',
+        status: 'IN_PROGRESS',
+        task: 'PR-240_MUTATION_WIDE_RECORD_TEST_AND_UI_UAT_CLOSURE',
+        preflightStatus: 'NOT_RUN_CURRENT_MUTATION',
+        postflightStatus: 'NOT_RUN_CURRENT_MUTATION',
+        packageStatus: 'BLOCKED_UNTIL_CLEAN_EXACT_COMMIT'
+      }
+    });
+  });
+
   it('binds local, external and delivery verification to one live source boundary', async () => {
     const completionPaths = [
       'scripts/verify-33-l-long-term-portfolio-completion.mjs',

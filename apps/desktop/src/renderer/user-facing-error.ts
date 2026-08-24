@@ -16,6 +16,7 @@ const TECHNICAL_MESSAGE_PATTERNS: readonly RegExp[] = Object.freeze([
   /(?:^|\s)\/[A-Za-z0-9._-]+(?:\/[A-Za-z0-9._-]+)+/u,
   /\b[a-z][\w.-]*:[a-z][\w.-]*\b/u,
   /[{[]\s*"[^"]+"\s*:/u,
+  /^\s*(?:[A-Za-z_$][A-Za-z0-9_$]*\.)*[A-Za-z_$][A-Za-z0-9_$]*Error\s*:/u,
   /^\s*(?:Error|TypeError|ReferenceError|SyntaxError|AggregateError)\s*:/iu
 ]);
 

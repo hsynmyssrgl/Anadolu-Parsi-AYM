@@ -15,9 +15,18 @@
   "artifactInventory": "artifacts/manifests/PROJECT_ARTIFACT_INDEX.json",
   "persistentLibraryRoot": "/ParsYuva/ParsYuva Aile Yasam Merkezi",
   "persistentLibraryReleasePath": "/ParsYuva/ParsYuva Aile Yasam Merkezi/Bronze 22.08.2026.50",
-  "preflightStatus": "NOT_RUN_CURRENT_PR240_MUTATION_DIRTY",
-  "postflightStatus": "NOT_RUN_CURRENT_PR240_MUTATION_DIRTY",
-  "libraryUploadStatus": "BLOCKED_UNTIL_CLEAN_EXACT_COMMIT",
+  "preflightStatus": "PENDING_33_P",
+  "postflightStatus": "NOT_RUN",
+  "libraryUploadStatus": "33-P_PENDING",
+  "activeDeliveryClosure": {
+    "requirement": "PR-240",
+    "decision": "DEC-275",
+    "status": "IN_PROGRESS",
+    "task": "PR-240_MUTATION_WIDE_RECORD_TEST_AND_UI_UAT_CLOSURE",
+    "preflightStatus": "NOT_RUN_CURRENT_MUTATION",
+    "postflightStatus": "NOT_RUN_CURRENT_MUTATION",
+    "packageStatus": "BLOCKED_UNTIL_CLEAN_EXACT_COMMIT"
+  },
   "conversationCapacity": {
     "method": "platform_actual_or_unavailable",
     "actualUsedPercent": null,
@@ -32,8 +41,8 @@
     "canonicalPR172Unchanged": true,
     "recordedAt": "2026-08-06T07:45:38.3898625+03:00"
   },
-  "nextOfficialTask": "PR-240_MUTATION_WIDE_RECORD_TEST_AND_UI_UAT_CLOSURE",
-  "activeMicroStep": "33-P_PR240_CLOSURE",
+  "nextOfficialTask": "33-P_DEC-227_IMPLEMENTATION_VALIDATION_AND_RECEIPT",
+  "activeMicroStep": "33-P",
   "supersessions": [
     {
       "id": "GOV-SUP-29-D3-001",

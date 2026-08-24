@@ -12,6 +12,7 @@ describe('renderer user-facing error boundary', () => {
       "Error invoking remote method 'catalog:listPeople': Error: [object Object]",
       '[CORE-UNEXPECTED-001] SQLite işlemi tamamlanamadı.',
       'PPK-013 repository policy denied the request',
+      'PlatformPolicyEnforcementError: Trusted policy connection authority could not be resolved',
       'TypeError: failed\n    at loadCenter (C:\\PPT\\app.ts:42:7)',
       '/home/user/app/database.sqlite dosyasına erişilemedi.',
       'UNKNOWN_IPC_CHANNEL'
@@ -28,6 +29,9 @@ describe('renderer user-facing error boundary', () => {
     expect(toUserFacingErrorMessage(new Error('Aile adı gereklidir.'), 'Kayıt oluşturulamadı.')).toBe('Aile adı gereklidir.');
     expect(toUserFacingErrorMessage(new Error('The password must contain a symbol.'), 'The record could not be saved.')).toBe(
       'The password must contain a symbol.'
+    );
+    expect(toUserFacingErrorMessage(new Error('There was an error while checking the form.'), 'The form could not be checked.')).toBe(
+      'There was an error while checking the form.'
     );
   });
 
