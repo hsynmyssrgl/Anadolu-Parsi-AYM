@@ -27,8 +27,9 @@ import {
 const sha = (value: string) => value.repeat(64);
 const applicationVersion = '22.08.2026.50';
 const packageVersion = '22.8.2026-50';
-const installerPath = 'C:\\PPT\\AYM\\06_KOD\\app\\apps\\desktop\\release\\ParsYuva-Bronze-22.08.2026.50.exe';
-const packagedPath = 'C:\\PPT\\AYM\\06_KOD\\app\\apps\\desktop\\release\\win-unpacked\\ParsYuva-Bronze.exe';
+const checkoutRoot = resolve(process.cwd());
+const installerPath = resolve(checkoutRoot, 'apps', 'desktop', 'release', 'ParsYuva-Bronze-22.08.2026.50.exe');
+const packagedPath = resolve(checkoutRoot, 'apps', 'desktop', 'release', 'win-unpacked', 'ParsYuva-Bronze.exe');
 const installedPath = 'C:\\Program Files\\PPT\\ParsYuva-Bronze\\ParsYuva-Bronze.exe';
 const sourceCommit = 'a'.repeat(40);
 const sourceTree = 'b'.repeat(40);
@@ -66,9 +67,9 @@ const baseInput = (mode: 'bootstrap' | 'continuation' = 'bootstrap'): any => {
   const installerRunId = '10000000-0000-4000-8000-000000000001';
   const installationRunId = '20000000-0000-4000-8000-000000000002';
   const installedUiRunId = '30000000-0000-4000-8000-000000000003';
-  const installerEvidenceRoot = `C:\\PPT\\AYM\\06_KOD\\app\\artifacts\\validation\\installer-experience\\${installerRunId}`;
-  const installationEvidenceRoot = `C:\\PPT\\AYM\\06_KOD\\app\\artifacts\\validation\\windows-installed-release-uat\\${installationRunId}`;
-  const installedUiEvidenceRoot = `${installationEvidenceRoot}\\installed-frontend`;
+  const installerEvidenceRoot = resolve(checkoutRoot, 'artifacts', 'validation', 'installer-experience', installerRunId);
+  const installationEvidenceRoot = resolve(checkoutRoot, 'artifacts', 'validation', 'windows-installed-release-uat', installationRunId);
+  const installedUiEvidenceRoot = resolve(installationEvidenceRoot, 'installed-frontend');
   const installer = identity(installerPath, sha('1'), 120_000_000);
   const packagedRuntime = identity(packagedPath, sha('2'), 225_000_000);
   const installedRuntime = identity(installedPath, sha('2'), 225_000_000);
@@ -886,7 +887,7 @@ const baseInput = (mode: 'bootstrap' | 'continuation' = 'bootstrap'): any => {
       nativeDialog: nativeScreenshotReadbacks
     },
     finalRunId: '40000000-0000-4000-8000-000000000004',
-    finalEvidenceRoot: 'C:\\PPT\\AYM\\06_KOD\\app\\artifacts\\validation\\bronze-final-delivery\\40000000-0000-4000-8000-000000000004',
+    finalEvidenceRoot: resolve(checkoutRoot, 'artifacts', 'validation', 'bronze-final-delivery', '40000000-0000-4000-8000-000000000004'),
     finalProducer: {
       final: { path: 'scripts/create-bronze-final-local-test-delivery.mjs', sizeBytes: 1000, sha256: sha('6') },
       installedUi: { path: 'scripts/run-installed-frontend-user-uat.mjs', sizeBytes: 1000, sha256: sha('4') },
@@ -915,7 +916,7 @@ const baseInput = (mode: 'bootstrap' | 'continuation' = 'bootstrap'): any => {
     Object.assign(input.packageProvenance, {
       releaseId: nextReleaseId, release: nextRelease, parentRelease: previousPackageReceipt.release,
       previousPackageProvenance: {
-        path: 'C:\\PPT\\AYM\\06_KOD\\app\\artifacts\\validation\\release-history\\bronze-22.08.2026.50-windows-package-provenance-bundle\\bundle.json',
+        path: resolve(checkoutRoot, 'artifacts', 'validation', 'release-history', 'bronze-22.08.2026.50-windows-package-provenance-bundle', 'bundle.json'),
         release: previousPackageReceipt.release, releaseId: previousPackageReceipt.releaseId,
         sourceCommit: previousSourceProvenance.headCommit, sha256: sha('4'), sizeBytes: 1000,
         packagedRuntime: previousPackageReceipt.artifacts.packagedRuntime

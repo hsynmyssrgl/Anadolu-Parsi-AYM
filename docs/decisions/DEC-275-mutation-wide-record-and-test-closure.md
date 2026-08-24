@@ -15,4 +15,6 @@ Her değişiklikte hedefli test, filtresiz tam regresyon, typecheck, değişen M
 
 Gerçek test hataları boş `wip(rejected)` checkpoint commit ile tarihçeye yazılır. Tüm kaynak ve kayıt kapanışı bitmeden ara installer üretilemez. Paket yalnız temiz exact committen ve ana kaynak ile ilgili kanal kaynak eşitliği doğrulandıktan sonra oluşturulabilir. Eksik, eski veya gerekçesiz kayıt fail-closed engeldir; waiver yoktur.
 
+FAIL makbuzu; ham çıktı, stack, mutlak dış yol veya sır değeri taşımadan repo-relative test dosyasını ve güvenli test adını kaydeder. Suite yüklenemiyorsa bu durum ayrı bir `SUITE_IMPORT` kimliğiyle görünür olur. Böylece hata ayrıntısı için aynı uzun test turunun ikinci kez çalıştırılması gerekmez; sayaçlar test dosyası, Vitest suite ve assertion anlamları karıştırılmadan raporlanır.
+
 Bu karar `DEC-270/PR-235` exact-commit etki ve test zincirini kaldırmaz; kapsamını bütün kayıt sınıfları ve tüm kullanıcı etkileşimi/görsel bütünlük yüzeyleri için açıkça güçlendirir.

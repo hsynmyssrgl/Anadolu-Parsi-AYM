@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { assertMatchingReleaseSourceProvenance, captureReleaseSourceProvenance } from './lib/release-source-provenance.mjs';
 import {
   createDependencyAssessmentContract, currentEvidenceIdentity, loadCanonicalProducerBindings, loadMutationEvidencePolicy,
-  parseVitestJsonSummary, readEvidenceBinding, readRepoFileBinding, renderCommand,
+  parseVitestJsonFailureInventory, parseVitestJsonSummary, readEvidenceBinding, readRepoFileBinding, renderCommand,
   resolveChangeImpactDependencies, sha256Bytes, snapshotMutationEvidenceAndToolchain,
   validateTargetedTestFiles, writeEvidenceReceipt
 } from './lib/mutation-release-evidence.mjs';
@@ -118,6 +118,15 @@ let vitest;
 try { vitest = JSON.parse(execution.stdout); }
 catch { throw new Error(`Vitest JSON output could not be parsed: ${execution.stdout.slice(0, 500)}`); }
 const summary = parseVitestJsonSummary(vitest);
+const failedTests = parseVitestJsonFailureInventory(vitest, { root });
+const testResultFiles = vitest.testResults.length;
+if (!Number.isSafeInteger(testResultFiles) || testResultFiles <= 0) {
+  throw new Error('Vitest test-result file inventory is empty or invalid.');
+}
+const measuredFailure = summary.testFilesFailed > 0 || summary.testsFailed > 0;
+if (measuredFailure !== (failedTests.length > 0)) {
+  throw new Error('Vitest failure inventory does not match the measured failure counters.');
+}
 const [after, guardAfter] = await Promise.all([
   captureReleaseSourceProvenance({ root, expectedChannel: 'Bronze' }),
   snapshotMutationEvidenceAndToolchain(root)
@@ -162,6 +171,8 @@ const receipt = {
     stderrSizeBytes: Buffer.byteLength(execution.stderr ?? '', 'utf8'),
     stderrSha256: sha256Bytes(Buffer.from(execution.stderr ?? '', 'utf8'))
   },
+  failedTests,
+  testResultFiles,
   chain,
   executionGuard: {
     beforeSha256: guardBefore.sha256,
@@ -176,5 +187,8 @@ const receipt = {
 if (kind === 'full' && !commandMatrixPassed) receipt.status = 'FAIL';
 await writeEvidenceReceipt(root, outputPath, receipt);
 if (execution.stderr) process.stderr.write(execution.stderr);
-console.log(`${receipt.evidenceKind}: ${receipt.status} / ${summary.testFilesPassed} files / ${summary.testsPassed} tests.`);
+for (const failure of failedTests) {
+  console.error(`FAILED_TEST: ${failure.file} :: ${failure.testName ?? '<suite import>'}`);
+}
+console.log(`${receipt.evidenceKind}: ${receipt.status} / ${testResultFiles} test files / ${summary.testsPassed} passed tests.`);
 if (!passed || !commandMatrixPassed) process.exitCode = 1;

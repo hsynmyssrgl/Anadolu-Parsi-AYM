@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { describe,expect,it } from 'vitest';
 
@@ -25,8 +25,8 @@ const verifierModule=await import(pathToFileURL(resolve('scripts/verify-release-
 };
 
 const createGitDouble=(dirtyChannel?:string,wrongCommonChannel?:string)=>{
-  const authoritativeRoot=resolve(process.cwd());
-  const codeRoot=dirname(authoritativeRoot);
+  const codeRoot=resolve(process.cwd(),'.release-channel-test-double');
+  const authoritativeRoot=resolve(codeRoot,'app');
   const commonGitDirectory=resolve(authoritativeRoot,'.git');
   const roots=new Map(configuration.channels.map((item)=>[
     resolve(codeRoot,'kanallar',item.directory),item

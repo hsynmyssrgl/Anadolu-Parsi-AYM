@@ -586,6 +586,42 @@ export const parseVitestJsonSummary = (value) => {
   });
 };
 
+export const parseVitestJsonFailureInventory = (value, { root }) => {
+  if (!Array.isArray(value?.testResults)) fail('Vitest JSON testResults inventory is invalid.');
+  const normalizedRoot = resolve(root);
+  const normalizeFile = (name) => {
+    if (typeof name !== 'string' || !name.trim()) fail('Vitest failed-suite file is invalid.');
+    const absolute = isAbsolute(name) ? resolve(name) : resolve(normalizedRoot, name);
+    const repoRelative = relative(normalizedRoot, absolute).replaceAll('\\', '/');
+    if (!repoRelative || repoRelative.startsWith('../') || isAbsolute(repoRelative)
+      || !repoRelative.endsWith('.test.ts')) fail('Vitest failed-suite file is outside the governed repository.');
+    return repoRelative;
+  };
+  const normalizeTestName = (name) => {
+    if (typeof name !== 'string' || !name.trim() || name.length > 1000 || /[\u0000-\u001f\u007f]/u.test(name)) {
+      fail('Vitest failed-test name is invalid.');
+    }
+    return name.trim();
+  };
+  const failures = [];
+  for (const suite of value.testResults) {
+    if (suite?.status !== 'failed') continue;
+    const file = normalizeFile(suite.name);
+    const assertions = Array.isArray(suite.assertionResults) ? suite.assertionResults : [];
+    const failedAssertions = assertions.filter((item) => item?.status === 'failed');
+    if (failedAssertions.length === 0) {
+      failures.push(Object.freeze({ file, failureKind: 'SUITE_IMPORT', testName: null }));
+      continue;
+    }
+    for (const assertion of failedAssertions) {
+      failures.push(Object.freeze({ file, failureKind: 'TEST', testName: normalizeTestName(assertion.fullName) }));
+    }
+  }
+  return Object.freeze(failures.sort((left, right) => left.file.localeCompare(right.file)
+    || left.failureKind.localeCompare(right.failureKind)
+    || String(left.testName ?? '').localeCompare(String(right.testName ?? ''))));
+};
+
 export const renderCommand = (executable, args) => [executable, ...args]
   .map((value) => /[\s"]/u.test(value) ? `"${value.replaceAll('"', '\\"')}"` : value).join(' ');
 

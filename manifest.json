@@ -1,7 +1,7 @@
 {
   "schemaVersion": 3,
   "packageVersion": "22.8.2026-50",
-  "generatedAt": "2026-08-24T12:30:27.534Z",
+  "generatedAt": "2026-08-24T13:35:15.207Z",
   "fileCount": 4865,
   "files": [
     {
@@ -1851,8 +1851,8 @@
     },
     {
       "path": "apps/desktop/tests/bronze-final-local-test-delivery-contract.test.ts",
-      "sha256": "8479c24d5ff95347d2862fd968ccb703ca0b2d6fe1994443c6ca5c0dd6994404",
-      "bytes": 95686
+      "sha256": "43a4437fc7cf67198e8d215397576438b28c64023f3cd74e88c4272e9be57467",
+      "bytes": 95743
     },
     {
       "path": "apps/desktop/tests/canonical-product-navigation-authority.test.ts",
@@ -2526,8 +2526,8 @@
     },
     {
       "path": "apps/desktop/tests/mutation-release-evidence-producers.test.ts",
-      "sha256": "33f5aa1c12a7a8969f327997c2bcb01fb6f9fec205ab0059bf0b1cad034490d2",
-      "bytes": 17352
+      "sha256": "ce0f5af72555d9b86e3b21be3126fa42c4446a4633a82bcf2c34bd3a80472d9c",
+      "bytes": 18778
     },
     {
       "path": "apps/desktop/tests/mutation-release-readiness-contract.test.ts",
@@ -2741,8 +2741,8 @@
     },
     {
       "path": "apps/desktop/tests/release-channel-isolation.test.ts",
-      "sha256": "199ad24bbaa6cc354545472236f5733ad2b0654ca1e3cb878a4f4d653fcdbe47",
-      "bytes": 6881
+      "sha256": "af713076e2debe5ad545b5969afbb5c525ee797bcbc961286bb05317745e0376",
+      "bytes": 6900
     },
     {
       "path": "apps/desktop/tests/release-source-provenance.test.ts",
@@ -6391,17 +6391,17 @@
     },
     {
       "path": "artifacts/manifests/ALL_DOCUMENTS_INDEX.csv",
-      "sha256": "e4db1679b26b64580a4f27522d743ee4c207b279f60dc3cbb0c3198a0c69e9da",
+      "sha256": "18ec61de1c618d207871e98baaf6e78ca4065806f72321c5a9df290c9d5a9d28",
       "bytes": 311996
     },
     {
       "path": "artifacts/manifests/ALL_DOCUMENTS_INDEX.json",
-      "sha256": "bd9e2ef3687009df939bfa8072920ee1152c5f71dab4096b3ccb8aab4aee38a7",
+      "sha256": "2b3eabd07c1432730b48d56f735e6da2409691d280146e514fbdb8155ca69172",
       "bytes": 599897
     },
     {
       "path": "artifacts/manifests/ALL_DOCUMENTS_INDEX.md",
-      "sha256": "4f965506d87359f96b44a0ccf38e92c1f1369dbbe8fe3022d6bbc15219202ad0",
+      "sha256": "a513abed75f9c2ee634a36feeb185ee2b00fad0768a33ff48ae4b47e176dd3ff",
       "bytes": 340457
     },
     {
@@ -7176,18 +7176,18 @@
     },
     {
       "path": "artifacts/manifests/PROJECT_ARTIFACT_INDEX.csv",
-      "sha256": "2863b086589f6818052e7b0df5f4efc681afe7a9e364ef1cad4162c1b4235420",
-      "bytes": 651624
+      "sha256": "07cd099f6dbb76482e35593fadd6fa656bd15f504dcc7c27463f8ca4e3b75d50",
+      "bytes": 651625
     },
     {
       "path": "artifacts/manifests/PROJECT_ARTIFACT_INDEX.json",
-      "sha256": "04ad09c3491baaf43127821d3099ab247e197c1632b78b6740b923e9470b8c0a",
-      "bytes": 1242759
+      "sha256": "77ae5bccd5598760e99265b861bac28199510f39cdcb22882fc9c3818c895ae2",
+      "bytes": 1242760
     },
     {
       "path": "artifacts/manifests/PROJECT_ARTIFACT_INDEX.md",
-      "sha256": "689398ad4c4995d71ee6bd3d42af762925945dea7d8fff864194cdfe997e25b3",
-      "bytes": 708056
+      "sha256": "5b79c0f8cde9bee7e7d741972c0be6a5f8e663c057dd52978f58c82342795d43",
+      "bytes": 708057
     },
     {
       "path": "artifacts/manifests/REPORT_SUMMARY_VERIFICATION_BUILD74.txt",
@@ -8856,8 +8856,8 @@
     },
     {
       "path": "BUILD_STATUS.md",
-      "sha256": "b8ae4c0d5547e5c3879b6057e9b55cd6ee4e520c616f8ecaa553cdd0ed87e559",
-      "bytes": 2114
+      "sha256": "30a937bbcb20f5861a1d1b19cc3847f999e07b4998c142491554ce144e60e5eb",
+      "bytes": 2474
     },
     {
       "path": "BUILD100_ARCHITECTURE_VALIDATION_REPORT.md",
@@ -11121,8 +11121,8 @@
     },
     {
       "path": "config/user-decision-ledger.json",
-      "sha256": "c5f6ec7cdb83012b7ec50fa33cdc33c9a13a9d8bc1c62e702451a759093a691c",
-      "bytes": 140595
+      "sha256": "8eb864f2574a646fc69618c0aabddaf813ac952d8099f63268a47cfcd9f24d88",
+      "bytes": 140718
     },
     {
       "path": "config/work-segmentation-plan.json",
@@ -11426,8 +11426,8 @@
     },
     {
       "path": "docs/17_MASTER_BUILD_LEDGER.md",
-      "sha256": "bbd9a0886c58c5cad8a6e0d5d1c9438f27d767a149011a71d79a9c4265b3a50d",
-      "bytes": 163404
+      "sha256": "b5c6d1edc97b4522b5fd20965ebd7032099628dc06755649f61e8c57e89af9a3",
+      "bytes": 163962
     },
     {
       "path": "docs/18_PROJECT_CONSTITUTION_V3.md",
@@ -12601,7 +12601,7 @@
     },
     {
       "path": "docs/current/08_TUM_BELGELER_DIZINI.md",
-      "sha256": "4f965506d87359f96b44a0ccf38e92c1f1369dbbe8fe3022d6bbc15219202ad0",
+      "sha256": "a513abed75f9c2ee634a36feeb185ee2b00fad0768a33ff48ae4b47e176dd3ff",
       "bytes": 340457
     },
     {
@@ -12616,7 +12616,7 @@
     },
     {
       "path": "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
-      "sha256": "07ce642e4795823fcc4e8681703e516ec54fc9f5445fe8f51924a0d43e753e54",
+      "sha256": "549bb900af92d9dd6092436a5a29a4c9ab118e3f097af76e53f48912d1cc6e64",
       "bytes": 139187
     },
     {
@@ -12746,13 +12746,13 @@
     },
     {
       "path": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.docx",
-      "sha256": "7d35c2bd5616629c58e24a6a4c0555825da2315620e9cd3869ebaec8212b5e0f",
-      "bytes": 359653
+      "sha256": "a0436710a64fc289b0b543f51d9ae4d06b05c46af7805f58909b4ad85e7a2440",
+      "bytes": 359652
     },
     {
       "path": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.pdf",
-      "sha256": "d71037c3b3647c91111f467ab033d057e0a2b6f9833bfb91fd04f67369fd6c66",
-      "bytes": 501368
+      "sha256": "c64b79690512052fcd3675bf41a4362e3b416c3e7ed36b7b3c33b757cc6e4c34",
+      "bytes": 501370
     },
     {
       "path": "docs/current/MASTER_PROJECT_DOCUMENTATION_BUILD209.docx",
@@ -13881,8 +13881,8 @@
     },
     {
       "path": "docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md",
-      "sha256": "b0b140e9e171bc4b1c95053a458a7d32a51a227d2604b996eaf32bbd77f6de9f",
-      "bytes": 2290
+      "sha256": "0c48b8a474b3e9667ae458092ba8b87bda6cedd7ed26cec57f36dab8f95f78bb",
+      "bytes": 2718
     },
     {
       "path": "docs/examples/anadolu-parsi-family-import-v1.example.json",
@@ -14356,8 +14356,8 @@
     },
     {
       "path": "docs/ticari-urun-temeli/01_YONETIM/05_DEGISIKLIK_SICILI.json",
-      "sha256": "c9a1d162ffa1df0d061f71385ff6d67a6c4b38264bc5b7a4bd0cf33d72025812",
-      "bytes": 15311
+      "sha256": "ab7dac52b3e4e5b1700a745d7fe7d0c29ae597a0cef210aa9687e8f485c9dacd",
+      "bytes": 16442
     },
     {
       "path": "docs/ticari-urun-temeli/01_YONETIM/06_RISK_SICILI.md",
@@ -14431,7 +14431,7 @@
     },
     {
       "path": "docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json",
-      "sha256": "33298f445bc8ee064db96006a2ab1baf773357151ec7a6889a0ea52f1213f199",
+      "sha256": "584dfd9722ed732ae8aab6643322c30dff839a86d830517c9a3917e9346a8fb0",
       "bytes": 17394
     },
     {
@@ -14711,8 +14711,8 @@
     },
     {
       "path": "docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md",
-      "sha256": "4cb12db28f58f01abd45dffeb3a602a24e96e184dba9cdb5a2bb72de0c5b8c16",
-      "bytes": 9805
+      "sha256": "9f962c7843a44c252edcd31b72cd4ed7205d66b780939972ac89fc426ad054fa",
+      "bytes": 9871
     },
     {
       "path": "docs/ticari-urun-temeli/08_IS_LISTESI/02_DIS_KAYNAK_GEREKTIREN_ISLER.md",
@@ -14721,8 +14721,8 @@
     },
     {
       "path": "docs/ticari-urun-temeli/08_IS_LISTESI/03_ANA_IS_SICILI.json",
-      "sha256": "17b09120369b22ee00b93b243b5aea18ba4353eae0dde6533b046d0498bfda0e",
-      "bytes": 30586
+      "sha256": "952b774b39d6349e301c276757bb468f23d6d16e5c7b8bed574ef4709b8dbe7b",
+      "bytes": 30719
     },
     {
       "path": "docs/ticari-urun-temeli/08_IS_LISTESI/04_IS_YURUTME_SIRASI.md",
@@ -19526,8 +19526,8 @@
     },
     {
       "path": "scripts/lib/mutation-release-evidence.mjs",
-      "sha256": "2e8c28b72e27ab7493d72b47c14328d0b89820ac12b71a1cdfae7b61a2b6d217",
-      "bytes": 45315
+      "sha256": "4396d0b70dc92c200862e0049522d8cedb856bf9e5f102936f195d8b3f297c2e",
+      "bytes": 47186
     },
     {
       "path": "scripts/lib/npm-cache-bundle-acceptance.mjs",
@@ -19931,8 +19931,8 @@
     },
     {
       "path": "scripts/run-mutation-test-evidence.mjs",
-      "sha256": "b193804b68a814c7dc59c198b7dd44cc6f6b357a6b0fed79f3a1a546eee76fe6",
-      "bytes": 9514
+      "sha256": "699ada233fcce87f70255b563e740910124030f3ba8d1bcc946e669a9a24d7b3",
+      "bytes": 10214
     },
     {
       "path": "scripts/run-npm-audit-evidence.mjs",

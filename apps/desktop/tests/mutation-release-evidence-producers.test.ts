@@ -4,7 +4,8 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   appendExternalBaselineRecord, BOOTSTRAP_ADOPTION_BASE_COMMIT,
-  CANONICAL_UNIVERSAL_AFFECTED_VITEST_FILES, CANONICAL_UNIVERSAL_DEPENDENT_RECORDS, parseVitestJsonSummary,
+  CANONICAL_UNIVERSAL_AFFECTED_VITEST_FILES, CANONICAL_UNIVERSAL_DEPENDENT_RECORDS,
+  parseVitestJsonFailureInventory, parseVitestJsonSummary,
   readExternalBaselineChain, resolveChangeImpactDependencies,
   validateChangeImpactDependencyRegistry, validateTargetedTestFiles
 } from '../../../scripts/lib/mutation-release-evidence.mjs';
@@ -74,6 +75,9 @@ describe('PR-235 canonical mutation evidence producers', () => {
     expect(testRunner).toContain('affectedCommand:');
     expect(testRunner).toContain("'--maxWorkers=1', '--reporter=json'");
     expect(testRunner).toContain('snapshotMutationEvidenceAndToolchain(root)');
+    expect(testRunner).toContain('parseVitestJsonFailureInventory(vitest, { root })');
+    expect(testRunner).toContain('FAILED_TEST: ${failure.file}');
+    expect(testRunner).toContain('testResultFiles,');
     expect(testRunner).toContain('assertMatchingReleaseSourceProvenance(after.provenance, before.provenance');
     expect(preflight).toContain("process.argv.includes('--read-only')");
     expect(preflight).toContain("await readJson('artifacts/validation/governed-preflight.json')");
@@ -236,6 +240,30 @@ describe('PR-235 canonical mutation evidence producers', () => {
       numPassedTestSuites: 1, numFailedTestSuites: -1,
       numPassedTests: 1, numFailedTests: 0, numPendingTests: 0
     })).toThrow(/numFailedTestSuites/u);
+  });
+
+  it('records only governed relative failed test identities without stack or message payloads', () => {
+    const root = join(tmpdir(), 'parsyuva-vitest-failure-root');
+    expect(parseVitestJsonFailureInventory({ testResults: [
+      {
+        name: join(root, 'apps', 'desktop', 'tests', 'z.test.ts'), status: 'failed',
+        assertionResults: [{ status: 'failed', fullName: 'Z zinciri reddeder', failureMessages: ['secret stack'] }]
+      },
+      {
+        name: join(root, 'apps', 'desktop', 'tests', 'a.test.ts'), status: 'failed',
+        assertionResults: []
+      },
+      {
+        name: join(root, 'apps', 'desktop', 'tests', 'pass.test.ts'), status: 'passed',
+        assertionResults: [{ status: 'passed', fullName: 'PASS' }]
+      }
+    ] }, { root })).toEqual([
+      { file: 'apps/desktop/tests/a.test.ts', failureKind: 'SUITE_IMPORT', testName: null },
+      { file: 'apps/desktop/tests/z.test.ts', failureKind: 'TEST', testName: 'Z zinciri reddeder' }
+    ]);
+    expect(() => parseVitestJsonFailureInventory({ testResults: [{
+      name: join(root, '..', 'outside.test.ts'), status: 'failed', assertionResults: []
+    }] }, { root })).toThrow(/outside/u);
   });
 
   it('rejects arbitrary Vitest options, absolute paths and traversal', () => {

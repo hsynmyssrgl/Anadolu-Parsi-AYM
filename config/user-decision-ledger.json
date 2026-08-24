@@ -2847,7 +2847,7 @@
       "status": "ACTIVE",
       "source": "Acik kullanici karari: bundan sonra en ufak degisiklik bile her yerde tum kayitlari guncellemeli ve testi yapilmali; kullaniciya aylar surecek eksik test yuku birakilmamali",
       "document": "docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md",
-      "documentSha256": "b0b140e9e171bc4b1c95053a458a7d32a51a227d2604b996eaf32bbd77f6de9f",
+      "documentSha256": "0c48b8a474b3e9667ae458092ba8b87bda6cedd7ed26cec57f36dab8f95f78bb",
       "documents": [
         "AGENTS.md",
         "SHA256SUMS.txt",
@@ -2872,7 +2872,7 @@
         "docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md",
         "manifest.json"
       ],
-      "workListImpact": "IS-0215 eklendi. Her mutasyon tum bagimli kayit siniflarini UPDATED veya kanitli NOT_AFFECTED olarak kapatir. Byte-exact tarihsel kayitlar degistirilmesi gereken dependentRecord sayilmaz; dogrudan degisiklikte tum degismezlik kapilarini tetikler. Guncel ratchet, belge ve resmi uretici makbuzlari Git teslimine girer. Hedefli ve filtresiz tam regresyon, typecheck, sozdizimi, kaynak butunlugu ve UI etkisinde tam etkilesim/gorsel UAT zorunludur. Gercek test hatalari wip(rejected) checkpoint olarak kaydedilir ve kapanis bitmeden ara installer uretilmez.",
+      "workListImpact": "IS-0215 eklendi. Her mutasyon tum bagimli kayit siniflarini UPDATED veya kanitli NOT_AFFECTED olarak kapatir. Byte-exact tarihsel kayitlar degistirilmesi gereken dependentRecord sayilmaz; dogrudan degisiklikte tum degismezlik kapilarini tetikler. Guncel ratchet, belge ve resmi uretici makbuzlari Git teslimine girer. FAIL makbuzu ham stack veya sir tasimadan repo-relative test dosyasi, guvenli test adi ve SUITE_IMPORT kimligini gosterir. Hedefli ve filtresiz tam regresyon, typecheck, sozdizimi, kaynak butunlugu ve UI etkisinde tam etkilesim/gorsel UAT zorunludur. Gercek test hatalari wip(rejected) checkpoint olarak kaydedilir ve kapanis bitmeden ara installer uretilmez.",
       "syncStatus": "SYNCHRONIZED",
       "requirements": ["PR-240"],
       "codeAreas": [
