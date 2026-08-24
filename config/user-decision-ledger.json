@@ -2885,6 +2885,7 @@
         "scripts/run-mutation-test-evidence.mjs",
         "scripts/verify-source-integrity.mjs",
         "scripts/verify-current-master-documentation-v5.mjs",
+        "scripts/generate-current-master-documentation.py",
         "scripts/verify-release-channel-worktrees.mjs",
         "scripts/run-installed-frontend-user-uat.mjs",
         "scripts/run-governed-postflight.mjs",

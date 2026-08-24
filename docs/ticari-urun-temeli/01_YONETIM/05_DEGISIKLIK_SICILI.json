@@ -382,6 +382,7 @@
         "scripts/verify-desktop-core-service-startup-runtime.mjs",
         "scripts/verify-desktop-core-service-startup-contract.mjs",
         "apps/desktop/tests/mutation-release-evidence-producers.test.ts",
+        "scripts/generate-current-master-documentation.py",
         "docs/ticari-urun-temeli"
       ],
       "isListesiEtkisi": "IS-0211 ve IS-0215 DEVAM kalir. Exact Bronze tam regresyon tum Vitest ve 47 ek komutu tamamladiktan sonra desktop-core-service-startup-runtime makbuzunun yeni olusmasi guard kapisini dusurdu; 4c6652e0 ile gercek FAIL kaydedildi. Kesin 34-D -> PPK-022 -> sarmalayici -> calisma dogrulayicisi zincirinde --no-write aktarimi kapatildi. Kaynak regresyonu 1 dosya/6 test, masaustu calisma 51/51, sozlesme 41/41, uctan uca PPK-022 24/24 PASS verdi ve 1.571 dogrulama dosyasinda sifir ekleme veya degisiklik kanitlandi. Yeni exact hedefli/tam regresyon, kaynak butunlugu ve kurulu UI UAT tamamlanmadan paket yoktur.",
