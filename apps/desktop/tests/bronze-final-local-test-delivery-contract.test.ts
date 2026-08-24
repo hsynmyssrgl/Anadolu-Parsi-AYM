@@ -62,7 +62,7 @@ const identity = (path: string, hash: string, sizeBytes: number) => ({
   signerSubject: null
 });
 
-const baseInput = () => {
+const baseInput = (mode: 'bootstrap' | 'continuation' = 'bootstrap'): any => {
   const installerRunId = '10000000-0000-4000-8000-000000000001';
   const installationRunId = '20000000-0000-4000-8000-000000000002';
   const installedUiRunId = '30000000-0000-4000-8000-000000000003';
@@ -80,16 +80,16 @@ const baseInput = () => {
   };
   const previousPackageReceipt = {
     schemaVersion: 2, id: 'PPT-WINDOWS-PACKAGE-PROVENANCE-V2', evidenceKind: 'WINDOWS_PACKAGE_PROVENANCE',
-    status: 'PASS', buildMode: 'LOCAL_UNSIGNED_NSIS', release: 'Bronze 22.08.2026.49',
-    releaseId: 'bronze-2026-08-22-r49', sourceProvenance: previousSourceProvenance,
+    status: 'PASS', buildMode: 'LOCAL_UNSIGNED_NSIS', release: 'Bronze 22.08.2026.50',
+    releaseId: 'bronze-2026-08-22-r50', sourceProvenance: previousSourceProvenance,
     producer: { path: 'apps/desktop/scripts/run-electron-builder.mjs', sizeBytes: 2_001, sha256: digest(803) },
-    artifacts: { packagedRuntime: { path: packagedPath, sizeBytes: 224_000_000, sha256: digest(804) } }
+    artifacts: { packagedRuntime: { path: packagedPath, sizeBytes: 224_000_000, sha256: digest(804), fileVersion: '22.8.2026-50' } }
   };
   const previousPackageArchiveBinding = { sizeBytes: 1_600, sha256: digest(805) };
   const previousPackageHistoryBundleReceipt = {
     schemaVersion: 1, id: 'PPT-WINDOWS-PACKAGE-PROVENANCE-HISTORY-BUNDLE-V1', status: 'PASS',
     release: previousPackageReceipt.release, releaseId: previousPackageReceipt.releaseId,
-    channel: 'Bronze', version: '22.08.2026.49', packageVersion: '22.8.2026-49',
+    channel: 'Bronze', version: '22.08.2026.50', packageVersion: '22.8.2026-50',
     sourceCommit: previousSourceProvenance.headCommit, producer: { ...previousPackageReceipt.producer },
     packageProvenance: {
       sourcePath: 'artifacts/validation/windows-package-provenance.json',
@@ -495,7 +495,7 @@ const baseInput = () => {
     },
     unredactedSecretCount: 0
   }));
-  return {
+  const input: any = {
     release: `Bronze ${applicationVersion}`,
     applicationVersion,
     packageVersion,
@@ -550,12 +550,7 @@ const baseInput = () => {
       releaseId: expectedReleaseId,
       release: `Bronze ${applicationVersion}`,
       parentRelease: 'Bronze 22.08.2026.49',
-      previousPackageProvenance: {
-        path: 'C:\\PPT\\AYM\\06_KOD\\app\\artifacts\\validation\\release-history\\bronze-22.08.2026.49-windows-package-provenance-bundle\\bundle.json',
-        release: 'Bronze 22.08.2026.49', releaseId: 'bronze-2026-08-22-r49',
-        sourceCommit: previousSourceProvenance.headCommit, sha256: sha('4'), sizeBytes: 1000,
-        packagedRuntime: previousPackageReceipt.artifacts.packagedRuntime
-      },
+      previousPackageProvenance: null,
       sourceProvenance,
       sourceProtection: {
         sha256: sha('f'), sizeBytes: 1024,
@@ -624,8 +619,8 @@ const baseInput = () => {
       screenshots: installerScreenshots
     },
     installationPreservation: {
-      schemaVersion: 2,
-      id: 'PPT-WINDOWS-INSTALLED-RELEASE-UAT110-V2',
+      schemaVersion: 3,
+      id: 'PPT-WINDOWS-INSTALLED-RELEASE-UAT110-V3',
       evidenceKind: 'WINDOWS_INSTALLED_RELEASE_PRESERVATION',
       status: 'PASS',
       exitCode: 0,
@@ -634,6 +629,7 @@ const baseInput = () => {
       startedAt: '2026-08-23T16:36:30.000Z',
       completedAt: '2026-08-23T16:36:34.000Z',
       classification: 'LOCAL_UNSIGNED_INSTALLATION_PRESERVATION_ONLY',
+      installationMode: 'BOOTSTRAP_FRESH_INSTALL',
       release: `Bronze ${applicationVersion}`,
       expectedReleaseId,
       sourceCommit,
@@ -643,7 +639,8 @@ const baseInput = () => {
       packageProvenance: { sha256: sha('9') },
       governedPreflight: { sha256: sha('0') },
       installerExperience: { sha256: sha('5') },
-      previousPackageProvenance: { sha256: sha('4'), sizeBytes: 1000 },
+      previousPackageProvenance: null,
+      installedBefore: null,
       producer: { path: 'scripts/run-windows-installed-release-uat.ps1', sha256: sha('2'), sizeBytes: 1_002 },
       syntheticMarker: { cleanupStatus: 'DELETED_AND_ABSENCE_READBACK_PASS' },
       cleanup: { markerDeleted: true, markerAbsentReadback: true, originalUserDataStateRestored: true },
@@ -654,21 +651,39 @@ const baseInput = () => {
         receiptContainsUserContent: false,
         contentEqualityMeasured: true
       },
-      upgrade: {
-        status: 'PASS', classification: 'VERSION_UPGRADE_N_TO_N_PLUS_1',
+      primaryInstallation: {
+        status: 'PASS', classification: 'BOOTSTRAP_FRESH_INSTALL_SEQUENCE_50',
         installedEqualsPackaged: true, markerPreserved: true,
         allUserDataContentEqualityPreserved: true, otherChannelAndLegacyProgramMetadataPreserved: true,
         otherChannelWriteCount: 0, dataSelectionDialogObserved: false,
         bronzeRegistry: { exactSingleEntry: true },
-        fromFileVersion: '22.8.2026-49', toFileVersion: packageVersion, fromSequence: 49, toSequence: 50, exactSuccessor: true
+        fromFileVersion: null, toFileVersion: packageVersion, fromSequence: null, toSequence: 50,
+        exactSuccessor: false, governedBootstrap: true, targetInstallRootAbsentBefore: true,
+        targetExecutableAbsentBefore: true, bronzeUninstallRegistryAbsentBefore: true,
+        packagePreviousProvenanceAbsent: true,
+        before: { program: { bronze: { exists: false } }, uninstallRegistry: { bronze: { entryCount: 0 } } }
       },
+      freshInstall: {
+        status: 'PASS', classification: 'BOOTSTRAP_FRESH_INSTALL_SEQUENCE_50',
+        installedEqualsPackaged: true, markerPreserved: true,
+        allUserDataContentEqualityPreserved: true, otherChannelAndLegacyProgramMetadataPreserved: true,
+        otherChannelWriteCount: 0, dataSelectionDialogObserved: false,
+        bronzeRegistry: { exactSingleEntry: true },
+        fromFileVersion: null, toFileVersion: packageVersion, fromSequence: null, toSequence: 50,
+        exactSuccessor: false, governedBootstrap: true, targetInstallRootAbsentBefore: true,
+        targetExecutableAbsentBefore: true, bronzeUninstallRegistryAbsentBefore: true,
+        packagePreviousProvenanceAbsent: true,
+        before: { program: { bronze: { exists: false } }, uninstallRegistry: { bronze: { entryCount: 0 } } }
+      },
+      upgrade: null,
       maintenance: {
         status: 'PASS', classification: 'SAME_VERSION_MAINTENANCE',
         installedEqualsPackaged: true, markerPreserved: true,
         allUserDataContentEqualityPreserved: true, otherChannelAndLegacyProgramMetadataPreserved: true,
         otherChannelWriteCount: 0, dataSelectionDialogObserved: false,
         bronzeRegistry: { exactSingleEntry: true },
-        beforeFileVersion: packageVersion, afterFileVersion: packageVersion, sameVersion: true
+        beforeFileVersion: packageVersion, afterFileVersion: packageVersion, sameVersion: true,
+        precedingPhase: 'BOOTSTRAP_FRESH_INSTALL_SEQUENCE_50'
       }
     },
     packagedProbe: {
@@ -878,11 +893,75 @@ const baseInput = () => {
       installerExperience: { path: 'scripts/run-windows-installer-experience-uat.ps1', sizeBytes: 1_001, sha256: sha('1') },
       installedRelease: { path: 'scripts/run-windows-installed-release-uat.ps1', sizeBytes: 1_002, sha256: sha('2') }
     },
-    previousPackageHistoryBundle: { value: previousPackageHistoryBundleReceipt, sizeBytes: 1000, sha256: sha('4') },
-    previousPackageArchive: { value: previousPackageReceipt, ...previousPackageArchiveBinding },
-    historicalPreviousSourceProvenance: previousSourceProvenance,
-    previousPackageProducerReadback: { ...previousPackageReceipt.producer }
+    previousPackageHistoryBundle: null,
+    previousPackageArchive: null,
+    historicalPreviousSourceProvenance: null,
+    previousPackageProducerReadback: null
   };
+  if (mode === 'continuation') {
+    const nextApplicationVersion = '24.08.2026.51';
+    const nextPackageVersion = '24.8.2026-51';
+    const nextRelease = `Bronze ${nextApplicationVersion}`;
+    const nextReleaseId = 'bronze-2026-08-24-r51';
+    input.release = nextRelease;
+    input.applicationVersion = nextApplicationVersion;
+    input.packageVersion = nextPackageVersion;
+    input.installer.path = input.installer.path.replace(applicationVersion, nextApplicationVersion);
+    input.installer.fullPath = input.installer.path;
+    for (const runtime of [input.installer, input.packagedRuntime, input.installedRuntime]) {
+      runtime.fileVersion = nextPackageVersion;
+      runtime.productVersion = nextPackageVersion;
+    }
+    Object.assign(input.packageProvenance, {
+      releaseId: nextReleaseId, release: nextRelease, parentRelease: previousPackageReceipt.release,
+      previousPackageProvenance: {
+        path: 'C:\\PPT\\AYM\\06_KOD\\app\\artifacts\\validation\\release-history\\bronze-22.08.2026.50-windows-package-provenance-bundle\\bundle.json',
+        release: previousPackageReceipt.release, releaseId: previousPackageReceipt.releaseId,
+        sourceCommit: previousSourceProvenance.headCommit, sha256: sha('4'), sizeBytes: 1000,
+        packagedRuntime: previousPackageReceipt.artifacts.packagedRuntime
+      }
+    });
+    input.installerExperience.release = nextRelease;
+    input.installerExperience.releaseId = nextReleaseId;
+    const continuation = {
+      status: 'PASS', classification: 'VERSION_UPGRADE_N_TO_N_PLUS_1',
+      installedEqualsPackaged: true, markerPreserved: true,
+      allUserDataContentEqualityPreserved: true, otherChannelAndLegacyProgramMetadataPreserved: true,
+      otherChannelWriteCount: 0, dataSelectionDialogObserved: false,
+      bronzeRegistry: { exactSingleEntry: true },
+      fromFileVersion: '22.8.2026-50', toFileVersion: nextPackageVersion,
+      fromSequence: 50, toSequence: 51, exactSuccessor: true, governedBootstrap: false,
+      targetInstallRootAbsentBefore: false, targetExecutableAbsentBefore: false,
+      bronzeUninstallRegistryAbsentBefore: false, packagePreviousProvenanceAbsent: false
+    };
+    Object.assign(input.installationPreservation, {
+      release: nextRelease, expectedReleaseId: nextReleaseId,
+      installationMode: 'CONTINUATION_N_TO_N_PLUS_ONE',
+      installedBefore: {
+        path: installedPath, sizeBytes: previousPackageReceipt.artifacts.packagedRuntime.sizeBytes,
+        sha256: previousPackageReceipt.artifacts.packagedRuntime.sha256,
+        fileVersion: previousPackageReceipt.artifacts.packagedRuntime.fileVersion
+      },
+      previousPackageProvenance: {
+        path: input.packageProvenance.previousPackageProvenance.path, sizeBytes: 1000, sha256: sha('4')
+      },
+      primaryInstallation: continuation, freshInstall: null, upgrade: { ...continuation }
+    });
+    input.installationPreservation.maintenance.beforeFileVersion = nextPackageVersion;
+    input.installationPreservation.maintenance.afterFileVersion = nextPackageVersion;
+    input.installationPreservation.maintenance.precedingPhase = 'VERSION_UPGRADE_N_TO_N_PLUS_1';
+    input.packagedProbe.applicationVersion = nextApplicationVersion;
+    for (const run of input.packagedProbe.runs) run.applicationVersion = nextApplicationVersion;
+    input.installedUi.release = nextRelease;
+    input.installedUi.releaseId = nextReleaseId;
+    input.installedUi.installedFileVersion = nextPackageVersion;
+    input.installedUi.executableIdentity.fileVersion = nextPackageVersion;
+    input.previousPackageHistoryBundle = { value: previousPackageHistoryBundleReceipt, sizeBytes: 1000, sha256: sha('4') };
+    input.previousPackageArchive = { value: previousPackageReceipt, ...previousPackageArchiveBinding };
+    input.historicalPreviousSourceProvenance = previousSourceProvenance;
+    input.previousPackageProducerReadback = { ...previousPackageReceipt.producer };
+  }
+  return input;
 };
 
 const refreshInteractionBindings = (input: ReturnType<typeof baseInput>) => {
@@ -919,8 +998,10 @@ describe('Bronze final local-test delivery receipt contract', () => {
       status: 'LOCAL_TEST_PASS_PRODUCTION_RELEASE_BLOCKED',
       windowsInstalledReleaseUat: {
         status: 'PASS',
-        id: 'PPT-WINDOWS-INSTALLED-RELEASE-UAT110-V2',
-        upgrade: 'PASS',
+        id: 'PPT-WINDOWS-INSTALLED-RELEASE-UAT110-V3',
+        installationMode: 'BOOTSTRAP_FRESH_INSTALL',
+        freshInstall: 'PASS',
+        upgrade: 'NOT_APPLICABLE',
         sameVersionMaintenance: 'PASS',
         metadataOnlyUserDataInspection: true,
         otherChannelWrites: 0
@@ -949,6 +1030,19 @@ describe('Bronze final local-test delivery receipt contract', () => {
     expect(receipt.packagedRuntime.sha256).toBe(receipt.installedRuntime.sha256);
     expect(receipt.sourceProvenance).toMatchObject({
       source: '06_KOD/kanallar/Bronze', branch: 'channel/bronze', headCommit: sourceCommit
+    });
+  });
+
+  it('accepts a different-day exact sequence-50 to sequence-51 continuation with immutable predecessor evidence', () => {
+    const receipt = createFinalLocalTestDeliveryReceipt(baseInput('continuation'));
+    expect(receipt).toMatchObject({
+      release: 'Bronze 24.08.2026.51',
+      applicationVersion: '24.08.2026.51',
+      windowsInstalledReleaseUat: {
+        id: 'PPT-WINDOWS-INSTALLED-RELEASE-UAT110-V3',
+        installationMode: 'CONTINUATION_N_TO_N_PLUS_ONE',
+        freshInstall: 'NOT_APPLICABLE', upgrade: 'PASS', sameVersionMaintenance: 'PASS'
+      }
     });
   });
 
@@ -1008,14 +1102,28 @@ describe('Bronze final local-test delivery receipt contract', () => {
     expect(() => createFinalLocalTestDeliveryReceipt(staleInstalledUat)).toThrow(/chronology/u);
   });
 
-  it('rejects a forged previous package archive or history-bundle readback', () => {
-    const forgedBundle = baseInput();
-    forgedBundle.previousPackageHistoryBundle.value.packageProvenance.sha256 = sha('7');
-    expect(() => createFinalLocalTestDeliveryReceipt(forgedBundle)).toThrow(/history bundle/u);
+  it('rejects fabricated previous package evidence or an upgrade claim for sequence-50 bootstrap', () => {
+    const fabricatedPrevious: any = baseInput();
+    fabricatedPrevious.previousPackageHistoryBundle = { value: {}, sizeBytes: 1000, sha256: sha('4') };
+    expect(() => createFinalLocalTestDeliveryReceipt(fabricatedPrevious)).toThrow(/fabricated previous package evidence/u);
 
-    const forgedArchiveProducer = baseInput();
-    forgedArchiveProducer.previousPackageArchive.value.producer.sha256 = sha('7');
-    expect(() => createFinalLocalTestDeliveryReceipt(forgedArchiveProducer)).toThrow(/history bundle|producer blob/u);
+    const bootstrapAsUpgrade = baseInput();
+    bootstrapAsUpgrade.installationPreservation.installationMode = 'CONTINUATION_N_TO_N_PLUS_ONE';
+    expect(() => createFinalLocalTestDeliveryReceipt(bootstrapAsUpgrade)).toThrow(/mode/u);
+  });
+
+  it('rejects continuation predecessor runtime or bundle binding drift', () => {
+    const runtimeDrift = baseInput('continuation');
+    runtimeDrift.installationPreservation.installedBefore.sha256 = sha('7');
+    expect(() => createFinalLocalTestDeliveryReceipt(runtimeDrift)).toThrow(/lineage-bound/u);
+
+    const bundlePathDrift = baseInput('continuation');
+    bundlePathDrift.installationPreservation.previousPackageProvenance.path = 'C:\\forged\\bundle.json';
+    expect(() => createFinalLocalTestDeliveryReceipt(bundlePathDrift)).toThrow(/lineage-bound/u);
+
+    const continuationAsFresh = baseInput('continuation');
+    continuationAsFresh.installationPreservation.installationMode = 'BOOTSTRAP_FRESH_INSTALL';
+    expect(() => createFinalLocalTestDeliveryReceipt(continuationAsFresh)).toThrow(/mode/u);
   });
 
   it('revalidates the raw installed UI interaction and state matrices instead of trusting summary counts', () => {

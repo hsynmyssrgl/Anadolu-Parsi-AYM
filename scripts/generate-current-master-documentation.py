@@ -212,7 +212,7 @@ DRIFT_FIXES = [
     "DEC-271 ile güncel kanal program kökleri legacy dizinin dışındaki C:\\Program Files\\PPT\\ParsYuva-<Kanal> kardeş yollarına taşındı; AppData ParsYuva/<Kanal> ve diğer kanal yalıtımı korunurken otomatik legacy veri migration veya silme yasaklandı.",
     "DEC-272 ile sürüm tahsisi exact expected release ID alan açık tek mutasyon oldu; preview yazmaz, uyuşmazlık yazım ve temizliğe geçmeden durur, signed/local/dir yalnız önceden tahsisli exact current kimliğini tüketir.",
     "DEC-273 ile Windows installer teslimi metadata-only kanonik UAT110 gerçek N→N+1 ve same-version maintenance koruması ile source/package/expected release bağlı schema2 kurulu ön yüz UAT111 makbuzuna bağlandı.",
-    "DEC-274/PR-239 ile Windows teslim zinciri canlı PR-235 readback, schema2 package provenance, canlı sibling predecessor, installer-experience V2, UAT110 V2, parent-run bağlı UAT111 V3 ve final V3 geri-okuma kapılarıyla adversarial olarak güçlendirildi.",
+    "DEC-274/PR-239 ile Windows teslim zinciri canlı PR-235 readback, schema2 package provenance, Bronze 50 bootstrap veya Bronze 51+ exact sibling continuation modlu UAT110 V3, installer-experience V2, parent-run bağlı UAT111 V3 ve final V3 geri-okuma kapılarıyla adversarial olarak güçlendirildi.",
     "PR-235 ile en küçük değişiklik dahi exact değişen yol, bağımlı kural/karar/belge/manifest/ratchet/test/UAT kayıtları ve aynı temiz committe hedefli-tam-bütünlük kanıtlarıyla fail-closed eşlemeye bağlandı.",
     "PR-239 UAT111 kapsamı Git'te izlenen TypeScript kanonik rota otoritesi, tüm görünür ve uygun kontrollerin dinamik outcome matrisi, gerçek native CANCEL/ACCEPT ve exclusive reparse-korumalı kanıt köküyle güncellendi.",
 ]
@@ -325,7 +325,7 @@ def build_markdown() -> str:
 
 
 SOURCE.parent.mkdir(parents=True, exist_ok=True)
-SOURCE.write_text(build_markdown(), encoding="utf-8")
+SOURCE.write_bytes(build_markdown().encode("utf-8"))
 
 
 def set_cell_shading(cell, fill: str):

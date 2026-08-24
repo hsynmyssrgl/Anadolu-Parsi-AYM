@@ -45,7 +45,7 @@
     "path": "config/change-impact-dependency-registry.json",
     "schemaVersion": 1,
     "id": "PPT-CHANGE-IMPACT-DEPENDENCY-REGISTRY-V1",
-    "sha256": "acb69d6b05994b455b18f9210afd4583a290c384ef3fb47d386b35284a565b48",
+    "sha256": "7087aedf7e354575ae9cf09449a9531c23a20abdb27da967b9f3f4fecd60e6a8",
     "unmatchedChangedPathEffect": "BLOCK",
     "dependentRecordsMustBeChanged": true,
     "targetedVitestMustEqualAffectedFiles": true

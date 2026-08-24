@@ -195,9 +195,9 @@ export const validateProvenanceReceipts = ({
   check(governedPreflight?.schemaVersion === 1 && governedPreflight.status === 'PASS', 'Governed preflight PASS/schema 1 değildir.');
   const canonicalRuleRegistrySha256 = lowerSha(governedPreflight.rulesSha256, 'Kanonik kural sicili');
   check(lowerSha(governedPreflight.sourceFingerprint?.sha256, 'Preflight kaynak parmak izi') === governedSourceFingerprintSha256, 'Preflight başka kaynak parmak izine bağlıdır.');
-  check(installationPreservation?.schemaVersion === 2 && installationPreservation.status === 'PASS' && installationPreservation.exitCode === 0,
-    'Kurulum koruma UAT PASS/schema 2 değildir.');
-  check(installationPreservation.id === 'PPT-WINDOWS-INSTALLED-RELEASE-UAT110-V2'
+  check(installationPreservation?.schemaVersion === 3 && installationPreservation.status === 'PASS' && installationPreservation.exitCode === 0,
+    'Kurulum koruma UAT PASS/schema 3 değildir.');
+  check(installationPreservation.id === 'PPT-WINDOWS-INSTALLED-RELEASE-UAT110-V3'
     && installationPreservation.evidenceKind === 'WINDOWS_INSTALLED_RELEASE_PRESERVATION'
     && installationPreservation.classification === 'LOCAL_UNSIGNED_INSTALLATION_PRESERVATION_ONLY',
   'Kurulum koruma UAT110 kimliği/sınıflandırması geçersizdir.');
@@ -207,8 +207,18 @@ export const validateProvenanceReceipts = ({
   const packagedRuntimeSha256 = lowerSha(packageProvenance.artifacts?.packagedRuntime?.sha256, 'Paket runtime');
   check(lowerSha(installationPreservation.installer?.sha256, 'Koruma installer') === installerSha256, 'Kurulum koruma makbuzu başka installer kullandı.');
   check(lowerSha(installationPreservation.packagedRuntime?.sha256, 'Koruma packaged runtime') === packagedRuntimeSha256, 'Kurulum koruma packaged runtime bağı bozuk.');
+  const releaseMatch = /^Bronze (\d{2})\.(\d{2})\.(\d{4})\.(\d+)$/u.exec(packageProvenance.release);
+  check(releaseMatch, 'Paket release sürümü ayrıştırılamadı.');
+  const currentSequence = Number(releaseMatch[4]);
+  check(Number.isSafeInteger(currentSequence) && currentSequence >= 50,
+    'Paket sürüm sırası governed predecessor sınırının altındadır.');
+  const isGovernedBootstrap = currentSequence === 50;
+  const expectedMode = isGovernedBootstrap ? 'BOOTSTRAP_FRESH_INSTALL' : 'CONTINUATION_N_TO_N_PLUS_ONE';
+  const expectedPrimaryClassification = isGovernedBootstrap ? 'BOOTSTRAP_FRESH_INSTALL_SEQUENCE_50' : 'VERSION_UPGRADE_N_TO_N_PLUS_1';
+  check(installationPreservation.installationMode === expectedMode,
+    'Kurulum koruma modu paket provenance sürümünden türetilen modla eşleşmiyor.');
   for (const [label, phase, classification] of [
-    ['upgrade', installationPreservation.upgrade, 'VERSION_UPGRADE_N_TO_N_PLUS_1'],
+    ['primaryInstallation', installationPreservation.primaryInstallation, expectedPrimaryClassification],
     ['maintenance', installationPreservation.maintenance, 'SAME_VERSION_MAINTENANCE'],
   ]) {
     check(phase?.status === 'PASS' && phase.classification === classification && phase.installedEqualsPackaged === true
@@ -223,23 +233,58 @@ export const validateProvenanceReceipts = ({
     check(match, `${label} FileVersion kanonik değildir.`);
     return match.slice(1).map(Number);
   };
-  const from = version(installationPreservation.upgrade?.fromFileVersion, 'Upgrade from');
-  const to = version(installationPreservation.upgrade?.toFileVersion, 'Upgrade to');
-  const fromDate = Date.UTC(from[2], from[1] - 1, from[0]);
-  const toDate = Date.UTC(to[2], to[1] - 1, to[0]);
-  const expectedParentRelease = `Bronze ${String(from[0]).padStart(2, '0')}.${String(from[1]).padStart(2, '0')}.${from[2]}.${from[3]}`;
-  check(from[1] === to[1] && from[2] === to[2] && toDate >= fromDate && to[3] === from[3] + 1
-    && installationPreservation.upgrade?.fromSequence === from[3]
-    && installationPreservation.upgrade?.toSequence === to[3]
-    && installationPreservation.upgrade?.exactSuccessor === true
-    && packageProvenance.parentRelease === expectedParentRelease,
-  'Upgrade fazı exact aynı-seri N→N+1 değildir.');
-  check(packageProvenance.previousPackageProvenance?.release === expectedParentRelease
-    && lowerSha(installationPreservation.previousPackageProvenance?.sha256, 'UAT110 previous package') === lowerSha(packageProvenance.previousPackageProvenance?.sha256, 'Current package previous binding')
-    && Number(installationPreservation.previousPackageProvenance?.sizeBytes) === Number(packageProvenance.previousPackageProvenance?.sizeBytes),
-  'Upgrade fazı immutable schema2 parent package provenance bağı taşımıyor.');
+  const to = version(installationPreservation.primaryInstallation?.toFileVersion, 'Primary installation to');
+  check(to[3] === currentSequence && installationPreservation.primaryInstallation?.toSequence === currentSequence,
+    'İlk kurulum/yükseltme paket sürüm sırasına bağlı değildir.');
+  if (isGovernedBootstrap) {
+    const expectedParentRelease = `Bronze ${releaseMatch[1]}.${releaseMatch[2]}.${releaseMatch[3]}.49`;
+    check(packageProvenance.parentRelease === expectedParentRelease && packageProvenance.previousPackageProvenance === null,
+      'Bronze 50 paketi governed bootstrap/null previous provenance taşımıyor.');
+    check(installationPreservation.previousPackageProvenance === null
+      && installationPreservation.installedBefore === null
+      && installationPreservation.upgrade === null
+      && installationPreservation.freshInstall?.classification === expectedPrimaryClassification
+      && JSON.stringify(installationPreservation.freshInstall) === JSON.stringify(installationPreservation.primaryInstallation),
+    'Bronze 50 makbuzu yalnız fresh-install union dalını taşımıyor.');
+    check(installationPreservation.primaryInstallation?.fromFileVersion === null
+      && installationPreservation.primaryInstallation?.fromSequence === null
+      && installationPreservation.primaryInstallation?.exactSuccessor === false
+      && installationPreservation.primaryInstallation?.governedBootstrap === true
+      && installationPreservation.primaryInstallation?.targetInstallRootAbsentBefore === true
+      && installationPreservation.primaryInstallation?.targetExecutableAbsentBefore === true
+      && installationPreservation.primaryInstallation?.bronzeUninstallRegistryAbsentBefore === true
+      && installationPreservation.primaryInstallation?.packagePreviousProvenanceAbsent === true
+      && installationPreservation.primaryInstallation?.before?.program?.bronze?.exists === false
+      && Number(installationPreservation.primaryInstallation?.before?.uninstallRegistry?.bronze?.entryCount) === 0,
+    'Bronze 50 fresh-install yokluk/bootstrap kanıtları eksiktir.');
+  } else {
+    check(installationPreservation.freshInstall === null
+      && installationPreservation.upgrade?.classification === expectedPrimaryClassification
+      && JSON.stringify(installationPreservation.upgrade) === JSON.stringify(installationPreservation.primaryInstallation),
+    'Bronze 51+ makbuzu yalnız exact N→N+1 union dalını taşımıyor.');
+    const from = version(installationPreservation.upgrade?.fromFileVersion, 'Upgrade from');
+    const fromDate = Date.UTC(from[2], from[1] - 1, from[0]);
+    const toDate = Date.UTC(to[2], to[1] - 1, to[0]);
+    const expectedParentRelease = `Bronze ${String(from[0]).padStart(2, '0')}.${String(from[1]).padStart(2, '0')}.${from[2]}.${from[3]}`;
+    check(from[1] === to[1] && from[2] === to[2] && toDate >= fromDate && to[3] === from[3] + 1
+      && installationPreservation.upgrade?.fromSequence === from[3]
+      && installationPreservation.upgrade?.toSequence === to[3]
+      && installationPreservation.upgrade?.exactSuccessor === true
+      && installationPreservation.upgrade?.governedBootstrap === false
+      && packageProvenance.parentRelease === expectedParentRelease,
+    'Upgrade fazı exact aynı-seri N→N+1 değildir.');
+    check(packageProvenance.previousPackageProvenance?.release === expectedParentRelease
+      && installationPreservation.installedBefore?.fileVersion === installationPreservation.upgrade?.fromFileVersion
+      && lowerSha(installationPreservation.installedBefore?.sha256, 'UAT110 installed N runtime') === lowerSha(packageProvenance.previousPackageProvenance?.packagedRuntime?.sha256, 'Current package previous runtime')
+      && Number(installationPreservation.installedBefore?.sizeBytes) === Number(packageProvenance.previousPackageProvenance?.packagedRuntime?.sizeBytes)
+      && String(installationPreservation.previousPackageProvenance?.path ?? '') === String(packageProvenance.previousPackageProvenance?.path ?? '')
+      && lowerSha(installationPreservation.previousPackageProvenance?.sha256, 'UAT110 previous package') === lowerSha(packageProvenance.previousPackageProvenance?.sha256, 'Current package previous binding')
+      && Number(installationPreservation.previousPackageProvenance?.sizeBytes) === Number(packageProvenance.previousPackageProvenance?.sizeBytes),
+    'Upgrade fazı immutable schema2 parent package provenance bağı taşımıyor.');
+  }
   check(installationPreservation.maintenance?.beforeFileVersion === installationPreservation.maintenance?.afterFileVersion
-    && installationPreservation.maintenance?.beforeFileVersion === installationPreservation.upgrade?.toFileVersion
+    && installationPreservation.maintenance?.beforeFileVersion === installationPreservation.primaryInstallation?.toFileVersion
+    && installationPreservation.maintenance?.precedingPhase === expectedPrimaryClassification
     && installationPreservation.maintenance?.sameVersion === true,
   'Maintenance fazı N+1→N+1 aynı sürüm değildir.');
   check(installationPreservation.cleanup?.markerDeleted === true

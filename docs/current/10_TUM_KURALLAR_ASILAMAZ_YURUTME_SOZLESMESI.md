@@ -4,7 +4,7 @@
 - Karar: **DEC-129**
 - Kanonik kural sayısı: **238**
 - Aktif kural: **212**
-- Kural SHA-256: `4c8a52f9adc2153177f1e504104e20ac5e9d3f7d780daa2c7d7bdb5d399a6050`
+- Kural SHA-256: `3936b7fc4a1c6e04e195edf1a9d201c620ed613220286788f83cac5e82c2bc2e`
 
 ## Değişmez çalışma ilkesi
 
@@ -16,7 +16,7 @@ PR-236 gereği Bronze, Silver ve Gold programları legacy kökün dışındaki `
 
 PR-237 gereği sürüm tahsisi zorunlu expected release ID ile açık tek mutasyondur. Preview salt okunurdur; kimlik uyuşmazlığı lock, temp, yazım veya installer temizliği öncesi durur. Signed/local/dir paket girişleri allocator çalıştırmaz ve yalnız önceden tahsisli ledger/manifest/repository/APP_META exact kimliğini tüketir.
 
-PR-239 gereği Windows installer teslimi yalnız schema2 exact-commit package provenance, immutable previous package arşiviyle eşleşen canlı sibling N, zorunlu installer-experience V2, gerçek N→N+1 ve N+1→N+1 UAT110 V2, tracked TypeScript kaynağına bağlı exact modül/rota otoritesi, tüm uygun kontrollerin dinamik outcome kapsamı, gerçek native CANCEL/ACCEPT, exclusive reparse-korumalı kanıt kökü, guard kaybında sıfır path temizliği, parent-run bağlı UAT111 V3 ve bütün girdileri canlı geri okuyan final V3 zinciriyle kabul edilir. Legacy nested runtime trusted predecessor değildir; mevcut kullanıcı verisi içeriği makbuza yazılmaz. NotSigned ve koruma kapalı Kaspersky testi üretim veya zararsızlık iddiası değildir.
+PR-239 gereği Windows installer teslimi yalnız schema2 exact-commit package provenance, zorunlu installer-experience V2 ve UAT110 V3'ün paket sırasından yeniden türettiği birbirini dışlayan modla kabul edilir: Bronze 50 için kanonik hedefin yokluğunu kanıtlayan fresh-install + same-version maintenance; Bronze 51+ için immutable previous package arşiviyle eşleşen canlı sibling N'den exact N→N+1 + same-version maintenance. Tracked TypeScript kaynağına bağlı exact modül/rota otoritesi, tüm uygun kontrollerin dinamik outcome kapsamı, gerçek native CANCEL/ACCEPT, exclusive reparse-korumalı kanıt kökü, guard kaybında sıfır path temizliği, parent-run bağlı UAT111 V3 ve bütün girdileri canlı geri okuyan final V3 zorunludur. Legacy nested runtime trusted predecessor değildir; mevcut kullanıcı verisi içeriği makbuza yazılmaz. NotSigned ve koruma kapalı Kaspersky testi üretim veya zararsızlık iddiası değildir.
 
 PR-235 gereği her mutasyonun exact changed-file etki analizi kural, karar, belge, manifest, ratchet, test ve UAT bağlarını günceller veya açık gerekçeyle etkilenmediğini gösterir. Kalıcı postflight ve paketleme aynı temiz committe hedefli test, tam regresyon ve kaynak bütünlüğü PASS olmadan; installer teslimi aynı pakete/commite bağlı paket sonrası gerçek kurulu ana EXE UAT PASS olmadan ilerleyemez.
 

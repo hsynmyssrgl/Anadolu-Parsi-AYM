@@ -59,7 +59,7 @@ const LOCAL_TEST_STATUS = 'LOCAL_TEST_PASS_PRODUCTION_RELEASE_BLOCKED';
 const LOCAL_TEST_CLASSIFICATION = 'UNSIGNED_LOCAL_TEST_ONLY';
 const FINAL_LOCAL_TEST_DELIVERY_ID = 'PPT-BRONZE-FINAL-LOCAL-TEST-DELIVERY-V3';
 const INSTALLER_EXPERIENCE_UAT_ID = 'PPT-WINDOWS-INSTALLER-EXPERIENCE-UAT-V2';
-const INSTALLED_RELEASE_UAT_ID = 'PPT-WINDOWS-INSTALLED-RELEASE-UAT110-V2';
+const INSTALLED_RELEASE_UAT_ID = 'PPT-WINDOWS-INSTALLED-RELEASE-UAT110-V3';
 const INSTALLED_FRONTEND_UAT_ID = 'PPT-INSTALLED-FRONTEND-USER-UAT111-V3';
 const NARRATION_CLAIM_BOUNDARY = 'OFFLINE_WAVE_SYNTHESIS_ONLY_NOT_AUDIBLE_OUTPUT';
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
@@ -1008,6 +1008,10 @@ export const createFinalLocalTestDeliveryReceipt = (input) => {
   const versionMatch = /^(\d{2})\.(\d{2})\.(\d{4})\.(\d+)$/u.exec(applicationVersion);
   check(Boolean(versionMatch), 'Application version is invalid.');
   const [, day, month, year, sequence] = versionMatch;
+  const currentSequence = Number(sequence);
+  check(Number.isSafeInteger(currentSequence) && currentSequence >= 50,
+    'Application sequence is outside the governed predecessor boundary.');
+  const isGovernedBootstrap = currentSequence === 50;
   check(packageVersion === `${Number(day)}.${Number(month)}.${year}-${sequence}`,
     'Desktop package version is not bound to the application version.');
   check(/^[a-f0-9]{40,64}$/u.test(sourceCommit), 'Source commit is invalid.');
@@ -1137,7 +1141,7 @@ export const createFinalLocalTestDeliveryReceipt = (input) => {
     && lowerSha256(installerExperience.producer?.sha256, 'Installer experience producer') === finalProducer.installerExperience?.sha256,
   'Installer experience producer identity is stale.');
 
-  check(installationPreservation?.schemaVersion === 2 && installationPreservation.status === 'PASS'
+  check(installationPreservation?.schemaVersion === 3 && installationPreservation.status === 'PASS'
     && installationPreservation.id === INSTALLED_RELEASE_UAT_ID
     && installationPreservation.evidenceKind === 'WINDOWS_INSTALLED_RELEASE_PRESERVATION'
     && installationPreservation.exitCode === 0
@@ -1171,8 +1175,12 @@ export const createFinalLocalTestDeliveryReceipt = (input) => {
     && installationPreservation.packagedRuntime?.sha256 === packagedRuntime.sha256
     && Number(installationPreservation.packagedRuntime?.sizeBytes) === packagedRuntime.sizeBytes,
   'Installed-release UAT110 executable identity is stale.');
+  const expectedInstallationMode = isGovernedBootstrap ? 'BOOTSTRAP_FRESH_INSTALL' : 'CONTINUATION_N_TO_N_PLUS_ONE';
+  const expectedPrimaryClassification = isGovernedBootstrap ? 'BOOTSTRAP_FRESH_INSTALL_SEQUENCE_50' : 'VERSION_UPGRADE_N_TO_N_PLUS_1';
+  check(installationPreservation.installationMode === expectedInstallationMode,
+    'Installed-release UAT110 mode does not match package provenance sequence semantics.');
   for (const [label, phase, classification] of [
-    ['upgrade', installationPreservation.upgrade, 'VERSION_UPGRADE_N_TO_N_PLUS_1'],
+    ['primaryInstallation', installationPreservation.primaryInstallation, expectedPrimaryClassification],
     ['maintenance', installationPreservation.maintenance, 'SAME_VERSION_MAINTENANCE']
   ]) {
     check(phase?.status === 'PASS' && phase.classification === classification
@@ -1188,52 +1196,92 @@ export const createFinalLocalTestDeliveryReceipt = (input) => {
     check(match, `${label} FileVersion is invalid.`);
     return match.slice(1).map(Number);
   };
-  const from = parseFileVersion(installationPreservation.upgrade?.fromFileVersion, 'Upgrade from');
-  const to = parseFileVersion(installationPreservation.upgrade?.toFileVersion, 'Upgrade to');
-  const parentRelease = `Bronze ${String(from[0]).padStart(2, '0')}.${String(from[1]).padStart(2, '0')}.${from[2]}.${from[3]}`;
-  check(previousPackageHistoryBundle?.value?.schemaVersion === 1
-    && previousPackageHistoryBundle.value.id === 'PPT-WINDOWS-PACKAGE-PROVENANCE-HISTORY-BUNDLE-V1'
-    && previousPackageHistoryBundle.value.status === 'PASS'
-    && previousPackageHistoryBundle.value.release === parentRelease
-    && previousPackageHistoryBundle.value.releaseId === packageProvenance.previousPackageProvenance?.releaseId
-    && previousPackageHistoryBundle.value.sourceCommit === packageProvenance.previousPackageProvenance?.sourceCommit
-    && previousPackageHistoryBundle.value.channel === 'Bronze'
-    && previousPackageHistoryBundle.value.version === parentRelease.replace(/^Bronze /u, '')
-    && previousPackageHistoryBundle.value.packageVersion === `${from[0]}.${from[1]}.${from[2]}-${from[3]}`
-    && previousPackageHistoryBundle.value.producer?.path === previousPackageArchive?.value?.producer?.path
-    && previousPackageHistoryBundle.value.producer?.sha256 === previousPackageArchive?.value?.producer?.sha256
-    && Number(previousPackageHistoryBundle.value.producer?.sizeBytes) === Number(previousPackageArchive?.value?.producer?.sizeBytes)
-    && previousPackageHistoryBundle.sha256 === packageProvenance.previousPackageProvenance?.sha256
-    && Number(previousPackageHistoryBundle.sizeBytes) === Number(packageProvenance.previousPackageProvenance?.sizeBytes)
-    && previousPackageHistoryBundle.value.packageProvenance?.archivePath === 'windows-package-provenance.json'
-    && previousPackageHistoryBundle.value.packageProvenance?.sha256 === previousPackageArchive?.sha256
-    && Number(previousPackageHistoryBundle.value.packageProvenance?.sizeBytes) === Number(previousPackageArchive?.sizeBytes),
-  'Previous package provenance history bundle is not the immutable exact-parent binding.');
-  check(previousPackageArchive?.value?.schemaVersion === 2
-    && previousPackageArchive.value.id === 'PPT-WINDOWS-PACKAGE-PROVENANCE-V2'
-    && previousPackageArchive.value.evidenceKind === 'WINDOWS_PACKAGE_PROVENANCE'
-    && previousPackageArchive.value.status === 'PASS'
-    && previousPackageArchive.value.release === parentRelease
-    && previousPackageArchive.value.releaseId === packageProvenance.previousPackageProvenance?.releaseId
-    && previousPackageArchive.value.sourceProvenance?.headCommit === packageProvenance.previousPackageProvenance?.sourceCommit
-    && previousPackageArchive.value.artifacts?.packagedRuntime?.sha256 === packageProvenance.previousPackageProvenance?.packagedRuntime?.sha256
-    && Number(previousPackageArchive.value.artifacts?.packagedRuntime?.sizeBytes) === Number(packageProvenance.previousPackageProvenance?.packagedRuntime?.sizeBytes),
-  'Previous package provenance archive is not the exact schema-2 receipt inside its history bundle.');
-  assertMatchingReleaseSourceProvenance(historicalPreviousSourceProvenance, previousPackageArchive.value.sourceProvenance, 'previous package archive source');
-  check(previousPackageArchive.value.producer?.path === 'apps/desktop/scripts/run-electron-builder.mjs'
-    && previousPackageArchive.value.producer?.sha256 === previousPackageProducerReadback?.sha256
-    && Number(previousPackageArchive.value.producer?.sizeBytes) === Number(previousPackageProducerReadback?.sizeBytes),
-  'Previous package provenance producer blob does not match its exact historical source commit.');
-  check(from[1] === to[1] && from[2] === to[2]
-    && Date.UTC(to[2], to[1] - 1, to[0]) >= Date.UTC(from[2], from[1] - 1, from[0])
-    && to[3] === from[3] + 1 && packageProvenance.parentRelease === parentRelease
-    && packageProvenance.previousPackageProvenance?.release === parentRelease
-    && installationPreservation.previousPackageProvenance?.sha256 === packageProvenance.previousPackageProvenance?.sha256,
-  'Installed-release UAT110 is not a lineage-bound same-month N to N+1 upgrade.');
+  const to = parseFileVersion(installationPreservation.primaryInstallation?.toFileVersion, 'Primary installation to');
+  check(to[3] === currentSequence && installationPreservation.primaryInstallation?.toSequence === currentSequence,
+    'Installed-release UAT110 primary phase is not bound to the package sequence.');
+  if (isGovernedBootstrap) {
+    const parentMatch = /^Bronze (\d{2})\.(\d{2})\.(\d{4})\.(\d+)$/u.exec(String(packageProvenance.parentRelease ?? ''));
+    check(parentMatch && Number(parentMatch[2]) === Number(month) && Number(parentMatch[3]) === Number(year)
+      && Number(parentMatch[4]) === 49 && packageProvenance.previousPackageProvenance === null,
+      'Bronze 50 package is not a governed bootstrap with null previous package provenance.');
+    check(previousPackageHistoryBundle === null && previousPackageArchive === null
+      && historicalPreviousSourceProvenance === null && previousPackageProducerReadback === null,
+    'Bronze 50 final delivery must not receive fabricated previous package evidence.');
+    check(installationPreservation.previousPackageProvenance === null
+      && installationPreservation.installedBefore === null
+      && installationPreservation.upgrade === null
+      && installationPreservation.freshInstall?.classification === expectedPrimaryClassification
+      && JSON.stringify(installationPreservation.freshInstall) === JSON.stringify(installationPreservation.primaryInstallation),
+    'Bronze 50 UAT110 does not carry the exclusive fresh-install union branch.');
+    check(installationPreservation.primaryInstallation?.fromFileVersion === null
+      && installationPreservation.primaryInstallation?.fromSequence === null
+      && installationPreservation.primaryInstallation?.exactSuccessor === false
+      && installationPreservation.primaryInstallation?.governedBootstrap === true
+      && installationPreservation.primaryInstallation?.targetInstallRootAbsentBefore === true
+      && installationPreservation.primaryInstallation?.targetExecutableAbsentBefore === true
+      && installationPreservation.primaryInstallation?.bronzeUninstallRegistryAbsentBefore === true
+      && installationPreservation.primaryInstallation?.packagePreviousProvenanceAbsent === true
+      && installationPreservation.primaryInstallation?.before?.program?.bronze?.exists === false
+      && Number(installationPreservation.primaryInstallation?.before?.uninstallRegistry?.bronze?.entryCount) === 0,
+    'Bronze 50 UAT110 fresh-install absence proof is incomplete.');
+  } else {
+    check(installationPreservation.freshInstall === null
+      && installationPreservation.upgrade?.classification === expectedPrimaryClassification
+      && JSON.stringify(installationPreservation.upgrade) === JSON.stringify(installationPreservation.primaryInstallation),
+    'Bronze 51+ UAT110 does not carry the exclusive continuation union branch.');
+    const from = parseFileVersion(installationPreservation.upgrade?.fromFileVersion, 'Upgrade from');
+    const parentRelease = `Bronze ${String(from[0]).padStart(2, '0')}.${String(from[1]).padStart(2, '0')}.${from[2]}.${from[3]}`;
+    check(previousPackageHistoryBundle?.value?.schemaVersion === 1
+      && previousPackageHistoryBundle.value.id === 'PPT-WINDOWS-PACKAGE-PROVENANCE-HISTORY-BUNDLE-V1'
+      && previousPackageHistoryBundle.value.status === 'PASS'
+      && previousPackageHistoryBundle.value.release === parentRelease
+      && previousPackageHistoryBundle.value.releaseId === packageProvenance.previousPackageProvenance?.releaseId
+      && previousPackageHistoryBundle.value.sourceCommit === packageProvenance.previousPackageProvenance?.sourceCommit
+      && previousPackageHistoryBundle.value.channel === 'Bronze'
+      && previousPackageHistoryBundle.value.version === parentRelease.replace(/^Bronze /u, '')
+      && previousPackageHistoryBundle.value.packageVersion === `${from[0]}.${from[1]}.${from[2]}-${from[3]}`
+      && previousPackageHistoryBundle.value.producer?.path === previousPackageArchive?.value?.producer?.path
+      && previousPackageHistoryBundle.value.producer?.sha256 === previousPackageArchive?.value?.producer?.sha256
+      && Number(previousPackageHistoryBundle.value.producer?.sizeBytes) === Number(previousPackageArchive?.value?.producer?.sizeBytes)
+      && previousPackageHistoryBundle.sha256 === packageProvenance.previousPackageProvenance?.sha256
+      && Number(previousPackageHistoryBundle.sizeBytes) === Number(packageProvenance.previousPackageProvenance?.sizeBytes)
+      && previousPackageHistoryBundle.value.packageProvenance?.archivePath === 'windows-package-provenance.json'
+      && previousPackageHistoryBundle.value.packageProvenance?.sha256 === previousPackageArchive?.sha256
+      && Number(previousPackageHistoryBundle.value.packageProvenance?.sizeBytes) === Number(previousPackageArchive?.sizeBytes),
+    'Previous package provenance history bundle is not the immutable exact-parent binding.');
+    check(previousPackageArchive?.value?.schemaVersion === 2
+      && previousPackageArchive.value.id === 'PPT-WINDOWS-PACKAGE-PROVENANCE-V2'
+      && previousPackageArchive.value.evidenceKind === 'WINDOWS_PACKAGE_PROVENANCE'
+      && previousPackageArchive.value.status === 'PASS'
+      && previousPackageArchive.value.release === parentRelease
+      && previousPackageArchive.value.releaseId === packageProvenance.previousPackageProvenance?.releaseId
+      && previousPackageArchive.value.sourceProvenance?.headCommit === packageProvenance.previousPackageProvenance?.sourceCommit
+      && previousPackageArchive.value.artifacts?.packagedRuntime?.sha256 === packageProvenance.previousPackageProvenance?.packagedRuntime?.sha256
+      && Number(previousPackageArchive.value.artifacts?.packagedRuntime?.sizeBytes) === Number(packageProvenance.previousPackageProvenance?.packagedRuntime?.sizeBytes),
+    'Previous package provenance archive is not the exact schema-2 receipt inside its history bundle.');
+    assertMatchingReleaseSourceProvenance(historicalPreviousSourceProvenance, previousPackageArchive.value.sourceProvenance, 'previous package archive source');
+    check(previousPackageArchive.value.producer?.path === 'apps/desktop/scripts/run-electron-builder.mjs'
+      && previousPackageArchive.value.producer?.sha256 === previousPackageProducerReadback?.sha256
+      && Number(previousPackageArchive.value.producer?.sizeBytes) === Number(previousPackageProducerReadback?.sizeBytes),
+    'Previous package provenance producer blob does not match its exact historical source commit.');
+    check(from[1] === to[1] && from[2] === to[2]
+      && Date.UTC(to[2], to[1] - 1, to[0]) >= Date.UTC(from[2], from[1] - 1, from[0])
+      && to[3] === from[3] + 1 && packageProvenance.parentRelease === parentRelease
+      && packageProvenance.previousPackageProvenance?.release === parentRelease
+      && installationPreservation.installedBefore?.fileVersion === installationPreservation.upgrade?.fromFileVersion
+      && installationPreservation.installedBefore?.fileVersion === previousPackageArchive.value.artifacts?.packagedRuntime?.fileVersion
+      && installationPreservation.installedBefore?.sha256 === previousPackageArchive.value.artifacts?.packagedRuntime?.sha256
+      && Number(installationPreservation.installedBefore?.sizeBytes) === Number(previousPackageArchive.value.artifacts?.packagedRuntime?.sizeBytes)
+      && installationPreservation.previousPackageProvenance?.path === packageProvenance.previousPackageProvenance?.path
+      && Number(installationPreservation.previousPackageProvenance?.sizeBytes) === Number(packageProvenance.previousPackageProvenance?.sizeBytes)
+      && installationPreservation.previousPackageProvenance?.sha256 === packageProvenance.previousPackageProvenance?.sha256,
+    'Installed-release UAT110 is not a lineage-bound same-month N to N+1 upgrade.');
+  }
   check(installationPreservation.maintenance?.sameVersion === true
     && installationPreservation.maintenance?.beforeFileVersion === installationPreservation.maintenance?.afterFileVersion
-    && installationPreservation.maintenance?.beforeFileVersion === installationPreservation.upgrade?.toFileVersion,
-  'Installed-release UAT110 maintenance phase is not exact N+1 to N+1.');
+    && installationPreservation.maintenance?.beforeFileVersion === installationPreservation.primaryInstallation?.toFileVersion
+    && installationPreservation.maintenance?.precedingPhase === expectedPrimaryClassification,
+  'Installed-release UAT110 maintenance phase is not exact same-version maintenance after its primary phase.');
   check(installationPreservation.privacyBoundary?.existingUserFileContentsHashedForEquality === true
     && installationPreservation.privacyBoundary?.existingUserFileContentsRecorded === false
     && installationPreservation.privacyBoundary?.existingUserFileNamesRecorded === false
@@ -1467,7 +1515,10 @@ export const createFinalLocalTestDeliveryReceipt = (input) => {
     windowsInstalledReleaseUat: {
       status: 'PASS', id: INSTALLED_RELEASE_UAT_ID,
       expectedReleaseId: installationPreservation.expectedReleaseId,
-      upgrade: 'PASS', sameVersionMaintenance: 'PASS', metadataOnlyUserDataInspection: true,
+      installationMode: expectedInstallationMode,
+      freshInstall: isGovernedBootstrap ? 'PASS' : 'NOT_APPLICABLE',
+      upgrade: isGovernedBootstrap ? 'NOT_APPLICABLE' : 'PASS',
+      sameVersionMaintenance: 'PASS', metadataOnlyUserDataInspection: true,
       markerPreserved: true, otherChannelWrites: 0,
       receiptSha256: evidenceBindings.installationPreservationUat110.sha256
     },
@@ -1736,41 +1787,53 @@ const main = async () => {
   ]), sourceProtectionBinding];
   const byId = Object.fromEntries(bindings.map((binding) => [binding.id, binding]));
   const previousReference = byId.packageProvenance.value?.previousPackageProvenance;
-  check(previousReference?.release === byId.packageProvenance.value?.parentRelease,
-    'Current package provenance does not name its exact parent release archive.');
-  const expectedPreviousPath = resolve(root, windowsPackageHistoryBundleRelativePath(previousReference.release));
-  check(samePath(previousReference.path, expectedPreviousPath), 'Previous package provenance archive path is not canonical.');
-  const previousHistory = await verifyWindowsPackageHistoryBundle({
-    root,
-    bundlePath: expectedPreviousPath,
-    expectedRelease: previousReference.release,
-    expectedReleaseId: previousReference.releaseId,
-    currentProvenance: liveSource.provenance,
-    runGit: liveSource.runGit,
-    requireEarlierCommit: true
-  });
-  check(previousHistory.bundleBinding.sha256 === previousReference.sha256
-    && previousHistory.bundleBinding.sizeBytes === Number(previousReference.sizeBytes),
-  'Previous package provenance history bundle live readback mismatch.');
-  const previousPackageHistoryBundle = Object.freeze({
-    value: previousHistory.bundle,
-    sizeBytes: previousHistory.bundleBinding.sizeBytes,
-    sha256: previousHistory.bundleBinding.sha256
-  });
-  const previousPackageArchive = Object.freeze({
-    value: previousHistory.receipt,
-    sizeBytes: previousHistory.packageBinding.sizeBytes,
-    sha256: previousHistory.packageBinding.sha256
-  });
-  const historicalPreviousSourceProvenance = previousHistory.provenance;
-  const previousProducerPath = 'apps/desktop/scripts/run-electron-builder.mjs';
-  const previousProducerRaw = liveSource.runGit(['show', `${historicalPreviousSourceProvenance.headCommit}:${previousProducerPath}`]);
-  const previousProducerBytes = Buffer.isBuffer(previousProducerRaw) ? previousProducerRaw : Buffer.from(previousProducerRaw);
-  const previousPackageProducerReadback = Object.freeze({
-    path: previousProducerPath,
-    sizeBytes: previousProducerBytes.length,
-    sha256: sha256Bytes(previousProducerBytes)
-  });
+  const packageSequenceMatch = /\.(\d+)$/u.exec(String(byId.packageProvenance.value?.release ?? ''));
+  check(packageSequenceMatch, 'Current package provenance release sequence is invalid.');
+  const isGovernedBootstrap = Number(packageSequenceMatch[1]) === 50;
+  let previousPackageHistoryBundle = null;
+  let previousPackageArchive = null;
+  let historicalPreviousSourceProvenance = null;
+  let previousPackageProducerReadback = null;
+  if (isGovernedBootstrap) {
+    check(previousReference === null,
+      'Bronze 50 governed bootstrap must not name a previous package archive.');
+  } else {
+    check(previousReference?.release === byId.packageProvenance.value?.parentRelease,
+      'Current package provenance does not name its exact parent release archive.');
+    const expectedPreviousPath = resolve(root, windowsPackageHistoryBundleRelativePath(previousReference.release));
+    check(samePath(previousReference.path, expectedPreviousPath), 'Previous package provenance archive path is not canonical.');
+    const previousHistory = await verifyWindowsPackageHistoryBundle({
+      root,
+      bundlePath: expectedPreviousPath,
+      expectedRelease: previousReference.release,
+      expectedReleaseId: previousReference.releaseId,
+      currentProvenance: liveSource.provenance,
+      runGit: liveSource.runGit,
+      requireEarlierCommit: true
+    });
+    check(previousHistory.bundleBinding.sha256 === previousReference.sha256
+      && previousHistory.bundleBinding.sizeBytes === Number(previousReference.sizeBytes),
+    'Previous package provenance history bundle live readback mismatch.');
+    previousPackageHistoryBundle = Object.freeze({
+      value: previousHistory.bundle,
+      sizeBytes: previousHistory.bundleBinding.sizeBytes,
+      sha256: previousHistory.bundleBinding.sha256
+    });
+    previousPackageArchive = Object.freeze({
+      value: previousHistory.receipt,
+      sizeBytes: previousHistory.packageBinding.sizeBytes,
+      sha256: previousHistory.packageBinding.sha256
+    });
+    historicalPreviousSourceProvenance = previousHistory.provenance;
+    const previousProducerPath = 'apps/desktop/scripts/run-electron-builder.mjs';
+    const previousProducerRaw = liveSource.runGit(['show', `${historicalPreviousSourceProvenance.headCommit}:${previousProducerPath}`]);
+    const previousProducerBytes = Buffer.isBuffer(previousProducerRaw) ? previousProducerRaw : Buffer.from(previousProducerRaw);
+    previousPackageProducerReadback = Object.freeze({
+      path: previousProducerPath,
+      sizeBytes: previousProducerBytes.length,
+      sha256: sha256Bytes(previousProducerBytes)
+    });
+  }
   const verifiedPackage = await verifyWindowsPackageProvenanceLive({
     root,
     packageProvenancePath,

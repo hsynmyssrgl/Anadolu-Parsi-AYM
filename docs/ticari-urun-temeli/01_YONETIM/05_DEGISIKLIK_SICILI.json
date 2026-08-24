@@ -215,7 +215,7 @@
         "config/canonical-rule-registry.json",
         "docs/ticari-urun-temeli"
       ],
-      "isListesiEtkisi": "IS-0214 eklendi; stale schema1 veya degismis legacy nested .50 trusted predecessor sayilmaz. Temiz schema2 parent package ve canli sibling N exact eslesir; installer experience UAT110 V2 UAT111 V3 dinamik outcome ve final V3 canli readback tamamlanmadan teslim yoktur.",
+      "isListesiEtkisi": "IS-0214 guncellendi; Bronze 50 previous package/runtime kabul etmeyen bootstrap fresh-install ve same-version maintenance, Bronze 51+ immutable parent package ve canli sibling N exact eslesen N to N+1 ve maintenance uygular. Installer experience, UAT110 V3, UAT111 V3 dinamik outcome ve final V3 canli readback tamamlanmadan teslim yoktur.",
       "senkronDurumu": "SYNCHRONIZED"
     },
     {

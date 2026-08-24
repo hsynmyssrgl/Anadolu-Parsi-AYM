@@ -2793,7 +2793,7 @@
       "acceptedAt": "2026-08-24T08:30:00+03:00",
       "title": "Adversarial Windows package kurulum ve final teslim kanit zinciri",
       "status": "ACTIVE",
-      "source": "Acik kullanici karari: schema2 package provenance ve previous package archive canli installed predecessor bagi, zorunlu installer experience, schema2 UAT110, schema3 UAT111 ve schema3 final teslimi exact source producer path hash chronology screenshot secret ve dynamic outcome kanitlariyla fail-closed bagla",
+      "source": "Acik kullanici karari: Bronze 50 temiz bootstrap ilk kurulumunu ve Bronze 51+ exact previous package/runtime bagli N to N+1 yukseltmesini birbirini dislayan UAT110 V3 modlariyla; zorunlu installer experience, UAT111 V3 ve final V3 teslim zincirinde fail-closed bagla",
       "document": "docs/decisions/DEC-274-adversarial-windows-delivery-evidence-chain.md",
       "documents": [
         "config/canonical-rule-registry.json",
@@ -2807,7 +2807,7 @@
         "docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md",
         "docs/10_MASTER_DECISION_REGISTER.md"
       ],
-      "workListImpact": "IS-0214 eklendi. Stale schema1 final ve degismis legacy nested runtime trusted predecessor olamaz; temiz exact .50 predecessor schema2 package receipt ile sibling yola kurulur, sonra .51 exact lineage ile gercek yukseltme ve maintenance yapilir. Final; zorunlu installer deneyimi, UAT110 V2, UAT111 V3, exact kanonik rota otoritesi, tum uygun kontroller, gercek native CANCEL/ACCEPT, reparse icermeyen exclusive kanit koku, guard kaybinda dis yola silme yasağı ve dinamik outcome matrisiyle kapanir.",
+      "workListImpact": "IS-0214 guncellendi. Bronze .50 kanonik package provenance previousPackageProvenance=null bootstrap'tir; kurulum kokunun, EXE'nin ve uninstall kaydinin yoklugu kanitlanarak fresh-install ve ayri same-version maintenance calisir. Bronze .51+ ise immutable exact previous package ve canli installed N runtime ile N to N+1 ve maintenance calistirir. Final; zorunlu installer deneyimi, UAT110 V3 mod unionu, UAT111 V3, exact kanonik rota otoritesi, tum uygun kontroller, gercek native CANCEL/ACCEPT, reparse icermeyen exclusive kanit koku, guard kaybinda dis yola silme yasagi ve dinamik outcome matrisiyle kapanir.",
       "syncStatus": "SYNCHRONIZED",
       "requirements": [],
       "codeAreas": [

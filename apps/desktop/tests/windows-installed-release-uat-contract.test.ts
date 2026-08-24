@@ -28,14 +28,15 @@ describe('Windows installed release UAT contract', () => {
       'InstallerPath',
       'PackagedExePath',
       'InstalledExePath',
-      'PreviousInstalledExePath',
       'PackageProvenance',
       'GovernedPreflight',
       'InstallerExperienceUat',
-      'PreviousPackageProvenance',
       'EvidenceRoot',
       'ExpectedReleaseId'
     ]) expect(source).toContain(`[Parameter(Mandatory = $true)][ValidateNotNullOrEmpty()][string]$${parameter}`);
+    for (const parameter of ['PreviousInstalledExePath', 'PreviousPackageProvenance']) {
+      expect(source).toContain(`[Parameter()][AllowEmptyString()][string]$${parameter} = ''`);
+    }
     expect(source).toContain("$package.releaseId -ceq $ExpectedReleaseId");
     expect(source).toContain("$verifiedPackage.sourceCommit");
   });
@@ -59,21 +60,40 @@ describe('Windows installed release UAT contract', () => {
       'Atomik makbuz readback uyusmuyor'
     ]) expect(source).toContain(marker);
     expect(source.indexOf('$script:EvidenceRunGuard = New-EvidenceRunGuard')).toBeLessThan(
-      source.indexOf("Invoke-InstallerPhase 'VERSION_UPGRADE_N_TO_N_PLUS_1'"),
+      source.indexOf('$primaryProcess = Invoke-InstallerPhase $primaryClassification'),
     );
     expect(source.indexOf('Close-EvidenceRunGuard $script:EvidenceRunGuard')).toBeGreaterThan(
       source.indexOf('Get-FileSha256 $InstalledUiReceiptPath'),
     );
   });
 
-  it('proves N to N plus one upgrade and a distinct same-version maintenance phase', async () => {
+  it('proves mutually exclusive sequence-50 bootstrap or N to N plus one upgrade, followed by maintenance', async () => {
     const source = await readFile(producerUrl, 'utf8');
-    expect(source).toContain("'VERSION_UPGRADE_N_TO_N_PLUS_1'");
+    for (const marker of [
+      '$isGovernedBootstrap = $newSequence -eq 50',
+      "'BOOTSTRAP_FRESH_INSTALL_SEQUENCE_50'",
+      "'VERSION_UPGRADE_N_TO_N_PLUS_1'",
+      "installationMode = $installationMode",
+      'freshInstall = $freshInstallReceipt',
+      'upgrade = $upgradeReceipt',
+      'targetInstallRootAbsentBefore',
+      'targetExecutableAbsentBefore',
+      'bronzeUninstallRegistryAbsentBefore',
+      'packagePreviousProvenanceAbsent'
+    ]) expect(source).toContain(marker);
     expect(source).toContain("'SAME_VERSION_MAINTENANCE'");
     expect(source).toContain('$newSequence -eq ($oldSequence + 1)');
     expect(source.match(/Invoke-InstallerPhase/gu)?.length).toBe(3);
     expect(source).toContain('dataSelectionDialogObserved = $false');
     expect(source).toContain('installedEqualsPackaged = $true');
+    expect(source).toContain('Bronze 50 governed bootstrap onceki paket/runtime girdisi kabul etmez.');
+    expect(source).toContain('Bronze 51+ exact N paketi ve runtime girdileri zorunludur.');
+    expect(source).toContain('Package parentRelease canli installed N release kimligiyle uyusmuyor.');
+    expect(source).toContain('Installed N runtime installer baslamadan onceki canli geri-okumada degisti.');
+    expect(source).toContain('Bronze 50 fresh-install yoklugu installer baslamadan hemen once yeniden dogrulanamadi.');
+    expect(source.indexOf('Bronze 50 governed bootstrap oncesinde kanonik install root tamamen yok olmalidir.')).toBeLessThan(
+      source.indexOf('$primaryProcess = Invoke-InstallerPhase $primaryClassification'),
+    );
   });
 
   it('accepts only the canonical parent history bundle and delegates all trust checks to the JS verifier before install', async () => {
@@ -89,7 +109,7 @@ describe('Windows installed release UAT contract', () => {
     expect(source).not.toContain('-windows-package-provenance.json"');
     expect(source).not.toContain("Read-JsonFile $PreviousPackageProvenance 'PreviousPackageProvenance'");
     expect(source.indexOf('verifyPreviousWindowsPackageProvenance')).toBeLessThan(
-      source.indexOf("Invoke-InstallerPhase 'VERSION_UPGRADE_N_TO_N_PLUS_1'")
+      source.indexOf('$primaryProcess = Invoke-InstallerPhase $primaryClassification')
     );
   });
 
@@ -118,7 +138,7 @@ describe('Windows installed release UAT contract', () => {
     expect(source).toContain("authenticodeStatus -eq 'NotSigned'");
   });
 
-  it('writes schema-2 UAT110 then invokes the schema-3 installed frontend runner with the preservation/run binding', async () => {
+  it('writes schema-3 UAT110 then invokes the schema-3 installed frontend runner with the preservation/run binding', async () => {
     const source = await readFile(producerUrl, 'utf8');
     expect(source).toContain("windows-installed-release-uat110.json");
     expect(source).toContain("installed-frontend-user-uat111.json");
@@ -134,7 +154,8 @@ describe('Windows installed release UAT contract', () => {
       '--output'
     ]) expect(source).toContain(argument);
     expect(source).toContain("$installedUi.schemaVersion -eq 3");
-    expect(source).toContain("PPT-WINDOWS-INSTALLED-RELEASE-UAT110-V2");
+    expect(source).toContain("PPT-WINDOWS-INSTALLED-RELEASE-UAT110-V3");
+    expect(source).toContain('schemaVersion = 3');
     expect(source).toContain('installationPreservationSha256');
     expect(source).toContain('packageProvenanceSha256');
   });

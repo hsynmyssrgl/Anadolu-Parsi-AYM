@@ -9,7 +9,7 @@
   "commercialReleaseEligible": false,
   "canonicalRuleRegistry": "PPT-CANONICAL-RULE-REGISTRY-V27",
   "canonicalRuleCount": 240,
-  "canonicalRuleSha256": "4c8a52f9adc2153177f1e504104e20ac5e9d3f7d780daa2c7d7bdb5d399a6050",
+  "canonicalRuleSha256": "3936b7fc4a1c6e04e195edf1a9d201c620ed613220286788f83cac5e82c2bc2e",
   "governedPreflight": "NOT_RUN",
   "worktreeClean": false,
   "historicalDocumentsRemainImmutable": true,

@@ -2,6 +2,13 @@
 
 > **Tek yetkili devam noktası:** Yeni bir sohbet veya geliştirme oturumu bu dosyayı okuyarak başlar. Geçmiş buildleri yeniden araştırmak yerine `Güncel devam noktası` ve `Kalan işler` bölümleri esas alınır.
 
+## 24.08.2026 — Bronze 22.08.2026.50 UAT110 V3 düzeltme kaydı
+
+- DEC-274/PR-239 senkronlandı: Bronze sequence 50 previous paket/runtime kabul etmeyen temiz bootstrap ilk kurulum + same-version maintenance; sequence 51+ immutable previous package ve canlı installed N runtime bağlı exact N→N+1 + maintenance uygular.
+- UAT110 `PPT-WINDOWS-INSTALLED-RELEASE-UAT110-V3` oldu; UAT111 ve final V3 kurulum modunu package provenance'dan bağımsız yeniden türetir.
+- Hedefli kapanış: **PASS (12 test dosyası / 94 test)**; kök typecheck ve değişen MJS/PowerShell parser: **PASS**.
+- Filtresiz tam regresyon, kaynak bütünlüğü, temiz exact commit, yeni installer, gerçek kurulum/UAT110/UAT111/final koşuları bu kayıt anında henüz tamamlanmamıştır ve PASS sayılmaz.
+
 - Ürün: **ParsYuva Aile Yaşam Merkezi**
 - Güncel build: **228**
 - Güncel sürüm: **02.08.2026.228**
@@ -996,4 +1003,3 @@ PR-172. PR-172 yalnız platform tarafından sağlanan gerçek sohbet bağlam kap
 ---
 
 Bu dosya `config/master-build-ledger.json` kaynağından üretilir. Elle yapılan ve JSON kaynağıyla eşleşmeyen değişiklikler doğrulama kapısında reddedilir.
-

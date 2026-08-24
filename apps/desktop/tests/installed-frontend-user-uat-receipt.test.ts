@@ -10,7 +10,7 @@ const sha = (character: string) => character.repeat(64);
 const jsonSha = (value: unknown) => createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const commit = 'a'.repeat(40);
 
-const fixture = () => {
+const fixture = (): any => {
   const installedIdentity = {
     fullPath: INSTALLED_EXECUTABLE_PATH,
     sizeBytes: 42_000,
@@ -26,7 +26,7 @@ const fixture = () => {
     releaseId: 'bronze-2026-08-22-r50',
     release: 'Bronze 22.08.2026.50',
     parentRelease: 'Bronze 22.08.2026.49',
-    previousPackageProvenance: { release: 'Bronze 22.08.2026.49', sha256: sha('8'), sizeBytes: 800 },
+    previousPackageProvenance: null,
     sourceProvenance: {
       channel: 'Bronze',
       headCommit: commit,
@@ -44,13 +44,23 @@ const fixture = () => {
     rulesSha256: sha('4'),
     sourceFingerprint: { sha256: sha('3'), fileCount: 2_700 },
   };
+  const primaryInstallation = {
+    status: 'PASS', classification: 'BOOTSTRAP_FRESH_INSTALL_SEQUENCE_50', installedEqualsPackaged: true,
+    markerPreserved: true, allUserDataContentEqualityPreserved: true, otherChannelAndLegacyProgramMetadataPreserved: true,
+    otherChannelWriteCount: 0, dataSelectionDialogObserved: false, bronzeRegistry: { exactSingleEntry: true }, installedRuntime: { sha256: sha('2') },
+    fromFileVersion: null, toFileVersion: '22.8.2026-50', fromSequence: null, toSequence: 50,
+    exactSuccessor: false, governedBootstrap: true, targetInstallRootAbsentBefore: true,
+    targetExecutableAbsentBefore: true, bronzeUninstallRegistryAbsentBefore: true, packagePreviousProvenanceAbsent: true,
+    before: { program: { bronze: { exists: false } }, uninstallRegistry: { bronze: { entryCount: 0 } } },
+  };
   const installationPreservation = {
-    schemaVersion: 2,
-    id: 'PPT-WINDOWS-INSTALLED-RELEASE-UAT110-V2',
+    schemaVersion: 3,
+    id: 'PPT-WINDOWS-INSTALLED-RELEASE-UAT110-V3',
     evidenceKind: 'WINDOWS_INSTALLED_RELEASE_PRESERVATION',
     status: 'PASS',
     exitCode: 0,
     classification: 'LOCAL_UNSIGNED_INSTALLATION_PRESERVATION_ONLY',
+    installationMode: 'BOOTSTRAP_FRESH_INSTALL',
     release: 'Bronze 22.08.2026.50',
     expectedReleaseId: 'bronze-2026-08-22-r50',
     sourceCommit: commit,
@@ -58,24 +68,59 @@ const fixture = () => {
     governedPreflight: { sha256: sha('6') },
     installer: { sha256: sha('1'), fileVersion: '22.8.2026-50' },
     packagedRuntime: { sha256: sha('2'), sizeBytes: 42_000 },
-    previousPackageProvenance: { sha256: sha('8'), sizeBytes: 800 },
+    previousPackageProvenance: null,
+    installedBefore: null,
     producer: { path: 'scripts/run-windows-installed-release-uat.ps1', sha256: sha('9'), sizeBytes: 1000 },
     cleanup: { markerDeleted: true, markerAbsentReadback: true, originalUserDataStateRestored: true },
     privacyBoundary: { existingUserFileContentsHashedForEquality: true, existingUserFileContentsRecorded: false, existingUserFileNamesRecorded: false, receiptContainsUserContent: false, contentEqualityMeasured: true },
-    upgrade: {
-      status: 'PASS', classification: 'VERSION_UPGRADE_N_TO_N_PLUS_1', installedEqualsPackaged: true,
-      markerPreserved: true, allUserDataContentEqualityPreserved: true, otherChannelAndLegacyProgramMetadataPreserved: true,
-      otherChannelWriteCount: 0, dataSelectionDialogObserved: false, bronzeRegistry: { exactSingleEntry: true }, installedRuntime: { sha256: sha('2') },
-      fromFileVersion: '22.8.2026-49', toFileVersion: '22.8.2026-50', fromSequence: 49, toSequence: 50, exactSuccessor: true,
-    },
+    primaryInstallation,
+    freshInstall: { ...primaryInstallation },
+    upgrade: null,
     maintenance: {
       status: 'PASS', classification: 'SAME_VERSION_MAINTENANCE', installedEqualsPackaged: true,
       markerPreserved: true, allUserDataContentEqualityPreserved: true, otherChannelAndLegacyProgramMetadataPreserved: true,
       otherChannelWriteCount: 0, dataSelectionDialogObserved: false, bronzeRegistry: { exactSingleEntry: true }, installedRuntime: { sha256: sha('2') },
       beforeFileVersion: '22.8.2026-50', afterFileVersion: '22.8.2026-50', sameVersion: true,
+      precedingPhase: 'BOOTSTRAP_FRESH_INSTALL_SEQUENCE_50',
     },
   };
   return { installedIdentity, packageProvenance, governedPreflight, installationPreservation };
+};
+
+const continuationFixture = (): any => {
+  const input = fixture();
+  input.installedIdentity.fileVersion = '24.8.2026-51';
+  input.installedIdentity.productVersion = '24.8.2026-51';
+  input.packageProvenance.releaseId = 'bronze-2026-08-24-r51';
+  input.packageProvenance.release = 'Bronze 24.08.2026.51';
+  input.packageProvenance.parentRelease = 'Bronze 22.08.2026.50';
+  input.packageProvenance.previousPackageProvenance = {
+    path: 'C:\\PPT\\AYM\\06_KOD\\app\\artifacts\\validation\\release-history\\bronze-22.08.2026.50-windows-package-provenance-bundle\\bundle.json',
+    release: 'Bronze 22.08.2026.50', sha256: sha('8'), sizeBytes: 800,
+    packagedRuntime: { sha256: sha('7'), sizeBytes: 41_000, fileVersion: '22.8.2026-50' },
+  };
+  input.installationPreservation.release = 'Bronze 24.08.2026.51';
+  input.installationPreservation.expectedReleaseId = 'bronze-2026-08-24-r51';
+  input.installationPreservation.installationMode = 'CONTINUATION_N_TO_N_PLUS_ONE';
+  input.installationPreservation.installer.fileVersion = '24.8.2026-51';
+  input.installationPreservation.previousPackageProvenance = {
+    path: input.packageProvenance.previousPackageProvenance.path, sha256: sha('8'), sizeBytes: 800,
+  };
+  input.installationPreservation.installedBefore = { fileVersion: '22.8.2026-50', sha256: sha('7'), sizeBytes: 41_000 };
+  const upgrade = {
+    ...input.installationPreservation.primaryInstallation,
+    classification: 'VERSION_UPGRADE_N_TO_N_PLUS_1',
+    fromFileVersion: '22.8.2026-50', toFileVersion: '24.8.2026-51', fromSequence: 50, toSequence: 51,
+    exactSuccessor: true, governedBootstrap: false, targetInstallRootAbsentBefore: false,
+    targetExecutableAbsentBefore: false, bronzeUninstallRegistryAbsentBefore: false, packagePreviousProvenanceAbsent: false,
+  };
+  input.installationPreservation.primaryInstallation = upgrade;
+  input.installationPreservation.freshInstall = null;
+  input.installationPreservation.upgrade = { ...upgrade };
+  input.installationPreservation.maintenance.beforeFileVersion = '24.8.2026-51';
+  input.installationPreservation.maintenance.afterFileVersion = '24.8.2026-51';
+  input.installationPreservation.maintenance.precedingPhase = 'VERSION_UPGRADE_N_TO_N_PLUS_1';
+  return input;
 };
 
 describe('installed frontend UAT receipt schema and provenance', () => {
@@ -97,6 +142,26 @@ describe('installed frontend UAT receipt schema and provenance', () => {
       packagedRuntimeSha256: sha('2'),
       packageBuildMode: 'LOCAL_UNSIGNED_NSIS',
     });
+  });
+
+  it('accepts exact continuation but rejects cross-mode bootstrap and upgrade claims', () => {
+    const continuation = continuationFixture();
+    expect(() => validateProvenanceReceipts({
+      ...continuation, expectedReleaseId: 'bronze-2026-08-24-r51',
+      packageProvenanceSha256: sha('5'), governedPreflightSha256: sha('6'),
+    })).not.toThrow();
+
+    const bootstrapWithPrevious = fixture();
+    bootstrapWithPrevious.packageProvenance.previousPackageProvenance = { release: 'Bronze 22.08.2026.49', sha256: sha('8'), sizeBytes: 800 };
+    expect(() => validateProvenanceReceipts({ ...bootstrapWithPrevious, expectedReleaseId: 'bronze-2026-08-22-r50', packageProvenanceSha256: sha('5'), governedPreflightSha256: sha('6') })).toThrow(/bootstrap|null previous/u);
+
+    const bootstrapAsUpgrade = fixture();
+    bootstrapAsUpgrade.installationPreservation.installationMode = 'CONTINUATION_N_TO_N_PLUS_ONE';
+    expect(() => validateProvenanceReceipts({ ...bootstrapAsUpgrade, expectedReleaseId: 'bronze-2026-08-22-r50', packageProvenanceSha256: sha('5'), governedPreflightSha256: sha('6') })).toThrow(/mod/u);
+
+    const continuationWithoutPrevious = continuationFixture();
+    continuationWithoutPrevious.packageProvenance.previousPackageProvenance = null;
+    expect(() => validateProvenanceReceipts({ ...continuationWithoutPrevious, expectedReleaseId: 'bronze-2026-08-24-r51', packageProvenanceSha256: sha('5'), governedPreflightSha256: sha('6') })).toThrow(/parent package provenance/u);
   });
 
   it('fails closed for stale source, release, installer or installed binary bindings', () => {

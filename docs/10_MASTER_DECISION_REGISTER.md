@@ -1460,7 +1460,7 @@ Uygulama bağı mutasyondan önce kaydedilen clean Bronze baseline receipt'i, im
 
 ## DEC-274 — Adversarial Windows paket, kurulum ve final teslim kanıt zinciri
 
-24.08.2026 tarihinde PR-238, PR-239 ile superseded edildi. Teslim; canlı PR-235 geri-okumalı schema2 package provenance, immutable parent package arşiviyle exact canlı sibling N, zorunlu installer-experience V2, UAT110 V2, parent-run bağlı UAT111 V3 ve final V3 kanıtlarını source/producer/path/hash/kronoloji/screenshot/secret bağlarıyla yeniden doğrular. Sabit tıklama sayısı kabul değildir; dinamik outcome matrisi sıfır residual ile kapanır. Legacy nested runtime predecessor sayılmaz. NotSigned veya Kaspersky koruması kapalı test üretim uygunluğu değildir.
+24.08.2026 tarihinde PR-238, PR-239 ile superseded edildi. Teslim; canlı PR-235 geri-okumalı schema2 package provenance, Bronze 50 için previous paket/runtime kabul etmeyen bootstrap fresh-install + maintenance veya Bronze 51+ için immutable parent package arşiviyle exact canlı sibling N'den N→N+1 + maintenance üreten UAT110 V3 modunu yeniden türetir. Zorunlu installer-experience V2, parent-run bağlı UAT111 V3 ve final V3 kanıtları source/producer/path/hash/kronoloji/screenshot/secret bağlarıyla doğrulanır. Sabit tıklama sayısı kabul değildir; dinamik outcome matrisi sıfır residual ile kapanır. Legacy nested runtime predecessor sayılmaz. NotSigned veya Kaspersky koruması kapalı test üretim uygunluğu değildir.
 
 ## DEC-275 — En küçük değişiklikte tüm kayıt ve test kapanışı
 

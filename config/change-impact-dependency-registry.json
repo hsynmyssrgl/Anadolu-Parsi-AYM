@@ -124,6 +124,7 @@
       "affectedVitestFiles": [
         "apps/desktop/tests/bronze-final-local-test-delivery-contract.test.ts",
         "apps/desktop/tests/installed-frontend-user-uat-contract.test.ts",
+        "apps/desktop/tests/installed-frontend-user-uat-receipt.test.ts",
         "apps/desktop/tests/installed-ui-native-file-dialog-harness.test.ts",
         "apps/desktop/tests/windows-installed-release-uat-contract.test.ts",
         "apps/desktop/tests/windows-installer-experience-uat-contract.test.ts",

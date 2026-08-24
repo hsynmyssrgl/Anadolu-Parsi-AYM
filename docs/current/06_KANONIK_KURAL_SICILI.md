@@ -5,7 +5,7 @@
 - Toplam kural: **240**
 - Aktif kural: **215**
 - Açıkça superseded tarihsel kural: **25**
-- Kural SHA-256: `4c8a52f9adc2153177f1e504104e20ac5e9d3f7d780daa2c7d7bdb5d399a6050`
+- Kural SHA-256: `3936b7fc4a1c6e04e195edf1a9d201c620ed613220286788f83cac5e82c2bc2e`
 - Makine okunur tek aktif kaynak: `config/canonical-rule-registry.json`
 
 `PR-186` her bağlayıcı kararın aynı sürümde DEC ve makine defterine kaydını, `PR-187` bilinen belge/kod/kural driftinde kapanış yasağını getirir. `DEC-251` ve `config/documentation-synchronization-policy.json` bu iki kuralı karar anında DEC + etkilenen belge + iş listesi açık/kapalı/neden güncellemesi olarak fail-closed uygular.
@@ -38,7 +38,7 @@
 
 `PR-237`; sürüm tahsisini zorunlu expected release ID ile ayrı ve tek seferli mutasyon yapar. Preview salt okunurdur; mismatch herhangi yazıma veya temizliğe geçmeden durur. Signed/local/dir paket girişleri yalnız önceden tahsis edilmiş exact current kimliği tüketir ve tarihsel kanıtlar değişmeden kalır.
 
-`PR-238`, `PR-239` ile superseded edilmiştir. `PR-239`; schema2 package provenance ve immutable önceki package arşivini canlı sibling N runtime ile bağlar; zorunlu installer-experience V2, UAT110 V2, parent-run bağlı UAT111 V3 ve final V3 makbuzlarını source/producer/path/hash/kronoloji/screenshot/secret geri-okumalarıyla kanıtlar. Tracked TypeScript kaynağından türetilen exact modül/rota otoritesi, tüm uygun kontrollerin dinamik outcome kapsamı, gerçek native CANCEL/ACCEPT ve reparse içermeyen exclusive kanıt kökü zorunludur; guard kaybında path temizliği yapılmaz. Legacy nested runtime trusted predecessor değildir. NotSigned/Kaspersky koruması kapalı test üretim kanıtı değildir.
+`PR-238`, `PR-239` ile superseded edilmiştir. `PR-239`; Bronze 50 için previous package/runtime kabul etmeyen temiz bootstrap ilk kurulum + same-version maintenance, Bronze 51+ için immutable önceki package arşiviyle canlı sibling N runtime'ı bağlayan exact N→N+1 + maintenance modlarını UAT110 V3 union sözleşmesiyle ayırır. Zorunlu installer-experience V2, parent-run bağlı UAT111 V3 ve final V3 makbuzları source/producer/path/hash/kronoloji/screenshot/secret geri-okumalarıyla kanıtlanır. Tracked TypeScript kaynağından türetilen exact modül/rota otoritesi, tüm uygun kontrollerin dinamik outcome kapsamı, gerçek native CANCEL/ACCEPT ve reparse içermeyen exclusive kanıt kökü zorunludur; guard kaybında path temizliği yapılmaz. Legacy nested runtime trusted predecessor değildir. NotSigned/Kaspersky koruması kapalı test üretim kanıtı değildir.
 
 `PR-240`; en küçük değişiklikte dahi etkilenen ana/kanal kaynakları, kural-karar sicilleri, aktif ve ticari belgeler, iş listesi, kapsam/envanter/ratchet/manifest/indeks, güncel ana DOCX/PDF ve kanıt sözleşmelerinin aynı zincirde güncellenmesini zorunlu kılar. Her değişiklik hedefli ve filtresiz tam regresyon, typecheck, sözdizimi ve kaynak bütünlüğü; UI etkisinde tüm modül/rota/menü/kontrol/durum/erişilebilirlik/görsel bütünlük UAT'ı gerektirir. Gerçek test hatası `wip(rejected)` checkpoint olarak kaydedilir; bütün kapanış tamamlanmadan ara installer üretilemez.
 

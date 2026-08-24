@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-RULE-ENFORCEMENT-REGISTRY-V1",
   "release": "Bronze 22.08.2026.50",
-  "canonicalRulesSha256": "4c8a52f9adc2153177f1e504104e20ac5e9d3f7d780daa2c7d7bdb5d399a6050",
+  "canonicalRulesSha256": "3936b7fc4a1c6e04e195edf1a9d201c620ed613220286788f83cac5e82c2bc2e",
   "activeRuleCount": 215,
   "defaultPolicy": "FAIL_CLOSED_NO_WAIVER",
   "entries": [
@@ -2805,6 +2805,9 @@
     {
       "ruleId": "PR-239",
       "mode": "WINDOWS_INSTALLED_RELEASE_UAT_GATE",
+      "installedReleaseUatSchemaVersion": 3,
+      "sequence50InstallationMode": "BOOTSTRAP_FRESH_INSTALL_THEN_SAME_VERSION_MAINTENANCE",
+      "sequence51PlusInstallationMode": "EXACT_N_TO_N_PLUS_ONE_THEN_SAME_VERSION_MAINTENANCE",
       "failClosed": true,
       "waiverAllowed": false,
       "skipAllowed": false,

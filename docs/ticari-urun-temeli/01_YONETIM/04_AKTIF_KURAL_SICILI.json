@@ -8,7 +8,7 @@
   "anaKuralSayisi": 240,
   "aktifKuralSayisi": 215,
   "degistirilmisKuralSayisi": 25,
-  "anaKuralSha256": "4c8a52f9adc2153177f1e504104e20ac5e9d3f7d780daa2c7d7bdb5d399a6050",
+  "anaKuralSha256": "3936b7fc4a1c6e04e195edf1a9d201c620ed613220286788f83cac5e82c2bc2e",
   "yurutmeKapisi": "../06_KOD/app/scripts/run-governed-preflight.mjs",
   "temelAlanDogrulamaKapisi": "11_OTOMASYON/dogrula-ticari-temel-alani.mjs",
   "kurallar": [
@@ -159,7 +159,7 @@
     {
       "id": "TK-017",
       "baslik": "Adversarial Windows teslim kanit zinciri",
-      "metin": "Schema2 exact-commit package provenance ve immutable previous package archive ile canli sibling N exact eslesmeden Windows local-test teslimi kapanmaz. Installer-experience V2, UAT110 V2, parent-run bagli UAT111 V3 ve final V3; Git'te izlenen TypeScript kaynagindan exact 4 modul 22 rota, gorunur uygun butun kontroller, gercek owned native CANCEL ve ACCEPT, exclusive reparse-korumali evidence root, guard kaybinda sifir path tabanli cleanup ve source producer path hash chronology screenshot secret readback kapilarini PASS kanitlamalidir.",
+      "metin": "Schema2 exact-commit package provenance ile Windows kurulum modu paket sirasindan turetilir: Bronze 50 previous paket/runtime kabul etmeyen bootstrap fresh-install ve maintenance; Bronze 51+ immutable previous package archive ile canli sibling N exact eslesen N to N+1 ve maintenance uygular. Installer-experience V2, UAT110 V3, parent-run bagli UAT111 V3 ve final V3; Git'te izlenen TypeScript kaynagindan exact 4 modul 22 rota, gorunur uygun butun kontroller, gercek owned native CANCEL ve ACCEPT, exclusive reparse-korumali evidence root, guard kaybinda sifir path tabanli cleanup ve source producer path hash chronology screenshot secret readback kapilarini PASS kanitlamalidir.",
       "durum": "ACTIVE",
       "kaynak": "PR-239 ve DEC-274",
       "yurutme": "FAIL_CLOSED",
