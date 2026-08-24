@@ -20,11 +20,11 @@
     "PR-240"
   ],
   "mutationWideRecordAndTestClosureVerified": true,
-  "mutationDependencyRegistrySha256": "7087aedf7e354575ae9cf09449a9531c23a20abdb27da967b9f3f4fecd60e6a8",
+  "mutationDependencyRegistrySha256": "eadf8e36ecdb2ba4e47183ffcdc088d2ea2bb7a9a6b83145bfa496de65cc50c3",
   "workItemCount": 60,
   "fileCount": 87,
   "sourceFileCount": 86,
-  "sourceFingerprintSha256": "5d607edd479beb4711adebcd301b0a269fa526854d73e44c5134ca201c4a717e",
+  "sourceFingerprintSha256": "72086bd0793f8c63720dc4e905f39d7477f9939d6c5ef30568331ca8286110aa",
   "checks": 1234,
   "status": "PASS",
   "commercialReleaseEligible": false,
@@ -63,8 +63,8 @@
     },
     {
       "path": "01_YONETIM/05_DEGISIKLIK_SICILI.json",
-      "bytes": 13889,
-      "sha256": "f149f5d7769c4de8442a0353b60980a0bd43980d1b6b851582d262a681a583b9"
+      "bytes": 14052,
+      "sha256": "21e0995f7de3146940a2250e7b29de7eba5cdad8cba8ee61dedae7aefc40e3f9"
     },
     {
       "path": "01_YONETIM/06_RISK_SICILI.md",
@@ -462,5 +462,5 @@
       "sha256": "094b240d5bdec88564096e9c0997158e02ae44a00d952dfdac8f2fd25f2b9fe2"
     }
   ],
-  "generatedAt": "2026-08-24T11:27:03.236Z"
+  "generatedAt": "2026-08-24T11:54:45.928Z"
 }

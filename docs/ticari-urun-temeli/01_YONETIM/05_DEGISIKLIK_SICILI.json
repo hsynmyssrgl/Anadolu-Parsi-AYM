@@ -270,7 +270,7 @@
         "config/canonical-rule-registry.json",
         "docs/ticari-urun-temeli"
       ],
-      "isListesiEtkisi": "IS-0211 DEVAM kalir. BOOTSTRAP_ADOPTION diff tabani 440d5c7a olarak korunur; o committe producer bulunmadigi icin producer pointer sourceCommit kayit commitinde external-pointer exact esitligi ve base-pointer-HEAD ancestry ile dogrulanir. PRE_MUTATION producer bagi kendi baseline commitinde kalir. Hedefli, tam regresyon, paket ve kurulu UAT kanitlari tamamlanmadan PASS yoktur.",
+      "isListesiEtkisi": "IS-0211 DEVAM kalir. BOOTSTRAP_ADOPTION diff tabani 440d5c7a olarak korunur; o committe producer bulunmadigi icin producer pointer sourceCommit kayit commitinde external-pointer exact esitligi ve base-pointer-HEAD ancestry ile dogrulanir. PRE_MUTATION producer bagi kendi baseline commitinde kalir. Tam diffte fail-closed yakalanan .gitattributes governed-source safety-net dependency kuralina, manifest/SHA256SUMS ve universal hedefli test bagiyla eklenmistir. Hedefli, tam regresyon, paket ve kurulu UAT kanitlari tamamlanmadan PASS yoktur.",
       "senkronDurumu": "SYNCHRONIZED"
     }
   ]

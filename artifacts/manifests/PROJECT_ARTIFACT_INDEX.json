@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "release": "Bronze 22.08.2026.50",
   "releaseId": "bronze-2026-08-22-r50",
-  "generatedAt": "2026-08-24T11:33:35.134Z",
+  "generatedAt": "2026-08-24T11:55:29.554Z",
   "selfIndexedPaths": [
     "SHA256SUMS.txt",
     "artifacts/inventory/TESLIMAT_CALISMA_AGACI_ENVANTERI.json",
@@ -4064,8 +4064,8 @@
     },
     {
       "path": "apps/desktop/tests/mutation-release-evidence-producers.test.ts",
-      "bytes": 16551,
-      "sha256": "0ce79e135e662d8019263f570067c14ab70b23676afc5a63bbb062bf2c7e1aeb",
+      "bytes": 16737,
+      "sha256": "f79d680237b30d9c08d61807182951e027bafd2bda0944dcca51c1e1a3353341",
       "extension": ".ts",
       "classification": "EVIDENCE",
       "isDocument": false
@@ -4128,8 +4128,8 @@
     },
     {
       "path": "apps/desktop/tests/operation-rule-check-policy.test.ts",
-      "bytes": 14079,
-      "sha256": "6a4e042ead5166b89ca9270594ce9456f5a2691a89f4330fe18763052fe01b07",
+      "bytes": 14152,
+      "sha256": "5329a6094b3c42877f0868a0930484510fbe292c9a7e98d3bf9fbd701ff180d6",
       "extension": ".ts",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -8553,7 +8553,7 @@
     {
       "path": "artifacts/validation/feature-reality-gate.json",
       "bytes": 673,
-      "sha256": "6d95b4460454d504799af787009a5c6e6eeca0ae0d53406ed93e352d99cf9d9b",
+      "sha256": "05a0fc89481d85171f107bbd0f4e3183a7c2bc21ae4843be2abd39f684d2c556",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -8577,7 +8577,7 @@
     {
       "path": "artifacts/validation/governed-preflight.json",
       "bytes": 9554,
-      "sha256": "775c8e2ac4742cd0cfdb97b33c10f817b143286a6635923a0b0a3e9bafa8a0ea",
+      "sha256": "4b7de8ec35273cc12ae50291284f09c2b91cc92441f9e34d4e4101bd9b90fa1e",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -10528,8 +10528,8 @@
     },
     {
       "path": "BUILD_STATUS.md",
-      "bytes": 1722,
-      "sha256": "0ec5594e43840522d1f595a9d471d183076402c9ae0f8b388288d36a0af63318",
+      "bytes": 1829,
+      "sha256": "724d92181cae9be9ebe712f6559f519a2efee75b23ef1382b63dbb6f64e9a63a",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -13880,8 +13880,8 @@
     },
     {
       "path": "config/change-impact-dependency-registry.json",
-      "bytes": 38589,
-      "sha256": "7087aedf7e354575ae9cf09449a9531c23a20abdb27da967b9f3f4fecd60e6a8",
+      "bytes": 38607,
+      "sha256": "eadf8e36ecdb2ba4e47183ffcdc088d2ea2bb7a9a6b83145bfa496de65cc50c3",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -13977,7 +13977,7 @@
     {
       "path": "config/mutation-release-readiness-policy.json",
       "bytes": 5127,
-      "sha256": "6c648f9b6b0b39613e5014274cc2566c171cfc7279e0b6ca0cc276ccb7b5ad06",
+      "sha256": "d23c957f169b0a412c3d5b6fdf83c12c940e2267e78ba4196102fa06867d3092",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -14624,8 +14624,8 @@
     },
     {
       "path": "docs/17_MASTER_BUILD_LEDGER.md",
-      "bytes": 162794,
-      "sha256": "358310c22ec57cea9bc8a71fe78708b51bf50db0597256d00570cb482f5c3ecd",
+      "bytes": 163010,
+      "sha256": "a6f0a7d2f3aa399e46d6c8f00c3bf453fe4b27128f5edbfe39e82ea16edc7ad0",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -16529,7 +16529,7 @@
     {
       "path": "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
       "bytes": 139187,
-      "sha256": "1043bcac7a493dfa79432e1633e4159db6c6db4c459041a59f6c1bed83db24a4",
+      "sha256": "0eaa88ca1b8d9a607fef5b547346267f9e9d1bff6eddc02253d9bf3a90f5228b",
       "extension": ".md",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -16736,8 +16736,8 @@
     },
     {
       "path": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.docx",
-      "bytes": 359654,
-      "sha256": "6f75ba869a24008bbc44a04a260b949c7808ceaed1e64e320b94f2cc908db082",
+      "bytes": 359653,
+      "sha256": "c20131ed615970c8994c98be5f1d97d73b159f1bdef59d51205cbd9cb7dd50cf",
       "extension": ".docx",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -16745,7 +16745,7 @@
     {
       "path": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.pdf",
       "bytes": 501367,
-      "sha256": "cb58707f444d7f5780e4fb9a681dacb376001cee64f5f5b29d84d36b611136ba",
+      "sha256": "957d133fcaec4ecea46e7158c0a0e94d6e0ae16dab79ab2eb61c4cb9ad452bc7",
       "extension": ".pdf",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -19312,8 +19312,8 @@
     },
     {
       "path": "docs/ticari-urun-temeli/01_YONETIM/05_DEGISIKLIK_SICILI.json",
-      "bytes": 13889,
-      "sha256": "f149f5d7769c4de8442a0353b60980a0bd43980d1b6b851582d262a681a583b9",
+      "bytes": 14052,
+      "sha256": "21e0995f7de3146940a2250e7b29de7eba5cdad8cba8ee61dedae7aefc40e3f9",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -19433,7 +19433,7 @@
     {
       "path": "docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json",
       "bytes": 17394,
-      "sha256": "6d779bd5589ba25f142f11dc5ca9cdc808166953996dd9e9a38655cb67003f34",
+      "sha256": "3e351fe7b5ea92e9307dbf96c64f02a0103746a073a3cff2932b9a9e694b3f95",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true

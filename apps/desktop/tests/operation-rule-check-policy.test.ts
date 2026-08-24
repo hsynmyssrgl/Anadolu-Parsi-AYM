@@ -135,6 +135,7 @@ describe('operation rule check policy', () => {
     expect(dependencyRegistry.universalDependentRecords).toHaveLength(13);
     expect(dependencyRegistry.universalAffectedVitestFiles).toHaveLength(3);
     expect(dependencyRegistry.pathRules.find((rule: any) => rule.id === 'governed-source-safety-net')).toMatchObject({
+      match: { exactPaths: expect.arrayContaining(['.gitattributes']) },
       dependentRecords: ['SHA256SUMS.txt', 'manifest.json'], includeChangedTestFile: true
     });
     expect(source).toContain('dec275?.documentSha256 === createHash');

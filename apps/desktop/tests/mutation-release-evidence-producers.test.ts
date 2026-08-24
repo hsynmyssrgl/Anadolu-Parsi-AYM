@@ -134,6 +134,7 @@ describe('PR-235 canonical mutation evidence producers', () => {
     const plan = resolveChangeImpactDependencies({
       registry,
       changedFiles: [
+        '.gitattributes',
         'apps/desktop/tests/data-store.test.ts',
         'apps/desktop/src/renderer/App.tsx',
         'scripts/run-windows-installer-experience-uat.ps1',
@@ -168,6 +169,9 @@ describe('PR-235 canonical mutation evidence producers', () => {
       'config/34-d-explicit-consent-recording-media-retention-inventory.json',
       'config/34-f-family-meetings-decisions-consent-minutes-inventory.json'
     ]));
+    expect(plan.changedPathDependencies.find((entry) => entry.path === '.gitattributes')).toMatchObject({
+      ruleIds: ['governed-source-safety-net']
+    });
     expect(plan.requiredCommands).toEqual(expect.arrayContaining([
       'rootTypecheck',
       'affectedCommand:dataStoreSmoke',

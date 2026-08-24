@@ -5,6 +5,7 @@
 ## 24.08.2026 — Bronze 22.08.2026.50 UAT110 V3 düzeltme kaydı
 
 - PR-235 bootstrap baseline gerçek FAIL'i düzeltildi: sabit diff tabanı korunur; producer yalnız pointer sourceCommit kayıt commitinde external-pointer exact eşitliği ve base-pointer-HEAD ancestry ile doğrulanır. PRE_MUTATION producer bağı baseline commitinde kalır. Hedefli negatif ve tam regresyon kanıtları tamamlanana kadar paketleme kapalıdır.
+- Bootstrap tam diff taramasında fail-closed yakalanan `.gitattributes` yolu governed-source safety-net dependency kuralına eklendi; manifest/SHA256SUMS ve universal hedefli test bağı olmadan etkisiz sayılamaz.
 
 - DEC-274/PR-239 senkronlandı: Bronze sequence 50 previous paket/runtime kabul etmeyen temiz bootstrap ilk kurulum + same-version maintenance; sequence 51+ immutable previous package ve canlı installed N runtime bağlı exact N→N+1 + maintenance uygular.
 - UAT110 `PPT-WINDOWS-INSTALLED-RELEASE-UAT110-V3` oldu; UAT111 ve final V3 kurulum modunu package provenance'dan bağımsız yeniden türetir.

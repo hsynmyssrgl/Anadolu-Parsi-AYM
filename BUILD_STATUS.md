@@ -11,6 +11,7 @@
 ## Current validation status
 
 - PR-235 bootstrap producer pointer-sourceCommit/ancestry fix: **TARGETED PASS; FULL REGRESSION PENDING**
+- PR-235 historical full-diff `.gitattributes` dependency mapping: **IMPLEMENTED; EXACT EVIDENCE PENDING**
 
 - Source preflight gate: **NOT_RUN**
 - Source integrity: **NOT_RUN**

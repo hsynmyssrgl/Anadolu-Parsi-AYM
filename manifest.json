@@ -1,7 +1,7 @@
 {
   "schemaVersion": 3,
   "packageVersion": "22.8.2026-50",
-  "generatedAt": "2026-08-24T11:34:02.199Z",
+  "generatedAt": "2026-08-24T11:55:50.773Z",
   "fileCount": 4865,
   "files": [
     {
@@ -2526,8 +2526,8 @@
     },
     {
       "path": "apps/desktop/tests/mutation-release-evidence-producers.test.ts",
-      "sha256": "0ce79e135e662d8019263f570067c14ab70b23676afc5a63bbb062bf2c7e1aeb",
-      "bytes": 16551
+      "sha256": "f79d680237b30d9c08d61807182951e027bafd2bda0944dcca51c1e1a3353341",
+      "bytes": 16737
     },
     {
       "path": "apps/desktop/tests/mutation-release-readiness-contract.test.ts",
@@ -2566,8 +2566,8 @@
     },
     {
       "path": "apps/desktop/tests/operation-rule-check-policy.test.ts",
-      "sha256": "6a4e042ead5166b89ca9270594ce9456f5a2691a89f4330fe18763052fe01b07",
-      "bytes": 14079
+      "sha256": "5329a6094b3c42877f0868a0930484510fbe292c9a7e98d3bf9fbd701ff180d6",
+      "bytes": 14152
     },
     {
       "path": "apps/desktop/tests/places-travel-asset-pet-data-store.test.ts",
@@ -6391,17 +6391,17 @@
     },
     {
       "path": "artifacts/manifests/ALL_DOCUMENTS_INDEX.csv",
-      "sha256": "819ab9d4bcab0575f04c0c01cf6b96555ed8990ace04c62cb693a07fc6c1a4a7",
+      "sha256": "ad02c5688600edcfbd5643be384f48b0ecf54f4e952dd67604095cc79c6089a6",
       "bytes": 311480
     },
     {
       "path": "artifacts/manifests/ALL_DOCUMENTS_INDEX.json",
-      "sha256": "136d54ca119b6d15a61311063faadf16164104ecdffa78b226d263283912f80b",
+      "sha256": "d0e23934ccd7b1292028bd009c8cb0208b5ed190865e820964d56d91bf2bf8d1",
       "bytes": 598979
     },
     {
       "path": "artifacts/manifests/ALL_DOCUMENTS_INDEX.md",
-      "sha256": "1f7b1f039fdf3f738de34fbeb985c2be75c8f958b095a804ea391f36339061be",
+      "sha256": "61814a36d523d58949e246d5934f9e0ae8428fc7cfbf07fed50ed59d926e8c41",
       "bytes": 339905
     },
     {
@@ -7176,17 +7176,17 @@
     },
     {
       "path": "artifacts/manifests/PROJECT_ARTIFACT_INDEX.csv",
-      "sha256": "3acb31880c5acf8fbfb01acf007b934859a796a801dd572c2d805901deb4622f",
+      "sha256": "a50a534de2a511a5aa64e7afe402e9dd4422a521d3e9d3526f0cd512b0c995d5",
       "bytes": 651108
     },
     {
       "path": "artifacts/manifests/PROJECT_ARTIFACT_INDEX.json",
-      "sha256": "dac71b6756e83ba5ec87066b1841d367b16f9e2498e2c687de7bf7ffce517605",
+      "sha256": "d93623912bbbc51fe91b1d90a178d235d2414d639d2e89416e656c682263d540",
       "bytes": 1241841
     },
     {
       "path": "artifacts/manifests/PROJECT_ARTIFACT_INDEX.md",
-      "sha256": "81207ae3b961c9a51a907079ef5d7d1d78bc36d0edbb09884806314f178ef336",
+      "sha256": "737a9eb6d215c748255167807d3bd0cce5d1bd9ef132df31d8bf55d94a14ca2e",
       "bytes": 707504
     },
     {
@@ -8856,8 +8856,8 @@
     },
     {
       "path": "BUILD_STATUS.md",
-      "sha256": "0ec5594e43840522d1f595a9d471d183076402c9ae0f8b388288d36a0af63318",
-      "bytes": 1722
+      "sha256": "724d92181cae9be9ebe712f6559f519a2efee75b23ef1382b63dbb6f64e9a63a",
+      "bytes": 1829
     },
     {
       "path": "BUILD100_ARCHITECTURE_VALIDATION_REPORT.md",
@@ -10961,8 +10961,8 @@
     },
     {
       "path": "config/change-impact-dependency-registry.json",
-      "sha256": "7087aedf7e354575ae9cf09449a9531c23a20abdb27da967b9f3f4fecd60e6a8",
-      "bytes": 38589
+      "sha256": "eadf8e36ecdb2ba4e47183ffcdc088d2ea2bb7a9a6b83145bfa496de65cc50c3",
+      "bytes": 38607
     },
     {
       "path": "config/conversation-capacity-policy.json",
@@ -11021,7 +11021,7 @@
     },
     {
       "path": "config/mutation-release-readiness-policy.json",
-      "sha256": "6c648f9b6b0b39613e5014274cc2566c171cfc7279e0b6ca0cc276ccb7b5ad06",
+      "sha256": "d23c957f169b0a412c3d5b6fdf83c12c940e2267e78ba4196102fa06867d3092",
       "bytes": 5127
     },
     {
@@ -11426,8 +11426,8 @@
     },
     {
       "path": "docs/17_MASTER_BUILD_LEDGER.md",
-      "sha256": "358310c22ec57cea9bc8a71fe78708b51bf50db0597256d00570cb482f5c3ecd",
-      "bytes": 162794
+      "sha256": "a6f0a7d2f3aa399e46d6c8f00c3bf453fe4b27128f5edbfe39e82ea16edc7ad0",
+      "bytes": 163010
     },
     {
       "path": "docs/18_PROJECT_CONSTITUTION_V3.md",
@@ -12601,7 +12601,7 @@
     },
     {
       "path": "docs/current/08_TUM_BELGELER_DIZINI.md",
-      "sha256": "1f7b1f039fdf3f738de34fbeb985c2be75c8f958b095a804ea391f36339061be",
+      "sha256": "61814a36d523d58949e246d5934f9e0ae8428fc7cfbf07fed50ed59d926e8c41",
       "bytes": 339905
     },
     {
@@ -12616,7 +12616,7 @@
     },
     {
       "path": "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
-      "sha256": "1043bcac7a493dfa79432e1633e4159db6c6db4c459041a59f6c1bed83db24a4",
+      "sha256": "0eaa88ca1b8d9a607fef5b547346267f9e9d1bff6eddc02253d9bf3a90f5228b",
       "bytes": 139187
     },
     {
@@ -12746,12 +12746,12 @@
     },
     {
       "path": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.docx",
-      "sha256": "6f75ba869a24008bbc44a04a260b949c7808ceaed1e64e320b94f2cc908db082",
-      "bytes": 359654
+      "sha256": "c20131ed615970c8994c98be5f1d97d73b159f1bdef59d51205cbd9cb7dd50cf",
+      "bytes": 359653
     },
     {
       "path": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.pdf",
-      "sha256": "cb58707f444d7f5780e4fb9a681dacb376001cee64f5f5b29d84d36b611136ba",
+      "sha256": "957d133fcaec4ecea46e7158c0a0e94d6e0ae16dab79ab2eb61c4cb9ad452bc7",
       "bytes": 501367
     },
     {
@@ -14356,8 +14356,8 @@
     },
     {
       "path": "docs/ticari-urun-temeli/01_YONETIM/05_DEGISIKLIK_SICILI.json",
-      "sha256": "f149f5d7769c4de8442a0353b60980a0bd43980d1b6b851582d262a681a583b9",
-      "bytes": 13889
+      "sha256": "21e0995f7de3146940a2250e7b29de7eba5cdad8cba8ee61dedae7aefc40e3f9",
+      "bytes": 14052
     },
     {
       "path": "docs/ticari-urun-temeli/01_YONETIM/06_RISK_SICILI.md",
@@ -14431,7 +14431,7 @@
     },
     {
       "path": "docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json",
-      "sha256": "6d779bd5589ba25f142f11dc5ca9cdc808166953996dd9e9a38655cb67003f34",
+      "sha256": "3e351fe7b5ea92e9307dbf96c64f02a0103746a073a3cff2932b9a9e694b3f95",
       "bytes": 17394
     },
     {

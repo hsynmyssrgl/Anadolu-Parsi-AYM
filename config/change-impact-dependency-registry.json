@@ -557,7 +557,7 @@
     {
       "id": "governed-source-safety-net",
       "match": {
-        "exactPaths": ["manifest.json", "package-lock.json", "package.json", "repository-metadata.json", "SHA256SUMS.txt", "tsconfig.base.json"],
+        "exactPaths": [".gitattributes", "manifest.json", "package-lock.json", "package.json", "repository-metadata.json", "SHA256SUMS.txt", "tsconfig.base.json"],
         "pathPrefixes": ["apps/", "packages/", "scripts/", "config/", "docs/", "artifacts/manifests/", "artifacts/validation/"],
         "pathSuffixes": []
       },
