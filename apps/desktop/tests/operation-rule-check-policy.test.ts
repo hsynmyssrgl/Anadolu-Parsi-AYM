@@ -172,6 +172,19 @@ describe('operation rule check policy', () => {
     });
   });
 
+  it('keeps the first-family release policy on the PR-240 strengthened evidence chain', async () => {
+    const source = await readSource('scripts/verify-first-family-clean-release-policy.mjs');
+    for (const marker of [
+      "rule.id === 'PR-240' && rule.state === 'ACTIVE'",
+      "mutationPolicy.strengthenedByRequirement === 'PR-240'",
+      "mutationPolicy.strengthenedByDecision === 'DEC-275'",
+      "mutationReadiness.strengthenedByRequirement === 'PR-240'",
+      "mutationReadiness.strengthenedByDecision === 'DEC-275'",
+      'packageGeneratedAt < installerStartedAt',
+      'installationAt <= installedUiStartedAt'
+    ]) expect(source).toContain(marker);
+  });
+
   it('binds local, external and delivery verification to one live source boundary', async () => {
     const completionPaths = [
       'scripts/verify-33-l-long-term-portfolio-completion.mjs',

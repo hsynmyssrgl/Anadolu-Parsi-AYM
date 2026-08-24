@@ -8,10 +8,23 @@
   "canonicalRuleCount": 240,
   "canonicalRuleSha256": "4c8a52f9adc2153177f1e504104e20ac5e9d3f7d780daa2c7d7bdb5d399a6050",
   "decision": "DEC-259",
+  "decisions": [
+    "DEC-259",
+    "DEC-270",
+    "DEC-274",
+    "DEC-275"
+  ],
+  "requirements": [
+    "PR-235",
+    "PR-239",
+    "PR-240"
+  ],
+  "mutationWideRecordAndTestClosureVerified": true,
+  "mutationDependencyRegistrySha256": "acb69d6b05994b455b18f9210afd4583a290c384ef3fb47d386b35284a565b48",
   "workItemCount": 60,
   "fileCount": 87,
   "sourceFileCount": 86,
-  "sourceFingerprintSha256": "fe3bcc6e861e18691ccb59bc3c3fd87d5f54c5149b6f412578a4f8956fc70d3c",
+  "sourceFingerprintSha256": "fe8ffb5859a08a4de5fc17111fd5c4695848e2782af38b7bd779fe97bc59eabd",
   "checks": 1234,
   "status": "PASS",
   "commercialReleaseEligible": false,
@@ -50,8 +63,8 @@
     },
     {
       "path": "01_YONETIM/05_DEGISIKLIK_SICILI.json",
-      "bytes": 12664,
-      "sha256": "f731b173558da8ddea8413c76469dce2cc5b6a77f2a7f6fa75d12673cfd21418"
+      "bytes": 12694,
+      "sha256": "b3d90392a581dfaf462c703b98bb261e74ff2b0d3043fcc56a4de4bcf34c0f3d"
     },
     {
       "path": "01_YONETIM/06_RISK_SICILI.md",
@@ -445,9 +458,9 @@
     },
     {
       "path": "11_OTOMASYON/dogrula-ticari-temel-alani.mjs",
-      "bytes": 24265,
-      "sha256": "cbdfb72a8bf1e3be62aba41e45f1c28123ca3191cd0e1dc43a930f6a7bad3468"
+      "bytes": 25811,
+      "sha256": "094b240d5bdec88564096e9c0997158e02ae44a00d952dfdac8f2fd25f2b9fe2"
     }
   ],
-  "generatedAt": "2026-08-24T07:00:41.917Z"
+  "generatedAt": "2026-08-24T08:45:38.579Z"
 }

@@ -1,26 +1,29 @@
 {
   "schemaVersion": 1,
   "release": "Bronze 22.08.2026.50",
-  "rulesSha256": "0bf1ad0e1a1c8eca988ce363817bff510e5d2c3300aa13829dfee5bfbf0a835f",
+  "rulesSha256": "4c8a52f9adc2153177f1e504104e20ac5e9d3f7d780daa2c7d7bdb5d399a6050",
   "mode": "GENERATE_AND_VERIFY",
   "acknowledgement": {
     "schemaVersion": 1,
     "release": "Bronze 22.08.2026.50",
     "ruleRegistry": "config/canonical-rule-registry.json",
-    "rulesSha256": "0bf1ad0e1a1c8eca988ce363817bff510e5d2c3300aa13829dfee5bfbf0a835f",
-    "acknowledgedAt": "2026-08-24T08:30:00+03:00",
+    "rulesSha256": "4c8a52f9adc2153177f1e504104e20ac5e9d3f7d780daa2c7d7bdb5d399a6050",
+    "acknowledgedAt": "2026-08-24T12:00:00+03:00",
     "authority": "Explicit user instruction in current conversation",
-    "statement": "All written project rules and operation checks remain binding without waiver. Bronze Windows local-test delivery now additionally requires schema-2 package provenance with live PR-235 exact-commit readback, mandatory schema-2 installer-experience evidence, an immutable schema-2 parent-package archive and byte-identical live sibling installed N predecessor, exact same-month sequence-plus-one monotonic-date upgrade, separate same-version maintenance, content-equality and marker-cleanup proof, schema-3 installed-frontend UAT bound to the UAT110 parent run, exact canonical module and route authority, dynamic visible-control outcome coverage with zero residuals, real native-dialog CANCEL and ACCEPT exercises, exclusive non-reparse evidence roots, no path cleanup after guard loss, main/renderer error classification, screenshot hash/readback and secret scan, and a schema-3 final receipt that revalidates producer, source, chronology and distinct evidence roots. Legacy nested Bronze is protected snapshot data and is never a trusted predecessor. NotSigned or protection-disabled Kaspersky testing is not a production or harmlessness claim. Every ACTIVE rule must be fail-closed enforced or explicitly BLOCKED/NOT_RUN until evidence exists."
+    "statement": "All written project rules and operation checks remain binding without waiver. Every smallest mutation must atomically update every affected main/channel source, rule, decision, active/commercial document, work item, scope, inventory, ratchet, manifest, index, current master DOCX/PDF and evidence contract, or record a concrete NOT_AFFECTED justification. Targeted tests, unfiltered full regression, typecheck, changed-script syntax and source integrity are mandatory; UI mutations require complete module, route, menu, visible-control, state, accessibility and visual-integrity UAT. Every actual test failure is preserved by a wip(rejected) checkpoint. No intermediate installer may be built before closure; packaging requires clean exact main/channel source equality. Bronze Windows local-test delivery also requires the complete PR-239 adversarial provenance, installer-experience, UAT110, UAT111 and final-readback chain. NotSigned or protection-disabled Kaspersky testing is not a production or harmlessness claim. Every ACTIVE rule must be fail-closed enforced or explicitly BLOCKED/NOT_RUN until evidence exists."
   },
   "certifiedFullPreflightGeneratedAt": null,
-  "sourceFingerprint": null,
-  "status": "FAIL",
+  "sourceFingerprint": {
+    "sha256": "25dce064ab3aed4a9b5647f1cb878a00e96ac9af592871d0e231b44f9a208459",
+    "fileCount": 2791
+  },
+  "status": "PASS",
   "results": [
     {
       "script": "scripts/verify-canonical-rule-registry.mjs",
       "arguments": [],
       "exitCode": 0,
-      "stdout": "Canonical Rule Registry: PASS (1055 checks / 239 rules / 0bf1ad0e1a1c8eca988ce363817bff510e5d2c3300aa13829dfee5bfbf0a835f).",
+      "stdout": "Canonical Rule Registry: PASS (1060 checks / 240 rules / 4c8a52f9adc2153177f1e504104e20ac5e9d3f7d780daa2c7d7bdb5d399a6050).",
       "stderr": ""
     },
     {
@@ -32,35 +35,42 @@
         "governed-preflight"
       ],
       "exitCode": 0,
-      "stdout": "İşlem kural kontrolü: PASS (test / governed-preflight / PPT-CANONICAL-RULE-REGISTRY-V26).",
+      "stdout": "İşlem kural kontrolü: PASS (test / governed-preflight / PPT-CANONICAL-RULE-REGISTRY-V27).",
       "stderr": ""
     },
     {
       "script": "docs/ticari-urun-temeli/11_OTOMASYON/dogrula-ticari-temel-alani.mjs",
       "arguments": [],
       "exitCode": 0,
-      "stdout": "Ticari temel alani: PASS (1216 kontrol / 87 dosya / 59 is / 239 kural).",
+      "stdout": "Ticari temel alani: PASS (1234 kontrol / 87 dosya / 60 is / 240 kural).",
       "stderr": ""
     },
     {
       "script": "scripts/verify-user-decision-ledger.mjs",
       "arguments": [],
       "exitCode": 0,
-      "stdout": "User Decision Ledger: PASS (723 checks / 103 decisions).",
+      "stdout": "User Decision Ledger: PASS (750 checks / 104 decisions).",
       "stderr": ""
     },
     {
       "script": "scripts/verify-documentation-synchronization-policy.mjs",
       "arguments": [],
       "exitCode": 0,
-      "stdout": "Documentation synchronization policy: PASS (725 checks / 24 governed decisions).",
+      "stdout": "Documentation synchronization policy: PASS (762 checks / 25 governed decisions).",
+      "stderr": ""
+    },
+    {
+      "script": "scripts/verify-current-master-documentation-v5.mjs",
+      "arguments": [],
+      "exitCode": 0,
+      "stdout": "Current master V5: PASS (240 rules / 184 decisions / 106 ADR / 13 DOCX tables / 25 PDF pages).",
       "stderr": ""
     },
     {
       "script": "scripts/verify-universal-rule-enforcement.mjs",
       "arguments": [],
       "exitCode": 0,
-      "stdout": "Universal Rule Enforcement: PASS (2614 checks / 214 ACTIVE rules / no waiver).",
+      "stdout": "Universal Rule Enforcement: PASS (2636 checks / 215 ACTIVE rules / no waiver).",
       "stderr": ""
     },
     {
@@ -73,10 +83,133 @@
     {
       "script": "scripts/verify-first-family-clean-release-policy.mjs",
       "arguments": [],
-      "exitCode": 1,
-      "stdout": "",
-      "stderr": "MUTATION_EXACT_COMMIT_READINESS: PR-235 exact-commit targeted/full/integrity package gate and fresh installed-executable UAT delivery gate"
+      "exitCode": 0,
+      "stdout": "First-family clean release policy: PASS (16 checks / Bronze 22.08.2026.50).",
+      "stderr": ""
+    },
+    {
+      "script": "scripts/verify-windows-installer-retention-policy.mjs",
+      "arguments": [],
+      "exitCode": 0,
+      "stdout": "Windows installer retention policy: PASS (0 artefakt / yalnız 22.08.2026.50 kabul edilir).",
+      "stderr": ""
+    },
+    {
+      "script": "scripts/verify-user-visible-release-display-policy.mjs",
+      "arguments": [],
+      "exitCode": 0,
+      "stdout": "Görünür sürüm kanalı tekilleştirme kuralı: PASS (9 kontrol).",
+      "stderr": ""
+    },
+    {
+      "script": "scripts/verify-step-checkpoint-gate.mjs",
+      "arguments": [],
+      "exitCode": 0,
+      "stdout": "Step Checkpoint Gate: PASS (2241 checks / current 33-P).",
+      "stderr": ""
+    },
+    {
+      "script": "scripts/verify-active-release-contract-v2.mjs",
+      "arguments": [],
+      "exitCode": 0,
+      "stdout": "Active Release Contract V2: PASS (114 checks / 18 workspaces).",
+      "stderr": ""
+    },
+    {
+      "script": "scripts/verify-workspace-dependencies.mjs",
+      "arguments": [],
+      "exitCode": 0,
+      "stdout": "Workspace dependency contracts verified: 575 assertions / 18 workspaces / acyclic production graph.",
+      "stderr": ""
+    },
+    {
+      "script": "scripts/verify-conversation-capacity-policy.mjs",
+      "arguments": [],
+      "exitCode": 0,
+      "stdout": "Conversation Capacity: UNAVAILABLE.",
+      "stderr": ""
+    },
+    {
+      "script": "scripts/verify-feature-reality-gate.mjs",
+      "arguments": [],
+      "exitCode": 0,
+      "stdout": "Feature Reality Gate: PASS honesty / 358 requirements / surface 17+5=22 / unused API 14+0 / Silver BLOCKED.",
+      "stderr": ""
+    },
+    {
+      "script": "scripts/verify-platform-policy-gate.mjs",
+      "arguments": [],
+      "exitCode": 0,
+      "stdout": "Platform Policy Gate: PASS / authorization bypass 0 / presentation conditions 10 / AST gate PASS / capability manifest gate PASS / application security profile gate PASS / policy service availability gate PASS.\nPlatform Policy runtime: PASS (8 checks).",
+      "stderr": ""
+    },
+    {
+      "script": "scripts/verify-core-service-boundary.mjs",
+      "arguments": [],
+      "exitCode": 0,
+      "stdout": "Core Service boundary: PASS (8 checks).",
+      "stderr": ""
+    },
+    {
+      "script": "scripts/verify-core-service-local-admin-contract.mjs",
+      "arguments": [],
+      "exitCode": 0,
+      "stdout": "Core Service Local Admin Contract: PASS (154 checks).",
+      "stderr": ""
+    },
+    {
+      "script": "scripts/verify-core-service-local-admin-runtime-wrapper.mjs",
+      "arguments": [],
+      "exitCode": 0,
+      "stdout": "Core Service Local Admin Runtime: PASS (50 checks).",
+      "stderr": "(node:12108) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "script": "scripts/verify-desktop-core-service-startup-contract.mjs",
+      "arguments": [],
+      "exitCode": 0,
+      "stdout": "Desktop Core Service Startup Contract: PASS (41 checks).",
+      "stderr": ""
+    },
+    {
+      "script": "scripts/verify-desktop-core-service-startup-runtime-wrapper.mjs",
+      "arguments": [],
+      "exitCode": 0,
+      "stdout": "Desktop Core Service Startup Runtime: PASS (51 checks).",
+      "stderr": "(node:21012) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "script": "scripts/verify-system-health-core-service-ipc-contract.mjs",
+      "arguments": [],
+      "exitCode": 0,
+      "stdout": "System Health Core Service IPC Contract: PASS (10 checks).",
+      "stderr": ""
+    },
+    {
+      "script": "scripts/verify-system-health-core-service-ipc-runtime-wrapper.mjs",
+      "arguments": [],
+      "exitCode": 0,
+      "stdout": "System Health Core Service IPC Runtime: PASS (10 checks).",
+      "stderr": "(node:12972) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "script": "scripts/generate-project-artifact-index-v2.mjs",
+      "arguments": [
+        "--git-index"
+      ],
+      "exitCode": 0,
+      "stdout": "Artifact indexes generated: 4401 files / 2140 documents.",
+      "stderr": ""
+    },
+    {
+      "script": "scripts/verify-project-artifact-index-v2.mjs",
+      "arguments": [
+        "--git-index"
+      ],
+      "exitCode": 0,
+      "stdout": "Complete Document/Artifact Index: PASS (13128 checks / 4401 files / 2140 documents).",
+      "stderr": ""
     }
   ],
-  "generatedAt": "2026-08-24T05:39:59.239Z"
+  "generatedAt": "2026-08-24T08:46:02.913Z"
 }

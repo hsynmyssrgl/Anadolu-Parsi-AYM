@@ -41,10 +41,15 @@ check('DYNAMIC_EXTERNAL_SOURCE_BACKUP', externalProtection.includes("repositoryM
 check('VERSION_SCOPED_EXTERNAL_CLEANUP', externalCleaner.includes('ledger.current?.parentRelease') && externalCleaner.includes("resolve(libraryRoot, parentRelease, 'installer')") && externalCleaner.includes('beklenmeyen giriş var; silme durduruldu') && !externalCleaner.includes('authoritative-source'), 'external stale-installer cleanup is parent-release scoped and cannot target source archives');
 check('RELEASE_IDENTITY', metadata.visibleRelease === registry.effectiveRelease && registry.rules.some((rule) => rule.id === 'PR-233' && rule.state === 'ACTIVE') && registry.rules.some((rule) => rule.id === 'PR-232' && rule.state === 'SUPERSEDED'), 'repository release equals canonical release, PR-233 is active and PR-232 is superseded');
 check('MUTATION_EXACT_COMMIT_READINESS', registry.rules.some((rule) => rule.id === 'PR-235' && rule.state === 'ACTIVE')
+  && registry.rules.some((rule) => rule.id === 'PR-240' && rule.state === 'ACTIVE')
   && mutationPolicy.schemaVersion === 2 && mutationPolicy.requirement === 'PR-235' && mutationPolicy.decision === 'DEC-270'
-  && baselineProducer.includes('PRE_MUTATION_BASELINE')
-  && impactProducer.includes('listChangedPathsForImpactAnalysis')
+  && mutationPolicy.strengthenedByRequirement === 'PR-240' && mutationPolicy.strengthenedByDecision === 'DEC-275'
+  && baselineProducer.includes('PRE_MUTATION_BASELINE') && baselineProducer.includes("strengthenedByRequirement: 'PR-240'")
+  && baselineProducer.includes("strengthenedByDecision: 'DEC-275'")
+  && impactProducer.includes('listChangedPathsForImpactAnalysis') && impactProducer.includes("strengthenedByRequirement: 'PR-240'")
+  && impactProducer.includes("strengthenedByDecision: 'DEC-275'")
   && testProducer.includes('spawnSync(process.execPath') && testProducer.includes("kind === 'full'")
+  && testProducer.includes("strengthenedByRequirement: 'PR-240'") && testProducer.includes("strengthenedByDecision: 'DEC-275'")
   && preflight.includes("process.argv.includes('--read-only')")
   && postflight.includes("['scripts/run-governed-preflight.mjs', '--read-only']")
   && !postflight.includes("['scripts/generate-project-artifact-index-v2.mjs']")
@@ -52,9 +57,12 @@ check('MUTATION_EXACT_COMMIT_READINESS', registry.rules.some((rule) => rule.id =
   && builder.includes('mutationReleaseReadiness')
   && builder.includes('listChangedPathsForImpactAnalysis')
   && finalDelivery.includes("mutationReadiness.requirement === 'PR-235'")
+  && finalDelivery.includes("mutationReadiness.strengthenedByRequirement === 'PR-240'")
+  && finalDelivery.includes("mutationReadiness.strengthenedByDecision === 'DEC-275'")
   && finalDelivery.includes("installedUi.runtimeKind === 'INSTALLED_EXECUTABLE'")
-  && finalDelivery.includes('packageGeneratedAt < installedUiStartedAt'),
-'PR-235 exact-commit targeted/full/integrity package gate and fresh installed-executable UAT delivery gate');
+  && finalDelivery.includes('packageGeneratedAt < installerStartedAt')
+  && finalDelivery.includes('installationAt <= installedUiStartedAt'),
+'PR-235/PR-240 exact-commit all-record targeted/full/integrity package gate and fresh installed-executable UAT delivery gate');
 
 const failures = checks.filter((item) => item.status === 'FAIL');
 const report = { schemaVersion: 1, release: registry.effectiveRelease, rule: 'PR-233', decision: 'DEC-267', status: failures.length ? 'FAIL' : 'PASS', checks, generatedAt: new Date().toISOString() };
