@@ -12,6 +12,7 @@ const setupScript=readFileSync('scripts/setup-release-channel-worktrees.mjs','ut
 const verifierScript=readFileSync('scripts/verify-release-channel-worktrees.mjs','utf8');
 const allocator=readFileSync('scripts/allocate-monthly-release-version.mjs','utf8');
 const installer=readFileSync('apps/desktop/build/installer.nsh','utf8');
+const gitAttributes=readFileSync('.gitattributes','utf8');
 const setupModule=await import(pathToFileURL(resolve('scripts/setup-release-channel-worktrees.mjs')).href) as {
   assertCleanWorktree:(status:string,label:string)=>void;
   assertExactCommit:(actual:string,expected:string,label:string)=>void;
@@ -69,6 +70,10 @@ describe('release-channel source and runtime isolation',()=>{
       sharedGitObjectDatabase:true,separateBranchesRequired:true,separateWorkingDirectoriesRequired:true,
       directDirectoryCopyProhibited:true,crossChannelBuildOutputReuseProhibited:true,crossChannelUserDataReuseProhibited:true
     });
+  });
+
+  it('preserves exact tracked blob bytes across every release worktree',()=>{
+    expect(gitAttributes).toMatch(/^\* -text$/mu);
   });
 
   it('creates governed Git worktrees only from a clean authoritative repository',()=>{

@@ -1,3 +1,7 @@
+# ParsYuva release worktrees must preserve the exact tracked blob bytes.
+# Platform Git settings must never rewrite line endings between app and channels.
+* -text
+
 # PPK-026 deterministic code-generation inputs and outputs are byte-stable on every platform.
 /config/32-v-ppk-026-typed-policy-sdk-schema.json text eol=lf
 /packages/core-service-client/src/generated-policy-client.ts text eol=lf
