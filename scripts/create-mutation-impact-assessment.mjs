@@ -6,6 +6,7 @@ import {
   loadMutationEvidencePolicy,
   readExternalBaselineFromPointer,
   readEvidenceBinding,
+  readRepoFileBinding,
   resolveChangeImpactDependencies,
   validateImpactAssessment,
   writeEvidenceReceipt
@@ -30,11 +31,18 @@ const changedFiles = listChangedPathsForImpactAnalysis({
 });
 const changedFileImpacts = classifyChangedFiles(changedFiles);
 const dependencyPlan = resolveChangeImpactDependencies({ registry: dependencyRegistry, changedFiles });
-const missingDependentRecords = dependencyPlan.dependentRecords.filter((path) => !changedFiles.includes(path));
-if (missingDependentRecords.length > 0) {
-  throw new Error(`Mutation dependency records must be updated before assessment: ${missingDependentRecords.join(', ')}`);
-}
 await stat(resolve(root, fallbackEvidence));
+const dependentRecordImpacts = Object.fromEntries(await Promise.all(dependencyPlan.dependentRecords.map(async (path) => {
+  const binding = await readRepoFileBinding(root, path, `dependent record impact ${path}`);
+  return [path, changedFiles.includes(path)
+    ? { status: 'UPDATED', sha256: binding.sha256, evidencePaths: [path] }
+    : {
+        status: 'NOT_AFFECTED_WITH_BASELINE_IDENTITY',
+        reasonCode: 'DEPENDENT_RECORD_BASELINE_IDENTITY_UNCHANGED',
+        sha256: binding.sha256,
+        evidencePaths: [fallbackEvidence]
+      }];
+})));
 const impactAreas = Object.fromEntries((policy.impactAreas ?? []).map((area) => {
   const paths = Object.entries(changedFileImpacts)
     .filter(([, areas]) => areas.includes(area))
@@ -54,6 +62,7 @@ const assessment = {
   baselineCommit: externalBaseline.record.value.sourceProvenance.headCommit,
   changedFileImpacts,
   impactAreas,
+  dependentRecordImpacts,
   dependencyPlan: createDependencyAssessmentContract({ plan: dependencyPlan, registryBinding: dependencyRegistryBinding })
 };
 validateImpactAssessment({

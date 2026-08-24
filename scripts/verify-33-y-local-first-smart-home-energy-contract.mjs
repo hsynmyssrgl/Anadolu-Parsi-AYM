@@ -1,9 +1,10 @@
 import { createHash } from 'node:crypto';
 import { mkdir,readFile,writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { assertGovernedSourceRoot } from './lib/governed-source-root.mjs';
 
-const root=resolve(process.cwd());if(root!==resolve('C:\\PPT\\AYM','06_KOD','app'))throw new Error(`Unsafe source root: ${root}`);
-const noWrite=process.argv.includes('--no-write');const json=async(path)=>JSON.parse(await readFile(resolve(root,path),'utf8'));
+const noWrite=process.argv.includes('--no-write');const root=assertGovernedSourceRoot({allowReleaseChannel:noWrite});
+const json=async(path)=>JSON.parse(await readFile(resolve(root,path),'utf8'));
 const text=async(path)=>readFile(resolve(root,path),'utf8');const has=(source,markers)=>markers.every((marker)=>source.includes(marker));
 const targetedTestFiles=Object.freeze(['packages/application/tests/smart-home-energy-use-cases.test.ts','packages/repositories/smart-home-energy-repository-policy.test.ts','apps/desktop/tests/smart-home-energy-data-store.test.ts','apps/desktop/tests/smart-home-energy-ipc-integration.test.ts','apps/desktop/tests/smart-home-energy-ui.test.ts']);
 const [scope,inventory,manifest,migrations,contract,repository,adapter,runtime,main,preload,globalTypes,decision,threat,...tests]=await Promise.all([

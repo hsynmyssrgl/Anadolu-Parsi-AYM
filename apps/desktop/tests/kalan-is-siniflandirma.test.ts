@@ -1,18 +1,21 @@
-import { readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { describe, expect, it } from 'vitest';
+import { ACTIVE_BUILD_META } from '../../../scripts/lib/active-build-meta.mjs';
 
 describe('kalan iş sınıflandırması', () => {
   it('358 gereksinimi yeni hata, yerel kod ve dış kabulü karıştırmadan sınıflandırır', () => {
-    const run = spawnSync(process.execPath, ['scripts/siniflandir-kalan-isler.mjs', '--no-write'], {
+    const run = spawnSync(process.execPath, [
+      'scripts/siniflandir-kalan-isler.mjs',
+      '--no-write',
+      '--json-stdout'
+    ], {
       cwd: process.cwd(),
       encoding: 'utf8',
       windowsHide: true
     });
     expect(run.status, `${run.stdout}\n${run.stderr}`).toBe(0);
-    expect(run.stdout).toContain('PASS (358; kapalı 109; yalnız dış kabul 24; üretim+dış kabul 169; karma 53; final 3)');
 
-    const report = JSON.parse(readFileSync('artifacts/inventory/KALAN_IS_SINIFLANDIRMA.json', 'utf8')) as {
+    const report = JSON.parse(run.stdout) as {
       readonly requirementCount: number;
       readonly activeRelease: string;
       readonly scopeBaselineRelease: string;
@@ -23,7 +26,7 @@ describe('kalan iş sınıflandırması', () => {
     };
     expect(report).toMatchObject({
       requirementCount: 358,
-      activeRelease: 'Bronze 20.08.2026.37',
+      activeRelease: ACTIVE_BUILD_META.milestone,
       scopeBaselineRelease: 'Bronze 04.08.2026.29',
       strictCompleteCount: 109,
       strictRemainingCount: 249,

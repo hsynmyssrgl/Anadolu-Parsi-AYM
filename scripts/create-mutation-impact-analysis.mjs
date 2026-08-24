@@ -40,6 +40,11 @@ const dependencyRecordBindings = Object.fromEntries(await Promise.all(assessed.d
   const binding = await readRepoFileBinding(root, path, `dependent record ${path}`);
   return [path, { path: binding.path, sizeBytes: binding.sizeBytes, sha256: binding.sha256 }];
 })));
+for (const [path, impact] of Object.entries(assessed.dependentRecordImpacts)) {
+  if (dependencyRecordBindings[path]?.sha256 !== impact.sha256) {
+    throw new Error(`Dependent record impact SHA-256 differs from current readback: ${path}`);
+  }
+}
 const affectedTestBindings = Object.fromEntries(await Promise.all(assessed.dependencyPlan.affectedVitestFiles.map(async (path) => {
   const binding = await readRepoFileBinding(root, path, `affected test ${path}`);
   return [path, { path: binding.path, sizeBytes: binding.sizeBytes, sha256: binding.sha256 }];
@@ -67,6 +72,7 @@ const receipt = {
   changedFiles,
   changedFileImpacts: assessed.changedFileImpacts,
   impactAreas: assessed.impactAreas,
+  dependentRecordImpacts: assessed.dependentRecordImpacts,
   dependencyPlan: assessed.dependencyAssessment,
   dependencyRecordBindings,
   affectedTestBindings,

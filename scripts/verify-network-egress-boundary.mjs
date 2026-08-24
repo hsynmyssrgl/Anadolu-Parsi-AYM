@@ -149,6 +149,21 @@ export const inspectNetworkEgressStaticRatchet = () => {
   });
 };
 
+export const networkEgressReportMatchesCurrentRatchet = (report, currentBoundary) => Boolean(
+  report?.status === 'PASS'
+  && report.productionSourceZones === currentBoundary?.productionSourceZones
+  && report.scannedFiles === currentBoundary?.scannedFiles
+  && report.sourceInventorySha256 === currentBoundary?.sourceInventorySha256
+  && report.selfTestAssertions === currentBoundary?.maliciousSelfTests
+  && report.authorizedExternalEgressAdapters === currentBoundary?.authorizedAdapterCount
+  && report.authorizedEgressPurposeCount === currentBoundary?.authorizedPurposeCount
+  && report.authorizedInventorySha256 === currentBoundary?.authorizedInventorySha256
+  && report.localOnlyTransportFiles === currentBoundary?.localOnlyTransportFiles
+  && report.directPrimitiveExceptions === currentBoundary?.directPrimitiveExceptionCount
+  && Array.isArray(report.findings)
+  && report.findings.length === currentBoundary?.findings
+);
+
 const main = async () => {
   const staticRatchet = inspectNetworkEgressStaticRatchet();
   const rootArgument = process.argv.indexOf('--root');

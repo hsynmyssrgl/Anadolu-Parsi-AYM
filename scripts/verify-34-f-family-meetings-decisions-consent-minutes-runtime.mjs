@@ -1,10 +1,10 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { assertGovernedSourceRoot } from './lib/governed-source-root.mjs';
 
-const root=resolve(process.cwd());
-if(root!==resolve('C:\\PPT\\AYM','06_KOD','app'))throw new Error(`Unsafe source root: ${root}`);
-const noWrite=process.argv.includes('--no-write');const node=process.execPath;
+const noWrite=process.argv.includes('--no-write');const root=assertGovernedSourceRoot({allowReleaseChannel:noWrite});
+const node=process.execPath;
 const npmCli=process.env.npm_execpath??resolve(root,'.tmp','npm-10.9.2','package','bin','npm-cli.js');const npmArgs=args=>[npmCli,...args];
 const run=(name,command,args)=>{const result=spawnSync(command,args,{cwd:root,encoding:'utf8',stdio:'pipe',maxBuffer:32*1024*1024});
   const output=`${result.error?.stack??''}${result.stdout??''}${result.stderr??''}`;return {name,status:result.status===0?'PASS':'FAIL',

@@ -1,10 +1,10 @@
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { assertGovernedSourceRoot } from './lib/governed-source-root.mjs';
 
-const root = resolve(process.cwd());
-if (root !== resolve('C:\\PPT\\AYM', '06_KOD', 'app')) throw new Error(`Unsafe source root: ${root}`);
 const noWrite = process.argv.includes('--no-write');
+const root = assertGovernedSourceRoot({ allowReleaseChannel: noWrite });
 const json = async (path) => JSON.parse(await readFile(resolve(root, path), 'utf8'));
 const text = async (path) => readFile(resolve(root, path), 'utf8');
 const has = (source, markers) => markers.every((marker) => source.includes(marker));
@@ -75,8 +75,9 @@ const definitions = [
     'bounded-capacity overflow', 'forged owner receipt', 'downstream failure', 'rejects renderer-supplied manifests', 'without a new route'])],
   ['decision and threat model deny execution provider production trust sandbox and acceptance claims', has(decision, ['countsAsRequirementPass=false',
     'NOT_RUN', 'Production imza güveni']) && has(threat, ['Sahte veya değiştirilmiş manifest', 'Renderer otorite yükseltmesi', 'NOT_RUN'])],
-  ['PPK-015 021 and 022 ratchets are exact PASS', p15.status === 'PASS' && p15.files === 590
-    && p15.sourceSha256 === 'a739c17e51942946e2e6923d8ac7524630e36b56ec1078671eddf351b64e6f93' && p15.findings === 0
+  ['package-time PPK-015 snapshot and exact PPK-021/022 ratchets are internally consistent', p15.status === 'PASS'
+    && p15.status === inventory.validation.ppk015.status && p15.files === inventory.validation.ppk015.files
+    && p15.sourceSha256 === inventory.validation.ppk015.sourceSha256 && p15.findings === inventory.validation.ppk015.findings
     && p21.status === 'PASS' && p21.files === 590 && p21.surfaces === 897 && p21.sha256 === '9ea5b846e552e760fbd8dd5f8bee7fb83988ef19bb93e3bbd4ac0465c4b71205'
     && p22.status === 'PASS' && p22.files === 590 && p22.surfaces === 447 && p22.sha256 === '54061e189e7771868552efa869c69a75426f24e4edd846af1c62496c82f0e1d6'],
   ['production signing external manual evidence and requirement acceptance remain closed', scope.truth?.productionSigningTrustProvisioned === false

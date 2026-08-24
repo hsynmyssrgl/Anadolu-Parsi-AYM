@@ -1,10 +1,9 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-
-const root = resolve(process.cwd());
-if (root !== resolve('C:\\PPT\\AYM', '06_KOD', 'app')) throw new Error(`Unsafe source root: ${root}`);
+import { assertGovernedSourceRoot } from './lib/governed-source-root.mjs';
 
 const noWrite = process.argv.includes('--no-write');
+const root = assertGovernedSourceRoot({ allowReleaseChannel: noWrite });
 const output = 'artifacts/validation/33-R-archive-evidence-relations-media-lifecycle-unified-authorized-search-boundary.json';
 const readJson = async (path) => JSON.parse(await readFile(resolve(root, path), 'utf8'));
 const readText = async (path) => readFile(resolve(root, path), 'utf8');

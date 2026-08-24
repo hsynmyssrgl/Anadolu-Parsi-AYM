@@ -45,9 +45,17 @@
     "path": "config/change-impact-dependency-registry.json",
     "schemaVersion": 1,
     "id": "PPT-CHANGE-IMPACT-DEPENDENCY-REGISTRY-V1",
-    "sha256": "e57d47e657a31b0d50742e09b68013d0172324efcdde7ab34d9dd666d554dfef",
+    "sha256": "a56325beaba64e7de2930f3a3f8ab1b75544f8dfc30aae347d1c5c27118abf40",
     "unmatchedChangedPathEffect": "BLOCK",
     "dependentRecordsMustBeChanged": true,
+    "dependentRecordNotAffected": {
+      "allowed": true,
+      "status": "NOT_AFFECTED_WITH_BASELINE_IDENTITY",
+      "reasonCode": "DEPENDENT_RECORD_BASELINE_IDENTITY_UNCHANGED",
+      "sha256Required": true,
+      "baselineDiffAbsenceRequired": true,
+      "evidencePathsRequired": true
+    },
     "targetedVitestMustEqualAffectedFiles": true
   },
   "externalBaselineChain": {

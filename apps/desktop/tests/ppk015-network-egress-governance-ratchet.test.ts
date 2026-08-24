@@ -1,7 +1,8 @@
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
-import { inspectNetworkEgressStaticRatchet, scanNetworkEgressBoundary } from '../../../scripts/verify-network-egress-boundary.mjs';
+import { inspectNetworkEgressStaticRatchet, networkEgressReportMatchesCurrentRatchet,
+  scanNetworkEgressBoundary } from '../../../scripts/verify-network-egress-boundary.mjs';
 
 const read = async (path: string): Promise<Buffer> => readFile(path);
 const json = async (path: string): Promise<Record<string, unknown>> => JSON.parse((await read(path)).toString('utf8')) as Record<string, unknown>;
@@ -66,6 +67,28 @@ describe('PPK-015 historical closure and current egress ratchet', () => {
       localOnlyTransportFiles: staticRatchet.localOnlyTransportFiles });
     expect((current.authorizedAdapters as unknown[])).toHaveLength(2);
     expect((current.authorizedPurposes as unknown[])).toHaveLength(3);
+    const report = {
+      status: 'PASS',
+      productionSourceZones: scan.zones,
+      scannedFiles: scan.files,
+      sourceInventorySha256: scan.sourceInventorySha256,
+      ...staticRatchet,
+      directPrimitiveExceptions: 0,
+      findings: scan.findings
+    };
+    expect(networkEgressReportMatchesCurrentRatchet(report, current)).toBe(true);
+    expect(networkEgressReportMatchesCurrentRatchet({ ...report, scannedFiles: report.scannedFiles + 1 }, current)).toBe(false);
+    expect(networkEgressReportMatchesCurrentRatchet({ ...report, sourceInventorySha256: 'stale' }, current)).toBe(false);
+    const verifierSources = await Promise.all([
+      read('scripts/verify-33-z-signed-plugin-external-provider-platform-runtime.mjs'),
+      read('scripts/verify-34-a-communication-policy-mls-foundation-runtime.mjs'),
+      read('scripts/verify-remaining-package-local-foundation.mjs')
+    ]);
+    for (const sourceBytes of verifierSources) {
+      const source = sourceBytes.toString('utf8');
+      expect(source).toContain('config/ppk-015-network-egress-current-ratchet.json');
+      expect(source).toContain('networkEgressReportMatchesCurrentRatchet');
+    }
   });
 
   it('forbids restoring stale latest-decision and no-migration-77 checks', async () => {

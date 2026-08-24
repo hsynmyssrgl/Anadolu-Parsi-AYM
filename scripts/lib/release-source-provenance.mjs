@@ -591,6 +591,16 @@ export const validateMutationReleaseEvidence = ({
     || JSON.stringify(impactAnalysis.affectedTestBindings) !== JSON.stringify(affectedTestBindings)) {
     fail('Mutation impact analysis does not match the read-back assessment.');
   }
+  if (policy.dependencyRegistry?.dependentRecordNotAffected?.allowed === true) {
+    if (JSON.stringify(impactAnalysis.dependentRecordImpacts) !== JSON.stringify(assessed.dependentRecordImpacts)) {
+      fail('Mutation impact analysis dependent-record impacts do not match the read-back assessment.');
+    }
+    for (const [path, impact] of Object.entries(assessed.dependentRecordImpacts)) {
+      if (dependencyRecordBindings[path]?.sha256 !== impact.sha256) {
+        fail(`Mutation dependent-record impact SHA-256 differs from read-back binding: ${path}`);
+      }
+    }
+  }
   assertReleaseEvidenceIdentity(targetedTest, provenance, canonicalRulesSha256, 'Targeted test evidence');
   assertProducer(targetedTest, 'targetedTest', 'Targeted test evidence');
   const targetedFiles = validateTargetedTestFiles(targetedTest.targetFiles);

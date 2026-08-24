@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { ACTIVE_BUILD_META } from './lib/active-build-meta.mjs';
 
 const noWrite = process.argv.includes('--no-write');
+const jsonStdout = process.argv.includes('--json-stdout');
 const registryPath = 'config/accepted-scope-registry.json';
 const roadmapPath = 'config/remaining-scope-package-roadmap.json';
 const jsonOutputPath = 'artifacts/inventory/KALAN_IS_SINIFLANDIRMA.json';
@@ -190,4 +191,8 @@ if (failures.length > 0) {
   console.error(`Kalan iş sınıflandırması: FAIL (${failures.join('; ')})`);
   process.exit(1);
 }
-console.log(`Kalan iş sınıflandırması: PASS (${requirements.length}; kapalı ${counts.KATI_KAPALI}; yalnız dış kabul ${counts.YEREL_KOD_TAMAM_DIS_KABUL_BEKLIYOR}; üretim+dış kabul ${counts.YEREL_BILESENLER_KURULU_URETIM_ENTEGRASYONU_VE_DIS_KABUL_ACIK}; karma ${counts.YEREL_VE_DIS_IS_BIRLIKTE_ACIK}; final ${counts.SON_KAPANIS_OTOMASYONU_BEKLIYOR}).`);
+if (jsonStdout) {
+  console.log(JSON.stringify(report));
+} else {
+  console.log(`Kalan iş sınıflandırması: PASS (${requirements.length}; kapalı ${counts.KATI_KAPALI}; yalnız dış kabul ${counts.YEREL_KOD_TAMAM_DIS_KABUL_BEKLIYOR}; üretim+dış kabul ${counts.YEREL_BILESENLER_KURULU_URETIM_ENTEGRASYONU_VE_DIS_KABUL_ACIK}; karma ${counts.YEREL_VE_DIS_IS_BIRLIKTE_ACIK}; final ${counts.SON_KAPANIS_OTOMASYONU_BEKLIYOR}).`);
+}

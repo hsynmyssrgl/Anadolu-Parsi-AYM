@@ -2847,7 +2847,7 @@
       "status": "ACTIVE",
       "source": "Acik kullanici karari: bundan sonra en ufak degisiklik bile her yerde tum kayitlari guncellemeli ve testi yapilmali; kullaniciya aylar surecek eksik test yuku birakilmamali",
       "document": "docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md",
-      "documentSha256": "0c48b8a474b3e9667ae458092ba8b87bda6cedd7ed26cec57f36dab8f95f78bb",
+      "documentSha256": "5322416417ecf1d294e59f7d09518af4b4e61426cce5b7f555335fdd623acd3f",
       "documents": [
         "AGENTS.md",
         "SHA256SUMS.txt",
@@ -2872,10 +2872,11 @@
         "docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md",
         "manifest.json"
       ],
-      "workListImpact": "IS-0215 eklendi. Her mutasyon tum bagimli kayit siniflarini UPDATED veya kanitli NOT_AFFECTED olarak kapatir. Byte-exact tarihsel kayitlar degistirilmesi gereken dependentRecord sayilmaz; dogrudan degisiklikte tum degismezlik kapilarini tetikler. Guncel ratchet, belge ve resmi uretici makbuzlari Git teslimine girer. FAIL makbuzu ham stack veya sir tasimadan repo-relative test dosyasi, guvenli test adi ve SUITE_IMPORT kimligini gosterir. Hedefli ve filtresiz tam regresyon, typecheck, sozdizimi, kaynak butunlugu ve UI etkisinde tam etkilesim/gorsel UAT zorunludur. Gercek test hatalari wip(rejected) checkpoint olarak kaydedilir ve kapanis bitmeden ara installer uretilmez.",
+      "workListImpact": "IS-0215 eklendi ve temiz kanal regresyon bulgusuyla guclendirildi. Her mutasyon tum bagimli kayit siniflarini UPDATED veya baseline diff yoklugu, gerekce ve assessment/analysis/readback SHA bagi ile kanitli NOT_AFFECTED olarak kapatir; sahte/no-op degisiklik yasaktir. Byte-exact tarihsel kayitlar degistirilmez; guncel ratchet, belge ve resmi makbuzlar Git teslimine girer. Ignored eski uretici ciktisi test gercegi olamaz; test canli yapilandirilmis ciktiyi ve aktif build metasini kullanir. Salt-okunur verifier exact Git app/Bronze/Silver/Gold kokunde, yazan mod yalniz ana app kokunde calisir. Data-store smoke tekrarlanabilir wrapper ile derlenir. PPK-015 canli raporu tarihsel scope kopyasina degil kanonik currentBoundary kaydinin tum alanlarina baglidir; degistirilmis sayi veya ozet reddedilir. 34-G-34-K dahil 47/47 ek komut katalog on kosumu PASS olmustur. Ana build ledger ureticisinin cift satir sonu 284545ff gercek FAIL checkpointiyle korunmus ve cikti yerine kanonik uretici duzeltilmistir. 5d56bcac, a7d50f72, 925d25d1, e42f9b58, 4894345b, 88fb84f8, 447eb103, 90b0fb0f, 5490c2b4 ve 284545ff gercek FAIL checkpointleri korunur. Hedefli ve filtresiz tam regresyon, typecheck, sozdizimi, kaynak butunlugu ve UI etkisinde tam UAT zorunludur; kapanis bitmeden ara installer uretilmez.",
       "syncStatus": "SYNCHRONIZED",
       "requirements": ["PR-240"],
       "codeAreas": [
+        "scripts/lib/governed-source-root.mjs",
         "scripts/lib/mutation-release-evidence.mjs",
         "scripts/lib/release-source-provenance.mjs",
         "scripts/verify-operation-rule-check.mjs",
@@ -2887,9 +2888,18 @@
         "scripts/verify-release-channel-worktrees.mjs",
         "scripts/run-installed-frontend-user-uat.mjs",
         "scripts/run-governed-postflight.mjs",
+        "scripts/siniflandir-kalan-isler.mjs",
+        "scripts/run-data-store-smoke-regression.mjs",
+        "scripts/verify-network-egress-boundary.mjs",
+        "scripts/verify-33-z-signed-plugin-external-provider-platform-runtime.mjs",
+        "scripts/verify-34-a-communication-policy-mls-foundation-runtime.mjs",
+        "scripts/verify-remaining-package-local-foundation.mjs",
         "docs/ticari-urun-temeli/11_OTOMASYON/dogrula-ticari-temel-alani.mjs"
       ],
       "evidence": [
+        "apps/desktop/tests/governed-source-root.test.ts",
+        "apps/desktop/tests/kalan-is-siniflandirma.test.ts",
+        "apps/desktop/tests/ppk015-network-egress-governance-ratchet.test.ts",
         "apps/desktop/tests/operation-rule-check-policy.test.ts",
         "apps/desktop/tests/current-master-documentation-v5-governance.test.ts",
         "apps/desktop/tests/mutation-release-readiness-contract.test.ts",

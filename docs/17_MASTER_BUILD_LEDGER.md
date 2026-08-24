@@ -2,18 +2,6 @@
 
 > **Tek yetkili devam noktası:** Yeni bir sohbet veya geliştirme oturumu bu dosyayı okuyarak başlar. Geçmiş buildleri yeniden araştırmak yerine `Güncel devam noktası` ve `Kalan işler` bölümleri esas alınır.
 
-## 24.08.2026 — Bronze 22.08.2026.50 UAT110 V3 düzeltme kaydı
-
-- PR-235 bootstrap baseline gerçek FAIL'i düzeltildi: sabit diff tabanı korunur; producer yalnız pointer sourceCommit kayıt commitinde external-pointer exact eşitliği ve base-pointer-HEAD ancestry ile doğrulanır. PRE_MUTATION producer bağı baseline commitinde kalır. Hedefli negatif ve tam regresyon kanıtları tamamlanana kadar paketleme kapalıdır.
-- Bootstrap tam diff taramasında fail-closed yakalanan `.gitattributes` yolu governed-source safety-net dependency kuralına eklendi; manifest/SHA256SUMS ve universal hedefli test bağı olmadan etkisiz sayılamaz.
-- PR-240 bağımlı-kayıt çelişkisi kapatıldı: byte-exact değişmez `32-k` tarihsel scope güncellenmesi gereken kayıtlardan çıkarıldı fakat tetikleyici ve SHA değişmezlik kapısı olarak korundu. Güncel PPK-015 ratchet/contract/runtime kayıtları bağımlı kalır; 34-F boundary/contract/runtime makbuzları resmî üreticilerden PASS üretilip Git teslim kapsamına alınır.
-- Exact 76 dosyalık Bronze hedefli turundaki gerçek FAIL `5d56bcac` reddedilmiş checkpointiyle korundu. Kök nedenler izole `tools/windows-packager/node_modules` önkoşulunun eksikliği ile `release-channel-isolation` ve final teslim test fixture'larının ana `app` checkout yoluna bağlı olmasıydı. Bronze packager grafiği ayrı kuruldu, fixture'lar checkout bağımsızlaştırıldı ve mutasyon FAIL makbuzuna stack/secret taşımayan sıralı dosya/test kimlik envanteri eklendi. Yeni exact commit kanıtları üretilmeden PASS iddiası yoktur.
-
-- DEC-274/PR-239 senkronlandı: Bronze sequence 50 previous paket/runtime kabul etmeyen temiz bootstrap ilk kurulum + same-version maintenance; sequence 51+ immutable previous package ve canlı installed N runtime bağlı exact N→N+1 + maintenance uygular.
-- UAT110 `PPT-WINDOWS-INSTALLED-RELEASE-UAT110-V3` oldu; UAT111 ve final V3 kurulum modunu package provenance'dan bağımsız yeniden türetir.
-- Hedefli kapanış: **PASS (12 test dosyası / 94 test)**; kök typecheck ve değişen MJS/PowerShell parser: **PASS**.
-- Filtresiz tam regresyon, kaynak bütünlüğü, temiz exact commit, yeni installer, gerçek kurulum/UAT110/UAT111/final koşuları bu kayıt anında henüz tamamlanmamıştır ve PASS sayılmaz.
-
 - Ürün: **ParsYuva Aile Yaşam Merkezi**
 - Güncel build: **228**
 - Güncel sürüm: **02.08.2026.228**

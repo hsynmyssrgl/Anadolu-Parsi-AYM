@@ -2,12 +2,12 @@ import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
+import { assertGovernedSourceRoot } from './lib/governed-source-root.mjs';
 
-const root = resolve(process.cwd());
-if (root !== resolve('C:\\PPT\\AYM', '06_KOD', 'app')) throw new Error(`Unsafe source root: ${root}`);
+const noWrite = process.argv.includes('--no-write');
+const root = assertGovernedSourceRoot({ allowReleaseChannel: noWrite });
 
 const output = 'artifacts/validation/33-Q-local-governed-ocr-derived-data-pipeline-runtime.json';
-const noWrite = process.argv.includes('--no-write');
 const requirements = Object.freeze([
   'B3-04',
   ...Array.from({ length: 20 }, (_, index) => `OCR-${String(index + 1).padStart(3, '0')}`),

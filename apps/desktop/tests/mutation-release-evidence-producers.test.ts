@@ -48,6 +48,14 @@ describe('PR-235 canonical mutation evidence producers', () => {
         path: 'config/change-impact-dependency-registry.json',
         unmatchedChangedPathEffect: 'BLOCK',
         dependentRecordsMustBeChanged: true,
+        dependentRecordNotAffected: {
+          allowed: true,
+          status: 'NOT_AFFECTED_WITH_BASELINE_IDENTITY',
+          reasonCode: 'DEPENDENT_RECORD_BASELINE_IDENTITY_UNCHANGED',
+          sha256Required: true,
+          baselineDiffAbsenceRequired: true,
+          evidencePathsRequired: true
+        },
         targetedVitestMustEqualAffectedFiles: true
       },
       postflight: { trackedFileWritesAllowed: false, artifactIndexGenerationAllowed: false }
@@ -64,6 +72,9 @@ describe('PR-235 canonical mutation evidence producers', () => {
     expect(baseline).toContain('BOOTSTRAP_ADOPTION_BASE_COMMIT');
     expect(impact).toContain('readExternalBaselineFromPointer');
     expect(assessment).toContain('baselinePointer: baselinePointer.value');
+    expect(assessment).toContain("status: 'NOT_AFFECTED_WITH_BASELINE_IDENTITY'");
+    expect(assessment).toContain("reasonCode: 'DEPENDENT_RECORD_BASELINE_IDENTITY_UNCHANGED'");
+    expect(assessment).toContain('sha256: binding.sha256');
     expect(impact).toContain('baselinePointer: baselinePointer.value');
     expect(impact).not.toContain("optionValue('--assessment");
     expect(testRunner).toContain('spawnSync(process.execPath');
@@ -112,6 +123,8 @@ describe('PR-235 canonical mutation evidence producers', () => {
       expect(command.arguments).toContain('--no-write');
     }
     for (const path of [
+      'scripts/run-data-store-smoke-regression.mjs',
+      'scripts/verify-remaining-package-local-foundation.mjs',
       'scripts/verify-data-store-smoke.mjs',
       'scripts/verify-32-q-ppk-021-platform-policy-ast-gate-runtime.mjs',
       'scripts/verify-32-r-ppk-022-capability-manifest-gate-contract.mjs',
@@ -141,6 +154,50 @@ describe('PR-235 canonical mutation evidence producers', () => {
     expect(ppk015Rule.dependentRecords).not.toContain('config/32-k-ppk-015-network-egress-policy-scope.json');
     expect(ppk015Rule.dependentRecords).toContain('config/ppk-015-network-egress-current-ratchet.json');
     expect(ppk015Rule.affectedVitestFiles).toContain('apps/desktop/tests/ppk015-network-egress-governance-ratchet.test.ts');
+    expect(ppk015Rule.match.exactPaths).toContain('scripts/verify-network-egress-boundary.mjs');
+    const helperPlan = resolveChangeImpactDependencies({
+      registry,
+      changedFiles: ['scripts/verify-network-egress-boundary.mjs']
+    });
+    const helperCommands = helperPlan.requiredCommands.filter((id) => id.startsWith('affectedCommand:'));
+    expect(helperCommands).toEqual(expect.arrayContaining([
+      'affectedCommand:ppk015NetworkEgressContract',
+      'affectedCommand:ppk015NetworkEgressRuntime',
+      'affectedCommand:signedPluginProviderRuntime',
+      'affectedCommand:communicationPolicyMlsRuntime',
+      'affectedCommand:e2eeFileSharingRemainingRuntime',
+      'affectedCommand:communicationAuditArchiveRuntime',
+      'affectedCommand:distributedCoreConsensusTenancyRuntime',
+      'affectedCommand:distributedClientsOperationsDrRuntime',
+      'affectedCommand:windowsResilienceUniversalUxRuntime'
+    ]));
+    expect(helperCommands).not.toEqual(expect.arrayContaining([
+      'affectedCommand:e2eeFileSharingRemainingBoundary',
+      'affectedCommand:e2eeFileSharingRemainingContract'
+    ]));
+    const sharedPlan = resolveChangeImpactDependencies({
+      registry,
+      changedFiles: ['scripts/verify-remaining-package-local-foundation.mjs']
+    });
+    const sharedCommands = sharedPlan.requiredCommands.filter((id) => id.startsWith('affectedCommand:'));
+    expect(sharedCommands).toHaveLength(15);
+    expect(sharedCommands).toEqual(expect.arrayContaining([
+      'affectedCommand:e2eeFileSharingRemainingBoundary',
+      'affectedCommand:e2eeFileSharingRemainingContract',
+      'affectedCommand:e2eeFileSharingRemainingRuntime',
+      'affectedCommand:communicationAuditArchiveBoundary',
+      'affectedCommand:communicationAuditArchiveContract',
+      'affectedCommand:communicationAuditArchiveRuntime',
+      'affectedCommand:distributedCoreConsensusTenancyBoundary',
+      'affectedCommand:distributedCoreConsensusTenancyContract',
+      'affectedCommand:distributedCoreConsensusTenancyRuntime',
+      'affectedCommand:distributedClientsOperationsDrBoundary',
+      'affectedCommand:distributedClientsOperationsDrContract',
+      'affectedCommand:distributedClientsOperationsDrRuntime',
+      'affectedCommand:windowsResilienceUniversalUxBoundary',
+      'affectedCommand:windowsResilienceUniversalUxContract',
+      'affectedCommand:windowsResilienceUniversalUxRuntime'
+    ]));
     const plan = resolveChangeImpactDependencies({
       registry,
       changedFiles: [

@@ -1,6 +1,8 @@
 import { existsSync,readFileSync } from 'node:fs';import { mkdir,writeFile } from 'node:fs/promises';import { resolve } from 'node:path';import { spawnSync } from 'node:child_process';
-const root=resolve(process.cwd());if(root!==resolve('C:\\PPT\\AYM','06_KOD','app'))throw new Error(`Unsafe source root: ${root}`);
+import { assertGovernedSourceRoot } from './lib/governed-source-root.mjs';
+import { networkEgressReportMatchesCurrentRatchet } from './verify-network-egress-boundary.mjs';
 const step=process.argv[2],mode=process.argv[3];const noWrite=process.argv.includes('--no-write');
+const root=assertGovernedSourceRoot({allowReleaseChannel:noWrite});
 const packages={
   '34-G':{slug:'e2ee-file-sharing-remaining-communication-ux',decision:'DEC-244',migration:111,
     scope:'config/34-g-e2ee-file-sharing-remaining-communication-ux-scope.json',inventory:'config/34-g-e2ee-file-sharing-remaining-communication-ux-inventory.json',
@@ -54,7 +56,7 @@ const packages={
     markers:[['packages/domain/src/windows-resilience-universal-ux.ts','callerSuppliedSearchAuthorizationAccepted: false'],['packages/domain/src/windows-resilience-universal-ux.ts','productionUniversalSearchAuthorityComposed: true'],['packages/domain/src/windows-resilience-universal-ux.ts','operationLedgerRetentionPolicyDecided: false'],['packages/application/src/windows-resilience-universal-ux-use-cases.ts','UniversalUxSearchAuthorityPort'],['packages/application/src/windows-resilience-universal-ux-use-cases.ts','WindowsResilienceEvidenceProviderPort'],['packages/repositories/src/windows-resilience-universal-ux-repository.ts','exact durable policy receipt'],['packages/database/src/family-database-migrations.ts',"createMigrationDefinition(115, 'windows_resilience_universal_ux'"],['packages/database/src/family-database-migrations.ts','34-K operation requires exact owner-bound durable PEP receipt'],['apps/desktop/src/renderer/UniversalUxConsolidationPanel.tsx','searchUnifiedAuthorizedRecords({query:normalized,limit:25})']]}
 };
 const selected=packages[step];if(!selected||!['boundary','contract','runtime'].includes(mode))throw new Error('Usage: node verify-remaining-package-local-foundation.mjs <34-G..34-K> <boundary|contract|runtime> [--no-write]');
-const headResult=spawnSync('git',['-c','safe.directory=C:/PPT/AYM/06_KOD/app','rev-parse','HEAD'],{cwd:root,encoding:'utf8'});
+const headResult=spawnSync('git',['-c',`safe.directory=${root.replaceAll('\\','/')}`,'rev-parse','HEAD'],{cwd:root,encoding:'utf8'});
 if(headResult.status!==0||!/^[0-9a-f]{40}\s*$/u.test(headResult.stdout??''))throw new Error('Cannot resolve exact source HEAD.');
 const sourceBaseHead=headResult.stdout.trim();
 const read=path=>readFileSync(resolve(root,path),'utf8');const json=path=>JSON.parse(read(path));const checks=[];
@@ -108,7 +110,10 @@ if(mode==='runtime'){
     const migrations=run('database migration verification',[resolve(root,'scripts/verify-database-migrations.mjs')]);
     check('migration checksum is current',migrations.result.status===0&&migrations.output.includes(selected.validation.migrationSha256));
     const ppk015=run('PPK-015 raw current boundary',[resolve(root,'scripts/verify-network-egress-boundary.mjs')]);
-    check('PPK-015 source ratchet is current',ppk015.result.status===0&&ppk015.output.includes(selected.validation.ppk015Sha256));
+    let ppk015Report;try{ppk015Report=JSON.parse(ppk015.output);}catch{ppk015Report=undefined;}
+    const ppk015Current=json('config/ppk-015-network-egress-current-ratchet.json').currentBoundary;
+    check('PPK-015 source ratchet is current',ppk015.result.status===0
+      &&networkEgressReportMatchesCurrentRatchet(ppk015Report,ppk015Current));
     const ppk021=run('PPK-021 raw current gate',[resolve(root,'scripts/verify-platform-policy-ast-gate.mjs')]);
     check('PPK-021 exact surface ratchet is current',ppk021.result.status===0&&ppk021.output.includes(`"privilegedSurfaces": ${selected.validation.ppk021Count}`)&&ppk021.output.includes(selected.validation.ppk021Sha256));
     const ppk022=run('PPK-022 raw current gate',[resolve(root,'scripts/verify-platform-capability-manifest-gate.mjs')]);
@@ -137,7 +142,7 @@ const failures=checks.filter(item=>item.status==='FAIL');const report={schemaVer
   status:failures.length?'FAIL':'PASS',governanceState:'PLANNED',localImplementationStatus:selected.localStatus??'PARTIAL_LOCAL_FOUNDATION_ACCEPTANCE_INCOMPLETE',
   requirementsClosed:false,countsAsRequirementPass:false,checkCount:checks.length,passed:checks.length-failures.length,failed:failures.length,
   checks,generatedAt:new Date().toISOString()};
-if(!noWrite){await mkdir(resolve(root,'artifacts/validation'),{recursive:true});await writeFile(resolve(root,'artifacts/validation',
+if (!noWrite) {await mkdir(resolve(root,'artifacts/validation'),{recursive:true});await writeFile(resolve(root,'artifacts/validation',
   `${step}-${selected.slug}-${mode}.json`),`${JSON.stringify(report,null,2)}\n`,'utf8');}
 if(failures.length){console.error(`${step} ${mode}: FAIL (${failures.length}/${checks.length}).`);for(const item of failures)console.error(item.name);process.exit(1);}
 console.log(`${step} ${mode}: PASS (${checks.length}/${checks.length}; requirement PASS=false; write=${!noWrite}).`);

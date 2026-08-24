@@ -1,18 +1,20 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { assertGovernedSourceRoot } from './lib/governed-source-root.mjs';
+import { networkEgressReportMatchesCurrentRatchet } from './verify-network-egress-boundary.mjs';
 
-const root = resolve(process.cwd());
-if (root !== resolve('C:\\PPT\\AYM', '06_KOD', 'app')) throw new Error(`Unsafe source root: ${root}`);
 const noWrite = process.argv.includes('--no-write');
+const root = assertGovernedSourceRoot({ allowReleaseChannel: noWrite });
 const json = async (path) => JSON.parse(await readFile(resolve(root, path), 'utf8'));
-const [scope, inventory, registry, roadmap, plan, ledger] = await Promise.all([
+const [scope, inventory, registry, roadmap, plan, ledger, ppk015Ratchet] = await Promise.all([
   json('config/33-z-signed-plugin-external-provider-platform-scope.json'),
   json('config/33-z-signed-plugin-external-provider-platform-inventory.json'),
   json('config/accepted-scope-registry.json'),
   json('config/remaining-scope-package-roadmap.json'),
   json('config/work-segmentation-plan.json'),
-  json('config/active-governance-ledger.json')
+  json('config/active-governance-ledger.json'),
+  json('config/ppk-015-network-egress-current-ratchet.json')
 ]);
 
 const execute = (args, timeout = 300_000) => spawnSync(process.execPath, args, {
@@ -61,9 +63,8 @@ const definitions = [
     && m104?.checksum === scope.validation.migrationSha256],
   ['data store smoke includes migration 104 under the current migration head', smoke.status === 0 && smokeReport?.status === 'passed'
     && smokeReport?.migrationVersions?.includes(104) && smokeReport?.migrationVersions?.at(-1) === latestMigrationVersion],
-  ['PPK-015 raw gate matches scope ratchet', gate15.status === 0 && p15?.status === 'PASS'
-    && p15?.scannedFiles === scope.validation.ppk015.files && p15?.sourceInventorySha256 === scope.validation.ppk015.sourceSha256
-    && p15?.authorizedInventorySha256 === scope.validation.ppk015.authorizedInventorySha256 && p15?.findings?.length === 0],
+  ['PPK-015 raw gate matches canonical current ratchet', gate15.status === 0
+    && networkEgressReportMatchesCurrentRatchet(p15, ppk015Ratchet.currentBoundary)],
   ['PPK-021 raw gate matches scope ratchet', gate21.status === 0 && p21?.status === 'PASS'
     && p21?.scannedFiles === scope.validation.ppk021.files && p21?.privilegedSurfaces === scope.validation.ppk021.surfaces
     && p21?.exactAllowlistSha256 === scope.validation.ppk021.sha256 && p21?.findings?.length === 0],
@@ -88,7 +89,8 @@ const checks = definitions.map(([name, passed]) => ({ name, status: passed ? 'PA
 const failures = checks.filter((item) => item.status === 'FAIL');
 const report = { schemaVersion: 1, step: '33-Z', decision: 'DEC-237', status: failures.length ? 'FAIL' : 'PASS',
   governanceState: 'PLANNED', countsAsRequirementPass: false, targetedTestFilesPassed: files, targetedTestsPassed: tests,
-  migration104Sha256: m104?.checksum ?? null, ppk015: p15, ppk021: p21, ppk022: p22,
+  migration104Sha256: m104?.checksum ?? null, ppk015RatchetSource: 'config/ppk-015-network-egress-current-ratchet.json',
+  ppk015: p15, ppk021: p21, ppk022: p22,
   checkCount: checks.length, passed: checks.length - failures.length, failed: failures.length, checks, generatedAt: new Date().toISOString() };
 if (!noWrite) {
   await mkdir(resolve(root, 'artifacts/validation'), { recursive: true });

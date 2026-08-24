@@ -116,6 +116,14 @@ describe('operation rule check policy', () => {
         sha256: createHash('sha256').update(dependencyRegistryRaw).digest('hex'),
         unmatchedChangedPathEffect: 'BLOCK',
         dependentRecordsMustBeChanged: true,
+        dependentRecordNotAffected: {
+          allowed: true,
+          status: 'NOT_AFFECTED_WITH_BASELINE_IDENTITY',
+          reasonCode: 'DEPENDENT_RECORD_BASELINE_IDENTITY_UNCHANGED',
+          sha256Required: true,
+          baselineDiffAbsenceRequired: true,
+          evidencePathsRequired: true
+        },
         targetedVitestMustEqualAffectedFiles: true
       },
       evidenceExecution: {

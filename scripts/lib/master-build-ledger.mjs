@@ -266,7 +266,7 @@ export const renderLedgerMarkdown = (ledger) => {
   lines.push(`- Durum: **${ledger.lastStatusNotification.status}**`);
   lines.push(`- Kayıt zamanı: **${ledger.lastStatusNotification.recordedAt}**`);
   lines.push(`- Bildirim: ${ledger.lastStatusNotification.message}`);
-  lines.push('', '---', '', 'Bu dosya `config/master-build-ledger.json` kaynağından üretilir. Elle yapılan ve JSON kaynağıyla eşleşmeyen değişiklikler doğrulama kapısında reddedilir.', '');
+  lines.push('', '---', '', 'Bu dosya `config/master-build-ledger.json` kaynağından üretilir. Elle yapılan ve JSON kaynağıyla eşleşmeyen değişiklikler doğrulama kapısında reddedilir.');
   return lines.join('\n');
 };
 

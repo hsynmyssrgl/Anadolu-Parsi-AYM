@@ -1,9 +1,10 @@
 import { mkdir,readFile,writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { assertGovernedSourceRoot } from './lib/governed-source-root.mjs';
 
-const root=resolve(process.cwd());if(root!==resolve('C:\\PPT\\AYM','06_KOD','app'))throw new Error(`Unsafe source root: ${root}`);
-const noWrite=process.argv.includes('--no-write');const json=async(path)=>JSON.parse(await readFile(resolve(root,path),'utf8'));
+const noWrite=process.argv.includes('--no-write');const root=assertGovernedSourceRoot({allowReleaseChannel:noWrite});
+const json=async(path)=>JSON.parse(await readFile(resolve(root,path),'utf8'));
 const [scope,inventory,registry,roadmap,plan,ledger]=await Promise.all([json('config/33-y-local-first-smart-home-energy-scope.json'),json('config/33-y-local-first-smart-home-energy-inventory.json'),json('config/accepted-scope-registry.json'),json('config/remaining-scope-package-roadmap.json'),json('config/work-segmentation-plan.json'),json('config/active-governance-ledger.json')]);
 const execute=(args,timeout=300000)=>spawnSync(process.execPath,args,{cwd:root,encoding:'utf8',windowsHide:true,timeout,maxBuffer:64*1024*1024,env:process.env});const clean=(value)=>String(value??'').replace(/\u001b\[[0-?]*[ -/]*[@-~]/gu,'');const output=(result)=>clean(`${result.stdout??''}\n${result.stderr??''}`);const parse=(result)=>{try{return JSON.parse(clean(result.stdout).trim());}catch{return undefined;}};
 const vitest=execute(['node_modules/vitest/vitest.mjs','run',...scope.validation.targetedTestFiles,'--maxWorkers=1']);const vitestText=output(vitest);const files=Number(vitestText.match(/Test Files\s+(\d+) passed/u)?.[1]??0);const tests=Number(vitestText.match(/Tests\s+(\d+) passed/u)?.[1]??0);

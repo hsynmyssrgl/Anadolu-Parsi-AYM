@@ -11,7 +11,8 @@ const SHA256_PATTERN = /^[a-f0-9]{64}$/u;
 const GIT_OBJECT_PATTERN = /^[a-f0-9]{40,64}$/u;
 const RECORD_NAME_PATTERN = /^(\d{8})-([a-f0-9]{40,64})-(PRE_MUTATION|BOOTSTRAP_ADOPTION)\.json$/u;
 const ALLOWED_REASON_CODES = new Set([
-  'NO_MATCHING_CHANGED_PATH', 'COVERED_BY_EXISTING_CONTRACT', 'FRESH_INSTALLED_EXE_UAT_REQUIRED'
+  'NO_MATCHING_CHANGED_PATH', 'COVERED_BY_EXISTING_CONTRACT', 'FRESH_INSTALLED_EXE_UAT_REQUIRED',
+  'DEPENDENT_RECORD_BASELINE_IDENTITY_UNCHANGED'
 ]);
 const CANONICAL_DEPENDENCY_REGISTRY_ID = 'PPT-CHANGE-IMPACT-DEPENDENCY-REGISTRY-V1';
 export const CANONICAL_MUTATION_IMPACT_AREAS = Object.freeze([
@@ -72,7 +73,7 @@ export const CANONICAL_CHANGE_IMPACT_COMMAND_MATRIX = Object.freeze({
 export const CANONICAL_AFFECTED_COMMAND_CATALOG = Object.freeze({
   dataStoreSmoke: Object.freeze({
     phase: 'full', mode: 'EXACT_NODE_SCRIPT', executable: 'node',
-    arguments: Object.freeze(['scripts/verify-data-store-smoke.mjs', '--no-write']), nonMutating: true
+    arguments: Object.freeze(['scripts/run-data-store-smoke-regression.mjs', '--no-write']), nonMutating: true
   }),
   platformPolicyAstRuntime: Object.freeze({
     phase: 'full', mode: 'EXACT_NODE_SCRIPT', executable: 'node',
@@ -85,6 +86,66 @@ export const CANONICAL_AFFECTED_COMMAND_CATALOG = Object.freeze({
   ppk015NetworkEgressRuntime: Object.freeze({
     phase: 'full', mode: 'EXACT_NODE_SCRIPT', executable: 'node',
     arguments: Object.freeze(['scripts/verify-32-k-ppk-015-network-egress-runtime.mjs', '--no-write']), nonMutating: true
+  }),
+  e2eeFileSharingRemainingBoundary: Object.freeze({
+    phase: 'full', mode: 'EXACT_NODE_SCRIPT', executable: 'node',
+    arguments: Object.freeze(['scripts/verify-remaining-package-local-foundation.mjs', '34-G', 'boundary', '--no-write']), nonMutating: true
+  }),
+  e2eeFileSharingRemainingContract: Object.freeze({
+    phase: 'full', mode: 'EXACT_NODE_SCRIPT', executable: 'node',
+    arguments: Object.freeze(['scripts/verify-remaining-package-local-foundation.mjs', '34-G', 'contract', '--no-write']), nonMutating: true
+  }),
+  e2eeFileSharingRemainingRuntime: Object.freeze({
+    phase: 'full', mode: 'EXACT_NODE_SCRIPT', executable: 'node',
+    arguments: Object.freeze(['scripts/verify-remaining-package-local-foundation.mjs', '34-G', 'runtime', '--no-write']), nonMutating: true
+  }),
+  communicationAuditArchiveBoundary: Object.freeze({
+    phase: 'full', mode: 'EXACT_NODE_SCRIPT', executable: 'node',
+    arguments: Object.freeze(['scripts/verify-remaining-package-local-foundation.mjs', '34-H', 'boundary', '--no-write']), nonMutating: true
+  }),
+  communicationAuditArchiveContract: Object.freeze({
+    phase: 'full', mode: 'EXACT_NODE_SCRIPT', executable: 'node',
+    arguments: Object.freeze(['scripts/verify-remaining-package-local-foundation.mjs', '34-H', 'contract', '--no-write']), nonMutating: true
+  }),
+  communicationAuditArchiveRuntime: Object.freeze({
+    phase: 'full', mode: 'EXACT_NODE_SCRIPT', executable: 'node',
+    arguments: Object.freeze(['scripts/verify-remaining-package-local-foundation.mjs', '34-H', 'runtime', '--no-write']), nonMutating: true
+  }),
+  distributedCoreConsensusTenancyBoundary: Object.freeze({
+    phase: 'full', mode: 'EXACT_NODE_SCRIPT', executable: 'node',
+    arguments: Object.freeze(['scripts/verify-remaining-package-local-foundation.mjs', '34-I', 'boundary', '--no-write']), nonMutating: true
+  }),
+  distributedCoreConsensusTenancyContract: Object.freeze({
+    phase: 'full', mode: 'EXACT_NODE_SCRIPT', executable: 'node',
+    arguments: Object.freeze(['scripts/verify-remaining-package-local-foundation.mjs', '34-I', 'contract', '--no-write']), nonMutating: true
+  }),
+  distributedCoreConsensusTenancyRuntime: Object.freeze({
+    phase: 'full', mode: 'EXACT_NODE_SCRIPT', executable: 'node',
+    arguments: Object.freeze(['scripts/verify-remaining-package-local-foundation.mjs', '34-I', 'runtime', '--no-write']), nonMutating: true
+  }),
+  distributedClientsOperationsDrBoundary: Object.freeze({
+    phase: 'full', mode: 'EXACT_NODE_SCRIPT', executable: 'node',
+    arguments: Object.freeze(['scripts/verify-remaining-package-local-foundation.mjs', '34-J', 'boundary', '--no-write']), nonMutating: true
+  }),
+  distributedClientsOperationsDrContract: Object.freeze({
+    phase: 'full', mode: 'EXACT_NODE_SCRIPT', executable: 'node',
+    arguments: Object.freeze(['scripts/verify-remaining-package-local-foundation.mjs', '34-J', 'contract', '--no-write']), nonMutating: true
+  }),
+  distributedClientsOperationsDrRuntime: Object.freeze({
+    phase: 'full', mode: 'EXACT_NODE_SCRIPT', executable: 'node',
+    arguments: Object.freeze(['scripts/verify-remaining-package-local-foundation.mjs', '34-J', 'runtime', '--no-write']), nonMutating: true
+  }),
+  windowsResilienceUniversalUxBoundary: Object.freeze({
+    phase: 'full', mode: 'EXACT_NODE_SCRIPT', executable: 'node',
+    arguments: Object.freeze(['scripts/verify-remaining-package-local-foundation.mjs', '34-K', 'boundary', '--no-write']), nonMutating: true
+  }),
+  windowsResilienceUniversalUxContract: Object.freeze({
+    phase: 'full', mode: 'EXACT_NODE_SCRIPT', executable: 'node',
+    arguments: Object.freeze(['scripts/verify-remaining-package-local-foundation.mjs', '34-K', 'contract', '--no-write']), nonMutating: true
+  }),
+  windowsResilienceUniversalUxRuntime: Object.freeze({
+    phase: 'full', mode: 'EXACT_NODE_SCRIPT', executable: 'node',
+    arguments: Object.freeze(['scripts/verify-remaining-package-local-foundation.mjs', '34-K', 'runtime', '--no-write']), nonMutating: true
   }),
   ppk022CapabilityManifestContract: Object.freeze({
     phase: 'full', mode: 'EXACT_NODE_SCRIPT', executable: 'node',
@@ -450,6 +511,12 @@ export const loadMutationEvidencePolicy = async (root = process.cwd()) => {
     || policy.dependencyRegistry?.sha256 !== dependencyRegistryBinding.sha256
     || policy.dependencyRegistry?.unmatchedChangedPathEffect !== 'BLOCK'
     || policy.dependencyRegistry?.dependentRecordsMustBeChanged !== true
+    || policy.dependencyRegistry?.dependentRecordNotAffected?.allowed !== true
+    || policy.dependencyRegistry?.dependentRecordNotAffected?.status !== 'NOT_AFFECTED_WITH_BASELINE_IDENTITY'
+    || policy.dependencyRegistry?.dependentRecordNotAffected?.reasonCode !== 'DEPENDENT_RECORD_BASELINE_IDENTITY_UNCHANGED'
+    || policy.dependencyRegistry?.dependentRecordNotAffected?.sha256Required !== true
+    || policy.dependencyRegistry?.dependentRecordNotAffected?.baselineDiffAbsenceRequired !== true
+    || policy.dependencyRegistry?.dependentRecordNotAffected?.evidencePathsRequired !== true
     || policy.dependencyRegistry?.targetedVitestMustEqualAffectedFiles !== true
     || policy.evidenceExecution?.fullRegressionRootTypecheckRequired !== true
     || policy.evidenceExecution?.fullRegressionChangedMjsNodeCheckRequired !== true
@@ -520,9 +587,35 @@ export const validateImpactAssessment = ({
     fail('Mutation impact assessment changed-file path classification is missing or not exact.');
   }
   const dependencyPlan = resolveChangeImpactDependencies({ registry: dependencyRegistry, changedFiles });
-  const missingDependentRecords = dependencyPlan.dependentRecords.filter((path) => !changedFiles.includes(path));
-  if (missingDependentRecords.length > 0) {
-    fail(`Mutation dependency records were not updated in the exact changed-file inventory: ${missingDependentRecords.join(', ')}`);
+  let dependentRecordImpacts;
+  if (policy.dependencyRegistry?.dependentRecordNotAffected?.allowed === true) {
+    const dependentRecordImpactKeys = Object.keys(assessment.dependentRecordImpacts ?? {}).sort((a, b) => a.localeCompare(b, 'en'));
+    if (dependentRecordImpactKeys.length !== dependencyPlan.dependentRecords.length
+      || !dependentRecordImpactKeys.every((path) => dependencyPlan.dependentRecords.includes(path))) {
+      fail('Mutation dependent-record impact inventory is missing or not exact.');
+    }
+    dependentRecordImpacts = {};
+    for (const path of dependencyPlan.dependentRecords) {
+      const value = assessment.dependentRecordImpacts[path];
+      if (!SHA256_PATTERN.test(String(value?.sha256 ?? ''))) {
+        fail(`Mutation dependent-record impact SHA-256 is missing or invalid: ${path}`);
+      }
+      if (changedFiles.includes(path)) {
+        if (value.status !== 'UPDATED' || !exactJson(value.evidencePaths, [path])) {
+          fail(`Changed mutation dependent record is not marked UPDATED with exact evidence: ${path}`);
+        }
+      } else if (value.status !== 'NOT_AFFECTED_WITH_BASELINE_IDENTITY'
+        || value.reasonCode !== 'DEPENDENT_RECORD_BASELINE_IDENTITY_UNCHANGED'
+        || !Array.isArray(value.evidencePaths) || value.evidencePaths.length === 0) {
+        fail(`Unchanged mutation dependent record lacks governed baseline-identity evidence: ${path}`);
+      }
+      dependentRecordImpacts[path] = value;
+    }
+  } else {
+    const missingDependentRecords = dependencyPlan.dependentRecords.filter((path) => !changedFiles.includes(path));
+    if (missingDependentRecords.length > 0) {
+      fail(`Mutation dependency records were not updated in the exact changed-file inventory: ${missingDependentRecords.join(', ')}`);
+    }
   }
   const dependencyAssessment = createDependencyAssessmentContract({ plan: dependencyPlan, registryBinding: dependencyRegistryBinding });
   if (!exactJson(assessment.dependencyPlan, dependencyAssessment)) {
@@ -557,7 +650,8 @@ export const validateImpactAssessment = ({
     impactAreas: result,
     changedFileImpacts: fileImpacts,
     dependencyPlan,
-    dependencyAssessment
+    dependencyAssessment,
+    dependentRecordImpacts: dependentRecordImpacts ? Object.freeze(dependentRecordImpacts) : undefined
   });
 };
 

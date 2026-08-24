@@ -3,7 +3,7 @@
   "step": "34-I",
   "decision": "DEC-246",
   "mode": "contract",
-  "sourceBaseHead": "a12d202519fe30df64bd36ee1185905369cf6fa1",
+  "sourceBaseHead": "5490c2b423e6661177654b4e83b4a309b7b11fb8",
   "status": "PASS",
   "governanceState": "PLANNED",
   "localImplementationStatus": "LOCAL_HARDENED_FAIL_CLOSED_FOUNDATION_ACCEPTANCE_INCOMPLETE",
@@ -44,5 +44,5 @@
       "detail": ""
     }
   ],
-  "generatedAt": "2026-08-20T09:31:40.393Z"
+  "generatedAt": "2026-08-24T16:50:20.077Z"
 }

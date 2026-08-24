@@ -103,6 +103,12 @@ check(mutationReadinessPolicy?.schemaVersion === 2
   && mutationReadinessPolicy?.dependencyRegistry?.sha256 === dependencyRegistrySha256
   && mutationReadinessPolicy?.dependencyRegistry?.unmatchedChangedPathEffect === 'BLOCK'
   && mutationReadinessPolicy?.dependencyRegistry?.dependentRecordsMustBeChanged === true
+  && mutationReadinessPolicy?.dependencyRegistry?.dependentRecordNotAffected?.allowed === true
+  && mutationReadinessPolicy?.dependencyRegistry?.dependentRecordNotAffected?.status === 'NOT_AFFECTED_WITH_BASELINE_IDENTITY'
+  && mutationReadinessPolicy?.dependencyRegistry?.dependentRecordNotAffected?.reasonCode === 'DEPENDENT_RECORD_BASELINE_IDENTITY_UNCHANGED'
+  && mutationReadinessPolicy?.dependencyRegistry?.dependentRecordNotAffected?.sha256Required === true
+  && mutationReadinessPolicy?.dependencyRegistry?.dependentRecordNotAffected?.baselineDiffAbsenceRequired === true
+  && mutationReadinessPolicy?.dependencyRegistry?.dependentRecordNotAffected?.evidencePathsRequired === true
   && mutationReadinessPolicy?.dependencyRegistry?.targetedVitestMustEqualAffectedFiles === true
   && mutationReadinessPolicy?.externalBaselineChain?.bootstrapAdoption?.historicalBaseCommitPreservedAsImpactBase === true
   && mutationReadinessPolicy?.externalBaselineChain?.bootstrapAdoption?.producerCommitSource === 'REPOSITORY_POINTER_SOURCE_COMMIT'

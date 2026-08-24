@@ -307,6 +307,31 @@
       ],
       "isListesiEtkisi": "IS-0215 DEVAM kalir. 5d56bcac reddedilmis checkpoint korunur. Bronze izole Windows packager grafiği kanal icinde kuruldu; kanal ve final teslim fixture yollari checkout bagimsizdir. Gelecek FAIL makbuzu stack/sir yerine repo-relative dosya, test adi veya SUITE_IMPORT kimligi ve gercek test dosyasi sayisini gosterir. Yeni exact commit hedefli/tam regresyon, kaynak butunlugu ve kurulu UI UAT tamamlanmadan PASS yoktur.",
       "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-019",
+      "tarih": "2026-08-24",
+      "baslik": "Temiz kanal tam regresyon kok ve canli siniflandirma bagi",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-275, PR-240 ve d8746da8 filtresiz regresyon FAIL makbuzu",
+      "etkilenenAlanlar": [
+        "scripts/lib/governed-source-root.mjs",
+        "scripts/siniflandir-kalan-isler.mjs",
+        "apps/desktop/tests/governed-source-root.test.ts",
+        "apps/desktop/tests/kalan-is-siniflandirma.test.ts",
+        "scripts/verify-33-q-*.mjs",
+        "scripts/verify-33-r-*.mjs",
+        "scripts/verify-33-y-*.mjs",
+        "scripts/verify-33-z-*.mjs",
+        "scripts/verify-34-a-*.mjs",
+        "scripts/verify-34-b-*.mjs",
+        "scripts/verify-34-c-*.mjs",
+        "scripts/verify-34-d-*.mjs",
+        "scripts/verify-34-f-*.mjs",
+        "docs/current/12_KALAN_IS_SINIFLANDIRMA.md"
+      ],
+      "isListesiEtkisi": "IS-0211 ve IS-0215 DEVAM kalir. d8746da8 hedefli 76/509 PASS sonrasi filtresiz turdaki 1 test, 30 ek komut ve build ledger bicim FAIL'i a7d50f72/925d25d1/e42f9b58/4894345b/88fb84f8/447eb103/90b0fb0f/5490c2b4/284545ff rejected checkpointleriyle korunur. Ignored eski JSON ve sabit .37 beklentisi kaldirildi; canli JSON stdout .50 metasina baglandi. Salt-okunur verifier exact Git app/Bronze/Silver/Gold kokunde, yazan mod yalniz ana app kokunde calisir. Data-store smoke tekrarlanabilir wrapper ile hazirlanir. PPK-015 canli raporu tarihsel scope kopyasindan ayrilip kanonik currentBoundary'nin tum alanlarina baglandi; 34-G-34-K dahil 47/47 ek komut on kosumu PASS oldu. Master build ledger cift son satiri ciktiya elle mudahale edilmeden kanonik ureticide duzeltildi. Degismeyen bagimli kayitlar baseline diff yoklugu, gerekce ve assessment/analysis/readback SHA bagi ile NOT_AFFECTED olabilir; sahte/no-op degisiklik yoktur. Yeni exact commit kanitlari olmadan paket yoktur.",
+      "senkronDurumu": "SYNCHRONIZED"
     }
   ]
 }

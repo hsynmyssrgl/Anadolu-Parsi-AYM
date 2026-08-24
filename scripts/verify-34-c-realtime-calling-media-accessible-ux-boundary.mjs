@@ -1,9 +1,9 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { assertGovernedSourceRoot } from './lib/governed-source-root.mjs';
 
-const root=resolve(process.cwd());
-if(root!==resolve('C:\\PPT\\AYM','06_KOD','app'))throw new Error(`Unsafe source root: ${root}`);
 const noWrite=process.argv.includes('--no-write');
+const root=assertGovernedSourceRoot({allowReleaseChannel:noWrite});
 const json=async path=>JSON.parse(await readFile(resolve(root,path),'utf8'));
 const source=async path=>readFile(resolve(root,path),'utf8');
 const has=(text,markers)=>markers.every(marker=>text.includes(marker));

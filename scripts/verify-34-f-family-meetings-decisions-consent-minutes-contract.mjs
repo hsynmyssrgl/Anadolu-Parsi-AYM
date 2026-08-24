@@ -1,10 +1,10 @@
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { assertGovernedSourceRoot } from './lib/governed-source-root.mjs';
 
-const root=resolve(process.cwd());
-if(root!==resolve('C:\\PPT\\AYM','06_KOD','app'))throw new Error(`Unsafe source root: ${root}`);
-const noWrite=process.argv.includes('--no-write');const text=async path=>readFile(resolve(root,path),'utf8');
+const noWrite=process.argv.includes('--no-write');const root=assertGovernedSourceRoot({allowReleaseChannel:noWrite});
+const text=async path=>readFile(resolve(root,path),'utf8');
 const has=(value,markers)=>markers.every(marker=>value.includes(marker));const sha=value=>createHash('sha256').update(value,'utf8').digest('hex');
 const paths={scope:'config/34-f-family-meetings-decisions-consent-minutes-scope.json',
   inventory:'config/34-f-family-meetings-decisions-consent-minutes-inventory.json',

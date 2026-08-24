@@ -3,7 +3,7 @@
 - Belge sürümü: **GUNCEL-2026-08-24-V5**
 - Tarih: **24.08.2026**
 - Görünür ürün sürümü: **Bronze 22.08.2026.50**
-- Kaynak HEAD: `5d56bcacf660a58ce3a567a3cd7ec37882f87a09`
+- Kaynak HEAD: `284545ffb90ee91707810d4c3d137ab03cc569cd`
 - Statü: **ACTIVE_CURRENT_MASTER_REFERENCE**
 - Kararlar: **DEC-250–DEC-275**
 
@@ -16,7 +16,7 @@
 - Office/RTF/PDF: **872**; benzersiz içerik hash'i: **7585**; tekrar kopya: **29269**.
 - Build209–228 master çiftleri ve eski Bronze aktif referans çifti tarihsel olarak korunmuştur.
 - Karar dosyası: **184**; ADR: **106**; security/threat belgesi: **72**.
-- Mevcut tam belge/config/kanıt envanteri: **2143** (yeni sürümden önceki indeks).
+- Mevcut tam belge/config/kanıt envanteri: **3866** (yeni sürümden önceki indeks).
 
 ## 2. Yetki ve öncelik
 

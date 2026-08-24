@@ -44,16 +44,7 @@ const initialChangedFiles = [
   'scripts/verify-data-store-smoke.mjs',
   'scripts/verify-33-q-local-governed-ocr-derived-data-pipeline-runtime.mjs'
 ];
-const closeDependencyRecords = (initial: string[]) => {
-  const files = new Set(initial);
-  for (;;) {
-    const plan = resolveChangeImpactDependencies({ registry: dependencyRegistry, changedFiles: [...files] });
-    const before = files.size;
-    plan.dependentRecords.forEach((path: string) => files.add(path));
-    if (files.size === before) return [...files].sort((a, b) => a.localeCompare(b, 'en'));
-  }
-};
-const changedFiles = closeDependencyRecords(initialChangedFiles);
+const changedFiles = [...initialChangedFiles].sort((a, b) => a.localeCompare(b, 'en'));
 const dependencyPlan = resolveChangeImpactDependencies({ registry: dependencyRegistry, changedFiles });
 const dependencyAssessment = createDependencyAssessmentContract({ plan: dependencyPlan, registryBinding: dependencyRegistryBinding });
 const changedFileImpacts = classifyChangedFiles(changedFiles);
@@ -76,7 +67,13 @@ const policy = {
   dependencyRegistry: {
     path: dependencyRegistryPath, schemaVersion: 1, id: dependencyRegistry.id,
     sha256: dependencyRegistryBinding.sha256, unmatchedChangedPathEffect: 'BLOCK',
-    dependentRecordsMustBeChanged: true, targetedVitestMustEqualAffectedFiles: true
+    dependentRecordsMustBeChanged: true,
+    dependentRecordNotAffected: {
+      allowed: true, status: 'NOT_AFFECTED_WITH_BASELINE_IDENTITY',
+      reasonCode: 'DEPENDENT_RECORD_BASELINE_IDENTITY_UNCHANGED', sha256Required: true,
+      baselineDiffAbsenceRequired: true, evidencePathsRequired: true
+    },
+    targetedVitestMustEqualAffectedFiles: true
   }
 };
 const provenance = {
@@ -105,6 +102,16 @@ const fakeBindings = (paths: readonly string[], prefix: string) => Object.fromEn
   path, sizeBytes: 100 + index, sha256: digest(`${prefix}:${path}`)
 }]));
 const dependencyRecordBindings = fakeBindings(dependencyPlan.dependentRecords, 'record');
+const dependentRecordImpacts = Object.fromEntries(dependencyPlan.dependentRecords.map((path: string) => [path,
+  changedFiles.includes(path)
+    ? { status: 'UPDATED', sha256: dependencyRecordBindings[path].sha256, evidencePaths: [path] }
+    : {
+        status: 'NOT_AFFECTED_WITH_BASELINE_IDENTITY',
+        reasonCode: 'DEPENDENT_RECORD_BASELINE_IDENTITY_UNCHANGED',
+        sha256: dependencyRecordBindings[path].sha256,
+        evidencePaths: [evidencePath]
+      }
+]));
 const affectedTestBindings = fakeBindings(dependencyPlan.affectedVitestFiles, 'test');
 const stream = { sizeBytes: 0, sha256: digest('') };
 const measured = (id: string, executable: string, args: string[], changedPath: string | null = null) => ({
@@ -150,6 +157,7 @@ const input = (): any => ({
   impactAssessment: {
     schemaVersion: 2, requirement: 'PR-235', decision: 'DEC-270',
     strengthenedByRequirement: 'PR-240', strengthenedByDecision: 'DEC-275', changedFileImpacts, impactAreas,
+    dependentRecordImpacts: structuredClone(dependentRecordImpacts),
     dependencyPlan: dependencyAssessment
   },
   impactAssessmentSha256: assessmentSha,
@@ -161,7 +169,8 @@ const input = (): any => ({
       baselinePointerSha256: pointerSha, baselineExternalSha256: externalSha, assessmentSha256: assessmentSha,
       dependencyRegistrySha256: dependencyRegistryBinding.sha256
     },
-    changedFiles, changedFileImpacts, impactAreas, evidencePathBindings, dependencyPlan: dependencyAssessment,
+    changedFiles, changedFileImpacts, impactAreas, dependentRecordImpacts: structuredClone(dependentRecordImpacts),
+    evidencePathBindings, dependencyPlan: dependencyAssessment,
     dependencyRecordBindings, affectedTestBindings, producer: producerBindings.impactAnalysis
   },
   targetedTest: {
@@ -231,6 +240,13 @@ describe('PR-235 mutation release readiness', () => {
     expect(() => validateMutationReleaseEvidence(failedFile)).toThrow(/measured PASS/u);
     const forgedAssessment = input(); forgedAssessment.impactAssessment.changedFileImpacts = {};
     expect(() => validateMutationReleaseEvidence(forgedAssessment)).toThrow(/path classification/u);
+    const forgedNotAffected = input();
+    const unchangedRecord = Object.keys(forgedNotAffected.impactAssessment.dependentRecordImpacts)
+      .find((path) => !changedFiles.includes(path));
+    expect(unchangedRecord).toBeDefined();
+    forgedNotAffected.impactAssessment.dependentRecordImpacts[unchangedRecord as string].sha256 = sha('0');
+    forgedNotAffected.impactAnalysis.dependentRecordImpacts[unchangedRecord as string].sha256 = sha('0');
+    expect(() => validateMutationReleaseEvidence(forgedNotAffected)).toThrow(/SHA-256 differs/u);
     const missingTest = input(); missingTest.targetedTest.targetFiles = [...missingTest.targetedTest.targetFiles].slice(0, -1);
     expect(() => validateMutationReleaseEvidence(missingTest)).toThrow(/exact affected Vitest set/u);
     const missingTypecheck = input(); missingTypecheck.fullRegression.additionalCommands.shift();

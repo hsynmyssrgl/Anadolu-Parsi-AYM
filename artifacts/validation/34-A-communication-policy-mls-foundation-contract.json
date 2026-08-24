@@ -59,7 +59,7 @@
       "status": "PASS"
     },
     {
-      "name": "PPK-015 021 and 022 ratchets are exact PASS",
+      "name": "package-time PPK-015 snapshot and exact PPK-021/022 ratchets are internally consistent",
       "status": "PASS"
     },
     {
@@ -67,5 +67,5 @@
       "status": "PASS"
     }
   ],
-  "generatedAt": "2026-08-24T04:09:35.106Z"
+  "generatedAt": "2026-08-24T16:33:45.990Z"
 }

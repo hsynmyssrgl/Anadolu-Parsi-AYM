@@ -164,6 +164,7 @@
           "apps/desktop/src/main/volatile-sqlite-session.ts",
           "apps/desktop/tests/data-store.test.ts",
           "scripts/verify-32-q-ppk-021-platform-policy-ast-gate-runtime.mjs",
+          "scripts/run-data-store-smoke-regression.mjs",
           "scripts/verify-data-store-smoke.mjs"
         ],
         "pathPrefixes": ["packages/database/", "packages/repositories/"],
@@ -189,8 +190,10 @@
           "apps/desktop/src/renderer/App.tsx",
           "config/32-k-ppk-015-network-egress-policy-scope.json",
           "config/ppk-015-network-egress-current-ratchet.json",
+          "scripts/verify-network-egress-boundary.mjs",
           "scripts/verify-32-k-ppk-015-network-egress-contract.mjs",
           "scripts/verify-32-k-ppk-015-network-egress-runtime.mjs",
+          "apps/desktop/tests/ppk015-network-egress-governance-ratchet.test.ts",
           "docs/current/PPK-015_NETWORK_EGRESS_CURRENT_RATCHET.md",
           "docs/security/PPK-015_NETWORK_EGRESS_POLICY_THREAT_MODEL.md",
           "artifacts/validation/32-K-ppk-015-network-egress-contract.json",
@@ -210,7 +213,17 @@
         "apps/desktop/tests/ppk015-network-egress-governance-ratchet.test.ts",
         "apps/desktop/tests/ppk015-network-egress-policy.test.ts"
       ],
-      "affectedCommandIds": ["ppk015NetworkEgressContract", "ppk015NetworkEgressRuntime"],
+      "affectedCommandIds": [
+        "ppk015NetworkEgressContract",
+        "ppk015NetworkEgressRuntime",
+        "signedPluginProviderRuntime",
+        "communicationPolicyMlsRuntime",
+        "e2eeFileSharingRemainingRuntime",
+        "communicationAuditArchiveRuntime",
+        "distributedCoreConsensusTenancyRuntime",
+        "distributedClientsOperationsDrRuntime",
+        "windowsResilienceUniversalUxRuntime"
+      ],
       "includeChangedTestFile": false
     },
     {
@@ -261,7 +274,7 @@
         "artifacts/validation/33-Q-local-governed-ocr-derived-data-pipeline-contract.json",
         "artifacts/validation/33-Q-local-governed-ocr-derived-data-pipeline-runtime.json"
       ],
-      "affectedVitestFiles": [],
+      "affectedVitestFiles": ["apps/desktop/tests/ppk015-network-egress-governance-ratchet.test.ts"],
       "affectedCommandIds": [
         "localGovernedOcrBoundary",
         "localGovernedOcrContract",
@@ -296,7 +309,7 @@
         "artifacts/validation/33-R-archive-evidence-relations-media-lifecycle-unified-authorized-search-contract.json",
         "artifacts/validation/33-R-archive-evidence-relations-media-lifecycle-unified-authorized-search-runtime.json"
       ],
-      "affectedVitestFiles": [],
+      "affectedVitestFiles": ["apps/desktop/tests/ppk015-network-egress-governance-ratchet.test.ts"],
       "affectedCommandIds": [
         "archiveEvidenceRelationsBoundary",
         "archiveEvidenceRelationsContract",
@@ -554,6 +567,216 @@
       "includeChangedTestFile": false
     },
     {
+      "id": "remaining-package-local-foundation-shared-engine",
+      "match": {
+        "exactPaths": ["scripts/verify-remaining-package-local-foundation.mjs"],
+        "pathPrefixes": [],
+        "pathSuffixes": []
+      },
+      "dependentRecords": [
+        "artifacts/validation/34-G-e2ee-file-sharing-remaining-communication-ux-boundary.json",
+        "artifacts/validation/34-G-e2ee-file-sharing-remaining-communication-ux-contract.json",
+        "artifacts/validation/34-G-e2ee-file-sharing-remaining-communication-ux-runtime.json",
+        "artifacts/validation/34-H-communication-audit-archive-integrity-boundary.json",
+        "artifacts/validation/34-H-communication-audit-archive-integrity-contract.json",
+        "artifacts/validation/34-H-communication-audit-archive-integrity-runtime.json",
+        "artifacts/validation/34-I-distributed-core-consensus-tenancy-boundary.json",
+        "artifacts/validation/34-I-distributed-core-consensus-tenancy-contract.json",
+        "artifacts/validation/34-I-distributed-core-consensus-tenancy-runtime.json",
+        "artifacts/validation/34-J-distributed-clients-operations-disaster-recovery-boundary.json",
+        "artifacts/validation/34-J-distributed-clients-operations-disaster-recovery-contract.json",
+        "artifacts/validation/34-J-distributed-clients-operations-disaster-recovery-runtime.json",
+        "artifacts/validation/34-K-windows-resilience-universal-ux-boundary.json",
+        "artifacts/validation/34-K-windows-resilience-universal-ux-contract.json",
+        "artifacts/validation/34-K-windows-resilience-universal-ux-runtime.json"
+      ],
+      "affectedVitestFiles": ["apps/desktop/tests/ppk015-network-egress-governance-ratchet.test.ts"],
+      "affectedCommandIds": [
+        "e2eeFileSharingRemainingBoundary",
+        "e2eeFileSharingRemainingContract",
+        "e2eeFileSharingRemainingRuntime",
+        "communicationAuditArchiveBoundary",
+        "communicationAuditArchiveContract",
+        "communicationAuditArchiveRuntime",
+        "distributedCoreConsensusTenancyBoundary",
+        "distributedCoreConsensusTenancyContract",
+        "distributedCoreConsensusTenancyRuntime",
+        "distributedClientsOperationsDrBoundary",
+        "distributedClientsOperationsDrContract",
+        "distributedClientsOperationsDrRuntime",
+        "windowsResilienceUniversalUxBoundary",
+        "windowsResilienceUniversalUxContract",
+        "windowsResilienceUniversalUxRuntime"
+      ],
+      "includeChangedTestFile": false
+    },
+    {
+      "id": "34-g-e2ee-file-sharing-remaining-communication-ux-full-chain",
+      "match": {
+        "exactPaths": [
+          "config/34-g-e2ee-file-sharing-remaining-communication-ux-scope.json",
+          "config/34-g-e2ee-file-sharing-remaining-communication-ux-inventory.json",
+          "docs/decisions/DEC-244-e2ee-file-sharing-remaining-communication-ux.md",
+          "docs/security/THREAT_MODEL_34_G_E2EE_FILE_SHARING_REMAINING_COMMUNICATION_UX.md",
+          "artifacts/validation/34-G-e2ee-file-sharing-remaining-communication-ux-boundary.json",
+          "artifacts/validation/34-G-e2ee-file-sharing-remaining-communication-ux-contract.json",
+          "artifacts/validation/34-G-e2ee-file-sharing-remaining-communication-ux-runtime.json"
+        ],
+        "pathPrefixes": [],
+        "pathSuffixes": []
+      },
+      "dependentRecords": [
+        "config/34-g-e2ee-file-sharing-remaining-communication-ux-scope.json",
+        "config/34-g-e2ee-file-sharing-remaining-communication-ux-inventory.json",
+        "docs/decisions/DEC-244-e2ee-file-sharing-remaining-communication-ux.md",
+        "docs/security/THREAT_MODEL_34_G_E2EE_FILE_SHARING_REMAINING_COMMUNICATION_UX.md",
+        "artifacts/validation/34-G-e2ee-file-sharing-remaining-communication-ux-boundary.json",
+        "artifacts/validation/34-G-e2ee-file-sharing-remaining-communication-ux-contract.json",
+        "artifacts/validation/34-G-e2ee-file-sharing-remaining-communication-ux-runtime.json"
+      ],
+      "affectedVitestFiles": [
+        "packages/application/tests/communication-file-sharing-use-cases.test.ts",
+        "packages/repositories/communication-file-sharing-repository-policy.test.ts",
+        "apps/desktop/tests/communication-file-payload-vault.test.ts",
+        "apps/desktop/tests/communication-file-sharing-ipc-integration.test.ts",
+        "apps/desktop/tests/communication-file-sharing-ipc-bridge.test.ts",
+        "apps/desktop/tests/remaining-communication-distributed-ui.test.ts"
+      ],
+      "affectedCommandIds": ["e2eeFileSharingRemainingBoundary", "e2eeFileSharingRemainingContract", "e2eeFileSharingRemainingRuntime"],
+      "includeChangedTestFile": false
+    },
+    {
+      "id": "34-h-communication-audit-archive-integrity-full-chain",
+      "match": {
+        "exactPaths": [
+          "config/34-h-communication-audit-archive-integrity-scope.json",
+          "config/34-h-communication-audit-archive-integrity-inventory.json",
+          "docs/decisions/DEC-245-communication-audit-archive-integrity.md",
+          "docs/security/THREAT_MODEL_34_H_COMMUNICATION_AUDIT_ARCHIVE_INTEGRITY.md",
+          "artifacts/validation/34-H-communication-audit-archive-integrity-boundary.json",
+          "artifacts/validation/34-H-communication-audit-archive-integrity-contract.json",
+          "artifacts/validation/34-H-communication-audit-archive-integrity-runtime.json"
+        ],
+        "pathPrefixes": [],
+        "pathSuffixes": []
+      },
+      "dependentRecords": [
+        "config/34-h-communication-audit-archive-integrity-scope.json",
+        "config/34-h-communication-audit-archive-integrity-inventory.json",
+        "docs/decisions/DEC-245-communication-audit-archive-integrity.md",
+        "docs/security/THREAT_MODEL_34_H_COMMUNICATION_AUDIT_ARCHIVE_INTEGRITY.md",
+        "artifacts/validation/34-H-communication-audit-archive-integrity-boundary.json",
+        "artifacts/validation/34-H-communication-audit-archive-integrity-contract.json",
+        "artifacts/validation/34-H-communication-audit-archive-integrity-runtime.json"
+      ],
+      "affectedVitestFiles": [
+        "packages/application/tests/communication-audit-archive-use-cases.test.ts",
+        "packages/repositories/communication-audit-archive-repository-policy.test.ts",
+        "apps/desktop/tests/communication-audit-archive-ipc-integration.test.ts",
+        "apps/desktop/tests/communication-audit-archive-ipc-bridge.test.ts",
+        "apps/desktop/tests/remaining-communication-distributed-ui.test.ts"
+      ],
+      "affectedCommandIds": ["communicationAuditArchiveBoundary", "communicationAuditArchiveContract", "communicationAuditArchiveRuntime"],
+      "includeChangedTestFile": false
+    },
+    {
+      "id": "34-i-distributed-core-consensus-tenancy-full-chain",
+      "match": {
+        "exactPaths": [
+          "config/34-i-distributed-core-consensus-tenancy-scope.json",
+          "config/34-i-distributed-core-consensus-tenancy-inventory.json",
+          "docs/decisions/DEC-246-distributed-core-consensus-tenancy.md",
+          "docs/security/THREAT_MODEL_34_I_DISTRIBUTED_CORE_CONSENSUS_TENANCY.md",
+          "artifacts/validation/34-I-distributed-core-consensus-tenancy-boundary.json",
+          "artifacts/validation/34-I-distributed-core-consensus-tenancy-contract.json",
+          "artifacts/validation/34-I-distributed-core-consensus-tenancy-runtime.json"
+        ],
+        "pathPrefixes": [],
+        "pathSuffixes": []
+      },
+      "dependentRecords": [
+        "config/34-i-distributed-core-consensus-tenancy-scope.json",
+        "config/34-i-distributed-core-consensus-tenancy-inventory.json",
+        "docs/decisions/DEC-246-distributed-core-consensus-tenancy.md",
+        "docs/security/THREAT_MODEL_34_I_DISTRIBUTED_CORE_CONSENSUS_TENANCY.md",
+        "artifacts/validation/34-I-distributed-core-consensus-tenancy-boundary.json",
+        "artifacts/validation/34-I-distributed-core-consensus-tenancy-contract.json",
+        "artifacts/validation/34-I-distributed-core-consensus-tenancy-runtime.json"
+      ],
+      "affectedVitestFiles": [
+        "apps/core-service/tests/distributed-core-cluster-runtime.test.ts",
+        "apps/core-service/tests/distributed-core-migration-boundary.test.ts",
+        "apps/core-service/tests/windows-service-control-server.test.ts",
+        "apps/desktop/tests/remaining-communication-distributed-ui.test.ts"
+      ],
+      "affectedCommandIds": ["distributedCoreConsensusTenancyBoundary", "distributedCoreConsensusTenancyContract", "distributedCoreConsensusTenancyRuntime"],
+      "includeChangedTestFile": false
+    },
+    {
+      "id": "34-j-distributed-clients-operations-disaster-recovery-full-chain",
+      "match": {
+        "exactPaths": [
+          "config/34-j-distributed-clients-operations-disaster-recovery-scope.json",
+          "config/34-j-distributed-clients-operations-disaster-recovery-inventory.json",
+          "docs/decisions/DEC-247-distributed-clients-operations-disaster-recovery.md",
+          "docs/security/THREAT_MODEL_34_J_DISTRIBUTED_CLIENTS_OPERATIONS_DR.md",
+          "artifacts/validation/34-J-distributed-clients-operations-disaster-recovery-boundary.json",
+          "artifacts/validation/34-J-distributed-clients-operations-disaster-recovery-contract.json",
+          "artifacts/validation/34-J-distributed-clients-operations-disaster-recovery-runtime.json"
+        ],
+        "pathPrefixes": [],
+        "pathSuffixes": []
+      },
+      "dependentRecords": [
+        "config/34-j-distributed-clients-operations-disaster-recovery-scope.json",
+        "config/34-j-distributed-clients-operations-disaster-recovery-inventory.json",
+        "docs/decisions/DEC-247-distributed-clients-operations-disaster-recovery.md",
+        "docs/security/THREAT_MODEL_34_J_DISTRIBUTED_CLIENTS_OPERATIONS_DR.md",
+        "artifacts/validation/34-J-distributed-clients-operations-disaster-recovery-boundary.json",
+        "artifacts/validation/34-J-distributed-clients-operations-disaster-recovery-contract.json",
+        "artifacts/validation/34-J-distributed-clients-operations-disaster-recovery-runtime.json"
+      ],
+      "affectedVitestFiles": [
+        "apps/core-service/tests/distributed-operations-runtime.test.ts",
+        "apps/core-service/tests/distributed-operations-migration-boundary.test.ts",
+        "apps/desktop/tests/remaining-communication-distributed-ui.test.ts"
+      ],
+      "affectedCommandIds": ["distributedClientsOperationsDrBoundary", "distributedClientsOperationsDrContract", "distributedClientsOperationsDrRuntime"],
+      "includeChangedTestFile": false
+    },
+    {
+      "id": "34-k-windows-resilience-universal-ux-full-chain",
+      "match": {
+        "exactPaths": [
+          "config/34-k-windows-resilience-universal-ux-scope.json",
+          "config/34-k-windows-resilience-universal-ux-inventory.json",
+          "docs/decisions/DEC-248-windows-resilience-universal-ux.md",
+          "docs/security/THREAT_MODEL_34_K_WINDOWS_RESILIENCE_UNIVERSAL_UX.md",
+          "artifacts/validation/34-K-windows-resilience-universal-ux-boundary.json",
+          "artifacts/validation/34-K-windows-resilience-universal-ux-contract.json",
+          "artifacts/validation/34-K-windows-resilience-universal-ux-runtime.json"
+        ],
+        "pathPrefixes": [],
+        "pathSuffixes": []
+      },
+      "dependentRecords": [
+        "config/34-k-windows-resilience-universal-ux-scope.json",
+        "config/34-k-windows-resilience-universal-ux-inventory.json",
+        "docs/decisions/DEC-248-windows-resilience-universal-ux.md",
+        "docs/security/THREAT_MODEL_34_K_WINDOWS_RESILIENCE_UNIVERSAL_UX.md",
+        "artifacts/validation/34-K-windows-resilience-universal-ux-boundary.json",
+        "artifacts/validation/34-K-windows-resilience-universal-ux-contract.json",
+        "artifacts/validation/34-K-windows-resilience-universal-ux-runtime.json"
+      ],
+      "affectedVitestFiles": [
+        "packages/application/tests/windows-resilience-universal-ux-use-cases.test.ts",
+        "packages/repositories/windows-resilience-universal-ux-repository-policy.test.ts",
+        "apps/desktop/tests/universal-ux-consolidation-ui.test.ts"
+      ],
+      "affectedCommandIds": ["windowsResilienceUniversalUxBoundary", "windowsResilienceUniversalUxContract", "windowsResilienceUniversalUxRuntime"],
+      "includeChangedTestFile": false
+    },
+    {
       "id": "governed-source-safety-net",
       "match": {
         "exactPaths": [".gitattributes", "manifest.json", "package-lock.json", "package.json", "repository-metadata.json", "SHA256SUMS.txt", "tsconfig.base.json"],
@@ -574,7 +797,7 @@
       "phase": "full",
       "mode": "EXACT_NODE_SCRIPT",
       "executable": "node",
-      "arguments": ["scripts/verify-data-store-smoke.mjs", "--no-write"],
+      "arguments": ["scripts/run-data-store-smoke-regression.mjs", "--no-write"],
       "nonMutating": true
     },
     "platformPolicyAstRuntime": {
@@ -597,6 +820,66 @@
       "executable": "node",
       "arguments": ["scripts/verify-32-k-ppk-015-network-egress-runtime.mjs", "--no-write"],
       "nonMutating": true
+    },
+    "e2eeFileSharingRemainingBoundary": {
+      "phase": "full", "mode": "EXACT_NODE_SCRIPT", "executable": "node",
+      "arguments": ["scripts/verify-remaining-package-local-foundation.mjs", "34-G", "boundary", "--no-write"], "nonMutating": true
+    },
+    "e2eeFileSharingRemainingContract": {
+      "phase": "full", "mode": "EXACT_NODE_SCRIPT", "executable": "node",
+      "arguments": ["scripts/verify-remaining-package-local-foundation.mjs", "34-G", "contract", "--no-write"], "nonMutating": true
+    },
+    "e2eeFileSharingRemainingRuntime": {
+      "phase": "full", "mode": "EXACT_NODE_SCRIPT", "executable": "node",
+      "arguments": ["scripts/verify-remaining-package-local-foundation.mjs", "34-G", "runtime", "--no-write"], "nonMutating": true
+    },
+    "communicationAuditArchiveBoundary": {
+      "phase": "full", "mode": "EXACT_NODE_SCRIPT", "executable": "node",
+      "arguments": ["scripts/verify-remaining-package-local-foundation.mjs", "34-H", "boundary", "--no-write"], "nonMutating": true
+    },
+    "communicationAuditArchiveContract": {
+      "phase": "full", "mode": "EXACT_NODE_SCRIPT", "executable": "node",
+      "arguments": ["scripts/verify-remaining-package-local-foundation.mjs", "34-H", "contract", "--no-write"], "nonMutating": true
+    },
+    "communicationAuditArchiveRuntime": {
+      "phase": "full", "mode": "EXACT_NODE_SCRIPT", "executable": "node",
+      "arguments": ["scripts/verify-remaining-package-local-foundation.mjs", "34-H", "runtime", "--no-write"], "nonMutating": true
+    },
+    "distributedCoreConsensusTenancyBoundary": {
+      "phase": "full", "mode": "EXACT_NODE_SCRIPT", "executable": "node",
+      "arguments": ["scripts/verify-remaining-package-local-foundation.mjs", "34-I", "boundary", "--no-write"], "nonMutating": true
+    },
+    "distributedCoreConsensusTenancyContract": {
+      "phase": "full", "mode": "EXACT_NODE_SCRIPT", "executable": "node",
+      "arguments": ["scripts/verify-remaining-package-local-foundation.mjs", "34-I", "contract", "--no-write"], "nonMutating": true
+    },
+    "distributedCoreConsensusTenancyRuntime": {
+      "phase": "full", "mode": "EXACT_NODE_SCRIPT", "executable": "node",
+      "arguments": ["scripts/verify-remaining-package-local-foundation.mjs", "34-I", "runtime", "--no-write"], "nonMutating": true
+    },
+    "distributedClientsOperationsDrBoundary": {
+      "phase": "full", "mode": "EXACT_NODE_SCRIPT", "executable": "node",
+      "arguments": ["scripts/verify-remaining-package-local-foundation.mjs", "34-J", "boundary", "--no-write"], "nonMutating": true
+    },
+    "distributedClientsOperationsDrContract": {
+      "phase": "full", "mode": "EXACT_NODE_SCRIPT", "executable": "node",
+      "arguments": ["scripts/verify-remaining-package-local-foundation.mjs", "34-J", "contract", "--no-write"], "nonMutating": true
+    },
+    "distributedClientsOperationsDrRuntime": {
+      "phase": "full", "mode": "EXACT_NODE_SCRIPT", "executable": "node",
+      "arguments": ["scripts/verify-remaining-package-local-foundation.mjs", "34-J", "runtime", "--no-write"], "nonMutating": true
+    },
+    "windowsResilienceUniversalUxBoundary": {
+      "phase": "full", "mode": "EXACT_NODE_SCRIPT", "executable": "node",
+      "arguments": ["scripts/verify-remaining-package-local-foundation.mjs", "34-K", "boundary", "--no-write"], "nonMutating": true
+    },
+    "windowsResilienceUniversalUxContract": {
+      "phase": "full", "mode": "EXACT_NODE_SCRIPT", "executable": "node",
+      "arguments": ["scripts/verify-remaining-package-local-foundation.mjs", "34-K", "contract", "--no-write"], "nonMutating": true
+    },
+    "windowsResilienceUniversalUxRuntime": {
+      "phase": "full", "mode": "EXACT_NODE_SCRIPT", "executable": "node",
+      "arguments": ["scripts/verify-remaining-package-local-foundation.mjs", "34-K", "runtime", "--no-write"], "nonMutating": true
     },
     "ppk022CapabilityManifestContract": {
       "phase": "full",

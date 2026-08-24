@@ -8,11 +8,12 @@
   "targetedTestFilesPassed": 6,
   "targetedTestsPassed": 37,
   "migration105Sha256": "7756e6e14267e84eb3c7643b4da3534178bf706a2ed551af6f9068451ecfb4f8",
+  "ppk015RatchetSource": "config/ppk-015-network-egress-current-ratchet.json",
   "ppk015": {
     "status": "PASS",
     "productionSourceZones": 18,
     "scannedFiles": 590,
-    "sourceInventorySha256": "7f272e59ac4e55cfaeabca625058f94772d56f8e1e8898299000943c8a023952",
+    "sourceInventorySha256": "052b076f316ac04d03c49e29841c372dca5d820c3fcd10838074c4c93e2cf46c",
     "selfTestAssertions": 7,
     "authorizedExternalEgressAdapters": 2,
     "authorizedEgressPurposeCount": 3,
@@ -90,7 +91,7 @@
       "status": "PASS"
     },
     {
-      "name": "PPK-015 raw gate matches scope ratchet",
+      "name": "PPK-015 raw gate matches canonical current ratchet",
       "status": "PASS"
     },
     {
@@ -118,5 +119,5 @@
       "status": "PASS"
     }
   ],
-  "generatedAt": "2026-08-24T04:10:12.489Z"
+  "generatedAt": "2026-08-24T16:34:25.615Z"
 }
