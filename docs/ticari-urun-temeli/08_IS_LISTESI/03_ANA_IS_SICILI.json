@@ -11,7 +11,7 @@
     "status": "DEVAM",
     "affectedWorkItems": ["IS-0211", "IS-0215"],
     "finding": "d421c299 exact Bronze test ve kaynak butunlugu PASS sonrasinda preflight once temizlenen guncel installer makbuzlari, sonra tamamlanmis adimlarin 1428 gerekli yolundan 803 Git-disi checkpoint payload eksigiyle fail-closed durdu; 607a9a53 ve 8b2b5ccc korundu.",
-    "focusedValidation": "Ana kaynakta 1428/1428 gerekli yol mevcuttur. Kanal kurulumu tamamlanmis localEvidence ve persistent receipt yollarini tracked/manifest dislamali kanonik yol, normal dosya, SHA-256, atomik yazim ve readback ile uc kanala esitleyecek sekilde duzeltilmektedir.",
+    "focusedValidation": "Ana kaynakta 1428/1428 gerekli yol mevcuttur. Kanal kurulumu tamamlanmis localEvidence ve persistent receipt yollarini tracked/manifest dislamali kanonik yol, normal dosya, SHA-256, atomik yazim ve readback ile uc kanala esitleyecek sekilde duzeltilmistir. 65ffd15d kaynakli guncel master DOCX 29/29 sayfa ozgun cozulunurlukte tek tek incelenerek gorsel QA PASS vermistir.",
     "remaining": "Odakli test, uc kanal payload esitlemesi, yeni temiz exact commit hedefli/tam regresyonu, exact Bronze preflight/kaynak butunlugu ve kurulu tam UI UAT zorunludur."
   },
   "isler": [

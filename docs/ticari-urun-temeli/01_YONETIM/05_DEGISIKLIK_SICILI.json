@@ -588,7 +588,7 @@
         "BUILD_STATUS.md",
         "docs/ticari-urun-temeli"
       ],
-      "isListesiEtkisi": "IS-0211, IS-0215 ve IS-0601 DEVAM kalir. d421c299 exact test ve kaynak butunlugu PASS sonrasinda preflight once temizlenen guncel installer makbuzlari, sonra tamamlanmis adimlarin 1428 gerekli yolundan 803 Git-disi checkpoint payload eksigiyle durdu. Ana kaynak 1428/1428 tamdir. Kanal kurulumu manifest payloadina ek olarak tamamlanmis localEvidence ve persistent receipt yollarini tracked/manifest dislamali SHA-256 ve atomik readback ile uc kanala esitler. Secici 809 yol, odakli 1 dosya/9 test ve ticari temel 1234 kontrol PASS; yeni exact kapilar olmadan paket yoktur.",
+      "isListesiEtkisi": "IS-0211, IS-0215 ve IS-0601 DEVAM kalir. d421c299 exact test ve kaynak butunlugu PASS sonrasinda preflight once temizlenen guncel installer makbuzlari, sonra tamamlanmis adimlarin 1428 gerekli yolundan 803 Git-disi checkpoint payload eksigiyle durdu. Ana kaynak 1428/1428 tamdir. Kanal kurulumu manifest payloadina ek olarak tamamlanmis localEvidence ve persistent receipt yollarini tracked/manifest dislamali SHA-256 ve atomik readback ile uc kanala esitler. Secici 809 yol, odakli 1 dosya/9 test ve ticari temel 1234 kontrol PASS verdi. 65ffd15d kaynakli guncel master DOCX 29/29 sayfa ozgun cozulunurlukte tek tek incelenerek gorsel QA PASS verdi; yeni exact kapilar olmadan paket yoktur.",
       "senkronDurumu": "SYNCHRONIZED"
     }
   ]
