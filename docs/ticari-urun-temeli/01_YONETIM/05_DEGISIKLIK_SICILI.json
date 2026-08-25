@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PARSYUVA-AILE-YASAM-MERKEZI-TICARI-DEGISIKLIK-SICILI-V2",
   "temelTarihi": "2026-08-19",
-  "sonKayit": "TICARI-031",
+  "sonKayit": "TICARI-032",
   "kayitlar": [
     {
       "id": "TICARI-001",
@@ -550,6 +550,25 @@
         "docs/ticari-urun-temeli"
       ],
       "isListesiEtkisi": "IS-0215 DEVAM kalir. 96b9faac kaynakli ana DOCX ilk PNG renderinda yanlis bundled PATH nedeniyle Poppler pdfinfo cozumlenemedi ve e5787764 ile gercek FAIL kaydedildi. Dogru native Poppler ve LibreOffice yollarina retry 28/28 sayfa PASS; butun sayfalar temas sayfalarinda, 6-7 ve 27-28 ayrica ozgun cozulunurlukte gorsel QA PASS verdi. Yeni exact testler, kaynak butunlugu ve kurulu tam UI UAT tamamlanmadan paket yoktur.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-032",
+      "tarih": "2026-08-25",
+      "baslik": "Final 29 sayfalik master DOCX gorsel QA",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-275, PR-240 ve 7f866e69 kaynakli final belge QA sonucu",
+      "etkilenenAlanlar": [
+        "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.docx",
+        "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.pdf",
+        "scripts/generate-current-master-documentation.py",
+        "config/active-governance-ledger.json",
+        "config/user-decision-ledger.json",
+        "docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md",
+        "BUILD_STATUS.md",
+        "docs/ticari-urun-temeli"
+      ],
+      "isListesiEtkisi": "IS-0215 DEVAM kalir. 7f866e69 kaynakli final master DOCX dogru native Poppler ve LibreOffice zinciriyle 29/29 sayfa PASS verdi. Tum sayfalar bes temas sayfasinda; 6-7 ve 26-29 ayrica ozgun cozulunurlukte incelendi. Exact testler, kaynak butunlugu ve kurulu tam UI UAT tamamlanmadan paket yoktur.",
       "senkronDurumu": "SYNCHRONIZED"
     }
   ]
