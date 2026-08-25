@@ -16,6 +16,9 @@ const gitAttributes=readFileSync('.gitattributes','utf8');
 const setupModule=await import(pathToFileURL(resolve('scripts/setup-release-channel-worktrees.mjs')).href) as {
   assertCleanWorktree:(status:string,label:string)=>void;
   assertExactCommit:(actual:string,expected:string,label:string)=>void;
+  selectUntrackedManifestPayloadEntries:(input:{
+    manifestFiles:Array<{path:string;sha256:string;bytes:number}>;trackedPaths:Set<string>;
+  })=>Array<{path:string;sha256:string;bytes:number}>;
 };
 const verifierModule=await import(pathToFileURL(resolve('scripts/verify-release-channel-worktrees.mjs')).href) as {
   verifyReleaseChannelWorktrees:(input:{
@@ -87,6 +90,25 @@ describe('release-channel source and runtime isolation',()=>{
     const commit='a'.repeat(40);
     expect(()=>setupModule.assertExactCommit(commit,commit,'Bronze branch')).not.toThrow();
     expect(()=>setupModule.assertExactCommit('b'.repeat(40),commit,'Bronze branch')).toThrow(/authoritative HEAD/u);
+  });
+
+  it('hydrates only hash-bound non-Git source payload into every channel worktree',()=>{
+    const digest='a'.repeat(64);
+    expect(setupModule.selectUntrackedManifestPayloadEntries({
+      manifestFiles:[
+        {path:'apps/desktop/package.json',sha256:digest,bytes:10},
+        {path:'artifacts/checkpoints/closure.json',sha256:digest,bytes:20}
+      ],
+      trackedPaths:new Set(['apps/desktop/package.json'])
+    })).toEqual([{path:'artifacts/checkpoints/closure.json',sha256:digest,bytes:20}]);
+    expect(()=>setupModule.selectUntrackedManifestPayloadEntries({
+      manifestFiles:[{path:'../outside.json',sha256:digest,bytes:1}],trackedPaths:new Set()
+    })).toThrow(/Unsafe manifest payload path/u);
+    expect(()=>setupModule.selectUntrackedManifestPayloadEntries({
+      manifestFiles:[{path:'artifacts/checkpoints/closure.json',sha256:'bad',bytes:1}],trackedPaths:new Set()
+    })).toThrow(/Invalid source manifest payload identity/u);
+    expect(setupScript).toContain('hydrateManifestPayload({ repositoryRoot, target, manifest, trackedPaths })');
+    expect(setupScript).toContain('Release-channel manifest payload readback mismatch');
   });
 
   it('resolves the canonical repository from shared Git metadata inside a channel worktree',()=>{

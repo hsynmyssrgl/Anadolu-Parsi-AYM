@@ -24,13 +24,14 @@
 - PR-240 final master DOCX görsel QA: **28/28 PASS** — `0669cb38` kaynak commitinden yeniden üretilen belge exact bundled LibreOffice/Poppler yollarıyla 28 PNG sayfa verdi. Önceki onaylı renderla 2–6 byte-exact aynı; değişen 1 ve 7–28 sayfalar özgün çözünürlükte tek tek incelendi, taşma, örtüşme, kesilme veya bozuk karakter bulunmadı.
 - PR-240 exact tam regresyon sonu no-write koruması: **FAIL KAYITLI; KÖK NEDEN DÜZELTİLDİ, YENİ EXACT EVIDENCE PENDING** — `80cf2a39` exact Bronze kaynağında hedefli 94 dosya/598 test ile filtresiz 398 dosya/2.469 test PASS oldu; ek komutlar sonrasında yalnız migration manifesti `generatedAt` alanı değiştiği için temiz ağaç kapısı reddetti ve `c7a3c130` ile korundu. `33-R` dış `--no-write` bayrağını migration/smoke/PPK-021/PPK-022 alt süreçlerine aktaracak şekilde düzeltildi. Odaklı 1 dosya/6 test ve gerçek 33-R matrisi 11/11, 8 dosya/30 test PASS; migration manifest SHA-256 önce/sonra byte-exact aynıdır. Yeni temiz exact commit hedefli/tam regresyonu ve exact Bronze kaynak bütünlüğü olmadan paket yoktur.
 - PR-240 resmî tam regresyon çağrı ortamı: **FAIL KAYITLI; KANONİK NPM GİRİŞİ ZORUNLU** — `bfb6db9f` exact Bronze kaynağında hedefli 94 dosya/598 test ve filtresiz 398 dosya/2.469 test PASS iken üreticinin doğrudan `node` ile çağrılması `npm_execpath` bağını kaldırdı; 171 ek komuttan ortak npm alt çağrısı kullanan 34-B/C/D/F runtime’ları FAIL oldu ve `51316ac3` ile korundu. Aynı 34-B zinciri resmî npm ortamında 13/13, 5 dosya/30 test PASS verdi. Yeni exact tur yalnız `npm run verify:mutation-full-regression:evidence` ile çalıştırılacaktır.
+- PR-240 exact Bronze kaynak payload bütünlüğü: **TAM REGRESYON PASS; KAYNAK BÜTÜNLÜĞÜ FAIL KAYITLI, KÖK NEDEN DÜZELTİLDİ, YENİ EXACT EVIDENCE PENDING** — resmî npm girişiyle `c02744cd` exact Bronze turunda 398 dosya/2.469 test ve 171/171 ek komut PASS verdi. Ardından kaynak bütünlüğü manifest=4.868, canlı=4.186, SHA=4.869 ve 684 bulguyla FAIL oldu; 683 Git-dışı manifest payload dosyası kanal worktree'sinde yoktu ve linked-worktree `.git` yönetim dosyası yanlışlıkla kaynak sayıldı. Sonuç `7d67fcff` ile korunur. Kanal kurulum aracı Git-dışı payloadı güvenli yol/normal dosya/SHA-256/atomik readback ile Bronze/Silver/Gold'a eşitler; kaynak toplayıcı `.git` dosya ve klasörünü dışlar. Odaklı 2 dosya/9 test PASS; yeni exact commit hedefli/tam regresyonu ve Bronze kaynak bütünlüğü olmadan paket yoktur.
 
 - Source preflight gate: **NOT_RUN**
-- Source integrity: **NOT_RUN**
+- Source integrity: **FAIL (`c02744cd`; `7d67fcff` KAYITLI, DÜZELTME SONRASI YENİ EXACT RETRY PENDING)**
 - Clean install gate: **NOT_RUN**
 - Full root `tsc --noEmit`: **PASS (24.08.2026; UAT110 V3 kaynak turu)**
 - UAT110 V3 bootstrap/continuation targeted contract tests: **PASS (12 dosya / 94 test)**
-- Unit and integration tests: **FULL REGRESSION PENDING**
+- Unit and integration tests: **`c02744cd` FULL REGRESSION PASS (398 dosya/2.469 test, 171/171 ek komut); YENİ DÜZELTME COMMITİ İÇİN YENİDEN KOŞU PENDING**
 - Electron production build: **NOT_RUN**
 - Blocking smoke chain: **NOT_RUN**
 - Windows launch / installer: **NOT_RUN**

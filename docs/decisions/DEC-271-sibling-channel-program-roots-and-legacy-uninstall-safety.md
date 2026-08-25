@@ -10,6 +10,8 @@ Bronze, Silver ve Gold programları legacy `C:\Program Files\PPT\ParsYuva` kök�
 
 Kanal appId, productName, `ParsYuva-<Kanal>.exe`, `ParsYuva <Kanal>` kısayolu, kaldırma kapsamı, kullanıcı verisi, Git worktree ve branch yalıtımı korunur. Build çıktısı ve kullanıcı verisi kanallar arasında yeniden kullanılamaz.
 
+PR-240 kaynak teslimi kapsamında, manifestte kayıtlı fakat Git'te izlenmeyen yönetişim/checkpoint payloadı da kanal dizinlerinde eksik bırakılamaz. Worktree kurulumu bu dosyaları doğrudan klasör kopyasıyla değil; kanonik göreli yol, normal dosya, byte sayısı ve SHA-256 kimliği doğrulanmış seçici eşitlemeyle Bronze, Silver ve Gold'un ayrı çalışma dizinlerine taşır ve canlı readback yapar. Git'te izlenen dosyalar bu yolla üzerine yazılamaz; manifest dışı stale dosyalar sessizce silinmez.
+
 Yükseltme ve sessiz bakım kişisel veri seçim akışını açmaz. Per-machine kaldırıcı yalnız etkileşimli kaldırmada signed-in kullanıcının AppData bağlamına geçer ve iptal veya tamamlanma çıkışında all-users bağlamını geri yükler.
 
 Legacy 37–44 uygulama kökü temizliği, legacy kökün altında `Bronze`, `Silver` veya `Gold` kanal dizini görürse recursive silmeden fail-closed durur. Legacy kullanıcı verisi otomatik taşınmaz ve silinmez; gerçek migration ayrı açık kullanıcı kararı, kaynak/target envanteri, geri dönüş planı ve canlı N→N+1 UAT kanıtı gerektirir.
@@ -29,5 +31,8 @@ DEC-269 ve PR-234'ün exact nested program-path hükmü superseded edilmiştir. 
 - `apps/desktop/tests/installer-narration-experience.test.ts`
 - `apps/desktop/tests/windows-installer-experience-uat-contract.test.ts`
 - `apps/desktop/tests/brand-release-visual-contract.test.ts`
+- `scripts/lib/source-manifest.mjs`
+- `apps/desktop/tests/release-channel-isolation.test.ts`
+- `apps/desktop/tests/source-manifest-worktree.test.ts`
 
 Bu kaynak/test bağı gerçek installer üretimi, canlı yükseltme veya migration PASS iddiası değildir; paketleme ve kurulum bu değişiklikte yapılmaz.

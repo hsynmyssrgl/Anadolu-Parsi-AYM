@@ -8,6 +8,7 @@ export const SOURCE_SHA256_FILE = 'SHA256SUMS.txt';
 
 const excludedDirectoryNames = new Set(['node_modules', 'dist', 'release', '.git', 'coverage', '.tmp', 'tmp']);
 const excludedFileNames = new Set([SOURCE_MANIFEST_FILE, SOURCE_SHA256_FILE]);
+const excludedEntryNames = new Set(['.git']);
 const excludedRelativeDirectories = new Set(['artifacts/validation']);
 
 export const normalizeSourcePath = (value) => {
@@ -28,6 +29,7 @@ const isExcludedRelativeDirectory = (relativePath) => {
 };
 
 const isExcludedName = (name, isDirectory) => {
+  if (excludedEntryNames.has(name)) return true;
   if (name.startsWith('.tmp')) return true;
   if (isDirectory) return excludedDirectoryNames.has(name);
   return excludedFileNames.has(name);

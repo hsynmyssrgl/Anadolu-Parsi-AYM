@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PARSYUVA-AILE-YASAM-MERKEZI-TICARI-DEGISIKLIK-SICILI-V2",
   "temelTarihi": "2026-08-19",
-  "sonKayit": "TICARI-029",
+  "sonKayit": "TICARI-030",
   "kayitlar": [
     {
       "id": "TICARI-001",
@@ -510,6 +510,27 @@
         "docs/ticari-urun-temeli"
       ],
       "isListesiEtkisi": "IS-0211 ve IS-0215 DEVAM kalir. bfb6db9f exact Bronze kaynaginda hedefli 94 dosya/598 test ve filtresiz 398 dosya/2469 test PASS iken tam regresyon ureticisinin dogrudan node ile cagrilmasi npm_execpath bagini kaldirdi; 171 ek komuttan 34-B/C/D/F runtime FAIL oldu ve 51316ac3 ile korundu. Ayni 34-B zinciri resmi npm ortaminda 13/13, 5 dosya/30 test PASS verdi. Final exact tur yalniz npm run verify:mutation-full-regression:evidence girisiyle calistirilir.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-030",
+      "tarih": "2026-08-25",
+      "baslik": "Kanal kaynak manifest payload butunlugu",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-271, DEC-275, PR-240 ve 7d67fcff reddedilmis exact Bronze kaynak butunlugu checkpointi",
+      "etkilenenAlanlar": [
+        "scripts/setup-release-channel-worktrees.mjs",
+        "scripts/lib/source-manifest.mjs",
+        "apps/desktop/tests/release-channel-isolation.test.ts",
+        "apps/desktop/tests/source-manifest-worktree.test.ts",
+        "config/active-governance-ledger.json",
+        "config/user-decision-ledger.json",
+        "docs/decisions/DEC-271-sibling-channel-program-roots-and-legacy-uninstall-safety.md",
+        "docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md",
+        "BUILD_STATUS.md",
+        "docs/ticari-urun-temeli"
+      ],
+      "isListesiEtkisi": "IS-0211, IS-0215 ve IS-0601 DEVAM kalir. c02744cd exact Bronze resmi npm tam regresyonu 398 dosya/2469 test ve 171/171 ek komut PASS; kaynak butunlugu 683 eksik Git-disi manifest payloadi ve linked-worktree .git dosyasinin yanlis kaynak sayilmasi nedeniyle 684 bulguyla FAIL olup 7d67fcff ile korunmustur. Kanal kurulumu hash-bound payloadi Bronze/Silver/Gold ayri dizinlerine atomik esitleyip readback yapar; kaynak toplayici .git dosya/klasorunu dislar. Odakli 2 dosya/9 test PASS; yeni exact kapilar olmadan paket yoktur.",
       "senkronDurumu": "SYNCHRONIZED"
     }
   ]
