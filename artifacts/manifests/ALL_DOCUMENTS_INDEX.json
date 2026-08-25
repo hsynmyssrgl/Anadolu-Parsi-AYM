@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "release": "Bronze 22.08.2026.50",
   "releaseId": "bronze-2026-08-22-r50",
-  "generatedAt": "2026-08-25T14:37:26.609Z",
+  "generatedAt": "2026-08-25T14:41:32.784Z",
   "selfIndexedPaths": [
     "SHA256SUMS.txt",
     "artifacts/inventory/TESLIMAT_CALISMA_AGACI_ENVANTERI.json",
@@ -3709,7 +3709,7 @@
     {
       "path": "artifacts/validation/feature-reality-gate.json",
       "bytes": 673,
-      "sha256": "31fa408e71a297b25547a283ab92cc0422ff7c38cfe4f0f2443f1c605b953de2",
+      "sha256": "4cfde41678ced4c6da43250d26040e3819e3d8d5ea194749f9967fd92b122181",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -14357,7 +14357,7 @@
     {
       "path": "docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json",
       "bytes": 17395,
-      "sha256": "35ee5c94d21c6d10e206549d4379d391d7fccf88680aad164f8a5e5bd5bf89c6",
+      "sha256": "413aef9218101932f72e18d7ecaefc3f77833a76f181f17b05584af373f32d0b",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
