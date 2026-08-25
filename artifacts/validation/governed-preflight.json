@@ -14,8 +14,8 @@
   },
   "certifiedFullPreflightGeneratedAt": null,
   "sourceFingerprint": {
-    "sha256": "bcc2c8ffbd285d7d3a19cc1924748f58dca41d1194d45ea759de0f0c11f4b863",
-    "fileCount": 2791
+    "sha256": "7bed28278b3f8c4c45d0c0b64bdaa602ff70f3bda89b8bc80c177ee968d7eeb4",
+    "fileCount": 2795
   },
   "status": "PASS",
   "results": [
@@ -63,7 +63,7 @@
       "script": "scripts/verify-current-master-documentation-v5.mjs",
       "arguments": [],
       "exitCode": 0,
-      "stdout": "Current master V5: PASS (240 rules / 184 decisions / 106 ADR / 13 DOCX tables / 25 PDF pages).",
+      "stdout": "Current master V5: PASS (240 rules / 184 decisions / 106 ADR / 13 DOCX tables / 26 PDF pages).",
       "stderr": ""
     },
     {
@@ -162,21 +162,21 @@
       "arguments": [],
       "exitCode": 0,
       "stdout": "Core Service Local Admin Runtime: PASS (50 checks).",
-      "stderr": "(node:47212) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+      "stderr": "(node:37348) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
     },
     {
       "script": "scripts/verify-desktop-core-service-startup-contract.mjs",
       "arguments": [],
       "exitCode": 0,
-      "stdout": "Desktop Core Service Startup Contract: PASS (41 checks).",
+      "stdout": "Desktop Core Service Startup Contract: PASS (41 checks; write=true).",
       "stderr": ""
     },
     {
       "script": "scripts/verify-desktop-core-service-startup-runtime-wrapper.mjs",
       "arguments": [],
       "exitCode": 0,
-      "stdout": "Desktop Core Service Startup Runtime: PASS (51 checks).",
-      "stderr": "(node:44384) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+      "stdout": "Desktop Core Service Startup Runtime: PASS (51 checks; write=true).",
+      "stderr": "(node:30792) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
     },
     {
       "script": "scripts/verify-system-health-core-service-ipc-contract.mjs",
@@ -190,7 +190,7 @@
       "arguments": [],
       "exitCode": 0,
       "stdout": "System Health Core Service IPC Runtime: PASS (10 checks).",
-      "stderr": "(node:34200) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+      "stderr": "(node:8420) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
     },
     {
       "script": "scripts/generate-project-artifact-index-v2.mjs",
@@ -198,7 +198,7 @@
         "--git-index"
       ],
       "exitCode": 0,
-      "stdout": "Artifact indexes generated: 4404 files / 2143 documents.",
+      "stdout": "Artifact indexes generated: 4408 files / 2143 documents.",
       "stderr": ""
     },
     {
@@ -207,9 +207,9 @@
         "--git-index"
       ],
       "exitCode": 0,
-      "stdout": "Complete Document/Artifact Index: PASS (13140 checks / 4404 files / 2143 documents).",
+      "stdout": "Complete Document/Artifact Index: PASS (13148 checks / 4408 files / 2143 documents).",
       "stderr": ""
     }
   ],
-  "generatedAt": "2026-08-24T13:32:05.401Z"
+  "generatedAt": "2026-08-25T13:07:32.076Z"
 }
