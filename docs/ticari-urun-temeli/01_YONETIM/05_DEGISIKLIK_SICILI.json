@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PARSYUVA-AILE-YASAM-MERKEZI-TICARI-DEGISIKLIK-SICILI-V2",
   "temelTarihi": "2026-08-19",
-  "sonKayit": "TICARI-034",
+  "sonKayit": "TICARI-035",
   "kayitlar": [
     {
       "id": "TICARI-001",
@@ -606,6 +606,26 @@
         "docs/ticari-urun-temeli"
       ],
       "isListesiEtkisi": "IS-0211, IS-0215 ve IS-0601 DEVAM kalir. 0f0a4653 exact Bronze etki analizi 95 hedefli test dosyasi hesapladi; hedefli turda 600 test PASS iken operation-rule-check-policy current-mutation preflightStatus alaninda tarihsel 607a9a53/8b2b5ccc FAIL metnini reddetti ve 50f4d9e5 ile korundu. Tarihsel retler QA alanlarinda kalir; current-mutation alani NOT_RUN_CURRENT_MUTATION olur. Bronze/Silver/Gold her kanalda 1428/1428 checkpoint yolu ve eksik 0 PASS; yeni exact kapilar olmadan paket yoktur.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-035",
+      "tarih": "2026-08-25",
+      "baslik": "Final preflight sertifikasi sonrasi kaynak manifesti hash kapanisi",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-275, PR-240 ve 6a0840d4 reddedilmis source-integrity checkpointi",
+      "etkilenenAlanlar": [
+        "manifest.json",
+        "SHA256SUMS.txt",
+        "artifacts/manifests",
+        "artifacts/validation/governed-preflight.json",
+        "config/active-governance-ledger.json",
+        "config/user-decision-ledger.json",
+        "docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md",
+        "BUILD_STATUS.md",
+        "docs/ticari-urun-temeli"
+      ],
+      "isListesiEtkisi": "IS-0211, IS-0215 ve IS-0601 DEVAM kalir. cc01412c exact Bronze hedefli 95 dosya/601 test ve tam 399 dosya/2472 test PASS sonrasi preflight sertifikasinin degistirdigi sekiz izlenen dosyanin hashleri kaynak manifestinde eski kaldigi icin source-integrity FAIL oldu ve 6a0840d4 ile korundu. Kayitlar ve indeksler tamamlandiktan sonra manifest/SHA son uretici olarak yenilenir; yeni exact kapilar olmadan paket yoktur.",
       "senkronDurumu": "SYNCHRONIZED"
     }
   ]

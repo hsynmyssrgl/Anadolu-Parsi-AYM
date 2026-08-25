@@ -7,12 +7,12 @@
   "requirementPass": false,
   "izinliDurumlar": ["TAMAMLANDI", "DEVAM", "ACIK", "BLOCKED", "NOT_RUN"],
   "latestMutationClosure": {
-    "checkpoint": "50f4d9e5",
+    "checkpoint": "6a0840d4",
     "status": "DEVAM",
     "affectedWorkItems": ["IS-0211", "IS-0215"],
-    "finding": "0f0a4653 exact Bronze etki analizi 95 hedefli test dosyasi hesapladi; hedefli turda 600 test PASS iken aktif yasam dongusunden ayri PR-240 teslim kapanisinin current-mutation preflightStatus alanindaki tarihsel FAIL metni reddedildi ve 50f4d9e5 ile korundu.",
-    "focusedValidation": "Bronze, Silver ve Gold kanallarinin her birinde tamamlanmis adimlar icin 1428/1428 gerekli yol mevcut ve eksik 0'dır. Current-mutation preflightStatus NOT_RUN_CURRENT_MUTATION olur; tarihsel preflight retleri QA alanlarinda korunur.",
-    "remaining": "Yeni temiz exact commit hedefli/tam regresyonu, exact Bronze preflight/kaynak butunlugu ve kurulu tam UI UAT zorunludur."
+    "finding": "cc01412c exact Bronze hedefli turu 95 dosya/601 test ve filtresiz tam turu 399 dosya/2472 test PASS verdi; preflight sertifikasinin degistirdigi sekiz izlenen dosyanin hashleri kaynak manifestinde eski kaldigi icin kaynak butunlugu FAIL oldu ve 6a0840d4 ile korundu.",
+    "focusedValidation": "Bronze, Silver ve Gold ayni cc01412c sertifika commitindedir; exact hedefli ve tam testler PASS'tir. Manifest ve SHA listesi tum kayit/indeks uretiminden sonra son uretici olarak yenilenir.",
+    "remaining": "Yeni temiz exact commit hedefli/tam regresyonu, kaynak butunlugu, read-only pre/postflight ve kurulu tam UI UAT zorunludur."
   },
   "isler": [
     {"id":"IS-0001","alan":"Yonetim","is":"Ticari temel klasor ve belge yapisi","sorumlu":"Codex","durum":"TAMAMLANDI","kabul":"Zorunlu dosyalar ve otomatik kapi PASS","kanit":["05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json"],"disKaynakGerekli":false,"acikNedeni":"","bagimliliklar":[],"requirementPass":true},
