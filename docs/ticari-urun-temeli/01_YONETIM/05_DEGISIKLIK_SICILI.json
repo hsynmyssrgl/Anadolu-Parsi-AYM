@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PARSYUVA-AILE-YASAM-MERKEZI-TICARI-DEGISIKLIK-SICILI-V2",
   "temelTarihi": "2026-08-19",
-  "sonKayit": "TICARI-037",
+  "sonKayit": "TICARI-039",
   "kayitlar": [
     {
       "id": "TICARI-001",
@@ -663,6 +663,46 @@
         "docs/ticari-urun-temeli"
       ],
       "isListesiEtkisi": "IS-0211, IS-0215 ve IS-0601 DEVAM kalir. 1745095c sonrasinda kanal dallari authoritative HEAD'e ilerletilmeden setup worktree verify cagrisi commit farkini yazimsiz reddetti ve d5540157 ile korundu. Dogru sira uc kanali git merge --ff-only exact HEAD'e ilerletmek, sonra manifest/checkpoint payload hydrate ve exact commit/branch/common object store/clean tree readback yapmaktir. Yeni exact tum kapilar ve kurulu UAT olmadan paket yoktur.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-038",
+      "tarih": "2026-08-26",
+      "baslik": "Kanal-portatif guvenilir npm CLI cozumlemesi",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-275, PR-240 ve b1d237db/c9f2eebe/5179a170/f8946730/1cb33525 reddedilmis checkpointleri",
+      "etkilenenAlanlar": [
+        "scripts/verify-34-b-communication-messaging-lifecycle-privacy-presence-runtime.mjs",
+        "scripts/verify-34-c-realtime-calling-media-accessible-ux-runtime.mjs",
+        "scripts/verify-34-d-explicit-consent-recording-media-retention-runtime.mjs",
+        "scripts/verify-34-e-local-first-translation-caption-language-provider-runtime.mjs",
+        "scripts/verify-34-f-family-meetings-decisions-consent-minutes-runtime.mjs",
+        "apps/desktop/tests/mutation-release-evidence-producers.test.ts",
+        "config/active-governance-ledger.json",
+        "config/user-decision-ledger.json",
+        "docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md",
+        "BUILD_STATUS.md",
+        "docs/ticari-urun-temeli"
+      ],
+      "isListesiEtkisi": "IS-0211, IS-0215 ve IS-0601 DEVAM kalir. 5179a170 exact hedefli 95 dosya/601 test ve tam Vitest 399 dosya/2472 test PASS iken 34-B/C/D/F kanal runtime'lari bulunmayan gecici npm CLI yoluyla FAIL olmus ve f8946730/1cb33525 ile korunmustur. 34-B-34-F aktif Node npm fallback'iyle duzeltilmis; odakli 1 dosya/6 test ve gercek no-write runtime sonuclari 13/13, 14/14, 14/14, 15/15, 15/15 PASS vermistir. Yeni exact test, source-integrity, pre/postflight, yedek, paket ve kurulu UAT olmadan installer yoktur.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-039",
+      "tarih": "2026-08-26",
+      "baslik": "Son master belge QA arac zinciri ve 29 sayfa gorsel kapanisi",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-275, PR-240 ve c5879c9a/194a8281/62d0b1d8 reddedilmis checkpointleri",
+      "etkilenenAlanlar": [
+        "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.docx",
+        "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.pdf",
+        "config/active-governance-ledger.json",
+        "config/user-decision-ledger.json",
+        "docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md",
+        "BUILD_STATUS.md",
+        "docs/ticari-urun-temeli"
+      ],
+      "isListesiEtkisi": "IS-0211, IS-0215 ve IS-0601 DEVAM kalir. LibreOffice ve Poppler PATH retleri ile temas sayfasi yardimci komut ret kaydi korunmustur; dogru mutlak arac yollarinda 29/29 sayfa gorsel QA PASS vermistir. Yeni exact test, source-integrity, pre/postflight, yedek, paket ve kurulu UAT olmadan installer yoktur.",
       "senkronDurumu": "SYNCHRONIZED"
     }
   ]

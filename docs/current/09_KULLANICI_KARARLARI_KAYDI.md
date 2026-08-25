@@ -106,6 +106,7 @@ Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağ
 - `DEC-275` packageStatus sözleşme drift kaydı — kaynak koruma düzeltmesinin ilk genişletilmiş retryında 28 test PASS iken yönetişim testi yalnız eski sabit `BLOCKED` paket metnini kabul ederek gerçek `FAIL` ayrıntısını reddetmiş ve `a7b0f3c3` ile korunmuştur. Sözleşme fail-closed `BLOCKED_`/`FAIL_` semantiğine bağlandı; 4 dosya/29 test PASS.
 - `DEC-275` kaynak koruma düzeltmesi belge QA kaydı — güncel master DOCX 29/29 sayfa PASS; 2–29 önceki onaylı renderla byte-exact aynı, yalnız HEAD satırı değişen 1. sayfa özgün çözünürlükte taşma, örtüşme, kesilme, font ve bozuk karakter olmadan PASS'tir.
 - `DEC-275` kanal eşitleme çağrı sırası kaydı — `1745095c` sonrasında kanal dalları authoritative HEAD'e ilerletilmeden eşitleyicinin varsayılan doğrulaması commit farkını yazım yapmadan reddetmiş ve `d5540157` ile korunmuştur. Üç kanal yalnız `--ff-only` ilerletilir; sonra payload hydrate ve exact commit/branch/temiz ağaç doğrulaması yapılır.
+- `DEC-275` kanal-portatif npm CLI kaydı — `5179a170` exact hedefli 95 dosya/601 test ve filtresiz 399 dosya/2.472 test PASS iken 34-B/C/D/F runtime'ları Bronze kanalında bulunmayan geçici npm CLI yoluna düştüğü için ek komut matrisi FAIL olmuş ve `f8946730` ile korunmuştur; ortak tanı `1cb33525`tir. 34-B–34-F aktif Node npm CLI'sini doğrulanmış fallback olarak kullanır; odaklı 1 dosya/6 test ve gerçek no-write runtime sonuçları sırasıyla 13/13, 14/14, 14/14, 15/15, 15/15 PASS. Yeni exact kapanış zorunludur.
 
 ## Bundan sonraki kararlar için zorunlu eşzamanlılık kuralı
 
@@ -114,3 +115,5 @@ Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağ
 `DEC-252` gereği bu yenilemedeki kapsamlı tarihsel tarama son temeldir. Bundan sonra eski build, arşiv ve checkpoint belgelerinin içeriği yeniden denetlenmez veya güncel karar kaynağı sayılmaz; yalnız değişmez `HISTORICAL` kayıt olarak korunur. Yeni denetimler aktif ve yeni belgelere uygulanır.
 
 Makine defteri yalnız açık kullanıcı kararlarını tutar. Türetilmiş paket/mimari kararlarının eksiksiz DEC-090–DEC-275 dizini ve dosya yolları `docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md` içindedir.
+
+Son belge QA turundaki `c5879c9a`, `194a8281` ve `62d0b1d8` test aracı retleri silinmemiştir. Mutlak LibreOffice/native Poppler yollarıyla 29/29 sayfa render edilmiş; tüm sayfalar temaslarda, 6–8 ve 27–29. sayfalar özgün çözünürlükte görsel PASS vermiştir. Bu PASS yeni exact test, paket ve kurulu uygulama UAT yükümlülüğünü kaldırmaz.

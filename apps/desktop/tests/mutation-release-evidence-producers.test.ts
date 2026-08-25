@@ -153,6 +153,10 @@ describe('PR-235 canonical mutation evidence producers', () => {
       'scripts/verify-34-f-family-meetings-decisions-consent-minutes-runtime.mjs'
     ]) {
       const source = await readFile(path, 'utf8');
+      expect(source).toContain("join(dirname(process.execPath),'node_modules','npm','bin','npm-cli.js')");
+      expect(source).toContain("typeof candidate==='string'&&existsSync(candidate)");
+      expect(source).toContain("if(!npmCli)throw new Error('A trusted npm CLI could not be resolved from the active Node installation.')");
+      expect(source).not.toContain("const npmCli=process.env.npm_execpath??");
       expect(source).toContain("const governedNpmRun=script=>npmArgs(['run',script,...(noWrite?['--','--no-write']:[])]);");
       for (const script of [
         'verify:migrations',

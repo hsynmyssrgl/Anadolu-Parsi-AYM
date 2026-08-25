@@ -1,12 +1,15 @@
+import { existsSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { assertGovernedSourceRoot } from './lib/governed-source-root.mjs';
 
 const noWrite=process.argv.includes('--no-write');
 const root=assertGovernedSourceRoot({allowReleaseChannel:noWrite});
 const node=process.execPath;
-const npmCli=process.env.npm_execpath??resolve(root,'.tmp','npm-10.9.2','package','bin','npm-cli.js');
+const npmCli=[process.env.npm_execpath,join(dirname(process.execPath),'node_modules','npm','bin','npm-cli.js'),
+  resolve(root,'.tmp','npm-10.9.2','package','bin','npm-cli.js')].find(candidate=>typeof candidate==='string'&&existsSync(candidate));
+if(!npmCli)throw new Error('A trusted npm CLI could not be resolved from the active Node installation.');
 const npmArgs=args=>[npmCli,...args];
 const governedNpmRun=script=>npmArgs(['run',script,...(noWrite?['--','--no-write']:[])]);
 const run=(name,command,args)=>{const result=spawnSync(command,args,{cwd:root,encoding:'utf8',stdio:'pipe',maxBuffer:32*1024*1024});

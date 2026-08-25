@@ -84,7 +84,7 @@ Durumlar: `TAMAMLANDI`, `DEVAM`, `ACIK`, `BLOCKED`, `NOT_RUN`.
 
 | ID | Is | Sorumlu | Durum | Kabul |
 |---|---|---|---|---|
-| IS-0601 | Tam regresyonu yeni kaynakta tekrar kos | Codex | DEVAM | 96377fb9 exact kapıları PASS sonrasında kaynak koruma final makbuzu farkı paketlemede FAIL oldu ve b87ebe2e ile korundu. Makbuz üreticisi düzeltmesi kaynak değişikliği olduğundan yeni exact hedefli ve filtresiz tam tur zorunlu |
+| IS-0601 | Tam regresyonu yeni kaynakta tekrar kos | Codex | DEVAM | 5179a170 hedefli 95/601 ve tam Vitest 399/2.472 PASS; dört kanal npm runtime FAIL'i f8946730/1cb33525 ile korundu. Beş runtime düzeltmesi gerçek PASS; yeni temiz exact hedefli/tam tur zorunlu |
 | IS-0602 | SBOM ve lisans kapisi | Codex | TAMAMLANDI | Belirsiz/yasak lisans 0 |
 | IS-0603 | SAST/dependency/secret tarama | Codex | TAMAMLANDI | Kritik/yuksek 0 |
 | IS-0604 | Performans ve buyuk aile testi | Codex | DEVAM | Buyuk aile ve fresh-profile dogruluk PASS; paketlenmis Electron bellek/CPU/startup SLA baseline acik |
@@ -129,3 +129,7 @@ Dış kaynak koruma final makbuzu kaydı: `96377fb9` exact hedefli/tam test, kay
 Kaynak koruma düzeltmesi belge QA kaydı: güncel master DOCX 29/29 sayfa PASS; 2–29 önceki onaylı renderla byte-exact aynı, yalnız HEAD satırı değişen 1. sayfa özgün çözünürlükte kusursuzdur. Bu belge PASS'i yeni exact test/yedek/paket/kurulu UAT zorunluluğunu kaldırmaz.
 
 Kanal eşitleme çağrı kaydı: `1745095c` sonrası var olan kanallar fast-forward edilmeden eşitleyici doğrulaması commit farkını yazım yapmadan reddetti ve `d5540157` ile korundu. Doğru sıra Bronze/Silver/Gold dallarını yalnız `--ff-only` ilerletmek, sonra payload hydrate ve exact readback yapmaktır. `IS-0211`, `IS-0215` ve `IS-0601` yeni exact kapılar bitene kadar `DEVAM` kalır.
+
+Kanal-portatif npm CLI kaydı: `5179a170` exact hedefli 95 dosya/601 test ve filtresiz 399 dosya/2.472 test PASS iken 34-B/C/D/F ek runtime'ları Bronze kanalında bulunmayan geçici npm CLI yoluna düştüğü için tur FAIL olmuş ve `f8946730` ile korunmuştur; tanı `1cb33525`tir. 34-B–34-F aktif Node npm CLI fallback'iyle düzeltildi; odaklı 1 dosya/6 test ve gerçek no-write runtime sonuçları 13/13, 14/14, 14/14, 15/15, 15/15 PASS. `IS-0211`, `IS-0215` ve `IS-0601` yeni exact kapanış bitene kadar `DEVAM` kalır.
+
+Son belge QA araç zinciri kaydı: eksik LibreOffice PATH'i `c5879c9a`, eksik Poppler `pdfinfo` PATH'i `194a8281`, temas sayfası yardımcı komutu sözdizimi hatası `62d0b1d8` ile korunmuştur. Doğru mutlak araç yollarıyla 29/29 sayfa PASS; 6–8 ve 27–29 özgün çözünürlükte kusursuzdur. `IS-0211`, `IS-0215` ve `IS-0601` yeni exact kapanış bitene kadar `DEVAM` kalır.
