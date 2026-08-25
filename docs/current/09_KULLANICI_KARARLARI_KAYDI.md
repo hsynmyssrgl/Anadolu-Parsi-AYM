@@ -94,6 +94,7 @@ Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağ
 - `DEC-275` exact worktree kaynak bütünlüğü kaydı — `99ad48dd`, doğrulayıcının ana `app` ağacında çağrılmasını fail-closed ret olarak korur. Ürün kaynağı bozulması değildir; exact Bronze ağacındaki retry PASS olmadan paket yoktur.
 - `DEC-275` final belge görsel QA kaydı — `0669cb38` kaynaklı DOCX 28/28 sayfa PASS; 2–6 byte-exact aynı, değişen 1 ve 7–28 özgün çözünürlükte taşma, örtüşme, kesilme veya bozuk karakter olmadan PASS'tir.
 - `DEC-275` exact tam regresyon no-write kaydı — `c7a3c130`, `80cf2a39` exact Bronze kaynağında hedefli 94 dosya/598 test ve filtresiz 398 dosya/2.469 test PASS sonrasında `33-R` alt sürecinin migration manifestinde yalnız `generatedAt` değiştirmesini fail-closed ret olarak korur. Dört alt doğrulayıcıya `--no-write` aktarımı eklendi; odaklı 1 dosya/6 test ve gerçek 33-R 11/11, 8 dosya/30 test PASS, manifest SHA-256 byte-exact değişmezdir. Yeni temiz exact commit tam regresyonu zorunludur.
+- `DEC-275` resmî tam regresyon çağrı kaydı — `51316ac3`, `bfb6db9f` exact Bronze kaynağında hedefli 94 dosya/598 test ve filtresiz 398 dosya/2.469 test PASS iken üreticinin doğrudan `node` ile çağrılıp npm ortam bağını kaybetmesini korur; 171 ek komuttan 34-B/C/D/F bu nedenle FAIL olmuştur. Kanonik npm ortamında 34-B 13/13, 5 dosya/30 test PASS; final tur yalnız resmî npm scriptiyle yeniden çalıştırılır.
 
 ## Bundan sonraki kararlar için zorunlu eşzamanlılık kuralı
 

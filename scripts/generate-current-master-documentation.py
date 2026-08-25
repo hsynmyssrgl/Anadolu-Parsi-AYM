@@ -224,6 +224,7 @@ DRIFT_FIXES = [
     "PR-240 release kaynak bütünlüğü doğrulayıcısının ana app çalışma ağacında çağrılması 99ad48dd ile fail-closed korunmuştur. Bu ret ürün kaynak bozulması değildir; exact Bronze çalışma ağacındaki retry PASS olmadan paket üretilemez.",
     "PR-240 final master DOCX 0669cb38 kaynak commitinden exact bundled LibreOffice/Poppler yollarıyla 28/28 sayfa render ve görsel QA PASS vermiştir; 2–6 byte-exact aynı, değişen 1 ve 7–28 özgün çözünürlükte kusursuzdur.",
     "PR-240 exact 80cf2a39 Bronze koşusunda hedefli 94 dosya/598 test ve filtresiz 398 dosya/2.469 test PASS sonrasında 33-R alt sürecinin migration manifestinde yalnız generatedAt değiştirmesi c7a3c130 ile fail-closed korunmuştur. Dört alt doğrulayıcıya no-write aktarımı eklendikten sonra odaklı 1 dosya/6 test ve gerçek 33-R matrisi 11/11, 8 dosya/30 test PASS; manifest SHA byte-exact değişmezdir. Yeni temiz exact commit tam regresyonunun yerine geçmez.",
+    "PR-240 exact bfb6db9f Bronze koşusunda hedefli 94 dosya/598 test ve filtresiz 398 dosya/2.469 test PASS iken üreticinin direct-node çağrısı npm ortam bağını kaldırdığı için 171 ek komuttan 34-B/C/D/F FAIL olmuş ve 51316ac3 ile korunmuştur. Kanonik npm ortamında 34-B 13/13, 5 dosya/30 test PASS; final tur yalnız resmi npm scriptiyle yeniden çalıştırılır.",
 ]
 
 

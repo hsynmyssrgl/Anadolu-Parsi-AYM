@@ -7,11 +7,11 @@
   "requirementPass": false,
   "izinliDurumlar": ["TAMAMLANDI", "DEVAM", "ACIK", "BLOCKED", "NOT_RUN"],
   "latestMutationClosure": {
-    "checkpoint": "c7a3c130",
+    "checkpoint": "51316ac3",
     "status": "DEVAM",
     "affectedWorkItems": ["IS-0211", "IS-0215"],
-    "finding": "33-R runtime no-write bayragini migration, smoke, PPK-021 ve PPK-022 alt dogrulayicilarina aktarmadi.",
-    "focusedValidation": "1 dosya/6 test ve gercek 33-R 11/11, 8 dosya/30 test PASS; migration manifest SHA byte-exact degismedi.",
+    "finding": "Tam regresyon ureticisi resmi npm girisi yerine direct-node ile cagrildigi icin 34-B/C/D/F runtime npm alt cagri ortamini kaybetti.",
+    "focusedValidation": "bfb6db9f hedefli 94 dosya/598 test ve filtresiz 398 dosya/2469 test PASS; kanonik npm ortaminda 34-B 13/13, 5 dosya/30 test PASS.",
     "remaining": "Yeni temiz exact commit hedefli/tam regresyonu, exact Bronze kaynak butunlugu ve kurulu tam UI UAT zorunludur."
   },
   "isler": [

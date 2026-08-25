@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PARSYUVA-AILE-YASAM-MERKEZI-TICARI-DEGISIKLIK-SICILI-V2",
   "temelTarihi": "2026-08-19",
-  "sonKayit": "TICARI-028",
+  "sonKayit": "TICARI-029",
   "kayitlar": [
     {
       "id": "TICARI-001",
@@ -492,6 +492,24 @@
         "docs/ticari-urun-temeli"
       ],
       "isListesiEtkisi": "IS-0211 ve IS-0215 DEVAM kalir. 80cf2a39 exact Bronze kaynaginda hedefli 94 dosya/598 test ve filtresiz 398 dosya/2469 test PASS sonrasinda 33-R runtime alt sureci migration manifestinin yalniz generatedAt alanini degistirdi; temiz worktree kapisi reddetti ve c7a3c130 ile korundu. Dort alt dogrulayiciya no-write aktarimi eklendi. Odakli 1 dosya/6 test ve gercek 33-R 11/11, 8 dosya/30 test PASS; manifest SHA byte-exact aynidir. Yeni temiz exact commit hedefli/tam regresyonu, kaynak butunlugu ve kurulu UI UAT tamamlanmadan paket yoktur.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-029",
+      "tarih": "2026-08-25",
+      "baslik": "Resmi npm tam regresyon girisi zorunlulugu",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-275, PR-240 ve 51316ac3 reddedilmis komut ortami checkpointi",
+      "etkilenenAlanlar": [
+        "scripts/run-mutation-test-evidence.mjs",
+        "config/change-impact-dependency-registry.json",
+        "config/active-governance-ledger.json",
+        "config/user-decision-ledger.json",
+        "docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md",
+        "BUILD_STATUS.md",
+        "docs/ticari-urun-temeli"
+      ],
+      "isListesiEtkisi": "IS-0211 ve IS-0215 DEVAM kalir. bfb6db9f exact Bronze kaynaginda hedefli 94 dosya/598 test ve filtresiz 398 dosya/2469 test PASS iken tam regresyon ureticisinin dogrudan node ile cagrilmasi npm_execpath bagini kaldirdi; 171 ek komuttan 34-B/C/D/F runtime FAIL oldu ve 51316ac3 ile korundu. Ayni 34-B zinciri resmi npm ortaminda 13/13, 5 dosya/30 test PASS verdi. Final exact tur yalniz npm run verify:mutation-full-regression:evidence girisiyle calistirilir.",
       "senkronDurumu": "SYNCHRONIZED"
     }
   ]
