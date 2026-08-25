@@ -1,7 +1,7 @@
 {
   "schemaVersion": 3,
   "packageVersion": "22.8.2026-50",
-  "generatedAt": "2026-08-24T23:31:57.207Z",
+  "generatedAt": "2026-08-25T02:11:01.169Z",
   "fileCount": 4868,
   "files": [
     {
@@ -2531,8 +2531,8 @@
     },
     {
       "path": "apps/desktop/tests/mutation-release-evidence-producers.test.ts",
-      "sha256": "0689dc7944181b973c4d98876c073c9d311836019d3ecba5a11b500b1bb7fd99",
-      "bytes": 24438
+      "sha256": "edd919f49518928bb01d9dcd0065560dbdf382d7ed22bcb412b80ee88f22993a",
+      "bytes": 25225
     },
     {
       "path": "apps/desktop/tests/mutation-release-readiness-contract.test.ts",
@@ -6396,17 +6396,17 @@
     },
     {
       "path": "artifacts/manifests/ALL_DOCUMENTS_INDEX.csv",
-      "sha256": "0706f2de32ef633c193e8db35bfa080933b1dfb20e52dd1114aa12a74f10da4f",
+      "sha256": "02266431b3dbcd1003ee3205b9217e0d4a2ce0a8a01d8bd401bf1c3dbfb87a83",
       "bytes": 311998
     },
     {
       "path": "artifacts/manifests/ALL_DOCUMENTS_INDEX.json",
-      "sha256": "f45674338b3478d7c7f0f7a60168a96216a8aa4efa9290ebcfba1b7d39a2597f",
+      "sha256": "ea89a8e6c4385ac8e98a6f97f4d9ce2b0434e0ab86a600caf1382f42c4a0459a",
       "bytes": 599899
     },
     {
       "path": "artifacts/manifests/ALL_DOCUMENTS_INDEX.md",
-      "sha256": "1663731f2901c3c6a29dd1947fb332822a262eaa947dc4d29239cc4f66269618",
+      "sha256": "0ec37becdbf2fc061d9a844c56f6b415a90e20864251bf4915a33a022b15a57b",
       "bytes": 340459
     },
     {
@@ -7181,17 +7181,17 @@
     },
     {
       "path": "artifacts/manifests/PROJECT_ARTIFACT_INDEX.csv",
-      "sha256": "3ee1a544b2f34906b63f07dbd5fa9b482f40be9a0013140652a0981d35de4ff2",
+      "sha256": "e4cf8423ada33d04460a498456f1301270ec3d3462a62bc576ce3e9d99abe9b6",
       "bytes": 652037
     },
     {
       "path": "artifacts/manifests/PROJECT_ARTIFACT_INDEX.json",
-      "sha256": "1be54dbb1cb8d7f0c6e574da8a83ab5b11772b5f797efbc347a87b26ff18d8e1",
+      "sha256": "a5b0f1e48a95eada489e19057538e92ded9a3039b9e09225e0457368172b4c65",
       "bytes": 1243574
     },
     {
       "path": "artifacts/manifests/PROJECT_ARTIFACT_INDEX.md",
-      "sha256": "3519e5a5e8b8a9bf12085bdd9221d851b47d05020db7c803ac5ef42d9f3282bc",
+      "sha256": "e49a4eb3084ec3f1005278a13c0a2f6aed0f6505f803d4fafa2841bb6d8f749c",
       "bytes": 708506
     },
     {
@@ -8861,8 +8861,8 @@
     },
     {
       "path": "BUILD_STATUS.md",
-      "sha256": "44c0bda3efc49d9fa5480e50291439b2272ceb8bb76cd0b571a04b78705ac689",
-      "bytes": 5640
+      "sha256": "b7da712f4ad8b1b18e76fe241c518d7f24ce9bd1715109a24513451601c0c139",
+      "bytes": 8039
     },
     {
       "path": "BUILD100_ARCHITECTURE_VALIDATION_REPORT.md",
@@ -10931,8 +10931,8 @@
     },
     {
       "path": "config/active-governance-ledger.json",
-      "sha256": "5a838fa3efda828b9d1299c6c9b1033a5323b95a992b0b89614126c97421bb24",
-      "bytes": 51811
+      "sha256": "e7038942e9e1bfc5a4888e06de31ce418eeb67605ea7e3c29eeb8982197be24e",
+      "bytes": 52170
     },
     {
       "path": "config/additional-family-capabilities.json",
@@ -11126,8 +11126,8 @@
     },
     {
       "path": "config/user-decision-ledger.json",
-      "sha256": "2c365e8c8b57fb66cef2892f6cb7b878716fe5d2b7a11abe8db5941f96980b27",
-      "bytes": 144431
+      "sha256": "61f509e26504acab74d60dba6ec2bb02c44b7c2356dc9a40466d8ef1851ad037",
+      "bytes": 145319
     },
     {
       "path": "config/work-segmentation-plan.json",
@@ -11396,8 +11396,8 @@
     },
     {
       "path": "docs/10_MASTER_DECISION_REGISTER.md",
-      "sha256": "9fceadd126652c3e0f6701c1a6e3154cc9dd49d584d9b4ebd39e5fb38c6b9bc3",
-      "bytes": 122240
+      "sha256": "60d5bebc7f7cf2a7115b40d619b2a8df3ae569df14c98189aeab1102847011bf",
+      "bytes": 124007
     },
     {
       "path": "docs/11_DOCUMENT_AUTHORITY_MATRIX.md",
@@ -12606,13 +12606,13 @@
     },
     {
       "path": "docs/current/08_TUM_BELGELER_DIZINI.md",
-      "sha256": "1663731f2901c3c6a29dd1947fb332822a262eaa947dc4d29239cc4f66269618",
+      "sha256": "0ec37becdbf2fc061d9a844c56f6b415a90e20864251bf4915a33a022b15a57b",
       "bytes": 340459
     },
     {
       "path": "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
-      "sha256": "a8c9af168cc5d7bb110fe6aca9d6d029a9566fd7c3404e5b0d7cb5af1efff606",
-      "bytes": 12510
+      "sha256": "6d48cc135ff3f18797ce20a4437dcec06457eb080deea2a0138112f9cf2cc445",
+      "bytes": 13856
     },
     {
       "path": "docs/current/10_TUM_KURALLAR_ASILAMAZ_YURUTME_SOZLESMESI.md",
@@ -12621,8 +12621,8 @@
     },
     {
       "path": "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
-      "sha256": "e289b45ef3ee887e360a55a337de5114b511f8ddd5d7c0f23f01d2560bebf322",
-      "bytes": 140411
+      "sha256": "3a72224ce87ef2e344d60b955c0d4b2412fcc9be0abace8c3123fe328c48066a",
+      "bytes": 141635
     },
     {
       "path": "docs/current/12_KALAN_IS_SINIFLANDIRMA.md",
@@ -12751,13 +12751,13 @@
     },
     {
       "path": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.docx",
-      "sha256": "96f19df5275f02f104d607491790c61f605ec5a9887a9712395ada51ec26272b",
-      "bytes": 360244
+      "sha256": "e50c2ef498e59dc6b9897a56f5397e427097ec0a059af8ef7b5e020377844943",
+      "bytes": 360710
     },
     {
       "path": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.pdf",
-      "sha256": "1f1eadf85769384c9d17a45c0a4be4f9872afbcd225461adc4a055b77e9717ef",
-      "bytes": 501764
+      "sha256": "ab1e836103c233aeac835d32ae1c602f5c4e2e92de84f7fc863c98c8fd09601e",
+      "bytes": 502026
     },
     {
       "path": "docs/current/MASTER_PROJECT_DOCUMENTATION_BUILD209.docx",
@@ -13886,8 +13886,8 @@
     },
     {
       "path": "docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md",
-      "sha256": "623807ce4c8794dfc0d58d92327833de7996735655e4e6fcfb9cde6777aa6df3",
-      "bytes": 11314
+      "sha256": "789b3ab960b0c0294b7908df6b5027f65ebe911651db0ae3ce4ae67c233a25c9",
+      "bytes": 14371
     },
     {
       "path": "docs/examples/anadolu-parsi-family-import-v1.example.json",
@@ -14361,8 +14361,8 @@
     },
     {
       "path": "docs/ticari-urun-temeli/01_YONETIM/05_DEGISIKLIK_SICILI.json",
-      "sha256": "72c84f9f3f3ce605d609a442e7824f72ee6c80805f5175ce21f1e66fe83feb19",
-      "bytes": 25662
+      "sha256": "f2bb20b2b0943d1da60c990599f2089c462f70bac8b72039d12eada3245e407c",
+      "bytes": 29257
     },
     {
       "path": "docs/ticari-urun-temeli/01_YONETIM/06_RISK_SICILI.md",
@@ -14436,7 +14436,7 @@
     },
     {
       "path": "docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json",
-      "sha256": "2364f804d7d4a37de0ddd2572767c81fe290e8e1cbf48c79da42d5ecf65209aa",
+      "sha256": "3867e32873a7843683b3c818adc323e6d08be95cd0002453907b54e1fd87edaf",
       "bytes": 17395
     },
     {
@@ -14716,8 +14716,8 @@
     },
     {
       "path": "docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md",
-      "sha256": "05c0f46b1afa1618f956bf57244351f845b2c75e9e5567fd8eb7bcd091aaa9ea",
-      "bytes": 10766
+      "sha256": "b95e38e45df948fb056ccf44c908bb8a064333e85053da13a330e65d5bf2f360",
+      "bytes": 10345
     },
     {
       "path": "docs/ticari-urun-temeli/08_IS_LISTESI/02_DIS_KAYNAK_GEREKTIREN_ISLER.md",
@@ -14726,8 +14726,8 @@
     },
     {
       "path": "docs/ticari-urun-temeli/08_IS_LISTESI/03_ANA_IS_SICILI.json",
-      "sha256": "e5a06346b800c6687e1fd5326aa8ec5280f920c55ac242cada72900dc931b0b6",
-      "bytes": 31980
+      "sha256": "200783821077a30faabe6d9735c747b8dc87ae16870dd8610ef875604a08c775",
+      "bytes": 31578
     },
     {
       "path": "docs/ticari-urun-temeli/08_IS_LISTESI/04_IS_YURUTME_SIRASI.md",
@@ -19381,8 +19381,8 @@
     },
     {
       "path": "scripts/generate-current-master-documentation.py",
-      "sha256": "db0b811d5ee6417d71f7df97eb88a30b229f03d4a1ea0f33e866801fec54684f",
-      "bytes": 57184
+      "sha256": "785ad06ec4473a1ffe6e2a57793d68a16f7cb91b8a123618b346939e4b5a7b75",
+      "bytes": 58428
     },
     {
       "path": "scripts/generate-manifest.mjs",
@@ -21486,8 +21486,8 @@
     },
     {
       "path": "scripts/verify-33-y-local-first-smart-home-energy-runtime.mjs",
-      "sha256": "95f2fa8807fdcfd7cd5f339bd68dd37e8f8e6d7c35d7bd4f11534a7cf9e38a03",
-      "bytes": 7184
+      "sha256": "39fafad472169aee45f31fe7320b04820d3ea3d190a1e28b8815e8a519464fc5",
+      "bytes": 7325
     },
     {
       "path": "scripts/verify-33-z-signed-plugin-external-provider-platform-boundary.mjs",
@@ -21501,8 +21501,8 @@
     },
     {
       "path": "scripts/verify-33-z-signed-plugin-external-provider-platform-runtime.mjs",
-      "sha256": "a166912d95c751c0e297508a858905e8c98fbbbcf4bbc9bcf4ef8ecc75f4df5f",
-      "bytes": 8014
+      "sha256": "cc12088d31227770208d26b39e646b9bfdbe85958837901b01a06b7732b548a7",
+      "bytes": 8185
     },
     {
       "path": "scripts/verify-34-a-communication-policy-mls-foundation-boundary.mjs",
@@ -21516,8 +21516,8 @@
     },
     {
       "path": "scripts/verify-34-a-communication-policy-mls-foundation-runtime.mjs",
-      "sha256": "f0e13f247b1ed592ef0b24decb4e4d883961106d8109d90daa2aa471151673aa",
-      "bytes": 8015
+      "sha256": "7394bf9085e587a3c220bea254876cc6a12353e520ead2e689a2a76bcd00908d",
+      "bytes": 8186
     },
     {
       "path": "scripts/verify-34-b-communication-messaging-lifecycle-privacy-presence-boundary.mjs",

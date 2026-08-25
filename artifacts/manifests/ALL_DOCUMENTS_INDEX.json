@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "release": "Bronze 22.08.2026.50",
   "releaseId": "bronze-2026-08-22-r50",
-  "generatedAt": "2026-08-24T23:31:27.907Z",
+  "generatedAt": "2026-08-25T02:10:56.363Z",
   "selfIndexedPaths": [
     "SHA256SUMS.txt",
     "artifacts/inventory/TESLIMAT_CALISMA_AGACI_ENVANTERI.json",
@@ -5604,8 +5604,8 @@
     },
     {
       "path": "BUILD_STATUS.md",
-      "bytes": 5640,
-      "sha256": "44c0bda3efc49d9fa5480e50291439b2272ceb8bb76cd0b571a04b78705ac689",
+      "bytes": 8039,
+      "sha256": "b7da712f4ad8b1b18e76fe241c518d7f24ce9bd1715109a24513451601c0c139",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -8900,8 +8900,8 @@
     },
     {
       "path": "config/active-governance-ledger.json",
-      "bytes": 51811,
-      "sha256": "5a838fa3efda828b9d1299c6c9b1033a5323b95a992b0b89614126c97421bb24",
+      "bytes": 52170,
+      "sha256": "e7038942e9e1bfc5a4888e06de31ce418eeb67605ea7e3c29eeb8982197be24e",
       "extension": ".json",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -9212,8 +9212,8 @@
     },
     {
       "path": "config/user-decision-ledger.json",
-      "bytes": 144431,
-      "sha256": "2c365e8c8b57fb66cef2892f6cb7b878716fe5d2b7a11abe8db5941f96980b27",
+      "bytes": 145319,
+      "sha256": "61f509e26504acab74d60dba6ec2bb02c44b7c2356dc9a40466d8ef1851ad037",
       "extension": ".json",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -9492,8 +9492,8 @@
     },
     {
       "path": "docs/10_MASTER_DECISION_REGISTER.md",
-      "bytes": 122240,
-      "sha256": "9fceadd126652c3e0f6701c1a6e3154cc9dd49d584d9b4ebd39e5fb38c6b9bc3",
+      "bytes": 124007,
+      "sha256": "60d5bebc7f7cf2a7115b40d619b2a8df3ae569df14c98189aeab1102847011bf",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -11436,8 +11436,8 @@
     },
     {
       "path": "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
-      "bytes": 12510,
-      "sha256": "a8c9af168cc5d7bb110fe6aca9d6d029a9566fd7c3404e5b0d7cb5af1efff606",
+      "bytes": 13856,
+      "sha256": "6d48cc135ff3f18797ce20a4437dcec06457eb080deea2a0138112f9cf2cc445",
       "extension": ".md",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -11452,8 +11452,8 @@
     },
     {
       "path": "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
-      "bytes": 140405,
-      "sha256": "a1662dbdb64aa1b9a26732e39cf7c41547358becc550d2f980aaa9fa257c4538",
+      "bytes": 141635,
+      "sha256": "3a72224ce87ef2e344d60b955c0d4b2412fcc9be0abace8c3123fe328c48066a",
       "extension": ".md",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -11660,16 +11660,16 @@
     },
     {
       "path": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.docx",
-      "bytes": 360106,
-      "sha256": "308b9e36d9efd34404a6af0db8305965d1c94988f5680149fce8d998d1e15a96",
+      "bytes": 360710,
+      "sha256": "e50c2ef498e59dc6b9897a56f5397e427097ec0a059af8ef7b5e020377844943",
       "extension": ".docx",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
     },
     {
       "path": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.pdf",
-      "bytes": 501703,
-      "sha256": "f31f065d7d0fa7e8923d0a4fc305f30b611c3bd4b22b8fc7bcf8d7f7195e530c",
+      "bytes": 502026,
+      "sha256": "ab1e836103c233aeac835d32ae1c602f5c4e2e92de84f7fc863c98c8fd09601e",
       "extension": ".pdf",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -13476,8 +13476,8 @@
     },
     {
       "path": "docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md",
-      "bytes": 11314,
-      "sha256": "623807ce4c8794dfc0d58d92327833de7996735655e4e6fcfb9cde6777aa6df3",
+      "bytes": 14371,
+      "sha256": "789b3ab960b0c0294b7908df6b5027f65ebe911651db0ae3ce4ae67c233a25c9",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -14236,8 +14236,8 @@
     },
     {
       "path": "docs/ticari-urun-temeli/01_YONETIM/05_DEGISIKLIK_SICILI.json",
-      "bytes": 25662,
-      "sha256": "72c84f9f3f3ce605d609a442e7824f72ee6c80805f5175ce21f1e66fe83feb19",
+      "bytes": 29257,
+      "sha256": "f2bb20b2b0943d1da60c990599f2089c462f70bac8b72039d12eada3245e407c",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -14357,7 +14357,7 @@
     {
       "path": "docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json",
       "bytes": 17395,
-      "sha256": "2364f804d7d4a37de0ddd2572767c81fe290e8e1cbf48c79da42d5ecf65209aa",
+      "sha256": "3867e32873a7843683b3c818adc323e6d08be95cd0002453907b54e1fd87edaf",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -14804,8 +14804,8 @@
     },
     {
       "path": "docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md",
-      "bytes": 10766,
-      "sha256": "05c0f46b1afa1618f956bf57244351f845b2c75e9e5567fd8eb7bcd091aaa9ea",
+      "bytes": 10345,
+      "sha256": "b95e38e45df948fb056ccf44c908bb8a064333e85053da13a330e65d5bf2f360",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -14820,8 +14820,8 @@
     },
     {
       "path": "docs/ticari-urun-temeli/08_IS_LISTESI/03_ANA_IS_SICILI.json",
-      "bytes": 31980,
-      "sha256": "e5a06346b800c6687e1fd5326aa8ec5280f920c55ac242cada72900dc931b0b6",
+      "bytes": 31578,
+      "sha256": "200783821077a30faabe6d9735c747b8dc87ae16870dd8610ef875604a08c775",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
