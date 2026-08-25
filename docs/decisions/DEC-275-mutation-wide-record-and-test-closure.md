@@ -47,4 +47,6 @@ Runtime yeniden kontrolü sonunda izlenen migration manifestinde yalnız `genera
 
 Güncel master DOCX'in LibreOffice ile PDF'e dönüşümü başarıyla tamamlanmış, fakat ilk PNG render denemesinde bundled Poppler `pdfinfo` dizini PATH'e eklenmediği için fail-closed durmuştur; `dd675310` boş `wip(rejected)` checkpointi bu altyapı hatasını korur. Exact bundled Poppler ve LibreOffice dizinleriyle yeniden deneme 28/28 PNG sayfa üretmiştir. Önceki onaylı renderla 10–25. sayfalar byte-exact aynı kalmış; kaynak HEAD ve yeni kapanış maddeleri nedeniyle değişen 1–9 ile 26–28. sayfalar özgün çözünürlükte taşma, örtüşme, kesilme ve bozuk karakter açısından yeniden incelenip PASS verilmiştir.
 
+Release kaynak bütünlüğü doğrulayıcısının ana `app` çalışma ağacında çağrılması beklenen exact Bronze kök şartını karşılamadığı için fail-closed durmuştur; `99ad48dd` boş `wip(rejected)` checkpointi bu yanlış worktree çağrısını korur. Bu kayıt ürün kaynak bütünlüğü hatası değildir ve PASS yerine geçmez; aynı doğrulayıcı exact Bronze çalışma ağacında yeniden çalıştırılıp başarılı olmadan paket üretilemez.
+
 Bu karar `DEC-270/PR-235` exact-commit etki ve test zincirini kaldırmaz; kapsamını bütün kayıt sınıfları ve tüm kullanıcı etkileşimi/görsel bütünlük yüzeyleri için açıkça güçlendirir.

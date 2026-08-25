@@ -1473,3 +1473,5 @@ Uygulama bağı mutasyondan önce kaydedilen clean Bronze baseline receipt'i, im
 `ddb1abff`, 33-Y/33-Z/34-A salt-okunur runtime zincirinin alt migration/smoke/politika üreticilerine `--no-write` aktarmayıp izlenen manifestte zaman damgası bırakmasını ret olarak korur. Ortak aktarım düzeltmesinden sonra 1 dosya/6 test ve üç runtime 11/11 PASS; üç manifest SHA-256 karşılaştırması byte-exact değişmezdir. Yeni exact hedefli/tam regresyon ve kaynak bütünlüğü tamamlanmadan paket yoktur.
 
 `dd675310`, güncel master DOCX'in ilk PNG renderında bundled Poppler yolunun çözülememesini ret olarak korur. Exact Poppler/LibreOffice yollarıyla 28/28 sayfa üretildi; 10–25 byte-identical, değişen 1–9 ve 26–28 sayfalar özgün çözünürlükte görsel QA PASS verdi.
+
+`99ad48dd`, release kaynak bütünlüğü doğrulayıcısının ana `app` çalışma ağacında çağrılmasını fail-closed ret olarak korur. Bu ret ürün kaynağı bozukluğu değildir; doğru kabul için aynı doğrulayıcı exact Bronze çalışma ağacında çalıştırılmalı ve PASS vermelidir.

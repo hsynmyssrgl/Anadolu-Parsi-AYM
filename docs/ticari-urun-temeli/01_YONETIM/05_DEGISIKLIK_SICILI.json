@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PARSYUVA-AILE-YASAM-MERKEZI-TICARI-DEGISIKLIK-SICILI-V2",
   "temelTarihi": "2026-08-19",
-  "sonKayit": "TICARI-026",
+  "sonKayit": "TICARI-027",
   "kayitlar": [
     {
       "id": "TICARI-001",
@@ -458,6 +458,22 @@
         "BUILD_STATUS.md"
       ],
       "isListesiEtkisi": "IS-0211 ve IS-0215 DEVAM kalir. Ilk DOCX PNG renderi LibreOffice PDF donusumunden sonra bundled Poppler pdfinfo PATH eksigiyle fail-closed durdu ve dd675310 ile kaydedildi. Exact Poppler/LibreOffice retry 28/28 sayfa uretti; 10-25 onceki renderla byte-identical, degisen 1-9 ve 26-28 sayfalar ozgun cozulunurlukte tasma, ortusme, kesilme ve bozuk karakter olmadan PASS verdi. Yeni exact hedefli/tam regresyon ve kaynak butunlugu tamamlanmadan paket yoktur.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-027",
+      "tarih": "2026-08-25",
+      "baslik": "Release kaynak butunlugu exact Bronze worktree cagrisi",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-275, PR-240 ve 99ad48dd reddedilmis worktree checkpointi",
+      "etkilenenAlanlar": [
+        "scripts/verify-source-integrity.mjs",
+        "config/mutation-release-readiness-policy.json",
+        "docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md",
+        "BUILD_STATUS.md",
+        "docs/ticari-urun-temeli"
+      ],
+      "isListesiEtkisi": "IS-0211 ve IS-0215 DEVAM kalir. Release kaynak butunlugu dogrulayicisinin ana app agacinda cagrilmasi exact Bronze kok sartini karsilamadigi icin fail-closed durdu ve 99ad48dd ile kaydedildi. Bu ret urun kaynak bozulmasi degildir ve PASS yerine gecmez. Dogrulayici exact Bronze calisma agacinda yeniden calisip PASS vermeden paket yoktur.",
       "senkronDurumu": "SYNCHRONIZED"
     }
   ]
