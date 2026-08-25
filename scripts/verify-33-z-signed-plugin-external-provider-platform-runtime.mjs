@@ -20,6 +20,7 @@ const [scope, inventory, registry, roadmap, plan, ledger, ppk015Ratchet] = await
 const execute = (args, timeout = 300_000) => spawnSync(process.execPath, args, {
   cwd: root, encoding: 'utf8', windowsHide: true, timeout, maxBuffer: 64 * 1024 * 1024, env: process.env
 });
+const governedNodeScript = (path) => [path, ...(noWrite ? ['--no-write'] : [])];
 const clean = (value) => String(value ?? '').replace(/\u001b\[[0-?]*[ -/]*[@-~]/gu, '');
 const output = (result) => clean(`${result.stdout ?? ''}\n${result.stderr ?? ''}`);
 const parse = (result) => { try { return JSON.parse(clean(result.stdout).trim()); } catch { return undefined; } };
@@ -28,17 +29,17 @@ const vitest = execute(['node_modules/vitest/vitest.mjs', 'run', ...scope.valida
 const vitestText = output(vitest);
 const files = Number(vitestText.match(/Test Files\s+(?:\d+ failed\s+\|\s+)?(\d+) passed/u)?.[1] ?? 0);
 const tests = Number(vitestText.match(/Tests\s+(?:\d+ failed\s+\|\s+)?(\d+) passed/u)?.[1] ?? 0);
-const migration = execute(['scripts/verify-database-migrations.mjs']);
+const migration = execute(governedNodeScript('scripts/verify-database-migrations.mjs'));
 const migrationReport = parse(migration);
 const m104 = migrationReport?.migrationVersions?.find((item) => item.version === 104);
 const latestMigrationVersion = migrationReport?.migrationVersions?.at(-1)?.version;
-const smoke = execute(['scripts/verify-data-store-smoke.mjs']);
+const smoke = execute(governedNodeScript('scripts/verify-data-store-smoke.mjs'));
 const smokeReport = parse(smoke);
-const gate15 = execute(['scripts/verify-network-egress-boundary.mjs']);
+const gate15 = execute(governedNodeScript('scripts/verify-network-egress-boundary.mjs'));
 const p15 = parse(gate15);
-const gate21 = execute(['scripts/verify-platform-policy-ast-gate.mjs']);
+const gate21 = execute(governedNodeScript('scripts/verify-platform-policy-ast-gate.mjs'));
 const p21 = parse(gate21);
-const gate22 = execute(['scripts/verify-platform-capability-manifest-gate.mjs']);
+const gate22 = execute(governedNodeScript('scripts/verify-platform-capability-manifest-gate.mjs'));
 const p22 = parse(gate22);
 const packages = ['domain', 'security', 'application', 'repository-contracts', 'repositories', 'database'];
 const types = Object.fromEntries(packages.map((name) => [name, execute(['node_modules/typescript/bin/tsc', '-p', `packages/${name}/tsconfig.json`, '--noEmit'])]));

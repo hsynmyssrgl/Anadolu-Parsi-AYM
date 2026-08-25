@@ -165,6 +165,20 @@ describe('PR-235 canonical mutation evidence producers', () => {
       }
       expect(source).not.toMatch(/npmArgs\(\['run','verify:(?:migrations|data-store-smoke|ppk021:runtime|ppk022:runtime|ppk015:egress:runtime)'\]\)/u);
     }
+    for (const path of [
+      'scripts/verify-33-y-local-first-smart-home-energy-runtime.mjs',
+      'scripts/verify-33-z-signed-plugin-external-provider-platform-runtime.mjs',
+      'scripts/verify-34-a-communication-policy-mls-foundation-runtime.mjs'
+    ]) {
+      const source = await readFile(path, 'utf8');
+      expect(source).toMatch(/const governedNodeScript\s*=\s*\(?(?:path)\)?\s*=>\s*\[path,\s*\.\.\.\(noWrite\s*\?\s*\['--no-write'\]\s*:\s*\[\]\)\];/u);
+      for (const script of [
+        'scripts/verify-database-migrations.mjs',
+        'scripts/verify-data-store-smoke.mjs',
+        'scripts/verify-platform-policy-ast-gate.mjs',
+        'scripts/verify-platform-capability-manifest-gate.mjs'
+      ]) expect(source).toContain(`governedNodeScript('${script}')`);
+    }
     const ppk022RuntimeSource = await readFile('scripts/verify-32-r-ppk-022-capability-manifest-gate-runtime.mjs', 'utf8');
     expect(ppk022RuntimeSource).toContain("['scripts/verify-desktop-core-service-startup-runtime-wrapper.mjs', ...noWriteArgs]");
     const startupRuntimeWrapperSource = await readFile('scripts/verify-desktop-core-service-startup-runtime-wrapper.mjs', 'utf8');

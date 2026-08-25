@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PARSYUVA-AILE-YASAM-MERKEZI-TICARI-DEGISIKLIK-SICILI-V2",
   "temelTarihi": "2026-08-19",
-  "sonKayit": "TICARI-024",
+  "sonKayit": "TICARI-025",
   "kayitlar": [
     {
       "id": "TICARI-001",
@@ -423,6 +423,24 @@
         "docs/ticari-urun-temeli"
       ],
       "isListesiEtkisi": "IS-0211 ve IS-0215 DEVAM kalir. Git-index ile uretilen kanonik indeksin varsayilan canli-agac modunda dogrulanmasi ignored tarihsel artifact kapsam farkinda fail-closed durdu ve 47f441e1 ile gercek ret kaydedildi. Ureticiyle ayni --git-index --no-report dogrulamasi 13146 kontrol/4407 dosya/2143 belge; kaynak butunlugu 4868/4868 dosya ve 4869 SHA PASS verdi. Yanlis-mod ret PASS sayilmaz; yeni exact hedefli/tam regresyon, kaynak butunlugu ve kurulu UI UAT tamamlanmadan paket yoktur.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-025",
+      "tarih": "2026-08-25",
+      "baslik": "Bronze runtime derleme onkosulu ve kalan no-write kapanisi",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-275, PR-240 ve 703be65a/0a118f5f/7fb288cd/ddb1abff reddedilmis checkpointleri",
+      "etkilenenAlanlar": [
+        "scripts/verify-33-y-local-first-smart-home-energy-runtime.mjs",
+        "scripts/verify-33-z-signed-plugin-external-provider-platform-runtime.mjs",
+        "scripts/verify-34-a-communication-policy-mls-foundation-runtime.mjs",
+        "apps/desktop/tests/mutation-release-evidence-producers.test.ts",
+        "docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md",
+        "BUILD_STATUS.md",
+        "docs/ticari-urun-temeli"
+      ],
+      "isListesiEtkisi": "IS-0211 ve IS-0215 DEVAM kalir. cb20d2e5 exact Bronze turunda 398 Vitest dosyasi/2469 test PASS iken 16 ek runtime eksik workspace dist nedeniyle FAIL olup 703be65a ile kaydedildi. 0a118f5f eksik resmi npm tani ortamini, 7fb288cd eksik core-service dist onkosulunu ve ddb1abff 33-Y/33-Z/34-A alt surec no-write sizintisini korur. Resmi package/core-service/desktop buildlerinden sonra 16/16 ek runtime PASS; no-write duzeltmesinden sonra 1 dosya/6 test, uc runtime ve uc byte-exact manifest SHA kontrolu PASS verdi. Yeni exact hedefli/tam regresyon, kaynak butunlugu ve kurulu UI UAT tamamlanmadan paket yoktur.",
       "senkronDurumu": "SYNCHRONIZED"
     }
   ]
