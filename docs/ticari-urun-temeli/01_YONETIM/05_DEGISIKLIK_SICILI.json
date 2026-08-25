@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PARSYUVA-AILE-YASAM-MERKEZI-TICARI-DEGISIKLIK-SICILI-V2",
   "temelTarihi": "2026-08-19",
-  "sonKayit": "TICARI-030",
+  "sonKayit": "TICARI-031",
   "kayitlar": [
     {
       "id": "TICARI-001",
@@ -531,6 +531,25 @@
         "docs/ticari-urun-temeli"
       ],
       "isListesiEtkisi": "IS-0211, IS-0215 ve IS-0601 DEVAM kalir. c02744cd exact Bronze resmi npm tam regresyonu 398 dosya/2469 test ve 171/171 ek komut PASS; kaynak butunlugu 683 eksik Git-disi manifest payloadi ve linked-worktree .git dosyasinin yanlis kaynak sayilmasi nedeniyle 684 bulguyla FAIL olup 7d67fcff ile korunmustur. Kanal kurulumu hash-bound payloadi Bronze/Silver/Gold ayri dizinlerine atomik esitleyip readback yapar; kaynak toplayici .git dosya/klasorunu dislar. Odakli 2 dosya/9 test PASS; yeni exact kapilar olmadan paket yoktur.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-031",
+      "tarih": "2026-08-25",
+      "baslik": "Guncel master DOCX Poppler retry siniri",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-275, PR-240 ve e5787764 reddedilmis belge render checkpointi",
+      "etkilenenAlanlar": [
+        "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.docx",
+        "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.pdf",
+        "scripts/generate-current-master-documentation.py",
+        "config/active-governance-ledger.json",
+        "config/user-decision-ledger.json",
+        "docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md",
+        "BUILD_STATUS.md",
+        "docs/ticari-urun-temeli"
+      ],
+      "isListesiEtkisi": "IS-0215 DEVAM kalir. 96b9faac kaynakli ana DOCX ilk PNG renderinda yanlis bundled PATH nedeniyle Poppler pdfinfo cozumlenemedi ve e5787764 ile gercek FAIL kaydedildi. Dogru native Poppler ve LibreOffice yollarina retry 28/28 sayfa PASS; butun sayfalar temas sayfalarinda, 6-7 ve 27-28 ayrica ozgun cozulunurlukte gorsel QA PASS verdi. Yeni exact testler, kaynak butunlugu ve kurulu tam UI UAT tamamlanmadan paket yoktur.",
       "senkronDurumu": "SYNCHRONIZED"
     }
   ]
