@@ -168,7 +168,8 @@ describe('PR-235 canonical mutation evidence producers', () => {
     for (const path of [
       'scripts/verify-33-y-local-first-smart-home-energy-runtime.mjs',
       'scripts/verify-33-z-signed-plugin-external-provider-platform-runtime.mjs',
-      'scripts/verify-34-a-communication-policy-mls-foundation-runtime.mjs'
+      'scripts/verify-34-a-communication-policy-mls-foundation-runtime.mjs',
+      'scripts/verify-33-r-archive-evidence-relations-media-lifecycle-unified-authorized-search-runtime.mjs'
     ]) {
       const source = await readFile(path, 'utf8');
       expect(source).toMatch(/const governedNodeScript\s*=\s*\(?(?:path)\)?\s*=>\s*\[path,\s*\.\.\.\(noWrite\s*\?\s*\['--no-write'\]\s*:\s*\[\]\)\];/u);

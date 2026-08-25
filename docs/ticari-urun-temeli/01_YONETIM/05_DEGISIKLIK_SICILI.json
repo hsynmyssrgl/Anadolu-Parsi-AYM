@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PARSYUVA-AILE-YASAM-MERKEZI-TICARI-DEGISIKLIK-SICILI-V2",
   "temelTarihi": "2026-08-19",
-  "sonKayit": "TICARI-027",
+  "sonKayit": "TICARI-028",
   "kayitlar": [
     {
       "id": "TICARI-001",
@@ -474,6 +474,24 @@
         "docs/ticari-urun-temeli"
       ],
       "isListesiEtkisi": "IS-0211 ve IS-0215 DEVAM kalir. Release kaynak butunlugu dogrulayicisinin ana app agacinda cagrilmasi exact Bronze kok sartini karsilamadigi icin fail-closed durdu ve 99ad48dd ile kaydedildi. Bu ret urun kaynak bozulmasi degildir ve PASS yerine gecmez. Dogrulayici exact Bronze calisma agacinda yeniden calisip PASS vermeden paket yoktur.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-028",
+      "tarih": "2026-08-25",
+      "baslik": "33-R tam regresyon no-write aktarim kapanisi",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-275, PR-240 ve c7a3c130 reddedilmis tam regresyon checkpointi",
+      "etkilenenAlanlar": [
+        "scripts/verify-33-r-archive-evidence-relations-media-lifecycle-unified-authorized-search-runtime.mjs",
+        "apps/desktop/tests/mutation-release-evidence-producers.test.ts",
+        "config/active-governance-ledger.json",
+        "config/user-decision-ledger.json",
+        "docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md",
+        "BUILD_STATUS.md",
+        "docs/ticari-urun-temeli"
+      ],
+      "isListesiEtkisi": "IS-0211 ve IS-0215 DEVAM kalir. 80cf2a39 exact Bronze kaynaginda hedefli 94 dosya/598 test ve filtresiz 398 dosya/2469 test PASS sonrasinda 33-R runtime alt sureci migration manifestinin yalniz generatedAt alanini degistirdi; temiz worktree kapisi reddetti ve c7a3c130 ile korundu. Dort alt dogrulayiciya no-write aktarimi eklendi. Odakli 1 dosya/6 test ve gercek 33-R 11/11, 8 dosya/30 test PASS; manifest SHA byte-exact aynidir. Yeni temiz exact commit hedefli/tam regresyonu, kaynak butunlugu ve kurulu UI UAT tamamlanmadan paket yoktur.",
       "senkronDurumu": "SYNCHRONIZED"
     }
   ]

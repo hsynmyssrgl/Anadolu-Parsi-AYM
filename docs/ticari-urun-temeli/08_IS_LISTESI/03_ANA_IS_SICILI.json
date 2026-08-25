@@ -6,6 +6,14 @@
   "tamamlandi": 16,
   "requirementPass": false,
   "izinliDurumlar": ["TAMAMLANDI", "DEVAM", "ACIK", "BLOCKED", "NOT_RUN"],
+  "latestMutationClosure": {
+    "checkpoint": "c7a3c130",
+    "status": "DEVAM",
+    "affectedWorkItems": ["IS-0211", "IS-0215"],
+    "finding": "33-R runtime no-write bayragini migration, smoke, PPK-021 ve PPK-022 alt dogrulayicilarina aktarmadi.",
+    "focusedValidation": "1 dosya/6 test ve gercek 33-R 11/11, 8 dosya/30 test PASS; migration manifest SHA byte-exact degismedi.",
+    "remaining": "Yeni temiz exact commit hedefli/tam regresyonu, exact Bronze kaynak butunlugu ve kurulu tam UI UAT zorunludur."
+  },
   "isler": [
     {"id":"IS-0001","alan":"Yonetim","is":"Ticari temel klasor ve belge yapisi","sorumlu":"Codex","durum":"TAMAMLANDI","kabul":"Zorunlu dosyalar ve otomatik kapi PASS","kanit":["05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json"],"disKaynakGerekli":false,"acikNedeni":"","bagimliliklar":[],"requirementPass":true},
     {"id":"IS-0002","alan":"Yonetim","is":"Kirli calisma agacini anlamli teslimlere ayirma","sorumlu":"Codex","durum":"TAMAMLANDI","kabul":"Ilgisiz degisiklik yok ve diff audit PASS","kanit":["05_KALITE_TEST_KANIT/05_GIT_YEDEK_DOGRULAMA_KANITI.json"],"disKaynakGerekli":false,"acikNedeni":"","bagimliliklar":["IS-0001"],"requirementPass":true},

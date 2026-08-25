@@ -105,3 +105,5 @@ Durumlar: `TAMAMLANDI`, `DEVAM`, `ACIK`, `BLOCKED`, `NOT_RUN`.
 ## Kapanis kurali
 
 Bir satir yalnız kabul olcutu ve bagli kanit kaydi PASS oldugunda `TAMAMLANDI` olur. Kullanici veya dis kaynak bekleyen satirlar yerel kodlamayi durdurmaz; ilgili ticari yayin iddiasini kapali tutar.
+
+Güncel mutasyon kapanışı: `c7a3c130`, `80cf2a39` exact Bronze tam regresyonunda 398 dosya/2.469 test PASS sonrasında `33-R` alt sürecinin migration manifesti zaman damgasına yazmasını fail-closed korur. Aktarım düzeltmesi odaklı 1 dosya/6 test ve gerçek 33-R 11/11, 8 dosya/30 test PASS; manifest SHA byte-exact değişmezdir. `IS-0211` ve `IS-0215`, yeni temiz exact commit hedefli/tam regresyonu, exact Bronze kaynak bütünlüğü ve kurulu tam UI UAT tamamlanana kadar `DEVAM` kalır.

@@ -34,6 +34,7 @@ const execute = (args, timeout = 300_000) => spawnSync(process.execPath, args, {
   maxBuffer: 64 * 1024 * 1024,
   env: process.env
 });
+const governedNodeScript = (path) => [path, ...(noWrite ? ['--no-write'] : [])];
 const clean = (value) => String(value ?? '').replace(/\u001b\[[0-?]*[ -/]*[@-~]/gu, '');
 const combined = (result) => clean(`${result.stdout ?? ''}\n${result.stderr ?? ''}`);
 const parseJson = (result) => {
@@ -47,14 +48,14 @@ const testsMatch = vitestOutput.match(/Tests\s+(\d+) passed/u);
 const filesPassed = filesMatch ? Number(filesMatch[1]) : 0;
 const testsPassed = testsMatch ? Number(testsMatch[1]) : 0;
 
-const migration = execute(['scripts/verify-database-migrations.mjs']);
+const migration = execute(governedNodeScript('scripts/verify-database-migrations.mjs'));
 const migrationReport = parseJson(migration);
 const migration96 = migrationReport?.migrationVersions?.find((item) => item.version === 96);
-const smoke = execute(['scripts/verify-data-store-smoke.mjs']);
+const smoke = execute(governedNodeScript('scripts/verify-data-store-smoke.mjs'));
 const smokeReport = parseJson(smoke);
-const ppk021 = execute(['scripts/verify-platform-policy-ast-gate.mjs']);
+const ppk021 = execute(governedNodeScript('scripts/verify-platform-policy-ast-gate.mjs'));
 const ppk021Report = parseJson(ppk021);
-const ppk022 = execute(['scripts/verify-platform-capability-manifest-gate.mjs']);
+const ppk022 = execute(governedNodeScript('scripts/verify-platform-capability-manifest-gate.mjs'));
 const ppk022Report = parseJson(ppk022);
 
 const typechecks = {
