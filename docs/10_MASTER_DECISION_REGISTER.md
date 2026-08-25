@@ -1501,3 +1501,5 @@ Checkpoint payload kalıcı düzeltmesini içeren `65ffd15d` kaynak commitinden 
 İlk genişletilmiş retryda 28 test PASS iken yönetişim sözleşmesinin yalnız eski sabit `BLOCKED` paket metnini kabul etmesi güncel gerçek `FAIL` ayrıntısını reddetmiş ve `a7b0f3c3` ile korunmuştur. Sözleşme fail-closed `BLOCKED_`/`FAIL_` anlamına bağlanmış, 4 dosya/29 test PASS vermiştir.
 
 Bu kayıtlarla güncellenen master DOCX 29/29 sayfa görsel QA PASS vermiş; 2–29 önceki onaylı renderla byte-exact aynı, yalnız HEAD satırı değişen 1. sayfa özgün çözünürlükte kusursuz bulunmuştur.
+
+`1745095c` sonrasında kanal dalları authoritative HEAD'e ilerletilmeden eşitleyicinin doğrulama davranışı çağrılmış, commit farkı yazım yapmadan reddedilmiş ve `d5540157` ile korunmuştur. Doğru sıra üç worktree dalını yalnız fast-forward ilerletmek, ardından payload hydrate ve exact commit/temiz ağaç doğrulaması yapmaktır.

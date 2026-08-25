@@ -3,7 +3,7 @@
 - Belge sürümü: **GUNCEL-2026-08-24-V5**
 - Tarih: **24.08.2026**
 - Görünür ürün sürümü: **Bronze 22.08.2026.50**
-- Kaynak HEAD: `a7b0f3c3d7c1b18cdca6e0e0fe167facb96016b5`
+- Kaynak HEAD: `d5540157debdd7e133e42f59fc96d70e949dfeb4`
 - Statü: **ACTIVE_CURRENT_MASTER_REFERENCE**
 - Kararlar: **DEC-250–DEC-275**
 

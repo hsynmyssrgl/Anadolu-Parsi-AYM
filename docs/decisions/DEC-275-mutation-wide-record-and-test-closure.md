@@ -81,4 +81,6 @@ Genişletilmiş hedefli retryda 28 test PASS iken `operation-rule-check-policy.t
 
 Bu kayıtları taşıyan master DOCX kanonik LibreOffice/Poppler zincirinde 29 PNG sayfa üretmiştir. Sayfa 2–29 önceki tam onaylı renderla byte-exact aynıdır; yalnız kaynak HEAD satırı değişen 1. sayfa özgün çözünürlükte taşma, örtüşme, kesilme, font ve bozuk karakter kusuru olmadan PASS vermiştir.
 
+`1745095c` düzeltme commit'i sonrasında kanal eşitleyicinin var olan Bronze dalı authoritative HEAD'e ilerletilmeden varsayılan doğrulama davranışıyla çağrılması commit farkını hiçbir kanal dosyasına yazmadan fail-closed reddetmiş ve `d5540157` ile korunmuştur. Bu araç mevcut kanal dallarını kendi başına taşımaz. Doğru mutasyon sırası Bronze/Silver/Gold worktree dallarını exact authoritative HEAD'e yalnız `git merge --ff-only` ile ilerletmek; ardından eşitleyiciyi manifest ve tamamlanmış checkpoint payloadını hydrate ederek branch/commit/ortak Git nesne deposu/temiz ağaç eşitliğini doğrulamak için çalıştırmaktır. Reset veya geçmişi yeniden yazma yoktur.
+
 Bu karar `DEC-270/PR-235` exact-commit etki ve test zincirini kaldırmaz; kapsamını bütün kayıt sınıfları ve tüm kullanıcı etkileşimi/görsel bütünlük yüzeyleri için açıkça güçlendirir.

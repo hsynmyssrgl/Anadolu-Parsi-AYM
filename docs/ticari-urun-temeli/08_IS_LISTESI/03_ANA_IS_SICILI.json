@@ -7,12 +7,12 @@
   "requirementPass": false,
   "izinliDurumlar": ["TAMAMLANDI", "DEVAM", "ACIK", "BLOCKED", "NOT_RUN"],
   "latestMutationClosure": {
-    "checkpoint": "a7b0f3c3",
+    "checkpoint": "d5540157",
     "status": "DEVAM",
     "affectedWorkItems": ["IS-0211", "IS-0215"],
-    "finding": "96377fb9 exact test, kaynak butunlugu, governed pre/postflight ve kanal esitligi PASS sonrasinda paket kapisi LATEST external PASS ile immutable local PENDING byte farkini reddetti; sonuc b87ebe2e ile korundu ve installer uretilmedi.",
+    "finding": "Kaynak koruma paket hatasi b87ebe2e ve stale packageStatus sozlesmesi a7b0f3c3 ile korundu. 1745095c sonrasinda kanal dallari fast-forward edilmeden verify cagrisi commit farkini yazimsiz reddetti ve d5540157 ile korundu.",
     "focusedValidation": "Ilk immutable PENDING kaydi ezilmez; external receipt SHA-256 bagli ikinci immutable PASS kaydi ve sidecar yerelde ve D: readback ile saklanir. Eski sabit BLOCKED test beklentisi a7b0f3c3 ile korunmus, fail-closed semantik retry 4 dosya/29 test PASS vermistir.",
-    "remaining": "Yeni temiz exact commit kayitlari, hedefli/tam regresyon, kaynak butunlugu, read-only pre/postflight, yerel/dis yedek, paket ve kurulu tam UI UAT zorunludur."
+    "remaining": "Uc kanali ff-only ilerletme ve payload hydrate sonrasi yeni temiz exact commit kayitlari, hedefli/tam regresyon, kaynak butunlugu, read-only pre/postflight, yerel/dis yedek, paket ve kurulu tam UI UAT zorunludur."
   },
   "isler": [
     {"id":"IS-0001","alan":"Yonetim","is":"Ticari temel klasor ve belge yapisi","sorumlu":"Codex","durum":"TAMAMLANDI","kabul":"Zorunlu dosyalar ve otomatik kapi PASS","kanit":["05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json"],"disKaynakGerekli":false,"acikNedeni":"","bagimliliklar":[],"requirementPass":true},

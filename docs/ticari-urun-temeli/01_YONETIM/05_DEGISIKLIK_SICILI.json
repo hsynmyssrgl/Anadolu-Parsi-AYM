@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PARSYUVA-AILE-YASAM-MERKEZI-TICARI-DEGISIKLIK-SICILI-V2",
   "temelTarihi": "2026-08-19",
-  "sonKayit": "TICARI-036",
+  "sonKayit": "TICARI-037",
   "kayitlar": [
     {
       "id": "TICARI-001",
@@ -646,6 +646,23 @@
         "docs/ticari-urun-temeli"
       ],
       "isListesiEtkisi": "IS-0211, IS-0215 ve IS-0601 DEVAM kalir. 96377fb9 exact test, source-integrity, pre/postflight ve kanal esitligi PASS sonrasinda paket kapisi LATEST external PASS ile immutable local PENDING byte farkini reddetti ve b87ebe2e ile korundu. Ilk immutable kayit ezilmez; external receipt SHA-256 bagli ikinci immutable PASS kaydi ve sidecar yerelde ve D: readback ile saklanir. Ilk genis retryda eski sabit BLOCKED metin beklentisi gercek FAIL ayrintisini reddetti ve a7b0f3c3 ile korundu; fail-closed semantik duzeltmesi 4 dosya/29 test PASS. Master DOCX 29/29 gorsel QA PASS; sayfa 2-29 byte-exact ayni, sayfa 1 original kusursuzdur. Yeni exact tum kapilar ve kurulu UAT olmadan paket yoktur.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-037",
+      "tarih": "2026-08-25",
+      "baslik": "Kanal worktree fast-forward ve payload hydrate dogrulama sirasi",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-275, PR-240 ve d5540157 reddedilmis kanal sync verify-mode checkpointi",
+      "etkilenenAlanlar": [
+        "scripts/setup-release-channel-worktrees.mjs",
+        "config/active-governance-ledger.json",
+        "config/user-decision-ledger.json",
+        "docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md",
+        "BUILD_STATUS.md",
+        "docs/ticari-urun-temeli"
+      ],
+      "isListesiEtkisi": "IS-0211, IS-0215 ve IS-0601 DEVAM kalir. 1745095c sonrasinda kanal dallari authoritative HEAD'e ilerletilmeden setup worktree verify cagrisi commit farkini yazimsiz reddetti ve d5540157 ile korundu. Dogru sira uc kanali git merge --ff-only exact HEAD'e ilerletmek, sonra manifest/checkpoint payload hydrate ve exact commit/branch/common object store/clean tree readback yapmaktir. Yeni exact tum kapilar ve kurulu UAT olmadan paket yoktur.",
       "senkronDurumu": "SYNCHRONIZED"
     }
   ]
