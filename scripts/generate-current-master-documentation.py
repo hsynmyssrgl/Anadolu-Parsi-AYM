@@ -220,6 +220,7 @@ DRIFT_FIXES = [
     "PR-240 hedefli test üreticisinin zorunlu açık test listesi verilmeden çağrılması 4c8b6b7d ile fail-closed korunmuştur. Etki değerlendirmesi ve analizi 577 değişen yol ile 94 test dosyasını PASS hesaplamıştır; yeni exact koşu bu 94 dosyayı analizden türetilen sırayla açıkça aktarır ve ret PASS olarak yorumlanmaz.",
     "PR-240 kanonik Git-index üretimi ile varsayılan canlı-ağaç doğrulama modu uyuşmazlığı 47f441e1 ile fail-closed korunmuştur. Eş --git-index --no-report doğrulaması 13.146 kontrol/4.407 dosya/2.143 belge ve kaynak bütünlüğü 4.868/4.868 dosya/4.869 SHA PASS vermiştir; yanlış-mod ret PASS değildir.",
     "PR-240 Bronze runtime önkoşul zinciri 703be65a, 0a118f5f ve 7fb288cd ile; 33-Y/33-Z/34-A alt süreç no-write sızıntısı ddb1abff ile fail-closed korunmuştur. Paket/core-service/desktop çıktılarından sonra 16/16 ek runtime PASS; ortak no-write aktarımından sonra 1 dosya/6 test, üç runtime ve üç byte-exact manifest SHA karşılaştırması PASS vermiştir. Yeni exact commit tam regresyonunun yerine geçmez.",
+    "PR-240 güncel master DOCX ilk PNG renderında bundled Poppler yolunun çözülememesi dd675310 ile fail-closed korunmuştur. Exact Poppler/LibreOffice retry 28/28 sayfa üretmiş; 10–25 byte-identical, değişen 1–9 ve 26–28 sayfalar özgün çözünürlükte görsel QA PASS vermiştir.",
 ]
 
 

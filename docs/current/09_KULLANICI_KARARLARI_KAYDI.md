@@ -90,6 +90,7 @@ Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağ
 - `DEC-275` uygulama kaydı — `4c8b6b7d`, 577 değişen yol ve 94 test dosyası PASS hesaplandıktan sonra hedefli üreticiye zorunlu açık test listesinin verilmemesini fail-closed ret olarak korur. Yeni koşu analizden türetilen aynı 94 dosyayı exact sırayla aktarır; bu ret PASS değildir.
 - `DEC-275` indeks QA kaydı — `47f441e1`, Git-index üretimi ile varsayılan canlı-ağaç doğrulama modunun kapsam uyuşmazlığını ret olarak korur. Eş `--git-index --no-report` doğrulaması 13.146 kontrol/4.407 dosya/2.143 belge ve kaynak bütünlüğü 4.868/4.868 dosya/4.869 SHA PASS vermiştir.
 - `DEC-275` runtime önkoşul/no-write kaydı — `703be65a`, 398 Vitest dosyası/2.469 test PASS sonrasında 16 ek runtime için eksik Bronze workspace çıktısını; `0a118f5f` eksik resmî npm tanı ortamını; `7fb288cd` eksik core-service uygulama çıktısını ve `ddb1abff` 33-Y/33-Z/34-A alt süreç no-write sızıntısını ret olarak korur. Resmî paket/core-service/desktop önkoşullarıyla 16/16 ek runtime PASS; düzeltmeden sonra üç runtime ve üç byte-exact manifest SHA kontrolü PASS vermiştir. Yeni exact tam regresyon zorunludur.
+- `DEC-275` güncel belge render kaydı — `dd675310`, DOCX→PDF sonrasında bundled Poppler yolunun çözülememesini ret olarak korur. Exact Poppler/LibreOffice retry 28/28 sayfa PASS; 10–25 byte-identical, değişen 1–9 ve 26–28 sayfalar özgün çözünürlükte görsel QA PASS vermiştir.
 
 ## Bundan sonraki kararlar için zorunlu eşzamanlılık kuralı
 

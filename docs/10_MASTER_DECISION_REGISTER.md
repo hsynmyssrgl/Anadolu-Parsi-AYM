@@ -1471,3 +1471,5 @@ Uygulama bağı mutasyondan önce kaydedilen clean Bronze baseline receipt'i, im
 `703be65a`, 398 Vitest dosyası/2.469 test PASS sonrasında Bronze workspace `dist` önkoşulu yokluğunda 16 ek runtime komutunun FAIL olmasını; `0a118f5f` eksik resmî npm ortamıyla yapılan tanı çağrısını ve `7fb288cd` eksik core-service uygulama çıktısını ret olarak korur. Paket, core-service ve desktop çalışma çıktıları aynı Bronze kökünde üretildiğinde 16/16 ek runtime PASS vermiştir.
 
 `ddb1abff`, 33-Y/33-Z/34-A salt-okunur runtime zincirinin alt migration/smoke/politika üreticilerine `--no-write` aktarmayıp izlenen manifestte zaman damgası bırakmasını ret olarak korur. Ortak aktarım düzeltmesinden sonra 1 dosya/6 test ve üç runtime 11/11 PASS; üç manifest SHA-256 karşılaştırması byte-exact değişmezdir. Yeni exact hedefli/tam regresyon ve kaynak bütünlüğü tamamlanmadan paket yoktur.
+
+`dd675310`, güncel master DOCX'in ilk PNG renderında bundled Poppler yolunun çözülememesini ret olarak korur. Exact Poppler/LibreOffice yollarıyla 28/28 sayfa üretildi; 10–25 byte-identical, değişen 1–9 ve 26–28 sayfalar özgün çözünürlükte görsel QA PASS verdi.

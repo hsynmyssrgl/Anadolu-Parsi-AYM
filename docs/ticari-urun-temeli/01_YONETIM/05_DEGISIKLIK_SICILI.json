@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PARSYUVA-AILE-YASAM-MERKEZI-TICARI-DEGISIKLIK-SICILI-V2",
   "temelTarihi": "2026-08-19",
-  "sonKayit": "TICARI-025",
+  "sonKayit": "TICARI-026",
   "kayitlar": [
     {
       "id": "TICARI-001",
@@ -441,6 +441,23 @@
         "docs/ticari-urun-temeli"
       ],
       "isListesiEtkisi": "IS-0211 ve IS-0215 DEVAM kalir. cb20d2e5 exact Bronze turunda 398 Vitest dosyasi/2469 test PASS iken 16 ek runtime eksik workspace dist nedeniyle FAIL olup 703be65a ile kaydedildi. 0a118f5f eksik resmi npm tani ortamini, 7fb288cd eksik core-service dist onkosulunu ve ddb1abff 33-Y/33-Z/34-A alt surec no-write sizintisini korur. Resmi package/core-service/desktop buildlerinden sonra 16/16 ek runtime PASS; no-write duzeltmesinden sonra 1 dosya/6 test, uc runtime ve uc byte-exact manifest SHA kontrolu PASS verdi. Yeni exact hedefli/tam regresyon, kaynak butunlugu ve kurulu UI UAT tamamlanmadan paket yoktur.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-026",
+      "tarih": "2026-08-25",
+      "baslik": "Guncel master DOCX exact Poppler render retry kapanisi",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-275, PR-240 ve dd675310 reddedilmis belge render checkpointi",
+      "etkilenenAlanlar": [
+        "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.docx",
+        "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.pdf",
+        "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
+        "scripts/generate-current-master-documentation.py",
+        "docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md",
+        "BUILD_STATUS.md"
+      ],
+      "isListesiEtkisi": "IS-0211 ve IS-0215 DEVAM kalir. Ilk DOCX PNG renderi LibreOffice PDF donusumunden sonra bundled Poppler pdfinfo PATH eksigiyle fail-closed durdu ve dd675310 ile kaydedildi. Exact Poppler/LibreOffice retry 28/28 sayfa uretti; 10-25 onceki renderla byte-identical, degisen 1-9 ve 26-28 sayfalar ozgun cozulunurlukte tasma, ortusme, kesilme ve bozuk karakter olmadan PASS verdi. Yeni exact hedefli/tam regresyon ve kaynak butunlugu tamamlanmadan paket yoktur.",
       "senkronDurumu": "SYNCHRONIZED"
     }
   ]
