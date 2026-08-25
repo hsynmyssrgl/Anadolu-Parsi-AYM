@@ -3,7 +3,7 @@
 - Belge sürümü: **GUNCEL-2026-08-24-V5**
 - Tarih: **24.08.2026**
 - Görünür ürün sürümü: **Bronze 22.08.2026.50**
-- Kaynak HEAD: `f0cef9c4a1ecbf0bc19544451e8731fa283472c8`
+- Kaynak HEAD: `8b2b5ccc6a120fbecee02fff877d54256d1b8014`
 - Statü: **ACTIVE_CURRENT_MASTER_REFERENCE**
 - Kararlar: **DEC-250–DEC-275**
 
@@ -163,6 +163,7 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - PR-240 c02744cd exact Bronze resmi npm tam regresyonu 398 dosya/2.469 test ve 171/171 ek komut PASS vermiştir. Kaynak bütünlüğü 683 eksik Git-dışı manifest payloadı ve linked-worktree .git yönetim dosyasının yanlış kaynak sayılması nedeniyle 684 bulguyla FAIL olmuş ve 7d67fcff ile korunmuştur. Kanal kurulumu üç ayrı kanala güvenli yol/normal dosya/byte/SHA-256/atomik readback bağlı payload eşitlemesi yapar; kaynak toplayıcı .git dosya ve klasörünü dışlar. Odaklı 2 dosya/9 test PASS; yeni exact kapılar zorunludur.
 - PR-240 96b9faac kaynaklı güncel ana DOCX ilk PNG renderında yanlış bundled PATH nedeniyle Poppler pdfinfo çözülememiş ve e5787764 ile fail-closed korunmuştur. Doğru native\poppler\Library\bin ve LibreOffice yollarıyla retry 28/28 sayfa üretmiş; bütün sayfalar temas sayfalarında, metin yoğun 6–7 ve tablo yoğun 27–28 ayrıca özgün çözünürlükte taşma, örtüşme, kesilme, font ve bozuk karakter açısından görsel QA PASS vermiştir.
 - PR-240 kapanış kayıtlarını içeren 7f866e69 kaynak commitinden final master DOCX doğru native Poppler/LibreOffice zinciriyle 29/29 sayfa görsel QA PASS vermiştir. Tüm sayfalar beş temas sayfasında; 6–7 ve yoğun kural/envanter tablolarını taşıyan 26–29 ayrıca özgün çözünürlükte kusursuzdur.
+- PR-240 d421c299 exact Bronze turunda hedefli 95 dosya/600 test, filtresiz 399 dosya/2.471 test, 172/172 ek komut ve 4.869/4.869 kaynak bütünlüğü PASS sonrasında governed preflight; önce güncel retention/görünür sürüm makbuzu eksikliğini 607a9a53, ardından tamamlanmış çalışma adımlarının 1.428 kanıt yolundan 803 Git-dışı checkpoint payload dosyasının kanal eksikliğini 8b2b5ccc ile fail-closed korumuştur. Kanal kurulumu tamamlanmış localEvidence ve persistent receipt yollarını tracked/manifest dışlamalı kanonik yol, normal dosya, SHA-256, atomik yazım ve readback ile üç kanala eşitler. Seçici 809 yol, odaklı 1 dosya/9 test ve ticari temel 1.234 kontrol PASS; yeni exact preflight PASS olmadan paket yoktur.
 
 ## 9. Görsel kimlik ve erişilebilirlik
 

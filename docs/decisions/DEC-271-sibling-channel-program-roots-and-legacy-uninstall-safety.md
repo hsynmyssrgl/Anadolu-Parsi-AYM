@@ -10,7 +10,7 @@ Bronze, Silver ve Gold programları legacy `C:\Program Files\PPT\ParsYuva` kök�
 
 Kanal appId, productName, `ParsYuva-<Kanal>.exe`, `ParsYuva <Kanal>` kısayolu, kaldırma kapsamı, kullanıcı verisi, Git worktree ve branch yalıtımı korunur. Build çıktısı ve kullanıcı verisi kanallar arasında yeniden kullanılamaz.
 
-PR-240 kaynak teslimi kapsamında, manifestte kayıtlı fakat Git'te izlenmeyen yönetişim/checkpoint payloadı da kanal dizinlerinde eksik bırakılamaz. Worktree kurulumu bu dosyaları doğrudan klasör kopyasıyla değil; kanonik göreli yol, normal dosya, byte sayısı ve SHA-256 kimliği doğrulanmış seçici eşitlemeyle Bronze, Silver ve Gold'un ayrı çalışma dizinlerine taşır ve canlı readback yapar. Git'te izlenen dosyalar bu yolla üzerine yazılamaz; manifest dışı stale dosyalar sessizce silinmez.
+PR-240 kaynak teslimi kapsamında, manifestte kayıtlı fakat Git'te izlenmeyen yönetişim/checkpoint payloadı da kanal dizinlerinde eksik bırakılamaz. Ayrıca aktif çalışma planındaki tamamlanmış adımların bütün `localEvidence` ve persistent receipt yolları governed preflight çalışmadan önce fiziksel olarak mevcut olmalıdır. Worktree kurulumu bu iki kümeyi doğrudan klasör kopyasıyla değil; tracked ve zaten manifest-bound yolları dışlayan, kanonik göreli yol, normal dosya, byte sayısı ve SHA-256 kimliği doğrulanmış seçici eşitlemeyle Bronze, Silver ve Gold'un ayrı çalışma dizinlerine taşır ve canlı readback yapar. Git'te izlenen dosyalar bu yolla üzerine yazılamaz; manifest/çalışma planı dışı stale dosyalar sessizce silinmez.
 
 Yükseltme ve sessiz bakım kişisel veri seçim akışını açmaz. Per-machine kaldırıcı yalnız etkileşimli kaldırmada signed-in kullanıcının AppData bağlamına geçer ve iptal veya tamamlanma çıkışında all-users bağlamını geri yükler.
 

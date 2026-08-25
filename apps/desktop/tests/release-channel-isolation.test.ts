@@ -19,6 +19,10 @@ const setupModule=await import(pathToFileURL(resolve('scripts/setup-release-chan
   selectUntrackedManifestPayloadEntries:(input:{
     manifestFiles:Array<{path:string;sha256:string;bytes:number}>;trackedPaths:Set<string>;
   })=>Array<{path:string;sha256:string;bytes:number}>;
+  selectUntrackedCheckpointPayloadPaths:(input:{
+    workPlan:{steps:Array<{status:string;localEvidence?:string[];persistentReceiptPath?:string}>};
+    excludedPaths:Set<string>;
+  })=>string[];
 };
 const verifierModule=await import(pathToFileURL(resolve('scripts/verify-release-channel-worktrees.mjs')).href) as {
   verifyReleaseChannelWorktrees:(input:{
@@ -109,6 +113,27 @@ describe('release-channel source and runtime isolation',()=>{
     })).toThrow(/Invalid source manifest payload identity/u);
     expect(setupScript).toContain('hydrateManifestPayload({ repositoryRoot, target, manifest, trackedPaths })');
     expect(setupScript).toContain('Release-channel manifest payload readback mismatch');
+  });
+
+  it('hydrates every completed work-step checkpoint that the governed preflight requires',()=>{
+    expect(setupModule.selectUntrackedCheckpointPayloadPaths({
+      workPlan:{steps:[
+        {status:'COMPLETED',localEvidence:['artifacts/validation/29-A.json','artifacts/validation/shared.json'],
+          persistentReceiptPath:'artifacts/checkpoints/29-A_LIBRARY_RECEIPT.json'},
+        {status:'COMPLETED',localEvidence:['artifacts/validation/shared.json','artifacts/validation/29-B.json']},
+        {status:'IN_PROGRESS',localEvidence:['artifacts/validation/current-mutable.json']}
+      ]},
+      excludedPaths:new Set(['artifacts/checkpoints/29-A_LIBRARY_RECEIPT.json'])
+    })).toEqual([
+      'artifacts/validation/29-A.json',
+      'artifacts/validation/shared.json',
+      'artifacts/validation/29-B.json'
+    ]);
+    expect(()=>setupModule.selectUntrackedCheckpointPayloadPaths({
+      workPlan:{steps:[{status:'COMPLETED',localEvidence:['../outside.json']}]},excludedPaths:new Set()
+    })).toThrow(/Unsafe manifest payload path/u);
+    expect(setupScript).toContain('hydrateCheckpointPayload({ repositoryRoot, target, workPlan');
+    expect(setupScript).toContain('Release-channel checkpoint payload readback mismatch');
   });
 
   it('resolves the canonical repository from shared Git metadata inside a channel worktree',()=>{

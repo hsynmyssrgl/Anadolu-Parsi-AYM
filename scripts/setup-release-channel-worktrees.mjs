@@ -47,6 +47,25 @@ export const selectUntrackedManifestPayloadEntries = ({ manifestFiles, trackedPa
   return Object.freeze(entries);
 };
 
+export const selectUntrackedCheckpointPayloadPaths = ({ workPlan, excludedPaths }) => {
+  if (!Array.isArray(workPlan?.steps)) throw new Error('Work segmentation checkpoint inventory is invalid.');
+  const excluded = excludedPaths instanceof Set ? excludedPaths : new Set(excludedPaths ?? []);
+  const seen = new Set();
+  const paths = [];
+  for (const step of workPlan.steps) {
+    if (step?.status !== 'COMPLETED') continue;
+    const candidates = [...(Array.isArray(step.localEvidence) ? step.localEvidence : [])];
+    if (step.persistentReceiptPath) candidates.push(step.persistentReceiptPath);
+    for (const candidate of candidates) {
+      const path = normalizeManifestPath(candidate);
+      if (seen.has(path)) continue;
+      seen.add(path);
+      if (!excluded.has(path)) paths.push(path);
+    }
+  }
+  return Object.freeze(paths);
+};
+
 const assertCanonicalRoot = (root, label) => {
   const full = resolve(root);
   const item = lstatSync(full);
@@ -133,6 +152,42 @@ const hydrateManifestPayload = ({ repositoryRoot, target, manifest, trackedPaths
   return Object.freeze({ status: 'PASS', manifestPayloadFiles: entries.length, copied, unchanged });
 };
 
+const hydrateCheckpointPayload = ({ repositoryRoot, target, workPlan, excludedPaths }) => {
+  const paths = selectUntrackedCheckpointPayloadPaths({ workPlan, excludedPaths });
+  let copied = 0;
+  let unchanged = 0;
+  for (const path of paths) {
+    const sourcePath = assertCanonicalPayloadFile(repositoryRoot, path, 'Authoritative checkpoint payload');
+    const bytes = readFileSync(sourcePath);
+    const expectedSha256 = sha256(bytes);
+    const targetPath = ensureCanonicalTargetParent(target, path, 'Release-channel checkpoint payload');
+    if (existsSync(targetPath)) {
+      const item = lstatSync(targetPath);
+      if (!item.isFile() || item.isSymbolicLink() || !samePath(realpathSync(targetPath), targetPath)) {
+        throw new Error(`Release-channel checkpoint payload target is not canonical: ${path}`);
+      }
+      const current = readFileSync(targetPath);
+      if (current.length === bytes.length && sha256(current) === expectedSha256) {
+        unchanged += 1;
+        continue;
+      }
+    }
+    const temporaryPath = resolve(dirname(targetPath), `.tmp-channel-checkpoint-${randomUUID()}`);
+    try {
+      writeFileSync(temporaryPath, bytes, { flag: 'wx' });
+      renameSync(temporaryPath, targetPath);
+    } finally {
+      if (existsSync(temporaryPath)) unlinkSync(temporaryPath);
+    }
+    const readback = readFileSync(assertCanonicalPayloadFile(target, path, 'Release-channel checkpoint payload'));
+    if (readback.length !== bytes.length || sha256(readback) !== expectedSha256) {
+      throw new Error(`Release-channel checkpoint payload readback mismatch: ${path}`);
+    }
+    copied += 1;
+  }
+  return Object.freeze({ status: 'PASS', checkpointPayloadFiles: paths.length, copied, unchanged });
+};
+
 export const assertCleanWorktree = (status, label) => {
   if (String(status).trim()) throw new Error(`${label} is not clean. Commit and validate first.`);
 };
@@ -149,6 +204,7 @@ export const setupReleaseChannelWorktrees = ({ repositoryRoot = scriptRepository
   const codeRoot = dirname(repositoryRoot);
   const configuration = JSON.parse(readFileSync(join(repositoryRoot, 'config/release-channel-worktrees.json'), 'utf8'));
   const manifest = JSON.parse(readFileSync(join(repositoryRoot, 'manifest.json'), 'utf8'));
+  const workPlan = JSON.parse(readFileSync(join(repositoryRoot, 'config/work-segmentation-plan.json'), 'utf8'));
   const git = (args, { allowFailure = false, cwd = repositoryRoot } = {}) => {
     const result = spawnSync('git', ['-c', `safe.directory=${cwd}`, ...args], {
       cwd, encoding: 'utf8', windowsHide: true
@@ -166,6 +222,10 @@ export const setupReleaseChannelWorktrees = ({ repositoryRoot = scriptRepository
     'The authoritative repository');
   const authoritativeHead = git(['rev-parse', 'HEAD']).stdout.trim();
   const trackedPaths = new Set(git(['ls-files', '-z']).stdout.split('\0').filter(Boolean));
+  const checkpointExcludedPaths = new Set([
+    ...trackedPaths,
+    ...(manifest.files ?? []).map((entry) => normalizeManifestPath(entry?.path))
+  ]);
   const authoritativeCommonGitDirectory = resolve(repositoryRoot,
     git(['rev-parse', '--git-common-dir']).stdout.trim());
 
@@ -205,9 +265,12 @@ export const setupReleaseChannelWorktrees = ({ repositoryRoot = scriptRepository
     if (existingBranch !== undefined) {
       if (existingBranch !== definition.branch) throw new Error(`${definition.channel} worktree is bound to an unexpected branch.`);
       verifyWorktree(definition, target);
-      const payload = hydrateManifestPayload({ repositoryRoot, target, manifest, trackedPaths });
+      const manifestPayload = hydrateManifestPayload({ repositoryRoot, target, manifest, trackedPaths });
+      const checkpointPayload = hydrateCheckpointPayload({ repositoryRoot, target, workPlan,
+        excludedPaths: checkpointExcludedPaths });
       verifyWorktree(definition, target);
-      outcomes.push({ channel: definition.channel, directory: target, branch: definition.branch, status: 'EXISTING', payload });
+      outcomes.push({ channel: definition.channel, directory: target, branch: definition.branch, status: 'EXISTING',
+        payload: { manifest: manifestPayload, checkpoints: checkpointPayload } });
       continue;
     }
     if (existsSync(target)) throw new Error(`${target} exists but is not a registered Git worktree.`);
@@ -220,9 +283,12 @@ export const setupReleaseChannelWorktrees = ({ repositoryRoot = scriptRepository
       ? ['worktree', 'add', target, definition.branch]
       : ['worktree', 'add', '-b', definition.branch, target, 'HEAD']);
     verifyWorktree(definition, target);
-    const payload = hydrateManifestPayload({ repositoryRoot, target, manifest, trackedPaths });
+    const manifestPayload = hydrateManifestPayload({ repositoryRoot, target, manifest, trackedPaths });
+    const checkpointPayload = hydrateCheckpointPayload({ repositoryRoot, target, workPlan,
+      excludedPaths: checkpointExcludedPaths });
     verifyWorktree(definition, target);
-    outcomes.push({ channel: definition.channel, directory: target, branch: definition.branch, status: 'CREATED', payload });
+    outcomes.push({ channel: definition.channel, directory: target, branch: definition.branch, status: 'CREATED',
+      payload: { manifest: manifestPayload, checkpoints: checkpointPayload } });
   }
 
   return { status: 'PASS', policyId: configuration.policyId, authoritativeHead, worktrees: outcomes };

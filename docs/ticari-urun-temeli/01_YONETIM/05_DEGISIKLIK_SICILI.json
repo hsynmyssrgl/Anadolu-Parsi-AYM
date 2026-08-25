@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PARSYUVA-AILE-YASAM-MERKEZI-TICARI-DEGISIKLIK-SICILI-V2",
   "temelTarihi": "2026-08-19",
-  "sonKayit": "TICARI-032",
+  "sonKayit": "TICARI-033",
   "kayitlar": [
     {
       "id": "TICARI-001",
@@ -569,6 +569,26 @@
         "docs/ticari-urun-temeli"
       ],
       "isListesiEtkisi": "IS-0215 DEVAM kalir. 7f866e69 kaynakli final master DOCX dogru native Poppler ve LibreOffice zinciriyle 29/29 sayfa PASS verdi. Tum sayfalar bes temas sayfasinda; 6-7 ve 26-29 ayrica ozgun cozulunurlukte incelendi. Exact testler, kaynak butunlugu ve kurulu tam UI UAT tamamlanmadan paket yoktur.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-033",
+      "tarih": "2026-08-25",
+      "baslik": "Governed preflight kanal checkpoint payload butunlugu",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-271, DEC-275, PR-240 ve 607a9a53/8b2b5ccc reddedilmis preflight checkpointleri",
+      "etkilenenAlanlar": [
+        "scripts/setup-release-channel-worktrees.mjs",
+        "apps/desktop/tests/release-channel-isolation.test.ts",
+        "config/work-segmentation-plan.json",
+        "config/active-governance-ledger.json",
+        "config/user-decision-ledger.json",
+        "docs/decisions/DEC-271-sibling-channel-program-roots-and-legacy-uninstall-safety.md",
+        "docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md",
+        "BUILD_STATUS.md",
+        "docs/ticari-urun-temeli"
+      ],
+      "isListesiEtkisi": "IS-0211, IS-0215 ve IS-0601 DEVAM kalir. d421c299 exact test ve kaynak butunlugu PASS sonrasinda preflight once temizlenen guncel installer makbuzlari, sonra tamamlanmis adimlarin 1428 gerekli yolundan 803 Git-disi checkpoint payload eksigiyle durdu. Ana kaynak 1428/1428 tamdir. Kanal kurulumu manifest payloadina ek olarak tamamlanmis localEvidence ve persistent receipt yollarini tracked/manifest dislamali SHA-256 ve atomik readback ile uc kanala esitler. Secici 809 yol, odakli 1 dosya/9 test ve ticari temel 1234 kontrol PASS; yeni exact kapilar olmadan paket yoktur.",
       "senkronDurumu": "SYNCHRONIZED"
     }
   ]
