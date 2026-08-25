@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PARSYUVA-AILE-YASAM-MERKEZI-TICARI-DEGISIKLIK-SICILI-V2",
   "temelTarihi": "2026-08-19",
-  "sonKayit": "TICARI-035",
+  "sonKayit": "TICARI-036",
   "kayitlar": [
     {
       "id": "TICARI-001",
@@ -626,6 +626,26 @@
         "docs/ticari-urun-temeli"
       ],
       "isListesiEtkisi": "IS-0211, IS-0215 ve IS-0601 DEVAM kalir. cc01412c exact Bronze hedefli 95 dosya/601 test ve tam 399 dosya/2472 test PASS sonrasi preflight sertifikasinin degistirdigi sekiz izlenen dosyanin hashleri kaynak manifestinde eski kaldigi icin source-integrity FAIL oldu ve 6a0840d4 ile korundu. Kayitlar ve indeksler tamamlandiktan sonra manifest/SHA son uretici olarak yenilenir; yeni exact kapilar olmadan paket yoktur.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-036",
+      "tarih": "2026-08-25",
+      "baslik": "Dis kaynak koruma final immutable makbuz butunlugu",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-275, PR-240 ve b87ebe2e/a7b0f3c3 reddedilmis paketleme ve sozlesme checkpointleri",
+      "etkilenenAlanlar": [
+        "scripts/protect-authoritative-source-external.mjs",
+        "scripts/lib/aym-source-authority.mjs",
+        "apps/desktop/tests/aym-governance-channel-receipt-path.test.ts",
+        "apps/desktop/tests/authoritative-source-exact-commit-backup.test.ts",
+        "config/active-governance-ledger.json",
+        "config/user-decision-ledger.json",
+        "docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md",
+        "BUILD_STATUS.md",
+        "docs/ticari-urun-temeli"
+      ],
+      "isListesiEtkisi": "IS-0211, IS-0215 ve IS-0601 DEVAM kalir. 96377fb9 exact test, source-integrity, pre/postflight ve kanal esitligi PASS sonrasinda paket kapisi LATEST external PASS ile immutable local PENDING byte farkini reddetti ve b87ebe2e ile korundu. Ilk immutable kayit ezilmez; external receipt SHA-256 bagli ikinci immutable PASS kaydi ve sidecar yerelde ve D: readback ile saklanir. Ilk genis retryda eski sabit BLOCKED metin beklentisi gercek FAIL ayrintisini reddetti ve a7b0f3c3 ile korundu; fail-closed semantik duzeltmesi 4 dosya/29 test PASS. Master DOCX 29/29 gorsel QA PASS; sayfa 2-29 byte-exact ayni, sayfa 1 original kusursuzdur. Yeni exact tum kapilar ve kurulu UAT olmadan paket yoktur.",
       "senkronDurumu": "SYNCHRONIZED"
     }
   ]

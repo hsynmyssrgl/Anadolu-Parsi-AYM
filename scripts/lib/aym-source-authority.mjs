@@ -117,8 +117,17 @@ export const readCanonicalChannelSourceProtection = async ({
     || !SHA256_PATTERN.test(String(protection.treeSha256 ?? ''))) {
     fail(`${expectedChannel} canonical LATEST receipt identity is invalid.`);
   }
+  const completedExternalProtection = protection.externalLibraryReceiptStatus === 'PASS'
+    && protection.officialCompletionClaimed === true;
+  if (completedExternalProtection
+    && !SHA256_PATTERN.test(String(protection.externalReceipt?.sha256 ?? ''))) {
+    fail(`${expectedChannel} completed canonical LATEST receipt external identity is invalid.`);
+  }
+  const immutableName = completedExternalProtection
+    ? `PROTECTION_${protection.treeSha256}_${protection.externalReceipt.sha256}.json`
+    : `PROTECTION_${protection.treeSha256}.json`;
   const immutablePath = resolve(root, '05_TEST', '30Z_LOCAL_RECEIPT', expectedChannel,
-    `PROTECTION_${protection.treeSha256}.json`);
+    immutableName);
   const immutable = await readCanonicalRegularFile(immutablePath, root,
     `${expectedChannel} immutable source-protection receipt`);
   if (!latest.bytes.equals(immutable.bytes)) {

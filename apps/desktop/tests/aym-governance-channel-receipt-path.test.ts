@@ -62,6 +62,26 @@ describe('AYM governance channel receipt path', () => {
       await writeFile(join(receiptRoot, `PROTECTION_${treeSha256}.json`), Buffer.from('{}\n'));
       await expect(readCanonicalChannelSourceProtection({ aymRoot, expectedChannel: 'Bronze' }))
         .rejects.toThrow(/does not equal its immutable protection record/u);
+
+      await writeFile(join(receiptRoot, `PROTECTION_${treeSha256}.json`), protectionBytes);
+      const externalReceiptSha256 = 'b'.repeat(64);
+      const completedProtection = {
+        ...protection,
+        externalLibraryReceiptStatus: 'PASS',
+        officialCompletionClaimed: true,
+        externalReceipt: { sha256: externalReceiptSha256 }
+      };
+      const completedBytes = Buffer.from(`${JSON.stringify(completedProtection, null, 2)}\n`);
+      const completedPath = join(receiptRoot, `PROTECTION_${treeSha256}_${externalReceiptSha256}.json`);
+      await writeFile(completedPath, completedBytes);
+      await writeFile(join(receiptRoot, 'LATEST.json'), completedBytes);
+      await expect(readCanonicalChannelSourceProtection({ aymRoot, expectedChannel: 'Bronze' }))
+        .resolves.toMatchObject({ value: completedProtection, binding: { immutablePath: completedPath } });
+      expect(readFileSync(join(receiptRoot, `PROTECTION_${treeSha256}.json`))).toEqual(protectionBytes);
+
+      await writeFile(completedPath, Buffer.from('{}\n'));
+      await expect(readCanonicalChannelSourceProtection({ aymRoot, expectedChannel: 'Bronze' }))
+        .rejects.toThrow(/does not equal its immutable protection record/u);
     } finally {
       await rm(aymRoot, { recursive: true, force: true });
     }

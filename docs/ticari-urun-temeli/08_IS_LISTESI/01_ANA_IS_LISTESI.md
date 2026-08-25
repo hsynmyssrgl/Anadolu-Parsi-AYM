@@ -84,7 +84,7 @@ Durumlar: `TAMAMLANDI`, `DEVAM`, `ACIK`, `BLOCKED`, `NOT_RUN`.
 
 | ID | Is | Sorumlu | Durum | Kabul |
 |---|---|---|---|---|
-| IS-0601 | Tam regresyonu yeni kaynakta tekrar kos | Codex | DEVAM | 0f0a4653 exact Bronze hedefli turunda 600 test PASS iken lifecycle/delivery closure durum drifti FAIL oldu ve 50f4d9e5 ile korundu. Duzeltme final kaynak degisikligi oldugundan yeni exact hedefli ve filtresiz tam tur zorunlu |
+| IS-0601 | Tam regresyonu yeni kaynakta tekrar kos | Codex | DEVAM | 96377fb9 exact kapıları PASS sonrasında kaynak koruma final makbuzu farkı paketlemede FAIL oldu ve b87ebe2e ile korundu. Makbuz üreticisi düzeltmesi kaynak değişikliği olduğundan yeni exact hedefli ve filtresiz tam tur zorunlu |
 | IS-0602 | SBOM ve lisans kapisi | Codex | TAMAMLANDI | Belirsiz/yasak lisans 0 |
 | IS-0603 | SAST/dependency/secret tarama | Codex | TAMAMLANDI | Kritik/yuksek 0 |
 | IS-0604 | Performans ve buyuk aile testi | Codex | DEVAM | Buyuk aile ve fresh-profile dogruluk PASS; paketlenmis Electron bellek/CPU/startup SLA baseline acik |
@@ -123,3 +123,7 @@ Checkpoint payload düzeltmesi sonrası belge QA kaydı: `65ffd15d` kaynaklı g�
 Aktif yaşam döngüsü/teslim kapanışı kaydı: `0f0a4653` exact Bronze etki analizi 95 hedefli test dosyası hesapladı; hedefli turda 600 test PASS iken PR-240 current-mutation `preflightStatus` alanındaki tarihsel FAIL metni `operation-rule-check-policy.test.ts` tarafından reddedildi ve `50f4d9e5` ile korundu. Alan `NOT_RUN_CURRENT_MUTATION` olarak düzeltilir; tarihsel retler QA kayıtlarında kalır. Bronze/Silver/Gold checkpoint yolları her kanalda 1.428/1.428 ve eksik 0 PASS'tir. `IS-0211`, `IS-0215` ve `IS-0601` yeni exact kapılar bitene kadar `DEVAM` kalır.
 
 Final sertifika/hash kaydı: `cc01412c` exact Bronze hedefli turu 95 dosya/601 test ve filtresiz tam turu 399 dosya/2.472 test PASS verdi. Preflight sertifika commit'inin değiştirdiği sekiz izlenen indeks/kanıt dosyasının hash'leri kaynak manifestinde eski kaldığı için kaynak bütünlüğü FAIL oldu ve `6a0840d4` ile korundu. `IS-0211`, `IS-0215` ve `IS-0601`; manifest/SHA yenilenip yeni exact kaynak bütünlüğü, read-only pre/postflight ve kurulu UI UAT bitene kadar `DEVAM` kalır.
+
+Dış kaynak koruma final makbuzu kaydı: `96377fb9` exact hedefli/tam test, kaynak bütünlüğü, governed pre/postflight ve ana/kanal eşitliği PASS sonrasında paket kapısı dış USB `PASS` durumlu `LATEST` ile ilk yerel `PENDING` değişmez makbuzun byte farkını reddetti; gerçek sonuç `b87ebe2e` ile korundu ve installer üretilmedi. İlk kayıt ezilmeden dış receipt SHA-256 kimliğine bağlı ikinci değişmez final kayıt ve sidecar yerelde/D: geri okumalı saklanır. `IS-0211`, `IS-0215` ve `IS-0601` yeni exact bütün kapılar, paket ve kurulu tam UI UAT bitene kadar `DEVAM` kalır.
+
+Kaynak koruma düzeltmesi belge QA kaydı: güncel master DOCX 29/29 sayfa PASS; 2–29 önceki onaylı renderla byte-exact aynı, yalnız HEAD satırı değişen 1. sayfa özgün çözünürlükte kusursuzdur. Bu belge PASS'i yeni exact test/yedek/paket/kurulu UAT zorunluluğunu kaldırmaz.

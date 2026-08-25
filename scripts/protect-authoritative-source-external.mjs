@@ -28,6 +28,16 @@ const jsonBytes = (value) => Buffer.from(`${JSON.stringify(value, null, 2)}\n`, 
 const assert = (condition, message) => { if (!condition) throw new Error(message); };
 const posix = (path) => path.split(sep).join('/');
 const writeBytes = async (path, bytes) => { await mkdir(dirname(path), { recursive: true }); await writeFile(path, bytes); };
+const writeImmutableBytes = async (path, bytes) => {
+  await mkdir(dirname(path), { recursive: true });
+  try {
+    await writeFile(path, bytes, { flag: 'wx' });
+  } catch (error) {
+    if (error?.code !== 'EEXIST') throw error;
+    const existing = await readFile(path);
+    assert(existing.equals(bytes), `Immutable source-protection record already exists with different bytes: ${path}`);
+  }
+};
 const writePair = async (path, value) => {
   const bytes = jsonBytes(value);
   const digest = sha256(bytes);
@@ -94,9 +104,20 @@ const localProtection = async () => {
   const declaredReceipt = (await readFile(receiptSidecar, 'utf8')).trim().split(/\s+/u)[0];
   const declaredBackup = (await readFile(backupSidecar, 'utf8')).trim().split(/\s+/u)[0];
   assert(declaredReceipt === protection.receipt.sha256 && declaredBackup === protection.backup.sha256, 'Local protection sidecar mismatch');
-  const immutableProtectionPath = resolve(localReceiptRoot, `PROTECTION_${protection.treeSha256}.json`);
+  const completedExternalProtection = protection.externalLibraryReceiptStatus === 'PASS'
+    && protection.officialCompletionClaimed === true;
+  if (completedExternalProtection) {
+    assert(/^[a-f0-9]{64}$/u.test(String(protection.externalReceipt?.sha256 ?? '')),
+      'Completed source protection external receipt SHA-256 is invalid');
+  }
+  const immutableProtectionName = completedExternalProtection
+    ? `PROTECTION_${protection.treeSha256}_${protection.externalReceipt.sha256}.json`
+    : `PROTECTION_${protection.treeSha256}.json`;
+  const immutableProtectionPath = resolve(localReceiptRoot, immutableProtectionName);
   const immutableProtection = await readJson(immutableProtectionPath);
   assert(immutableProtection.treeSha256 === protection.treeSha256, 'Immutable local protection identity mismatch');
+  const [latestBytes, immutableBytes] = await Promise.all([readFile(latestPath), readFile(immutableProtectionPath)]);
+  assert(latestBytes.equals(immutableBytes), 'Canonical LATEST source protection does not equal its immutable record');
   assert(liveEvidence.treeSha256 === protection.treeSha256, 'Live local source tree does not match the selected protection receipt');
   return { latestPath, protection, receiptPath, receiptSidecar, backupPath, backupSidecar, immutableProtectionPath };
 };
@@ -153,7 +174,7 @@ const createExternal = async () => {
     backupScope: 'TRACKED_FILES_AT_EXACT_COMMIT',
     treeSha256: protection.treeSha256, baseExpected: copied.length, baseMatched: copied.length,
     receiptExpected: 2, receiptMatched: 2, failed: 0,
-    expectedFinalFileCount: copied.length + 4, verifiedAt: new Date().toISOString(), mandatoryTruthSentence: truth
+    expectedFinalFileCount: copied.length + 6, verifiedAt: new Date().toISOString(), mandatoryTruthSentence: truth
   };
   const localReadbackPath = resolve(externalReceiptRoot, `READBACK_${protection.treeSha256}.json`);
   const readbackBinding = await writePair(localReadbackPath, readback);
@@ -161,7 +182,7 @@ const createExternal = async () => {
   await copyChecked(localReadbackPath, externalReadbackPath);
   await copyChecked(`${localReadbackPath}.sha256`, `${externalReadbackPath}.sha256`);
   const names = await listFiles(targetRoot);
-  assert(names.length === readback.expectedFinalFileCount, `D: final source protection file count mismatch: ${names.length}`);
+  assert(names.length === copied.length + 4, `D: pre-completion source protection file count mismatch: ${names.length}`);
   const completedProtection = {
     ...protection,
     externalLibraryReceiptStatus: 'PASS', officialCompletionClaimed: true,
@@ -169,15 +190,29 @@ const createExternal = async () => {
       path: `05_TEST/30Z_EXTERNAL_RECEIPT/${protection.sourceProvenance.channel}/${receiptName}`, sha256: receiptBinding.sha256,
       readbackPath: `05_TEST/30Z_EXTERNAL_RECEIPT/${protection.sourceProvenance.channel}/${basename(localReadbackPath)}`,
       readbackSha256: readbackBinding.sha256, storageBackend: 'EXTERNAL_USB_D_DRIVE',
-      externalPath: targetRoot, finalFileCount: names.length
+      externalPath: targetRoot, finalFileCount: readback.expectedFinalFileCount
     }
   };
   const finalLiveEvidence = verifyLiveLocalSource();
   assert(finalLiveEvidence.treeSha256 === protection.treeSha256, 'Live local source changed before external protection promotion');
   assertMatchingReleaseSourceProvenance(finalLiveEvidence.sourceProvenance, protection.sourceProvenance, 'external promotion source');
-  await writeBytes(local.latestPath, jsonBytes(completedProtection));
+  const completedProtectionName = `PROTECTION_${protection.treeSha256}_${receiptBinding.sha256}.json`;
+  const completedProtectionPath = resolve(localReceiptRoot, completedProtectionName);
+  const completedProtectionBytes = jsonBytes(completedProtection);
+  const completedProtectionSha256 = sha256(completedProtectionBytes);
+  await writeImmutableBytes(completedProtectionPath, completedProtectionBytes);
+  await writeImmutableBytes(`${completedProtectionPath}.sha256`,
+    Buffer.from(`${completedProtectionSha256}  ${completedProtectionName}\n`, 'utf8'));
+  await copyChecked(completedProtectionPath,
+    resolve(targetRoot, 'local-protection-completion', completedProtectionName));
+  await copyChecked(`${completedProtectionPath}.sha256`,
+    resolve(targetRoot, 'local-protection-completion', `${completedProtectionName}.sha256`));
+  const finalNames = await listFiles(targetRoot);
+  assert(finalNames.length === readback.expectedFinalFileCount,
+    `D: completed source protection file count mismatch: ${finalNames.length}`);
+  await writeBytes(local.latestPath, completedProtectionBytes);
   await writeBytes(resolve(externalReceiptRoot, 'LATEST.json'), jsonBytes(receipt));
-  console.log(JSON.stringify({ status: 'PASS', requirement: receipt.requirement, governanceRequirement: receipt.governanceRequirement, decision: receipt.decision, treeSha256: protection.treeSha256, externalPath: targetRoot, files: names.length }));
+  console.log(JSON.stringify({ status: 'PASS', requirement: receipt.requirement, governanceRequirement: receipt.governanceRequirement, decision: receipt.decision, treeSha256: protection.treeSha256, externalPath: targetRoot, files: finalNames.length }));
 };
 
 const verifyExternal = async () => {
@@ -202,8 +237,16 @@ const verifyExternal = async () => {
     const bytes = await readFile(resolve(protection.externalReceipt.externalPath, artifact.path));
     assert(bytes.length === artifact.sourceSizeBytes && sha256(bytes) === artifact.sourceSha256, `D: artifact readback mismatch: ${artifact.path}`);
   }
-  for (const path of [receiptPath, `${receiptPath}.sha256`, readbackPath, `${readbackPath}.sha256`]) {
-    const external = resolve(protection.externalReceipt.externalPath, 'external-receipt', basename(path));
+  const supplemental = [
+    { path: receiptPath, directory: 'external-receipt' },
+    { path: `${receiptPath}.sha256`, directory: 'external-receipt' },
+    { path: readbackPath, directory: 'external-receipt' },
+    { path: `${readbackPath}.sha256`, directory: 'external-receipt' },
+    { path: local.immutableProtectionPath, directory: 'local-protection-completion' },
+    { path: `${local.immutableProtectionPath}.sha256`, directory: 'local-protection-completion' }
+  ];
+  for (const { path, directory } of supplemental) {
+    const external = resolve(protection.externalReceipt.externalPath, directory, basename(path));
     const [left, right] = await Promise.all([readFile(path), readFile(external)]);
     assert(left.length === right.length && sha256(left) === sha256(right), `D: supplemental readback mismatch: ${basename(path)}`);
   }

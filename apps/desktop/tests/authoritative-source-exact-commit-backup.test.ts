@@ -19,6 +19,9 @@ describe('tracked-only authoritative source protection contract', () => {
     expect(localProtection).not.toContain('readFile(file.absolute)');
     expect(externalProtection).toContain("schemaVersion: 2, release: visibleRelease");
     expect(externalProtection).toContain("backupScope: 'TRACKED_FILES_AT_EXACT_COMMIT'");
+    expect(externalProtection).toContain('local-protection-completion');
+    expect(externalProtection).toContain('completedProtectionName');
+    expect(externalProtection).toContain('Canonical LATEST source protection does not equal its immutable record');
     expect(packageBuilder).toContain('writeWindowsPackageProvenanceTransaction');
     expect(packageProvenance).toContain("WINDOWS_PACKAGE_PROVENANCE_PATH = 'artifacts/validation/windows-package-provenance.json'");
     expect(packageProvenance).toContain('windowsPackageHistoryBundleRelativePath');

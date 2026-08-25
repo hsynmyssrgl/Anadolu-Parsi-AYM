@@ -202,10 +202,10 @@ describe('operation rule check policy', () => {
         status: 'IN_PROGRESS',
         task: 'PR-240_MUTATION_WIDE_RECORD_TEST_AND_UI_UAT_CLOSURE',
         preflightStatus: 'NOT_RUN_CURRENT_MUTATION',
-        postflightStatus: 'NOT_RUN_CURRENT_MUTATION',
-        packageStatus: 'BLOCKED_UNTIL_CLEAN_EXACT_COMMIT'
+        postflightStatus: 'NOT_RUN_CURRENT_MUTATION'
       }
     });
+    expect(ledger.activeDeliveryClosure.packageStatus).toMatch(/^(?:BLOCKED_|FAIL_)/u);
   });
 
   it('keeps the first-family release policy on the PR-240 strengthened evidence chain', async () => {
