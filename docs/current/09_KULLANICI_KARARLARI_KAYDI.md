@@ -92,6 +92,7 @@ Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağ
 - `DEC-275` runtime önkoşul/no-write kaydı — `703be65a`, 398 Vitest dosyası/2.469 test PASS sonrasında 16 ek runtime için eksik Bronze workspace çıktısını; `0a118f5f` eksik resmî npm tanı ortamını; `7fb288cd` eksik core-service uygulama çıktısını ve `ddb1abff` 33-Y/33-Z/34-A alt süreç no-write sızıntısını ret olarak korur. Resmî paket/core-service/desktop önkoşullarıyla 16/16 ek runtime PASS; düzeltmeden sonra üç runtime ve üç byte-exact manifest SHA kontrolü PASS vermiştir. Yeni exact tam regresyon zorunludur.
 - `DEC-275` güncel belge render kaydı — `dd675310`, DOCX→PDF sonrasında bundled Poppler yolunun çözülememesini ret olarak korur. Exact Poppler/LibreOffice retry 28/28 sayfa PASS; 10–25 byte-identical, değişen 1–9 ve 26–28 sayfalar özgün çözünürlükte görsel QA PASS vermiştir.
 - `DEC-275` exact worktree kaynak bütünlüğü kaydı — `99ad48dd`, doğrulayıcının ana `app` ağacında çağrılmasını fail-closed ret olarak korur. Ürün kaynağı bozulması değildir; exact Bronze ağacındaki retry PASS olmadan paket yoktur.
+- `DEC-275` final belge görsel QA kaydı — `0669cb38` kaynaklı DOCX 28/28 sayfa PASS; 2–6 byte-exact aynı, değişen 1 ve 7–28 özgün çözünürlükte taşma, örtüşme, kesilme veya bozuk karakter olmadan PASS'tir.
 
 ## Bundan sonraki kararlar için zorunlu eşzamanlılık kuralı
 

@@ -457,7 +457,7 @@
         "docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md",
         "BUILD_STATUS.md"
       ],
-      "isListesiEtkisi": "IS-0211 ve IS-0215 DEVAM kalir. Ilk DOCX PNG renderi LibreOffice PDF donusumunden sonra bundled Poppler pdfinfo PATH eksigiyle fail-closed durdu ve dd675310 ile kaydedildi. Exact Poppler/LibreOffice retry 28/28 sayfa uretti; 10-25 onceki renderla byte-identical, degisen 1-9 ve 26-28 sayfalar ozgun cozulunurlukte tasma, ortusme, kesilme ve bozuk karakter olmadan PASS verdi. Yeni exact hedefli/tam regresyon ve kaynak butunlugu tamamlanmadan paket yoktur.",
+      "isListesiEtkisi": "IS-0211 ve IS-0215 DEVAM kalir. Ilk DOCX PNG renderi LibreOffice PDF donusumunden sonra bundled Poppler pdfinfo PATH eksigiyle fail-closed durdu ve dd675310 ile kaydedildi. Exact Poppler/LibreOffice retry 28/28 sayfa uretti. 0669cb38 kaynakli final uretimde 2-6 onceki renderla byte-identical; degisen 1 ve 7-28 sayfalar ozgun cozulunurlukte tasma, ortusme, kesilme ve bozuk karakter olmadan PASS verdi. Yeni exact hedefli/tam regresyon ve exact Bronze kaynak butunlugu tamamlanmadan paket yoktur.",
       "senkronDurumu": "SYNCHRONIZED"
     },
     {

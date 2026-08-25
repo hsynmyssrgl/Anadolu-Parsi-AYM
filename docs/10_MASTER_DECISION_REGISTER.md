@@ -1475,3 +1475,5 @@ Uygulama bağı mutasyondan önce kaydedilen clean Bronze baseline receipt'i, im
 `dd675310`, güncel master DOCX'in ilk PNG renderında bundled Poppler yolunun çözülememesini ret olarak korur. Exact Poppler/LibreOffice yollarıyla 28/28 sayfa üretildi; 10–25 byte-identical, değişen 1–9 ve 26–28 sayfalar özgün çözünürlükte görsel QA PASS verdi.
 
 `99ad48dd`, release kaynak bütünlüğü doğrulayıcısının ana `app` çalışma ağacında çağrılmasını fail-closed ret olarak korur. Bu ret ürün kaynağı bozukluğu değildir; doğru kabul için aynı doğrulayıcı exact Bronze çalışma ağacında çalıştırılmalı ve PASS vermelidir.
+
+`0669cb38` kaynak commitinden üretilen final master DOCX exact bundled LibreOffice/Poppler yollarıyla 28/28 sayfa render ve görsel QA PASS vermiştir. Sayfa 2–6 önceki onaylı renderla byte-exact aynı; değişen 1 ve 7–28 özgün çözünürlükte taşma, örtüşme, kesilme ve bozuk karakter olmadan PASS'tir.

@@ -222,6 +222,7 @@ DRIFT_FIXES = [
     "PR-240 Bronze runtime önkoşul zinciri 703be65a, 0a118f5f ve 7fb288cd ile; 33-Y/33-Z/34-A alt süreç no-write sızıntısı ddb1abff ile fail-closed korunmuştur. Paket/core-service/desktop çıktılarından sonra 16/16 ek runtime PASS; ortak no-write aktarımından sonra 1 dosya/6 test, üç runtime ve üç byte-exact manifest SHA karşılaştırması PASS vermiştir. Yeni exact commit tam regresyonunun yerine geçmez.",
     "PR-240 güncel master DOCX ilk PNG renderında bundled Poppler yolunun çözülememesi dd675310 ile fail-closed korunmuştur. Exact Poppler/LibreOffice retry 28/28 sayfa üretmiş; 10–25 byte-identical, değişen 1–9 ve 26–28 sayfalar özgün çözünürlükte görsel QA PASS vermiştir.",
     "PR-240 release kaynak bütünlüğü doğrulayıcısının ana app çalışma ağacında çağrılması 99ad48dd ile fail-closed korunmuştur. Bu ret ürün kaynak bozulması değildir; exact Bronze çalışma ağacındaki retry PASS olmadan paket üretilemez.",
+    "PR-240 final master DOCX 0669cb38 kaynak commitinden exact bundled LibreOffice/Poppler yollarıyla 28/28 sayfa render ve görsel QA PASS vermiştir; 2–6 byte-exact aynı, değişen 1 ve 7–28 özgün çözünürlükte kusursuzdur.",
 ]
 
 

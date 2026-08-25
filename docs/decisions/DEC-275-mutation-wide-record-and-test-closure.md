@@ -49,4 +49,6 @@ Güncel master DOCX'in LibreOffice ile PDF'e dönüşümü başarıyla tamamlanm
 
 Release kaynak bütünlüğü doğrulayıcısının ana `app` çalışma ağacında çağrılması beklenen exact Bronze kök şartını karşılamadığı için fail-closed durmuştur; `99ad48dd` boş `wip(rejected)` checkpointi bu yanlış worktree çağrısını korur. Bu kayıt ürün kaynak bütünlüğü hatası değildir ve PASS yerine geçmez; aynı doğrulayıcı exact Bronze çalışma ağacında yeniden çalıştırılıp başarılı olmadan paket üretilemez.
 
+`0669cb38` kaynak commitinden yeniden üretilen final master DOCX, exact bundled LibreOffice ve Poppler yollarıyla 28/28 PNG sayfa üretmiştir. Önceki onaylı renderla 2–6. sayfalar byte-exact aynı kalmış; içerik ve kaynak HEAD değişimi nedeniyle farklılaşan 1 ile 7–28. sayfalar özgün çözünürlükte tek tek incelenmiş, taşma, örtüşme, kesilme veya bozuk karakter görülmemiştir.
+
 Bu karar `DEC-270/PR-235` exact-commit etki ve test zincirini kaldırmaz; kapsamını bütün kayıt sınıfları ve tüm kullanıcı etkileşimi/görsel bütünlük yüzeyleri için açıkça güçlendirir.
