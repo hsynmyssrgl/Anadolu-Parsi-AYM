@@ -1074,10 +1074,10 @@
 - `artifacts/validation/application-security-profile-gate.json` — EVIDENCE — 702 bayt — `0903d7fd1395b8279c0ad77863b2991799fc72c932f08ca53756a2d85ac3853e`
 - `artifacts/validation/bronze-22.08.2026.50-final-local-test-delivery.json` — EVIDENCE — 2415 bayt — `f0f85f71c319e62353d47c9806bd8e26be5e89a3f270601f2212b0909dff6491`
 - `artifacts/validation/bronze-governance-reality-matrix.json` — EVIDENCE — 2055 bayt — `feb5c46c629c0684c5bda1c06d4fae2ea6be873bd587201ba116269db45948ca`
-- `artifacts/validation/feature-reality-gate.json` — EVIDENCE — 673 bayt — `b1a9ed171a32db1ac686f05fe1e74916db59856ba5ff323745dd9a8486161c27`
+- `artifacts/validation/feature-reality-gate.json` — EVIDENCE — 673 bayt — `73c85885620b13869c9fb7873382bae12bf96bf76a3bcf026ed5bc27276c1279`
 - `artifacts/validation/full-vitest-pass-2026-08-23.json` — EVIDENCE — 639 bayt — `1e4b454d2150f7a62b131e1ad648d0b2a2494799fc83340cd2b13d20557eab04`
 - `artifacts/validation/full-vitest-regression-failure-2026-08-23.json` — EVIDENCE — 8744 bayt — `245136ca0f0609ca58c2e21b4e11a9fa00df3485452b4d859fab1b68e4120f51`
-- `artifacts/validation/governed-preflight.json` — EVIDENCE — 9578 bayt — `c99d43d267c1f591a217c7a1872306e5f23e8d423f09bfa2186ef302b24c111f`
+- `artifacts/validation/governed-preflight.json` — EVIDENCE — 9578 bayt — `c4244bdf0cff2ed0517c5a489db2fbdb7bf41675fc98739899a651875db7d3a4`
 - `artifacts/validation/platform-capability-manifest-gate.json` — EVIDENCE — 624 bayt — `5d32ba78871c317a01163ded79b49e833bc96ed2d9b20b57e1f329314718051b`
 - `artifacts/validation/platform-policy-ast-gate.json` — EVIDENCE — 646 bayt — `483bd03a82cd187b20cefe6696f318e38f447941e9a1916c58b1a16a25c200a1`
 - `BRONZE_04.08.2026.27_BITIS_METNI.md` — ACTIVE_REFERENCE — 1243 bayt — `639a5137d4154eb3051a44375a341e84480ffe4ec4d1e8b386e0a7a3141459b8`
@@ -2434,7 +2434,7 @@
 - `docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/01_TEST_VE_KABUL_STRATEJISI.md` — TEST_OR_GATE — 1893 bayt — `f5d4fda88627ce603dc3b1796c733d6268eedf10cca01b52877a5dc2545943e4`
 - `docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/02_KANIT_VE_IZLENEBILIRLIK_SISTEMI.md` — ACTIVE_REFERENCE — 1126 bayt — `cf6b96461c2aabf08e9b305a0466356262418bb26a75847de9c6637d6ff3fad1`
 - `docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/03_KANIT_SICILI.json` — ACTIVE_REFERENCE — 26232 bayt — `2b4d2def7f95ae9be49964a311e81f66f0daa7a112a2b5e0d2578a13067028af`
-- `docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json` — ACTIVE_REFERENCE — 17395 bayt — `52f5c268d1a8ab27e50ef37bca19981956cf670f1e2e6a6cd9d8e9ae0c89afc5`
+- `docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json` — ACTIVE_REFERENCE — 17395 bayt — `29e836ce57f811858660daf52ec0a88147d8b9f47d8c2e8c584ed6d25d516993`
 - `docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/05_GIT_YEDEK_DOGRULAMA_KANITI.json` — ACTIVE_REFERENCE — 814 bayt — `f1f794646fcb62972102e8341d42f421621d88f6fc2d7d3a8941063ab097e222`
 - `docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/06_TAM_REGRESYON_KANITI.json` — ACTIVE_REFERENCE — 1093 bayt — `49b6860a3495e8f06f3499babc331c237905c9bd5e0fa23081abdcd83adf45b4`
 - `docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/07_MARKA_KIMLIGI_DOGRULAMA_KANITI.json` — ACTIVE_REFERENCE — 1151 bayt — `43e893603385be238ba3c62a1f7679fe3ddaa7e00f6bd08e08b906633f8757c1`
