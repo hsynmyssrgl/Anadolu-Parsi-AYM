@@ -3,7 +3,7 @@
 - Belge sürümü: **GUNCEL-2026-08-24-V5**
 - Tarih: **24.08.2026**
 - Görünür ürün sürümü: **Bronze 22.08.2026.50**
-- Kaynak HEAD: `6475d4bd7b73c0fb9a7a19661f4bbf036d35d3c2`
+- Kaynak HEAD: `f0cef9c4a1ecbf0bc19544451e8731fa283472c8`
 - Statü: **ACTIVE_CURRENT_MASTER_REFERENCE**
 - Kararlar: **DEC-250–DEC-275**
 
@@ -160,6 +160,9 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - PR-240 final master DOCX 0669cb38 kaynak commitinden exact bundled LibreOffice/Poppler yollarıyla 28/28 sayfa render ve görsel QA PASS vermiştir; 2–6 byte-exact aynı, değişen 1 ve 7–28 özgün çözünürlükte kusursuzdur.
 - PR-240 exact 80cf2a39 Bronze koşusunda hedefli 94 dosya/598 test ve filtresiz 398 dosya/2.469 test PASS sonrasında 33-R alt sürecinin migration manifestinde yalnız generatedAt değiştirmesi c7a3c130 ile fail-closed korunmuştur. Dört alt doğrulayıcıya no-write aktarımı eklendikten sonra odaklı 1 dosya/6 test ve gerçek 33-R matrisi 11/11, 8 dosya/30 test PASS; manifest SHA byte-exact değişmezdir. Yeni temiz exact commit tam regresyonunun yerine geçmez.
 - PR-240 exact bfb6db9f Bronze koşusunda hedefli 94 dosya/598 test ve filtresiz 398 dosya/2.469 test PASS iken üreticinin direct-node çağrısı npm ortam bağını kaldırdığı için 171 ek komuttan 34-B/C/D/F FAIL olmuş ve 51316ac3 ile korunmuştur. Kanonik npm ortamında 34-B 13/13, 5 dosya/30 test PASS; final tur yalnız resmi npm scriptiyle yeniden çalıştırılır.
+- PR-240 c02744cd exact Bronze resmi npm tam regresyonu 398 dosya/2.469 test ve 171/171 ek komut PASS vermiştir. Kaynak bütünlüğü 683 eksik Git-dışı manifest payloadı ve linked-worktree .git yönetim dosyasının yanlış kaynak sayılması nedeniyle 684 bulguyla FAIL olmuş ve 7d67fcff ile korunmuştur. Kanal kurulumu üç ayrı kanala güvenli yol/normal dosya/byte/SHA-256/atomik readback bağlı payload eşitlemesi yapar; kaynak toplayıcı .git dosya ve klasörünü dışlar. Odaklı 2 dosya/9 test PASS; yeni exact kapılar zorunludur.
+- PR-240 96b9faac kaynaklı güncel ana DOCX ilk PNG renderında yanlış bundled PATH nedeniyle Poppler pdfinfo çözülememiş ve e5787764 ile fail-closed korunmuştur. Doğru native\poppler\Library\bin ve LibreOffice yollarıyla retry 28/28 sayfa üretmiş; bütün sayfalar temas sayfalarında, metin yoğun 6–7 ve tablo yoğun 27–28 ayrıca özgün çözünürlükte taşma, örtüşme, kesilme, font ve bozuk karakter açısından görsel QA PASS vermiştir.
+- PR-240 kapanış kayıtlarını içeren 7f866e69 kaynak commitinden final master DOCX doğru native Poppler/LibreOffice zinciriyle 29/29 sayfa görsel QA PASS vermiştir. Tüm sayfalar beş temas sayfasında; 6–7 ve yoğun kural/envanter tablolarını taşıyan 26–29 ayrıca özgün çözünürlükte kusursuzdur.
 
 ## 9. Görsel kimlik ve erişilebilirlik
 
