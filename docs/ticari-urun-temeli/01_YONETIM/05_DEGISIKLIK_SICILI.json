@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PARSYUVA-AILE-YASAM-MERKEZI-TICARI-DEGISIKLIK-SICILI-V2",
   "temelTarihi": "2026-08-19",
-  "sonKayit": "TICARI-033",
+  "sonKayit": "TICARI-034",
   "kayitlar": [
     {
       "id": "TICARI-001",
@@ -589,6 +589,23 @@
         "docs/ticari-urun-temeli"
       ],
       "isListesiEtkisi": "IS-0211, IS-0215 ve IS-0601 DEVAM kalir. d421c299 exact test ve kaynak butunlugu PASS sonrasinda preflight once temizlenen guncel installer makbuzlari, sonra tamamlanmis adimlarin 1428 gerekli yolundan 803 Git-disi checkpoint payload eksigiyle durdu. Ana kaynak 1428/1428 tamdir. Kanal kurulumu manifest payloadina ek olarak tamamlanmis localEvidence ve persistent receipt yollarini tracked/manifest dislamali SHA-256 ve atomik readback ile uc kanala esitler. Secici 809 yol, odakli 1 dosya/9 test ve ticari temel 1234 kontrol PASS verdi. 65ffd15d kaynakli guncel master DOCX 29/29 sayfa ozgun cozulunurlukte tek tek incelenerek gorsel QA PASS verdi; yeni exact kapilar olmadan paket yoktur.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-034",
+      "tarih": "2026-08-25",
+      "baslik": "Aktif yasam dongusu ve PR-240 teslim kapanisi durum ayrimi",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-275, PR-240 ve 50f4d9e5 reddedilmis hedefli test checkpointi",
+      "etkilenenAlanlar": [
+        "config/active-governance-ledger.json",
+        "apps/desktop/tests/operation-rule-check-policy.test.ts",
+        "config/user-decision-ledger.json",
+        "docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md",
+        "BUILD_STATUS.md",
+        "docs/ticari-urun-temeli"
+      ],
+      "isListesiEtkisi": "IS-0211, IS-0215 ve IS-0601 DEVAM kalir. 0f0a4653 exact Bronze etki analizi 95 hedefli test dosyasi hesapladi; hedefli turda 600 test PASS iken operation-rule-check-policy current-mutation preflightStatus alaninda tarihsel 607a9a53/8b2b5ccc FAIL metnini reddetti ve 50f4d9e5 ile korundu. Tarihsel retler QA alanlarinda kalir; current-mutation alani NOT_RUN_CURRENT_MUTATION olur. Bronze/Silver/Gold her kanalda 1428/1428 checkpoint yolu ve eksik 0 PASS; yeni exact kapilar olmadan paket yoktur.",
       "senkronDurumu": "SYNCHRONIZED"
     }
   ]
