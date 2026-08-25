@@ -3,7 +3,7 @@
 - Belge sürümü: **GUNCEL-2026-08-24-V5**
 - Tarih: **24.08.2026**
 - Görünür ürün sürümü: **Bronze 22.08.2026.50**
-- Kaynak HEAD: `1c90cfa6e1a83ea952b573a8fe7f60cbf61ec9de`
+- Kaynak HEAD: `d8508c5092e710db47eaa2425bec8f5d796440fc`
 - Statü: **ACTIVE_CURRENT_MASTER_REFERENCE**
 - Kararlar: **DEC-250–DEC-275**
 
@@ -158,6 +158,7 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - PR-240 güncel master DOCX ilk PNG renderında bundled Poppler yolunun çözülememesi dd675310 ile fail-closed korunmuştur. Exact Poppler/LibreOffice retry 28/28 sayfa üretmiş; 10–25 byte-identical, değişen 1–9 ve 26–28 sayfalar özgün çözünürlükte görsel QA PASS vermiştir.
 - PR-240 release kaynak bütünlüğü doğrulayıcısının ana app çalışma ağacında çağrılması 99ad48dd ile fail-closed korunmuştur. Bu ret ürün kaynak bozulması değildir; exact Bronze çalışma ağacındaki retry PASS olmadan paket üretilemez.
 - PR-240 final master DOCX 0669cb38 kaynak commitinden exact bundled LibreOffice/Poppler yollarıyla 28/28 sayfa render ve görsel QA PASS vermiştir; 2–6 byte-exact aynı, değişen 1 ve 7–28 özgün çözünürlükte kusursuzdur.
+- PR-240 exact 80cf2a39 Bronze koşusunda hedefli 94 dosya/598 test ve filtresiz 398 dosya/2.469 test PASS sonrasında 33-R alt sürecinin migration manifestinde yalnız generatedAt değiştirmesi c7a3c130 ile fail-closed korunmuştur. Dört alt doğrulayıcıya no-write aktarımı eklendikten sonra odaklı 1 dosya/6 test ve gerçek 33-R matrisi 11/11, 8 dosya/30 test PASS; manifest SHA byte-exact değişmezdir. Yeni temiz exact commit tam regresyonunun yerine geçmez.
 
 ## 9. Görsel kimlik ve erişilebilirlik
 
