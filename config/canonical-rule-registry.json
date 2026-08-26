@@ -3,7 +3,7 @@
   "id": "PPT-CANONICAL-RULE-REGISTRY-V29",
   "product": "ParsYuva Aile Yaşam Merkezi",
   "upperBrand": "ParsYuva",
-  "effectiveRelease": "Bronze 26.08.2026.51",
+  "effectiveRelease": "Bronze 27.08.2026.52",
   "exceptionless": true,
   "previousRuleSet": {
     "version": "PROJECT-RULES-2026-08-02-V6",
@@ -1726,5 +1726,5 @@
       "effectiveRelease": "Bronze 26.08.2026.51"
     }
   ],
-  "rulesSha256": "cbd4476d480d81064291347293ba8140d8269bca2cac82d2358a87891f8c14c4"
+  "rulesSha256": "103e269ab67eed8423a03b726d00bc36616660ca2f0f3c65eea3491103640936"
 }

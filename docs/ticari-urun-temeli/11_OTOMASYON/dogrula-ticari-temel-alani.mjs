@@ -281,19 +281,19 @@ check(currentMaster.includes('DEC-276') && currentMaster.includes('PR-241'), 'DE
 check(currentCommercial.includes('verify:commercial-baseline'), 'ticari aktif belge dogrulama komutunu gostermiyor');
 
 const commercialChangeLedger = await readJson(resolve(ROOT, '01_YONETIM', '05_DEGISIKLIK_SICILI.json'));
-const commercialChange51Entries = commercialChangeLedger.kayitlar.filter((entry) => entry.id === 'TICARI-051');
-const commercialChange51 = commercialChange51Entries[0];
-check(commercialChangeLedger.sonKayit === 'TICARI-051'
-  && commercialChangeLedger.kayitlar.at(-1)?.id === 'TICARI-051'
-  && commercialChange51Entries.length === 1,
-'TICARI-051 exact tekil son ticari degisiklik kaydi degil');
-check(commercialChange51?.durum === 'ACTIVE'
-  && commercialChange51?.senkronDurumu === 'SYNCHRONIZED'
-  && String(commercialChange51?.kaynak ?? '').includes('DEC-275, DEC-276, PR-240, PR-241')
-  && String(commercialChange51?.isListesiEtkisi ?? '').includes('57/57 PASS')
-  && String(commercialChange51?.isListesiEtkisi ?? '').includes('25 sayfa')
-  && String(commercialChange51?.isListesiEtkisi ?? '').includes('32 sayfa'),
-'TICARI-051 ACTIVE/SYNCHRONIZED final-freeze6 57/57 gorsel QA bagi eksik');
+const commercialChange52Entries = commercialChangeLedger.kayitlar.filter((entry) => entry.id === 'TICARI-052');
+const commercialChange52 = commercialChange52Entries[0];
+check(commercialChangeLedger.sonKayit === 'TICARI-052'
+  && commercialChangeLedger.kayitlar.at(-1)?.id === 'TICARI-052'
+  && commercialChange52Entries.length === 1,
+'TICARI-052 exact tekil son ticari degisiklik kaydi degil');
+check(commercialChange52?.durum === 'ACTIVE'
+  && commercialChange52?.senkronDurumu === 'SYNCHRONIZED'
+  && String(commercialChange52?.kaynak ?? '').includes('DEC-275, DEC-276, PR-235, PR-240, PR-241')
+  && String(commercialChange52?.isListesiEtkisi ?? '').includes('58/58')
+  && String(commercialChange52?.isListesiEtkisi ?? '').includes('2 dosya/17 test PASS')
+  && String(commercialChange52?.isListesiEtkisi ?? '').includes('15e3c9d0 pre-mutation baseline PASS'),
+'TICARI-052 ACTIVE/SYNCHRONIZED Bronze 52 UAT110 ve 58/58 gorsel QA bagi eksik');
 
 const workRegistry = await readJson(resolve(ROOT, '08_IS_LISTESI', '03_ANA_IS_SICILI.json'));
 const workMarkdown = await readText(resolve(ROOT, '08_IS_LISTESI', '01_ANA_IS_LISTESI.md'));
@@ -401,7 +401,7 @@ const report = {
   canonicalRuleCount: canonicalRules.ruleCount,
   canonicalRuleSha256: canonicalRules.rulesSha256,
   decision: 'DEC-259',
-  commercialChange: 'TICARI-051',
+  commercialChange: 'TICARI-052',
   decisions: ['DEC-259', 'DEC-270', 'DEC-274', 'DEC-275', 'DEC-276'],
   requirements: ['PR-235', 'PR-239', 'PR-240', 'PR-241'],
   mutationWideRecordAndTestClosureVerified: failures.length === 0,

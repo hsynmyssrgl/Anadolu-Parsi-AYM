@@ -1,6 +1,6 @@
 # Katkı ve Değişiklik Kuralları
 
-**Aktif sürüm:** Bronze 26.08.2026.51
+**Aktif sürüm:** Bronze 27.08.2026.52
 
 1. Her değişiklik bir gereksinim, hata veya `DEC-xxx` kararıyla ilişkilendirilir.
 2. En son kullanıcı kararı ve aktif kaynak sözleşmesi eski belgeden üstündür.

@@ -182,6 +182,15 @@ function Get-TreeMetadataManifest([string]$Path, [string]$Scope) {
   }
 }
 
+function Get-OptionalPropertyString($Value, [string]$Name) {
+  if ($null -eq $Value) { return '' }
+  $property = Get-Member -InputObject $Value -Name $Name -MemberType Properties
+  if ($null -eq $property) { return '' }
+  $propertyValue = $Value | Select-Object -ExpandProperty $Name -ErrorAction Stop
+  if ($null -eq $propertyValue) { return '' }
+  return [string]$propertyValue
+}
+
 function Get-UninstallRegistryManifest([string]$Scope) {
   $records = [Collections.Generic.List[string]]::new()
   $roots = @(
@@ -192,20 +201,21 @@ function Get-UninstallRegistryManifest([string]$Scope) {
     if (-not (Test-Path -LiteralPath $registryRoot)) { continue }
     foreach ($key in Get-ChildItem -LiteralPath $registryRoot -ErrorAction Stop) {
       $value = Get-ItemProperty -LiteralPath $key.PSPath -ErrorAction Stop
-      if ([string]$value.DisplayName -notmatch '^ParsYuva(?:\s|$)') { continue }
-      $channel = if ([string]$value.DisplayName -match 'Bronze$') { 'bronze' } elseif ([string]$value.DisplayName -match 'Silver$') { 'silver' } elseif ([string]$value.DisplayName -match 'Gold$') { 'gold' } else { 'legacy' }
+      $displayName = Get-OptionalPropertyString $value 'DisplayName'
+      if ($displayName -notmatch '^ParsYuva(?:\s|$)') { continue }
+      $channel = if ($displayName -match 'Bronze$') { 'bronze' } elseif ($displayName -match 'Silver$') { 'silver' } elseif ($displayName -match 'Gold$') { 'gold' } else { 'legacy' }
       if ($channel -ne $Scope) { continue }
       $records.Add((@(
-        [string]$value.DisplayName,
-        [string]$value.DisplayVersion,
-        [string]$value.InstallLocation,
-        [string]$value.DisplayIcon,
-        [string]$value.UninstallString,
-        [string]$value.QuietUninstallString
+        $displayName,
+        (Get-OptionalPropertyString $value 'DisplayVersion'),
+        (Get-OptionalPropertyString $value 'InstallLocation'),
+        (Get-OptionalPropertyString $value 'DisplayIcon'),
+        (Get-OptionalPropertyString $value 'UninstallString'),
+        (Get-OptionalPropertyString $value 'QuietUninstallString')
       ) -join '|'))
     }
   }
-  $ordered = $records.ToArray() | Sort-Object
+  $ordered = @($records.ToArray() | Sort-Object)
   return [ordered]@{ scope = "registry-$Scope"; entryCount = $ordered.Count; metadataSha256 = Get-Sha256Text ($ordered -join "`n") }
 }
 
@@ -218,10 +228,19 @@ function Get-BronzeRegistryIdentity([string]$ExpectedVersion) {
     if (-not (Test-Path -LiteralPath $registryRoot)) { continue }
     foreach ($key in Get-ChildItem -LiteralPath $registryRoot -ErrorAction Stop) {
       $value = Get-ItemProperty -LiteralPath $key.PSPath -ErrorAction Stop
-      if ([string]$value.DisplayName -match '^ParsYuva.*Bronze$' -and
-          -not [string]::IsNullOrWhiteSpace([string]$value.InstallLocation) -and
-          [IO.Path]::GetFullPath([string]$value.InstallLocation).TrimEnd('\').Equals($CanonicalInstallRoot.TrimEnd('\'), [StringComparison]::OrdinalIgnoreCase)) {
-        $matches.Add($value)
+      $displayName = Get-OptionalPropertyString $value 'DisplayName'
+      $installLocation = Get-OptionalPropertyString $value 'InstallLocation'
+      if ($displayName -match '^ParsYuva.*Bronze$' -and
+          -not [string]::IsNullOrWhiteSpace($installLocation) -and
+          [IO.Path]::GetFullPath($installLocation).TrimEnd('\').Equals($CanonicalInstallRoot.TrimEnd('\'), [StringComparison]::OrdinalIgnoreCase)) {
+        $matches.Add([ordered]@{
+          DisplayName = $displayName
+          DisplayVersion = Get-OptionalPropertyString $value 'DisplayVersion'
+          InstallLocation = $installLocation
+          DisplayIcon = Get-OptionalPropertyString $value 'DisplayIcon'
+          UninstallString = Get-OptionalPropertyString $value 'UninstallString'
+          QuietUninstallString = Get-OptionalPropertyString $value 'QuietUninstallString'
+        })
       }
     }
   }

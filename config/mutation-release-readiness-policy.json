@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "PPT-MUTATION-RELEASE-READINESS-V2",
-  "release": "Bronze 26.08.2026.51",
+  "release": "Bronze 27.08.2026.52",
   "requirement": "PR-235",
   "decision": "DEC-270",
   "strengthenedByRequirement": "PR-240",

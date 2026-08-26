@@ -1,15 +1,15 @@
 {
   "product": "ParsYuva Aile Yaşam Merkezi",
-  "repositoryVersion": "26.08.2026.51",
-  "applicationVersion": "26.08.2026.51",
-  "visibleRelease": "Bronze 26.08.2026.51",
-  "packageVersion": "26.8.2026-51",
+  "repositoryVersion": "27.08.2026.52",
+  "applicationVersion": "27.08.2026.52",
+  "visibleRelease": "Bronze 27.08.2026.52",
+  "packageVersion": "27.8.2026-52",
   "edition": "Bronze",
   "owner": "ParsYuva",
-  "releaseId": "bronze-2026-08-26-r51",
-  "revision": "20260826-51",
-  "monthlySequence": 51,
-  "releaseDate": "2026-08-26",
+  "releaseId": "bronze-2026-08-27-r52",
+  "revision": "20260827-52",
+  "monthlySequence": 52,
+  "releaseDate": "2026-08-27",
   "parentSource": {
     "version": "02.08.2026.228",
     "sha256": "0d67125e80bfddd52292aa3db6f17c9d68e115fa6c35c0671e3bd191ecdf1328"
@@ -25,5 +25,5 @@
   "acceptedScopeRegistry": "config/accepted-scope-registry.json",
   "policyVersion": "PPT-PLATFORM-POLICY-2026-08-04-V1",
   "sourceInventoryFileCount": 2227,
-  "generatedDate": "2026-08-26"
+  "generatedDate": "2026-08-27"
 }

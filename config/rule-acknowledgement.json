@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "release": "Bronze 26.08.2026.51",
+  "release": "Bronze 27.08.2026.52",
   "ruleRegistry": "config/canonical-rule-registry.json",
-  "rulesSha256": "cbd4476d480d81064291347293ba8140d8269bca2cac82d2358a87891f8c14c4",
+  "rulesSha256": "103e269ab67eed8423a03b726d00bc36616660ca2f0f3c65eea3491103640936",
   "acknowledgedAt": "2026-08-24T12:00:00+03:00",
   "authority": "Explicit user instruction in current conversation",
   "statement": "All written project rules and operation checks remain binding without waiver. Every smallest mutation must atomically update every affected main/channel source, rule, decision, active/commercial document, work item, scope, inventory, ratchet, manifest, index, current master DOCX/PDF and evidence contract, or record a concrete NOT_AFFECTED justification. Targeted tests, unfiltered full regression, typecheck, changed-script syntax and source integrity are mandatory; UI mutations require complete module, route, menu, visible-control, state, accessibility and visual-integrity UAT. Every actual test failure is preserved by a wip(rejected) checkpoint. No intermediate installer may be built before closure; packaging requires clean exact main/channel source equality. Bronze Windows local-test delivery also requires the complete PR-239 adversarial provenance, installer-experience, UAT110, UAT111 and final-readback chain. PR-241 permits only Bronze 26.08.2026.51 to recover by fresh install after immutable rejected Bronze 50 without trusting or installing the rejected runtime; sequence 52+ keeps exact N-to-N+1 continuity. NotSigned or protection-disabled Kaspersky testing is not a production or harmlessness claim. Every ACTIVE rule must be fail-closed enforced or explicitly BLOCKED/NOT_RUN until evidence exists."

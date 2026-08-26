@@ -1,16 +1,16 @@
 # Active Release Status
 
 - Product: ParsYuva Aile Yaşam Merkezi
-- Application Version: `26.08.2026.51`
-- Package Version: `26.8.2026-51`
+- Application Version: `27.08.2026.52`
+- Package Version: `27.8.2026-52`
 - Stage: **Bronze Active Development**
-- Monthly Sequence: **51**
+- Monthly Sequence: **52**
 - Channel flow: **Bronze development → Silver validation/fixes → Gold production**
 - Silver status: **BLOCKED**
 
 ## Current validation status
 
-- DEC-276/PR-241 Bronze 51 recovery bootstrap: **IN PROGRESS; LATEST REJECTED CHECKPOINT `0099e39e`; P2 ASSESSMENT SOURCE/BASELINE EXACT BINDING FIX APPLIED; FOCUSED 2 FILES / 8 TESTS PASS; CURRENT EXACT TARGETED/FULL/SOURCE-INTEGRITY RETEST PENDING; FINAL-FREEZE6 V5 DOCX 30/30 + PDF 27/27 = 57/57 VISUAL QA PASS; PACKAGE NOT BUILT** — `0099e39e` yanlış ana kaynak kökü assessment çağrısını fail-closed korur; exact Bronze retry 109 yol/21 hedef test ve analysis 109 yol PASS üretmiştir. P2 sonrasında önceki onayla byte-exact aynı 25 sayfa korunmuş, değişen 32 sayfa üç bağımsız denetimde 32/32 PASS bulunmuştur. `6f9139e1` 21 dosya/211 test ve 399 dosya/2.481 test sonucu yalnız tarihsel PASS'tir. Assessment `sourceCommit` canlı provenance HEAD, `baselineCommit` doğrulanmış harici baseline pointer HEAD ile exact eşleşmeden create/analysis/postflight/builder/package zinciri ilerlemez. Yeni exact test/bütünlük ve kurulu uygulama UAT kapıları PASS vermeden teslim yoktur.
+- DEC-276/PR-241 Bronze 51 recovery köprüsü ve Bronze 52 continuation: **IN PROGRESS; LATEST REJECTED CHECKPOINT `2ca29a6d`; PRE-MUTATION BASELINE `15e3c9d0` PASS; UAT110 REGISTRY HARNESS FIX 2 FILES / 17 TESTS PASS; GOVERNED WRITER PASS AFTER COMMERCIAL RECORD FIX; CURRENT EXACT TARGETED/FULL/SOURCE-INTEGRITY RETEST PENDING; BRONZE 52 PACKAGE NOT BUILT** — `.51` exact paket/provenance ve üç sayfalı installer-experience kapıları `3b31753b` kaynağında PASS'tir. İlk UAT110, iki provenance doğrulamasından sonra kurulum başlamadan state-snapshot içinde `DisplayName` alanı olmayan ilgisiz Windows uninstall kayıtlarında `PropertyNotFoundStrict` ile durmuştur; kurulu EXE, uninstall kaydı ve UAT111 oluşmamış, mevcut 15 kullanıcı dosyası değişmemiştir. `059e3787`, `a1aec744`, `8472face`, `15e3c9d0` ve `64695e58` gerçek UAT harness retlerini gizlemeden korur. Null-güvenli alan okuma, sıfır kayıt dizi semantiği ve Windows PowerShell 5.1 strict-mode davranış testi 2 dosya/17 test PASS vermiştir. İlk Bronze 52 governed preflight, sabit `TICARI-051` son-kayıt beklentisi nedeniyle FAIL olmuş ve `2ca29a6d` ile korunmuştur; doğrulayıcı `TICARI-052` exact tekil son kaydına taşındıktan sonra ticari 1.254 kontrol ve 4.409 dosya/2.145 belge indeksli writer PASS vermiştir. Yeni exact Bronze 52 etki/test/bütünlük, `.51` predecessor kurulum readback'i, `.52` paket/installer-experience, N→N+1 UAT110, UAT111 ve final teslim PASS olmadan kullanıcı teslimi yoktur.
 - PR-235 bootstrap producer pointer-sourceCommit/ancestry fix: **TARGETED PASS (d8746da8; 76 dosya / 509 test); FULL REGRESSION FAIL KÖK NEDEN DÜZELTİLİYOR**
 - PR-235 historical full-diff `.gitattributes` dependency mapping: **IMPLEMENTED; EXACT EVIDENCE PENDING**
 - PR-240 dependent-record closure: **IMPLEMENTED; EXACT EVIDENCE PENDING** — değişmez 32-K tarihsel scope yalnız tetikleyici/değişmezlik kapısıdır; güncel PPK-015 ratchet ve makbuzlar bağımlı kayıttır. 34-F'nin üç resmî makbuzu Git teslim kapsamına alınmıştır.

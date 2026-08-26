@@ -1,6 +1,6 @@
 # Kullanıcı Kararları Kaydı
 
-- Görünür sürüm: **Bronze 26.08.2026.51**
+- Görünür sürüm: **Bronze 27.08.2026.52**
 - Makine okunur defter: `config/user-decision-ledger.json`
 - Aktif karar sayısı: **100**
 
@@ -122,6 +122,9 @@ Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağ
 - `DEC-275` kaynak koruma düzeltmesi belge QA kaydı — `a7b0f3c3` aşamasındaki master DOCX 29/29 sayfa PASS; 2–29 önceki onaylı renderla byte-exact aynı, yalnız HEAD satırı değişen 1. sayfa özgün çözünürlükte taşma, örtüşme, kesilme, font ve bozuk karakter olmadan PASS'tir.
 - `DEC-275` kanal eşitleme çağrı sırası kaydı — `1745095c` sonrasında kanal dalları authoritative HEAD'e ilerletilmeden eşitleyicinin varsayılan doğrulaması commit farkını yazım yapmadan reddetmiş ve `d5540157` ile korunmuştur. Üç kanal yalnız `--ff-only` ilerletilir; sonra payload hydrate ve exact commit/branch/temiz ağaç doğrulaması yapılır.
 - `DEC-275` kanal-portatif npm CLI kaydı — `5179a170` exact hedefli 95 dosya/601 test ve filtresiz 399 dosya/2.472 test PASS iken 34-B/C/D/F runtime'ları Bronze kanalında bulunmayan geçici npm CLI yoluna düştüğü için ek komut matrisi FAIL olmuş ve `f8946730` ile korunmuştur; ortak tanı `1cb33525`tir. 34-B–34-F aktif Node npm CLI'sini doğrulanmış fallback olarak kullanır; odaklı 1 dosya/6 test ve gerçek no-write runtime sonuçları sırasıyla 13/13, 14/14, 14/14, 15/15, 15/15 PASS. Yeni exact kapanış zorunludur.
+- `DEC-275/DEC-276` UAT110 registry harness ve Bronze 52 geçiş kaydı — `.51` package/provenance/installer-experience PASS sonrasındaki canlı UAT110, installer başlamadan eksik `DisplayName` alanlı ilgisiz Windows uninstall kaydında durmuştur. `059e3787`, `a1aec744`, `8472face`, `15e3c9d0` ve o aşamadaki son `64695e58` retleri korunur; kurulu EXE/UAT111 oluşmamış ve 15 kullanıcı dosyası değişmemiştir. Windows PowerShell 5.1 strict-mode null-güvenli düzeltmesi 2 dosya/17 test PASS, `15e3c9d0` PRE_MUTATION baseline PASS'tir. Bronze `27.08.2026.52` normal continuation için ayrılmıştır; exact `.51` predecessor readback, `.52` test/paket/UAT zinciri tamamlanmadan teslim yoktur.
+- `DEC-275` Bronze 52 ticari son-kayıt preflight kaydı — İlk governed writer turu, sicil `TICARI-052` ile ilerlemişken doğrulayıcının `TICARI-051` değerini son kayıt sanmasını FAIL bulmuş ve `2ca29a6d` boş `wip(rejected)` checkpointiyle korumuştur. Doğrulayıcı `TICARI-052` exact tekil ACTIVE/SYNCHRONIZED kaydına, 58/58 belge QA, 2 dosya/17 test ve `15e3c9d0` baseline bağlarına taşınmıştır. Retry ticari 1.254 kontrol/87 dosya/61 iş/241 kural ve governed preflight 4.409 dosya/2.145 belge PASS vermiştir; exact temiz commit kapıları yine zorunludur.
+- `DEC-275/DEC-276` Bronze 52 güncel master belge QA kaydı — DOCX 30/30 ve PDF 28/28, toplam 58/58 sayfa özgün çözünürlükte tek tek incelenmiş ve PASS vermiştir. Taşma, örtüşme, kırpılma, token-ortası sarım, font/glyph, tablo, header/footer, marj veya sayfa numarası kusuru yoktur. Bu belge PASS'i exact ürün, paket ve kurulu tam UI UAT kapılarının yerine geçmez.
 
 ## Bundan sonraki kararlar için zorunlu eşzamanlılık kuralı
 

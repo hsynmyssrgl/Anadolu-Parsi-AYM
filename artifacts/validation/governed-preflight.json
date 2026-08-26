@@ -1,20 +1,20 @@
 {
   "schemaVersion": 1,
-  "release": "Bronze 26.08.2026.51",
-  "rulesSha256": "cbd4476d480d81064291347293ba8140d8269bca2cac82d2358a87891f8c14c4",
+  "release": "Bronze 27.08.2026.52",
+  "rulesSha256": "103e269ab67eed8423a03b726d00bc36616660ca2f0f3c65eea3491103640936",
   "mode": "GENERATE_AND_VERIFY",
   "acknowledgement": {
     "schemaVersion": 1,
-    "release": "Bronze 26.08.2026.51",
+    "release": "Bronze 27.08.2026.52",
     "ruleRegistry": "config/canonical-rule-registry.json",
-    "rulesSha256": "cbd4476d480d81064291347293ba8140d8269bca2cac82d2358a87891f8c14c4",
+    "rulesSha256": "103e269ab67eed8423a03b726d00bc36616660ca2f0f3c65eea3491103640936",
     "acknowledgedAt": "2026-08-24T12:00:00+03:00",
     "authority": "Explicit user instruction in current conversation",
     "statement": "All written project rules and operation checks remain binding without waiver. Every smallest mutation must atomically update every affected main/channel source, rule, decision, active/commercial document, work item, scope, inventory, ratchet, manifest, index, current master DOCX/PDF and evidence contract, or record a concrete NOT_AFFECTED justification. Targeted tests, unfiltered full regression, typecheck, changed-script syntax and source integrity are mandatory; UI mutations require complete module, route, menu, visible-control, state, accessibility and visual-integrity UAT. Every actual test failure is preserved by a wip(rejected) checkpoint. No intermediate installer may be built before closure; packaging requires clean exact main/channel source equality. Bronze Windows local-test delivery also requires the complete PR-239 adversarial provenance, installer-experience, UAT110, UAT111 and final-readback chain. PR-241 permits only Bronze 26.08.2026.51 to recover by fresh install after immutable rejected Bronze 50 without trusting or installing the rejected runtime; sequence 52+ keeps exact N-to-N+1 continuity. NotSigned or protection-disabled Kaspersky testing is not a production or harmlessness claim. Every ACTIVE rule must be fail-closed enforced or explicitly BLOCKED/NOT_RUN until evidence exists."
   },
   "certifiedFullPreflightGeneratedAt": null,
   "sourceFingerprint": {
-    "sha256": "6277b83a4ea99230595d23dc70388e04f12112a2b64e8aa61da6900610652788",
+    "sha256": "b3cb704dd24a6f643cd6ac0a8e25bd954e793863ee441ca7199f938476479c8f",
     "fileCount": 2794
   },
   "status": "PASS",
@@ -23,7 +23,7 @@
       "script": "scripts/verify-canonical-rule-registry.mjs",
       "arguments": [],
       "exitCode": 0,
-      "stdout": "Canonical Rule Registry: PASS (1064 checks / 241 rules / cbd4476d480d81064291347293ba8140d8269bca2cac82d2358a87891f8c14c4).",
+      "stdout": "Canonical Rule Registry: PASS (1064 checks / 241 rules / 103e269ab67eed8423a03b726d00bc36616660ca2f0f3c65eea3491103640936).",
       "stderr": ""
     },
     {
@@ -63,7 +63,7 @@
       "script": "scripts/verify-current-master-documentation-v5.mjs",
       "arguments": [],
       "exitCode": 0,
-      "stdout": "Current master V5: PASS (241 rules / 185 decisions / 107 ADR / 13 DOCX tables / 27 PDF pages).",
+      "stdout": "Current master V5: PASS (241 rules / 185 decisions / 107 ADR / 13 DOCX tables / 28 PDF pages).",
       "stderr": ""
     },
     {
@@ -84,14 +84,14 @@
       "script": "scripts/verify-first-family-clean-release-policy.mjs",
       "arguments": [],
       "exitCode": 0,
-      "stdout": "First-family clean release policy: PASS (16 checks / Bronze 26.08.2026.51).",
+      "stdout": "First-family clean release policy: PASS (16 checks / Bronze 27.08.2026.52).",
       "stderr": ""
     },
     {
       "script": "scripts/verify-windows-installer-retention-policy.mjs",
       "arguments": [],
       "exitCode": 0,
-      "stdout": "Windows installer retention policy: PASS (0 artefakt / yalnız 26.08.2026.51 kabul edilir).",
+      "stdout": "Windows installer retention policy: PASS (0 artefakt / yalnız 27.08.2026.52 kabul edilir).",
       "stderr": ""
     },
     {
@@ -162,7 +162,7 @@
       "arguments": [],
       "exitCode": 0,
       "stdout": "Core Service Local Admin Runtime: PASS (50 checks).",
-      "stderr": "(node:19784) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+      "stderr": "(node:48532) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
     },
     {
       "script": "scripts/verify-desktop-core-service-startup-contract.mjs",
@@ -176,7 +176,7 @@
       "arguments": [],
       "exitCode": 0,
       "stdout": "Desktop Core Service Startup Runtime: PASS (51 checks; write=true).",
-      "stderr": "(node:69916) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+      "stderr": "(node:35008) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
     },
     {
       "script": "scripts/verify-system-health-core-service-ipc-contract.mjs",
@@ -190,7 +190,7 @@
       "arguments": [],
       "exitCode": 0,
       "stdout": "System Health Core Service IPC Runtime: PASS (10 checks).",
-      "stderr": "(node:33504) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+      "stderr": "(node:24968) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
     },
     {
       "script": "scripts/generate-project-artifact-index-v2.mjs",
@@ -211,5 +211,5 @@
       "stderr": ""
     }
   ],
-  "generatedAt": "2026-08-26T16:20:21.214Z"
+  "generatedAt": "2026-08-26T23:06:14.730Z"
 }

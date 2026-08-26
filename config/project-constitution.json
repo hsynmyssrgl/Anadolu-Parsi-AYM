@@ -1,7 +1,7 @@
 {
   "schemaVersion": 3,
   "id": "PPT-PROJECT-CONSTITUTION-V13",
-  "effectiveRelease": "Bronze 26.08.2026.51",
+  "effectiveRelease": "Bronze 27.08.2026.52",
   "projectStartDate": "2026-07-20",
   "applicationName": "ParsYuva Aile Yaşam Merkezi",
   "exceptionless": true,
@@ -112,7 +112,7 @@
   "windowsNativeDialogCancelAndAcceptEvidenceRequired": true,
   "windowsEvidenceExclusiveNonReparseRunRootRequired": true,
   "windowsEvidenceGuardLossForbidsPathCleanup": true,
-  "canonicalRulesSha256": "cbd4476d480d81064291347293ba8140d8269bca2cac82d2358a87891f8c14c4",
+  "canonicalRulesSha256": "103e269ab67eed8423a03b726d00bc36616660ca2f0f3c65eea3491103640936",
   "activeGovernanceLedger": "config/active-governance-ledger.json",
   "deliveryReportContract": "config/delivery-report-contract.json",
   "documentInventoryPolicy": "config/document-inventory-policy.json",

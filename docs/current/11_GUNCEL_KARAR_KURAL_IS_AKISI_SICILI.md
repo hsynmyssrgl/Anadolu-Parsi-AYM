@@ -1,9 +1,9 @@
 # ParsYuva Aile Yaşam Merkezi — Güncel Karar, Kural ve İş Akışı Sicili
 
-- Belge sürümü: **GUNCEL-2026-08-26-V5**
-- Tarih: **26.08.2026**
-- Görünür ürün sürümü: **Bronze 26.08.2026.51**
-- Kaynak HEAD: `0099e39e6699793bc7cf5a275749e58aed24b753`
+- Belge sürümü: **GUNCEL-2026-08-27-V5**
+- Tarih: **27.08.2026**
+- Görünür ürün sürümü: **Bronze 27.08.2026.52**
+- Kaynak HEAD: `2ca29a6df0c16aeab4dd3b27a8aa87c3197eb1da`
 - Statü: **ACTIVE_CURRENT_MASTER_REFERENCE**
 - Kararlar: **DEC-250–DEC-276**
 
@@ -30,7 +30,7 @@
 ## 3. Kapsam ve kural özeti
 
 - Gereksinim: **358** — COMPLETE 109, PARTIAL 25, FOUNDATION_STARTED 1, NOT_IMPLEMENTED 223.
-- Kural sicili: **PPT-CANONICAL-RULE-REGISTRY-V29**, toplam 241, aktif 216, superseded 25, SHA-256 `cbd4476d480d81064291347293ba8140d8269bca2cac82d2358a87891f8c14c4`.
+- Kural sicili: **PPT-CANONICAL-RULE-REGISTRY-V29**, toplam 241, aktif 216, superseded 25, SHA-256 `103e269ab67eed8423a03b726d00bc36616660ca2f0f3c65eea3491103640936`.
 - Kullanıcı karar defteri: **105** toplam kullanıcı kararı; **100** aktif, **5** superseded.
 
 ## 4. İş akışları
@@ -174,7 +174,9 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - Final-freeze2 çoklu önizlemesindeki DOCX header/footer ve PDF çift sayfa footer kırpması tam sayfa readback ile yanlış pozitiftir. PDF karar dizinindeki exact yolların karakter ortasından sarılması gerçek FAIL olup 17ad92d0 ile korunmuştur; karar/ADR yol hücreleri exact metni değiştirmeyen ayraç-sonrası sıfır-genişlikli kırma noktalarıyla yeniden üretilir.
 - Final-freeze3 makine kapısı 30 DOCX ve 27 PDF sayfayı eksiksiz bulmuş, ancak U+200B ReportLab token bölmesini engellememiştir. PDF karar/ADR yollarındaki ayraç dışı sarım a0d9df42 ile korunmuş; yol üreticisi yalnız /, -, _ sonrasında en çok 48 karakterlik deterministik satırlar üretir. Final-freeze4 DOCX 30/30 ve PDF 27/27, toplam 57/57 tam tek-sayfa özgün çözünürlük QA PASS vermiştir.
 - 0099e39e yanlış ana kaynak kökü mutation assessment çağrısını fail-closed reddeder; exact Bronze retry 109 değişen yol/21 hedef test ve analysis 109 yol PASS vermiştir. P2 kayıt bütünlüğü sertleştirmesi assessment sourceCommit değerini canlı release provenance HEAD, baselineCommit değerini doğrulanmış harici baseline pointer HEAD ile exact bağlar. Eksik veya drift kimlik yedi tüketicide reddedilir; odaklı 2 dosya/8 test PASS, yeni exact hedefli/tam/bütünlük ve kurulu UAT zinciri pendingdir.
+- 27.08.2026 UAT110 registry harness zincirinde 059e3787 canlı pre-install state-snapshot, a1aec744 doğrudan PSObject, 8472face AsPSObject, 15e3c9d0 sıfır kayıt Count ve 64695e58 Windows PowerShell test modülü çağrı retlerini korur. Installer başlamamış, kurulu EXE/UAT111 oluşmamış ve 15 AppData dosyası değişmemiştir. Property-safe isteğe bağlı alan okuma ve kesin sıfır-kayıt dizisi Windows PowerShell 5.1 altında 2 dosya/17 test PASS vermiştir. İlk Bronze 52 governed writer turundaki sabit TICARI-051 son-kayıt driftini 2ca29a6d korur; doğrulayıcı TICARI-052 exact tekil son kaydına taşındıktan sonra ticari 1.254 kontrol ve 4.409 dosya/2.145 belge indeksli retry PASS vermiştir. Bronze 27.08.2026.52 tek kez tahsis edilmiştir; exact test, kaynak bütünlüğü, belge QA, immutable .51 predecessor readback, paket ve N-to-N+1 kurulu UAT kapanmadan teslim yoktur.
 - Final-freeze6 P2 belge QA sonucunda önceki onayla byte-exact aynı 25 sayfa korunmuş, değişen DOCX 1 ve 9-19 ile PDF 1 ve 9-27 sayfaları üç bağımsız denetimde 32/32 PASS bulunmuştur. Toplam DOCX 30/30 ve PDF 27/27, yani 57/57 sayfa; taşma, örtüşme, kırpılma, font/glyph, tablo, footer, marj, sayfa numarası ve güvenli ayraç dışı token bölünmesi olmadan PASS'tir.
+- Bronze 27.08.2026.52 güncel master belge QA turunda DOCX 30/30 ve PDF 28/28, toplam 58/58 sayfa özgün çözünürlükte PASS vermiştir. Taşma, örtüşme, kırpılma, token-ortası sarım, font/glyph, tablo, header/footer, marj veya sayfa numarası kusuru yoktur; exact ürün, paket ve kurulu tam UI UAT kapıları ayrıca zorunludur.
 
 ## 9. Görsel kimlik ve erişilebilirlik
 

@@ -4,17 +4,16 @@
   "counterPolicy": "MONTHLY_RESET_CONTINUE_FROM_HISTORICAL_COUNT",
   "current": {
     "channel": "Bronze",
-    "date": "2026-08-26",
-    "displayDate": "26.08.2026",
-    "monthlySequence": 51,
-    "version": "26.08.2026.51",
-    "visibleRelease": "Bronze 26.08.2026.51",
-    "packageVersion": "26.8.2026-51",
-    "releaseId": "bronze-2026-08-26-r51",
+    "date": "2026-08-27",
+    "displayDate": "27.08.2026",
+    "monthlySequence": 52,
+    "version": "27.08.2026.52",
+    "visibleRelease": "Bronze 27.08.2026.52",
+    "packageVersion": "27.8.2026-52",
+    "releaseId": "bronze-2026-08-27-r52",
     "status": "IN_PROGRESS",
-    "parentRelease": "Bronze 22.08.2026.50",
-    "summary": "Bronze 50 geçersiz immutable paket geçmişinden sonra tek seferlik temiz recovery bootstrap sürümü.",
-    "recoveryBootstrapDecision": "RECOVERY_BOOTSTRAP_AFTER_REJECTED_50",
+    "parentRelease": "Bronze 26.08.2026.51",
+    "summary": "Resmî derleme numarası yalnız paketleme yetkisi tarafından ayrıldı.",
     "parentSourceSha256": null
   },
   "august2026HistoricalCountBeforeCurrent": 26,
@@ -291,6 +290,16 @@
       "parentRelease": "Bronze 22.08.2026.50",
       "recoveryBootstrapDecision": "RECOVERY_BOOTSTRAP_AFTER_REJECTED_50",
       "parentSourceSha256": null
+    },
+    {
+      "channel": "Bronze",
+      "date": "2026-08-27",
+      "monthlySequence": 52,
+      "version": "27.08.2026.52",
+      "packageVersion": "27.8.2026-52",
+      "releaseId": "bronze-2026-08-27-r52",
+      "status": "IN_PROGRESS",
+      "summary": "Resmî derleme numarası yalnız paketleme yetkisi tarafından ayrıldı."
     }
   ]
 }

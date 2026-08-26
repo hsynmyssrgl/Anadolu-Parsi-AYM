@@ -170,6 +170,53 @@ describe('Windows installed release UAT contract', () => {
     expect(source).toContain("authenticodeStatus -eq 'NotSigned'");
   });
 
+  it('skips unrelated Windows uninstall entries whose optional properties are absent under strict mode', async () => {
+    const source = await readFile(producerUrl, 'utf8');
+    expect(source).toContain('function Get-OptionalPropertyString');
+    expect(source).toContain('Get-Member -InputObject $Value -Name $Name -MemberType Properties');
+    expect(source).toContain('Select-Object -ExpandProperty $Name -ErrorAction Stop');
+    expect(source).toContain("$displayName = Get-OptionalPropertyString $value 'DisplayName'");
+    expect(source).toContain("Get-OptionalPropertyString $value 'QuietUninstallString'");
+    expect(source).toContain('$ordered = @($records.ToArray() | Sort-Object)');
+    expect(source).not.toContain('[string]$value.DisplayName');
+    expect(source).not.toContain('[string]$value.InstallLocation');
+  });
+
+  it('executes missing-property, ordered-entry and live snapshot behavior under Windows PowerShell strict mode', () => {
+    if (process.platform !== 'win32') return;
+    const scriptPath = fileURLToPath(producerUrl).replaceAll("'", "''");
+    const command = [
+      '$ErrorActionPreference="Stop"',
+      'Set-StrictMode -Version Latest',
+      'Import-Module "$env:SystemRoot\\System32\\WindowsPowerShell\\v1.0\\Modules\\Microsoft.PowerShell.Utility\\Microsoft.PowerShell.Utility.psd1" -Force -ErrorAction Stop',
+      `$path='${scriptPath}'`,
+      '$tokens=$null',
+      '$parseErrors=$null',
+      '$ast=[Management.Automation.Language.Parser]::ParseFile($path,[ref]$tokens,[ref]$parseErrors)',
+      'if($parseErrors.Count -gt 0){throw ($parseErrors|Out-String)}',
+      '$functionText=($ast.FindAll({param($node) $node -is [Management.Automation.Language.FunctionDefinitionAst]},$true)|ForEach-Object{$_.Extent.Text}) -join "`n"',
+      '$RepoRoot=[IO.Path]::GetFullPath((Join-Path (Split-Path -Parent $path) ".."))',
+      '$ExpectedUserDataRoot=[IO.Path]::GetFullPath((Join-Path $env:APPDATA "ParsYuva"))',
+      '$CanonicalInstallRoot=[IO.Path]::GetFullPath("C:\\Program Files\\PPT\\ParsYuva-Bronze")',
+      '$CanonicalInstalledExe=Join-Path $CanonicalInstallRoot "ParsYuva-Bronze.exe"',
+      '$RunRoot=Join-Path $env:TEMP "ParsYuva-UAT110-CONTRACT-NONEXISTENT"',
+      'Invoke-Expression $functionText',
+      '$missing=[pscustomobject]@{InstallLocation="ignored"}',
+      'if((Get-OptionalPropertyString $missing "DisplayName") -cne ""){throw "Missing property was not normalized to empty."}',
+      '$complete=[pscustomobject]@{DisplayName="ParsYuva Aile Yaşam Merkezi Bronze";DisplayVersion="26.8.2026-52";InstallLocation=$CanonicalInstallRoot;DisplayIcon="ParsYuva-Bronze.exe";UninstallString="uninstall";QuietUninstallString="uninstall /S"}',
+      'if((Get-OptionalPropertyString $complete "DisplayName") -cne $complete.DisplayName){throw "Present property readback changed."}',
+      '$ordered=[ordered]@{DisplayName=$complete.DisplayName;DisplayVersion=$complete.DisplayVersion;InstallLocation=$complete.InstallLocation;DisplayIcon=$complete.DisplayIcon;UninstallString=$complete.UninstallString;QuietUninstallString=$complete.QuietUninstallString}',
+      'if($ordered.DisplayVersion -cne "26.8.2026-52" -or $ordered.DisplayIcon -cne "ParsYuva-Bronze.exe"){throw "Ordered registry identity dot access failed."}',
+      '$snapshot=Get-StateSnapshot "STRICT_MODE_CONTRACT"',
+      'if($null -eq $snapshot.uninstallRegistry.bronze.entryCount){throw "Live registry snapshot did not produce an entry count."}',
+    ].join(';');
+    const result = spawnSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', command], {
+      encoding: 'utf8', windowsHide: true,
+    });
+    expect(`${result.stdout}\n${result.stderr}`).toBe('\n');
+    expect(result.status).toBe(0);
+  });
+
   it('writes schema-3 UAT110 then invokes the schema-3 installed frontend runner with the preservation/run binding', async () => {
     const source = await readFile(producerUrl, 'utf8');
     expect(source).toContain("windows-installed-release-uat110.json");

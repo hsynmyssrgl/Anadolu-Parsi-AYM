@@ -12,8 +12,8 @@ describe('current master documentation V5 governance', () => {
     const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
 
     expect(active.currentMasterDocumentation).toMatchObject({
-      version: 'GUNCEL-2026-08-26-V5',
-      asOf: '2026-08-26',
+      version: 'GUNCEL-2026-08-27-V5',
+      asOf: '2026-08-27',
       status: 'ACTIVE_CURRENT_MASTER_REFERENCE',
       historicalBuildArtifactsImmutable: true
     });

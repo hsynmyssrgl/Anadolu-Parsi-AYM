@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
-  "release": "Bronze 26.08.2026.51",
-  "releaseId": "bronze-2026-08-26-r51",
-  "generatedAt": "2026-08-26T16:20:20.166Z",
+  "release": "Bronze 27.08.2026.52",
+  "releaseId": "bronze-2026-08-27-r52",
+  "generatedAt": "2026-08-26T23:06:13.658Z",
   "selfIndexedPaths": [
     "SHA256SUMS.txt",
     "artifacts/inventory/TESLIMAT_CALISMA_AGACI_ENVANTERI.json",
@@ -105,7 +105,7 @@
     {
       "path": "apps/core-service/package.json",
       "bytes": 670,
-      "sha256": "d4fa2c4327c5713af2d794fee78f07f86b42ef06fc600f303e3b0fddd886f658",
+      "sha256": "c95dd2c0aac715bdfa3a64a1b876f5d2d0cfa4f69c0f011fa249ae927391de01",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -617,7 +617,7 @@
     {
       "path": "apps/desktop/package.json",
       "bytes": 3879,
-      "sha256": "a6bc8090acb9ccbc06f66fc40a6f145c913797bd4973d7d7d6482eb454ccad94",
+      "sha256": "e45401754157c7c5cb44692038a938aa6112d5b5aa642254c1b428a559ef218e",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -3233,7 +3233,7 @@
     {
       "path": "apps/desktop/tests/current-master-documentation-v5-governance.test.ts",
       "bytes": 2333,
-      "sha256": "818747a9f048bc02a51d38f241447082c95bd3006d26d054e04321aad59110f4",
+      "sha256": "bd2967701d4734c2f5fd779629f20ce1166e170d2f3a31cf7632a99bc5eb01c9",
       "extension": ".ts",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -4672,8 +4672,8 @@
     },
     {
       "path": "apps/desktop/tests/windows-installed-release-uat-contract.test.ts",
-      "bytes": 10468,
-      "sha256": "af2e436d78375968149c90324fbd66f0de87149331012953f3c644f8fc2d1143",
+      "bytes": 14209,
+      "sha256": "875e0b0a19c3ccb262e174372915299d4d7dc0bb071b0802dafc0992c3a8f49a",
       "extension": ".ts",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -8593,7 +8593,7 @@
     {
       "path": "artifacts/validation/feature-reality-gate.json",
       "bytes": 673,
-      "sha256": "85302564f994b596d19ad5188be0510853ba37d1e1b8c6df10d1e65e21617077",
+      "sha256": "5ab59939e3ecc7a5fc7d1db6789d437bdc7b900b80faf53c01de62f642705e80",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -8617,7 +8617,7 @@
     {
       "path": "artifacts/validation/governed-preflight.json",
       "bytes": 9781,
-      "sha256": "f3efb5e23ea8bd811ee19ded60b7090fb92ed801803a6625826eb2202eff048d",
+      "sha256": "155f221c7bf3e2e006bb522d1284860b5eae19a6d6ae98d55711c59518db44c3",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -10568,8 +10568,8 @@
     },
     {
       "path": "BUILD_STATUS.md",
-      "bytes": 21143,
-      "sha256": "46c43d69508d85301be1338650b0d857e80148c481d903f8fea9051f09c850d4",
+      "bytes": 21649,
+      "sha256": "7b5f1a70effd9fbbdb5f7bb991d59884bc553a067c8774c239971d9408c758e0",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -13089,7 +13089,7 @@
     {
       "path": "config/32-u-ppk-025-signing-trust-policy.json",
       "bytes": 3319,
-      "sha256": "22089572b8a3fef9d48985e03b90c0ea99ccccdc32ac220c26791912a2376756",
+      "sha256": "99ee04c98683f52b15dfe1cf6d6c150a9fb05489a4f4270df83267c312f00ef4",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -13097,7 +13097,7 @@
     {
       "path": "config/32-u-ppk-025-software-supply-chain-inventory.json",
       "bytes": 9012,
-      "sha256": "cb10d641fa4bc6e676efc930e86e0f74d5ef56c49753c84144d5922e5c3335b8",
+      "sha256": "28ae96e948cd87c58819f45d4be00a46b2fe4418f0f51733f86f616c5dd3b0af",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -13105,7 +13105,7 @@
     {
       "path": "config/32-u-ppk-025-software-supply-chain-policy.json",
       "bytes": 6834,
-      "sha256": "52bb6ba433a29f16be9a8afd3ecf452a455281cd3e7534d0486895d3adaa1111",
+      "sha256": "7b854a9088b73b97c03fe6d99b317eb562d956e826b2e45afbaa7874e31596ad",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -13113,7 +13113,7 @@
     {
       "path": "config/32-u-ppk-025-software-supply-chain-scope.json",
       "bytes": 7755,
-      "sha256": "227a4eed92fb7bbfb71a7c04602f14abeda133dfc9d75ec41ec18046ec686dde",
+      "sha256": "ea1d59a00faf0979dfc242bc24b4a5a2bb0eda293d7947af10758518dd568348",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -13849,7 +13849,7 @@
     {
       "path": "config/active-document-set.json",
       "bytes": 3054,
-      "sha256": "ee73f2160fa76a30c49041d3d3479e8921a4c637b329e445a81e1fa42c695f98",
+      "sha256": "dc98fc409046effa7d770e0fc285fe9af287f95aeb4c8d48d67eb06caecd9bc8",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -13864,8 +13864,8 @@
     },
     {
       "path": "config/active-governance-ledger.json",
-      "bytes": 56153,
-      "sha256": "06c439e092f61f695e917ddee6f0b0e1cd2451e88cffcc9e71678f082fae69a3",
+      "bytes": 56688,
+      "sha256": "55a78b8428a6d645dac38631af91fa898537f1d5da654ba0f32cc520dc7b3a77",
       "extension": ".json",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -13913,7 +13913,7 @@
     {
       "path": "config/canonical-rule-registry.json",
       "bytes": 107541,
-      "sha256": "16cd0412c960312d2eef105ec832883616bc2bac5e5e9608f356e6e8c263e34d",
+      "sha256": "4759636673d691d5f0f25ef340243ca1caed213e07988e71b1bdbbc71269a08a",
       "extension": ".json",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -13969,7 +13969,7 @@
     {
       "path": "config/documentation-synchronization-policy.json",
       "bytes": 2240,
-      "sha256": "f0a00fe1002b75587ca4b56288ed8399e991f3195506cc69548d287b1b5b05f7",
+      "sha256": "a9c948a647307bf56fe0b5601c4e90d229a023e1f641f8429aed7f572592d414",
       "extension": ".json",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -14017,7 +14017,7 @@
     {
       "path": "config/mutation-release-readiness-policy.json",
       "bytes": 5537,
-      "sha256": "d9a374adeac602a5a2cb2a0336b80daa5cbbb5acb5c22269324b4a394c49d3a9",
+      "sha256": "a370d6be2e1733e7e0d2c310c0fdb985db359eff5d008e9debf62a092f559974",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -14089,7 +14089,7 @@
     {
       "path": "config/project-constitution.json",
       "bytes": 6596,
-      "sha256": "0dae89257f30d8139d86e1a574db518e89c7ed3e9b73ceacbaa8669bae83130e",
+      "sha256": "7de004d9a0dc177fae5c718c97da2cf908b20cb00f0288514142de3b1558736b",
       "extension": ".json",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -14128,8 +14128,8 @@
     },
     {
       "path": "config/release-ledger.json",
-      "bytes": 10843,
-      "sha256": "2013b4a26258fc43402faf84dbefa3b5893b9a91544b7090671e59b45dbef7ad",
+      "bytes": 11078,
+      "sha256": "05cce9a915a93587989ce4ded529533cb1e1240c89618224a696f2366466e570",
       "extension": ".json",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -14145,15 +14145,15 @@
     {
       "path": "config/rule-acknowledgement.json",
       "bytes": 1662,
-      "sha256": "d09a17165cd6764b73118e152863b929731aaaeaa0f86f988840a4fb25f60de6",
+      "sha256": "4a976a658514eb5d937984e64022e10df226b0c1fdc9b8f5374d6522cd8db084",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
     },
     {
       "path": "config/rule-enforcement-registry.json",
-      "bytes": 105358,
-      "sha256": "c92be6c3052a0ffbe150303c42069bdd363288f96e4c77c4740809220f709d75",
+      "bytes": 105398,
+      "sha256": "d9996deea27b9c8d9040460f1b5d6161670468f30c00866aa1893ad1e3583aa1",
       "extension": ".json",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -14176,8 +14176,8 @@
     },
     {
       "path": "config/user-decision-ledger.json",
-      "bytes": 164244,
-      "sha256": "ca4038a88406ff599b82285aa450f1687994c812578d361ea5a0af00de126d07",
+      "bytes": 164311,
+      "sha256": "f25b0f73ee81a4d9995b3aebbdf38ecaf779a68316248f53d0ff1fec0d0e99db",
       "extension": ".json",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -14185,7 +14185,7 @@
     {
       "path": "config/work-segmentation-plan.json",
       "bytes": 154739,
-      "sha256": "0cd903741561a5206151842a9cf343082a602b84722de6d555cb8d3c05abc2a6",
+      "sha256": "54fa91dc47ba6a29b9d1c1ce3028f6458974fa665ed6dc5c9ad69038ae96f62b",
       "extension": ".json",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -14193,7 +14193,7 @@
     {
       "path": "CONTRIBUTING.md",
       "bytes": 8606,
-      "sha256": "76b141332ee971c66429332744cd2730ea40ea28e85cf33f7c2124ac7b45557a",
+      "sha256": "08bd84ec78eebf40207f3105f817a9859069b3fdc43582c9872e9e92b83def48",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -14201,7 +14201,7 @@
     {
       "path": "COPYRIGHT.md",
       "bytes": 374,
-      "sha256": "d7f7e67b95969f414521cc98b39d0e3af42fdbb121feb01afce6aca8ac0076c7",
+      "sha256": "da4d0365152e67e147ff39f74046b60adcd4e9b55158fc1f0015a92a2b56edf4",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -14361,7 +14361,7 @@
     {
       "path": "DELIVERY_SUMMARY_TR.md",
       "bytes": 912,
-      "sha256": "5ca4ef3ad3e6566bd8eb26f66258e21e871c09756d2a49b41b4211d5630b0465",
+      "sha256": "a053561ceb848150d5d255db289f2cdac297f2d50416059d790e8df45971746b",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -14608,8 +14608,8 @@
     },
     {
       "path": "docs/10_MASTER_DECISION_REGISTER.md",
-      "bytes": 147272,
-      "sha256": "51074e390c1a0d8de85a1d709a49a156a52782773abc7dd6bb9abf5e07efa3c5",
+      "bytes": 148359,
+      "sha256": "e91d7e1a3ec120a86659586b9fc7effdf04afb5ab36c1b6ce13588fc351e15b4",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -16489,7 +16489,7 @@
     {
       "path": "docs/current/00_AKTIF_ANA_KAPSAM.md",
       "bytes": 3285,
-      "sha256": "d1780ed851df53cca298afab8470b7730855b537cf502038985a5a77051ce82b",
+      "sha256": "4a2ed0c66eafff7c77846b4006b9d6be92b96839b535bba085e3be932a30240c",
       "extension": ".md",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -16521,7 +16521,7 @@
     {
       "path": "docs/current/04_AKTIF_BRONZE_YOL_HARITASI.md",
       "bytes": 2451,
-      "sha256": "14dcc597f022a67efb8aed8b2182153544da1b6366403061deec7d7275495271",
+      "sha256": "396ccf26c4e78e9f9bceddbfe981978c402c2ec19d7fecf77f77b35a80c1d812",
       "extension": ".md",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -16537,7 +16537,7 @@
     {
       "path": "docs/current/06_KANONIK_KURAL_SICILI.md",
       "bytes": 9465,
-      "sha256": "9bf762ee45ff15b0e196763e7c2e5e5141601291b8b72f5c5d1931406259450b",
+      "sha256": "a8b9093d6c6c4f9baa54326ae59dc6263cae872dad99913e4ddd343bac3baaef",
       "extension": ".md",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -16545,7 +16545,7 @@
     {
       "path": "docs/current/07_TESLIM_SOHBET_VE_KALICI_KAYIT_SOZLESMESI.md",
       "bytes": 1539,
-      "sha256": "867efa92332b7b28dded18b59bd52c475efb8dc857209e77f200ecbaa657bd36",
+      "sha256": "4ab7a6a4e702a76ff69102a51190af59e95a8f266373d4f74fee614c2fdec8a7",
       "extension": ".md",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -16560,8 +16560,8 @@
     },
     {
       "path": "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
-      "bytes": 29873,
-      "sha256": "a6160317cde2f61432eba41c36d2fa1969b83ffddd765b67df199062f5060d9e",
+      "bytes": 31558,
+      "sha256": "9c3e9c1d3261ad8c8db78ed05ba77a95eb3b48510002bc90cc9f449edb322a14",
       "extension": ".md",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -16569,15 +16569,15 @@
     {
       "path": "docs/current/10_TUM_KURALLAR_ASILAMAZ_YURUTME_SOZLESMESI.md",
       "bytes": 7040,
-      "sha256": "7d1a5ba481440537848b530ba4bc5ea5f55fe332f5447d19ba892b19c32cc507",
+      "sha256": "5c064df79464f66d5a98067431dec689f8a94d2c842b1069aff66dfd291bdf36",
       "extension": ".md",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
     },
     {
       "path": "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
-      "bytes": 152580,
-      "sha256": "e7be96c38adfc1d541dadb04de17652a655a1f2ab0922645c0a111a08e0099ca",
+      "bytes": 153831,
+      "sha256": "cfa580256483f371b0a0acee746a5f9f0e45b618c788588c7f0b7b95f70bc93f",
       "extension": ".md",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -16585,7 +16585,7 @@
     {
       "path": "docs/current/12_KALAN_IS_SINIFLANDIRMA.md",
       "bytes": 6768,
-      "sha256": "98eb75cda54fb7df0e7f7ce1c3bed8bd18161d7f7dd749059b6021195dbc698d",
+      "sha256": "fb2ffb2a35e026e22c5b42f9ee7b1e28c8c355073f03bee4bc27bec5bcaa2e19",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -16601,7 +16601,7 @@
     {
       "path": "docs/current/13_KURUMSALLASMA_VE_GLOBAL_MARKA_PLANI.md",
       "bytes": 4554,
-      "sha256": "2feb86cca9416776eb81fb3cabb0e643de034e25564606d8cfd069f3c5966f0d",
+      "sha256": "ae0b8eab519e81f24e9ff946b84cdce5d63f42f0e2d5c96459366ff22027796b",
       "extension": ".md",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -16625,7 +16625,7 @@
     {
       "path": "docs/current/15_EK_KURAL_TOPLU_BIRLESTIRME_SICILI.md",
       "bytes": 3790,
-      "sha256": "398e08a9dbf019df5fe96b9ed23d16e0a49aee521a6fb44deb043986d30a5ffe",
+      "sha256": "bde31fadc8e8f27759e6d6cd0b2d7c827c06d8d5e0fc188e5884bc63a5972a05",
       "extension": ".md",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -16784,16 +16784,16 @@
     },
     {
       "path": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.docx",
-      "bytes": 364926,
-      "sha256": "5172670f49ae062fbc273413439512df35a70afe20699714ea0176aa3b84bdd9",
+      "bytes": 365392,
+      "sha256": "a221411b3f8e3fc7d68e093c9826fcd75dd4fe3fad9982d80967dd1d05110fe2",
       "extension": ".docx",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
     },
     {
       "path": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.pdf",
-      "bytes": 509925,
-      "sha256": "59c961b01a8fec3cc92bc9728a2115bdebea21e2a315516cb03c3a07b18896a6",
+      "bytes": 511083,
+      "sha256": "7f152148de60b9adefbd245e022d18c4c4a82f27324e2ebd9a1d72503a46be97",
       "extension": ".pdf",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -18600,16 +18600,16 @@
     },
     {
       "path": "docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md",
-      "bytes": 50872,
-      "sha256": "a2a3e036ebabe891b50a8e04fbd08e82357a5a1a0d6b931e799775d5af14e07f",
+      "bytes": 51979,
+      "sha256": "04384a675208e6870c1ca331a4d5e31d3f94859ba9792cfc20c1bfd8a444cce4",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
     },
     {
       "path": "docs/decisions/DEC-276-bronze-51-rejected-predecessor-recovery-bootstrap.md",
-      "bytes": 19003,
-      "sha256": "4c35b8e54db0bae2f4be61185fe8a5505d96804534f120b3c13f6c1ca4a1136a",
+      "bytes": 20119,
+      "sha256": "3eee96db662850ddedc635ffb6b2ee8759f639897c373d6c7255f696a70002da",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -19320,8 +19320,8 @@
     },
     {
       "path": "docs/ticari-urun-temeli/00_OKU_BENI.md",
-      "bytes": 8922,
-      "sha256": "55b1a5aeb97fea1a4471f36de923643eb81b507aec1003e9f966b7fc98a28e87",
+      "bytes": 9044,
+      "sha256": "50ad81608146e2d73f3188e8b73ea6a68c0cc0ccba21ac929d303fe52a0ceaee",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -19329,7 +19329,7 @@
     {
       "path": "docs/ticari-urun-temeli/00_TEMEL_SURUM_MANIFESTOSU.json",
       "bytes": 1196,
-      "sha256": "5fec9033b8e41d6bb53bcf4d187ba2aee14cde29e1d9108c002309d7e700bdb9",
+      "sha256": "4657871c6cb15d7d30188a0b352c358002001307e47fd361c2fc673a9a468313",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -19361,15 +19361,15 @@
     {
       "path": "docs/ticari-urun-temeli/01_YONETIM/04_AKTIF_KURAL_SICILI.json",
       "bytes": 9935,
-      "sha256": "4f7b074d7b6e6396b681df856d71dd5cfcf9e1645aa68c65630f7fc51a32aa0f",
+      "sha256": "5e3a9e9b2cb8fd8d328f3524e465238f62eaad6b0f8fab2ff90b82118a15870b",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
     },
     {
       "path": "docs/ticari-urun-temeli/01_YONETIM/05_DEGISIKLIK_SICILI.json",
-      "bytes": 60198,
-      "sha256": "794fba88440a049ca85172f792b4d9617821de8a576ec696a5cb2a12a4ef36e8",
+      "bytes": 62529,
+      "sha256": "f8c276decc1e25e53fac93ba3eaf9e8aeb56d453afe8664ca7afe28566aa139b",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -19489,7 +19489,7 @@
     {
       "path": "docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json",
       "bytes": 17460,
-      "sha256": "0aa6fc05f38f22c6615b9df5a39eef6905d08fc4fe12e039280080ad48b0b5a0",
+      "sha256": "4fb61c240177a7cd65494716558c12d82f24c8807c062bcdb2f63a87fd4895f8",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -19936,8 +19936,8 @@
     },
     {
       "path": "docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md",
-      "bytes": 22222,
-      "sha256": "990a65ccfb3b4887e5716f11cb6ba0143d6b4a16f38dd527d0229cfea155a4c4",
+      "bytes": 23134,
+      "sha256": "3452b799a395c8acbedf4eaa82f3107dddc72da4be7191eebe8af1068b536d6d",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -19952,8 +19952,8 @@
     },
     {
       "path": "docs/ticari-urun-temeli/08_IS_LISTESI/03_ANA_IS_SICILI.json",
-      "bytes": 33391,
-      "sha256": "8d0e47068cffde159c29e87fbd5f29b52679a9f4cc9d6b735c4cdd7035bd4212",
+      "bytes": 34064,
+      "sha256": "2fc2b44684786858db99a2752f2a20bdbeffa86d8eebd16a9aa65ad07a47de48",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -20008,8 +20008,8 @@
     },
     {
       "path": "docs/ticari-urun-temeli/11_OTOMASYON/dogrula-ticari-temel-alani.mjs",
-      "bytes": 27812,
-      "sha256": "624c5bc57b28feafc6171bd3d145c26ead1cfa61f9da65715a6e976b999eb260",
+      "bytes": 27860,
+      "sha256": "15449bce87992b54b39c5419bc4a009756cf302c81d8b12ee86f86e8583fc7cf",
       "extension": ".mjs",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -20121,7 +20121,7 @@
     {
       "path": "package-lock.json",
       "bytes": 87853,
-      "sha256": "87e04937c16f0d1e6b400548aacd35d0517702dea20a7bdc96e90341deae677e",
+      "sha256": "36a06ca8fbeebec729142e528b7818f0e2676af13da41d45bae906de90fed2cf",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -20129,7 +20129,7 @@
     {
       "path": "package.json",
       "bytes": 126243,
-      "sha256": "5f9590015a10633bd2dc23a99d74635dea83f37a3f5fa497d1fa7ae5cff86063",
+      "sha256": "547750c8a91275de18c59c8971b8429e78a41f5db22102d57f7cd2a29c140d27",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -20137,7 +20137,7 @@
     {
       "path": "packages/application/package.json",
       "bytes": 633,
-      "sha256": "6970acd9acee7a2a5327b602e9b48a93b8451fe536b3de120134da6ebecf409d",
+      "sha256": "30713723336cc3490ab9221b86b0edba3ee2e8b287a7fde00bbd14884fa4ef6d",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -21241,7 +21241,7 @@
     {
       "path": "packages/config/package.json",
       "bytes": 363,
-      "sha256": "4788879181d6b8e35e9870df481fee3d5045f877e7e102d90d4aef009b3cacc4",
+      "sha256": "dc53e04acbd9eca93ce899f69ad9d9e1fce0693d822bda1d5fc85458d1e6acfd",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -21273,7 +21273,7 @@
     {
       "path": "packages/contracts/package.json",
       "bytes": 366,
-      "sha256": "791feaf61377aaf5cdb4c5f2afce50440bfc31bdadeee4058df915e409f45475",
+      "sha256": "7bfedfb948659c24e7e556949a7ed4208bdb34e1c1ced5c0c27ee38c6e369d59",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -21321,7 +21321,7 @@
     {
       "path": "packages/core-service-client/package.json",
       "bytes": 347,
-      "sha256": "8309f65805ebb0cd40cb239b4efeb25c4dbb40d139f016f8cdabad3c1e1337f6",
+      "sha256": "0d02a3e2975011ba1fac7d43ae380baa83409455e44763a012fab4c059e104e9",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -21377,7 +21377,7 @@
     {
       "path": "packages/core-service-contracts/package.json",
       "bytes": 343,
-      "sha256": "d6409e986539a833e0a92f28f6fcd42ea1f2ad6bc35d0a84bf1d078620aa6dd2",
+      "sha256": "681139d31c2c84dd4a9f66f87450a3ca131e153f10c6e5fdee5e964d12074e20",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -21409,7 +21409,7 @@
     {
       "path": "packages/core/package.json",
       "bytes": 304,
-      "sha256": "3e2bab14c6a1dd14d8f7287b08c48c85f31d4ed4e23f8fb9947f70c51b05f1e5",
+      "sha256": "eec84b7d6cae39f483a7900f01fc757ef3c849f8025f50050188a0efcbf1f28b",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -21505,7 +21505,7 @@
     {
       "path": "packages/database/package.json",
       "bytes": 403,
-      "sha256": "9a0614803174521c4de9a95aceee5c36a2eef3af292630d17e9e206ea310c9ac",
+      "sha256": "c63cd1c6643afd18163cdc42ae089d88c110751e464b48e1e40a5d00bbf9a57c",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -21617,7 +21617,7 @@
     {
       "path": "packages/domain/package.json",
       "bytes": 403,
-      "sha256": "1a1dbb3d079f8348b442bc35c68d3ec02fad3ec59af1901438704ca5e0347892",
+      "sha256": "3b14eff2407bc48d2e3e069ecc33e0830c876240fffbdf1f091ff8e116c279d6",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -21649,7 +21649,7 @@
     {
       "path": "packages/domain/src/app-meta.ts",
       "bytes": 5544,
-      "sha256": "0d53dd0eef9b4a7388a28950ac3c65ad06be624150f0ea5fdcfcaa9f0855acc0",
+      "sha256": "102e07a2b60f8100aa2a7e7ba7822643e08c04c2d129a59881750f27d74514ff",
       "extension": ".ts",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -22113,7 +22113,7 @@
     {
       "path": "packages/events/package.json",
       "bytes": 363,
-      "sha256": "384d8743ab069fe9ed51eaea381e30dbad65f12d3309b7b8beded619cf4fb2bd",
+      "sha256": "70b9661d4fa85483336236218b2687061293ee7e5dc7be4231a1a32ab3ae894a",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -22137,7 +22137,7 @@
     {
       "path": "packages/infrastructure/package.json",
       "bytes": 521,
-      "sha256": "258a5ecb8ea4eb98f5e4979ed4dbd4ef150c4b4948156913f823e584f9515c81",
+      "sha256": "3e2069fd82124be59d472d25e4cc3c3649650f13887c1c8bdb7ba8e6c2e54a5b",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -22185,7 +22185,7 @@
     {
       "path": "packages/logging/package.json",
       "bytes": 408,
-      "sha256": "990d294607f6b9ce771adc972b98b6b4f253866d69de0638a77d4855b9bc4486",
+      "sha256": "1a4ff0132796a212083812eb08c4d25051e7dcf7519b849735654f200a11fc69",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -22233,7 +22233,7 @@
     {
       "path": "packages/platform-policy/package.json",
       "bytes": 337,
-      "sha256": "ac3defc06f2ee9f1fad3e8cb70cfa44887b4b26515c72efbf5c22439d43d436f",
+      "sha256": "4574bf03c8592224305d4875ee0871f5ad1d1ff1afb4c813938c1635916f21f3",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -22697,7 +22697,7 @@
     {
       "path": "packages/repositories/package.json",
       "bytes": 644,
-      "sha256": "31af9a285e4b47bd9d18479a5f45109bdc8af0dcaf3af03f0d4001a0831e746b",
+      "sha256": "9b8e112a8a814d8ce16ec93729e67e2c28ac8cfbd8bf1f1e460889428c765563",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23281,7 +23281,7 @@
     {
       "path": "packages/repository-contracts/package.json",
       "bytes": 558,
-      "sha256": "7784a26d6d7ff5a36223316901d485ea3a285d4dc47988fbab86fd8e4816ca77",
+      "sha256": "6766085ddd17e1652aff643c6cbabfffca6ad8eb1a03f3f7ba34446328ddbaa7",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23841,7 +23841,7 @@
     {
       "path": "packages/security/package.json",
       "bytes": 400,
-      "sha256": "7c95d7218e7286b72f5b8504704464e0c5645ac2be993b72e58d456306cb51d1",
+      "sha256": "efa4fa6338922358c1dd36a49c2e2a063bdd07db386d06b8d4123327a65b227c",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -24105,7 +24105,7 @@
     {
       "path": "packages/test-data/package.json",
       "bytes": 368,
-      "sha256": "27d759cef4c6546f8a93777244c5449e393f0d941ea8bf8ccf6ecd48c3542eab",
+      "sha256": "3d84a5d2f60e8a30c48596a3c1a9a03d2141a9b4f08f0d1838a845dc04559cf4",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -24129,7 +24129,7 @@
     {
       "path": "PAKET_OZETI_TR.md",
       "bytes": 912,
-      "sha256": "5ca4ef3ad3e6566bd8eb26f66258e21e871c09756d2a49b41b4211d5630b0465",
+      "sha256": "a053561ceb848150d5d255db289f2cdac297f2d50416059d790e8df45971746b",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -24161,7 +24161,7 @@
     {
       "path": "README.md",
       "bytes": 867,
-      "sha256": "701642a87fee54b17e9226bc634e86fbf2f7331c93b2ae1f51828dc03d018610",
+      "sha256": "11b998f48c7448d111b42aa6d51516ee55c135f9ba5c1204aaf6509bb81bb584",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -25953,7 +25953,7 @@
     {
       "path": "repository-metadata.json",
       "bytes": 908,
-      "sha256": "7ea8b47805c42c9fb6a89ebdd2a133d15e376603926f32966abf2c7cc42c06de",
+      "sha256": "969ef379853e59be161edb5cf3ea0e85a54c7170ab0313f317a98b987e4cd0b3",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -27352,8 +27352,8 @@
     },
     {
       "path": "scripts/generate-current-master-documentation.py",
-      "bytes": 68873,
-      "sha256": "cd5a8e18173f9c3c0362031217ec7e2fbc6f54ac8d721352c4f2514be6039fec",
+      "bytes": 70134,
+      "sha256": "bbe8ef04c859ecc2a4c6827fa5cdd96d26267736ed1c3d1abc7f25669df29a3d",
       "extension": ".py",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -28312,8 +28312,8 @@
     },
     {
       "path": "scripts/run-windows-installed-release-uat.ps1",
-      "bytes": 47716,
-      "sha256": "8b87449d58c9ac8e9710139c1688b49a7037a925a0edfdef25dc2d94b7246f8c",
+      "bytes": 48737,
+      "sha256": "75dbfb41277c0c1342c38f88719ab1fa71641bb8f64fefc83e11cb9df7d8e3a4",
       "extension": ".ps1",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -35065,7 +35065,7 @@
     {
       "path": "SECURITY.md",
       "bytes": 11918,
-      "sha256": "b1fc79e693b856d61b3e8d2d5c27d080552e1cf014b1f5beae81d63d655410c5",
+      "sha256": "d31ccb9496972841b63346609c02c880bf27565917eb3e7c4391bddbcf3b7d43",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -35081,7 +35081,7 @@
     {
       "path": "START_HERE_TR.md",
       "bytes": 695,
-      "sha256": "cb0b4a6c6a8185e120c782db43f00ef2fa967deea177820c1d660792fa21bca6",
+      "sha256": "bb72ccd7ad86ff46db1c8f54c5eeced92b55841383a60f69693b3412e8e4db59",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -35225,7 +35225,7 @@
     {
       "path": "tools/windows-packager/package-lock.json",
       "bytes": 108943,
-      "sha256": "541a9eb09e78860ea0ae42535c7a3dc85cca62fe3d27f98ddcbac1cc3e45262c",
+      "sha256": "0a474add75a0c52936cb4a0aef5934dc11b064dc4f419b6aa943bd0abff6aa7e",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -35233,7 +35233,7 @@
     {
       "path": "tools/windows-packager/package.json",
       "bytes": 481,
-      "sha256": "617523ac4eaae84eb0f6c5617aeb9f37460acb648b9266b727d2719e060b3297",
+      "sha256": "ae23dd75c9e043a7925f17ccc1dd929326f626e2bcb98bb43db6d4ea6d81f5e5",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -35265,7 +35265,7 @@
     {
       "path": "VERIFICATION_REPORT.md",
       "bytes": 934,
-      "sha256": "f5cd8c4042c6f09b03baa3ff8ba618c53400f7c6d07b1d61734c9898546f6552",
+      "sha256": "f7c0c896ab276df427021a704e9580107cdfaf70d0393d9c0f2c00f9d6e30f17",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
