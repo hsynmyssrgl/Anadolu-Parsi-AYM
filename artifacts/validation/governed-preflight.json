@@ -14,7 +14,7 @@
   },
   "certifiedFullPreflightGeneratedAt": null,
   "sourceFingerprint": {
-    "sha256": "dae9d06aa3f4d73bdccad79e9425e20f557aac86f8d45d7c21394af10a6be2e4",
+    "sha256": "6277b83a4ea99230595d23dc70388e04f12112a2b64e8aa61da6900610652788",
     "fileCount": 2794
   },
   "status": "PASS",
@@ -70,7 +70,7 @@
       "script": "scripts/verify-universal-rule-enforcement.mjs",
       "arguments": [],
       "exitCode": 0,
-      "stdout": "Universal Rule Enforcement: PASS (2659 checks / 216 ACTIVE rules / no waiver).",
+      "stdout": "Universal Rule Enforcement: PASS (2669 checks / 216 ACTIVE rules / no waiver).",
       "stderr": ""
     },
     {
@@ -162,7 +162,7 @@
       "arguments": [],
       "exitCode": 0,
       "stdout": "Core Service Local Admin Runtime: PASS (50 checks).",
-      "stderr": "(node:71544) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+      "stderr": "(node:19784) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
     },
     {
       "script": "scripts/verify-desktop-core-service-startup-contract.mjs",
@@ -176,7 +176,7 @@
       "arguments": [],
       "exitCode": 0,
       "stdout": "Desktop Core Service Startup Runtime: PASS (51 checks; write=true).",
-      "stderr": "(node:77680) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+      "stderr": "(node:69916) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
     },
     {
       "script": "scripts/verify-system-health-core-service-ipc-contract.mjs",
@@ -190,7 +190,7 @@
       "arguments": [],
       "exitCode": 0,
       "stdout": "System Health Core Service IPC Runtime: PASS (10 checks).",
-      "stderr": "(node:28852) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+      "stderr": "(node:33504) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
     },
     {
       "script": "scripts/generate-project-artifact-index-v2.mjs",
@@ -211,5 +211,5 @@
       "stderr": ""
     }
   ],
-  "generatedAt": "2026-08-26T15:10:44.763Z"
+  "generatedAt": "2026-08-26T16:20:21.214Z"
 }

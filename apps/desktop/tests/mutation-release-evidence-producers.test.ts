@@ -12,7 +12,8 @@ import {
 
 describe('PR-235 canonical mutation evidence producers', () => {
   it('binds baseline, impact and real Vitest execution to read-only postflight', async () => {
-    const [policyText, dependencyRegistryText, packageText, baseline, assessment, impact, testRunner, preflight, postflight, builder, packageProvenance] = await Promise.all([
+    const [policyText, dependencyRegistryText, packageText, baseline, assessment, impact, testRunner, preflight, postflight,
+      builder, packageProvenance, mutationEvidence, releaseProvenance] = await Promise.all([
       readFile('config/mutation-release-readiness-policy.json', 'utf8'),
       readFile('config/change-impact-dependency-registry.json', 'utf8'),
       readFile('package.json', 'utf8'),
@@ -23,7 +24,9 @@ describe('PR-235 canonical mutation evidence producers', () => {
       readFile('scripts/run-governed-preflight.mjs', 'utf8'),
       readFile('scripts/run-governed-postflight.mjs', 'utf8'),
       readFile('apps/desktop/scripts/run-electron-builder.mjs', 'utf8'),
-      readFile('scripts/lib/windows-package-provenance.mjs', 'utf8')
+      readFile('scripts/lib/windows-package-provenance.mjs', 'utf8'),
+      readFile('scripts/lib/mutation-release-evidence.mjs', 'utf8'),
+      readFile('scripts/lib/release-source-provenance.mjs', 'utf8')
     ]);
     const policy = JSON.parse(policyText);
     const dependencyRegistry = JSON.parse(dependencyRegistryText);
@@ -77,6 +80,14 @@ describe('PR-235 canonical mutation evidence producers', () => {
     expect(assessment).toContain('sha256: binding.sha256');
     expect(impact).toContain('baselinePointer: baselinePointer.value');
     expect(impact).not.toContain("optionValue('--assessment");
+    expect(mutationEvidence).toContain('assessment.sourceCommit !== expectedSourceCommit');
+    expect(mutationEvidence).toContain('assessment.baselineCommit !== expectedBaselineCommit');
+    for (const producer of [assessment, impact, postflight, builder, releaseProvenance]) {
+      expect(producer).toContain('expectedSourceCommit:');
+      expect(producer).toContain('expectedBaselineCommit:');
+    }
+    expect(packageProvenance.match(/expectedSourceCommit:/gu)).toHaveLength(2);
+    expect(packageProvenance.match(/expectedBaselineCommit:/gu)).toHaveLength(2);
     expect(testRunner).toContain('spawnSync(process.execPath');
     expect(testRunner).toContain('validateTargetedTestFiles(requested)');
     expect(testRunner).toContain('Targeted Vitest files must exactly equal the affected files derived from changed paths.');

@@ -125,6 +125,8 @@
   "mutationBootstrapProducerPointerCommitBindingRequired": true,
   "mutationBootstrapProducerBasePointerHeadAncestryRequired": true,
   "mutationPreMutationProducerBaselineCommitBindingRequired": true,
+  "mutationImpactAssessmentSourceCommitExactProvenanceRequired": true,
+  "mutationImpactAssessmentBaselineCommitExactPointerRequired": true,
   "exactCommitTargetedFullRegressionAndIntegrityRequiredBeforePackage": true,
   "freshInstalledExecutableUatRequiredBeforeInstallerDelivery": true,
   "everyMutationDependentRecordAtomicSyncRequired": true,

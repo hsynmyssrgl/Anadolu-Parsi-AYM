@@ -3,7 +3,7 @@
 - Belge sürümü: **GUNCEL-2026-08-26-V5**
 - Tarih: **26.08.2026**
 - Görünür ürün sürümü: **Bronze 26.08.2026.51**
-- Kaynak HEAD: `a0d9df4227186653ca8fd5e103e01771afc8904f`
+- Kaynak HEAD: `0099e39e6699793bc7cf5a275749e58aed24b753`
 - Statü: **ACTIVE_CURRENT_MASTER_REFERENCE**
 - Kararlar: **DEC-250–DEC-276**
 
@@ -16,7 +16,7 @@
 - Office/RTF/PDF: **872**; benzersiz içerik hash'i: **7585**; tekrar kopya: **29269**.
 - Build209–228 master çiftleri ve eski Bronze aktif referans çifti tarihsel olarak korunmuştur.
 - Karar dosyası: **185**; ADR: **107**; security/threat belgesi: **72**.
-- Mevcut tam belge/config/kanıt envanteri: **2144** (yeni sürümden önceki indeks).
+- Mevcut tam belge/config/kanıt envanteri: **2145** (yeni sürümden önceki indeks).
 
 ## 2. Yetki ve öncelik
 
@@ -173,6 +173,8 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - Final-freeze render aracının desteklenmeyen argümanlarla ilk çağrısı belge testi başlamadan durmuş ve 764e856b boş reddedilmiş checkpointiyle korunmuştur. Doğru PATH tabanlı retry DOCX 30 ve PDF 26 sayfayı eksiksiz üretmiştir; bu çağrı reddi ürün veya belge kusuru değildir.
 - Final-freeze2 çoklu önizlemesindeki DOCX header/footer ve PDF çift sayfa footer kırpması tam sayfa readback ile yanlış pozitiftir. PDF karar dizinindeki exact yolların karakter ortasından sarılması gerçek FAIL olup 17ad92d0 ile korunmuştur; karar/ADR yol hücreleri exact metni değiştirmeyen ayraç-sonrası sıfır-genişlikli kırma noktalarıyla yeniden üretilir.
 - Final-freeze3 makine kapısı 30 DOCX ve 27 PDF sayfayı eksiksiz bulmuş, ancak U+200B ReportLab token bölmesini engellememiştir. PDF karar/ADR yollarındaki ayraç dışı sarım a0d9df42 ile korunmuş; yol üreticisi yalnız /, -, _ sonrasında en çok 48 karakterlik deterministik satırlar üretir. Final-freeze4 DOCX 30/30 ve PDF 27/27, toplam 57/57 tam tek-sayfa özgün çözünürlük QA PASS vermiştir.
+- 0099e39e yanlış ana kaynak kökü mutation assessment çağrısını fail-closed reddeder; exact Bronze retry 109 değişen yol/21 hedef test ve analysis 109 yol PASS vermiştir. P2 kayıt bütünlüğü sertleştirmesi assessment sourceCommit değerini canlı release provenance HEAD, baselineCommit değerini doğrulanmış harici baseline pointer HEAD ile exact bağlar. Eksik veya drift kimlik yedi tüketicide reddedilir; odaklı 2 dosya/8 test PASS, yeni exact hedefli/tam/bütünlük ve kurulu UAT zinciri pendingdir.
+- Final-freeze6 P2 belge QA sonucunda önceki onayla byte-exact aynı 25 sayfa korunmuş, değişen DOCX 1 ve 9-19 ile PDF 1 ve 9-27 sayfaları üç bağımsız denetimde 32/32 PASS bulunmuştur. Toplam DOCX 30/30 ve PDF 27/27, yani 57/57 sayfa; taşma, örtüşme, kırpılma, font/glyph, tablo, footer, marj, sayfa numarası ve güvenli ayraç dışı token bölünmesi olmadan PASS'tir.
 
 ## 9. Görsel kimlik ve erişilebilirlik
 

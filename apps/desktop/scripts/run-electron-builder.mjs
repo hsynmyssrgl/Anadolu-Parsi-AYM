@@ -165,7 +165,9 @@ if (!isDirectoryMode) {
   });
   const assessed = validateImpactAssessment({
     policy: mutationPolicy, assessment: assessment.value, changedFiles,
-    dependencyRegistry, dependencyRegistryBinding
+    dependencyRegistry, dependencyRegistryBinding,
+    expectedSourceCommit: sourceCaptureBefore.provenance.headCommit,
+    expectedBaselineCommit: externalBaseline.record.value.sourceProvenance.headCommit
   });
   const impactEvidencePaths = [...new Set(Object.values(assessed.impactAreas).flatMap((area) => area.evidencePaths ?? []))].sort();
   const impactEvidenceBindings = Object.fromEntries(await Promise.all(impactEvidencePaths.map(async (path) => {

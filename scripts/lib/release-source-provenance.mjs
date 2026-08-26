@@ -580,7 +580,9 @@ export const validateMutationReleaseEvidence = ({
     assessment: impactAssessment,
     changedFiles: actualFiles,
     dependencyRegistry,
-    dependencyRegistryBinding
+    dependencyRegistryBinding,
+    expectedSourceCommit: provenance.headCommit,
+    expectedBaselineCommit: mutationBaseline.sourceProvenance?.headCommit
   });
   const dependencyAssessment = createDependencyAssessmentContract({ plan: assessed.dependencyPlan, registryBinding: dependencyRegistryBinding });
   if (JSON.stringify(impactAnalysis.impactAreas) !== JSON.stringify(assessed.impactAreas)

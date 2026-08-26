@@ -68,7 +68,9 @@ if (!failed) {
       assessment: assessment.value,
       changedFiles,
       dependencyRegistry,
-      dependencyRegistryBinding
+      dependencyRegistryBinding,
+      expectedSourceCommit: source.provenance.headCommit,
+      expectedBaselineCommit: externalBaseline.record.value.sourceProvenance.headCommit
     });
     const impactEvidencePaths = [...new Set(Object.values(assessed.impactAreas).flatMap((area) => area.evidencePaths ?? []))].sort();
     const impactEvidenceBindings = Object.fromEntries(await Promise.all(impactEvidencePaths.map(async (path) => {

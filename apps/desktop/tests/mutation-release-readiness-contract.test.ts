@@ -156,7 +156,8 @@ const input = (): any => ({
   mutationBaselineExternalSha256: externalSha,
   impactAssessment: {
     schemaVersion: 2, requirement: 'PR-235', decision: 'DEC-270',
-    strengthenedByRequirement: 'PR-240', strengthenedByDecision: 'DEC-275', changedFileImpacts, impactAreas,
+    strengthenedByRequirement: 'PR-240', strengthenedByDecision: 'DEC-275', sourceCommit, baselineCommit: baseCommit,
+    changedFileImpacts, impactAreas,
     dependentRecordImpacts: structuredClone(dependentRecordImpacts),
     dependencyPlan: dependencyAssessment
   },
@@ -240,6 +241,14 @@ describe('PR-235 mutation release readiness', () => {
     expect(() => validateMutationReleaseEvidence(failedFile)).toThrow(/measured PASS/u);
     const forgedAssessment = input(); forgedAssessment.impactAssessment.changedFileImpacts = {};
     expect(() => validateMutationReleaseEvidence(forgedAssessment)).toThrow(/path classification/u);
+    const staleAssessmentSource = input(); staleAssessmentSource.impactAssessment.sourceCommit = '9'.repeat(40);
+    expect(() => validateMutationReleaseEvidence(staleAssessmentSource)).toThrow(/source\/baseline commit identity/u);
+    const missingAssessmentSource = input(); delete missingAssessmentSource.impactAssessment.sourceCommit;
+    expect(() => validateMutationReleaseEvidence(missingAssessmentSource)).toThrow(/source\/baseline commit identity/u);
+    const staleAssessmentBaseline = input(); staleAssessmentBaseline.impactAssessment.baselineCommit = '9'.repeat(40);
+    expect(() => validateMutationReleaseEvidence(staleAssessmentBaseline)).toThrow(/source\/baseline commit identity/u);
+    const missingAssessmentBaseline = input(); delete missingAssessmentBaseline.impactAssessment.baselineCommit;
+    expect(() => validateMutationReleaseEvidence(missingAssessmentBaseline)).toThrow(/source\/baseline commit identity/u);
     const forgedNotAffected = input();
     const unchangedRecord = Object.keys(forgedNotAffected.impactAssessment.dependentRecordImpacts)
       .find((path) => !changedFiles.includes(path));

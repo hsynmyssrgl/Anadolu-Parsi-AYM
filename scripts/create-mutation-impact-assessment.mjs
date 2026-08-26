@@ -70,7 +70,9 @@ validateImpactAssessment({
   assessment,
   changedFiles,
   dependencyRegistry,
-  dependencyRegistryBinding
+  dependencyRegistryBinding,
+  expectedSourceCommit: source.provenance.headCommit,
+  expectedBaselineCommit: externalBaseline.record.value.sourceProvenance.headCommit
 });
 await writeEvidenceReceipt(root, policy.defaultInput.impactAssessment, assessment);
 console.log(`Mutation impact assessment: PASS / ${changedFiles.length} changed files / ${dependencyPlan.affectedVitestFiles.length} tests.`);

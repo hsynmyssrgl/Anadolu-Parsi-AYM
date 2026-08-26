@@ -49,6 +49,7 @@ describe('operation rule check policy', () => {
         'scripts/verify-operation-rule-check.mjs',
         'scripts/lib/mutation-release-evidence.mjs',
         'scripts/lib/release-source-provenance.mjs',
+        'scripts/lib/windows-package-provenance.mjs',
         'scripts/record-mutation-baseline.mjs',
         'scripts/create-mutation-impact-assessment.mjs',
         'scripts/create-mutation-impact-analysis.mjs',
@@ -69,6 +70,8 @@ describe('operation rule check policy', () => {
     expect(source).toContain('constitution.mutationBootstrapProducerPointerCommitBindingRequired === true');
     expect(source).toContain('constitution.mutationBootstrapProducerBasePointerHeadAncestryRequired === true');
     expect(source).toContain('constitution.mutationPreMutationProducerBaselineCommitBindingRequired === true');
+    expect(source).toContain('constitution.mutationImpactAssessmentSourceCommitExactProvenanceRequired === true');
+    expect(source).toContain('constitution.mutationImpactAssessmentBaselineCommitExactPointerRequired === true');
     expect(source).toContain("entry.ruleId === 'PR-237'");
     expect(enforcement.entries.find((entry) => entry.ruleId === 'PR-237')?.gateScripts)
       .toEqual(expect.arrayContaining([
@@ -97,6 +100,9 @@ describe('operation rule check policy', () => {
     expect(enforcement.entries.find((entry) => entry.ruleId === 'PR-240')?.gateScripts)
       .toEqual([
         'scripts/verify-operation-rule-check.mjs',
+        'scripts/lib/mutation-release-evidence.mjs',
+        'scripts/lib/release-source-provenance.mjs',
+        'scripts/lib/windows-package-provenance.mjs',
         'scripts/create-mutation-impact-assessment.mjs',
         'scripts/create-mutation-impact-analysis.mjs',
         'scripts/run-mutation-test-evidence.mjs',
@@ -114,12 +120,18 @@ describe('operation rule check policy', () => {
     expect(enforcement.entries.find((entry) => entry.ruleId === 'PR-241')?.gateScripts)
       .toEqual([
         'scripts/lib/windows-package-provenance.mjs',
+        'scripts/lib/mutation-release-evidence.mjs',
+        'scripts/lib/release-source-provenance.mjs',
+        'scripts/create-mutation-impact-assessment.mjs',
+        'scripts/create-mutation-impact-analysis.mjs',
+        'scripts/run-governed-postflight.mjs',
         'scripts/lib/monthly-release-version.mjs',
         'scripts/run-windows-installed-release-uat.ps1',
         'scripts/run-installed-frontend-user-uat.mjs',
         'scripts/create-bronze-final-local-test-delivery.mjs',
         'scripts/allocate-monthly-release-version.mjs',
         'apps/desktop/scripts/run-electron-builder.mjs',
+        'apps/desktop/tests/mutation-release-readiness-contract.test.ts',
         'apps/desktop/tests/windows-package-provenance-history.test.ts',
         'apps/desktop/tests/monthly-release-version.test.ts',
         'apps/desktop/tests/windows-installed-release-uat-contract.test.ts',

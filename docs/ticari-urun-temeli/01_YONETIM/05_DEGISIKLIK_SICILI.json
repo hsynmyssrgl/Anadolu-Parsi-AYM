@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PARSYUVA-AILE-YASAM-MERKEZI-TICARI-DEGISIKLIK-SICILI-V2",
   "temelTarihi": "2026-08-19",
-  "sonKayit": "TICARI-049",
+  "sonKayit": "TICARI-051",
   "kayitlar": [
     {
       "id": "TICARI-001",
@@ -899,6 +899,54 @@
         "docs/ticari-urun-temeli"
       ],
       "isListesiEtkisi": "IS-0211, IS-0215, IS-0216 ve IS-0601 DEVAM kalir. Final-freeze4 DOCX 30/30 ve PDF 27/27, toplam 57/57 tam tek-sayfa ozgun cozulunurluk gorsel QA PASS'tir. Yollar yalniz /, -, _ ayiraclari sonrasinda sarilir; ADR-067 sira/yol ve butun sayfa mobilyasi eksiksizdir. Exact kaynak/test, paket ve kurulu UAT zorunludur.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-050",
+      "tarih": "2026-08-26",
+      "baslik": "Mutation assessment exact source ve baseline commit bagi",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-275, DEC-276, PR-235, PR-240, PR-241 ve 0099e39e reddedilmis yanlis kok cagri checkpointi",
+      "etkilenenAlanlar": [
+        "scripts/lib/mutation-release-evidence.mjs",
+        "scripts/lib/release-source-provenance.mjs",
+        "scripts/lib/windows-package-provenance.mjs",
+        "scripts/create-mutation-impact-assessment.mjs",
+        "scripts/create-mutation-impact-analysis.mjs",
+        "scripts/run-governed-postflight.mjs",
+        "apps/desktop/scripts/run-electron-builder.mjs",
+        "apps/desktop/tests/mutation-release-readiness-contract.test.ts",
+        "apps/desktop/tests/mutation-release-evidence-producers.test.ts",
+        "config/project-constitution.json",
+        "config/rule-enforcement-registry.json",
+        "config/active-governance-ledger.json",
+        "config/user-decision-ledger.json",
+        "docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md",
+        "docs/decisions/DEC-276-bronze-51-rejected-predecessor-recovery-bootstrap.md",
+        "BUILD_STATUS.md",
+        "docs/ticari-urun-temeli"
+      ],
+      "isListesiEtkisi": "IS-0211, IS-0215, IS-0216 ve IS-0601 DEVAM kalir. Assessment sourceCommit canli Bronze provenance HEAD, baselineCommit dogrulanmis harici baseline pointer HEAD ile exact eslesmeden yedi tuketici ilerlemez. 0099e39e yanlis kok cagri reddidir; exact Bronze retry 109 yol/21 hedef test ve analysis 109 yol PASS, odakli 2 dosya/8 test PASS. Yeni exact hedefli/tam/butunluk, paket ve kurulu UAT zorunludur.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-051",
+      "tarih": "2026-08-26",
+      "baslik": "V5 final-freeze6 P2 sonrasi 57 sayfa gorsel QA kapanisi",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-275, DEC-276, PR-240, PR-241 ve final-freeze6 uc bagimsiz gorsel denetim",
+      "etkilenenAlanlar": [
+        "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.docx",
+        "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.pdf",
+        "scripts/generate-current-master-documentation.py",
+        "config/active-governance-ledger.json",
+        "config/user-decision-ledger.json",
+        "docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md",
+        "docs/decisions/DEC-276-bronze-51-rejected-predecessor-recovery-bootstrap.md",
+        "BUILD_STATUS.md",
+        "docs/ticari-urun-temeli"
+      ],
+      "isListesiEtkisi": "IS-0211, IS-0215, IS-0216 ve IS-0601 DEVAM kalir. Final-freeze6 DOCX 30/30 ve PDF 27/27, toplam 57/57 PASS'tir: 25 sayfa onceki onayla byte-exact ayni, degisen 32 sayfa uc bagimsiz denetimde 32/32 PASS. Exact hedefli/tam/butunluk, paket ve kurulu UAT zorunludur.",
       "senkronDurumu": "SYNCHRONIZED"
     }
   ]

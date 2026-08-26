@@ -188,7 +188,8 @@ check(mutationReadinessPolicy?.schemaVersion === 2
   && Object.values(dependencyRegistry?.affectedCommandCatalog ?? {}).every((entry) => entry?.nonMutating === true),
 'PR-235 mutation-release readiness politikası eksik veya gevşetilmiş.');
 const exactPr235GateScripts = ['scripts/verify-operation-rule-check.mjs', 'scripts/lib/mutation-release-evidence.mjs',
-  'scripts/lib/release-source-provenance.mjs', 'scripts/record-mutation-baseline.mjs', 'scripts/create-mutation-impact-assessment.mjs',
+  'scripts/lib/release-source-provenance.mjs', 'scripts/lib/windows-package-provenance.mjs',
+  'scripts/record-mutation-baseline.mjs', 'scripts/create-mutation-impact-assessment.mjs',
   'scripts/create-mutation-impact-analysis.mjs',
   'scripts/run-mutation-test-evidence.mjs', 'scripts/verify-source-integrity.mjs',
   'scripts/generate-project-artifact-index-v2.mjs', 'scripts/verify-project-artifact-index-v2.mjs',
@@ -202,7 +203,9 @@ check(mutationReadinessEnforcement?.bootstrapAdoptionDiffBaseCommit === '440d5c7
   && mutationReadinessEnforcement?.preMutationProducerBinding === 'BASELINE_COMMIT_EXACT_PATH_SIZE_SHA256'
   && constitution.mutationBootstrapProducerPointerCommitBindingRequired === true
   && constitution.mutationBootstrapProducerBasePointerHeadAncestryRequired === true
-  && constitution.mutationPreMutationProducerBaselineCommitBindingRequired === true,
+  && constitution.mutationPreMutationProducerBaselineCommitBindingRequired === true
+  && constitution.mutationImpactAssessmentSourceCommitExactProvenanceRequired === true
+  && constitution.mutationImpactAssessmentBaselineCommitExactPointerRequired === true,
 'PR-235 bootstrap ve normal baseline producer commit bağları eksik veya gevşetilmiş.');
 check(['scripts/allocate-monthly-release-version.mjs', 'scripts/verify-active-version-sweep.mjs',
   'apps/desktop/scripts/build-signed-windows-release.mjs', 'apps/desktop/scripts/run-electron-builder.mjs']
@@ -218,6 +221,8 @@ const exactPr239GateScripts = ['apps/desktop/scripts/run-electron-builder.mjs', 
 check(JSON.stringify(installedReleaseUatEnforcement?.gateScripts) === JSON.stringify(exactPr239GateScripts),
   'PR-239 adversarial Windows delivery evidence enforcement kapıları eksik.');
 const exactPr240GateScripts = ['scripts/verify-operation-rule-check.mjs',
+  'scripts/lib/mutation-release-evidence.mjs', 'scripts/lib/release-source-provenance.mjs',
+  'scripts/lib/windows-package-provenance.mjs',
   'scripts/create-mutation-impact-assessment.mjs', 'scripts/create-mutation-impact-analysis.mjs',
   'scripts/run-mutation-test-evidence.mjs', 'scripts/verify-source-integrity.mjs',
   'scripts/verify-current-master-documentation-v5.mjs',
@@ -227,9 +232,13 @@ const exactPr240GateScripts = ['scripts/verify-operation-rule-check.mjs',
 check(JSON.stringify(mutationWideClosureEnforcement?.gateScripts) === JSON.stringify(exactPr240GateScripts),
   'PR-240 tum kayit ve test kapanisi enforcement kapilari eksik.');
 const exactPr241GateScripts = ['scripts/lib/windows-package-provenance.mjs',
+  'scripts/lib/mutation-release-evidence.mjs', 'scripts/lib/release-source-provenance.mjs',
+  'scripts/create-mutation-impact-assessment.mjs', 'scripts/create-mutation-impact-analysis.mjs',
+  'scripts/run-governed-postflight.mjs',
   'scripts/lib/monthly-release-version.mjs', 'scripts/run-windows-installed-release-uat.ps1',
   'scripts/run-installed-frontend-user-uat.mjs', 'scripts/create-bronze-final-local-test-delivery.mjs',
   'scripts/allocate-monthly-release-version.mjs', 'apps/desktop/scripts/run-electron-builder.mjs',
+  'apps/desktop/tests/mutation-release-readiness-contract.test.ts',
   'apps/desktop/tests/windows-package-provenance-history.test.ts',
   'apps/desktop/tests/monthly-release-version.test.ts',
   'apps/desktop/tests/windows-installed-release-uat-contract.test.ts',
@@ -259,12 +268,16 @@ check(constitution.everyMutationDependentRecordAtomicSyncRequired === true
   && constitution.uiMutationAllInteractiveAndVisualSurfacesUatRequired === true
   && constitution.actualTestFailureRejectedCheckpointRequired === true
   && constitution.intermediateInstallerBuildForbidden === true
-  && constitution.packageRequiresMainAndChannelSourceEquality === true,
+  && constitution.packageRequiresMainAndChannelSourceEquality === true
+  && constitution.mutationImpactAssessmentSourceCommitExactProvenanceRequired === true
+  && constitution.mutationImpactAssessmentBaselineCommitExactPointerRequired === true,
   'PR-240 Proje Anayasasi baglari eksik veya gevsetilmis.');
 check(constitution.windowsInstalledReleaseUatSequence51CurrentLedgerStatus === 'IN_PROGRESS'
   && constitution.windowsInstalledReleaseUatSequence51CurrentAndEntryStatusMustMatch === true
   && constitution.windowsPreviousPackageProvenanceSequence51PrecommitLiveReadbackRequired === true
-  && constitution.windowsPreviousPackageProvenanceSequence51PrecommitExactPathSizeShaIdentityRequired === true,
+  && constitution.windowsPreviousPackageProvenanceSequence51PrecommitExactPathSizeShaIdentityRequired === true
+  && constitution.mutationImpactAssessmentSourceCommitExactProvenanceRequired === true
+  && constitution.mutationImpactAssessmentBaselineCommitExactPointerRequired === true,
   'PR-241 Proje Anayasasi lifecycle veya parent bundle precommit readback baglari eksik.');
 
 if (failures.length === 0) {

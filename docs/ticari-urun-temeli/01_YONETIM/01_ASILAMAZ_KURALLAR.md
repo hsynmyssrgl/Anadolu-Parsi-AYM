@@ -100,3 +100,7 @@ Her durum degistiren islemden once `scripts/verify-operation-rule-check.mjs` ile
 ## 11. TK-019 — Rejected predecessor recovery bootstrap
 
 Bronze 50 immutable `REJECTED_INVALID_PACKAGE` paket/external geçmişidir; silinmez, yeniden yazılmaz ve trusted installed runtime sayılmaz. Yalnız Bronze 51, DEC-276/PR-241 exact ledger bağları ile rejected-parent provenance bundle'ını history-only kanıt olarak kullanıp temiz program kökü, EXE ve uninstall yokluğunu kanıtlar; recovery fresh-install ve ayrı same-version maintenance çalıştırır. Bu yol test, kaynak bütünlüğü, preflight/postflight, installer-experience, UAT110, UAT111 veya final geri-okuma kapılarından hiçbirini atlamaz. Bronze 52 ve sonrası normal exact predecessor continuation kuralına döner.
+
+## 12. TK-020 — Assessment exact commit kimliği
+
+Mutation assessment `sourceCommit` değeri canlı Bronze provenance HEAD, `baselineCommit` değeri doğrulanmış harici baseline pointer HEAD ile exact eşleşir. Eksik, biçimsiz veya drift etmiş kimlik create/analysis/readiness/postflight/builder/package provenance katmanlarının tamamında fail-closed reddedilir; assessment metadatası tek başına paket veya recovery yetkisi veremez.

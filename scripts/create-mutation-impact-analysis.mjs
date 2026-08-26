@@ -28,7 +28,9 @@ const assessed = validateImpactAssessment({
   assessment: assessment.value,
   changedFiles,
   dependencyRegistry,
-  dependencyRegistryBinding
+  dependencyRegistryBinding,
+  expectedSourceCommit: source.provenance.headCommit,
+  expectedBaselineCommit: external.record.value.sourceProvenance.headCommit
 });
 const evidencePaths = [...new Set(Object.values(assessed.impactAreas)
   .flatMap((area) => area.evidencePaths ?? []))].sort();

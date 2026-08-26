@@ -576,11 +576,18 @@ export const classifyChangedFiles = (changedFiles) => Object.freeze(Object.fromE
 ));
 
 export const validateImpactAssessment = ({
-  policy, assessment, changedFiles, dependencyRegistry, dependencyRegistryBinding
+  policy, assessment, changedFiles, dependencyRegistry, dependencyRegistryBinding,
+  expectedSourceCommit, expectedBaselineCommit
 }) => {
   if (assessment?.schemaVersion !== 2 || assessment.requirement !== 'PR-235' || assessment.decision !== 'DEC-270'
     || assessment.strengthenedByRequirement !== 'PR-240' || assessment.strengthenedByDecision !== 'DEC-275') {
     fail('Mutation impact assessment contract is invalid.');
+  }
+  if (!GIT_OBJECT_PATTERN.test(String(expectedSourceCommit ?? ''))
+    || !GIT_OBJECT_PATTERN.test(String(expectedBaselineCommit ?? ''))
+    || assessment.sourceCommit !== expectedSourceCommit
+    || assessment.baselineCommit !== expectedBaselineCommit) {
+    fail('Mutation impact assessment source/baseline commit identity is missing, invalid or stale.');
   }
   const fileImpacts = classifyChangedFiles(changedFiles);
   if (JSON.stringify(assessment.changedFileImpacts) !== JSON.stringify(fileImpacts)) {

@@ -402,7 +402,11 @@ const validateArchivedPr235 = ({ runGit, receipt, evidence, historicalProvenance
   const changedFiles = listChangedPathsForImpactAnalysis({ runGit, baselineReceipt: baselineExternal,
     baselinePointer: baseline,
     headCommit: commit, currentProvenance: historicalProvenance });
-  const assessed = validateImpactAssessment({ policy, assessment, changedFiles, dependencyRegistry, dependencyRegistryBinding });
+  const assessed = validateImpactAssessment({
+    policy, assessment, changedFiles, dependencyRegistry, dependencyRegistryBinding,
+    expectedSourceCommit: commit,
+    expectedBaselineCommit: baselineExternal.sourceProvenance?.headCommit
+  });
   const impactEvidencePaths = [...new Set(Object.values(assessed.impactAreas).flatMap((area) => area.evidencePaths ?? []))].sort();
   const impactEvidenceBindings = Object.fromEntries(impactEvidencePaths.map((path) => {
     const binding = gitBlobBinding(runGit, commit, path, `Historical impact evidence ${path}`);
@@ -919,7 +923,9 @@ export const verifyWindowsPackageProvenanceLive = async ({ root, expectedRelease
     headCommit: liveSource.provenance.headCommit,
     currentProvenance: liveSource.provenance });
   const assessed = validateImpactAssessment({
-    policy: policyRaw, assessment: assessment.value, changedFiles, dependencyRegistry, dependencyRegistryBinding
+    policy: policyRaw, assessment: assessment.value, changedFiles, dependencyRegistry, dependencyRegistryBinding,
+    expectedSourceCommit: liveSource.provenance.headCommit,
+    expectedBaselineCommit: externalBaseline.record.value.sourceProvenance.headCommit
   });
   const impactEvidencePaths = [...new Set(Object.values(assessed.impactAreas).flatMap((area) => area.evidencePaths ?? []))].sort();
   const impactEvidenceBindings = Object.fromEntries(await Promise.all(impactEvidencePaths.map(async (path) => {
