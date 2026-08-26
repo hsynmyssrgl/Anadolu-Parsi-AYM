@@ -6,6 +6,7 @@ describe('current master documentation V5 governance', () => {
     const active = JSON.parse(readFileSync('config/active-document-set.json', 'utf8'));
     const audit = readFileSync('scripts/audit-all-project-documents.py', 'utf8');
     const verifier = readFileSync('scripts/verify-current-master-documentation-v5.py', 'utf8');
+    const generator = readFileSync('scripts/generate-current-master-documentation.py', 'utf8');
     const pythonRuntime = readFileSync('scripts/lib/python-runtime.mjs', 'utf8');
     const preflight = readFileSync('scripts/run-governed-preflight.mjs', 'utf8');
     const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
@@ -22,6 +23,10 @@ describe('current master documentation V5 governance', () => {
     expect(verifier).toContain('DOCX missing {label} identifier');
     expect(verifier).toContain('EXPECTED_VERSION in docx_text');
     expect(verifier).toContain('EXPECTED_VERSION in pdf_text');
+    expect(generator).toContain('def pdf_path_breaks(value: str, max_chars: int = 48) -> str:');
+    expect(generator).toContain('re.split(r"(?<=[/_-])", str(value))');
+    expect(generator).toContain('return "\\n".join(lines)');
+    expect(generator).toContain('pdf_path_breaks(path.relative_to(ROOT).as_posix())');
     expect(pythonRuntime).toContain('PPT_PYTHON_EXECUTABLE');
     expect(pythonRuntime).toContain('codex-primary-runtime/dependencies/python/python.exe');
     expect(preflight).toContain("['scripts/verify-current-master-documentation-v5.mjs']");

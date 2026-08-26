@@ -3,7 +3,7 @@
 - Belge sürümü: **GUNCEL-2026-08-26-V5**
 - Tarih: **26.08.2026**
 - Görünür ürün sürümü: **Bronze 26.08.2026.51**
-- Kaynak HEAD: `787c5570b907816ee874add11aba92d88843125e`
+- Kaynak HEAD: `a0d9df4227186653ca8fd5e103e01771afc8904f`
 - Statü: **ACTIVE_CURRENT_MASTER_REFERENCE**
 - Kararlar: **DEC-250–DEC-276**
 
@@ -15,7 +15,7 @@
 - `C:\PPT\AYM` tüm belge türü taraması: **37023 dosya / 36854 okunabilir / 0 sorun**.
 - Office/RTF/PDF: **872**; benzersiz içerik hash'i: **7585**; tekrar kopya: **29269**.
 - Build209–228 master çiftleri ve eski Bronze aktif referans çifti tarihsel olarak korunmuştur.
-- Karar dosyası: **185**; ADR: **106**; security/threat belgesi: **72**.
+- Karar dosyası: **185**; ADR: **107**; security/threat belgesi: **72**.
 - Mevcut tam belge/config/kanıt envanteri: **2144** (yeni sürümden önceki indeks).
 
 ## 2. Yetki ve öncelik
@@ -167,6 +167,12 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - PR-240 0f0a4653 exact Bronze etki analizi 95 hedefli test dosyası hesaplamış; hedefli turda 600 test PASS iken operation-rule-check-policy current-mutation preflightStatus alanındaki tarihsel 607a9a53/8b2b5ccc FAIL metnini reddetmiş ve 50f4d9e5 ile fail-closed korunmuştur. Tarihsel retler QA alanlarında kalır; güncel mutasyon durumu NOT_RUN_CURRENT_MUTATION olur. Bronze/Silver/Gold hidrasyonu her kanalda 1.428/1.428 ve eksik 0 PASS; yeni exact testler zorunludur.
 - PR-241/DEC-276 Bronze 50 immutable REJECTED_INVALID_PACKAGE geçmişini trusted runtime saymadan korur. b0615638, 3eec5426 ve 86602f7a tarihsel retlerdir. Exact etki değerlendirmesinin eşlenmemiş Windows paketleyici lockfile reddi 3e496f47, ters ruleIds assertionı 398de9c8 ile korunmuş; assertion düzeltmesi 3 dosya/14 test PASS vermiştir. Render çağrı retleri 75e4072c/0f98c7cc ve kural FAIL sonrasında başlayan generator çağrısı 9a370e51 ile korunur. Temiz 9f16699d kapanışı sonrasında pre-sync kanal reddi dbefb586 ile korunmuştur. Ana kaynak ve Bronze/Silver/Gold 63c55074 commitinde exact temiz eşitlik PASS; etki zinciri 105 değişen yol/19 hedef test hesaplamış ve hedefli 19 dosya/188 test PASS vermiştir. Filtresiz turda 399 dosya/2.480 test PASS iken yalnız PPK-015 üretim kaynak ratchet hash eşliği düşmüş, gerçek FAIL cc922201 ile korunmuştur. Canlı sınır 18 bölge/590 dosya/0 bulgu/2 adapter/3 amaçtır; ağ yetkisi değişmemiştir. Ratchet debfeecf460834f50cf328bff58b2c19ad94ef229610c4c829a35c4331ef235a özetine eşlenir. V5 DOCX sayfa 15 Durum token sarımı FAIL'i 787c5570 ile korunmuş; görünür karar durumları okunur boşluklarla sarmalandıktan sonra final belge 29/29 görsel QA PASS vermiştir. Yalnız Bronze 51 rejected-parent provenance bundle'ını history-only lineage olarak kullanıp temiz recovery fresh-install ve ayrı same-version maintenance yolunu çalıştırabilir; bütün exact test, kaynak bütünlüğü, preflight/postflight, paket ve kurulu uygulama UAT kapıları zorunludur.
 - V5 belge becerisi başlangıcında tek format bekleyen yardımcıya birleşik docx,pdf değeri verilmesi içerik üretmeden reddedilmiş ve df92cdba ile korunmuştur. Bu ürün veya belge içerik kusuru ve PASS değildir; desteklenen tek docx retry PASS olmuş, üretim ancak bundan sonra başlatılmıştır. Kapanış renderındaki sayfa 15 Durum token-ortası bölünme 787c5570 ile korunmuş; üretici görünür durum değerlerindeki alt çizgileri izinli boşluklara dönüştürdükten sonra final DOCX 29/29 görsel QA PASS vermiştir.
+- 6f9139e1 exact Bronze zincirinde assessment 107 değişen yol/21 hedef test; hedefli 21 dosya/211 test ve filtresiz 399 dosya/2.481 test PASS vermiştir. Source-integrity governed preflight sonrasında yenilenen yedi indeks/dizin dosyası ile ticari temel kanıtının manifestte stale SHA taşımasını reddetmiş ve üretici sırası FAIL'i 2abcf853 ile korunmuştur. Final üretici sırası governed preflight writer ardından manifest/SHA256SUMS son üretimdir; yeni exact committe tüm kapılar tekrarlanır.
+- V5 30 sayfa renderında sayfa 12/14 ilk çoklu önizleme yorumu görüntüleyici kırpmasını dosya kusuru sanmış ve d1e0b803 ile tarihsel yanlış pozitif olarak korunmuştur. Ayrı özgün çözünürlük/piksel doğrulaması dört sütun başlıklarını eksiksiz bulmuş ve 30/30 görsel PASS vermiştir. Ana karar sicilinin bağlayıcı saydığı halde kaynakta bulunmayan ADR-067 gerçek kayıt bütünlüğü FAIL'i f1590772 ile korunmuş; DEC-084 ve Migrasyon 38'in mevcut claim rezervasyonu gerçeğinden ADR geri kurulmuş, kesintisiz ADR numarası ve bağlayıcı referans eşliği fail-closed kapıya alınmıştır.
+- V5 PDF Poppler renderı 26 sayfa vermiş; ilk turda sayfa 4/5 Yerel makine durum kodlarının token ortasında bölünmesi okunabilirlik FAIL olmuş ve 6d94ab9e ile korunmuştur. Kanonik makine değerleri değişmeden görünür DOCX/PDF durumları alt çizgi yerine anlamsal boşluklarla sarılmış; final DOCX 30/30 ve PDF 26/26, toplam 56/56 özgün çözünürlük sayfa taşma, örtüşme, kırpılma, font/glyph, tablo, footer ve sayfa numarası kusuru olmadan PASS vermiştir.
+- Final-freeze render aracının desteklenmeyen argümanlarla ilk çağrısı belge testi başlamadan durmuş ve 764e856b boş reddedilmiş checkpointiyle korunmuştur. Doğru PATH tabanlı retry DOCX 30 ve PDF 26 sayfayı eksiksiz üretmiştir; bu çağrı reddi ürün veya belge kusuru değildir.
+- Final-freeze2 çoklu önizlemesindeki DOCX header/footer ve PDF çift sayfa footer kırpması tam sayfa readback ile yanlış pozitiftir. PDF karar dizinindeki exact yolların karakter ortasından sarılması gerçek FAIL olup 17ad92d0 ile korunmuştur; karar/ADR yol hücreleri exact metni değiştirmeyen ayraç-sonrası sıfır-genişlikli kırma noktalarıyla yeniden üretilir.
+- Final-freeze3 makine kapısı 30 DOCX ve 27 PDF sayfayı eksiksiz bulmuş, ancak U+200B ReportLab token bölmesini engellememiştir. PDF karar/ADR yollarındaki ayraç dışı sarım a0d9df42 ile korunmuş; yol üreticisi yalnız /, -, _ sonrasında en çok 48 karakterlik deterministik satırlar üretir. Final-freeze4 DOCX 30/30 ve PDF 27/27, toplam 57/57 tam tek-sayfa özgün çözünürlük QA PASS vermiştir.
 
 ## 9. Görsel kimlik ve erişilebilirlik
 
@@ -447,6 +453,7 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - `ADR-064` — ADR-064 — Tetikleyiciye Duyarlı Temiz Yedek Geri Çekilmesi — `docs/adr/ADR-064-trigger-aware-clean-backup-rewrite-backoff.md`
 - `ADR-065` — ADR-065 — Otomatik Politikadan Bağımsız Manuel Temiz-Yedek Kullanılabilirliği — `docs/adr/ADR-065-manual-clean-backup-rewrite-availability.md`
 - `ADR-066` — ADR-066 — Çalışan Temiz-Yedek Defteri Sahip Kimliği — `docs/adr/ADR-066-running-clean-backup-ledger-owner-identity.md`
+- `ADR-067` — ADR-067 — Temiz-Yedek Claim Rezervasyonu — `docs/adr/ADR-067-clean-backup-rewrite-claim-reservation.md`
 - `ADR-068` — ADR-068 — Değiştirilemez Aktif Temiz-Yedek Sahiplik Anlık Görüntüsü — `docs/adr/ADR-068-immutable-active-clean-rewrite-ownership-snapshot.md`
 - `ADR-069` — ADR-069 — Aktif Temiz-Yedek Politika Parametreleri Değiştirilemez — `docs/adr/ADR-069-immutable-active-clean-rewrite-policy-parameters.md`
 - `ADR-070` — ADR-070 — Atomik temiz-yedek terminal geçişi — `docs/adr/ADR-070-atomic-clean-rewrite-terminal-transition.md`

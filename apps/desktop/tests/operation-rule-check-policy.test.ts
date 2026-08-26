@@ -24,11 +24,14 @@ describe('operation rule check policy', () => {
     expect(source).toContain("readFile('docs/decisions/DEC-276-bronze-51-rejected-predecessor-recovery-bootstrap.md')");
     expect(source).toContain("readdir('docs/adr')");
     expect(source).toContain("readdir('docs/decisions')");
+    expect(source).toContain("readFile('docs/10_MASTER_DECISION_REGISTER.md', 'utf8')");
     expect(source).toContain("readJson('docs/ticari-urun-temeli/08_IS_LISTESI/03_ANA_IS_SICILI.json')");
     expect(source).toContain("readJson('docs/ticari-urun-temeli/01_YONETIM/05_DEGISIKLIK_SICILI.json')");
     expect(source).toContain("exactIds(ruleIds, /^PR-\\d{3}$/u)");
     expect(source).toContain("exactIds(decisionIds, /^DEC-\\d{3}$/u)");
     expect(source).toContain("text.startsWith(`# ${id}`)");
+    expect(source).toContain('JSON.stringify(adrNumbers) === JSON.stringify(expectedAdrNumbers)');
+    expect(source).toContain('referencedMasterAdrIds.every((id) => adrIds.includes(id))');
     expect(source).toContain("exactIds(workIds, /^IS-\\d{4}$/u)");
     expect(source).toContain("exactIds(commercialIds, /^TICARI-\\d{3}$/u)");
     expect(source).toContain('registry.rulesSha256 === calculatedHash');

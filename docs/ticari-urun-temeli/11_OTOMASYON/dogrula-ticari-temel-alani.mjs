@@ -281,16 +281,18 @@ check(currentMaster.includes('DEC-276') && currentMaster.includes('PR-241'), 'DE
 check(currentCommercial.includes('verify:commercial-baseline'), 'ticari aktif belge dogrulama komutunu gostermiyor');
 
 const commercialChangeLedger = await readJson(resolve(ROOT, '01_YONETIM', '05_DEGISIKLIK_SICILI.json'));
-const commercialChange42Entries = commercialChangeLedger.kayitlar.filter((entry) => entry.id === 'TICARI-042');
-const commercialChange42 = commercialChange42Entries[0];
-check(commercialChangeLedger.sonKayit === 'TICARI-042'
-  && commercialChangeLedger.kayitlar.at(-1)?.id === 'TICARI-042'
-  && commercialChange42Entries.length === 1,
-'TICARI-042 exact tekil son ticari degisiklik kaydi degil');
-check(commercialChange42?.durum === 'ACTIVE'
-  && commercialChange42?.senkronDurumu === 'SYNCHRONIZED'
-  && String(commercialChange42?.kaynak ?? '').includes('DEC-276, PR-241'),
-'TICARI-042 ACTIVE/SYNCHRONIZED DEC-276/PR-241 otorite bagi eksik');
+const commercialChange49Entries = commercialChangeLedger.kayitlar.filter((entry) => entry.id === 'TICARI-049');
+const commercialChange49 = commercialChange49Entries[0];
+check(commercialChangeLedger.sonKayit === 'TICARI-049'
+  && commercialChangeLedger.kayitlar.at(-1)?.id === 'TICARI-049'
+  && commercialChange49Entries.length === 1,
+'TICARI-049 exact tekil son ticari degisiklik kaydi degil');
+check(commercialChange49?.durum === 'ACTIVE'
+  && commercialChange49?.senkronDurumu === 'SYNCHRONIZED'
+  && String(commercialChange49?.kaynak ?? '').includes('DEC-275, DEC-276, PR-240, PR-241')
+  && String(commercialChange49?.isListesiEtkisi ?? '').includes('57/57')
+  && String(commercialChange49?.isListesiEtkisi ?? '').includes('gorsel QA PASS'),
+'TICARI-049 ACTIVE/SYNCHRONIZED DEC-275/DEC-276/PR-240/PR-241 ve 57/57 QA bagi eksik');
 
 const workRegistry = await readJson(resolve(ROOT, '08_IS_LISTESI', '03_ANA_IS_SICILI.json'));
 const workMarkdown = await readText(resolve(ROOT, '08_IS_LISTESI', '01_ANA_IS_LISTESI.md'));
@@ -398,7 +400,7 @@ const report = {
   canonicalRuleCount: canonicalRules.ruleCount,
   canonicalRuleSha256: canonicalRules.rulesSha256,
   decision: 'DEC-259',
-  commercialChange: 'TICARI-042',
+  commercialChange: 'TICARI-049',
   decisions: ['DEC-259', 'DEC-270', 'DEC-274', 'DEC-275', 'DEC-276'],
   requirements: ['PR-235', 'PR-239', 'PR-240', 'PR-241'],
   mutationWideRecordAndTestClosureVerified: failures.length === 0,

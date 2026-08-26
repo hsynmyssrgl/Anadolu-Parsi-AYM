@@ -26,7 +26,8 @@ check(operation.length >= 3 && operation.length <= 160 && !/[\r\n]/u.test(operat
 check(allowedKinds.has(kind), `Geçerli --kind zorunludur: ${[...allowedKinds].join(', ')}.`);
 
 const [registry, acknowledgement, constitution, enforcement, mutationReadinessPolicy, dependencyRegistryBytes,
-  userDecisionLedger, dec275Bytes, dec276Bytes, workLedger, commercialLedger, adrNames, decisionNames] = await Promise.all([
+  userDecisionLedger, dec275Bytes, dec276Bytes, workLedger, commercialLedger, masterDecisionRegister,
+  adrNames, decisionNames] = await Promise.all([
   readJson('config/canonical-rule-registry.json'),
   readJson('config/rule-acknowledgement.json'),
   readJson('config/project-constitution.json'),
@@ -38,6 +39,7 @@ const [registry, acknowledgement, constitution, enforcement, mutationReadinessPo
   readFile('docs/decisions/DEC-276-bronze-51-rejected-predecessor-recovery-bootstrap.md'),
   readJson('docs/ticari-urun-temeli/08_IS_LISTESI/03_ANA_IS_SICILI.json'),
   readJson('docs/ticari-urun-temeli/01_YONETIM/05_DEGISIKLIK_SICILI.json'),
+  readFile('docs/10_MASTER_DECISION_REGISTER.md', 'utf8'),
   readdir('docs/adr'),
   readdir('docs/decisions')
 ]);
@@ -67,6 +69,11 @@ const commercialIds = commercialLedger.kayitlar?.map((entry) => entry.id) ?? [];
 const adrFiles = adrNames.filter((name) => /^ADR-\d{3}-.+\.md$/u.test(name));
 const decisionFiles = decisionNames.filter((name) => /^DEC-\d{3}-.+\.md$/u.test(name));
 const adrIds = adrFiles.map((name) => name.slice(0, 7));
+const adrNumbers = adrIds.map((id) => Number(id.slice(4))).sort((left, right) => left - right);
+const expectedAdrNumbers = adrNumbers.length > 0
+  ? Array.from({ length: adrNumbers.at(-1) }, (_, index) => index + 1)
+  : [];
+const referencedMasterAdrIds = [...new Set(masterDecisionRegister.match(/\bADR-\d{3}\b/gu) ?? [])];
 const decisionFileIds = decisionFiles.map((name) => name.slice(0, 7));
 const adrHeadings = await Promise.all(adrFiles.map(async (name) => ({
   id: name.slice(0, 7),
@@ -111,6 +118,10 @@ check(exactIds(decisionIds, /^DEC-\d{3}$/u), 'Kullanıcı DEC kimlikleri tekil v
 check(exactIds(adrIds, /^ADR-\d{3}$/u)
   && adrHeadings.every(({ id, text }) => text.startsWith(`# ${id}`)),
   'ADR dosya kimlikleri tekil değil veya dosya adı ile başlık uyuşmuyor.');
+check(JSON.stringify(adrNumbers) === JSON.stringify(expectedAdrNumbers),
+  'ADR dosya numaraları ADR-001 ile en yüksek ADR arasında kesintisiz değil.');
+check(referencedMasterAdrIds.every((id) => adrIds.includes(id)),
+  'Ana karar sicili, karşılık gelen kaynak ADR dosyası olmayan bağlayıcı bir ADR kimliği içeriyor.');
 check(exactIds(decisionFileIds, /^DEC-\d{3}$/u)
   && decisionHeadings.every(({ id, text }) => text.startsWith(`# ${id}`)),
   'DEC dosya kimlikleri tekil değil veya dosya adı ile başlık uyuşmuyor.');

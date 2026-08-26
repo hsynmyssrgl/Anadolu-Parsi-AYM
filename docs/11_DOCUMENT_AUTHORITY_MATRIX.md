@@ -249,6 +249,7 @@ Aktif belgelerde aşağıdakiler hata sayılır:
 | Belge | Yetki alanı | Bağlayıcılık |
 |---|---|---|
 | `docs/CLEAN_BACKUP_REWRITE_RUNNING_LEDGER_IDENTITY_V1.md` ve `docs/adr/ADR-066-running-clean-backup-ledger-owner-identity.md` | Çalışan temiz-yedek defteri policy-owner kimliği ve SQLite fail-closed koruması | Build 193 bağlayıcı veri bütünlüğü sözleşmesi |
+| `docs/adr/ADR-067-clean-backup-rewrite-claim-reservation.md` | Temiz-yedek claim rezervasyonu, tek kullanımlık sahiplik kanıtı ve değiştirilemez iş yükü başlangıç bağı | Build 194 / DEC-084 bağlayıcı mimari karar kaydı |
 
 
 ## Build 195 yetki güncellemesi

@@ -23,6 +23,7 @@ DECISION_IDS = sorted(
 )
 ADR_IDS = sorted(path.stem.split("-", 2)[0] + "-" + path.stem.split("-", 2)[1]
                  for path in (ROOT / "docs/adr").glob("ADR-*.md"))
+ADR_NUMBERS = sorted(int(identifier.removeprefix("ADR-")) for identifier in ADR_IDS)
 failures: list[str] = []
 
 
@@ -68,6 +69,8 @@ rule_ids = sorted(str(item["id"]) for item in RULES)
 decision_ids = DECISION_IDS
 ledger_decision_ids = sorted(str(item["id"]) for item in LEDGER_DECISIONS)
 check(set(ledger_decision_ids).issubset(decision_ids), "decision ledger contains an ID without a decision document")
+check(ADR_NUMBERS == list(range(1, max(ADR_NUMBERS, default=0) + 1)),
+      "ADR source numbering is not contiguous from ADR-001")
 for label, identifiers in (("rule", rule_ids), ("decision", decision_ids), ("ADR", ADR_IDS)):
     for identifier in identifiers:
         check(identifier in docx_text, f"DOCX missing {label} identifier: {identifier}")

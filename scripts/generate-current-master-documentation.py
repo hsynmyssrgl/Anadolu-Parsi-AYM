@@ -83,8 +83,12 @@ def status_from_markdown(path: Path) -> str:
         if ". " in value:
             value = value.split(". ", 1)[0].strip()
         value = value.replace("`", "").strip()
-        return (value or "KAYITLI").replace("_", " ")
+        return visible_status(value or "KAYITLI")
     return "KAYITLI"
+
+
+def visible_status(value) -> str:
+    return str(value or "-").replace("_", " ")
 
 
 def decision_number(path: Path) -> int:
@@ -233,6 +237,12 @@ DRIFT_FIXES = [
     "PR-240 0f0a4653 exact Bronze etki analizi 95 hedefli test dosyası hesaplamış; hedefli turda 600 test PASS iken operation-rule-check-policy current-mutation preflightStatus alanındaki tarihsel 607a9a53/8b2b5ccc FAIL metnini reddetmiş ve 50f4d9e5 ile fail-closed korunmuştur. Tarihsel retler QA alanlarında kalır; güncel mutasyon durumu NOT_RUN_CURRENT_MUTATION olur. Bronze/Silver/Gold hidrasyonu her kanalda 1.428/1.428 ve eksik 0 PASS; yeni exact testler zorunludur.",
     "PR-241/DEC-276 Bronze 50 immutable REJECTED_INVALID_PACKAGE geçmişini trusted runtime saymadan korur. b0615638, 3eec5426 ve 86602f7a tarihsel retlerdir. Exact etki değerlendirmesinin eşlenmemiş Windows paketleyici lockfile reddi 3e496f47, ters ruleIds assertionı 398de9c8 ile korunmuş; assertion düzeltmesi 3 dosya/14 test PASS vermiştir. Render çağrı retleri 75e4072c/0f98c7cc ve kural FAIL sonrasında başlayan generator çağrısı 9a370e51 ile korunur. Temiz 9f16699d kapanışı sonrasında pre-sync kanal reddi dbefb586 ile korunmuştur. Ana kaynak ve Bronze/Silver/Gold 63c55074 commitinde exact temiz eşitlik PASS; etki zinciri 105 değişen yol/19 hedef test hesaplamış ve hedefli 19 dosya/188 test PASS vermiştir. Filtresiz turda 399 dosya/2.480 test PASS iken yalnız PPK-015 üretim kaynak ratchet hash eşliği düşmüş, gerçek FAIL cc922201 ile korunmuştur. Canlı sınır 18 bölge/590 dosya/0 bulgu/2 adapter/3 amaçtır; ağ yetkisi değişmemiştir. Ratchet debfeecf460834f50cf328bff58b2c19ad94ef229610c4c829a35c4331ef235a özetine eşlenir. V5 DOCX sayfa 15 Durum token sarımı FAIL'i 787c5570 ile korunmuş; görünür karar durumları okunur boşluklarla sarmalandıktan sonra final belge 29/29 görsel QA PASS vermiştir. Yalnız Bronze 51 rejected-parent provenance bundle'ını history-only lineage olarak kullanıp temiz recovery fresh-install ve ayrı same-version maintenance yolunu çalıştırabilir; bütün exact test, kaynak bütünlüğü, preflight/postflight, paket ve kurulu uygulama UAT kapıları zorunludur.",
     "V5 belge becerisi başlangıcında tek format bekleyen yardımcıya birleşik docx,pdf değeri verilmesi içerik üretmeden reddedilmiş ve df92cdba ile korunmuştur. Bu ürün veya belge içerik kusuru ve PASS değildir; desteklenen tek docx retry PASS olmuş, üretim ancak bundan sonra başlatılmıştır. Kapanış renderındaki sayfa 15 Durum token-ortası bölünme 787c5570 ile korunmuş; üretici görünür durum değerlerindeki alt çizgileri izinli boşluklara dönüştürdükten sonra final DOCX 29/29 görsel QA PASS vermiştir.",
+    "6f9139e1 exact Bronze zincirinde assessment 107 değişen yol/21 hedef test; hedefli 21 dosya/211 test ve filtresiz 399 dosya/2.481 test PASS vermiştir. Source-integrity governed preflight sonrasında yenilenen yedi indeks/dizin dosyası ile ticari temel kanıtının manifestte stale SHA taşımasını reddetmiş ve üretici sırası FAIL'i 2abcf853 ile korunmuştur. Final üretici sırası governed preflight writer ardından manifest/SHA256SUMS son üretimdir; yeni exact committe tüm kapılar tekrarlanır.",
+    "V5 30 sayfa renderında sayfa 12/14 ilk çoklu önizleme yorumu görüntüleyici kırpmasını dosya kusuru sanmış ve d1e0b803 ile tarihsel yanlış pozitif olarak korunmuştur. Ayrı özgün çözünürlük/piksel doğrulaması dört sütun başlıklarını eksiksiz bulmuş ve 30/30 görsel PASS vermiştir. Ana karar sicilinin bağlayıcı saydığı halde kaynakta bulunmayan ADR-067 gerçek kayıt bütünlüğü FAIL'i f1590772 ile korunmuş; DEC-084 ve Migrasyon 38'in mevcut claim rezervasyonu gerçeğinden ADR geri kurulmuş, kesintisiz ADR numarası ve bağlayıcı referans eşliği fail-closed kapıya alınmıştır.",
+    "V5 PDF Poppler renderı 26 sayfa vermiş; ilk turda sayfa 4/5 Yerel makine durum kodlarının token ortasında bölünmesi okunabilirlik FAIL olmuş ve 6d94ab9e ile korunmuştur. Kanonik makine değerleri değişmeden görünür DOCX/PDF durumları alt çizgi yerine anlamsal boşluklarla sarılmış; final DOCX 30/30 ve PDF 26/26, toplam 56/56 özgün çözünürlük sayfa taşma, örtüşme, kırpılma, font/glyph, tablo, footer ve sayfa numarası kusuru olmadan PASS vermiştir.",
+    "Final-freeze render aracının desteklenmeyen argümanlarla ilk çağrısı belge testi başlamadan durmuş ve 764e856b boş reddedilmiş checkpointiyle korunmuştur. Doğru PATH tabanlı retry DOCX 30 ve PDF 26 sayfayı eksiksiz üretmiştir; bu çağrı reddi ürün veya belge kusuru değildir.",
+    "Final-freeze2 çoklu önizlemesindeki DOCX header/footer ve PDF çift sayfa footer kırpması tam sayfa readback ile yanlış pozitiftir. PDF karar dizinindeki exact yolların karakter ortasından sarılması gerçek FAIL olup 17ad92d0 ile korunmuştur; karar/ADR yol hücreleri exact metni değiştirmeyen ayraç-sonrası sıfır-genişlikli kırma noktalarıyla yeniden üretilir.",
+    "Final-freeze3 makine kapısı 30 DOCX ve 27 PDF sayfayı eksiksiz bulmuş, ancak U+200B ReportLab token bölmesini engellememiştir. PDF karar/ADR yollarındaki ayraç dışı sarım a0d9df42 ile korunmuş; yol üreticisi yalnız /, -, _ sonrasında en çok 48 karakterlik deterministik satırlar üretir. Final-freeze4 DOCX 30/30 ve PDF 27/27, toplam 57/57 tam tek-sayfa özgün çözünürlük QA PASS vermiştir.",
 ]
 
 
@@ -588,7 +598,7 @@ def build_docx():
     package_rows = []
     for item in roadmap["packages"]:
         package_rows.append([
-            item["step"], item["status"], item.get("localImplementationStatus") or "-",
+            item["step"], visible_status(item["status"]), visible_status(item.get("localImplementationStatus")),
             "EVET" if item.get("countsAsRequirementPass") else "HAYIR",
             package_status_reason(item),
         ])
@@ -597,13 +607,13 @@ def build_docx():
     add_doc_heading(doc, "7. Yerel doğrulama ve kabul sınırı", 1)
     validation = closure["validation"]
     validation_rows = [
-        ["Boundary", validation["localPackageBoundaries"]["status"], str(validation["localPackageBoundaries"]["checks"])],
-        ["Contract", validation["localPackageContracts"]["status"], str(validation["localPackageContracts"]["checks"])],
-        ["Runtime", validation["localPackageRuntimes"]["status"], str(validation["localPackageRuntimes"]["checks"])],
-        ["Targeted", validation["targeted"]["status"], f"{validation['targeted']['files']} dosya / {validation['targeted']['tests']} test"],
-        ["Full regression", validation["fullRegression"]["status"], f"{validation['fullRegression']['files']} dosya / {validation['fullRegression']['tests']} test"],
+        ["Boundary", visible_status(validation["localPackageBoundaries"]["status"]), str(validation["localPackageBoundaries"]["checks"])],
+        ["Contract", visible_status(validation["localPackageContracts"]["status"]), str(validation["localPackageContracts"]["checks"])],
+        ["Runtime", visible_status(validation["localPackageRuntimes"]["status"]), str(validation["localPackageRuntimes"]["checks"])],
+        ["Targeted", visible_status(validation["targeted"]["status"]), f"{validation['targeted']['files']} dosya / {validation['targeted']['tests']} test"],
+        ["Full regression", visible_status(validation["fullRegression"]["status"]), f"{validation['fullRegression']['files']} dosya / {validation['fullRegression']['tests']} test"],
         ["Root typecheck", validation["rootTypecheck"], "Kaynak tipi"],
-        ["Production builds", validation["productionBuilds"]["status"], f"{validation['productionBuilds']['workspaces']} workspace"],
+        ["Production builds", visible_status(validation["productionBuilds"]["status"]), f"{validation['productionBuilds']['workspaces']} workspace"],
         ["Requirement kabul", "HAYIR", "requirementsClosed=false / countsAsRequirementPass=false"],
     ]
     add_doc_table(doc, ["Kapı", "Sonuç", "Kanıt"], validation_rows, [2100, 1400, 5860], 8.1)
@@ -658,6 +668,21 @@ def build_docx():
 
 def pdf_escape(text: str) -> str:
     return html.escape(str(text)).replace("\n", "<br/>")
+
+
+def pdf_path_breaks(value: str, max_chars: int = 48) -> str:
+    """Keep exact path text and add deterministic line breaks only after separators."""
+    lines: list[str] = []
+    current = ""
+    for part in re.split(r"(?<=[/_-])", str(value)):
+        if current and len(current) + len(part) > max_chars:
+            lines.append(current)
+            current = part
+        else:
+            current += part
+    if current:
+        lines.append(current)
+    return "\n".join(lines)
 
 
 def build_pdf():
@@ -744,10 +769,10 @@ def build_pdf():
     story += [Paragraph("4. Güncel altyapı ve mimari", h1), pdf_table(["Katman", "Güncel altyapı gerçeği"], [[a, b] for a, b in INFRASTRUCTURE], [1.55 * inch, 5.45 * inch], 7.2), PageBreak(), Paragraph("5. Bağlayıcı iş akışları", h1)]
     for title_text, detail in WORKFLOWS:
         story.append(KeepTogether([Paragraph(pdf_escape(title_text), h2), p(detail)]))
-    package_rows = [[item["step"], item["status"], item.get("localImplementationStatus") or "-", "EVET" if item.get("countsAsRequirementPass") else "HAYIR", package_status_reason(item)] for item in roadmap["packages"]]
+    package_rows = [[item["step"], visible_status(item["status"]), visible_status(item.get("localImplementationStatus")), "EVET" if item.get("countsAsRequirementPass") else "HAYIR", package_status_reason(item)] for item in roadmap["packages"]]
     story += [PageBreak(), Paragraph("6. Paket iş listesi — açık/kapalı/neden", h1), p("Her açık paket yerel durum, açık kalma nedeni, eksik kanıt ve requirement PASS gerçeğiyle birlikte gösterilir."), pdf_table(["Paket", "Resmî", "Yerel", "PASS", "Açık kalma nedeni"], package_rows, [0.45*inch, 0.8*inch, 1.3*inch, 0.45*inch, 4.0*inch], 5.8)]
     validation = closure["validation"]
-    validation_rows = [["Boundary", validation["localPackageBoundaries"]["status"], str(validation["localPackageBoundaries"]["checks"])], ["Contract", validation["localPackageContracts"]["status"], str(validation["localPackageContracts"]["checks"])], ["Runtime", validation["localPackageRuntimes"]["status"], str(validation["localPackageRuntimes"]["checks"])], ["Targeted", validation["targeted"]["status"], f"{validation['targeted']['files']} dosya / {validation['targeted']['tests']} test"], ["Full regression", validation["fullRegression"]["status"], f"{validation['fullRegression']['files']} dosya / {validation['fullRegression']['tests']} test"], ["Production builds", validation["productionBuilds"]["status"], f"{validation['productionBuilds']['workspaces']} workspace"], ["Requirement kabul", "HAYIR", "requirementsClosed=false / countsAsRequirementPass=false"]]
+    validation_rows = [["Boundary", visible_status(validation["localPackageBoundaries"]["status"]), str(validation["localPackageBoundaries"]["checks"])], ["Contract", visible_status(validation["localPackageContracts"]["status"]), str(validation["localPackageContracts"]["checks"])], ["Runtime", visible_status(validation["localPackageRuntimes"]["status"]), str(validation["localPackageRuntimes"]["checks"])], ["Targeted", visible_status(validation["targeted"]["status"]), f"{validation['targeted']['files']} dosya / {validation['targeted']['tests']} test"], ["Full regression", visible_status(validation["fullRegression"]["status"]), f"{validation['fullRegression']['files']} dosya / {validation['fullRegression']['tests']} test"], ["Production builds", visible_status(validation["productionBuilds"]["status"]), f"{validation['productionBuilds']['workspaces']} workspace"], ["Requirement kabul", "HAYIR", "requirementsClosed=false / countsAsRequirementPass=false"]]
     story += [Paragraph("7. Yerel doğrulama ve kabul sınırı", h1), pdf_table(["Kapı", "Sonuç", "Kanıt"], validation_rows, [1.6*inch, 1.1*inch, 4.3*inch], 7.6), Paragraph("8. Dış bağımlılıklar ve neden açık", h1)]
     for title_text, detail in EXTERNAL_DEPENDENCIES:
         story.append(KeepTogether([Paragraph(pdf_escape(title_text), h2), p(detail)]))
@@ -755,9 +780,9 @@ def build_pdf():
     story += [KeepTogether([Paragraph("9. Installer ve çalıştırma gerçeği", h1), p("Güncel kanal program hedefi legacy kökün dışındaki C:\\Program Files\\PPT\\ParsYuva-<Kanal> kardeş dizinidir; ana dosya ParsYuva-<Kanal>.exe, kısayol ParsYuva <Kanal>, AppData kökü ParsYuva/<Kanal> ve teslim EXE adı ParsYuva-<Kanal>-GG.AA.YYYY.NN.exe biçimindedir. Otomatik legacy veri migration veya silme yoktur. ParsYuva-Bronze-20.08.2026.37.exe tarihsel yerel test installerı güncel N->N+1 kabul kanıtı değildir. Yükseltilmiş gerçek kurulum yaşam döngüsü PASS olmadıkça ve Production Authenticode sertifikası ile temiz harici Windows makinesi kanıtı tamamlanmadıkça ticari dağıtım hazır sayılmaz.")]), KeepTogether([Paragraph("10. Görsel kimlik ve erişilebilirlik", h1), visual_table, p(f"Logo {visual['brandMark']['width']}×{visual['brandMark']['height']} şeffaf PNG; SHA-256 {visual['brandMark']['sha256']}. Body {visual['typography']['bodyPx']} px, control {visual['typography']['controlPx']} px, minimum {visual['typography']['minimumPx']} px.")])]
     story += [KeepTogether([Paragraph("11. Belge sapmaları ve düzeltmeler", h1), p(f"• {DRIFT_FIXES[0]}")])] + [p(f"• {item}") for item in DRIFT_FIXES[1:]]
     story += [Paragraph("12. Tüm belge türü denetimi", h1), pdf_table(["Uzantı", "Dosya"], [[extension, str(count)] for extension, count in full_document_audit["extensionCounts"].items()], [2.0*inch,5.0*inch], 8.0), p(f"Kök taramada {full_document_audit['documentFileCount']} belge/config/metin dosyası bulundu; {full_document_audit['readableCount']} okunabilir, {full_document_audit['unreadableCount']} sorunlu. Tam yol ve SHA-256 listesi artifacts/manifests/ALL_PROJECT_DOCUMENT_FORMAT_AUDIT.json içindedir.")]
-    decision_rows = [[f"DEC-{decision_number(path):03d}", first_heading(path), status_from_markdown(path), path.relative_to(ROOT).as_posix()] for path in decision_files]
+    decision_rows = [[f"DEC-{decision_number(path):03d}", first_heading(path), status_from_markdown(path), pdf_path_breaks(path.relative_to(ROOT).as_posix())] for path in decision_files]
     story += [CondPageBreak(1.5*inch), Paragraph("13. DEC karar dizini — eksiksiz", h1), pdf_table(["ID", "Karar", "Durum", "Dosya"], decision_rows, [0.65*inch,3.1*inch,1.0*inch,2.25*inch], 5.5)]
-    adr_rows = [[f"ADR-{adr_number(path):03d}", first_heading(path), path.relative_to(ROOT).as_posix()] for path in adr_files]
+    adr_rows = [[f"ADR-{adr_number(path):03d}", first_heading(path), pdf_path_breaks(path.relative_to(ROOT).as_posix())] for path in adr_files]
     story += [CondPageBreak(1.2*inch), Paragraph("14. ADR dizini — eksiksiz", h1), pdf_table(["ID", "Mimari karar", "Dosya"], adr_rows, [0.7*inch,3.9*inch,2.4*inch], 5.8)]
     rule_rows = [[rule["id"], rule["state"], rule["text"]] for rule in rules["rules"]]
     story += [CondPageBreak(1.2*inch), Paragraph(f"15. Kanonik kurallar — {rules['ruleCount']} kayıt", h1), pdf_table(["ID", "Durum", "Kural"], rule_rows, [0.65*inch,0.85*inch,5.5*inch], 6.0)]
