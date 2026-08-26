@@ -1074,10 +1074,10 @@
 - `artifacts/validation/application-security-profile-gate.json` — EVIDENCE — 702 bayt — `0903d7fd1395b8279c0ad77863b2991799fc72c932f08ca53756a2d85ac3853e`
 - `artifacts/validation/bronze-22.08.2026.50-final-local-test-delivery.json` — EVIDENCE — 2415 bayt — `f0f85f71c319e62353d47c9806bd8e26be5e89a3f270601f2212b0909dff6491`
 - `artifacts/validation/bronze-governance-reality-matrix.json` — EVIDENCE — 2055 bayt — `feb5c46c629c0684c5bda1c06d4fae2ea6be873bd587201ba116269db45948ca`
-- `artifacts/validation/feature-reality-gate.json` — EVIDENCE — 673 bayt — `c4d6b913f75e8ee3b1b2a78c87854479cf16fbfeb4e8bdd457a2fc704c13f632`
+- `artifacts/validation/feature-reality-gate.json` — EVIDENCE — 673 bayt — `662a468360d97cc659b21f8e21a08584dd078efe949a6a65fd16245774037c94`
 - `artifacts/validation/full-vitest-pass-2026-08-23.json` — EVIDENCE — 639 bayt — `1e4b454d2150f7a62b131e1ad648d0b2a2494799fc83340cd2b13d20557eab04`
 - `artifacts/validation/full-vitest-regression-failure-2026-08-23.json` — EVIDENCE — 8744 bayt — `245136ca0f0609ca58c2e21b4e11a9fa00df3485452b4d859fab1b68e4120f51`
-- `artifacts/validation/governed-preflight.json` — EVIDENCE — 9780 bayt — `aeda958dad460228b43d7afceacc509b97fa7e49e40ecc330e3dfca8474deeba`
+- `artifacts/validation/governed-preflight.json` — EVIDENCE — 9781 bayt — `9f345e738b48d284341a7a1e86c2fef6c436181db1ce6b055963d05da36690ef`
 - `artifacts/validation/platform-capability-manifest-gate.json` — EVIDENCE — 624 bayt — `5d32ba78871c317a01163ded79b49e833bc96ed2d9b20b57e1f329314718051b`
 - `artifacts/validation/platform-policy-ast-gate.json` — EVIDENCE — 646 bayt — `483bd03a82cd187b20cefe6696f318e38f447941e9a1916c58b1a16a25c200a1`
 - `BRONZE_04.08.2026.27_BITIS_METNI.md` — ACTIVE_REFERENCE — 1243 bayt — `639a5137d4154eb3051a44375a341e84480ffe4ec4d1e8b386e0a7a3141459b8`
@@ -1321,7 +1321,7 @@
 - `BUILD_STATUS_MVP70.md` — HISTORICAL — 628 bayt — `053b702c570c12392927a479e880c3dfe1a7c4d89676a3be02b2844c015d57b7`
 - `BUILD_STATUS_MVP8.md` — HISTORICAL — 345 bayt — `18fd072047fadd00902d21e2b13b70e3712c428ada28b25538de40f94ceabef6`
 - `BUILD_STATUS_MVP9.md` — HISTORICAL — 0 bayt — `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`
-- `BUILD_STATUS.md` — ACTIVE_REFERENCE — 21136 bayt — `1c1cc230404428c9a54ba757a42c6d94a11ef8b9ff336575f18d8ebaa0bcea81`
+- `BUILD_STATUS.md` — ACTIVE_REFERENCE — 21349 bayt — `880b2a9f9bf777a91f47ea57fee798ed1b105d4e403cfe9210afbf446925eaba`
 - `BUILD100_ARCHITECTURE_VALIDATION_REPORT.md` — HISTORICAL — 2858 bayt — `0840cc51ace8f9f7f2bfe5a7596999ba16d2bf644ee12354645991f003f7bf8f`
 - `BUILD101_ARCHITECTURE_VALIDATION_REPORT.md` — HISTORICAL — 2801 bayt — `b918e18d062885612b50a222b89e430cbb80229430b1fbb59821a39eb078556b`
 - `BUILD102_ARCHITECTURE_VALIDATION_REPORT.md` — HISTORICAL — 3731 bayt — `2dfb89ed56c679ce67735af12dae6cff9640a8e805b67ab0a811b4343542e57f`
@@ -1733,7 +1733,7 @@
 - `config/accepted-scope-registry.json` — ACTIVE_AUTHORITY — 454446 bayt — `74e99b4abd218ccdb725e5efcfc8b04acfa86e964b780aa8dca562ecde2b20b5`
 - `config/active-document-set.json` — ACTIVE_REFERENCE — 3054 bayt — `ee73f2160fa76a30c49041d3d3479e8921a4c637b329e445a81e1fa42c695f98`
 - `config/active-file-classification.json` — ACTIVE_REFERENCE — 655 bayt — `d7aedc7d45c5f2ecbddc5813666d3f05227cb2014b0f350f259754213f99471c`
-- `config/active-governance-ledger.json` — ACTIVE_AUTHORITY — 55208 bayt — `1da47cb4c432eb48a98ca38e412287d7df6e960378882d42874c2e417b8d6610`
+- `config/active-governance-ledger.json` — ACTIVE_AUTHORITY — 55175 bayt — `e364a61c1205dfae1cd4b9474fb5078cd96696cd20e4208284720e30813f3738`
 - `config/additional-family-capabilities.json` — ACTIVE_REFERENCE — 22031 bayt — `f6cfb72cbe2c6b1bbe69df23283825f58a675610138b161584582974b68260bd`
 - `config/bronze-backlog-priority-policy.json` — ACTIVE_REFERENCE — 8108 bayt — `da460468f45de0222a84f4370339ed8866f9f3d808b898eb79386c4efeec3e1d`
 - `config/bronze-current-audit-policy.json` — ACTIVE_REFERENCE — 5416 bayt — `61bb63f5dfa3752a15bf6f7dfec0acd08da36b573d8da3d855c55a8a3472e722`
@@ -1759,7 +1759,7 @@
 - `config/persistent-artifact-policy.json` — ACTIVE_AUTHORITY — 787 bayt — `163b76bebc4ed67fd378c9169491c0fda8c253321a8a0ddf6ca53719ce397af1`
 - `config/personal-identity-policy.json` — ACTIVE_REFERENCE — 1716 bayt — `b7ed7ff5e2964404bcb20fa970b836bae647671e8c969b169543b157f1d98379`
 - `config/platform-policy-legacy-bypass-baseline.json` — ACTIVE_REFERENCE — 320 bayt — `9ae11369d9fe2b12a2e2f28eea0e4a0368decf9e6ff94011a2e15bb7867abe24`
-- `config/ppk-015-network-egress-current-ratchet.json` — ACTIVE_REFERENCE — 2021 bayt — `808f1f5e88856e3cf1d558722fc40d4448621f0139a0757c946fb4ce628a4a61`
+- `config/ppk-015-network-egress-current-ratchet.json` — ACTIVE_REFERENCE — 2021 bayt — `68649497c754a0e9a89bce74a21b78d635e66469ea1b16ae97b3ab5843f2bac6`
 - `config/product-lifecycle-policy.json` — ACTIVE_REFERENCE — 6379 bayt — `4b55c12e0a9e82dadf18272943ad5555f73dc631f37f940d8de73a47b47c831d`
 - `config/project-constitution.json` — ACTIVE_AUTHORITY — 6455 bayt — `e71106a3f38bda9229ea20193c289ff51eb519c4e3d3317838272454a13f4f7b`
 - `config/project-progress-model.json` — ACTIVE_REFERENCE — 890 bayt — `c7d74aa3204594059ad81adb26c7f54af1c1355fbf3b5395c6043b3c2c99230c`
@@ -1772,7 +1772,7 @@
 - `config/rule-enforcement-registry.json` — ACTIVE_AUTHORITY — 104845 bayt — `df9d1693f8f3a3917e7be719244851753ff251374dc12979ed53cff21a515971`
 - `config/source-preflight-checks.json` — ACTIVE_REFERENCE — 15017 bayt — `0955f9772e0d75368cacf7e2a318706ffa95f4d7f8b4f71950d38442cfb82dbb`
 - `config/ui-visual-reference-manifest.json` — ACTIVE_REFERENCE — 7483 bayt — `b05c44c9b241320f9f23af2bd4f60fcffb0698480449497f360395c5671adaf2`
-- `config/user-decision-ledger.json` — ACTIVE_AUTHORITY — 157625 bayt — `f764665a929452eba5391416634bedc8e9c5d8a0ec0a55d778fd4d6f07b3cd08`
+- `config/user-decision-ledger.json` — ACTIVE_AUTHORITY — 157962 bayt — `b00b6188b96f8253b9ca14b6bf5724c253b035b666737177a9eb85029232550c`
 - `config/work-segmentation-plan.json` — ACTIVE_AUTHORITY — 154739 bayt — `0cd903741561a5206151842a9cf343082a602b84722de6d555cb8d3c05abc2a6`
 - `CONTRIBUTING.md` — ACTIVE_REFERENCE — 8606 bayt — `76b141332ee971c66429332744cd2730ea40ea28e85cf33f7c2124ac7b45557a`
 - `COPYRIGHT.md` — ACTIVE_REFERENCE — 374 bayt — `d7f7e67b95969f414521cc98b39d0e3af42fdbb121feb01afce6aca8ac0076c7`
@@ -1826,7 +1826,7 @@
 - `docs/06_OPEN_ITEMS_AFTER_CODING_START.md` — ACTIVE_REFERENCE — 24435 bayt — `654351628e0c341b11e353caa7483c90593fba229445c2678163bb457fd48335`
 - `docs/07_BRONZE_REQUIREMENTS_TRACEABILITY.md` — ACTIVE_REFERENCE — 37715 bayt — `3c59d797560456c45675c15243b0254d8756ee8f2fca27065fc25f48af0189d8`
 - `docs/09_ACTIVE_DEVELOPMENT_STATUS.md` — ACTIVE_REFERENCE — 1475 bayt — `a59f0bb6dfd780699e42543607e9404d5c1c00cb0d99924f7c1ce21f66fcd0dc`
-- `docs/10_MASTER_DECISION_REGISTER.md` — ACTIVE_REFERENCE — 141181 bayt — `68fa9455ca280dc9d0b2a901f82fda19db3dc9d48b2035d9f9699cb07ce8384a`
+- `docs/10_MASTER_DECISION_REGISTER.md` — ACTIVE_REFERENCE — 142673 bayt — `ec5598a0cfc342516c8bbe71dc60f717966ec48d2e402f912b322da97626e0e2`
 - `docs/11_DOCUMENT_AUTHORITY_MATRIX.md` — ACTIVE_REFERENCE — 30299 bayt — `e068d8f477cc71d102eedabae9a02eea2eea1d69c07ccca55d33712c9994279c`
 - `docs/12_PRODUCT_SCOPE_AND_MODULE_CATALOG.md` — ACTIVE_REFERENCE — 11359 bayt — `117d4cb49f0cbfedd1ae705313e4088b703dc4b1aa20381063ad68a1a3427d55`
 - `docs/13_UI_UX_ACCESSIBILITY_STANDARD.md` — ACTIVE_REFERENCE — 10635 bayt — `a92f803797429acad05be0e1f141ed02314c19eb6b0f89336f64121e032c96e1`
@@ -2069,9 +2069,9 @@
 - `docs/current/06_KANONIK_KURAL_SICILI.md` — ACTIVE_AUTHORITY — 9224 bayt — `aa2404cfa289c564d50832767e3711a1cf97ba371c57e3031941639447e00327`
 - `docs/current/07_TESLIM_SOHBET_VE_KALICI_KAYIT_SOZLESMESI.md` — ACTIVE_AUTHORITY — 1539 bayt — `867efa92332b7b28dded18b59bd52c475efb8dc857209e77f200ecbaa657bd36`
 - `docs/current/08_TUM_BELGELER_DIZINI.md` — ACTIVE_AUTHORITY — SELF bayt — `SELF_GENERATED_AFTER_INVENTORY`
-- `docs/current/09_KULLANICI_KARARLARI_KAYDI.md` — ACTIVE_AUTHORITY — 24142 bayt — `37df8847e6375f4bc45459254a6d0f5dceaf7807fa7e6f7cacc5a8b14259bfe9`
+- `docs/current/09_KULLANICI_KARARLARI_KAYDI.md` — ACTIVE_AUTHORITY — 25752 bayt — `f9f67f49498eb8255268d387ec38952ff7c564fe54fecc529e2d2128c6c86a5d`
 - `docs/current/10_TUM_KURALLAR_ASILAMAZ_YURUTME_SOZLESMESI.md` — ACTIVE_AUTHORITY — 6637 bayt — `f1718a223e7743a76e462c6596b746c30cb66729b6ab0e8a42d6d5e4f6cf6608`
-- `docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md` — ACTIVE_AUTHORITY — 148075 bayt — `668a2118c1519ab6d161be723303f8238bf2a124ae0a06b02510d406ee18c69c`
+- `docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md` — ACTIVE_AUTHORITY — 148795 bayt — `c98e5b43f8416a873b00bae33aab50ed099990be951049cd8f80250091e25f1a`
 - `docs/current/12_KALAN_IS_SINIFLANDIRMA.md` — ACTIVE_REFERENCE — 6768 bayt — `98eb75cda54fb7df0e7f7ce1c3bed8bd18161d7f7dd749059b6021195dbc698d`
 - `docs/current/12_TUM_BELGE_TURLERI_DENETIMI.md` — ACTIVE_AUTHORITY — 2519 bayt — `e612fb3ce09ec0c8327c7675c3058a44093eee434c323e516f30b99aaf54e273`
 - `docs/current/13_KURUMSALLASMA_VE_GLOBAL_MARKA_PLANI.md` — ACTIVE_AUTHORITY — 4554 bayt — `2feb86cca9416776eb81fb3cabb0e643de034e25564606d8cfd069f3c5966f0d`
@@ -2097,8 +2097,8 @@
 - `docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_19.08.2026_V3.pdf` — ACTIVE_REFERENCE — 481003 bayt — `258d545e9ffeb91886d9057e59a6f272348cf2d78963e6ff4f67d7b0593a7c72`
 - `docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_20.08.2026_V4.docx` — ACTIVE_REFERENCE — 352628 bayt — `ad8c154b8f59ec8cff5a29214ea82ed6dcc99afe476727163dd892c113933812`
 - `docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_20.08.2026_V4.pdf` — ACTIVE_REFERENCE — 489570 bayt — `ab3cea90a659e4bd3bde698d8c93306ac1b5070bdaf4212040500d1b28f0cf54`
-- `docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.docx` — ACTIVE_AUTHORITY — 363111 bayt — `3037d3f0f8722875af6029b82f5101d6d7fcd9791840326169ba583d96c5d0a2`
-- `docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.pdf` — ACTIVE_AUTHORITY — 506917 bayt — `b7f83060b851ea2d0f56e8b9dd6f3970a9b1dcfa63a35538bf34ca353621c680`
+- `docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.docx` — ACTIVE_AUTHORITY — 363436 bayt — `9a6ec8f49a50f4976480846f2959bd10d11fac0fac2d70819c23d418ea8bb8ad`
+- `docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.pdf` — ACTIVE_AUTHORITY — 506985 bayt — `ebc04e5850b4fa93282cea3857250976d5878f63ccc4048a900ec94bafa058a3`
 - `docs/current/MASTER_PROJECT_DOCUMENTATION_BUILD209.docx` — HISTORICAL — 295186 bayt — `6303c334282081db7a2ad602cce5132cd105bb77ef7e574009e836a54abef8a6`
 - `docs/current/MASTER_PROJECT_DOCUMENTATION_BUILD209.pdf` — HISTORICAL — 391597 bayt — `590910ec50937a684c1c953624901ed1b191c733dc59588d46c23fbb14bcbd99`
 - `docs/current/MASTER_PROJECT_DOCUMENTATION_BUILD210.docx` — HISTORICAL — 295232 bayt — `1d6988e12788eaaad2d40dcf2224baa679920220a61241fbbaf6375454314ae1`
@@ -2139,7 +2139,7 @@
 - `docs/current/MASTER_PROJECT_DOCUMENTATION_BUILD227.pdf` — HISTORICAL — 106951 bayt — `670ed2b119e969677370dd593d776a237fdcfce55adb3929f7e562ab2c691d95`
 - `docs/current/MASTER_PROJECT_DOCUMENTATION_BUILD228.docx` — HISTORICAL — 1452242 bayt — `1558f7b55340c40e31bc892aac7ae95ce94defa88ce4b566b76ec93124f3cde6`
 - `docs/current/MASTER_PROJECT_DOCUMENTATION_BUILD228.pdf` — HISTORICAL — 106893 bayt — `bec80cd82f0a18ecc29579343c9988fd3b7db345e95cda38a3ad340755d020c9`
-- `docs/current/PPK-015_NETWORK_EGRESS_CURRENT_RATCHET.md` — ACTIVE_REFERENCE — 3986 bayt — `f58301675ab0abe44c8c59ac3b41d729e5c2243d49774170b895c913e1118c30`
+- `docs/current/PPK-015_NETWORK_EGRESS_CURRENT_RATCHET.md` — ACTIVE_REFERENCE — 4309 bayt — `b94c28faca4ecb0940256739719bb65e23d6ddf2184b392cfeaba10e0e7ee754`
 - `docs/current/PRODUCT_NAVIGATION_AND_FEATURE_REALITY_CONTRACT.md` — ACTIVE_REFERENCE — 3358 bayt — `384096c240fcbc259a573bddc393999416622cf730ed827255fbe96ea2b7681d`
 - `docs/decisions/DEC-090-clean-backup-rewrite-propagation-status-integrity.md` — ACTIVE_REFERENCE — 185 bayt — `bb4e6b9f0f1b6d76d875088b3eefa804287f4b6cd22d94a416bd465877c86115`
 - `docs/decisions/DEC-091-clean-backup-rewrite-propagation-uniqueness.md` — ACTIVE_REFERENCE — 228 bayt — `59d828e0ff855294ab9bd501cbb3c1302b040eef7858098a431e890f5ceb533d`
@@ -2324,8 +2324,8 @@
 - `docs/decisions/DEC-272-explicit-single-release-allocation-and-preallocated-package-identity.md` — ACTIVE_REFERENCE — 1805 bayt — `4ec5a48573fdc811b6eae49433a83f4336d68f7698966fc2863773cb63397382`
 - `docs/decisions/DEC-273-canonical-windows-installed-upgrade-maintenance-and-frontend-uat.md` — ACTIVE_REFERENCE — 2300 bayt — `a96d7a3fe54486a44f0f97c9c880c6e82558f811b6a3f3cb53b19feb57d8ca60`
 - `docs/decisions/DEC-274-adversarial-windows-delivery-evidence-chain.md` — ACTIVE_REFERENCE — 2873 bayt — `38f2704d57f451cbd8b9909ebe0455ee925af19a80e87f2debeccf1f2c526381`
-- `docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md` — ACTIVE_REFERENCE — 40461 bayt — `c5a22c4bf2609dddd13798fef1077ff78006ad5854b898c47d00da49a201a00c`
-- `docs/decisions/DEC-276-bronze-51-rejected-predecessor-recovery-bootstrap.md` — ACTIVE_REFERENCE — 11919 bayt — `73636df51b5d8463d899b363882be661f8d2b70dca94a7290e139a5f651b856e`
+- `docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md` — ACTIVE_REFERENCE — 42958 bayt — `b53d1d5c09c7841c17bf54788b1324371863665bfd865eae8edf440dae5f6572`
+- `docs/decisions/DEC-276-bronze-51-rejected-predecessor-recovery-bootstrap.md` — ACTIVE_REFERENCE — 13933 bayt — `8b2478efbe69bec1acff93ad75b22c6ee317a74148718b6d330407e51db25ae1`
 - `docs/examples/anadolu-parsi-family-import-v1.example.json` — ACTIVE_REFERENCE — 1300 bayt — `fd769c29e37671083eaf6960374fca184e06027b7e0b20c6112b1dc8b6b34494`
 - `docs/EXTERNAL_EVIDENCE_ROOT_TRUST_VERIFICATION_V1.md` — EVIDENCE — 2164 bayt — `2c8986237266d4eec82c9e986957ba347e56014299bbf5b32582b59b6fb0ebf4`
 - `docs/FAMILY_DATA_IMPORT_V1.md` — ACTIVE_REFERENCE — 3130 bayt — `8f708ee6a307c806edb6fd35a99f57243a2cc7af6232b5847a4f4d7208bec40e`
@@ -2420,7 +2420,7 @@
 - `docs/ticari-urun-temeli/01_YONETIM/02_KARAR_VE_DEGISIKLIK_YONETIMI.md` — ACTIVE_REFERENCE — 1633 bayt — `6b5beb81d306263cf5c12e72485151b97c1923e47c7b3dfaa5493225992f858b`
 - `docs/ticari-urun-temeli/01_YONETIM/03_SORUMLULUK_VE_ONAY_MATRISI.md` — ACTIVE_REFERENCE — 1286 bayt — `e9270d108179126edc8386bd12adb8ed59b1216b7f056aff48d0ade271b5ec6f`
 - `docs/ticari-urun-temeli/01_YONETIM/04_AKTIF_KURAL_SICILI.json` — ACTIVE_REFERENCE — 9935 bayt — `4f7b074d7b6e6396b681df856d71dd5cfcf9e1645aa68c65630f7fc51a32aa0f`
-- `docs/ticari-urun-temeli/01_YONETIM/05_DEGISIKLIK_SICILI.json` — ACTIVE_REFERENCE — 48464 bayt — `3f4789635a28871e2604da5c9cf80f12e5c102cfed33e771fa132dcad4113820`
+- `docs/ticari-urun-temeli/01_YONETIM/05_DEGISIKLIK_SICILI.json` — ACTIVE_REFERENCE — 48458 bayt — `4aae3d61ea22f594c893afab6c9a97228a2ccd975582129fb8fa61c1bf56b0b2`
 - `docs/ticari-urun-temeli/01_YONETIM/06_RISK_SICILI.md` — ACTIVE_REFERENCE — 3257 bayt — `6b356739408662e26aeb5ae77c5077f759aa9aee3bff4463a901a57d7fd5dd73`
 - `docs/ticari-urun-temeli/02_IS_ANALIZI/01_URUN_IS_ANALIZI.md` — ACTIVE_REFERENCE — 3750 bayt — `235e32a90ed6226eea68d54c11d8f143ef0b6af48bf362fa38eeaf1e0cf130f2`
 - `docs/ticari-urun-temeli/02_IS_ANALIZI/02_KULLANICI_AKISLARI.md` — ACTIVE_REFERENCE — 2667 bayt — `d24a42fcc55c2148663afc5ba885bd62392eb2f112751290cba55f9298f2f4cc`
@@ -2435,7 +2435,7 @@
 - `docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/01_TEST_VE_KABUL_STRATEJISI.md` — TEST_OR_GATE — 1893 bayt — `f5d4fda88627ce603dc3b1796c733d6268eedf10cca01b52877a5dc2545943e4`
 - `docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/02_KANIT_VE_IZLENEBILIRLIK_SISTEMI.md` — ACTIVE_REFERENCE — 1126 bayt — `cf6b96461c2aabf08e9b305a0466356262418bb26a75847de9c6637d6ff3fad1`
 - `docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/03_KANIT_SICILI.json` — ACTIVE_REFERENCE — 26232 bayt — `2b4d2def7f95ae9be49964a311e81f66f0daa7a112a2b5e0d2578a13067028af`
-- `docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json` — ACTIVE_REFERENCE — 17460 bayt — `59359e66fd461b8bde8c4415c6b522d481b3cf082c2e947a3adecd047dd495e3`
+- `docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json` — ACTIVE_REFERENCE — 17460 bayt — `cc651afbd44c9746469e7258007917bc277adc68ae0873cc64b509460ad9ff65`
 - `docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/05_GIT_YEDEK_DOGRULAMA_KANITI.json` — ACTIVE_REFERENCE — 814 bayt — `f1f794646fcb62972102e8341d42f421621d88f6fc2d7d3a8941063ab097e222`
 - `docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/06_TAM_REGRESYON_KANITI.json` — ACTIVE_REFERENCE — 1093 bayt — `49b6860a3495e8f06f3499babc331c237905c9bd5e0fa23081abdcd83adf45b4`
 - `docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/07_MARKA_KIMLIGI_DOGRULAMA_KANITI.json` — ACTIVE_REFERENCE — 1151 bayt — `43e893603385be238ba3c62a1f7679fe3ddaa7e00f6bd08e08b906633f8757c1`
@@ -2491,9 +2491,9 @@
 - `docs/ticari-urun-temeli/07_TICARI_HAZIRLIK/01_TICARILESME_YOL_HARITASI.md` — ACTIVE_REFERENCE — 1342 bayt — `20be91e390efb32541357d577a394d16894f6f7c65124d06e3a99db85c101c67`
 - `docs/ticari-urun-temeli/07_TICARI_HAZIRLIK/02_LISANS_AKTIVASYON_VE_DENEME.md` — ACTIVE_REFERENCE — 1379 bayt — `50c9daa50f63c08c123dca031d52cd71166289184ad2f7c188852cd4608871fe`
 - `docs/ticari-urun-temeli/07_TICARI_HAZIRLIK/03_OPERASYON_DESTEK_VE_OLAY_YONETIMI.md` — ACTIVE_REFERENCE — 1697 bayt — `a20863212d5dcbedd6c34e25fbf95be13c1654a80c7867a8096df32e177f0755`
-- `docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md` — ACTIVE_REFERENCE — 18195 bayt — `b5ae593b9516c762273b2c70462a37fbf6a65efb0cb6d367b12a745bda101e96`
+- `docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md` — ACTIVE_REFERENCE — 18260 bayt — `53309fe402fc04058af94b38f5601fc2ed3d496f84e582b515dd501a786bb538`
 - `docs/ticari-urun-temeli/08_IS_LISTESI/02_DIS_KAYNAK_GEREKTIREN_ISLER.md` — ACTIVE_REFERENCE — 1226 bayt — `27d8e198fa0227dd8c338c11725ca5926e687957c86c29120cff619a0789f81c`
-- `docs/ticari-urun-temeli/08_IS_LISTESI/03_ANA_IS_SICILI.json` — ACTIVE_REFERENCE — 33222 bayt — `cacc8c73340e5c9c9194851a7000abcadbcfdf2de370aa48362697a9261151db`
+- `docs/ticari-urun-temeli/08_IS_LISTESI/03_ANA_IS_SICILI.json` — ACTIVE_REFERENCE — 33193 bayt — `0932f031f527418a847c26cae2c66563425282ae9cd21f7dccc4ac7d5fcf3c45`
 - `docs/ticari-urun-temeli/08_IS_LISTESI/04_IS_YURUTME_SIRASI.md` — ACTIVE_REFERENCE — 1709 bayt — `62e707837e3c5b3fa95aaa6d546b4e0ba90bfacbed84abbede7d2cc7dbf04674`
 - `docs/ticari-urun-temeli/09_TARIHCE/01_PROJE_TARIHCESI.md` — ACTIVE_REFERENCE — 2348 bayt — `edd9c71c00db41f614394a7af628796f7f60672df1060127aba1e5fc0a1a167e`
 - `docs/ticari-urun-temeli/10_SEMALAR/01_KURAL_SEMASI.schema.json` — ACTIVE_REFERENCE — 1013 bayt — `30200c5f82576b41c2603376b599cb930c2584c4070fdea6db9d91bba965be62`
@@ -3418,7 +3418,7 @@
 - `scripts/generate-baseline-manifest.mjs` — TEST_OR_GATE — 4066 bayt — `a359e0d563be34fdb93f3afc33ef771c2537b11896972e948b76526012f5df45`
 - `scripts/generate-current-delivery-report.mjs` — TEST_OR_GATE — 47076 bayt — `f061ed7b5c1af08ca7a6b032a78bbcc2686be0f83e9d8b8dc6f427390a79be03`
 - `scripts/generate-current-master-documentation-v5.mjs` — TEST_OR_GATE — 291 bayt — `04114fd96a6821cf2ef3a316c80a215af8f37433ff49495e9b45cac5dbb697c3`
-- `scripts/generate-current-master-documentation.py` — TEST_OR_GATE — 63587 bayt — `5b827317715b0086b5238b83528614edf83cd2a0dc43cc40a2251e891829281a`
+- `scripts/generate-current-master-documentation.py` — TEST_OR_GATE — 64332 bayt — `ed91d49be6c4b91d5787e9c596bee7a286cbcd6ca40485d4fdf354af29ab7bc9`
 - `scripts/generate-manifest.mjs` — TEST_OR_GATE — 284 bayt — `8fdf2603d95d1be609548f12a5be05242f4f61e209083a56053dab77e8b3717c`
 - `scripts/generate-master-build-ledger.mjs` — TEST_OR_GATE — 663 bayt — `45a891e6b353c3c823083eab3ae2d1f99b21f10a553b2980a1829fff9f149102`
 - `scripts/generate-master-project-documentation-pdf.py` — TEST_OR_GATE — 10945 bayt — `e9c4449e7f784032430a3761646fa90d20e9f3d3e81499f3ebdbecebb8514d50`

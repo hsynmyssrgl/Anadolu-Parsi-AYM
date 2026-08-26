@@ -3,7 +3,7 @@
 - Belge sürümü: **GUNCEL-2026-08-26-V5**
 - Tarih: **26.08.2026**
 - Görünür ürün sürümü: **Bronze 26.08.2026.51**
-- Kaynak HEAD: `dbefb586e6775f695db6892ca00b605a65a2acdc`
+- Kaynak HEAD: `787c5570b907816ee874add11aba92d88843125e`
 - Statü: **ACTIVE_CURRENT_MASTER_REFERENCE**
 - Kararlar: **DEC-250–DEC-276**
 
@@ -165,7 +165,8 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - PR-240 kapanış kayıtlarını içeren 7f866e69 kaynak commitinden final master DOCX doğru native Poppler/LibreOffice zinciriyle 29/29 sayfa görsel QA PASS vermiştir. Tüm sayfalar beş temas sayfasında; 6–7 ve yoğun kural/envanter tablolarını taşıyan 26–29 ayrıca özgün çözünürlükte kusursuzdur.
 - PR-240 d421c299 exact Bronze turunda hedefli 95 dosya/600 test, filtresiz 399 dosya/2.471 test, 172/172 ek komut ve 4.869/4.869 kaynak bütünlüğü PASS sonrasında governed preflight; önce güncel retention/görünür sürüm makbuzu eksikliğini 607a9a53, ardından tamamlanmış çalışma adımlarının 1.428 kanıt yolundan 803 Git-dışı checkpoint payload dosyasının kanal eksikliğini 8b2b5ccc ile fail-closed korumuştur. Kanal kurulumu tamamlanmış localEvidence ve persistent receipt yollarını tracked/manifest dışlamalı kanonik yol, normal dosya, SHA-256, atomik yazım ve readback ile üç kanala eşitler. Seçici 809 yol, odaklı 1 dosya/9 test ve ticari temel 1.234 kontrol PASS; yeni exact preflight PASS olmadan paket yoktur.
 - PR-240 0f0a4653 exact Bronze etki analizi 95 hedefli test dosyası hesaplamış; hedefli turda 600 test PASS iken operation-rule-check-policy current-mutation preflightStatus alanındaki tarihsel 607a9a53/8b2b5ccc FAIL metnini reddetmiş ve 50f4d9e5 ile fail-closed korunmuştur. Tarihsel retler QA alanlarında kalır; güncel mutasyon durumu NOT_RUN_CURRENT_MUTATION olur. Bronze/Silver/Gold hidrasyonu her kanalda 1.428/1.428 ve eksik 0 PASS; yeni exact testler zorunludur.
-- PR-241/DEC-276 Bronze 50 immutable REJECTED_INVALID_PACKAGE geçmişini trusted runtime saymadan korur. b0615638, 3eec5426 ve 86602f7a tarihsel retlerdir. Exact etki değerlendirmesinin eşlenmemiş Windows paketleyici lockfile reddi 3e496f47, ters ruleIds assertionı 398de9c8 ile korunmuş; assertion düzeltmesi 3 dosya/14 test PASS vermiştir. Render çağrı retleri 75e4072c/0f98c7cc ve kural FAIL sonrasında başlayan generator çağrısı 9a370e51 ile korunur. Temiz 9f16699d kapanışı sonrasında henüz 89c4332f üzerinde duran Bronze worktree için setup doğrulayıcısının pre-sync exact HEAD reddi dbefb586 ile korunmuş ve aktif son rejected checkpoint olmuştur; olaylar ürün kusuru veya PASS değildir. Doğrulanmış native Poppler ve sistem LibreOffice ile güncel V5 DOCX 29/29 sayfa yeniden üretilmiş ve bütün sayfalar özgün çözünürlükte tek tek temiz bulunmuştur. Yeni PR-241 hash/operation-check zinciri master yönetişim sözleşmesi dahil 8 dosya/85 test; ticari temel doğrulaması 1.254 kontrol/87 dosya/61 iş/241 kural PASS geçmişi korunur. Yalnız Bronze 51 rejected-parent provenance bundle'ını history-only lineage olarak kullanıp temiz recovery fresh-install ve ayrı same-version maintenance yolunu çalıştırabilir; bütün exact test, kaynak bütünlüğü, preflight/postflight, paket ve kurulu uygulama UAT kapıları zorunludur.
+- PR-241/DEC-276 Bronze 50 immutable REJECTED_INVALID_PACKAGE geçmişini trusted runtime saymadan korur. b0615638, 3eec5426 ve 86602f7a tarihsel retlerdir. Exact etki değerlendirmesinin eşlenmemiş Windows paketleyici lockfile reddi 3e496f47, ters ruleIds assertionı 398de9c8 ile korunmuş; assertion düzeltmesi 3 dosya/14 test PASS vermiştir. Render çağrı retleri 75e4072c/0f98c7cc ve kural FAIL sonrasında başlayan generator çağrısı 9a370e51 ile korunur. Temiz 9f16699d kapanışı sonrasında pre-sync kanal reddi dbefb586 ile korunmuştur. Ana kaynak ve Bronze/Silver/Gold 63c55074 commitinde exact temiz eşitlik PASS; etki zinciri 105 değişen yol/19 hedef test hesaplamış ve hedefli 19 dosya/188 test PASS vermiştir. Filtresiz turda 399 dosya/2.480 test PASS iken yalnız PPK-015 üretim kaynak ratchet hash eşliği düşmüş, gerçek FAIL cc922201 ile korunmuştur. Canlı sınır 18 bölge/590 dosya/0 bulgu/2 adapter/3 amaçtır; ağ yetkisi değişmemiştir. Ratchet debfeecf460834f50cf328bff58b2c19ad94ef229610c4c829a35c4331ef235a özetine eşlenir. V5 DOCX sayfa 15 Durum token sarımı FAIL'i 787c5570 ile korunmuş; görünür karar durumları okunur boşluklarla sarmalandıktan sonra final belge 29/29 görsel QA PASS vermiştir. Yalnız Bronze 51 rejected-parent provenance bundle'ını history-only lineage olarak kullanıp temiz recovery fresh-install ve ayrı same-version maintenance yolunu çalıştırabilir; bütün exact test, kaynak bütünlüğü, preflight/postflight, paket ve kurulu uygulama UAT kapıları zorunludur.
+- V5 belge becerisi başlangıcında tek format bekleyen yardımcıya birleşik docx,pdf değeri verilmesi içerik üretmeden reddedilmiş ve df92cdba ile korunmuştur. Bu ürün veya belge içerik kusuru ve PASS değildir; desteklenen tek docx retry PASS olmuş, üretim ancak bundan sonra başlatılmıştır. Kapanış renderındaki sayfa 15 Durum token-ortası bölünme 787c5570 ile korunmuş; üretici görünür durum değerlerindeki alt çizgileri izinli boşluklara dönüştürdükten sonra final DOCX 29/29 görsel QA PASS vermiştir.
 
 ## 9. Görsel kimlik ve erişilebilirlik
 
@@ -327,13 +328,13 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - `DEC-224` — DEC-224 — Erişilebilirlik tercih merkezi — ACTIVE / IMPLEMENTATION IN PROGRESS — `docs/decisions/DEC-224-accessibility-preference-center.md`
 - `DEC-225` — DEC-225 — Taslak, geri alma ve asenkron ekran durumu UX'i — COMPLETED — `docs/decisions/DEC-225-draft-async-state-ux.md`
 - `DEC-226` — DEC-226 — Gizlilik, sahiplik, veri hakları ve olay kontrol merkezi — COMPLETED — `docs/decisions/DEC-226-privacy-ownership-data-rights-incident-control.md`
-- `DEC-227` — DEC-227 — Passkey, federated kimlik ve doğrulanabilir geçici yetki belgeleri — IN_PROGRESS — `docs/decisions/DEC-227-passkeys-federated-identity-verifiable-temporary-credentials.md`
-- `DEC-228` — DEC-228 — Yerel, yönetişimli OCR ve türetilmiş veri hattı — PLANNED / LOCAL_IMPLEMENTATION_STARTED — `docs/decisions/DEC-228-local-governed-ocr-derived-data-pipeline.md`
+- `DEC-227` — DEC-227 — Passkey, federated kimlik ve doğrulanabilir geçici yetki belgeleri — IN PROGRESS — `docs/decisions/DEC-227-passkeys-federated-identity-verifiable-temporary-credentials.md`
+- `DEC-228` — DEC-228 — Yerel, yönetişimli OCR ve türetilmiş veri hattı — PLANNED / LOCAL IMPLEMENTATION STARTED — `docs/decisions/DEC-228-local-governed-ocr-derived-data-pipeline.md`
 - `DEC-229` — DEC-229 — Arşiv kanıt ilişkileri, medya yaşam döngüsü ve birleşik yetkili arama — KAYITLI — `docs/decisions/DEC-229-archive-evidence-relations-media-lifecycle-unified-authorized-search.md`
 - `DEC-230` — DEC-230 — Sağlık koordinasyonu ve yaşlı desteği günlüğü — KAYITLI — `docs/decisions/DEC-230-health-care-coordination-elderly-support-ledger.md`
 - `DEC-231` — DEC-231 — Hane operasyonları merkezi — KAYITLI — `docs/decisions/DEC-231-household-operations-center.md`
 - `DEC-232` — DEC-232 — Çocuk eğitim koordinasyonu — KAYITLI — `docs/decisions/DEC-232-child-education-coordination.md`
-- `DEC-233` — DEC-233 — Yer, seyahat, taşınma ve evcil hayvan iş akışları — PLANNED / LOCAL_IMPLEMENTATION_STARTED — `docs/decisions/DEC-233-places-travel-asset-pet.md`
+- `DEC-233` — DEC-233 — Yer, seyahat, taşınma ve evcil hayvan iş akışları — PLANNED / LOCAL IMPLEMENTATION STARTED — `docs/decisions/DEC-233-places-travel-asset-pet.md`
 - `DEC-234` — DEC-234 — Onaya bağlı aile AI asistanı — KAYITLI — `docs/decisions/DEC-234-consent-bound-family-ai-assistant.md`
 - `DEC-235` — DEC-235 — Hafıza stüdyosu ve zaman kapsülü — KAYITLI — `docs/decisions/DEC-235-memory-studio-time-capsule.md`
 - `DEC-236` — DEC-236 — Yerel-first akıllı ev ve enerji adapterleri — KAYITLI — `docs/decisions/DEC-236-local-first-smart-home-energy-adapters.md`
@@ -342,22 +343,22 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - `DEC-239` — DEC-239 — Mesaj yaşam döngüsü ve mahremiyet koruyan presence — KAYITLI — `docs/decisions/DEC-239-communication-messaging-lifecycle-privacy-presence.md`
 - `DEC-240` — DEC-240 — Gerçek zamanlı arama planlama ve erişilebilir arama deneyimi — KAYITLI — `docs/decisions/DEC-240-realtime-calling-media-accessible-ux.md`
 - `DEC-241` — DEC-241 — Açık rızalı görüşme kaydı ve medya saklama — KAYITLI — `docs/decisions/DEC-241-explicit-consent-recording-media-retention.md`
-- `DEC-242` — DEC-242 — Yerel öncelikli çeviri, altyazı ve dil sağlayıcısı — PLANNED / LOCAL_IMPLEMENTATION_STARTED — `docs/decisions/DEC-242-local-first-translation-caption-language-provider.md`
-- `DEC-243` — DEC-243 — Aile toplantıları, kararlar ve rızaya bağlı tutanaklar — PLANNED / LOCAL_IMPLEMENTATION_STARTED — `docs/decisions/DEC-243-family-meetings-decisions-consent-minutes.md`
-- `DEC-244` — DEC-244 — E2EE dosya paylaşımı ve kalan iletişim UX — PLANNED / LOCAL_IMPLEMENTATION_STARTED — `docs/decisions/DEC-244-e2ee-file-sharing-remaining-communication-ux.md`
-- `DEC-245` — DEC-245 — İletişim audit ve arşiv bütünlüğü — PLANNED / LOCAL_IMPLEMENTATION_STARTED — `docs/decisions/DEC-245-communication-audit-archive-integrity.md`
-- `DEC-246` — DEC-246 — Dağıtık Core Service consensus ve tenancy temeli — PLANNED / LOCAL_IMPLEMENTATION_STARTED — `docs/decisions/DEC-246-distributed-core-consensus-tenancy.md`
-- `DEC-247` — DEC-247 — Dağıtık istemciler, bağlantı, operasyon ve felaket kurtarma — PLANNED / LOCAL_IMPLEMENTATION_STARTED — `docs/decisions/DEC-247-distributed-clients-operations-disaster-recovery.md`
-- `DEC-248` — DEC-248 — Windows dayanıklılık ve evrensel UX konsolidasyonu — PLANNED / LOCAL_IMPLEMENTATION_STARTED — `docs/decisions/DEC-248-windows-resilience-universal-ux.md`
-- `DEC-249` — DEC-249 — Bronze final drift, dokümantasyon ve deterministik teslim kapanışı — PLANNED_FINAL / LOCAL_CLOSURE_AUDIT_STARTED — `docs/decisions/DEC-249-bronze-final-drift-deterministic-delivery-closure.md`
+- `DEC-242` — DEC-242 — Yerel öncelikli çeviri, altyazı ve dil sağlayıcısı — PLANNED / LOCAL IMPLEMENTATION STARTED — `docs/decisions/DEC-242-local-first-translation-caption-language-provider.md`
+- `DEC-243` — DEC-243 — Aile toplantıları, kararlar ve rızaya bağlı tutanaklar — PLANNED / LOCAL IMPLEMENTATION STARTED — `docs/decisions/DEC-243-family-meetings-decisions-consent-minutes.md`
+- `DEC-244` — DEC-244 — E2EE dosya paylaşımı ve kalan iletişim UX — PLANNED / LOCAL IMPLEMENTATION STARTED — `docs/decisions/DEC-244-e2ee-file-sharing-remaining-communication-ux.md`
+- `DEC-245` — DEC-245 — İletişim audit ve arşiv bütünlüğü — PLANNED / LOCAL IMPLEMENTATION STARTED — `docs/decisions/DEC-245-communication-audit-archive-integrity.md`
+- `DEC-246` — DEC-246 — Dağıtık Core Service consensus ve tenancy temeli — PLANNED / LOCAL IMPLEMENTATION STARTED — `docs/decisions/DEC-246-distributed-core-consensus-tenancy.md`
+- `DEC-247` — DEC-247 — Dağıtık istemciler, bağlantı, operasyon ve felaket kurtarma — PLANNED / LOCAL IMPLEMENTATION STARTED — `docs/decisions/DEC-247-distributed-clients-operations-disaster-recovery.md`
+- `DEC-248` — DEC-248 — Windows dayanıklılık ve evrensel UX konsolidasyonu — PLANNED / LOCAL IMPLEMENTATION STARTED — `docs/decisions/DEC-248-windows-resilience-universal-ux.md`
+- `DEC-249` — DEC-249 — Bronze final drift, dokümantasyon ve deterministik teslim kapanışı — PLANNED FINAL / LOCAL CLOSURE AUDIT STARTED — `docs/decisions/DEC-249-bronze-final-drift-deterministic-delivery-closure.md`
 - `DEC-250` — DEC-250 — Güncel dokümantasyon yenilemesi ve tarihsel kayıtların korunması — ACTIVE — `docs/decisions/DEC-250-current-documentation-refresh-historical-preservation.md`
 - `DEC-251` — DEC-251 — Karar anında eşzamanlı belge ve iş listesi güncellemesi — ACTIVE — `docs/decisions/DEC-251-synchronous-decision-documentation-enforcement.md`
 - `DEC-252` — DEC-252 — Tarihsel kayıtların gelecek içerik denetimlerinden çıkarılması — ACTIVE — `docs/decisions/DEC-252-freeze-historical-records-from-future-content-review.md`
 - `DEC-253` — DEC-253 — Animasyonlu kurulum, yenilenmiş anlatım ve Silver sesli Yardım Merkezi — ACTIVE — `docs/decisions/DEC-253-animated-installer-narration-and-silver-help-center.md`
-- `DEC-254` — DEC-254 — ParsYuva marka kimliği ve kurumsallaşma yol haritası — ACTIVE / PARTIAL_EXTERNAL_ACTION — `docs/decisions/DEC-254-parsyuva-brand-and-institutionalization-roadmap.md`
+- `DEC-254` — DEC-254 — ParsYuva marka kimliği ve kurumsallaşma yol haritası — ACTIVE / PARTIAL EXTERNAL ACTION — `docs/decisions/DEC-254-parsyuva-brand-and-institutionalization-roadmap.md`
 - `DEC-255` — DEC-255 — Sistem Dili ve İngilizce Arayüz Altyapısı — KAYITLI — `docs/decisions/DEC-255-sistem-dili-ve-ingilizce-arayuz-altyapisi.md`
 - `DEC-256` — DEC-256 — Tek gerçek kurulum ilerlemesi ve yerel yüzde görünümü — ACTIVE — `docs/decisions/DEC-256-tek-gercek-kurulum-ilerlemesi.md`
-- `DEC-257` — DEC-257 — Başlıklarda ParsYuva AYM adının tekrarsız kullanımı — SUPERSEDED_BY_DEC_261 — `docs/decisions/DEC-257-parsyuva-aym-baslik-tekrar-yasagi.md`
+- `DEC-257` — DEC-257 — Başlıklarda ParsYuva AYM adının tekrarsız kullanımı — SUPERSEDED BY DEC 261 — `docs/decisions/DEC-257-parsyuva-aym-baslik-tekrar-yasagi.md`
 - `DEC-258` — DEC-258 — Çevrimdışı aile haritası altyapısı — UYGULANDI — YEREL HARİTA PAKETİ OPSİYONEL — `docs/decisions/DEC-258-cevrimdisi-aile-haritasi-altyapisi.md`
 - `DEC-259` — DEC-259 — Ticari Temel Alani ve Asilamaz Belge Kapisi — ACTIVE — `docs/decisions/DEC-259-ticari-temel-alani-ve-asilamaz-belge-kapisi.md`
 - `DEC-260` — DEC-260 — Ek kural toplu birleştirme ve doğrulanmış Git teslimi — ACTIVE — `docs/decisions/DEC-260-ek-kural-toplu-birlestirme-ve-dogrulanmis-git-teslimi.md`
@@ -369,7 +370,7 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - `DEC-266` — DEC-266 — Özel kurulum, ilk aile, temiz paket ve çift yedek kabul zinciri — ACTIVE — `docs/decisions/DEC-266-ozel-kurulum-ilk-aile-temiz-paket-ve-cift-yedek-kabul-zinciri.md`
 - `DEC-267` — DEC-267 — Geçişli sesli kurulum, tek pars ve kasa kilidi düzeltmesi — ACTIVE — `docs/decisions/DEC-267-gecisli-sesli-kurulum-tek-pars-ve-kasa-kilidi-duzeltmesi.md`
 - `DEC-268` — DEC-268 — Windows installer timer callback ve tam ön yüz kullanıcı UAT teslimi — ACTIVE — `docs/decisions/DEC-268-windows-installer-timer-callback-ve-tam-on-yuz-kullanici-uat-teslimi.md`
-- `DEC-269` — DEC-269 — Bronze, Silver ve Gold kurulum, veri ve kaynak yalıtımı — SUPERSEDED_BY_DEC-271 — `docs/decisions/DEC-269-bronze-silver-gold-kurulum-veri-ve-kaynak-yalitimi.md`
+- `DEC-269` — DEC-269 — Bronze, Silver ve Gold kurulum, veri ve kaynak yalıtımı — SUPERSEDED BY DEC-271 — `docs/decisions/DEC-269-bronze-silver-gold-kurulum-veri-ve-kaynak-yalitimi.md`
 - `DEC-270` — DEC-270 — Her mutasyon sonrası exact commit kanıtı ve taze kurulu EXE UAT teslim kapısı — ACTIVE — `docs/decisions/DEC-270-her-mutasyon-sonrasi-exact-commit-kaniti-ve-taze-kurulu-exe-uat-teslim-kapisi.md`
 - `DEC-271` — DEC-271 — Kardeş kanal program kökleri ve legacy kaldırma güvenliği — ACTIVE — `docs/decisions/DEC-271-sibling-channel-program-roots-and-legacy-uninstall-safety.md`
 - `DEC-272` — DEC-272 — Açık tek seferli sürüm tahsisi ve önceden tahsisli paket kimliği — ACTIVE — `docs/decisions/DEC-272-explicit-single-release-allocation-and-preallocated-package-identity.md`

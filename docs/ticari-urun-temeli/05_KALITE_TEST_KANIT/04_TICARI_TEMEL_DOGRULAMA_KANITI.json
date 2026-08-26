@@ -27,7 +27,7 @@
   "workItemCount": 61,
   "fileCount": 87,
   "sourceFileCount": 86,
-  "sourceFingerprintSha256": "8239525601910164ab597b9aa91b5b5d897ac6a1dd0bd0c8774257eb2814c632",
+  "sourceFingerprintSha256": "a381fd89b6ca1c75863dd18286a0bb23ce2a9c2b185ceb390476e4fd83aa4918",
   "checks": 1254,
   "status": "PASS",
   "commercialReleaseEligible": false,
@@ -66,8 +66,8 @@
     },
     {
       "path": "01_YONETIM/05_DEGISIKLIK_SICILI.json",
-      "bytes": 48464,
-      "sha256": "3f4789635a28871e2604da5c9cf80f12e5c102cfed33e771fa132dcad4113820"
+      "bytes": 48458,
+      "sha256": "4aae3d61ea22f594c893afab6c9a97228a2ccd975582129fb8fa61c1bf56b0b2"
     },
     {
       "path": "01_YONETIM/06_RISK_SICILI.md",
@@ -416,8 +416,8 @@
     },
     {
       "path": "08_IS_LISTESI/01_ANA_IS_LISTESI.md",
-      "bytes": 18195,
-      "sha256": "b5ae593b9516c762273b2c70462a37fbf6a65efb0cb6d367b12a745bda101e96"
+      "bytes": 18260,
+      "sha256": "53309fe402fc04058af94b38f5601fc2ed3d496f84e582b515dd501a786bb538"
     },
     {
       "path": "08_IS_LISTESI/02_DIS_KAYNAK_GEREKTIREN_ISLER.md",
@@ -426,8 +426,8 @@
     },
     {
       "path": "08_IS_LISTESI/03_ANA_IS_SICILI.json",
-      "bytes": 33222,
-      "sha256": "cacc8c73340e5c9c9194851a7000abcadbcfdf2de370aa48362697a9261151db"
+      "bytes": 33193,
+      "sha256": "0932f031f527418a847c26cae2c66563425282ae9cd21f7dccc4ac7d5fcf3c45"
     },
     {
       "path": "08_IS_LISTESI/04_IS_YURUTME_SIRASI.md",
@@ -465,5 +465,5 @@
       "sha256": "cd4dbee8b6d6742c63a61fd59d74b8920e136c5d9be7bf9360c7be722b70509c"
     }
   ],
-  "generatedAt": "2026-08-26T10:31:40.410Z"
+  "generatedAt": "2026-08-26T12:18:26.061Z"
 }

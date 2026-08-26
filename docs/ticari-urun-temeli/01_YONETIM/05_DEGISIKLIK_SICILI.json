@@ -745,7 +745,7 @@
       "tarih": "2026-08-26",
       "baslik": "Bronze 51 rejected predecessor recovery bootstrap",
       "durum": "ACTIVE",
-      "kaynak": "DEC-276, PR-241 ve 1490bb9f/4ec0820d/de8776f1/6a401791/cb7e8749/4c83cee8/aae819cc/ac2c02c1/5c07258c/b0615638/3eec5426/86602f7a/3e496f47/398de9c8/75e4072c/0f98c7cc/9a370e51/dbefb586 reddedilmis checkpointleri",
+      "kaynak": "DEC-276, PR-241 ve 1490bb9f/4ec0820d/de8776f1/6a401791/cb7e8749/4c83cee8/aae819cc/ac2c02c1/5c07258c/b0615638/3eec5426/86602f7a/3e496f47/398de9c8/75e4072c/0f98c7cc/9a370e51/dbefb586/cc922201/df92cdba/787c5570 reddedilmis checkpointleri",
       "etkilenenAlanlar": [
         "config/release-ledger.json",
         "scripts/lib/windows-package-provenance.mjs",
@@ -757,7 +757,7 @@
         "BUILD_STATUS.md",
         "docs/ticari-urun-temeli"
       ],
-      "isListesiEtkisi": "IS-0211, IS-0212, IS-0213, IS-0214, IS-0215, IS-0216 ve IS-0601 DEVAM kalir. Odakli test, ticari temel, master makine/governance ve final DOCX 29/29 gorsel QA PASS gecmisi korunur. Temiz 9f16699d sonrasi pre-sync kanal setup reddi dbefb586 ile korunur ve aktif son rejected checkpoint olur; urun veya kanal kaynak kusuru ve PASS degildir. Uc kanal ayri ff-only ile nihai commite tasinip esittik kapisi yinelenir. Full exact hedefli/filtresiz regresyon, TypeScript, kaynak butunlugu, pre/postflight, temiz paket, installer experience, UAT110/UAT111 ve final kurulu UAT tamamlanmadan ara installer yoktur.",
+      "isListesiEtkisi": "IS-0211, IS-0212, IS-0213, IS-0214, IS-0215, IS-0216 ve IS-0601 DEVAM kalir. Exact kanal esitligi ve hedefli 19 dosya/188 test PASS sonrasinda tam turdaki tek PPK-015 stale ratchet FAIL cc922201 ile korunup canli hashe duzeltilmistir. Belge baslangic reddi df92cdba ve sayfa 15 Durum token sarimi reddi 787c5570 tarihsel kalir. Uretici duzeltmesi sonrasi final V5 DOCX 29/29 gorsel QA PASS vermistir. Full exact zincir, TypeScript, kaynak butunlugu, pre/postflight, temiz paket, installer experience, UAT110/UAT111 ve final kurulu UAT tamamlanmadan ara installer yoktur.",
       "senkronDurumu": "SYNCHRONIZED"
     }
   ]

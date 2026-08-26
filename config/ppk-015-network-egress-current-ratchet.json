@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "requirement": "PPK-015",
   "status": "CURRENT_RATCHET",
-  "recordedAt": "2026-08-23",
+  "recordedAt": "2026-08-26",
   "historicalClosure": {
     "step": "32-K",
     "decisionId": "DEC-196",
@@ -17,7 +17,7 @@
   "currentBoundary": {
     "productionSourceZones": 18,
     "scannedFiles": 590,
-    "sourceInventorySha256": "052b076f316ac04d03c49e29841c372dca5d820c3fcd10838074c4c93e2cf46c",
+    "sourceInventorySha256": "debfeecf460834f50cf328bff58b2c19ad94ef229610c4c829a35c4331ef235a",
     "maliciousSelfTests": 7,
     "findings": 0,
     "authorizedAdapterCount": 2,
@@ -36,7 +36,7 @@
     "directPrimitiveExceptionCount": 0,
     "latestDatabaseMigration": 121,
     "changeImpactValidation": {
-      "date": "2026-08-24",
+      "date": "2026-08-26",
       "requirement": "PR-235",
       "status": "UPDATED",
       "fullBoundaryContractRuntimeChain": "52/52 PASS",
