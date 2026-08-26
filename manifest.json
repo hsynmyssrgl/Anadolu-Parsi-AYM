@@ -1,7 +1,7 @@
 {
   "schemaVersion": 3,
   "packageVersion": "22.8.2026-50",
-  "generatedAt": "2026-08-26T04:01:53.528Z",
+  "generatedAt": "2026-08-26T05:33:30.140Z",
   "fileCount": 4869,
   "files": [
     {
@@ -6401,17 +6401,17 @@
     },
     {
       "path": "artifacts/manifests/ALL_DOCUMENTS_INDEX.csv",
-      "sha256": "ef1812b6198e7e3d5e8b0cec7f000f433aceb2ad30397d1b01a5482a99a9dd4f",
+      "sha256": "c60cd1da3b118dd72c45737b99077c54cbce8b894f4e12cdb64be7d0815c1f16",
       "bytes": 311999
     },
     {
       "path": "artifacts/manifests/ALL_DOCUMENTS_INDEX.json",
-      "sha256": "cea4a3fdb1306c01d680bce9adafae2dc7e3596c359d01cb15826d25199c4459",
+      "sha256": "2f6f9006de554580d9dcc148d15eb0905a173db313724044c18f0926ebfadc90",
       "bytes": 599900
     },
     {
       "path": "artifacts/manifests/ALL_DOCUMENTS_INDEX.md",
-      "sha256": "29e2168ae6ae14ba3d805046968eb491f2f9c8169f472a6553e539ebf7c8e5ce",
+      "sha256": "41c9751b129f6cf10afe8d4cd5760a21270c5384a2df73d289b8ae504e8de8c4",
       "bytes": 340460
     },
     {
@@ -7186,17 +7186,17 @@
     },
     {
       "path": "artifacts/manifests/PROJECT_ARTIFACT_INDEX.csv",
-      "sha256": "8cc29734b39c946251436feb1e3890fd95107ce09a97b723917827f10b14f1c2",
+      "sha256": "e280309e87f6d0b81319882d5d210ba341bfe37bf04e617d6e98d9cebc85ec20",
       "bytes": 652183
     },
     {
       "path": "artifacts/manifests/PROJECT_ARTIFACT_INDEX.json",
-      "sha256": "0e769fafbfc9fa78307922d9330556257d218ca8d0a75d797c91600638945dff",
+      "sha256": "af8b0c9a5cbb07a243e3037dff6e041c8b5d7c81c367d4cd7aedcfc5cb04c509",
       "bytes": 1243854
     },
     {
       "path": "artifacts/manifests/PROJECT_ARTIFACT_INDEX.md",
-      "sha256": "88c93bfdc52d383041098c4c724a2e9ec06bca83c6708e3205466c94c22861a7",
+      "sha256": "4c1678570ae74aec13d6e6bb37a1b060dee6629ea51e13dda74d80375661df49",
       "bytes": 708665
     },
     {
@@ -12611,7 +12611,7 @@
     },
     {
       "path": "docs/current/08_TUM_BELGELER_DIZINI.md",
-      "sha256": "29e2168ae6ae14ba3d805046968eb491f2f9c8169f472a6553e539ebf7c8e5ce",
+      "sha256": "41c9751b129f6cf10afe8d4cd5760a21270c5384a2df73d289b8ae504e8de8c4",
       "bytes": 340460
     },
     {
@@ -14441,7 +14441,7 @@
     },
     {
       "path": "docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json",
-      "sha256": "86ab4e359ecc3c35b0686d515f91bf69a3038aee86019d43b19fa778348a2daf",
+      "sha256": "33cbb673a3ea07fc7e054be1e86577a246075160c1ddc9f9e727ed0281caab1a",
       "bytes": 17395
     },
     {
