@@ -137,3 +137,5 @@ Son belge QA araç zinciri kaydı: eksik LibreOffice PATH'i `c5879c9a`, eksik Po
 Preflight/paket fingerprint kapsam kaydı: `af2d15fa` erken kesilen canlı paket doğrulamasını, `151384be` ise 2.795 çalışma ağacı / 2.793 Git kapsam farkını korur. Fark yalnız ignored `scripts/__pycache__/*.pyc` dosyalarıdır; fingerprint taraması `__pycache__` dizinlerini dışlayarak Git otoritesiyle eşitlenmiştir ve odaklı 1 dosya/6 test PASS'tir. `IS-0211`, `IS-0214`, `IS-0215` ve `IS-0601` yeni exact zincir tamamlanana kadar `DEVAM` kalır.
 
 Fingerprint düzeltmesi belge QA kaydı: ilk temas yardımcısı Font overload hatası `3bc57c12` ile korunmuş; açık tipli retry 29/29 sayfa temaslarda ve 7–8/27–29 özgün çözünürlükte PASS vermiştir. Yeni exact kapanış yükümlülükleri sürer.
+
+Final kanal doğrulayıcı çağrı kaydı: zorunlu `--kind` olmadan yapılan ilk ek çağrı `2ab9cddf` ile korunmuş; doğru `--kind build` retry ana ve üç kanalın exact commit/dal/ortak Git deposu/temiz ağaç eşitliğini PASS vermiştir. `IS-0211`, `IS-0214`, `IS-0215` ve `IS-0601` yeni exact kapanış bitene kadar `DEVAM` kalır.

@@ -1498,6 +1498,8 @@ Checkpoint payload kalıcı düzeltmesini içeren `65ffd15d` kaynak commitinden 
 
 Ana belge temas sayfası yardımcısının ilk `System.Drawing.Font` overload hatası `3bc57c12` ile korunur. Açık tipli retry sonrası 29/29 sayfa temaslarda, 7–8 ve 27–29 özgün çözünürlükte görsel QA PASS vermiştir; bu ret yeni exact teslim kapılarını kaldırmaz.
 
+Kanal payload eşitlemesi PASS sonrasında ek verifier zorunlu `--kind` olmadan çağrılıp reddedilmiş ve `2ab9cddf` ile korunmuştur. Doğru `--kind build` retry ana ve üç kanalın exact commit/dal/ortak Git deposu/temiz ağaç eşitliğini PASS kanıtlamıştır.
+
 `cc01412c` sertifikalı exact Bronze kaynağında hedefli 95 dosya/601 test ve filtresiz tam 399 dosya/2.472 test PASS vermiştir. Preflight sertifikasının güncellediği sekiz indeks/kanıt dosyasının yeni hash'leri kaynak manifestine alınmadığından final kaynak bütünlüğü FAIL olmuş ve `6a0840d4` ile korunmuştur. Kayıt ve indeksler tamamlandıktan sonra `manifest.json` ile `SHA256SUMS.txt` son üretici olarak yenilenir; yeni exact kaynak bütünlüğü ve read-only pre/postflight PASS olmadan paket yoktur.
 
 `96377fb9` exact kaynakta hedefli 95 dosya/601 test, tam 399 dosya/2.472 test, kaynak bütünlüğü, governed pre/postflight ve ana/kanal commit eşitliği PASS sonrasında Windows paket kapısı, dış USB korumasıyla `PASS` yapılmış `LATEST` ile yalnız ilk yerel `PENDING` durumunu taşıyan değişmez makbuzun byte farkını reddetmiş; sonuç `b87ebe2e` ile korunmuştur. Kalıcı düzeltme ilk makbuzu ezmez; dış receipt SHA-256 kimliğine bağlı ikinci değişmez final makbuzu ve sidecarı hem yerelde hem D: geri okumalı saklar, `LATEST` yalnız final kayıtla eşleşir. Hedefli 2 dosya/4 test PASS; yeni exact bütün kapılar ve kurulu UAT olmadan paket yoktur.

@@ -7,11 +7,11 @@
   "requirementPass": false,
   "izinliDurumlar": ["TAMAMLANDI", "DEVAM", "ACIK", "BLOCKED", "NOT_RUN"],
   "latestMutationClosure": {
-    "checkpoint": "3bc57c12",
+    "checkpoint": "2ab9cddf",
     "status": "DEVAM",
     "affectedWorkItems": ["IS-0211", "IS-0214", "IS-0215", "IS-0601"],
-    "finding": "Installer deneyimi UAT canli paket dogrulamasi ilk kez erken kesilerek af2d15fa ile, tamamlanan kosuda 2795 preflight / 2793 Git kaynak kapsam farki saptanarak 151384be ile korundu. Ilk belge temas yardimcisi Font overload hatasi 3bc57c12 ile kaydedildi.",
-    "focusedValidation": "Iki fazla yol yalnız ignored scripts/__pycache__ Python bytecode dosyalaridir. Governed fingerprint taramasi __pycache__ dizinlerini Git otoritesiyle exact kapsam esitligi icin dislar; odakli 1 dosya/6 test PASS vermistir. Acik tipli temas retry 29/29 sayfa gorsel QA PASS vermistir.",
+    "finding": "Installer deneyimi UAT canli paket dogrulamasi af2d15fa/151384be, belge temas yardimcisi 3bc57c12 ile korunur. Son ek kanal verifier zorunlu --kind olmadan cagrilmis ve 2ab9cddf ile kaydedilmistir.",
+    "focusedValidation": "__pycache__ kapsam duzeltmesi 1 dosya/6 test, belge 29/29 gorsel QA PASS. Dogru --kind build retry ana kaynak ve uc kanal exact commit, dal, ortak Git nesne deposu ve temiz agac esitligini PASS kanitlamistir.",
     "remaining": "Eski paket gecersizdir. Yeni temiz exact commit kayitlari, hedefli/tam regresyon, kaynak butunlugu, read-only pre/postflight, yerel/dis yedek, temiz paket ve kurulu tam UI UAT zorunludur."
   },
   "isler": [

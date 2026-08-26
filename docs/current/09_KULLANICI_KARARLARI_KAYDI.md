@@ -121,3 +121,5 @@ Son belge QA turundaki `c5879c9a`, `194a8281` ve `62d0b1d8` test aracı retleri 
 Son preflight/paket kapsam kaydı: `af2d15fa` sessiz canlı paket doğrulamasının erken kesilmesini, `151384be` doğrulama sonunda saptanan 2.795 çalışma ağacı / 2.793 Git kaynak kapsam farkını korur. Fark ignored `scripts/__pycache__/*.pyc` dosyalarıdır; fingerprint taraması `__pycache__` dizinlerini exact Git kapsamıyla eşitleyecek biçimde dışlar. Eski paket geçersizdir; yeni exact test, yedek, temiz paket ve kurulu uygulama UAT tamamlanmadan teslim yapılmaz.
 
 Bu düzeltmenin ana belge QA turunda ilk temas yardımcısı `System.Drawing.Font` overload hatası `3bc57c12` ile korunmuştur. Açık tipli retry 29/29 sayfa temas ve 7–8/27–29 özgün çözünürlük kontrollerinde PASS vermiştir.
+
+Son kanal doğrulayıcı çağrı kaydı: zorunlu `--kind` olmadan yapılan ilk ek çağrı `2ab9cddf` ile korunmuştur. Doğru `--kind build` retry ana kaynak ile Bronze/Silver/Gold'un exact commit, dal, ortak Git deposu ve temiz ağaç eşitliğini PASS vermiştir.
