@@ -117,3 +117,7 @@ Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağ
 Makine defteri yalnız açık kullanıcı kararlarını tutar. Türetilmiş paket/mimari kararlarının eksiksiz DEC-090–DEC-275 dizini ve dosya yolları `docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md` içindedir.
 
 Son belge QA turundaki `c5879c9a`, `194a8281` ve `62d0b1d8` test aracı retleri silinmemiştir. Mutlak LibreOffice/native Poppler yollarıyla 29/29 sayfa render edilmiş; tüm sayfalar temaslarda, 6–8 ve 27–29. sayfalar özgün çözünürlükte görsel PASS vermiştir. Bu PASS yeni exact test, paket ve kurulu uygulama UAT yükümlülüğünü kaldırmaz.
+
+Son preflight/paket kapsam kaydı: `af2d15fa` sessiz canlı paket doğrulamasının erken kesilmesini, `151384be` doğrulama sonunda saptanan 2.795 çalışma ağacı / 2.793 Git kaynak kapsam farkını korur. Fark ignored `scripts/__pycache__/*.pyc` dosyalarıdır; fingerprint taraması `__pycache__` dizinlerini exact Git kapsamıyla eşitleyecek biçimde dışlar. Eski paket geçersizdir; yeni exact test, yedek, temiz paket ve kurulu uygulama UAT tamamlanmadan teslim yapılmaz.
+
+Bu düzeltmenin ana belge QA turunda ilk temas yardımcısı `System.Drawing.Font` overload hatası `3bc57c12` ile korunmuştur. Açık tipli retry 29/29 sayfa temas ve 7–8/27–29 özgün çözünürlük kontrollerinde PASS vermiştir.

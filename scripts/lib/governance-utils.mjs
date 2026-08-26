@@ -65,7 +65,7 @@ export const DOCUMENT_EXTENSIONS = new Set(['.md','.pdf','.docx','.txt','.rtf','
 // non-portable and fail every clean clone before it produces its own receipt.
 export const EXCLUDED_DIRECTORIES = new Set([
   'node_modules','dist','release','coverage','.git','.idea','.vscode','.tmp','.tmp-runtime-dist','tmp',
-  '34-L-bronze-local-closure-receipts'
+  '34-L-bronze-local-closure-receipts','__pycache__'
 ]);
 
 export const stableJson = (value) => JSON.stringify(value, Object.keys(value ?? {}).sort());

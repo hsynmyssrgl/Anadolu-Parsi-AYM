@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PARSYUVA-AILE-YASAM-MERKEZI-TICARI-DEGISIKLIK-SICILI-V2",
   "temelTarihi": "2026-08-19",
-  "sonKayit": "TICARI-039",
+  "sonKayit": "TICARI-040",
   "kayitlar": [
     {
       "id": "TICARI-001",
@@ -703,6 +703,24 @@
         "docs/ticari-urun-temeli"
       ],
       "isListesiEtkisi": "IS-0211, IS-0215 ve IS-0601 DEVAM kalir. LibreOffice ve Poppler PATH retleri ile temas sayfasi yardimci komut ret kaydi korunmustur; dogru mutlak arac yollarinda 29/29 sayfa gorsel QA PASS vermistir. Yeni exact test, source-integrity, pre/postflight, yedek, paket ve kurulu UAT olmadan installer yoktur.",
+      "senkronDurumu": "SYNCHRONIZED"
+    },
+    {
+      "id": "TICARI-040",
+      "tarih": "2026-08-26",
+      "baslik": "Preflight ve paket kaynak fingerprint kapsami esitligi",
+      "durum": "ACTIVE",
+      "kaynak": "DEC-275, PR-240 ve af2d15fa/151384be/3bc57c12 reddedilmis checkpointleri",
+      "etkilenenAlanlar": [
+        "scripts/lib/governance-utils.mjs",
+        "apps/desktop/tests/operation-rule-check-policy.test.ts",
+        "config/active-governance-ledger.json",
+        "config/user-decision-ledger.json",
+        "docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md",
+        "BUILD_STATUS.md",
+        "docs/ticari-urun-temeli"
+      ],
+      "isListesiEtkisi": "IS-0211, IS-0214, IS-0215 ve IS-0601 DEVAM kalir. af2d15fa sessiz canli paket dogrulamasinin erken kesilmesini; 151384be tamamlanan dogrulamadaki 2795 calisma agaci / 2793 Git kaynak kapsam farkini korur. Iki fazla yol ignored scripts/__pycache__ Python bytecode dosyalaridir. Governed fingerprint taramasi __pycache__ dizinlerini exact dislar ve odakli 1 dosya/6 test PASS vermistir. Ilk belge temas yardimcisi Font overload hatasi 3bc57c12 ile korunmus; acik tipli retry 29/29 sayfa gorsel PASS vermistir. Eski paket gecersizdir; yeni exact test, kaynak butunlugu, pre/postflight, yedek, temiz paket ve kurulu UAT olmadan teslim yoktur.",
       "senkronDurumu": "SYNCHRONIZED"
     }
   ]

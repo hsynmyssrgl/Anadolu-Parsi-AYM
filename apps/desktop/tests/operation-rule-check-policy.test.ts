@@ -186,6 +186,7 @@ describe('operation rule check policy', () => {
       readSource('scripts/generate-current-delivery-report.mjs')
     ]);
     expect(governanceUtils).toContain("'artifacts/validation/operation-rule-check.json'");
+    expect(governanceUtils).toContain("'__pycache__'");
     expect(sourceProtection).toContain('...DERIVED_DOCUMENT_INDEX_PATHS');
     expect(deliveryReport).toContain('...DERIVED_DOCUMENT_INDEX_PATHS');
   });
