@@ -63,7 +63,7 @@ const identity = (path: string, hash: string, sizeBytes: number) => ({
   signerSubject: null
 });
 
-const baseInput = (mode: 'bootstrap' | 'continuation' = 'bootstrap'): any => {
+const baseInput = (mode: 'bootstrap' | 'recovery' | 'continuation' = 'bootstrap'): any => {
   const installerRunId = '10000000-0000-4000-8000-000000000001';
   const installationRunId = '20000000-0000-4000-8000-000000000002';
   const installedUiRunId = '30000000-0000-4000-8000-000000000003';
@@ -84,7 +84,7 @@ const baseInput = (mode: 'bootstrap' | 'continuation' = 'bootstrap'): any => {
     status: 'PASS', buildMode: 'LOCAL_UNSIGNED_NSIS', release: 'Bronze 22.08.2026.50',
     releaseId: 'bronze-2026-08-22-r50', sourceProvenance: previousSourceProvenance,
     producer: { path: 'apps/desktop/scripts/run-electron-builder.mjs', sizeBytes: 2_001, sha256: digest(803) },
-    artifacts: { packagedRuntime: { path: packagedPath, sizeBytes: 224_000_000, sha256: digest(804), fileVersion: '22.8.2026-50' } }
+    artifacts: { packagedRuntime: { path: packagedPath, sizeBytes: 224_000_000, sha256: digest(804) } }
   };
   const previousPackageArchiveBinding = { sizeBytes: 1_600, sha256: digest(805) };
   const previousPackageHistoryBundleReceipt = {
@@ -642,6 +642,7 @@ const baseInput = (mode: 'bootstrap' | 'continuation' = 'bootstrap'): any => {
       installerExperience: { sha256: sha('5') },
       previousPackageProvenance: null,
       installedBefore: null,
+      recoveryBootstrapAuthority: null,
       producer: { path: 'scripts/run-windows-installed-release-uat.ps1', sha256: sha('2'), sizeBytes: 1_002 },
       syntheticMarker: { cleanupStatus: 'DELETED_AND_ABSENCE_READBACK_PASS' },
       cleanup: { markerDeleted: true, markerAbsentReadback: true, originalUserDataStateRestored: true },
@@ -659,7 +660,7 @@ const baseInput = (mode: 'bootstrap' | 'continuation' = 'bootstrap'): any => {
         otherChannelWriteCount: 0, dataSelectionDialogObserved: false,
         bronzeRegistry: { exactSingleEntry: true },
         fromFileVersion: null, toFileVersion: packageVersion, fromSequence: null, toSequence: 50,
-        exactSuccessor: false, governedBootstrap: true, targetInstallRootAbsentBefore: true,
+        exactSuccessor: false, governedBootstrap: true, recoveryBootstrap: false, targetInstallRootAbsentBefore: true,
         targetExecutableAbsentBefore: true, bronzeUninstallRegistryAbsentBefore: true,
         packagePreviousProvenanceAbsent: true,
         before: { program: { bronze: { exists: false } }, uninstallRegistry: { bronze: { entryCount: 0 } } }
@@ -671,7 +672,7 @@ const baseInput = (mode: 'bootstrap' | 'continuation' = 'bootstrap'): any => {
         otherChannelWriteCount: 0, dataSelectionDialogObserved: false,
         bronzeRegistry: { exactSingleEntry: true },
         fromFileVersion: null, toFileVersion: packageVersion, fromSequence: null, toSequence: 50,
-        exactSuccessor: false, governedBootstrap: true, targetInstallRootAbsentBefore: true,
+        exactSuccessor: false, governedBootstrap: true, recoveryBootstrap: false, targetInstallRootAbsentBefore: true,
         targetExecutableAbsentBefore: true, bronzeUninstallRegistryAbsentBefore: true,
         packagePreviousProvenanceAbsent: true,
         before: { program: { bronze: { exists: false } }, uninstallRegistry: { bronze: { entryCount: 0 } } }
@@ -899,11 +900,33 @@ const baseInput = (mode: 'bootstrap' | 'continuation' = 'bootstrap'): any => {
     historicalPreviousSourceProvenance: null,
     previousPackageProducerReadback: null
   };
-  if (mode === 'continuation') {
-    const nextApplicationVersion = '24.08.2026.51';
-    const nextPackageVersion = '24.8.2026-51';
+  if (mode !== 'bootstrap') {
+    const isRecovery = mode === 'recovery';
+    const nextApplicationVersion = isRecovery ? '26.08.2026.51' : '27.08.2026.52';
+    const nextPackageVersion = isRecovery ? '26.8.2026-51' : '27.8.2026-52';
     const nextRelease = `Bronze ${nextApplicationVersion}`;
-    const nextReleaseId = 'bronze-2026-08-24-r51';
+    const nextReleaseId = isRecovery ? 'bronze-2026-08-26-r51' : 'bronze-2026-08-27-r52';
+    const lineagePackageReceipt = isRecovery ? previousPackageReceipt : {
+      ...previousPackageReceipt,
+      release: 'Bronze 26.08.2026.51',
+      releaseId: 'bronze-2026-08-26-r51'
+    };
+    const lineagePackageVersion = isRecovery ? previousPackageHistoryBundleReceipt.packageVersion : '26.8.2026-51';
+    const lineageHistoryBundle = {
+      ...previousPackageHistoryBundleReceipt,
+      release: lineagePackageReceipt.release,
+      releaseId: lineagePackageReceipt.releaseId,
+      version: lineagePackageReceipt.release.replace(/^Bronze /u, ''),
+      packageVersion: lineagePackageVersion
+    };
+    const lineageVersion = lineagePackageReceipt.release.replace(/^Bronze /u, '');
+    const recoveryBootstrap = {
+      decision: 'RECOVERY_BOOTSTRAP_AFTER_REJECTED_50', parentStatus: 'REJECTED_INVALID_PACKAGE',
+      currentRelease: 'Bronze 26.08.2026.51', currentReleaseId: 'bronze-2026-08-26-r51',
+      parentRelease: 'Bronze 22.08.2026.50', parentReleaseId: 'bronze-2026-08-22-r50',
+      currentSequence: 51, parentSequence: 50,
+      releaseLedger: { path: 'config/release-ledger.json', sizeBytes: 1000, sha256: sha('a') }
+    };
     input.release = nextRelease;
     input.applicationVersion = nextApplicationVersion;
     input.packageVersion = nextPackageVersion;
@@ -914,53 +937,62 @@ const baseInput = (mode: 'bootstrap' | 'continuation' = 'bootstrap'): any => {
       runtime.productVersion = nextPackageVersion;
     }
     Object.assign(input.packageProvenance, {
-      releaseId: nextReleaseId, release: nextRelease, parentRelease: previousPackageReceipt.release,
+      releaseId: nextReleaseId, release: nextRelease, parentRelease: lineagePackageReceipt.release,
       previousPackageProvenance: {
-        path: resolve(checkoutRoot, 'artifacts', 'validation', 'release-history', 'bronze-22.08.2026.50-windows-package-provenance-bundle', 'bundle.json'),
-        release: previousPackageReceipt.release, releaseId: previousPackageReceipt.releaseId,
+        path: resolve(checkoutRoot, 'artifacts', 'validation', 'release-history', `bronze-${lineageVersion}-windows-package-provenance-bundle`, 'bundle.json'),
+        release: lineagePackageReceipt.release, releaseId: lineagePackageReceipt.releaseId,
         sourceCommit: previousSourceProvenance.headCommit, sha256: sha('4'), sizeBytes: 1000,
-        packagedRuntime: previousPackageReceipt.artifacts.packagedRuntime
+        packagedRuntime: lineagePackageReceipt.artifacts.packagedRuntime,
+        ...(isRecovery ? {
+          lineageRole: 'REJECTED_PARENT_HISTORY_ANCHOR_ONLY', trustedInstalledPredecessor: false, recoveryBootstrap
+        } : {})
       }
     });
     input.installerExperience.release = nextRelease;
     input.installerExperience.releaseId = nextReleaseId;
-    const continuation = {
-      status: 'PASS', classification: 'VERSION_UPGRADE_N_TO_N_PLUS_1',
+    const primary = {
+      status: 'PASS', classification: isRecovery ? 'RECOVERY_BOOTSTRAP_FRESH_INSTALL_SEQUENCE_51' : 'VERSION_UPGRADE_N_TO_N_PLUS_1',
       installedEqualsPackaged: true, markerPreserved: true,
       allUserDataContentEqualityPreserved: true, otherChannelAndLegacyProgramMetadataPreserved: true,
       otherChannelWriteCount: 0, dataSelectionDialogObserved: false,
       bronzeRegistry: { exactSingleEntry: true },
-      fromFileVersion: '22.8.2026-50', toFileVersion: nextPackageVersion,
-      fromSequence: 50, toSequence: 51, exactSuccessor: true, governedBootstrap: false,
-      targetInstallRootAbsentBefore: false, targetExecutableAbsentBefore: false,
-      bronzeUninstallRegistryAbsentBefore: false, packagePreviousProvenanceAbsent: false
+      fromFileVersion: isRecovery ? null : lineagePackageVersion,
+      toFileVersion: nextPackageVersion,
+      fromSequence: isRecovery ? null : 51, toSequence: isRecovery ? 51 : 52,
+      exactSuccessor: !isRecovery, governedBootstrap: false, recoveryBootstrap: isRecovery,
+      targetInstallRootAbsentBefore: isRecovery, targetExecutableAbsentBefore: isRecovery,
+      bronzeUninstallRegistryAbsentBefore: isRecovery, packagePreviousProvenanceAbsent: false,
+      ...(isRecovery ? { before: { program: { bronze: { exists: false } }, uninstallRegistry: { bronze: { entryCount: 0 } } } } : {})
     };
     Object.assign(input.installationPreservation, {
       release: nextRelease, expectedReleaseId: nextReleaseId,
-      installationMode: 'CONTINUATION_N_TO_N_PLUS_ONE',
-      installedBefore: {
+      installationMode: isRecovery ? 'RECOVERY_BOOTSTRAP_FRESH_INSTALL' : 'CONTINUATION_N_TO_N_PLUS_ONE',
+      installedBefore: isRecovery ? null : {
         path: installedPath, sizeBytes: previousPackageReceipt.artifacts.packagedRuntime.sizeBytes,
-        sha256: previousPackageReceipt.artifacts.packagedRuntime.sha256,
-        fileVersion: previousPackageReceipt.artifacts.packagedRuntime.fileVersion
+        sha256: lineagePackageReceipt.artifacts.packagedRuntime.sha256,
+        fileVersion: lineagePackageVersion
       },
       previousPackageProvenance: {
         path: input.packageProvenance.previousPackageProvenance.path, sizeBytes: 1000, sha256: sha('4')
       },
-      primaryInstallation: continuation, freshInstall: null, upgrade: { ...continuation }
+      recoveryBootstrapAuthority: isRecovery ? structuredClone(recoveryBootstrap) : null,
+      primaryInstallation: primary,
+      freshInstall: isRecovery ? { ...primary } : null,
+      upgrade: isRecovery ? null : { ...primary }
     });
     input.installationPreservation.maintenance.beforeFileVersion = nextPackageVersion;
     input.installationPreservation.maintenance.afterFileVersion = nextPackageVersion;
-    input.installationPreservation.maintenance.precedingPhase = 'VERSION_UPGRADE_N_TO_N_PLUS_1';
+    input.installationPreservation.maintenance.precedingPhase = primary.classification;
     input.packagedProbe.applicationVersion = nextApplicationVersion;
     for (const run of input.packagedProbe.runs) run.applicationVersion = nextApplicationVersion;
     input.installedUi.release = nextRelease;
     input.installedUi.releaseId = nextReleaseId;
     input.installedUi.installedFileVersion = nextPackageVersion;
     input.installedUi.executableIdentity.fileVersion = nextPackageVersion;
-    input.previousPackageHistoryBundle = { value: previousPackageHistoryBundleReceipt, sizeBytes: 1000, sha256: sha('4') };
-    input.previousPackageArchive = { value: previousPackageReceipt, ...previousPackageArchiveBinding };
+    input.previousPackageHistoryBundle = { value: lineageHistoryBundle, sizeBytes: 1000, sha256: sha('4') };
+    input.previousPackageArchive = { value: lineagePackageReceipt, ...previousPackageArchiveBinding };
     input.historicalPreviousSourceProvenance = previousSourceProvenance;
-    input.previousPackageProducerReadback = { ...previousPackageReceipt.producer };
+    input.previousPackageProducerReadback = { ...lineagePackageReceipt.producer };
   }
   return input;
 };
@@ -1034,15 +1066,27 @@ describe('Bronze final local-test delivery receipt contract', () => {
     });
   });
 
-  it('accepts a different-day exact sequence-50 to sequence-51 continuation with immutable predecessor evidence', () => {
-    const receipt = createFinalLocalTestDeliveryReceipt(baseInput('continuation'));
+  it('accepts exact sequence-51 recovery fresh-install while preserving rejected sequence-50 only as immutable ancestry', () => {
+    const receipt = createFinalLocalTestDeliveryReceipt(baseInput('recovery'));
     expect(receipt).toMatchObject({
-      release: 'Bronze 24.08.2026.51',
-      applicationVersion: '24.08.2026.51',
+      release: 'Bronze 26.08.2026.51',
+      applicationVersion: '26.08.2026.51',
       windowsInstalledReleaseUat: {
         id: 'PPT-WINDOWS-INSTALLED-RELEASE-UAT110-V3',
+        installationMode: 'RECOVERY_BOOTSTRAP_FRESH_INSTALL',
+        freshInstall: 'PASS', upgrade: 'NOT_APPLICABLE', recoveryBootstrap: 'PASS', sameVersionMaintenance: 'PASS'
+      }
+    });
+  });
+
+  it('keeps sequence 52 and later on the normal exact N to N plus one continuation path', () => {
+    const receipt = createFinalLocalTestDeliveryReceipt(baseInput('continuation'));
+    expect(receipt).toMatchObject({
+      release: 'Bronze 27.08.2026.52',
+      applicationVersion: '27.08.2026.52',
+      windowsInstalledReleaseUat: {
         installationMode: 'CONTINUATION_N_TO_N_PLUS_ONE',
-        freshInstall: 'NOT_APPLICABLE', upgrade: 'PASS', sameVersionMaintenance: 'PASS'
+        freshInstall: 'NOT_APPLICABLE', upgrade: 'PASS', recoveryBootstrap: 'NOT_APPLICABLE'
       }
     });
   });
@@ -1111,6 +1155,15 @@ describe('Bronze final local-test delivery receipt contract', () => {
     const bootstrapAsUpgrade = baseInput();
     bootstrapAsUpgrade.installationPreservation.installationMode = 'CONTINUATION_N_TO_N_PLUS_ONE';
     expect(() => createFinalLocalTestDeliveryReceipt(bootstrapAsUpgrade)).toThrow(/mode/u);
+
+    const bootstrapWithRecoveryClaim = baseInput();
+    bootstrapWithRecoveryClaim.installationPreservation.primaryInstallation.recoveryBootstrap = true;
+    bootstrapWithRecoveryClaim.installationPreservation.freshInstall.recoveryBootstrap = true;
+    expect(() => createFinalLocalTestDeliveryReceipt(bootstrapWithRecoveryClaim)).toThrow(/exclusive fresh-install|absence proof/u);
+
+    const bootstrapWithRecoveryAuthority = baseInput();
+    bootstrapWithRecoveryAuthority.installationPreservation.recoveryBootstrapAuthority = { decision: 'FORGED_RECOVERY' };
+    expect(() => createFinalLocalTestDeliveryReceipt(bootstrapWithRecoveryAuthority)).toThrow(/exclusive fresh-install/u);
   });
 
   it('rejects continuation predecessor runtime or bundle binding drift', () => {
@@ -1125,6 +1178,25 @@ describe('Bronze final local-test delivery receipt contract', () => {
     const continuationAsFresh = baseInput('continuation');
     continuationAsFresh.installationPreservation.installationMode = 'BOOTSTRAP_FRESH_INSTALL';
     expect(() => createFinalLocalTestDeliveryReceipt(continuationAsFresh)).toThrow(/mode/u);
+
+    const continuationWithRecoveryClaim = baseInput('continuation');
+    continuationWithRecoveryClaim.installationPreservation.primaryInstallation.recoveryBootstrap = true;
+    continuationWithRecoveryClaim.installationPreservation.upgrade.recoveryBootstrap = true;
+    expect(() => createFinalLocalTestDeliveryReceipt(continuationWithRecoveryClaim)).toThrow(/exclusive continuation/u);
+
+    const continuationWithRecoveryAuthority = baseInput('continuation');
+    continuationWithRecoveryAuthority.installationPreservation.recoveryBootstrapAuthority = { decision: 'FORGED_RECOVERY' };
+    expect(() => createFinalLocalTestDeliveryReceipt(continuationWithRecoveryAuthority)).toThrow(/exclusive continuation/u);
+  });
+
+  it('rejects recovery bootstrap when sequence-50 is trusted as installed runtime or ledger authority drifts', () => {
+    const trustedParent = baseInput('recovery');
+    trustedParent.packageProvenance.previousPackageProvenance.trustedInstalledPredecessor = true;
+    expect(() => createFinalLocalTestDeliveryReceipt(trustedParent)).toThrow(/authorized rejected-50 recovery/u);
+
+    const ledgerDrift = baseInput('recovery');
+    ledgerDrift.installationPreservation.recoveryBootstrapAuthority.parentStatus = 'IN_PROGRESS';
+    expect(() => createFinalLocalTestDeliveryReceipt(ledgerDrift)).toThrow(/authorized rejected-50 recovery|ledger authority/u);
   });
 
   it('revalidates the raw installed UI interaction and state matrices instead of trusting summary counts', () => {

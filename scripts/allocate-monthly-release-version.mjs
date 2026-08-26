@@ -157,7 +157,10 @@ if (previewOnly) {
     );
     planned.set(installerPath, installer);
 
-    ledger.current = { ...release, parentSourceSha256: ledger.current?.parentSourceSha256 ?? null };
+    // The exact predecessor source is bound later by immutable package provenance.
+    // Carrying an older release's legacy digest into a newly allocated release would
+    // present stale ancestry as if it described the current parent.
+    ledger.current = { ...release, parentSourceSha256: null };
     ledger.entries.push({
       channel: release.channel,
       date: release.date,
@@ -301,6 +304,11 @@ if (previewOnly) {
           'canonical rule identity'
         ]
       ]],
+      ['docs/current/12_KALAN_IS_SINIFLANDIRMA.md', [[
+        /^- Aktif sürüm: .*$/mu,
+        `- Aktif sürüm: **${release.visibleRelease}**`,
+        'active release'
+      ]]],
       ['docs/current/13_KURUMSALLASMA_VE_GLOBAL_MARKA_PLANI.md', [[/^- Görünür sürüm: .*$/mu, `- Görünür sürüm: **${release.visibleRelease}**`, 'visible release']]],
       ['docs/current/15_EK_KURAL_TOPLU_BIRLESTIRME_SICILI.md', [[/^- Görünür sürüm: .*$/mu, `- Görünür sürüm: **${release.visibleRelease}**`, 'visible release']]],
       ['docs/ticari-urun-temeli/00_OKU_BENI.md', [
@@ -313,6 +321,11 @@ if (previewOnly) {
           /Kanonik V\d+, \d+ kural ve SHA-256 `[a-f0-9]{64}`/u,
           `Kanonik V${String(canonicalRegistry.id).match(/V(\d+)$/u)?.[1]}, ${canonicalRegistry.ruleCount} kural ve SHA-256 \`${canonicalRegistry.rulesSha256}\``,
           'canonical rule identity'
+        ],
+        [
+          /^- Kaynak urun surumu: .*$/mu,
+          `- Kaynak urun surumu: ${release.visibleRelease}`,
+          'source product release'
         ]
       ]]
     ]);

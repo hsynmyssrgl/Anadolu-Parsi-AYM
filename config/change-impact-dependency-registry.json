@@ -116,7 +116,7 @@
     {
       "id": "windows-package-installer-and-uat",
       "match": {
-        "exactPaths": [],
+        "exactPaths": ["scripts/lib/monthly-release-version.mjs", "scripts/allocate-monthly-release-version.mjs"],
         "pathPrefixes": ["apps/desktop/build/", "apps/desktop/scripts/", "scripts/lib/windows-", "scripts/run-installed-", "scripts/run-windows-", "scripts/create-bronze-final-"],
         "pathSuffixes": []
       },
@@ -128,7 +128,8 @@
         "apps/desktop/tests/installed-ui-native-file-dialog-harness.test.ts",
         "apps/desktop/tests/windows-installed-release-uat-contract.test.ts",
         "apps/desktop/tests/windows-installer-experience-uat-contract.test.ts",
-        "apps/desktop/tests/windows-package-provenance-history.test.ts"
+        "apps/desktop/tests/windows-package-provenance-history.test.ts",
+        "apps/desktop/tests/monthly-release-version.test.ts"
       ],
       "includeChangedTestFile": false
     },

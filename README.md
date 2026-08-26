@@ -1,10 +1,10 @@
 # ParsYuva Aile Yaşam Merkezi
 
 - Product: ParsYuva Aile Yaşam Merkezi
-- Application Version: `22.08.2026.50`
-- Package Version: `22.8.2026-50`
+- Application Version: `26.08.2026.51`
+- Package Version: `26.8.2026-51`
 - Stage: **Bronze Active Development**
-- Monthly Sequence: **50**
+- Monthly Sequence: **51**
 
 ## Current source delivery
 

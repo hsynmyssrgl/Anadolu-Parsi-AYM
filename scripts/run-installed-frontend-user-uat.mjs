@@ -213,8 +213,11 @@ export const validateProvenanceReceipts = ({
   check(Number.isSafeInteger(currentSequence) && currentSequence >= 50,
     'Paket sürüm sırası governed predecessor sınırının altındadır.');
   const isGovernedBootstrap = currentSequence === 50;
-  const expectedMode = isGovernedBootstrap ? 'BOOTSTRAP_FRESH_INSTALL' : 'CONTINUATION_N_TO_N_PLUS_ONE';
-  const expectedPrimaryClassification = isGovernedBootstrap ? 'BOOTSTRAP_FRESH_INSTALL_SEQUENCE_50' : 'VERSION_UPGRADE_N_TO_N_PLUS_1';
+  const isRecoveryBootstrap = currentSequence === 51;
+  const expectedMode = isGovernedBootstrap ? 'BOOTSTRAP_FRESH_INSTALL'
+    : isRecoveryBootstrap ? 'RECOVERY_BOOTSTRAP_FRESH_INSTALL' : 'CONTINUATION_N_TO_N_PLUS_ONE';
+  const expectedPrimaryClassification = isGovernedBootstrap ? 'BOOTSTRAP_FRESH_INSTALL_SEQUENCE_50'
+    : isRecoveryBootstrap ? 'RECOVERY_BOOTSTRAP_FRESH_INSTALL_SEQUENCE_51' : 'VERSION_UPGRADE_N_TO_N_PLUS_1';
   check(installationPreservation.installationMode === expectedMode,
     'Kurulum koruma modu paket provenance sürümünden türetilen modla eşleşmiyor.');
   for (const [label, phase, classification] of [
@@ -242,26 +245,68 @@ export const validateProvenanceReceipts = ({
       'Bronze 50 paketi governed bootstrap/null previous provenance taşımıyor.');
     check(installationPreservation.previousPackageProvenance === null
       && installationPreservation.installedBefore === null
+      && installationPreservation.recoveryBootstrapAuthority === null
       && installationPreservation.upgrade === null
       && installationPreservation.freshInstall?.classification === expectedPrimaryClassification
       && JSON.stringify(installationPreservation.freshInstall) === JSON.stringify(installationPreservation.primaryInstallation),
-    'Bronze 50 makbuzu yalnız fresh-install union dalını taşımıyor.');
+    'Bronze 50 makbuzu yalnız recovery-authority-null fresh-install union dalını taşımıyor.');
     check(installationPreservation.primaryInstallation?.fromFileVersion === null
       && installationPreservation.primaryInstallation?.fromSequence === null
       && installationPreservation.primaryInstallation?.exactSuccessor === false
       && installationPreservation.primaryInstallation?.governedBootstrap === true
+      && installationPreservation.primaryInstallation?.recoveryBootstrap === false
       && installationPreservation.primaryInstallation?.targetInstallRootAbsentBefore === true
       && installationPreservation.primaryInstallation?.targetExecutableAbsentBefore === true
       && installationPreservation.primaryInstallation?.bronzeUninstallRegistryAbsentBefore === true
       && installationPreservation.primaryInstallation?.packagePreviousProvenanceAbsent === true
       && installationPreservation.primaryInstallation?.before?.program?.bronze?.exists === false
       && Number(installationPreservation.primaryInstallation?.before?.uninstallRegistry?.bronze?.entryCount) === 0,
-    'Bronze 50 fresh-install yokluk/bootstrap kanıtları eksiktir.');
+    'Bronze 50 fresh-install yokluk/bootstrap/recovery-false kanıtları eksiktir.');
+  } else if (isRecoveryBootstrap) {
+    const recovery = packageProvenance.previousPackageProvenance?.recoveryBootstrap;
+    check(packageProvenance.release === 'Bronze 26.08.2026.51'
+      && packageProvenance.releaseId === 'bronze-2026-08-26-r51'
+      && packageProvenance.parentRelease === 'Bronze 22.08.2026.50'
+      && packageProvenance.previousPackageProvenance?.release === 'Bronze 22.08.2026.50'
+      && packageProvenance.previousPackageProvenance?.releaseId === 'bronze-2026-08-22-r50'
+      && packageProvenance.previousPackageProvenance?.lineageRole === 'REJECTED_PARENT_HISTORY_ANCHOR_ONLY'
+      && packageProvenance.previousPackageProvenance?.trustedInstalledPredecessor === false
+      && recovery?.decision === 'RECOVERY_BOOTSTRAP_AFTER_REJECTED_50'
+      && recovery?.parentStatus === 'REJECTED_INVALID_PACKAGE'
+      && recovery?.currentSequence === 51 && recovery?.parentSequence === 50
+      && recovery?.releaseLedger?.path === 'config/release-ledger.json'
+      && Number(recovery?.releaseLedger?.sizeBytes) > 0
+      && sha256Pattern.test(String(recovery?.releaseLedger?.sha256 ?? '').toLowerCase()),
+    'Bronze 51 paketi exact rejected-50 recovery/history-anchor-only authority bağı taşımıyor.');
+    check(installationPreservation.installedBefore === null
+      && installationPreservation.upgrade === null
+      && installationPreservation.freshInstall?.classification === expectedPrimaryClassification
+      && JSON.stringify(installationPreservation.freshInstall) === JSON.stringify(installationPreservation.primaryInstallation),
+    'Bronze 51 recovery makbuzu yalnız fresh-install union dalını taşımıyor.');
+    check(installationPreservation.previousPackageProvenance?.path === packageProvenance.previousPackageProvenance?.path
+      && Number(installationPreservation.previousPackageProvenance?.sizeBytes) === Number(packageProvenance.previousPackageProvenance?.sizeBytes)
+      && lowerSha(installationPreservation.previousPackageProvenance?.sha256, 'UAT110 recovery parent bundle') === lowerSha(packageProvenance.previousPackageProvenance?.sha256, 'Current recovery parent bundle')
+      && JSON.stringify(installationPreservation.recoveryBootstrapAuthority) === JSON.stringify(recovery),
+    'Bronze 51 recovery makbuzu immutable sequence-50 history bundle/ledger authority bağı taşımıyor.');
+    check(installationPreservation.primaryInstallation?.fromFileVersion === null
+      && installationPreservation.primaryInstallation?.fromSequence === null
+      && installationPreservation.primaryInstallation?.exactSuccessor === false
+      && installationPreservation.primaryInstallation?.governedBootstrap === false
+      && installationPreservation.primaryInstallation?.recoveryBootstrap === true
+      && installationPreservation.primaryInstallation?.targetInstallRootAbsentBefore === true
+      && installationPreservation.primaryInstallation?.targetExecutableAbsentBefore === true
+      && installationPreservation.primaryInstallation?.bronzeUninstallRegistryAbsentBefore === true
+      && installationPreservation.primaryInstallation?.packagePreviousProvenanceAbsent === false
+      && installationPreservation.primaryInstallation?.before?.program?.bronze?.exists === false
+      && Number(installationPreservation.primaryInstallation?.before?.uninstallRegistry?.bronze?.entryCount) === 0,
+    'Bronze 51 recovery fresh-install yokluk/bootstrap kanıtları eksiktir.');
   } else {
     check(installationPreservation.freshInstall === null
+      && installationPreservation.recoveryBootstrapAuthority === null
+      && installationPreservation.primaryInstallation?.recoveryBootstrap === false
       && installationPreservation.upgrade?.classification === expectedPrimaryClassification
       && JSON.stringify(installationPreservation.upgrade) === JSON.stringify(installationPreservation.primaryInstallation),
-    'Bronze 51+ makbuzu yalnız exact N→N+1 union dalını taşımıyor.');
+    'Bronze 52+ makbuzu yalnız recovery-authority-null exact N→N+1 union dalını taşımıyor.');
     const from = version(installationPreservation.upgrade?.fromFileVersion, 'Upgrade from');
     const fromDate = Date.UTC(from[2], from[1] - 1, from[0]);
     const toDate = Date.UTC(to[2], to[1] - 1, to[0]);
@@ -271,6 +316,7 @@ export const validateProvenanceReceipts = ({
       && installationPreservation.upgrade?.toSequence === to[3]
       && installationPreservation.upgrade?.exactSuccessor === true
       && installationPreservation.upgrade?.governedBootstrap === false
+      && installationPreservation.upgrade?.recoveryBootstrap === false
       && packageProvenance.parentRelease === expectedParentRelease,
     'Upgrade fazı exact aynı-seri N→N+1 değildir.');
     check(packageProvenance.previousPackageProvenance?.release === expectedParentRelease

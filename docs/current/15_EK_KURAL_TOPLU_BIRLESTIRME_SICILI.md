@@ -1,7 +1,7 @@
 # Ek Kural Toplu Birleştirme Sicili
 
 - Tarih: **20.08.2026**
-- Görünür sürüm: **Bronze 22.08.2026.50**
+- Görünür sürüm: **Bronze 26.08.2026.51**
 - Karar: `DEC-260`
 - Kaynak tampon: `C:\PPT\AYM\01_YONETIM\01_GUNCEL_KURAL_KAYITLARI\01_18.08.2026_YENI_KURAL_KAYDI.md`
 - Durum: **ANA SİCİLLERE BİRLEŞTİRİLDİ**

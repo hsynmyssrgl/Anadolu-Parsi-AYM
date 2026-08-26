@@ -11,7 +11,8 @@ describe('current master documentation V5 governance', () => {
     const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
 
     expect(active.currentMasterDocumentation).toMatchObject({
-      version: 'GUNCEL-2026-08-24-V5',
+      version: 'GUNCEL-2026-08-26-V5',
+      asOf: '2026-08-26',
       status: 'ACTIVE_CURRENT_MASTER_REFERENCE',
       historicalBuildArtifactsImmutable: true
     });
@@ -19,6 +20,8 @@ describe('current master documentation V5 governance', () => {
     expect(audit).toContain('SELF_GENERATED_OUTPUTS.add');
     expect(verifier).toContain('PDF page {page_number} does not contain one exact page marker');
     expect(verifier).toContain('DOCX missing {label} identifier');
+    expect(verifier).toContain('EXPECTED_VERSION in docx_text');
+    expect(verifier).toContain('EXPECTED_VERSION in pdf_text');
     expect(pythonRuntime).toContain('PPT_PYTHON_EXECUTABLE');
     expect(pythonRuntime).toContain('codex-primary-runtime/dependencies/python/python.exe');
     expect(preflight).toContain("['scripts/verify-current-master-documentation-v5.mjs']");

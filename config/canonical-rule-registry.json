@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "id": "PPT-CANONICAL-RULE-REGISTRY-V28",
+  "id": "PPT-CANONICAL-RULE-REGISTRY-V29",
   "product": "ParsYuva Aile Yaşam Merkezi",
   "upperBrand": "ParsYuva",
-  "effectiveRelease": "Bronze 22.08.2026.50",
+  "effectiveRelease": "Bronze 26.08.2026.51",
   "exceptionless": true,
   "previousRuleSet": {
     "version": "PROJECT-RULES-2026-08-02-V6",
     "sha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
   },
-  "ruleCount": 240,
-  "activeRuleCount": 215,
+  "ruleCount": 241,
+  "activeRuleCount": 216,
   "supersededRuleCount": 25,
   "rules": [
     {
@@ -1717,7 +1717,14 @@
       "state": "ACTIVE",
       "source": "USER_DECISION_DEC-275",
       "effectiveRelease": "Bronze 22.08.2026.50"
+    },
+    {
+      "id": "PR-241",
+      "text": "Bronze 26.08.2026.51, gecersiz ve degismez Bronze 22.08.2026.50 paketinden sonraki tek recovery bootstrap surumudur. Bu yol yalniz release ledger icinde parent Bronze 50 kaydi REJECTED_INVALID_PACKAGE, current Bronze 51 top-level kaydi ile exact tek release entry statusu birbirine esit ve IN_PROGRESS, recoveryBootstrapDecision RECOVERY_BOOTSTRAP_AFTER_REJECTED_50 ve parentRelease exact Bronze 22.08.2026.50 oldugunda acilir. Bronze 50 immutable package history ve dis append-only zinciri silinmez, ezilmez veya trusted installed runtime sayilmaz; immutable transaction yayimindan hemen once parent bundle kanonik path, size, SHA-256, rejected-parent kimligi ve archived receipt bagi canli geri okunur. Bronze 51 paketi yalniz tarihsel ancestry bagini korur, previous installed runtime girdisini reddeder, kanonik Bronze program koku, EXE ve uninstall kaydinin yoklugunu kanitlayarak RECOVERY_BOOTSTRAP_FRESH_INSTALL_SEQUENCE_51 fazini ve ardindan ayri same-version maintenance veri korumasini calistirir. Sequence 50 bootstrap ve sequence 52+ exact N-to-N+1 continuation kurallari degismez. Bu tek seferlik recovery modu waiver degildir; exact commit, hedefli ve tam regresyon, kaynak butunlugu, preflight, installer experience, UAT110, UAT111 ve final teslim kanitlarinin tumunu zorunlu tutar.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-276",
+      "effectiveRelease": "Bronze 26.08.2026.51"
     }
   ],
-  "rulesSha256": "f43126d7c874689e09e58f82e0fcc8771692649de5353e79191d82222af99285"
+  "rulesSha256": "cbd4476d480d81064291347293ba8140d8269bca2cac82d2358a87891f8c14c4"
 }

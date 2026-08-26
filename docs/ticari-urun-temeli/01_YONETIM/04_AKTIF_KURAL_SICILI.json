@@ -4,11 +4,11 @@
   "durum": "ACTIVE",
   "istisnaIzinli": false,
   "anaKuralKaynagi": "../06_KOD/app/config/canonical-rule-registry.json",
-  "anaKuralSiciliId": "PPT-CANONICAL-RULE-REGISTRY-V28",
-  "anaKuralSayisi": 240,
-  "aktifKuralSayisi": 215,
+  "anaKuralSiciliId": "PPT-CANONICAL-RULE-REGISTRY-V29",
+  "anaKuralSayisi": 241,
+  "aktifKuralSayisi": 216,
   "degistirilmisKuralSayisi": 25,
-  "anaKuralSha256": "f43126d7c874689e09e58f82e0fcc8771692649de5353e79191d82222af99285",
+  "anaKuralSha256": "cbd4476d480d81064291347293ba8140d8269bca2cac82d2358a87891f8c14c4",
   "yurutmeKapisi": "../06_KOD/app/scripts/run-governed-preflight.mjs",
   "temelAlanDogrulamaKapisi": "11_OTOMASYON/dogrula-ticari-temel-alani.mjs",
   "kurallar": [
@@ -159,7 +159,7 @@
     {
       "id": "TK-017",
       "baslik": "Adversarial Windows teslim kanit zinciri",
-      "metin": "Schema2 exact-commit package provenance ile Windows kurulum modu paket sirasindan turetilir: Bronze 50 previous paket/runtime kabul etmeyen bootstrap fresh-install ve maintenance; Bronze 51+ immutable previous package archive ile canli sibling N exact eslesen N to N+1 ve maintenance uygular. Installer-experience V2, UAT110 V3, parent-run bagli UAT111 V3 ve final V3; Git'te izlenen TypeScript kaynagindan exact 4 modul 22 rota, gorunur uygun butun kontroller, gercek owned native CANCEL ve ACCEPT, exclusive reparse-korumali evidence root, guard kaybinda sifir path tabanli cleanup ve source producer path hash chronology screenshot secret readback kapilarini PASS kanitlamalidir.",
+      "metin": "Schema2 exact-commit package provenance ile Windows kurulum modu paket sirasindan turetilir: Bronze 50 previous paket/runtime kabul etmeyen bootstrap fresh-install ve maintenance; normal Bronze 52+ immutable previous package archive ile canli sibling N exact eslesen N to N+1 ve maintenance uygular. Exact Bronze 51 modu TK-019 ile rejected-parent history-only recovery olarak ayrilir. Installer-experience V2, UAT110 V3, parent-run bagli UAT111 V3 ve final V3; Git'te izlenen TypeScript kaynagindan exact 4 modul 22 rota, gorunur uygun butun kontroller, gercek owned native CANCEL ve ACCEPT, exclusive reparse-korumali evidence root, guard kaybinda sifir path tabanli cleanup ve source producer path hash chronology screenshot secret readback kapilarini PASS kanitlamalidir.",
       "durum": "ACTIVE",
       "kaynak": "PR-239 ve DEC-274",
       "yurutme": "FAIL_CLOSED",
@@ -171,6 +171,15 @@
       "metin": "Her mutasyon butun bagimli kaynak sicil belge is manifest indeks ana DOCX PDF ve kanit kayitlarini UPDATED veya kanitli NOT_AFFECTED olarak kapatir; hedefli ve tam test ile UI etkisinde butun etkilesim ve gorsel UAT zorunludur. Gercek hata wip(rejected) checkpoint olur ve kapanistan once ara installer uretilmez.",
       "durum": "ACTIVE",
       "kaynak": "PR-240 ve DEC-275",
+      "yurutme": "FAIL_CLOSED",
+      "kanitZorunlu": true
+    },
+    {
+      "id": "TK-019",
+      "baslik": "Bronze 51 rejected predecessor recovery bootstrap",
+      "metin": "Bronze 50 immutable REJECTED_INVALID_PACKAGE paket ve external history olarak korunur, trusted installed runtime sayilmaz. Yalniz Bronze 51 current ve exact tek entry statusu birbirine esit IN_PROGRESS oldugunda acilir; immutable parent bundle transaction oncesi kanonik path size SHA-256 rejected-parent identity ve archived receipt bagi canli okunur. Rejected parent package provenance bundle REJECTED_PARENT_HISTORY_ANCHOR_ONLY olarak kullanilir; installed predecessor girdisi reddedilir, temiz program koku EXE ve uninstall yoklugu kanitlanir, recovery fresh-install ve ayri same-version maintenance calistirilir. Sequence 52 ve sonrasi normal exact continuation uygular; tum test ve UAT kapilari zorunludur.",
+      "durum": "ACTIVE",
+      "kaynak": "PR-241 ve DEC-276",
       "yurutme": "FAIL_CLOSED",
       "kanitZorunlu": true
     }

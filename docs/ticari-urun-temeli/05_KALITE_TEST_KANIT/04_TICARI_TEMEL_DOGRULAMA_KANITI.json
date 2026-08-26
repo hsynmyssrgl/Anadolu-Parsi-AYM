@@ -4,28 +4,31 @@
   "product": "ParsYuva Aile Yaşam Merkezi",
   "baselineDate": "2026-08-24",
   "documentSetVersion": "1.8.0-belge.20260824.1",
-  "canonicalRuleRegistry": "PPT-CANONICAL-RULE-REGISTRY-V28",
-  "canonicalRuleCount": 240,
-  "canonicalRuleSha256": "f43126d7c874689e09e58f82e0fcc8771692649de5353e79191d82222af99285",
+  "canonicalRuleRegistry": "PPT-CANONICAL-RULE-REGISTRY-V29",
+  "canonicalRuleCount": 241,
+  "canonicalRuleSha256": "cbd4476d480d81064291347293ba8140d8269bca2cac82d2358a87891f8c14c4",
   "decision": "DEC-259",
+  "commercialChange": "TICARI-042",
   "decisions": [
     "DEC-259",
     "DEC-270",
     "DEC-274",
-    "DEC-275"
+    "DEC-275",
+    "DEC-276"
   ],
   "requirements": [
     "PR-235",
     "PR-239",
-    "PR-240"
+    "PR-240",
+    "PR-241"
   ],
   "mutationWideRecordAndTestClosureVerified": true,
-  "mutationDependencyRegistrySha256": "a56325beaba64e7de2930f3a3f8ab1b75544f8dfc30aae347d1c5c27118abf40",
-  "workItemCount": 60,
+  "mutationDependencyRegistrySha256": "128753cb118c386af52ca088c8d03abd2dfc5c5b775095c95d2482119b08a2ed",
+  "workItemCount": 61,
   "fileCount": 87,
   "sourceFileCount": 86,
-  "sourceFingerprintSha256": "540bb5eaefaad16b666cde233b147dcbe05ad2c5707f68b8e654b23fe38e5431",
-  "checks": 1234,
+  "sourceFingerprintSha256": "56a5177649e77be26176edcdd3448919bd9eb3d3d8d08953dd2d494e1699b5b6",
+  "checks": 1254,
   "status": "PASS",
   "commercialReleaseEligible": false,
   "externalEvidenceDefaultsToNotRun": true,
@@ -33,18 +36,18 @@
   "fileInventory": [
     {
       "path": "00_OKU_BENI.md",
-      "bytes": 8189,
-      "sha256": "e817c834d9e64dd6e61d2083cc1fe450117983767c41bc41e3b7fbfcd90d0510"
+      "bytes": 8739,
+      "sha256": "2b6cb15e07607d8f57c6826a823470e3c88ea4f602d4281bc83cc8dbbdb9e3f2"
     },
     {
       "path": "00_TEMEL_SURUM_MANIFESTOSU.json",
       "bytes": 1196,
-      "sha256": "196194412b95dace5253b8e27b226cd00a6de74a64e985f114e25a19d31fa0fd"
+      "sha256": "5fec9033b8e41d6bb53bcf4d187ba2aee14cde29e1d9108c002309d7e700bdb9"
     },
     {
       "path": "01_YONETIM/01_ASILAMAZ_KURALLAR.md",
-      "bytes": 7822,
-      "sha256": "4ee34ed4a5a8432b80d0e7cb33b639f3c9099b16569b5596822c92cc4350114b"
+      "bytes": 8536,
+      "sha256": "1a9fd178388b3e5af6a82be13c6d9c5fd3851adada0eaeb03755ff5bd922fc11"
     },
     {
       "path": "01_YONETIM/02_KARAR_VE_DEGISIKLIK_YONETIMI.md",
@@ -58,13 +61,13 @@
     },
     {
       "path": "01_YONETIM/04_AKTIF_KURAL_SICILI.json",
-      "bytes": 8886,
-      "sha256": "52cbc70696b1d9b983cca2d0ba0992c6b68525f8c221766b514d359a2138ece9"
+      "bytes": 9935,
+      "sha256": "4f7b074d7b6e6396b681df856d71dd5cfcf9e1645aa68c65630f7fc51a32aa0f"
     },
     {
       "path": "01_YONETIM/05_DEGISIKLIK_SICILI.json",
-      "bytes": 46924,
-      "sha256": "cf9dfad7ac738a9130b63d3e3708357a91cf57f51512a0b38478f955826e8e9a"
+      "bytes": 48608,
+      "sha256": "e8adf2d576b44db8f457fe4b16cc0b9369416347e5c5c786e418c22d87089bc5"
     },
     {
       "path": "01_YONETIM/06_RISK_SICILI.md",
@@ -103,8 +106,8 @@
     },
     {
       "path": "03_MIMARI/04_PLATFORM_VE_DAGITIM_MIMARISI.md",
-      "bytes": 4800,
-      "sha256": "abf7edce27781c7b906fcbd2cf9b43816f808bf1832717a8e6f82594b3a9f750"
+      "bytes": 5071,
+      "sha256": "38fbaca53bc95c4819c095669d6c2a8856471179e8adc526a21cf29a282e0890"
     },
     {
       "path": "03_MIMARI/05_ORTAM_VE_YAYIN_TOPOLOJISI.md",
@@ -413,8 +416,8 @@
     },
     {
       "path": "08_IS_LISTESI/01_ANA_IS_LISTESI.md",
-      "bytes": 17595,
-      "sha256": "09cabefaa2504fc70c823a04363f5ed59af587898d8ee4612adcd83e2eeed54e"
+      "bytes": 18254,
+      "sha256": "0a8e927040f12e9525f41cb347263b935ce888673163f3cece6cc3866cd8ac36"
     },
     {
       "path": "08_IS_LISTESI/02_DIS_KAYNAK_GEREKTIREN_ISLER.md",
@@ -423,8 +426,8 @@
     },
     {
       "path": "08_IS_LISTESI/03_ANA_IS_SICILI.json",
-      "bytes": 31920,
-      "sha256": "153aa2fa17bc77c0d42a9847dd656b18824324949880be426656deaeb9414c46"
+      "bytes": 34098,
+      "sha256": "e7f0432073de4971d8759f992d3aeee70641e41c8942513da6998a9e917a8a4c"
     },
     {
       "path": "08_IS_LISTESI/04_IS_YURUTME_SIRASI.md",
@@ -458,9 +461,9 @@
     },
     {
       "path": "11_OTOMASYON/dogrula-ticari-temel-alani.mjs",
-      "bytes": 25811,
-      "sha256": "094b240d5bdec88564096e9c0997158e02ae44a00d952dfdac8f2fd25f2b9fe2"
+      "bytes": 27558,
+      "sha256": "cd4dbee8b6d6742c63a61fd59d74b8920e136c5d9be7bf9360c7be722b70509c"
     }
   ],
-  "generatedAt": "2026-08-26T05:31:35.336Z"
+  "generatedAt": "2026-08-26T09:07:40.305Z"
 }

@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
   validateWindowsPackageProvenanceEnvelope,
+  readWindowsPackageRecoveryBootstrapAuthority,
   verifyExternalWindowsPackageProvenanceAnchor,
   verifyPreviousWindowsPackageProvenance,
   windowsPackageHistoryBundleRelativePath,
@@ -19,6 +20,27 @@ const evidenceIds = [
   'baseline', 'baselineExternal', 'fullRegression', 'impactAnalysis',
   'impactAssessment', 'sourceIntegrity', 'targetedTest'
 ] as const;
+const recoveryPreviousPackage = (root: string, first: { bundle: { path: string; sizeBytes: number; sha256: string } }, receipt: any,
+  recoveryBootstrap: any = {
+    decision: 'RECOVERY_BOOTSTRAP_AFTER_REJECTED_50',
+    parentStatus: 'REJECTED_INVALID_PACKAGE',
+    currentRelease: 'Bronze 26.08.2026.51',
+    currentReleaseId: 'bronze-2026-08-26-r51',
+    parentRelease: 'Bronze 22.08.2026.50',
+    parentReleaseId: 'bronze-2026-08-22-r50',
+    currentSequence: 51,
+    parentSequence: 50,
+    releaseLedger: { path: 'config/release-ledger.json', sizeBytes: 100, sha256: 'e'.repeat(64) }
+  }) => ({
+  release: receipt.release,
+  releaseId: receipt.releaseId,
+  path: resolve(root, first.bundle.path),
+  sizeBytes: first.bundle.sizeBytes,
+  sha256: first.bundle.sha256,
+  lineageRole: 'REJECTED_PARENT_HISTORY_ANCHOR_ONLY',
+  trustedInstalledPredecessor: false,
+  recoveryBootstrap
+});
 const simulatedHardKill = (expectedPoint: string) => async (point: string) => {
   if (point !== expectedPoint) return;
   throw Object.assign(new Error(`simulated hard kill: ${point}`), { code: 'PPT_SIMULATED_HARD_KILL' });
@@ -81,7 +103,23 @@ const createFixture = async () => {
     sourceProvenance: provenance,
     pr235EvidenceBindings: bindings
   };
-  return { root, receipt, bindings, externalChainRoot };
+  const recoveryPreallocatedRelease = {
+    visibleRelease: 'Bronze 26.08.2026.51', releaseId: 'bronze-2026-08-26-r51', monthlySequence: 51,
+    parentRelease: 'Bronze 22.08.2026.50', recoveryBootstrapDecision: 'RECOVERY_BOOTSTRAP_AFTER_REJECTED_50'
+  };
+  const ledger = {
+    schemaVersion: 1,
+    current: { ...recoveryPreallocatedRelease, status: 'IN_PROGRESS' },
+    entries: [
+      { version: '22.08.2026.50', monthlySequence: 50, releaseId: 'bronze-2026-08-22-r50', status: 'REJECTED_INVALID_PACKAGE' },
+      { version: '26.08.2026.51', monthlySequence: 51, releaseId: 'bronze-2026-08-26-r51', status: 'IN_PROGRESS',
+        parentRelease: 'Bronze 22.08.2026.50', recoveryBootstrapDecision: 'RECOVERY_BOOTSTRAP_AFTER_REJECTED_50' }
+    ]
+  };
+  await mkdir(resolve(root, 'config'), { recursive: true });
+  await writeFile(resolve(root, 'config/release-ledger.json'), `${JSON.stringify(ledger)}\n`);
+  const recoveryBootstrap = await readWindowsPackageRecoveryBootstrapAuthority({ root, preallocatedRelease: recoveryPreallocatedRelease });
+  return { root, receipt, bindings, externalChainRoot, recoveryBootstrap };
 };
 
 afterEach(async () => {
@@ -249,19 +287,64 @@ describe('immutable Windows package provenance history', () => {
       .rejects.toThrow(/already exist/u);
   });
 
-  it('keeps one sequence-50 bootstrap and hashes the exact sequence-51 parent record', async () => {
-    const { root, receipt, externalChainRoot } = await createFixture();
+  it('keeps rejected sequence-50 as immutable ancestry and hashes it into the exact recovery sequence-51 record', async () => {
+    const { root, receipt, externalChainRoot, recoveryBootstrap } = await createFixture();
     const first = await writeWindowsPackageProvenanceTransaction({ root, receipt, externalChainRoot });
-    const next = { ...receipt, release: 'Bronze 24.08.2026.51', releaseId: 'bronze-2026-08-24-r51',
-      version: '24.08.2026.51', packageVersion: '24.8.2026-51', parentRelease: receipt.release,
-      previousPackageProvenance: { release: receipt.release, releaseId: receipt.releaseId, path: resolve(root, first.bundle.path),
-        sizeBytes: first.bundle.sizeBytes, sha256: first.bundle.sha256 }, generatedAt: '2026-08-23T12:00:00.000Z' };
+    const next = { ...receipt, release: 'Bronze 26.08.2026.51', releaseId: 'bronze-2026-08-26-r51',
+      version: '26.08.2026.51', packageVersion: '26.8.2026-51', parentRelease: receipt.release,
+      previousPackageProvenance: recoveryPreviousPackage(root, first, receipt, recoveryBootstrap), generatedAt: '2026-08-25T12:00:00.000Z' };
+    const forgedLedgerBinding = JSON.parse(JSON.stringify(next));
+    forgedLedgerBinding.previousPackageProvenance.recoveryBootstrap.releaseLedger.sha256 = '0'.repeat(64);
+    await expect(writeWindowsPackageProvenanceTransaction({ root, receipt: forgedLedgerBinding, externalChainRoot }))
+      .rejects.toThrow(/live canonical release ledger/u);
     const second = await writeWindowsPackageProvenanceTransaction({ root, receipt: next, externalChainRoot });
     const firstRecord = JSON.parse(await readFile(first.externalAnchor.path, 'utf8'));
     const secondRecord = JSON.parse(await readFile(second.externalAnchor.path, 'utf8'));
     expect(firstRecord.chainMode).toBe('BOOTSTRAP');
     expect(secondRecord.chainMode).toBe('CONTINUATION');
     expect(secondRecord.previous.recordSha256).toBe(sha256(await readFile(first.externalAnchor.path)));
+  });
+
+  it('rejects forged recovery parent path, live binding drift and non-sequence-50 identity at immutable precommit', async () => {
+    const createNext = async () => {
+      const fixture = await createFixture();
+      const first = await writeWindowsPackageProvenanceTransaction({
+        root: fixture.root, receipt: fixture.receipt, externalChainRoot: fixture.externalChainRoot
+      });
+      const next = {
+        ...fixture.receipt,
+        release: 'Bronze 26.08.2026.51', releaseId: 'bronze-2026-08-26-r51',
+        version: '26.08.2026.51', packageVersion: '26.8.2026-51', parentRelease: fixture.receipt.release,
+        previousPackageProvenance: recoveryPreviousPackage(fixture.root, first, fixture.receipt, fixture.recoveryBootstrap),
+        generatedAt: '2026-08-25T12:00:00.000Z'
+      };
+      return { ...fixture, first, next };
+    };
+
+    const forgedPath = await createNext();
+    forgedPath.next.previousPackageProvenance.path = resolve(forgedPath.root, 'forged', 'bundle.json');
+    await expect(writeWindowsPackageProvenanceTransaction({
+      root: forgedPath.root, receipt: forgedPath.next, externalChainRoot: forgedPath.externalChainRoot
+    })).rejects.toThrow(/path is not canonical at immutable precommit/u);
+
+    const bindingDrift = await createNext();
+    bindingDrift.next.previousPackageProvenance.sha256 = '0'.repeat(64);
+    await expect(writeWindowsPackageProvenanceTransaction({
+      root: bindingDrift.root, receipt: bindingDrift.next, externalChainRoot: bindingDrift.externalChainRoot
+    })).rejects.toThrow(/live size\/SHA binding changed/u);
+
+    const identityDrift = await createNext();
+    const parentBundlePath = resolve(identityDrift.root, identityDrift.first.bundle.path);
+    const forgedBundle = JSON.parse(await readFile(parentBundlePath, 'utf8'));
+    forgedBundle.release = 'Bronze 22.08.2026.49';
+    forgedBundle.releaseId = 'bronze-2026-08-22-r49';
+    const forgedBytes = Buffer.from(`${JSON.stringify(forgedBundle, null, 2)}\n`);
+    await writeFile(parentBundlePath, forgedBytes);
+    identityDrift.next.previousPackageProvenance.sizeBytes = forgedBytes.length;
+    identityDrift.next.previousPackageProvenance.sha256 = sha256(forgedBytes);
+    await expect(writeWindowsPackageProvenanceTransaction({
+      root: identityDrift.root, receipt: identityDrift.next, externalChainRoot: identityDrift.externalChainRoot
+    })).rejects.toThrow(/exact rejected Bronze sequence-50 provenance identity/u);
   });
 
   it('fails closed on missing, future-dated and forged external anchor/bundle evidence', async () => {
@@ -297,12 +380,11 @@ describe('immutable Windows package provenance history', () => {
   });
 
   it('rejects full-chain parent-record hash drift', async () => {
-    const { root, receipt, externalChainRoot } = await createFixture();
+    const { root, receipt, externalChainRoot, recoveryBootstrap } = await createFixture();
     const first = await writeWindowsPackageProvenanceTransaction({ root, receipt, externalChainRoot });
-    const next = { ...receipt, release: 'Bronze 24.08.2026.51', releaseId: 'bronze-2026-08-24-r51',
-      version: '24.08.2026.51', packageVersion: '24.8.2026-51', parentRelease: receipt.release,
-      previousPackageProvenance: { release: receipt.release, releaseId: receipt.releaseId, path: resolve(root, first.bundle.path),
-        sizeBytes: first.bundle.sizeBytes, sha256: first.bundle.sha256 }, generatedAt: '2026-08-23T12:00:00.000Z' };
+    const next = { ...receipt, release: 'Bronze 26.08.2026.51', releaseId: 'bronze-2026-08-26-r51',
+      version: '26.08.2026.51', packageVersion: '26.8.2026-51', parentRelease: receipt.release,
+      previousPackageProvenance: recoveryPreviousPackage(root, first, receipt, recoveryBootstrap), generatedAt: '2026-08-25T12:00:00.000Z' };
     const second = await writeWindowsPackageProvenanceTransaction({ root, receipt: next, externalChainRoot });
     await writeFile(first.externalAnchor.path, `${(await readFile(first.externalAnchor.path, 'utf8')).trim()} \n`);
     const secondBundlePath = resolve(root, second.bundle.path);
@@ -334,6 +416,68 @@ describe('immutable Windows package provenance history', () => {
       currentProvenance,
       runGit: () => Buffer.alloc(0)
     })).rejects.toThrow(/not canonical/u);
+  });
+
+  it('accepts recovery authority only from the exact live ledger decision and rejected-invalid sequence-50 status', async () => {
+    const { root } = await createFixture();
+    const preallocatedRelease = {
+      visibleRelease: 'Bronze 26.08.2026.51', releaseId: 'bronze-2026-08-26-r51', monthlySequence: 51,
+      parentRelease: 'Bronze 22.08.2026.50', recoveryBootstrapDecision: 'RECOVERY_BOOTSTRAP_AFTER_REJECTED_50'
+    };
+    const ledger = {
+      schemaVersion: 1,
+      current: { ...preallocatedRelease, status: 'IN_PROGRESS' },
+      entries: [
+        { version: '22.08.2026.50', monthlySequence: 50, releaseId: 'bronze-2026-08-22-r50', status: 'REJECTED_INVALID_PACKAGE' },
+        { version: '26.08.2026.51', monthlySequence: 51, releaseId: 'bronze-2026-08-26-r51', status: 'IN_PROGRESS',
+          parentRelease: 'Bronze 22.08.2026.50', recoveryBootstrapDecision: 'RECOVERY_BOOTSTRAP_AFTER_REJECTED_50' }
+      ]
+    };
+    await mkdir(resolve(root, 'config'), { recursive: true });
+    await writeFile(resolve(root, 'config/release-ledger.json'), `${JSON.stringify(ledger)}\n`);
+    await expect(readWindowsPackageRecoveryBootstrapAuthority({ root, preallocatedRelease })).resolves.toMatchObject({
+      decision: 'RECOVERY_BOOTSTRAP_AFTER_REJECTED_50', parentStatus: 'REJECTED_INVALID_PACKAGE',
+      currentSequence: 51, parentSequence: 50, releaseLedger: { path: 'config/release-ledger.json' }
+    });
+    ledger.entries[0].status = 'IN_PROGRESS';
+    await writeFile(resolve(root, 'config/release-ledger.json'), `${JSON.stringify(ledger)}\n`);
+    await expect(readWindowsPackageRecoveryBootstrapAuthority({ root, preallocatedRelease }))
+      .rejects.toThrow(/rejected-invalid-package/u);
+    ledger.entries[0].status = 'REJECTED_INVALID_PACKAGE';
+    ledger.current.status = 'REJECTED_INVALID_PACKAGE';
+    await writeFile(resolve(root, 'config/release-ledger.json'), `${JSON.stringify(ledger)}\n`);
+    await expect(readWindowsPackageRecoveryBootstrapAuthority({ root, preallocatedRelease }))
+      .rejects.toThrow(/authorized Bronze sequence-51/u);
+    ledger.current.status = 'IN_PROGRESS';
+    ledger.entries[1].status = 'COMPLETED';
+    await writeFile(resolve(root, 'config/release-ledger.json'), `${JSON.stringify(ledger)}\n`);
+    await expect(readWindowsPackageRecoveryBootstrapAuthority({ root, preallocatedRelease }))
+      .rejects.toThrow(/authorized Bronze sequence-51/u);
+    await expect(readWindowsPackageRecoveryBootstrapAuthority({ root, preallocatedRelease: {
+      ...preallocatedRelease, monthlySequence: 52
+    } })).rejects.toThrow(/exact authorized/u);
+  });
+
+  it('rejects sequence-51 envelopes that forge a trusted installed predecessor or omit recovery authority', () => {
+    const receipt: any = {
+      schemaVersion: 2, id: 'PPT-WINDOWS-PACKAGE-PROVENANCE-V2', evidenceKind: 'WINDOWS_PACKAGE_PROVENANCE',
+      status: 'PASS', buildMode: 'LOCAL_UNSIGNED_NSIS', release: 'Bronze 26.08.2026.51',
+      releaseId: 'bronze-2026-08-26-r51', channel: 'Bronze', version: '26.08.2026.51', packageVersion: '26.8.2026-51',
+      parentRelease: 'Bronze 22.08.2026.50', previousPackageProvenance: recoveryPreviousPackage('C:/canonical', {
+        bundle: { path: 'bundle.json', sizeBytes: 100, sha256: 'f'.repeat(64) }
+      }, { release: 'Bronze 22.08.2026.50', releaseId: 'bronze-2026-08-22-r50' }),
+      generatedAt: '2026-08-25T12:00:00.000Z', producer: {
+        path: 'apps/desktop/scripts/run-electron-builder.mjs', sizeBytes: 1, sha256: 'd'.repeat(64)
+      }, sourceProvenance: { channel: 'Bronze', branch: 'channel/bronze', worktreeClean: true,
+        sharedGitObjectDatabaseVerified: true }
+    };
+    receipt.previousPackageProvenance.trustedInstalledPredecessor = true;
+    expect(() => validateWindowsPackageProvenanceEnvelope({ receipt, expectedReleaseId: receipt.releaseId }))
+      .toThrow(/history-anchor-only/u);
+    delete receipt.previousPackageProvenance.recoveryBootstrap;
+    receipt.previousPackageProvenance.trustedInstalledPredecessor = false;
+    expect(() => validateWindowsPackageProvenanceEnvelope({ receipt, expectedReleaseId: receipt.releaseId }))
+      .toThrow(/authority binding/u);
   });
 
   it('rejects forged schema-2 channel, version and release identity claims', () => {

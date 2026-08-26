@@ -11,6 +11,7 @@ from pypdf import PdfReader
 ROOT = Path(__file__).resolve().parents[1]
 ACTIVE = json.loads((ROOT / "config/active-document-set.json").read_text(encoding="utf-8"))
 MASTER = ACTIVE["currentMasterDocumentation"]
+EXPECTED_VERSION = str(MASTER.get("version", ""))
 DOCX_PATH = ROOT / MASTER["docx"]
 PDF_PATH = ROOT / MASTER["pdf"]
 RULES = json.loads((ROOT / "config/canonical-rule-registry.json").read_text(encoding="utf-8"))["rules"]
@@ -30,7 +31,10 @@ def check(condition: bool, message: str) -> None:
         failures.append(message)
 
 
-check(MASTER.get("version") == "GUNCEL-2026-08-24-V5", "current master version is not V5")
+check(re.fullmatch(r"GUNCEL-\d{4}-\d{2}-\d{2}-V5", EXPECTED_VERSION) is not None,
+      "current master version is not a dated V5 marker")
+check(MASTER.get("asOf") == EXPECTED_VERSION.removeprefix("GUNCEL-").removesuffix("-V5"),
+      "current master asOf does not match its version marker")
 check(MASTER.get("status") == "ACTIVE_CURRENT_MASTER_REFERENCE", "current master status is not active")
 check(MASTER.get("historicalBuildArtifactsImmutable") is True, "historical build immutability is not retained")
 check(DOCX_PATH.is_file() and DOCX_PATH.stat().st_size > 0, "current master DOCX is missing or empty")
@@ -69,8 +73,8 @@ for label, identifiers in (("rule", rule_ids), ("decision", decision_ids), ("ADR
         check(identifier in docx_text, f"DOCX missing {label} identifier: {identifier}")
         check(identifier in pdf_text, f"PDF missing {label} identifier: {identifier}")
 
-check("GUNCEL-2026-08-24-V5" in docx_text, "DOCX version marker is missing")
-check("GUNCEL-2026-08-24-V5" in pdf_text, "PDF version marker is missing")
+check(EXPECTED_VERSION in docx_text, "DOCX version marker is missing")
+check(EXPECTED_VERSION in pdf_text, "PDF version marker is missing")
 if failures:
     raise SystemExit("Current master V5 verification failed:\n" + "\n".join(failures))
 print(

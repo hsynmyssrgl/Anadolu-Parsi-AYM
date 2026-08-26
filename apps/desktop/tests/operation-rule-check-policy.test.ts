@@ -21,6 +21,7 @@ describe('operation rule check policy', () => {
     expect(source).toContain("readJson('config/rule-acknowledgement.json')");
     expect(source).toContain("readJson('config/user-decision-ledger.json')");
     expect(source).toContain("readFile('docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md')");
+    expect(source).toContain("readFile('docs/decisions/DEC-276-bronze-51-rejected-predecessor-recovery-bootstrap.md')");
     expect(source).toContain("readdir('docs/adr')");
     expect(source).toContain("readdir('docs/decisions')");
     expect(source).toContain("readJson('docs/ticari-urun-temeli/08_IS_LISTESI/03_ANA_IS_SICILI.json')");
@@ -106,6 +107,26 @@ describe('operation rule check policy', () => {
       ]);
     expect(source).toContain('constitution.everyMutationDependentRecordAtomicSyncRequired === true');
     expect(source).toContain('constitution.intermediateInstallerBuildForbidden === true');
+    expect(source).toContain("entry.ruleId === 'PR-241'");
+    expect(enforcement.entries.find((entry) => entry.ruleId === 'PR-241')?.gateScripts)
+      .toEqual([
+        'scripts/lib/windows-package-provenance.mjs',
+        'scripts/lib/monthly-release-version.mjs',
+        'scripts/run-windows-installed-release-uat.ps1',
+        'scripts/run-installed-frontend-user-uat.mjs',
+        'scripts/create-bronze-final-local-test-delivery.mjs',
+        'scripts/allocate-monthly-release-version.mjs',
+        'apps/desktop/scripts/run-electron-builder.mjs',
+        'apps/desktop/tests/windows-package-provenance-history.test.ts',
+        'apps/desktop/tests/monthly-release-version.test.ts',
+        'apps/desktop/tests/windows-installed-release-uat-contract.test.ts',
+        'apps/desktop/tests/installed-frontend-user-uat-contract.test.ts',
+        'apps/desktop/tests/installed-frontend-user-uat-receipt.test.ts',
+        'apps/desktop/tests/bronze-final-local-test-delivery-contract.test.ts'
+      ]);
+    expect(source).toContain('constitution.windowsInstalledReleaseUatSequence51CurrentLedgerStatus');
+    expect(source).toContain('constitution.windowsPreviousPackageProvenanceSequence51PrecommitLiveReadbackRequired');
+    expect(source).toContain('dec276?.documentSha256 === createHash');
     expect(mutationPolicy).toMatchObject({
       schemaVersion: 2, id: 'PPT-MUTATION-RELEASE-READINESS-V2',
       requirement: 'PR-235', decision: 'DEC-270', failClosed: true,

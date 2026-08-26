@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "id": "PPT-RULE-ENFORCEMENT-REGISTRY-V1",
-  "release": "Bronze 22.08.2026.50",
-  "canonicalRulesSha256": "f43126d7c874689e09e58f82e0fcc8771692649de5353e79191d82222af99285",
-  "activeRuleCount": 215,
+  "release": "Bronze 26.08.2026.51",
+  "canonicalRulesSha256": "cbd4476d480d81064291347293ba8140d8269bca2cac82d2358a87891f8c14c4",
+  "activeRuleCount": 216,
   "defaultPolicy": "FAIL_CLOSED_NO_WAIVER",
   "entries": [
     {
@@ -2764,7 +2764,10 @@
       "failClosed": true,
       "waiverAllowed": false,
       "skipAllowed": false,
-      "gateScripts": ["apps/desktop/scripts/verify-installer.mjs", "docs/ticari-urun-temeli/11_OTOMASYON/dogrula-ticari-temel-alani.mjs"],
+      "gateScripts": [
+        "apps/desktop/scripts/verify-installer.mjs",
+        "docs/ticari-urun-temeli/11_OTOMASYON/dogrula-ticari-temel-alani.mjs"
+      ],
       "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
       "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
       "trackedIn": "docs/ticari-urun-temeli/04_URUN_TASARIMI/02_SURUM_RENK_PALETLERI.md"
@@ -2775,7 +2778,10 @@
       "failClosed": true,
       "waiverAllowed": false,
       "skipAllowed": false,
-      "gateScripts": ["scripts/verify-desktop-security-boundary.mjs", "docs/ticari-urun-temeli/11_OTOMASYON/dogrula-ticari-temel-alani.mjs"],
+      "gateScripts": [
+        "scripts/verify-desktop-security-boundary.mjs",
+        "docs/ticari-urun-temeli/11_OTOMASYON/dogrula-ticari-temel-alani.mjs"
+      ],
       "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
       "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
       "trackedIn": "config/canonical-rule-registry.json"
@@ -2786,7 +2792,12 @@
       "failClosed": true,
       "waiverAllowed": false,
       "skipAllowed": false,
-      "gateScripts": ["scripts/verify-release-channel-worktrees.mjs", "apps/desktop/scripts/verify-installer.mjs", "scripts/verify-product-brand-identity.mjs", "scripts/verify-first-family-clean-release-policy.mjs"],
+      "gateScripts": [
+        "scripts/verify-release-channel-worktrees.mjs",
+        "apps/desktop/scripts/verify-installer.mjs",
+        "scripts/verify-product-brand-identity.mjs",
+        "scripts/verify-first-family-clean-release-policy.mjs"
+      ],
       "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
       "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
       "trackedIn": "docs/decisions/DEC-271-sibling-channel-program-roots-and-legacy-uninstall-safety.md"
@@ -2797,7 +2808,12 @@
       "failClosed": true,
       "waiverAllowed": false,
       "skipAllowed": false,
-      "gateScripts": ["scripts/allocate-monthly-release-version.mjs", "scripts/verify-active-version-sweep.mjs", "apps/desktop/scripts/build-signed-windows-release.mjs", "apps/desktop/scripts/run-electron-builder.mjs"],
+      "gateScripts": [
+        "scripts/allocate-monthly-release-version.mjs",
+        "scripts/verify-active-version-sweep.mjs",
+        "apps/desktop/scripts/build-signed-windows-release.mjs",
+        "apps/desktop/scripts/run-electron-builder.mjs"
+      ],
       "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
       "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
       "trackedIn": "docs/decisions/DEC-272-explicit-single-release-allocation-and-preallocated-package-identity.md"
@@ -2811,7 +2827,20 @@
       "failClosed": true,
       "waiverAllowed": false,
       "skipAllowed": false,
-      "gateScripts": ["apps/desktop/scripts/run-electron-builder.mjs", "scripts/lib/windows-package-provenance.mjs", "scripts/verify-windows-package-provenance.mjs", "scripts/run-windows-installer-experience-uat.ps1", "scripts/run-windows-installed-release-uat.ps1", "scripts/run-installed-frontend-user-uat.mjs", "scripts/lib/installed-ui-interaction-coverage.mjs", "scripts/lib/windows-native-file-dialog-uat.mjs", "scripts/lib/windows-native-file-dialog-uat.ps1", "scripts/lib/exclusive-evidence-run-root-guard.mjs", "scripts/lib/canonical-product-navigation.mjs", "scripts/create-bronze-final-local-test-delivery.mjs"],
+      "gateScripts": [
+        "apps/desktop/scripts/run-electron-builder.mjs",
+        "scripts/lib/windows-package-provenance.mjs",
+        "scripts/verify-windows-package-provenance.mjs",
+        "scripts/run-windows-installer-experience-uat.ps1",
+        "scripts/run-windows-installed-release-uat.ps1",
+        "scripts/run-installed-frontend-user-uat.mjs",
+        "scripts/lib/installed-ui-interaction-coverage.mjs",
+        "scripts/lib/windows-native-file-dialog-uat.mjs",
+        "scripts/lib/windows-native-file-dialog-uat.ps1",
+        "scripts/lib/exclusive-evidence-run-root-guard.mjs",
+        "scripts/lib/canonical-product-navigation.mjs",
+        "scripts/create-bronze-final-local-test-delivery.mjs"
+      ],
       "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
       "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
       "trackedIn": "docs/decisions/DEC-274-adversarial-windows-delivery-evidence-chain.md"
@@ -2826,7 +2855,21 @@
       "bootstrapAdoptionProducerCommitSource": "REPOSITORY_POINTER_SOURCE_COMMIT",
       "bootstrapAdoptionProducerBinding": "EXTERNAL_RECEIPT_EQUALS_POINTER_AND_BASE_TO_POINTER_TO_HEAD_ANCESTRY",
       "preMutationProducerBinding": "BASELINE_COMMIT_EXACT_PATH_SIZE_SHA256",
-      "gateScripts": ["scripts/verify-operation-rule-check.mjs", "scripts/lib/mutation-release-evidence.mjs", "scripts/lib/release-source-provenance.mjs", "scripts/record-mutation-baseline.mjs", "scripts/create-mutation-impact-assessment.mjs", "scripts/create-mutation-impact-analysis.mjs", "scripts/run-mutation-test-evidence.mjs", "scripts/verify-source-integrity.mjs", "scripts/generate-project-artifact-index-v2.mjs", "scripts/verify-project-artifact-index-v2.mjs", "scripts/run-governed-postflight.mjs", "apps/desktop/scripts/run-electron-builder.mjs", "scripts/create-bronze-final-local-test-delivery.mjs"],
+      "gateScripts": [
+        "scripts/verify-operation-rule-check.mjs",
+        "scripts/lib/mutation-release-evidence.mjs",
+        "scripts/lib/release-source-provenance.mjs",
+        "scripts/record-mutation-baseline.mjs",
+        "scripts/create-mutation-impact-assessment.mjs",
+        "scripts/create-mutation-impact-analysis.mjs",
+        "scripts/run-mutation-test-evidence.mjs",
+        "scripts/verify-source-integrity.mjs",
+        "scripts/generate-project-artifact-index-v2.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs",
+        "scripts/run-governed-postflight.mjs",
+        "apps/desktop/scripts/run-electron-builder.mjs",
+        "scripts/create-bronze-final-local-test-delivery.mjs"
+      ],
       "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
       "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
       "trackedIn": "config/mutation-release-readiness-policy.json"
@@ -2837,7 +2880,10 @@
       "failClosed": true,
       "waiverAllowed": false,
       "skipAllowed": false,
-      "gateScripts": ["scripts/verify-software-supply-chain-boundary.mjs", "apps/desktop/scripts/verify-installer.mjs"],
+      "gateScripts": [
+        "scripts/verify-software-supply-chain-boundary.mjs",
+        "apps/desktop/scripts/verify-installer.mjs"
+      ],
       "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
       "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
       "trackedIn": "config/canonical-rule-registry.json"
@@ -2848,7 +2894,10 @@
       "failClosed": true,
       "waiverAllowed": false,
       "skipAllowed": false,
-      "gateScripts": ["scripts/verify-monthly-release-contract.mjs", "scripts/verify-active-release-contract-v2.mjs"],
+      "gateScripts": [
+        "scripts/verify-monthly-release-contract.mjs",
+        "scripts/verify-active-release-contract-v2.mjs"
+      ],
       "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
       "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
       "trackedIn": "config/release-ledger.json"
@@ -2859,7 +2908,10 @@
       "failClosed": true,
       "waiverAllowed": false,
       "skipAllowed": false,
-      "gateScripts": ["scripts/verify-feature-reality-gate.mjs", "docs/ticari-urun-temeli/11_OTOMASYON/dogrula-ticari-temel-alani.mjs"],
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "docs/ticari-urun-temeli/11_OTOMASYON/dogrula-ticari-temel-alani.mjs"
+      ],
       "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
       "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
       "trackedIn": "docs/ticari-urun-temeli/07_TICARI_HAZIRLIK/02_LISANS_AKTIVASYON_VE_DENEME.md"
@@ -2870,7 +2922,10 @@
       "failClosed": true,
       "waiverAllowed": false,
       "skipAllowed": false,
-      "gateScripts": ["scripts/verify-desktop-security-boundary.mjs", "scripts/verify-feature-reality-gate.mjs"],
+      "gateScripts": [
+        "scripts/verify-desktop-security-boundary.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
       "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
       "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
       "trackedIn": "docs/ticari-urun-temeli/02_IS_ANALIZI/02_KULLANICI_AKISLARI.md"
@@ -2881,7 +2936,10 @@
       "failClosed": true,
       "waiverAllowed": false,
       "skipAllowed": false,
-      "gateScripts": ["apps/desktop/scripts/verify-installer.mjs", "scripts/verify-desktop-security-boundary.mjs"],
+      "gateScripts": [
+        "apps/desktop/scripts/verify-installer.mjs",
+        "scripts/verify-desktop-security-boundary.mjs"
+      ],
       "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
       "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
       "trackedIn": "config/canonical-rule-registry.json"
@@ -2892,7 +2950,10 @@
       "failClosed": true,
       "waiverAllowed": false,
       "skipAllowed": false,
-      "gateScripts": ["scripts/verify-database-migrations.mjs", "scripts/verify-feature-reality-gate.mjs"],
+      "gateScripts": [
+        "scripts/verify-database-migrations.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
       "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
       "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
       "trackedIn": "docs/ticari-urun-temeli/03_MIMARI/02_VERI_MIMARISI.md"
@@ -2903,7 +2964,11 @@
       "failClosed": true,
       "waiverAllowed": false,
       "skipAllowed": false,
-      "gateScripts": ["scripts/verify-documentation-synchronization-policy.mjs", "scripts/verify-project-artifact-index-v2.mjs", "docs/ticari-urun-temeli/11_OTOMASYON/dogrula-ticari-temel-alani.mjs"],
+      "gateScripts": [
+        "scripts/verify-documentation-synchronization-policy.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs",
+        "docs/ticari-urun-temeli/11_OTOMASYON/dogrula-ticari-temel-alani.mjs"
+      ],
       "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
       "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
       "trackedIn": "docs/current/15_EK_KURAL_TOPLU_BIRLESTIRME_SICILI.md"
@@ -2985,6 +3050,31 @@
       "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
       "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
       "trackedIn": "docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md"
+    },
+    {
+      "ruleId": "PR-241",
+      "mode": "REJECTED_PREDECESSOR_RECOVERY_BOOTSTRAP_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/lib/windows-package-provenance.mjs",
+        "scripts/lib/monthly-release-version.mjs",
+        "scripts/run-windows-installed-release-uat.ps1",
+        "scripts/run-installed-frontend-user-uat.mjs",
+        "scripts/create-bronze-final-local-test-delivery.mjs",
+        "scripts/allocate-monthly-release-version.mjs",
+        "apps/desktop/scripts/run-electron-builder.mjs",
+        "apps/desktop/tests/windows-package-provenance-history.test.ts",
+        "apps/desktop/tests/monthly-release-version.test.ts",
+        "apps/desktop/tests/windows-installed-release-uat-contract.test.ts",
+        "apps/desktop/tests/installed-frontend-user-uat-contract.test.ts",
+        "apps/desktop/tests/installed-frontend-user-uat-receipt.test.ts",
+        "apps/desktop/tests/bronze-final-local-test-delivery-contract.test.ts"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "docs/decisions/DEC-276-bronze-51-rejected-predecessor-recovery-bootstrap.md"
     }
   ]
 }

@@ -41,6 +41,31 @@ describe('Windows installed release UAT contract', () => {
     expect(source).toContain("$verifiedPackage.sourceCommit");
   });
 
+  it('fails closed before installer start when PE, package, calendar or visible release versions diverge', async () => {
+    const source = await readFile(producerUrl, 'utf8');
+    const firstInstallerStart = source.indexOf('$primaryProcess = Invoke-InstallerPhase $primaryClassification');
+    const exactMarkers = [
+      "$packageVersionMatch = [regex]::Match([string]$package.packageVersion, '^(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})-(\\d+)$')",
+      '[void][DateTime]::new($packageYear, $packageMonth, $packageDay)',
+      '[string]$package.packageVersion -ceq $expectedPackageVersion',
+      '[string]$packagedIdentity.fileVersion -ceq [string]$package.packageVersion',
+      '[string]$installerIdentity.fileVersion -ceq [string]$package.packageVersion',
+      '[string]$package.version -ceq $expectedVisibleVersion',
+      '[string]$package.release -ceq $expectedVisibleRelease',
+      'Packaged EXE FileVersion package.packageVersion ile exact bagli degil.',
+      'Installer FileVersion package.packageVersion ile exact bagli degil.',
+      'Package packageVersion gecerli bir release takvim tarihi tasimiyor.',
+      'Package release Bronze DD.MM.YYYY.sequence kimligiyle exact bagli degil.',
+    ];
+    expect(firstInstallerStart).toBeGreaterThan(-1);
+    for (const marker of exactMarkers) {
+      expect(source).toContain(marker);
+      expect(source.indexOf(marker)).toBeLessThan(firstInstallerStart);
+    }
+    expect(source).not.toContain('[string]$packagedIdentity.fileVersion -eq [string]$package.packageVersion');
+    expect(source).not.toContain('[string]$installerIdentity.fileVersion -eq [string]$package.packageVersion');
+  });
+
   it('uses the exact category parent plus a generated UUID run root, holds its guard and atomically reads receipts back', async () => {
     const source = await readFile(producerUrl, 'utf8');
     for (const marker of [
@@ -67,11 +92,14 @@ describe('Windows installed release UAT contract', () => {
     );
   });
 
-  it('proves mutually exclusive sequence-50 bootstrap or N to N plus one upgrade, followed by maintenance', async () => {
+  it('proves mutually exclusive sequence-50 bootstrap, rejected-50 sequence-51 recovery, or 52+ N to N plus one upgrade, followed by maintenance', async () => {
     const source = await readFile(producerUrl, 'utf8');
     for (const marker of [
       '$isGovernedBootstrap = $newSequence -eq 50',
+      '$isRecoveryBootstrap = $newSequence -eq 51',
       "'BOOTSTRAP_FRESH_INSTALL_SEQUENCE_50'",
+      "'RECOVERY_BOOTSTRAP_FRESH_INSTALL_SEQUENCE_51'",
+      "'RECOVERY_BOOTSTRAP_FRESH_INSTALL'",
       "'VERSION_UPGRADE_N_TO_N_PLUS_1'",
       "installationMode = $installationMode",
       'freshInstall = $freshInstallReceipt',
@@ -87,11 +115,15 @@ describe('Windows installed release UAT contract', () => {
     expect(source).toContain('dataSelectionDialogObserved = $false');
     expect(source).toContain('installedEqualsPackaged = $true');
     expect(source).toContain('Bronze 50 governed bootstrap onceki paket/runtime girdisi kabul etmez.');
-    expect(source).toContain('Bronze 51+ exact N paketi ve runtime girdileri zorunludur.');
+    expect(source).toContain('Bronze 51 recovery bootstrap trusted installed predecessor runtime kabul etmez.');
+    expect(source).toContain('Bronze 52+ exact installed N runtime girdisi zorunludur.');
+    expect(source).toContain('RECOVERY_BOOTSTRAP_AFTER_REJECTED_50');
+    expect(source).toContain('REJECTED_INVALID_PACKAGE');
+    expect(source).toContain('REJECTED_PARENT_HISTORY_ANCHOR_ONLY');
     expect(source).toContain('Package parentRelease canli installed N release kimligiyle uyusmuyor.');
     expect(source).toContain('Installed N runtime installer baslamadan onceki canli geri-okumada degisti.');
-    expect(source).toContain('Bronze 50 fresh-install yoklugu installer baslamadan hemen once yeniden dogrulanamadi.');
-    expect(source.indexOf('Bronze 50 governed bootstrap oncesinde kanonik install root tamamen yok olmalidir.')).toBeLessThan(
+    expect(source).toContain('fresh-install yoklugu installer baslamadan hemen once yeniden dogrulanamadi.');
+    expect(source.indexOf('Bronze fresh-install bootstrap oncesinde kanonik install root tamamen yok olmalidir.')).toBeLessThan(
       source.indexOf('$primaryProcess = Invoke-InstallerPhase $primaryClassification'),
     );
   });

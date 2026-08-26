@@ -199,6 +199,7 @@ const decision272 = decisionLedger.decisions.find((decision) => decision.id === 
 const decision273 = decisionLedger.decisions.find((decision) => decision.id === 'DEC-273');
 const decision274 = decisionLedger.decisions.find((decision) => decision.id === 'DEC-274');
 const decision275 = decisionLedger.decisions.find((decision) => decision.id === 'DEC-275');
+const decision276 = decisionLedger.decisions.find((decision) => decision.id === 'DEC-276');
 check(decisionLedger.decisionCount === decisionLedger.decisions.length, 'karar defteri sayisi uyusmuyor');
 check(decision259?.status === 'ACTIVE', 'DEC-259 aktif karar defterinde yok');
 check(decision259?.syncStatus === 'SYNCHRONIZED', 'DEC-259 senkron degil');
@@ -234,6 +235,10 @@ check(decision274?.status === 'ACTIVE', 'DEC-274 aktif karar defterinde yok');
 check(decision274?.syncStatus === 'SYNCHRONIZED', 'DEC-274 senkron degil');
 check(decision275?.status === 'ACTIVE', 'DEC-275 aktif karar defterinde yok');
 check(decision275?.syncStatus === 'SYNCHRONIZED', 'DEC-275 senkron degil');
+check(decision276?.status === 'ACTIVE' && decision276?.syncStatus === 'SYNCHRONIZED', 'DEC-276 aktif ve senkron karar defterinde yok');
+check(decision276?.document === 'docs/decisions/DEC-276-bronze-51-rejected-predecessor-recovery-bootstrap.md'
+  && JSON.stringify(decision276?.requirements) === JSON.stringify(['PR-241']),
+'DEC-276 exact dokuman ve PR-241 otorite bagi uyusmuyor');
 const currentDecisionSummary = await readText(resolve(REPO, 'docs', 'current', '09_KULLANICI_KARARLARI_KAYDI.md'));
 const currentMaster = await readText(resolve(REPO, 'docs', 'current', '11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md'));
 const currentCommercial = await readText(resolve(REPO, 'docs', 'current', '14_TICARI_URUN_TEMEL_SURUMU.md'));
@@ -271,12 +276,26 @@ check(currentDecisionSummary.includes('DEC-274'), 'DEC-274 kullanici kararlari k
 check(currentMaster.includes('DEC-274'), 'DEC-274 guncel ana sicilde yok');
 check(currentDecisionSummary.includes('DEC-275'), 'DEC-275 kullanici kararlari kaydinda yok');
 check(currentMaster.includes('DEC-275'), 'DEC-275 guncel ana sicilde yok');
+check(currentDecisionSummary.includes('DEC-276'), 'DEC-276 kullanici kararlari kaydinda yok');
+check(currentMaster.includes('DEC-276') && currentMaster.includes('PR-241'), 'DEC-276/PR-241 guncel ana sicil bagi eksik');
 check(currentCommercial.includes('verify:commercial-baseline'), 'ticari aktif belge dogrulama komutunu gostermiyor');
+
+const commercialChangeLedger = await readJson(resolve(ROOT, '01_YONETIM', '05_DEGISIKLIK_SICILI.json'));
+const commercialChange42Entries = commercialChangeLedger.kayitlar.filter((entry) => entry.id === 'TICARI-042');
+const commercialChange42 = commercialChange42Entries[0];
+check(commercialChangeLedger.sonKayit === 'TICARI-042'
+  && commercialChangeLedger.kayitlar.at(-1)?.id === 'TICARI-042'
+  && commercialChange42Entries.length === 1,
+'TICARI-042 exact tekil son ticari degisiklik kaydi degil');
+check(commercialChange42?.durum === 'ACTIVE'
+  && commercialChange42?.senkronDurumu === 'SYNCHRONIZED'
+  && String(commercialChange42?.kaynak ?? '').includes('DEC-276, PR-241'),
+'TICARI-042 ACTIVE/SYNCHRONIZED DEC-276/PR-241 otorite bagi eksik');
 
 const workRegistry = await readJson(resolve(ROOT, '08_IS_LISTESI', '03_ANA_IS_SICILI.json'));
 const workMarkdown = await readText(resolve(ROOT, '08_IS_LISTESI', '01_ANA_IS_LISTESI.md'));
 const markdownRows = [...workMarkdown.matchAll(/^\| (IS-[0-9]{4}) \| ([^|]+) \| ([^|]+) \| (TAMAMLANDI|DEVAM|ACIK|BLOCKED|NOT_RUN) \| ([^|]+) \|$/gm)];
-check(workRegistry.toplamIs === 60, `makine is sayisi 60 olmali: ${workRegistry.toplamIs}`);
+check(workRegistry.toplamIs === 61, `makine is sayisi 61 olmali: ${workRegistry.toplamIs}`);
 check(localRuleIds.has('TK-015'), 'TK-015 acik tek seferli surum tahsisi kurali eksik');
 check(workRegistry.isler.some((item) => item.id === 'IS-0212'), 'IS-0212 surum tahsisi is kaydi eksik');
 check(localRuleIds.has('TK-016'), 'TK-016 kanonik Windows kurulu UAT kurali eksik');
@@ -285,6 +304,8 @@ check(localRuleIds.has('TK-017'), 'TK-017 adversarial Windows teslim kanit kural
 check(workRegistry.isler.some((item) => item.id === 'IS-0214'), 'IS-0214 adversarial Windows teslim kaniti is kaydi eksik');
 check(localRuleIds.has('TK-018'), 'TK-018 tum kayit ve test kapanisi kurali eksik');
 check(workRegistry.isler.some((item) => item.id === 'IS-0215'), 'IS-0215 tum kayit ve test kapanisi is kaydi eksik');
+check(localRuleIds.has('TK-019'), 'TK-019 Bronze 51 rejected predecessor recovery bootstrap kurali eksik');
+check(workRegistry.isler.some((item) => item.id === 'IS-0216'), 'IS-0216 Bronze 51 rejected predecessor recovery bootstrap is kaydi eksik');
 check(workRegistry.isler.length === workRegistry.toplamIs, `is sicili sayisi uyusmuyor: ${workRegistry.isler.length}/${workRegistry.toplamIs}`);
 check(markdownRows.length === workRegistry.toplamIs, `markdown is sayisi uyusmuyor: ${markdownRows.length}/${workRegistry.toplamIs}`);
 check(workRegistry.tamamlandi === workRegistry.isler.filter((item) => item.durum === 'TAMAMLANDI').length, 'tamamlanan is sayisi drift etti');
@@ -377,8 +398,9 @@ const report = {
   canonicalRuleCount: canonicalRules.ruleCount,
   canonicalRuleSha256: canonicalRules.rulesSha256,
   decision: 'DEC-259',
-  decisions: ['DEC-259', 'DEC-270', 'DEC-274', 'DEC-275'],
-  requirements: ['PR-235', 'PR-239', 'PR-240'],
+  commercialChange: 'TICARI-042',
+  decisions: ['DEC-259', 'DEC-270', 'DEC-274', 'DEC-275', 'DEC-276'],
+  requirements: ['PR-235', 'PR-239', 'PR-240', 'PR-241'],
   mutationWideRecordAndTestClosureVerified: failures.length === 0,
   mutationDependencyRegistrySha256,
   workItemCount: workRegistry.isler.length,

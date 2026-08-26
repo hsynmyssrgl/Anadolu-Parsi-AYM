@@ -8,7 +8,7 @@
   "releaseState": "EXTERNAL_SIGNING_PENDING",
   "boundaries": {
     "defaultDecision": "DENY",
-    "releaseVersion": "22.8.2026-50",
+    "releaseVersion": "26.8.2026-51",
     "releaseChannel": "Bronze",
     "canonicalWorkspaceCount": 18,
     "rootPackageLockRequired": true,

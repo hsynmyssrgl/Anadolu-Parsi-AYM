@@ -26,7 +26,7 @@ check(operation.length >= 3 && operation.length <= 160 && !/[\r\n]/u.test(operat
 check(allowedKinds.has(kind), `Geçerli --kind zorunludur: ${[...allowedKinds].join(', ')}.`);
 
 const [registry, acknowledgement, constitution, enforcement, mutationReadinessPolicy, dependencyRegistryBytes,
-  userDecisionLedger, dec275Bytes, workLedger, commercialLedger, adrNames, decisionNames] = await Promise.all([
+  userDecisionLedger, dec275Bytes, dec276Bytes, workLedger, commercialLedger, adrNames, decisionNames] = await Promise.all([
   readJson('config/canonical-rule-registry.json'),
   readJson('config/rule-acknowledgement.json'),
   readJson('config/project-constitution.json'),
@@ -35,6 +35,7 @@ const [registry, acknowledgement, constitution, enforcement, mutationReadinessPo
   readFile('config/change-impact-dependency-registry.json'),
   readJson('config/user-decision-ledger.json'),
   readFile('docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md'),
+  readFile('docs/decisions/DEC-276-bronze-51-rejected-predecessor-recovery-bootstrap.md'),
   readJson('docs/ticari-urun-temeli/08_IS_LISTESI/03_ANA_IS_SICILI.json'),
   readJson('docs/ticari-urun-temeli/01_YONETIM/05_DEGISIKLIK_SICILI.json'),
   readdir('docs/adr'),
@@ -52,7 +53,9 @@ const mutationReadinessEnforcement = enforcement.entries.find((entry) => entry.r
 const releaseAllocationEnforcement = enforcement.entries.find((entry) => entry.ruleId === 'PR-237');
 const installedReleaseUatEnforcement = enforcement.entries.find((entry) => entry.ruleId === 'PR-239');
 const mutationWideClosureEnforcement = enforcement.entries.find((entry) => entry.ruleId === 'PR-240');
+const recoveryBootstrapEnforcement = enforcement.entries.find((entry) => entry.ruleId === 'PR-241');
 const dec275 = userDecisionLedger.decisions?.find((entry) => entry.id === 'DEC-275');
+const dec276 = userDecisionLedger.decisions?.find((entry) => entry.id === 'DEC-276');
 const exactIds = (values, pattern) => Array.isArray(values)
   && values.every((value) => pattern.test(value))
   && new Set(values).size === values.length;
@@ -212,6 +215,18 @@ const exactPr240GateScripts = ['scripts/verify-operation-rule-check.mjs',
   'scripts/run-governed-postflight.mjs', 'apps/desktop/scripts/run-electron-builder.mjs'];
 check(JSON.stringify(mutationWideClosureEnforcement?.gateScripts) === JSON.stringify(exactPr240GateScripts),
   'PR-240 tum kayit ve test kapanisi enforcement kapilari eksik.');
+const exactPr241GateScripts = ['scripts/lib/windows-package-provenance.mjs',
+  'scripts/lib/monthly-release-version.mjs', 'scripts/run-windows-installed-release-uat.ps1',
+  'scripts/run-installed-frontend-user-uat.mjs', 'scripts/create-bronze-final-local-test-delivery.mjs',
+  'scripts/allocate-monthly-release-version.mjs', 'apps/desktop/scripts/run-electron-builder.mjs',
+  'apps/desktop/tests/windows-package-provenance-history.test.ts',
+  'apps/desktop/tests/monthly-release-version.test.ts',
+  'apps/desktop/tests/windows-installed-release-uat-contract.test.ts',
+  'apps/desktop/tests/installed-frontend-user-uat-contract.test.ts',
+  'apps/desktop/tests/installed-frontend-user-uat-receipt.test.ts',
+  'apps/desktop/tests/bronze-final-local-test-delivery-contract.test.ts'];
+check(JSON.stringify(recoveryBootstrapEnforcement?.gateScripts) === JSON.stringify(exactPr241GateScripts),
+  'PR-241 recovery bootstrap enforcement kapilari eksik.');
 check(mutationWideClosureEnforcement?.trackedIn === 'docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md'
   && dec275?.status === 'ACTIVE' && dec275?.syncStatus === 'SYNCHRONIZED'
   && dec275?.document === mutationWideClosureEnforcement.trackedIn
@@ -220,6 +235,14 @@ check(mutationWideClosureEnforcement?.trackedIn === 'docs/decisions/DEC-275-muta
   && JSON.stringify(dec275?.requirements) === JSON.stringify(['PR-240'])
   && dec275Bytes.toString('utf8').includes('En küçük değişiklikte tüm kayıt ve test kapanışı'),
   'DEC-275 kullanici karari, belge hash/readback veya exact kayit kapsami eksik.');
+check(recoveryBootstrapEnforcement?.trackedIn === 'docs/decisions/DEC-276-bronze-51-rejected-predecessor-recovery-bootstrap.md'
+  && dec276?.status === 'ACTIVE' && dec276?.syncStatus === 'SYNCHRONIZED'
+  && dec276?.document === recoveryBootstrapEnforcement.trackedIn
+  && dec276?.documentSha256 === createHash('sha256').update(dec276Bytes).digest('hex')
+  && JSON.stringify(dec276?.requirements) === JSON.stringify(['PR-241'])
+  && dec276Bytes.toString('utf8').includes('top-level current kaydı ile exact tek release entry statusu')
+  && dec276Bytes.toString('utf8').includes('transaction yayımlanmadan hemen önce'),
+  'DEC-276 recovery karari, belge hash/readback veya PR-241 kapsami eksik.');
 check(constitution.everyMutationDependentRecordAtomicSyncRequired === true
   && constitution.everyMutationTargetedAndFullRegressionRequired === true
   && constitution.uiMutationAllInteractiveAndVisualSurfacesUatRequired === true
@@ -227,6 +250,11 @@ check(constitution.everyMutationDependentRecordAtomicSyncRequired === true
   && constitution.intermediateInstallerBuildForbidden === true
   && constitution.packageRequiresMainAndChannelSourceEquality === true,
   'PR-240 Proje Anayasasi baglari eksik veya gevsetilmis.');
+check(constitution.windowsInstalledReleaseUatSequence51CurrentLedgerStatus === 'IN_PROGRESS'
+  && constitution.windowsInstalledReleaseUatSequence51CurrentAndEntryStatusMustMatch === true
+  && constitution.windowsPreviousPackageProvenanceSequence51PrecommitLiveReadbackRequired === true
+  && constitution.windowsPreviousPackageProvenanceSequence51PrecommitExactPathSizeShaIdentityRequired === true,
+  'PR-241 Proje Anayasasi lifecycle veya parent bundle precommit readback baglari eksik.');
 
 if (failures.length === 0) {
   const channelGate = spawnSync(process.execPath, [

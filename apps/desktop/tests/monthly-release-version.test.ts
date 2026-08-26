@@ -89,16 +89,64 @@ describe('resmî aylık derleme sürümü', () => {
     expect(() => assertPreallocatedReleaseIdentity(identity)).toThrow(/release ID uyuşmazlığı/u);
   });
 
+  it('sequence-51 preallocated identity rejects current/entry lifecycle drift and rejected current status', () => {
+    const current = {
+      channel: 'Bronze', date: '2026-08-26', displayDate: '26.08.2026', monthlySequence: 51,
+      version: '26.08.2026.51', visibleRelease: 'Bronze 26.08.2026.51', packageVersion: '26.8.2026-51',
+      releaseId: 'bronze-2026-08-26-r51', status: 'IN_PROGRESS'
+    };
+    const input = {
+      expectedReleaseId: current.releaseId,
+      ledger: { current, entries: [{ ...current }] },
+      rootManifest: { version: current.packageVersion },
+      desktopManifest: {
+        version: current.packageVersion,
+        build: {
+          artifactName: 'ParsYuva-Bronze-26.08.2026.51.${ext}',
+          win: { artifactName: 'ParsYuva-Bronze-26.08.2026.51.${ext}' }
+        }
+      },
+      repositoryMetadata: {
+        repositoryVersion: current.version, applicationVersion: current.version,
+        visibleRelease: current.visibleRelease, packageVersion: current.packageVersion, releaseId: current.releaseId
+      },
+      appMeta: `version: '${current.version}', packageVersion: '${current.packageVersion}', releaseLabel: '${current.visibleRelease}', releaseId: '${current.releaseId}', monthlySequence: 51`
+    };
+    expect(assertPreallocatedReleaseIdentity(input)).toMatchObject({ status: 'IN_PROGRESS' });
+
+    const entryDrift = structuredClone(input);
+    entryDrift.ledger.entries[0].status = 'COMPLETED';
+    expect(() => assertPreallocatedReleaseIdentity(entryDrift)).toThrow(/current\/entry/u);
+
+    const rejected = structuredClone(input);
+    rejected.ledger.current.status = 'REJECTED_INVALID_PACKAGE';
+    rejected.ledger.entries[0].status = 'REJECTED_INVALID_PACKAGE';
+    expect(() => assertPreallocatedReleaseIdentity(rejected)).toThrow(/lifecycle durumu paketleme için izinli değildir/u);
+
+    const duplicate = structuredClone(input);
+    duplicate.ledger.entries.push({ ...duplicate.ledger.entries[0] });
+    expect(() => assertPreallocatedReleaseIdentity(duplicate)).toThrow(/exact tekil/u);
+  });
+
   it('active version sweep exact active carriers and historical evidence boundaries are explicit', () => {
     const sweep = readFileSync('scripts/verify-active-version-sweep.mjs', 'utf8');
     for (const marker of [
       'docs/current/00_AKTIF_ANA_KAPSAM.md',
       'docs/current/07_TESLIM_SOHBET_VE_KALICI_KAYIT_SOZLESMESI.md',
+      'docs/current/12_KALAN_IS_SINIFLANDIRMA.md',
       'config/active-governance-ledger.json',
       'config/documentation-synchronization-policy.json',
       'docs/ticari-urun-temeli/00_TEMEL_SURUM_MANIFESTOSU.json'
     ]) expect(sweep).toContain(marker);
+    expect(sweep).toContain('commercial source product release is stale');
     expect(sweep).not.toContain('artifacts/validation/bronze-');
+  });
+
+  it('allocator stale predecessor digestini tasimaz ve tum aktif surum tasiyicilarini gunceller', () => {
+    const allocator = readFileSync('scripts/allocate-monthly-release-version.mjs', 'utf8');
+    expect(allocator).toContain('parentSourceSha256: null');
+    expect(allocator).toContain("'docs/current/12_KALAN_IS_SINIFLANDIRMA.md'");
+    expect(allocator).toContain('^- Kaynak urun surumu:');
   });
 
   it('aktif rapor metadata değerlerinde tanımsız build veya milestone üretmez', () => {

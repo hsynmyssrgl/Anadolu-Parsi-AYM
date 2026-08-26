@@ -4,17 +4,18 @@
   "counterPolicy": "MONTHLY_RESET_CONTINUE_FROM_HISTORICAL_COUNT",
   "current": {
     "channel": "Bronze",
-    "date": "2026-08-22",
-    "displayDate": "22.08.2026",
-    "monthlySequence": 50,
-    "version": "22.08.2026.50",
-    "visibleRelease": "Bronze 22.08.2026.50",
-    "packageVersion": "22.8.2026-50",
-    "releaseId": "bronze-2026-08-22-r50",
+    "date": "2026-08-26",
+    "displayDate": "26.08.2026",
+    "monthlySequence": 51,
+    "version": "26.08.2026.51",
+    "visibleRelease": "Bronze 26.08.2026.51",
+    "packageVersion": "26.8.2026-51",
+    "releaseId": "bronze-2026-08-26-r51",
     "status": "IN_PROGRESS",
-    "parentRelease": "Bronze 22.08.2026.49",
-    "summary": "Resmî derleme numarası yalnız paketleme yetkisi tarafından ayrıldı.",
-    "parentSourceSha256": "d65e908bf8157d2eff111dcdbbae2762cb48a527021b97c3df26f463e993dea4"
+    "parentRelease": "Bronze 22.08.2026.50",
+    "summary": "Bronze 50 geçersiz immutable paket geçmişinden sonra tek seferlik temiz recovery bootstrap sürümü.",
+    "recoveryBootstrapDecision": "RECOVERY_BOOTSTRAP_AFTER_REJECTED_50",
+    "parentSourceSha256": null
   },
   "august2026HistoricalCountBeforeCurrent": 26,
   "entries": [
@@ -264,8 +265,32 @@
       "version": "22.08.2026.50",
       "packageVersion": "22.8.2026-50",
       "releaseId": "bronze-2026-08-22-r50",
+      "status": "REJECTED_INVALID_PACKAGE",
+      "summary": "Preflight sertifikası ile exact Git kaynak fingerprint kapsamı uyuşmadığı için paket geçersizdir; immutable tarihsel ve harici append-only kayıt korunur, trusted runtime sayılmaz.",
+      "rejection": {
+        "previousStatus": "IN_PROGRESS",
+        "effectiveStatus": "REJECTED_INVALID_PACKAGE",
+        "reason": "de6c3c7b preflight 000a93e7/2792 ile exact Git f96cd181/2793 kapsamı eşit değildir; tek fark tracked Python bytecode dosyasıdır.",
+        "evidence": [
+          "1490bb9f",
+          "docs/decisions/DEC-276-bronze-51-rejected-predecessor-recovery-bootstrap.md"
+        ],
+        "immutablePackageHistoryRewritten": false,
+        "externalAppendOnlyHistoryRewritten": false
+      }
+    },
+    {
+      "channel": "Bronze",
+      "date": "2026-08-26",
+      "monthlySequence": 51,
+      "version": "26.08.2026.51",
+      "packageVersion": "26.8.2026-51",
+      "releaseId": "bronze-2026-08-26-r51",
       "status": "IN_PROGRESS",
-      "summary": "Resmî derleme numarası yalnız paketleme yetkisi tarafından ayrıldı."
+      "summary": "Bronze 50 geçersiz immutable paket geçmişinden sonra tek seferlik temiz recovery bootstrap sürümü.",
+      "parentRelease": "Bronze 22.08.2026.50",
+      "recoveryBootstrapDecision": "RECOVERY_BOOTSTRAP_AFTER_REJECTED_50",
+      "parentSourceSha256": null
     }
   ]
 }

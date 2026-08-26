@@ -30,6 +30,7 @@ const activeReleaseMarkdownPaths = new Set([
   'docs/current/09_KULLANICI_KARARLARI_KAYDI.md',
   'docs/current/10_TUM_KURALLAR_ASILAMAZ_YURUTME_SOZLESMESI.md',
   'docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md',
+  'docs/current/12_KALAN_IS_SINIFLANDIRMA.md',
   'docs/current/13_KURUMSALLASMA_VE_GLOBAL_MARKA_PLANI.md',
   'docs/current/15_EK_KURAL_TOPLU_BIRLESTIRME_SICILI.md'
 ]);
@@ -75,6 +76,8 @@ for (const [path, field] of activeReleaseJsonFields) {
 const commercialReadme = await readFile('docs/ticari-urun-temeli/00_OKU_BENI.md', 'utf8');
 check(commercialReadme.includes(`Guncel ust kayit ${current.visibleRelease} ve `),
   'commercial current upper record release is stale');
+check(commercialReadme.includes(`- Kaynak urun surumu: ${current.visibleRelease}`),
+  'commercial source product release is stale');
 
 const report = {
   schemaVersion: 2,

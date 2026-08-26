@@ -1,10 +1,10 @@
 # Tüm Kurallar Aşılamaz Yürütme Sözleşmesi
 
-- Sürüm: **Bronze 22.08.2026.50**
+- Sürüm: **Bronze 26.08.2026.51**
 - Karar: **DEC-129**
-- Kanonik kural sayısı: **240**
-- Aktif kural: **215**
-- Kural SHA-256: `f43126d7c874689e09e58f82e0fcc8771692649de5353e79191d82222af99285`
+- Kanonik kural sayısı: **241**
+- Aktif kural: **216**
+- Kural SHA-256: `cbd4476d480d81064291347293ba8140d8269bca2cac82d2358a87891f8c14c4`
 
 ## Değişmez çalışma ilkesi
 
@@ -16,7 +16,9 @@ PR-236 gereği Bronze, Silver ve Gold programları legacy kökün dışındaki `
 
 PR-237 gereği sürüm tahsisi zorunlu expected release ID ile açık tek mutasyondur. Preview salt okunurdur; kimlik uyuşmazlığı lock, temp, yazım veya installer temizliği öncesi durur. Signed/local/dir paket girişleri allocator çalıştırmaz ve yalnız önceden tahsisli ledger/manifest/repository/APP_META exact kimliğini tüketir.
 
-PR-239 gereği Windows installer teslimi yalnız schema2 exact-commit package provenance, zorunlu installer-experience V2 ve UAT110 V3'ün paket sırasından yeniden türettiği birbirini dışlayan modla kabul edilir: Bronze 50 için kanonik hedefin yokluğunu kanıtlayan fresh-install + same-version maintenance; Bronze 51+ için immutable previous package arşiviyle eşleşen canlı sibling N'den exact N→N+1 + same-version maintenance. Tracked TypeScript kaynağına bağlı exact modül/rota otoritesi, tüm uygun kontrollerin dinamik outcome kapsamı, gerçek native CANCEL/ACCEPT, exclusive reparse-korumalı kanıt kökü, guard kaybında sıfır path temizliği, parent-run bağlı UAT111 V3 ve bütün girdileri canlı geri okuyan final V3 zorunludur. Legacy nested runtime trusted predecessor değildir; mevcut kullanıcı verisi içeriği makbuza yazılmaz. NotSigned ve koruma kapalı Kaspersky testi üretim veya zararsızlık iddiası değildir.
+PR-239 gereği Windows installer teslimi yalnız schema2 exact-commit package provenance, zorunlu installer-experience V2 ve UAT110 V3'ün paket sırasından yeniden türettiği birbirini dışlayan modla kabul edilir: Bronze 50 için kanonik hedefin yokluğunu kanıtlayan fresh-install + same-version maintenance; normal Bronze 52+ için immutable previous package arşiviyle eşleşen canlı sibling N'den exact N→N+1 + same-version maintenance. Tracked TypeScript kaynağına bağlı exact modül/rota otoritesi, tüm uygun kontrollerin dinamik outcome kapsamı, gerçek native CANCEL/ACCEPT, exclusive reparse-korumalı kanıt kökü, guard kaybında sıfır path temizliği, parent-run bağlı UAT111 V3 ve bütün girdileri canlı geri okuyan final V3 zorunludur. Legacy nested runtime trusted predecessor değildir; mevcut kullanıcı verisi içeriği makbuza yazılmaz. NotSigned ve koruma kapalı Kaspersky testi üretim veya zararsızlık iddiası değildir.
+
+PR-241 yalnız Bronze 51 için geçerlidir. Current top-level ve exact tek entry statusu birbirine eşit ve exact `IN_PROGRESS` olmalıdır; immutable parent bundle transaction yayımlanmadan hemen önce kanonik path/size/SHA/rejected-parent identity bağıyla canlı geri okunur. Bronze 50 package/external history immutable `REJECTED_INVALID_PACKAGE` olarak korunur; provenance bundle yalnız `REJECTED_PARENT_HISTORY_ANCHOR_ONLY` lineage girdisidir ve canlı installed predecessor otoritesi değildir. Bronze 51 temiz program kökü, EXE ve uninstall yokluğunu kanıtlayarak recovery fresh-install ve ayrı same-version maintenance çalıştırır. Exact test, kaynak bütünlüğü, preflight/postflight, installer-experience, UAT110, UAT111 ve final geri-okuma kapıları atlanamaz.
 
 PR-235 gereği her mutasyonun exact changed-file etki analizi kural, karar, belge, manifest, ratchet, test ve UAT bağlarını günceller veya açık gerekçeyle etkilenmediğini gösterir. Kalıcı postflight ve paketleme aynı temiz committe hedefli test, tam regresyon ve kaynak bütünlüğü PASS olmadan; installer teslimi aynı pakete/commite bağlı paket sonrası gerçek kurulu ana EXE UAT PASS olmadan ilerleyemez.
 

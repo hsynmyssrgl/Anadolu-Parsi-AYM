@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "PPT-MUTATION-RELEASE-READINESS-V2",
-  "release": "Bronze 22.08.2026.50",
+  "release": "Bronze 26.08.2026.51",
   "requirement": "PR-235",
   "decision": "DEC-270",
   "strengthenedByRequirement": "PR-240",
@@ -23,7 +23,11 @@
     "tests",
     "uat"
   ],
-  "allowedImpactStatus": ["UPDATED", "NOT_IMPACTED_WITH_REASON", "DEFERRED_TO_FRESH_INSTALLED_EXE_UAT"],
+  "allowedImpactStatus": [
+    "UPDATED",
+    "NOT_IMPACTED_WITH_REASON",
+    "DEFERRED_TO_FRESH_INSTALLED_EXE_UAT"
+  ],
   "defaultEvidence": {
     "baseline": "artifacts/validation/mutation-baseline.json",
     "impactAnalysis": "artifacts/validation/mutation-impact-analysis.json",
@@ -45,7 +49,7 @@
     "path": "config/change-impact-dependency-registry.json",
     "schemaVersion": 1,
     "id": "PPT-CHANGE-IMPACT-DEPENDENCY-REGISTRY-V1",
-    "sha256": "a56325beaba64e7de2930f3a3f8ab1b75544f8dfc30aae347d1c5c27118abf40",
+    "sha256": "128753cb118c386af52ca088c8d03abd2dfc5c5b775095c95d2482119b08a2ed",
     "unmatchedChangedPathEffect": "BLOCK",
     "dependentRecordsMustBeChanged": true,
     "dependentRecordNotAffected": {
@@ -109,7 +113,19 @@
       "repositoryRelativeTestFilesOnly": true,
       "requiredSuffix": ".test.ts",
       "fixedWorkerArgument": "--maxWorkers=1",
-      "forbiddenOptions": ["--config", "--root", "--dir", "--project", "--changed", "--related", "--testNamePattern", "-t", "--passWithNoTests", "--reporter", "--outputFile"]
+      "forbiddenOptions": [
+        "--config",
+        "--root",
+        "--dir",
+        "--project",
+        "--changed",
+        "--related",
+        "--testNamePattern",
+        "-t",
+        "--passWithNoTests",
+        "--reporter",
+        "--outputFile"
+      ]
     }
   },
   "postflight": {

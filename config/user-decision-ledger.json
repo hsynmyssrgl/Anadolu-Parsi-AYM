@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
-  "release": "Bronze 22.08.2026.50",
-  "decisionCount": 104,
+  "release": "Bronze 26.08.2026.51",
+  "decisionCount": 105,
   "decisions": [
     {
       "id": "DEC-121",
@@ -847,7 +847,9 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: Kalanları kapat; full auto",
       "document": "docs/decisions/DEC-182-ppk-002-remaining-technical-boundaries.md",
-      "requirements": ["PPK-002"],
+      "requirements": [
+        "PPK-002"
+      ],
       "codeAreas": [
         "apps/desktop/src/main/desktop-universal-api-policy-enforcement.ts",
         "apps/desktop/src/main/ipc-runtime.ts",
@@ -867,7 +869,9 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: Üst paketi oluşturalım; full auto devam",
       "document": "docs/decisions/DEC-183-ppk-002-universal-enforcement-top-closure.md",
-      "requirements": ["PPK-002"],
+      "requirements": [
+        "PPK-002"
+      ],
       "codeAreas": [
         "packages/repositories/src/sqlite-base.ts",
         "apps/desktop/src/main/desktop-repository-policy-scope.ts",
@@ -890,7 +894,9 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: PPK-003 tam otomatik devam",
       "document": "docs/decisions/DEC-184-ppk-003-bounded-default-deny-policy-decision-availability.md",
-      "requirements": ["PPK-003"],
+      "requirements": [
+        "PPK-003"
+      ],
       "codeAreas": [
         "packages/platform-policy/src/policy-enforcement-point.ts",
         "packages/platform-policy/policy-decision-availability.test.ts",
@@ -911,7 +917,9 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: Otomatik devam sıradan",
       "document": "docs/decisions/DEC-185-ppk-004-complete-policy-context-binding.md",
-      "requirements": ["PPK-004"],
+      "requirements": [
+        "PPK-004"
+      ],
       "codeAreas": [
         "packages/platform-policy/src/policy-kernel.ts",
         "packages/platform-policy/src/policy-enforcement-point.ts",
@@ -934,7 +942,9 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: Devam",
       "document": "docs/decisions/DEC-186-ppk-005-complete-data-classification.md",
-      "requirements": ["PPK-005"],
+      "requirements": [
+        "PPK-005"
+      ],
       "codeAreas": [
         "packages/platform-policy/src/policy-kernel.ts",
         "packages/platform-policy/src/policy-enforcement-point.ts",
@@ -957,7 +967,9 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: Full otomatik",
       "document": "docs/decisions/DEC-187-ppk-006-complete-policy-obligation-suite.md",
-      "requirements": ["PPK-006"],
+      "requirements": [
+        "PPK-006"
+      ],
       "codeAreas": [
         "packages/platform-policy/src/policy-kernel.ts",
         "packages/platform-policy/src/policy-enforcement-point.ts",
@@ -979,7 +991,9 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: Paketler bitince diğerine başla",
       "document": "docs/decisions/DEC-188-ppk-007-signed-versioned-policy-package.md",
-      "requirements": ["PPK-007"],
+      "requirements": [
+        "PPK-007"
+      ],
       "codeAreas": [
         "packages/platform-policy/src/policy-kernel.ts",
         "packages/platform-policy/src/policy-enforcement-point.ts",
@@ -1004,7 +1018,9 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: Paketler bitince diğerine başla",
       "document": "docs/decisions/DEC-189-ppk-008-application-identity-device-certificate-manifest.md",
-      "requirements": ["PPK-008"],
+      "requirements": [
+        "PPK-008"
+      ],
       "codeAreas": [
         "packages/platform-policy/src/policy-kernel.ts",
         "packages/platform-policy/src/policy-enforcement-point.ts",
@@ -1029,7 +1045,9 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: Paketler bitince diğerine başla",
       "document": "docs/decisions/DEC-190-ppk-009-core-service-policy-reevaluation.md",
-      "requirements": ["PPK-009"],
+      "requirements": [
+        "PPK-009"
+      ],
       "codeAreas": [
         "packages/platform-policy/src/policy-kernel.ts",
         "packages/platform-policy/src/policy-enforcement-point.ts",
@@ -1055,7 +1073,9 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: Paketler bitince diğerine başla",
       "document": "docs/decisions/DEC-191-ppk-010-central-policy-zero-exception.md",
-      "requirements": ["PPK-010"],
+      "requirements": [
+        "PPK-010"
+      ],
       "codeAreas": [
         "packages/security/src/authorization.ts",
         "apps/desktop/src/main/data-repair-application-adapter.ts",
@@ -1080,7 +1100,9 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: Paketler bitince diğerine başla",
       "document": "docs/decisions/DEC-192-ppk-011-contextual-ownership-policy.md",
-      "requirements": ["PPK-011"],
+      "requirements": [
+        "PPK-011"
+      ],
       "codeAreas": [
         "packages/security/src/authorization.ts",
         "packages/platform-policy/src/policy-kernel.ts",
@@ -1107,7 +1129,9 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: Paketler bitince diğerine başla",
       "document": "docs/decisions/DEC-193-ppk-012-offline-capability-lease-cache-fence.md",
-      "requirements": ["PPK-012"],
+      "requirements": [
+        "PPK-012"
+      ],
       "codeAreas": [
         "packages/platform-policy/src/offline-capability-lease.ts",
         "packages/domain/src/app-data.ts",
@@ -1133,7 +1157,9 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: PPK-013 tam kapsamlı ve tam otomatik uygula",
       "document": "docs/decisions/DEC-194-ppk-013-client-data-access-boundary.md",
-      "requirements": ["PPK-013"],
+      "requirements": [
+        "PPK-013"
+      ],
       "codeAreas": [
         "packages/platform-policy/src/client-data-access-boundary.ts",
         "packages/domain/src/app-data.ts",
@@ -1159,7 +1185,9 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: PPK-013 sonrası tam otomatik devam",
       "document": "docs/decisions/DEC-195-ppk-014-versioned-core-service-api-boundary.md",
-      "requirements": ["PPK-014"],
+      "requirements": [
+        "PPK-014"
+      ],
       "codeAreas": [
         "packages/platform-policy/src/versioned-core-service-api-boundary.ts",
         "packages/core-service-contracts/src/index.ts",
@@ -1185,7 +1213,9 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: tam otomatik devam",
       "document": "docs/decisions/DEC-196-ppk-015-network-egress-policy.md",
-      "requirements": ["PPK-015"],
+      "requirements": [
+        "PPK-015"
+      ],
       "codeAreas": [
         "packages/platform-policy/src/network-egress-policy.ts",
         "apps/desktop/src/main/governed-network-egress-use-case.ts",
@@ -1210,7 +1240,9 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: ajanlarla tam otomatik devam",
       "document": "docs/decisions/DEC-197-ppk-016-derived-data-policy-inheritance.md",
-      "requirements": ["PPK-016"],
+      "requirements": [
+        "PPK-016"
+      ],
       "codeAreas": [
         "packages/platform-policy/src/derived-data-inheritance-policy.ts",
         "packages/domain/src/derived-data-policy.ts",
@@ -1237,7 +1269,9 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: tüm işleri full auto olarak sen yap",
       "document": "docs/decisions/DEC-198-ppk-017-sensitive-log-policy.md",
-      "requirements": ["PPK-017"],
+      "requirements": [
+        "PPK-017"
+      ],
       "codeAreas": [
         "packages/platform-policy/src/sensitive-log-policy.ts",
         "packages/logging/src/index.ts",
@@ -1266,7 +1300,9 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: tüm işleri full auto olarak sen yap",
       "document": "docs/decisions/DEC-199-ppk-018-immutable-policy-decision-audit.md",
-      "requirements": ["PPK-018"],
+      "requirements": [
+        "PPK-018"
+      ],
       "codeAreas": [
         "packages/platform-policy/src/immutable-policy-decision-audit.ts",
         "packages/platform-policy/src/policy-enforcement-point.ts",
@@ -1294,7 +1330,9 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: tüm işleri full auto olarak sen yap",
       "document": "docs/decisions/DEC-200-ppk-019-source-deletion-propagation.md",
-      "requirements": ["PPK-019"],
+      "requirements": [
+        "PPK-019"
+      ],
       "codeAreas": [
         "packages/platform-policy/src/source-deletion-propagation-policy.ts",
         "packages/domain/src/source-deletion-propagation.ts",
@@ -1323,7 +1361,9 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: tüm işleri full auto olarak sen yap",
       "document": "docs/decisions/DEC-201-ppk-020-cross-platform-policy-conformance-suite.md",
-      "requirements": ["PPK-020"],
+      "requirements": [
+        "PPK-020"
+      ],
       "codeAreas": [
         "packages/platform-policy/src/policy-conformance-suite.ts",
         "packages/platform-policy/policy-conformance-suite.test.ts",
@@ -1351,7 +1391,9 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: tüm işleri full auto olarak sen yap",
       "document": "docs/decisions/DEC-202-ppk-021-platform-policy-ast-fail-gate.md",
-      "requirements": ["PPK-021"],
+      "requirements": [
+        "PPK-021"
+      ],
       "codeAreas": [
         "scripts/lib/platform-policy-ast-scanner.mjs",
         "scripts/verify-platform-policy-ast-gate.mjs",
@@ -1380,7 +1422,9 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: tüm işleri full auto olarak sen yap",
       "document": "docs/decisions/DEC-203-ppk-022-capability-manifest-build-runtime-gate.md",
-      "requirements": ["PPK-022"],
+      "requirements": [
+        "PPK-022"
+      ],
       "codeAreas": [
         "packages/platform-policy/src/policy-kernel.ts",
         "packages/platform-policy/src/platform-capability-manifest-policy.ts",
@@ -1409,7 +1453,9 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: tüm işleri full auto olarak sen yap",
       "document": "docs/decisions/DEC-204-ppk-023-application-security-profile-gate.md",
-      "requirements": ["PPK-023"],
+      "requirements": [
+        "PPK-023"
+      ],
       "codeAreas": [
         "config/32-s-ppk-023-application-security-profile-manifest.json",
         "scripts/verify-application-security-profile-gate.mjs",
@@ -1437,7 +1483,9 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: tüm işleri full auto olarak sen yap",
       "document": "docs/decisions/DEC-205-ppk-024-policy-service-availability-runtime-gate.md",
-      "requirements": ["PPK-024"],
+      "requirements": [
+        "PPK-024"
+      ],
       "codeAreas": [
         "packages/platform-policy/src/policy-service-availability-policy.ts",
         "packages/platform-policy/src/policy-enforcement-point.ts",
@@ -1468,7 +1516,9 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: tum isleri full auto olarak sen yap",
       "document": "docs/decisions/DEC-206-ppk-025-software-supply-chain-gates.md",
-      "requirements": ["PPK-025"],
+      "requirements": [
+        "PPK-025"
+      ],
       "codeAreas": [
         "packages/platform-policy/src/supply-chain-release-policy.ts",
         "packages/domain/src/supply-chain-release.ts",
@@ -1498,7 +1548,10 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: full auto devam et ve bir isle birden fazla gereksinimi kapat",
       "document": "docs/decisions/DEC-207-ppk-026-typed-policy-sdk-and-xpf003.md",
-      "requirements": ["PPK-026", "XPF-003"],
+      "requirements": [
+        "PPK-026",
+        "XPF-003"
+      ],
       "codeAreas": [
         "config/32-v-ppk-026-typed-policy-sdk-schema.json",
         "packages/core-service-client/src/generated-policy-client.ts",
@@ -1526,7 +1579,10 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: birden fazla gereksinim kapatacak full auto ilerle",
       "document": "docs/decisions/DEC-208-b0-03-b0-04-product-surface-governance.md",
-      "requirements": ["B0-03", "B0-04"],
+      "requirements": [
+        "B0-03",
+        "B0-04"
+      ],
       "codeAreas": [
         "config/32-w-b0-03-b0-04-product-surface-governance-inventory.json",
         "packages/domain/src/product-surface-governance.ts",
@@ -1554,7 +1610,10 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: sirayla full auto devam et, onay bekleme ve bir isle birden fazla gereksinim kapat",
       "document": "docs/decisions/DEC-209-b2-03-b2-04-desktop-session-electron-security.md",
-      "requirements": ["B2-03", "B2-04"],
+      "requirements": [
+        "B2-03",
+        "B2-04"
+      ],
       "codeAreas": [
         "packages/domain/src/desktop-security.ts",
         "packages/security/src/session.ts",
@@ -1583,7 +1642,10 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: sirayla full auto devam et, onay bekleme ve bir isle birden fazla gereksinim kapat",
       "document": "docs/decisions/DEC-210-b2-05-b6-03-sensitive-data-consent-and-export-preview.md",
-      "requirements": ["B2-05", "B6-03"],
+      "requirements": [
+        "B2-05",
+        "B6-03"
+      ],
       "codeAreas": [
         "packages/domain/src/app-data.ts",
         "packages/application/src/ai-consent-use-cases.ts",
@@ -1612,7 +1674,13 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: sirayla full auto devam et, onay bekleme ve bir isle birden fazla gereksinim kapat",
       "document": "docs/decisions/DEC-211-b4-banking-foundation.md",
-      "requirements": ["B4-01", "B4-02", "B4-03", "B4-04", "B4-07"],
+      "requirements": [
+        "B4-01",
+        "B4-02",
+        "B4-03",
+        "B4-04",
+        "B4-07"
+      ],
       "codeAreas": [
         "packages/domain/src/app-data.ts",
         "packages/application/src/banking-security.ts",
@@ -1642,7 +1710,10 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: sirayla full auto devam et, onay bekleme ve bir isle birden fazla gereksinim kapat",
       "document": "docs/decisions/DEC-212-b4-payment-card-management.md",
-      "requirements": ["B4-05", "B4-06"],
+      "requirements": [
+        "B4-05",
+        "B4-06"
+      ],
       "codeAreas": [
         "packages/domain/src/app-data.ts",
         "packages/application/src/banking-security.ts",
@@ -1672,7 +1743,10 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: sirayla full auto devam et, onay bekleme ve bir isle birden fazla gereksinim kapat",
       "document": "docs/decisions/DEC-213-b4-loan-management.md",
-      "requirements": ["B4-08", "B4-09"],
+      "requirements": [
+        "B4-08",
+        "B4-09"
+      ],
       "codeAreas": [
         "packages/domain/src/app-data.ts",
         "packages/application/src/banking-security.ts",
@@ -1703,7 +1777,11 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: sirayla full auto devam et, onay bekleme ve bir isle birden fazla gereksinim kapat",
       "document": "docs/decisions/DEC-214-b4-finance-planning-portfolio-analytics.md",
-      "requirements": ["B4-10", "B4-11", "B4-12"],
+      "requirements": [
+        "B4-10",
+        "B4-11",
+        "B4-12"
+      ],
       "codeAreas": [
         "packages/domain/src/app-data.ts",
         "packages/application/src/banking-security.ts",
@@ -1738,7 +1816,10 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: sirayla full auto devam et, onay bekleme ve bir isle birden fazla gereksinim kapat",
       "document": "docs/decisions/DEC-215-b4-controlled-import-open-banking.md",
-      "requirements": ["B4-13", "B4-14"],
+      "requirements": [
+        "B4-13",
+        "B4-14"
+      ],
       "codeAreas": [
         "packages/domain/src/app-data.ts",
         "packages/application/src/finance-use-cases.ts",
@@ -1770,7 +1851,11 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: full auto continue, use agents and close multiple requirements in one operation",
       "document": "docs/decisions/DEC-216-b5-category-life-home-vehicle.md",
-      "requirements": ["B5-04", "EXT-031", "EXT-034"],
+      "requirements": [
+        "B5-04",
+        "EXT-031",
+        "EXT-034"
+      ],
       "codeAreas": [
         "packages/domain/src/app-data.ts",
         "packages/application/src/life-security.ts",
@@ -1806,7 +1891,10 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: continue full auto, use agents and close multiple requirements in one operation",
       "document": "docs/decisions/DEC-217-home-inventory-utility-belongings.md",
-      "requirements": ["EXT-030", "EXT-032"],
+      "requirements": [
+        "EXT-030",
+        "EXT-032"
+      ],
       "codeAreas": [
         "packages/domain/src/app-data.ts",
         "packages/application/src/life-security.ts",
@@ -1836,7 +1924,12 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: continue full auto, use agents and close multiple requirements in one operation",
       "document": "docs/decisions/DEC-218-family-emergency-planning.md",
-      "requirements": ["B5-07", "EXT-009", "EXT-010", "EXT-013"],
+      "requirements": [
+        "B5-07",
+        "EXT-009",
+        "EXT-010",
+        "EXT-013"
+      ],
       "codeAreas": [
         "packages/domain/src/app-data.ts",
         "packages/application/src/life-security.ts",
@@ -1867,7 +1960,10 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: continue full auto and close multiple requirements in one operation",
       "document": "docs/decisions/DEC-219-family-emergency-preparedness-kits-and-drills.md",
-      "requirements": ["EXT-011", "EXT-015"],
+      "requirements": [
+        "EXT-011",
+        "EXT-015"
+      ],
       "codeAreas": [
         "packages/domain/src/app-data.ts",
         "packages/application/src/life-security.ts",
@@ -1898,7 +1994,10 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: continue full auto, use agents and close multiple requirements in one operation",
       "document": "docs/decisions/DEC-220-family-emergency-assistance-card.md",
-      "requirements": ["EXT-012", "EXT-014"],
+      "requirements": [
+        "EXT-012",
+        "EXT-014"
+      ],
       "codeAreas": [
         "packages/domain/src/app-data.ts",
         "packages/application/src/life-security.ts",
@@ -1929,9 +2028,24 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: activate 33-K / DEC-222 and continue full auto",
       "document": "docs/decisions/DEC-222-privacy-consent-lost-device-control-center.md",
-      "requirements": ["B5-06", "EXT-039"],
-      "codeAreas": ["packages/domain/src/app-data.ts","packages/application/src/privacy-control-use-cases.ts","apps/desktop/src/main/privacy-control-application-adapter.ts","apps/desktop/src/main/data-store.ts","apps/desktop/src/main/ipc-integration-policy.ts","apps/desktop/src/main/main.ts","apps/desktop/src/main/preload.ts","apps/desktop/src/renderer/App.tsx"],
-      "evidence": ["docs/security/THREAT_MODEL_33_K_PRIVACY_CONSENT_LOST_DEVICE_CONTROL.md","config/33-k-privacy-consent-lost-device-control-inventory.json"]
+      "requirements": [
+        "B5-06",
+        "EXT-039"
+      ],
+      "codeAreas": [
+        "packages/domain/src/app-data.ts",
+        "packages/application/src/privacy-control-use-cases.ts",
+        "apps/desktop/src/main/privacy-control-application-adapter.ts",
+        "apps/desktop/src/main/data-store.ts",
+        "apps/desktop/src/main/ipc-integration-policy.ts",
+        "apps/desktop/src/main/main.ts",
+        "apps/desktop/src/main/preload.ts",
+        "apps/desktop/src/renderer/App.tsx"
+      ],
+      "evidence": [
+        "docs/security/THREAT_MODEL_33_K_PRIVACY_CONSENT_LOST_DEVICE_CONTROL.md",
+        "config/33-k-privacy-consent-lost-device-control-inventory.json"
+      ]
     },
     {
       "id": "DEC-223",
@@ -1941,9 +2055,32 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: add the detailed long-term portfolio work list and continue full auto with grouped requirement closures",
       "document": "docs/decisions/DEC-223-long-term-portfolio-center.md",
-      "requirements": ["LTP-001","LTP-002","LTP-003","LTP-004","LTP-005","LTP-006","LTP-007","LTP-008"],
-      "codeAreas": ["packages/domain/src/long-term-portfolio.ts","packages/application/src/long-term-portfolio-use-cases.ts","packages/database/src/family-database-migrations.ts","packages/repository-contracts/src/long-term-portfolio-repository.ts","packages/repositories/src/long-term-portfolio-repository.ts","apps/desktop/src/main/long-term-portfolio-application-adapter.ts","apps/desktop/src/main/data-store.ts","apps/desktop/src/main/ipc-integration-policy.ts","apps/desktop/src/main/main.ts","apps/desktop/src/main/preload.ts","apps/desktop/src/renderer/LongTermPortfolioPanel.tsx"],
-      "evidence": ["docs/security/THREAT_MODEL_33_L_LONG_TERM_PORTFOLIO.md"]
+      "requirements": [
+        "LTP-001",
+        "LTP-002",
+        "LTP-003",
+        "LTP-004",
+        "LTP-005",
+        "LTP-006",
+        "LTP-007",
+        "LTP-008"
+      ],
+      "codeAreas": [
+        "packages/domain/src/long-term-portfolio.ts",
+        "packages/application/src/long-term-portfolio-use-cases.ts",
+        "packages/database/src/family-database-migrations.ts",
+        "packages/repository-contracts/src/long-term-portfolio-repository.ts",
+        "packages/repositories/src/long-term-portfolio-repository.ts",
+        "apps/desktop/src/main/long-term-portfolio-application-adapter.ts",
+        "apps/desktop/src/main/data-store.ts",
+        "apps/desktop/src/main/ipc-integration-policy.ts",
+        "apps/desktop/src/main/main.ts",
+        "apps/desktop/src/main/preload.ts",
+        "apps/desktop/src/renderer/LongTermPortfolioPanel.tsx"
+      ],
+      "evidence": [
+        "docs/security/THREAT_MODEL_33_L_LONG_TERM_PORTFOLIO.md"
+      ]
     },
     {
       "id": "DEC-224",
@@ -1953,9 +2090,43 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: package all remaining requirements and continue full auto without per-package approval",
       "document": "docs/decisions/DEC-224-accessibility-preference-center.md",
-      "requirements": ["B7-01","B7-02","B7-03","B7-04","B7-05","B7-06","B7-07","B7-08","B7-09","B7-10","B7-11","B7-12","B7-13"],
-      "codeAreas": ["packages/domain/src/accessibility-preferences.ts","packages/application/src/accessibility-preferences-use-cases.ts","packages/database/src/family-database-migrations.ts","packages/repository-contracts/src/accessibility-preferences-repository.ts","packages/repositories/src/accessibility-preferences-repository.ts","apps/desktop/src/main/accessibility-preferences-application-adapter.ts","apps/desktop/src/main/data-store.ts","apps/desktop/src/main/ipc-integration-policy.ts","apps/desktop/src/main/main.ts","apps/desktop/src/main/preload.ts","apps/desktop/src/renderer/accessibility.ts","apps/desktop/src/renderer/App.tsx","apps/desktop/src/renderer/styles.css","apps/desktop/src/renderer/typography.css"],
-      "evidence": ["artifacts/validation/33-M-accessibility-boundary.json","artifacts/validation/33-M-accessibility-contract.json","artifacts/validation/33-M-accessibility-runtime.json","docs/security/THREAT_MODEL_33_M_ACCESSIBILITY_PREFERENCES.md"]
+      "requirements": [
+        "B7-01",
+        "B7-02",
+        "B7-03",
+        "B7-04",
+        "B7-05",
+        "B7-06",
+        "B7-07",
+        "B7-08",
+        "B7-09",
+        "B7-10",
+        "B7-11",
+        "B7-12",
+        "B7-13"
+      ],
+      "codeAreas": [
+        "packages/domain/src/accessibility-preferences.ts",
+        "packages/application/src/accessibility-preferences-use-cases.ts",
+        "packages/database/src/family-database-migrations.ts",
+        "packages/repository-contracts/src/accessibility-preferences-repository.ts",
+        "packages/repositories/src/accessibility-preferences-repository.ts",
+        "apps/desktop/src/main/accessibility-preferences-application-adapter.ts",
+        "apps/desktop/src/main/data-store.ts",
+        "apps/desktop/src/main/ipc-integration-policy.ts",
+        "apps/desktop/src/main/main.ts",
+        "apps/desktop/src/main/preload.ts",
+        "apps/desktop/src/renderer/accessibility.ts",
+        "apps/desktop/src/renderer/App.tsx",
+        "apps/desktop/src/renderer/styles.css",
+        "apps/desktop/src/renderer/typography.css"
+      ],
+      "evidence": [
+        "artifacts/validation/33-M-accessibility-boundary.json",
+        "artifacts/validation/33-M-accessibility-contract.json",
+        "artifacts/validation/33-M-accessibility-runtime.json",
+        "docs/security/THREAT_MODEL_33_M_ACCESSIBILITY_PREFERENCES.md"
+      ]
     },
     {
       "id": "DEC-221",
@@ -1965,7 +2136,10 @@
       "status": "ACTIVE",
       "source": "Explicit user instruction: continue full auto and close multiple requirements in one operation",
       "document": "docs/decisions/DEC-221-family-emergency-card-portability.md",
-      "requirements": ["B5-03", "EXT-016"],
+      "requirements": [
+        "B5-03",
+        "EXT-016"
+      ],
       "codeAreas": [
         "packages/domain/src/app-data.ts",
         "packages/application/src/life-security.ts",
@@ -2851,7 +3025,7 @@
       "status": "ACTIVE",
       "source": "Acik kullanici karari: bundan sonra en ufak degisiklik bile her yerde tum kayitlari guncellemeli ve testi yapilmali; kullaniciya aylar surecek eksik test yuku birakilmamali",
       "document": "docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md",
-      "documentSha256": "e37aca51565c9932611047ef5e581ab4104dda4e950af5e4a18c4dc4d8cede3c",
+      "documentSha256": "fa7076375c1fd12feb3987d8b7d039ded9cf8e04744c9d0161d8ba90bf6fdee7",
       "documents": [
         "AGENTS.md",
         "SHA256SUMS.txt",
@@ -2877,8 +3051,9 @@
         "manifest.json"
       ],
       "workListImpact": "IS-0215 eklendi ve temiz kanal regresyon bulgusuyla guclendirildi. Her mutasyon tum bagimli kayit siniflarini UPDATED veya baseline diff yoklugu, gerekce ve assessment/analysis/readback SHA bagi ile kanitli NOT_AFFECTED olarak kapatir; sahte/no-op degisiklik yasaktir. Byte-exact tarihsel kayitlar degistirilmez; guncel ratchet, belge ve resmi makbuzlar Git teslimine girer. Ignored eski uretici ciktisi test gercegi olamaz; test canli yapilandirilmis ciktiyi ve aktif build metasina baglidir. Salt-okunur verifier exact Git app/Bronze/Silver/Gold kokunde, yazan mod yalniz ana app kokunde calisir. Gercek FAIL checkpointleri korunur. c02744cd resmi npm exact Bronze turunda 398 dosya/2469 test ve 171/171 ek komut PASS; kaynak butunlugu 683 eksik Git-disi manifest payloadi ve linked-worktree .git dosyasi nedeniyle 684 bulguyla FAIL olup 7d67fcff ile kaydedilmistir. Kanal kurulumu Git-disi payloadi kanonik yol/normal dosya/byte/SHA-256/atomik readback ile uc ayri kanala esitler; kaynak toplayici .git dosya ve klasorunu dislar. Odakli 2 dosya/9 test PASS. 96b9faac kaynakli DOCX ilk PNG renderinda yanlis bundled PATH nedeniyle Poppler pdfinfo cozumlenememis ve e5787764 ile gercek FAIL kaydedilmistir; dogru Poppler/LibreOffice retry 28/28 gorsel QA PASS vermistir. Yeni exact hedefli/tam regresyon, typecheck, sozdizimi, kaynak butunlugu ve UI etkisinde tam UAT zorunludur; kapanis bitmeden ara installer uretilmez.",
-      "latestRejectedCheckpoint": "2ab9cddf",
-      "documentationQaImpact": "47af84bd, b34e951b, 6ec632c8, dd675310, e5787764, c5879c9a ve 194a8281 DOCX render arac yolu FAIL checkpointleridir; 62d0b1d8 temas sayfasi yardimci komutunun soz dizimi ret kaydidir. Son turda dogru native Poppler ve LibreOffice yollarina retry 29/29 sayfa PASS verdi. Butun sayfalar temaslarda; metin yogun 6-8 ile kural/envanter yogun 27-29 ozgun cozulunurlukte tasma, ortusme, kesilme, font ve bozuk karakter kusuru olmadan PASS verdi. Retler uygulama veya belge icerik kusuru degil test ortami/yardimci komut kayitlaridir.",
+      "latestRejectedCheckpoint": "86602f7a",
+      "processInvocationImpact": "Manifest üreticisinin --help kipini desteklemeyip dosyaları yazdığı kural kontrolsüz yardımcı çağrı 3eec5426 ile tarihsel olarak korunur. Vitest 4.1.10'un desteklemediği --minWorkers seçeneğiyle yapılan çağrı test başlamadan durmuş ve 86602f7a ile son rejected checkpoint olarak kaydedilmiştir. Bu olaylar ürün kusuru veya PASS değildir; doğru test çağrısı ve manifest üretimi ayrı kural kontrolleriyle yinelenir.",
+      "documentationQaImpact": "Araç yolu retleri ve eski sabit 24.08 sürüm markerını reddeden b0615638 tarihsel checkpoint olarak korunur. Active document set ve verifier 26.08.2026 kanonik sürüm/asOf bağına düzeltildikten sonra makine retry 241 kural/185 karar/106 ADR/13 DOCX tablo/26 PDF sayfa, governance 1/1 PASS vermiştir. Son DOCX 29/29 görsel QA PASS; 2-7 önceki onaylı renderla SHA-256 özdeş, değişen 1 ve 8-29 özgün çözünürlükte tek tek kusursuzdur. Bu belge PASS'i exact ürün kapanışının yerine geçmez.",
       "artifactIndexQaImpact": "47f441e1 Git-index ile uretilen kanonik indeksin varsayilan canli-agac modunda dogrulanmasini FAIL korur. Ureticiyle ayni --git-index --no-report modu 13146 kontrol/4407 dosya/2143 belge PASS; kaynak butunlugu 4868/4868 dosya ve 4869 SHA PASS verdi.",
       "runtimePrerequisiteAndNoWriteImpact": "703be65a 398 Vitest dosyasi/2469 test PASS sonrasinda 16 ek runtime icin eksik Bronze dist onkosulunu; 0a118f5f eksik resmi npm tani ortamini; 7fb288cd eksik core-service uygulama ciktisini ve ddb1abff 33-Y/33-Z/34-A alt surec no-write sizintisini FAIL korur. Resmi package/core-service/desktop onkosullariyla 16/16 ek runtime PASS; ortak no-write aktarimiyla 1 dosya/6 test, uc runtime ve uc byte-exact manifest SHA kontrolu PASS verdi. c7a3c130, exact 80cf2a39 tam regresyonunda 33-R alt surecinin migration manifesti generatedAt alanina yazmasini FAIL korur; aktarim duzeltmesinden sonra 1 dosya/6 test ve gercek 33-R 11/11, 8 dosya/30 test PASS, manifest SHA byte-exact aynidir. Yeni exact tam regresyon zorunludur.",
       "fullRegressionNoWriteImpact": "c7a3c130 exact 80cf2a39 Bronze kaynaginda hedefli 94 dosya/598 test ve filtresiz 398 dosya/2469 test PASS sonrasindaki temiz worktree reddini korur. Kok neden 33-R runtime dis no-write bayraginin migration, smoke, PPK-021 ve PPK-022 alt dogrulayicilarina aktarilmamasidir; odakli duzeltme PASS olsa da yeni clean exact evidence zorunludur.",
@@ -2891,11 +3066,13 @@
       "sourceProtectionReceiptImpact": "96377fb9 exact kaynakta hedefli 95 dosya/601 test, tam 399 dosya/2472 test, kaynak butunlugu 4869/4869/4870, governed pre/postflight ve ana/kanal commit esitligi PASS sonrasinda paket kapisi LATEST external PASS ile immutable local PENDING byte farkini reddetmis ve b87ebe2e ile korunmustur. Ilk immutable kayit ezilmez; external receipt SHA-256 bagli ikinci immutable PASS kaydi ve sidecar yerelde ve D: readback ile saklanir. Ilk genis retryda eski sabit BLOCKED paket metni beklentisi gercek FAIL ayrintisini reddetmis ve a7b0f3c3 ile korunmustur; sozlesme fail-closed BLOCKED_/FAIL_ semantigine baglanmis, 4 dosya/29 test PASS vermistir. Yeni exact tum kapilar ve kurulu UAT zorunludur.",
       "channelSynchronizationInvocationImpact": "1745095c duzeltme commitinden sonra var olan Bronze dali authoritative HEAD'e ilerletilmeden setup-release-channel-worktrees varsayilan verify davranisiyla cagrilmis, commit farkini hicbir kanal dosyasina yazmadan reddetmis ve d5540157 ile korunmustur. Dogru sira Bronze/Silver/Gold dallarini exact HEAD'e git merge --ff-only ile ilerletmek, sonra manifest/checkpoint payloadini hydrate edip commit/branch/common Git object store/clean tree esitligini dogrulamaktir.",
       "portableNpmCliResolutionImpact": "b1d237db eski preflight sertifikasini, c9f2eebe eski impact sourceCommit bagini, 5179a170 eksik hedefli dosya listesini, f8946730 dort ek runtime matris FAIL sonucunu ve 1cb33525 ortak nested npm tani FAIL sonucunu korur. Bes runtime aktif Node npm CLI fallback'iyle duzeltilmis ve gercek no-write matrisleri PASS olmustur; yeni exact kapanis zorunludur.",
-      "preflightFingerprintScopeImpact": "af2d15fa sessiz canli paket dogrulamasinin erken kesilmesini, 151384be tamamlanan dogrulamadaki 2795 calisma agaci ve 2793 Git kaynak kapsam uyusmazligini korur. Iki fazla yol ignored scripts/__pycache__ Python bytecode dosyalaridir. Governed fingerprint taramasi __pycache__ dizinlerini Git otoritesiyle exact esitlik icin dislar; odakli 1 dosya/6 test PASS. Eski paket gecersizdir ve yeni exact zincir zorunludur.",
+      "preflightFingerprintScopeImpact": "af2d15fa sessiz canli paket dogrulamasinin erken kesilmesini, 151384be tamamlanan dogrulamadaki 2795 calisma agaci ve 2793 Git kaynak kapsam uyusmazligini korur; bu tarihsel fark iki ignored scripts/__pycache__ Python bytecode dosyasidir. Sonraki de6c3c7b preflight sertifikasi 000a93e7/2792 iken exact Git fingerprint f96cd181/2793 cikmis; tek fark daha once Git tarafindan izlenen generate-master-project-documentation.cpython-313.pyc dosyasidir. .gitignore izlenen dosyayi otomatik untrack etmez. Gercek uyusmazlik 1490bb9f ile korunur; tracked bytecode kaldirilir ve yeni exact committe fingerprint esitligi yeniden kanitlanir. Bronze 50 immutable REJECTED_INVALID_PACKAGE kalir; Bronze 51 yalniz DEC-276/PR-241 recovery bootstrap ve tum exact kapilarla ilerler.",
       "latestDocumentationQaRetryImpact": "3bc57c12 ilk System.Drawing.Font overload temas yardimcisi hatasini korur. Acik tipli retry 29/29 sayfayi temaslarda, 7-8 ve 27-29 sayfalari ozgun cozulunurlukte gorsel PASS bulmustur.",
       "latestChannelVerifierInvocationImpact": "2ab9cddf zorunlu --kind argumani verilmeden cagrilan kanal verifier ret kaydidir. Dogru --kind build retry ana ve uc kanalin exact 2ab9cddf commit, dogru dal, ortak Git nesne deposu ve temiz agac esitligini PASS kanitlamistir.",
       "syncStatus": "SYNCHRONIZED",
-      "requirements": ["PR-240"],
+      "requirements": [
+        "PR-240"
+      ],
       "codeAreas": [
         "scripts/lib/governed-source-root.mjs",
         "scripts/lib/mutation-release-evidence.mjs",
@@ -2907,6 +3084,8 @@
         "scripts/run-mutation-test-evidence.mjs",
         "scripts/verify-source-integrity.mjs",
         "scripts/verify-current-master-documentation-v5.mjs",
+        "scripts/verify-current-master-documentation-v5.py",
+        "config/active-document-set.json",
         "scripts/generate-current-master-documentation.py",
         "scripts/verify-release-channel-worktrees.mjs",
         "scripts/run-installed-frontend-user-uat.mjs",
@@ -2929,9 +3108,9 @@
         "scripts/verify-33-r-archive-evidence-relations-media-lifecycle-unified-authorized-search-runtime.mjs",
         "scripts/verify-remaining-package-local-foundation.mjs",
         "scripts/setup-release-channel-worktrees.mjs",
-      "scripts/lib/source-manifest.mjs",
-      "scripts/lib/aym-source-authority.mjs",
-      "scripts/protect-authoritative-source-external.mjs",
+        "scripts/lib/source-manifest.mjs",
+        "scripts/lib/aym-source-authority.mjs",
+        "scripts/protect-authoritative-source-external.mjs",
         "docs/ticari-urun-temeli/11_OTOMASYON/dogrula-ticari-temel-alani.mjs"
       ],
       "evidence": [
@@ -2944,10 +3123,56 @@
         "apps/desktop/tests/mutation-release-evidence-producers.test.ts",
         "apps/desktop/tests/release-source-provenance.test.ts",
         "apps/desktop/tests/release-channel-isolation.test.ts",
-      "apps/desktop/tests/source-manifest-worktree.test.ts",
-      "apps/desktop/tests/aym-governance-channel-receipt-path.test.ts",
-      "apps/desktop/tests/authoritative-source-exact-commit-backup.test.ts",
+        "apps/desktop/tests/source-manifest-worktree.test.ts",
+        "apps/desktop/tests/aym-governance-channel-receipt-path.test.ts",
+        "apps/desktop/tests/authoritative-source-exact-commit-backup.test.ts",
         "artifacts/validation/canonical-rule-registry-gate.json"
+      ]
+    },
+    {
+      "id": "DEC-276",
+      "date": "2026-08-26",
+      "acceptedAt": "2026-08-26T12:00:00+03:00",
+      "title": "Bronze 51 rejected predecessor recovery bootstrap",
+      "status": "ACTIVE",
+      "source": "Kullanıcının hatalı eski kararları düzeltme, bütün sorunları kayda alma, tam test ve temiz kurulum dosyasını ancak tüm kapılar geçince üretme yetkisi",
+      "document": "docs/decisions/DEC-276-bronze-51-rejected-predecessor-recovery-bootstrap.md",
+      "documentSha256": "c4791a8627e50ffd1e2b397d928df1065cc822f6561305f74ce225e482a65b54",
+      "documents": [
+        "config/release-ledger.json",
+        "config/canonical-rule-registry.json",
+        "config/rule-enforcement-registry.json",
+        "config/active-governance-ledger.json",
+        "BUILD_STATUS.md",
+        "docs/10_MASTER_DECISION_REGISTER.md",
+        "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
+        "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
+        "docs/ticari-urun-temeli/01_YONETIM/01_ASILAMAZ_KURALLAR.md",
+        "docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md"
+      ],
+      "workListImpact": "IS-0216 eklendi. Bronze 50 immutable REJECTED_INVALID_PACKAGE olarak korunur ve trusted runtime sayılmaz. Bronze 51 yalnız exact current/entry IN_PROGRESS status eşliği, immutable parent bundle transaction öncesi canlı path/size/SHA/identity readback, temiz program/EXE/uninstall yokluğu, RECOVERY_BOOTSTRAP_FRESH_INSTALL_SEQUENCE_51, ayrı same-version maintenance, exact hedefli/tam/bütünlük/preflight ve tam kurulu uygulama UAT PASS zinciriyle teslim edilebilir. Yeni PR-241 zinciri master yönetişim sözleşmesi dahil 8 dosya/85 test; ticari temel 1254 kontrol/87 dosya/61 iş/241 kural ve master makine/governance/29/29 görsel QA PASS vermiştir. b0615638 tarihsel verifier marker reddidir; full exact kapanış değildir.",
+      "latestRejectedCheckpoint": "86602f7a",
+      "processInvocationImpact": "Manifest üreticisinin --help kipini desteklemeyip dosyaları yazdığı kural kontrolsüz yardımcı çağrı 3eec5426 ile tarihsel olarak korunur. Vitest 4.1.10'un desteklemediği --minWorkers seçeneğiyle yapılan çağrı test başlamadan durmuş ve 86602f7a ile son rejected checkpoint olarak kaydedilmiştir. Bu olaylar Bronze 51 ürün kusuru veya PASS değildir; exact test ve paket yetkisi vermez.",
+      "syncStatus": "SYNCHRONIZED",
+      "requirements": [
+        "PR-241"
+      ],
+      "codeAreas": [
+        "scripts/lib/windows-package-provenance.mjs",
+        "scripts/lib/monthly-release-version.mjs",
+        "scripts/run-windows-installed-release-uat.ps1",
+        "scripts/run-installed-frontend-user-uat.mjs",
+        "scripts/create-bronze-final-local-test-delivery.mjs",
+        "scripts/allocate-monthly-release-version.mjs",
+        "apps/desktop/scripts/run-electron-builder.mjs"
+      ],
+      "evidence": [
+        "apps/desktop/tests/windows-package-provenance-history.test.ts",
+        "apps/desktop/tests/windows-installed-release-uat-contract.test.ts",
+        "apps/desktop/tests/installed-frontend-user-uat-contract.test.ts",
+        "apps/desktop/tests/installed-frontend-user-uat-receipt.test.ts",
+        "apps/desktop/tests/bronze-final-local-test-delivery-contract.test.ts",
+        "apps/desktop/tests/monthly-release-version.test.ts"
       ]
     }
   ]

@@ -1,11 +1,11 @@
 # Kanonik Kural Sicili
 
-- Görünür sürüm: **Bronze 22.08.2026.50**
-- Sicil kimliği: `PPT-CANONICAL-RULE-REGISTRY-V28`
-- Toplam kural: **240**
-- Aktif kural: **215**
+- Görünür sürüm: **Bronze 26.08.2026.51**
+- Sicil kimliği: `PPT-CANONICAL-RULE-REGISTRY-V29`
+- Toplam kural: **241**
+- Aktif kural: **216**
 - Açıkça superseded tarihsel kural: **25**
-- Kural SHA-256: `f43126d7c874689e09e58f82e0fcc8771692649de5353e79191d82222af99285`
+- Kural SHA-256: `cbd4476d480d81064291347293ba8140d8269bca2cac82d2358a87891f8c14c4`
 - Makine okunur tek aktif kaynak: `config/canonical-rule-registry.json`
 
 `PR-186` her bağlayıcı kararın aynı sürümde DEC ve makine defterine kaydını, `PR-187` bilinen belge/kod/kural driftinde kapanış yasağını getirir. `DEC-251` ve `config/documentation-synchronization-policy.json` bu iki kuralı karar anında DEC + etkilenen belge + iş listesi açık/kapalı/neden güncellemesi olarak fail-closed uygular.
@@ -18,7 +18,7 @@
 
 `PR-217`; güncel ürün ve belge başlıklarında yalnız `ParsYuva Aile Yaşam Merkezi` tam adının kullanılmasını bağlar. `AYM` kısaltması kullanıcı yüzeylerinde yasaktır; yalnız değiştirilemeyen tarihsel kayıtlar ve geriye dönük uyumluluk için zorunlu teknik kimliklerde korunabilir.
 
-`PR-218`–`PR-240`; sürüm kanalı renk/saydamlık sistemini, güvenli parola görünürlüğünü, kurulum adlandırma ve yaşam döngüsü kanıtını, atomik sürüm numarasını, 30 günlük deneme/Gold etkinleştirmeyi, kaldırma-yedek-sıfırlama sınırını, tepsiye küçülmeyi, veri koruyan migration/rollback sözleşmesini, ek kararların ana sicillere/Git teslimine bağlanmasını, eski installer temizliğini, görünür sürüm kanalının tek kez gösterilmesini, her işlem öncesi zorunlu kural kontrolünü, geçişli sesli kurulum kabul zincirini, Bronze/Silver/Gold kanal yalıtımını, her mutasyon sonrası exact-commit teslim kanıtını, legacy kök dışındaki kardeş kanal program yollarını, açık tek seferli sürüm tahsisini, kanonik kurulu Windows yükseltme/maintenance/UAT zincirini ve her küçük değişiklikte bütün bağımlı kayıt/test kapanışını düzenler.
+`PR-218`–`PR-241`; sürüm kanalı renk/saydamlık sistemini, güvenli parola görünürlüğünü, kurulum adlandırma ve yaşam döngüsü kanıtını, atomik sürüm numarasını, 30 günlük deneme/Gold etkinleştirmeyi, kaldırma-yedek-sıfırlama sınırını, tepsiye küçülmeyi, veri koruyan migration/rollback sözleşmesini, ek kararların ana sicillere/Git teslimine bağlanmasını, eski installer temizliğini, görünür sürüm kanalının tek kez gösterilmesini, her işlem öncesi zorunlu kural kontrolünü, geçişli sesli kurulum kabul zincirini, Bronze/Silver/Gold kanal yalıtımını, her mutasyon sonrası exact-commit teslim kanıtını, legacy kök dışındaki kardeş kanal program yollarını, açık tek seferli sürüm tahsisini, kanonik kurulu Windows yükseltme/maintenance/UAT zincirini, her küçük değişiklikte bütün bağımlı kayıt/test kapanışını ve yalnız Bronze 51 rejected-predecessor recovery bootstrap yolunu düzenler.
 
 `PR-220` önce `PR-228`, ardından `PR-234` ile değiştirilmiş; `PR-234` exact nested-path hükmü ise `PR-236` ile superseded edilmiştir. Güncel teknik teslim kuralı kanal yalıtımlıdır: `C:\Program Files\PPT\ParsYuva-<Kanal>`, `ParsYuva-<Kanal>.exe`, `ParsYuva <Kanal>` kısayolu, `ParsYuva/<Kanal>` AppData kökü ve `ParsYuva-<Kanal>-GG.AA.YYYY.NN.exe` dağıtım adıdır.
 
@@ -38,9 +38,11 @@
 
 `PR-237`; sürüm tahsisini zorunlu expected release ID ile ayrı ve tek seferli mutasyon yapar. Preview salt okunurdur; mismatch herhangi yazıma veya temizliğe geçmeden durur. Signed/local/dir paket girişleri yalnız önceden tahsis edilmiş exact current kimliği tüketir ve tarihsel kanıtlar değişmeden kalır.
 
-`PR-238`, `PR-239` ile superseded edilmiştir. `PR-239`; Bronze 50 için previous package/runtime kabul etmeyen temiz bootstrap ilk kurulum + same-version maintenance, Bronze 51+ için immutable önceki package arşiviyle canlı sibling N runtime'ı bağlayan exact N→N+1 + maintenance modlarını UAT110 V3 union sözleşmesiyle ayırır. Zorunlu installer-experience V2, parent-run bağlı UAT111 V3 ve final V3 makbuzları source/producer/path/hash/kronoloji/screenshot/secret geri-okumalarıyla kanıtlanır. Tracked TypeScript kaynağından türetilen exact modül/rota otoritesi, tüm uygun kontrollerin dinamik outcome kapsamı, gerçek native CANCEL/ACCEPT ve reparse içermeyen exclusive kanıt kökü zorunludur; guard kaybında path temizliği yapılmaz. Legacy nested runtime trusted predecessor değildir. NotSigned/Kaspersky koruması kapalı test üretim kanıtı değildir.
+`PR-238`, `PR-239` ile superseded edilmiştir. `PR-239`; Bronze 50 için previous package/runtime kabul etmeyen temiz bootstrap ilk kurulum + same-version maintenance ve normal sequence 52+ için immutable önceki package arşiviyle canlı sibling N runtime'ı bağlayan exact N→N+1 + maintenance modlarını UAT110 V3 union sözleşmesiyle ayırır. Zorunlu installer-experience V2, parent-run bağlı UAT111 V3 ve final V3 makbuzları source/producer/path/hash/kronoloji/screenshot/secret geri-okumalarıyla kanıtlanır. Tracked TypeScript kaynağından türetilen exact modül/rota otoritesi, tüm uygun kontrollerin dinamik outcome kapsamı, gerçek native CANCEL/ACCEPT ve reparse içermeyen exclusive kanıt kökü zorunludur; guard kaybında path temizliği yapılmaz. Legacy nested runtime trusted predecessor değildir. NotSigned/Kaspersky koruması kapalı test üretim kanıtı değildir.
 
 `PR-240`; en küçük değişiklikte dahi etkilenen ana/kanal kaynakları, kural-karar sicilleri, aktif ve ticari belgeler, iş listesi, kapsam/envanter/ratchet/manifest/indeks, güncel ana DOCX/PDF ve kanıt sözleşmelerinin aynı zincirde güncellenmesini zorunlu kılar. Her değişiklik hedefli ve filtresiz tam regresyon, typecheck, sözdizimi ve kaynak bütünlüğü; UI etkisinde tüm modül/rota/menü/kontrol/durum/erişilebilirlik/görsel bütünlük UAT'ı gerektirir. Gerçek test hatası `wip(rejected)` checkpoint olarak kaydedilir; bütün kapanış tamamlanmadan ara installer üretilemez.
+
+`PR-241`; yalnız exact Bronze 51 için current/entry status exact `IN_PROGRESS` eşliğini ve immutable parent bundle'ın transaction öncesi kanonik path/size/SHA/identity canlı geri-okumasını zorunlu tutar; Bronze 50 immutable rejected provenance bundle'ı `REJECTED_PARENT_HISTORY_ANCHOR_ONLY` kalır, installed predecessor girdisi reddedilir ve temiz program kökü/EXE/uninstall yokluğuyla recovery fresh-install + ayrı same-version maintenance çalıştırılır. Bronze 50 ve sequence 52+ normal semantiği değişmez; bütün exact test ve UAT kapıları korunur.
 
 ## Aşılmaz uygulama
 

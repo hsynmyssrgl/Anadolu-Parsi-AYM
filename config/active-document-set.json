@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "release": "Bronze 22.08.2026.50",
+  "release": "Bronze 26.08.2026.51",
   "authorityOrder": [
     "config/canonical-rule-registry.json",
     "config/project-constitution.json",
@@ -35,12 +35,12 @@
     "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.pdf"
   ],
   "currentMasterDocumentation": {
-    "version": "GUNCEL-2026-08-24-V5",
+    "version": "GUNCEL-2026-08-26-V5",
     "status": "ACTIVE_CURRENT_MASTER_REFERENCE",
     "source": "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
     "docx": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.docx",
     "pdf": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.pdf",
-    "asOf": "2026-08-24",
+    "asOf": "2026-08-26",
     "historicalBuildArtifactsImmutable": true
   },
   "supersededActiveReferences": [

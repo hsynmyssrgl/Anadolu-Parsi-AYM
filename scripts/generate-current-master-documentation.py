@@ -37,8 +37,8 @@ from reportlab.platypus import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
-AS_OF = "24.08.2026"
-VERSION = "GUNCEL-2026-08-24-V5"
+AS_OF = "26.08.2026"
+VERSION = "GUNCEL-2026-08-26-V5"
 SOURCE = ROOT / "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md"
 DOCX_OUT = ROOT / "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.docx"
 PDF_OUT = ROOT / "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.pdf"
@@ -145,6 +145,7 @@ document_index = read_json("artifacts/manifests/ALL_DOCUMENTS_INDEX.json")
 full_document_audit = read_json("artifacts/manifests/ALL_PROJECT_DOCUMENT_FORMAT_AUDIT.json")
 user_decisions = read_json("config/user-decision-ledger.json")
 requirement_counts = get_requirement_counts(requirements)
+decision_counts = dict(Counter(item.get("status", "UNKNOWN") for item in user_decisions["decisions"]))
 decision_files = sorted((ROOT / "docs/decisions").glob("DEC-*.md"), key=decision_number)
 adr_files = sorted((ROOT / "docs/adr").glob("ADR-*.md"), key=adr_number)
 threat_files = sorted((ROOT / "docs/security").glob("*.md"))
@@ -212,7 +213,7 @@ DRIFT_FIXES = [
     "DEC-271 ile güncel kanal program kökleri legacy dizinin dışındaki C:\\Program Files\\PPT\\ParsYuva-<Kanal> kardeş yollarına taşındı; AppData ParsYuva/<Kanal> ve diğer kanal yalıtımı korunurken otomatik legacy veri migration veya silme yasaklandı.",
     "DEC-272 ile sürüm tahsisi exact expected release ID alan açık tek mutasyon oldu; preview yazmaz, uyuşmazlık yazım ve temizliğe geçmeden durur, signed/local/dir yalnız önceden tahsisli exact current kimliğini tüketir.",
     "DEC-273 ile Windows installer teslimi metadata-only kanonik UAT110 gerçek N→N+1 ve same-version maintenance koruması ile source/package/expected release bağlı schema2 kurulu ön yüz UAT111 makbuzuna bağlandı.",
-    "DEC-274/PR-239 ile Windows teslim zinciri canlı PR-235 readback, schema2 package provenance, Bronze 50 bootstrap veya Bronze 51+ exact sibling continuation modlu UAT110 V3, installer-experience V2, parent-run bağlı UAT111 V3 ve final V3 geri-okuma kapılarıyla adversarial olarak güçlendirildi.",
+    "DEC-274/PR-239 ile Windows teslim zinciri canlı PR-235 readback, schema2 package provenance, Bronze 50 bootstrap veya normal Bronze 52+ exact sibling continuation modlu UAT110 V3, installer-experience V2, parent-run bağlı UAT111 V3 ve final V3 geri-okuma kapılarıyla adversarial olarak güçlendirildi; exact Bronze 51 recovery modu DEC-276/PR-241 ile ayrıca ayrıldı.",
     "PR-235 ile en küçük değişiklik dahi exact değişen yol, bağımlı kural/karar/belge/manifest/ratchet/test/UAT kayıtları ve aynı temiz committe hedefli-tam-bütünlük kanıtlarıyla fail-closed eşlemeye bağlandı.",
     "PR-235 BOOTSTRAP_ADOPTION diff tabanı sabit kalırken producer yalnız pointer sourceCommit kayıt commitinde external-pointer exact eşitliği ve baseCommit → pointer.sourceCommit → HEAD ancestry ile; normal PRE_MUTATION producer ise kendi baseline commitinde doğrulanır.",
     "PR-239 UAT111 kapsamı Git'te izlenen TypeScript kanonik rota otoritesi, tüm görünür ve uygun kontrollerin dinamik outcome matrisi, gerçek native CANCEL/ACCEPT ve exclusive reparse-korumalı kanıt köküyle güncellendi.",
@@ -230,6 +231,7 @@ DRIFT_FIXES = [
     "PR-240 kapanış kayıtlarını içeren 7f866e69 kaynak commitinden final master DOCX doğru native Poppler/LibreOffice zinciriyle 29/29 sayfa görsel QA PASS vermiştir. Tüm sayfalar beş temas sayfasında; 6–7 ve yoğun kural/envanter tablolarını taşıyan 26–29 ayrıca özgün çözünürlükte kusursuzdur.",
     "PR-240 d421c299 exact Bronze turunda hedefli 95 dosya/600 test, filtresiz 399 dosya/2.471 test, 172/172 ek komut ve 4.869/4.869 kaynak bütünlüğü PASS sonrasında governed preflight; önce güncel retention/görünür sürüm makbuzu eksikliğini 607a9a53, ardından tamamlanmış çalışma adımlarının 1.428 kanıt yolundan 803 Git-dışı checkpoint payload dosyasının kanal eksikliğini 8b2b5ccc ile fail-closed korumuştur. Kanal kurulumu tamamlanmış localEvidence ve persistent receipt yollarını tracked/manifest dışlamalı kanonik yol, normal dosya, SHA-256, atomik yazım ve readback ile üç kanala eşitler. Seçici 809 yol, odaklı 1 dosya/9 test ve ticari temel 1.234 kontrol PASS; yeni exact preflight PASS olmadan paket yoktur.",
     "PR-240 0f0a4653 exact Bronze etki analizi 95 hedefli test dosyası hesaplamış; hedefli turda 600 test PASS iken operation-rule-check-policy current-mutation preflightStatus alanındaki tarihsel 607a9a53/8b2b5ccc FAIL metnini reddetmiş ve 50f4d9e5 ile fail-closed korunmuştur. Tarihsel retler QA alanlarında kalır; güncel mutasyon durumu NOT_RUN_CURRENT_MUTATION olur. Bronze/Silver/Gold hidrasyonu her kanalda 1.428/1.428 ve eksik 0 PASS; yeni exact testler zorunludur.",
+    "PR-241/DEC-276 Bronze 50 immutable REJECTED_INVALID_PACKAGE geçmişini trusted runtime saymadan korur. de6c3c7b preflight 000a93e7/2792 ile exact Git f96cd181/2793 arasındaki tek tracked Python bytecode farkı 1490bb9f ile kayıtlıdır. Araç yolu retleri ve doğrulayıcıdaki eski sabit 24.08 marker driftini reddeden b0615638 tarihsel rejected checkpoint olarak korunur; active document set ve doğrulayıcı 26.08.2026 kanonik sürüm/asOf bağına düzeltilmiştir. Manifest üreticisinin --help kipini desteklemeyip dosyaları yazdığı kural kontrolsüz yardımcı çağrı 3eec5426 ile tarihsel olarak korunur. Vitest 4.1.10'un desteklemediği --minWorkers seçeneği çağrıyı test başlamadan durdurmuş ve 86602f7a ile aktif son rejected checkpoint olarak kaydedilmiştir; bu olaylar ürün kusuru veya PASS değildir. Retry 241 kural, 185 karar, 106 ADR, 13 DOCX tablo ve 26 PDF sayfa makine kontrolü, V5 governance 1/1 test ve son DOCX 29/29 görsel QA PASS vermiştir; 2–7 önceki onaylı renderla SHA-256 özdeş, değişen 1 ve 8–29 özgün çözünürlükte tek tek kusursuzdur. Yeni PR-241 hash/operation-check zinciri master yönetişim sözleşmesi dahil 8 dosya/85 test; ticari temel doğrulaması 1.254 kontrol/87 dosya/61 iş/241 kural PASS vermiştir. Yalnız Bronze 51 rejected-parent provenance bundle'ını history-only lineage olarak kullanıp temiz recovery fresh-install ve ayrı same-version maintenance yolunu çalıştırabilir; bütün exact test, kaynak bütünlüğü, preflight/postflight, paket ve kurulu uygulama UAT kapıları zorunludur.",
 ]
 
 
@@ -253,7 +255,7 @@ def build_markdown() -> str:
         f"- Görünür ürün sürümü: **{ledger['release']}**",
         f"- Kaynak HEAD: `{git_head()}`",
         "- Statü: **ACTIVE_CURRENT_MASTER_REFERENCE**",
-        "- Kararlar: **DEC-250–DEC-275**",
+        "- Kararlar: **DEC-250–DEC-276**",
         "",
         "> Bu sürüm geçmiş PDF/DOCX ve build kapanış belgelerinin üzerine yazmaz. Yerel PASS ile dış kabul kanıtını ayırır; NOT_RUN/PARTIAL/BLOCKED sonuçlarını tamamlanmış göstermez.",
         "",
@@ -279,7 +281,7 @@ def build_markdown() -> str:
         "",
         f"- Gereksinim: **{requirements['requirementCount']}** — COMPLETE {requirement_counts.get('COMPLETE', 0)}, PARTIAL {requirement_counts.get('PARTIAL', 0)}, FOUNDATION_STARTED {requirement_counts.get('FOUNDATION_STARTED', 0)}, NOT_IMPLEMENTED {requirement_counts.get('NOT_IMPLEMENTED', 0)}.",
         f"- Kural sicili: **{rules['id']}**, toplam {rules['ruleCount']}, aktif {rules['activeRuleCount']}, superseded {rules['supersededRuleCount']}, SHA-256 `{rules['rulesSha256']}`.",
-        f"- Kullanıcı karar defteri: **{user_decisions['decisionCount']}** açık kullanıcı kararı.",
+        f"- Kullanıcı karar defteri: **{user_decisions['decisionCount']}** toplam kullanıcı kararı; **{decision_counts.get('ACTIVE', 0)}** aktif, **{decision_counts.get('SUPERSEDED', 0)}** superseded.",
         "",
         "## 4. İş akışları",
         "",

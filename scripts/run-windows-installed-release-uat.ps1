@@ -356,10 +356,28 @@ Assert-True ($package.artifacts.installer.sha256 -eq $installerIdentity.sha256 -
 Assert-True ($package.artifacts.packagedRuntime.sha256 -eq $packagedIdentity.sha256 -and [long]$package.artifacts.packagedRuntime.sizeBytes -eq $packagedIdentity.sizeBytes) 'Packaged EXE provenance bagi uyusmuyor.'
 Assert-True ($installerExperience.installer.sha256 -eq $installerIdentity.sha256 -and $installerExperience.packageProvenance.sha256 -eq $packageBinding.sha256 -and $installerExperience.sourceCommit -eq $verifiedPackage.sourceCommit) 'Installer experience receipt exact installer/package/source ile bagli degil.'
 
+$packageVersionMatch = [regex]::Match([string]$package.packageVersion, '^(\d{1,2})\.(\d{1,2})\.(\d{4})-(\d+)$')
+Assert-True ($packageVersionMatch.Success) 'Package packageVersion day.month.year-sequence biciminde kanonik degil.'
+$packageDay = [int]$packageVersionMatch.Groups[1].Value
+$packageMonth = [int]$packageVersionMatch.Groups[2].Value
+$packageYear = [int]$packageVersionMatch.Groups[3].Value
+$packageSequence = [int]$packageVersionMatch.Groups[4].Value
+try { [void][DateTime]::new($packageYear, $packageMonth, $packageDay) } catch { throw 'Package packageVersion gecerli bir release takvim tarihi tasimiyor.' }
+$expectedPackageVersion = "$packageDay.$packageMonth.$packageYear-$packageSequence"
+$expectedVisibleVersion = '{0:D2}.{1:D2}.{2}.{3}' -f $packageDay, $packageMonth, $packageYear, $packageSequence
+$expectedVisibleRelease = "Bronze $expectedVisibleVersion"
+Assert-True ([string]$package.packageVersion -ceq $expectedPackageVersion) 'Package packageVersion normalize day.month.year-sequence kimligiyle exact degil.'
+Assert-True ([string]$packagedIdentity.fileVersion -ceq [string]$package.packageVersion) 'Packaged EXE FileVersion package.packageVersion ile exact bagli degil.'
+Assert-True ([string]$installerIdentity.fileVersion -ceq [string]$package.packageVersion) 'Installer FileVersion package.packageVersion ile exact bagli degil.'
+Assert-True ([string]$package.version -ceq $expectedVisibleVersion) 'Package version DD.MM.YYYY.sequence kimligiyle exact bagli degil.'
+Assert-True ([string]$package.release -ceq $expectedVisibleRelease) 'Package release Bronze DD.MM.YYYY.sequence kimligiyle exact bagli degil.'
+
 $newVersionMatch = [regex]::Match($packagedIdentity.fileVersion, '^(\d{1,2})\.(\d{1,2})\.(\d{4})-(\d+)$')
 Assert-True ($newVersionMatch.Success) 'Packaged FileVersion kanonik degil.'
 $newSequence = [int]$newVersionMatch.Groups[4].Value
 $isGovernedBootstrap = $newSequence -eq 50
+$isRecoveryBootstrap = $newSequence -eq 51
+$isFreshInstallBootstrap = $isGovernedBootstrap -or $isRecoveryBootstrap
 Assert-True ($newSequence -ge 50) 'Package sequence governed predecessor sinirinin altindadir.'
 $parentReleaseMatch = [regex]::Match([string]$package.parentRelease, '^Bronze (\d{2})\.(\d{2})\.(\d{4})\.(\d+)$')
 Assert-True ($parentReleaseMatch.Success -and [int]$parentReleaseMatch.Groups[2].Value -eq [int]$newVersionMatch.Groups[2].Value -and [int]$parentReleaseMatch.Groups[3].Value -eq [int]$newVersionMatch.Groups[3].Value -and [int]$parentReleaseMatch.Groups[4].Value -eq ($newSequence - 1)) 'Package parentRelease exact ayni-ay predecessor lineage ile uyusmuyor.'
@@ -373,49 +391,65 @@ if ($isGovernedBootstrap) {
   Assert-True ([string]::IsNullOrWhiteSpace($PreviousPackageProvenance) -and [string]::IsNullOrWhiteSpace($PreviousInstalledExePath)) 'Bronze 50 governed bootstrap onceki paket/runtime girdisi kabul etmez.'
   Assert-True (-not (Test-Path -LiteralPath $InstalledExePath)) 'Bronze 50 governed bootstrap fresh-install oncesinde kanonik EXE bulunmamalidir.'
 } else {
-  Assert-True (-not [string]::IsNullOrWhiteSpace($PreviousPackageProvenance) -and -not [string]::IsNullOrWhiteSpace($PreviousInstalledExePath)) 'Bronze 51+ exact N paketi ve runtime girdileri zorunludur.'
+  Assert-True (-not [string]::IsNullOrWhiteSpace($PreviousPackageProvenance)) 'Bronze 51+ exact parent package history bundle girdisi zorunludur.'
   $PreviousPackageProvenance = Resolve-RegularFile $PreviousPackageProvenance 'PreviousPackageProvenance'
-  $PreviousInstalledExePath = Resolve-RegularFile $PreviousInstalledExePath 'PreviousInstalledExePath'
   Assert-True (Test-ContainedPath $PreviousPackageProvenance ([IO.Path]::GetFullPath((Join-Path $RepoRoot 'artifacts\validation\release-history')))) 'PreviousPackageProvenance kanonik immutable release-history kokunun altinda degil.'
-  Assert-True ([IO.Path]::GetFullPath($PreviousInstalledExePath).Equals($CanonicalPreviousInstalledExe, [StringComparison]::OrdinalIgnoreCase)) 'PreviousInstalledExePath kanonik Bronze sibling N runtime degil.'
-  Assert-True ([IO.Path]::GetFullPath($PreviousInstalledExePath).Equals([IO.Path]::GetFullPath($InstalledExePath), [StringComparison]::OrdinalIgnoreCase)) 'N ve N+1 ayni kanonik Bronze sibling runtime yolunu kullanmalidir.'
   $previousPackageBinding = [ordered]@{ path = $PreviousPackageProvenance; sizeBytes = (Get-Item -LiteralPath $PreviousPackageProvenance).Length; sha256 = Get-FileSha256 $PreviousPackageProvenance }
-  $installedBeforeIdentity = Get-FileIdentity $PreviousInstalledExePath
-  $oldVersionMatch = [regex]::Match($installedBeforeIdentity.fileVersion, '^(\d{1,2})\.(\d{1,2})\.(\d{4})-(\d+)$')
-  Assert-True ($oldVersionMatch.Success) 'Installed N FileVersion kanonik degil.'
-  Assert-True ($newVersionMatch.Groups[2].Value -eq $oldVersionMatch.Groups[2].Value -and $newVersionMatch.Groups[3].Value -eq $oldVersionMatch.Groups[3].Value) 'Yukseltme ayni aylik Bronze release serisinde degil.'
-  $oldSequence = [int]$oldVersionMatch.Groups[4].Value
-  Assert-True ($newSequence -eq ($oldSequence + 1)) 'Ilk faz gercek exact N->N+1 surum yukseltmesi degil.'
-  $expectedPreviousRelease = "Bronze $($oldVersionMatch.Groups[1].Value.PadLeft(2,'0')).$($oldVersionMatch.Groups[2].Value.PadLeft(2,'0')).$($oldVersionMatch.Groups[3].Value).$oldSequence"
-  Assert-True ([string]$package.parentRelease -eq $expectedPreviousRelease) 'Package parentRelease canli installed N release kimligiyle uyusmuyor.'
-  $oldDate = [DateTime]::new([int]$oldVersionMatch.Groups[3].Value, [int]$oldVersionMatch.Groups[2].Value, [int]$oldVersionMatch.Groups[1].Value)
-  $newDate = [DateTime]::new([int]$newVersionMatch.Groups[3].Value, [int]$newVersionMatch.Groups[2].Value, [int]$newVersionMatch.Groups[1].Value)
-  Assert-True ($newDate -ge $oldDate) 'N->N+1 release tarihi monotonik degil.'
+  if ($isRecoveryBootstrap) {
+    Assert-True ([string]$package.release -ceq 'Bronze 26.08.2026.51' -and [string]$package.releaseId -ceq 'bronze-2026-08-26-r51' -and [string]$package.parentRelease -ceq 'Bronze 22.08.2026.50') 'Bronze 51 yalniz exact rejected-50 recovery bootstrap kimligiyle kullanilabilir.'
+    Assert-True ([string]::IsNullOrWhiteSpace($PreviousInstalledExePath)) 'Bronze 51 recovery bootstrap trusted installed predecessor runtime kabul etmez.'
+    Assert-True (-not (Test-Path -LiteralPath $InstalledExePath)) 'Bronze 51 recovery bootstrap fresh-install oncesinde kanonik EXE bulunmamalidir.'
+    Assert-True ($package.previousPackageProvenance.lineageRole -ceq 'REJECTED_PARENT_HISTORY_ANCHOR_ONLY' -and $package.previousPackageProvenance.trustedInstalledPredecessor -eq $false -and $package.previousPackageProvenance.recoveryBootstrap.decision -ceq 'RECOVERY_BOOTSTRAP_AFTER_REJECTED_50' -and $package.previousPackageProvenance.recoveryBootstrap.parentStatus -ceq 'REJECTED_INVALID_PACKAGE' -and [int]$package.previousPackageProvenance.recoveryBootstrap.currentSequence -eq 51 -and [int]$package.previousPackageProvenance.recoveryBootstrap.parentSequence -eq 50) 'Bronze 51 recovery package rejected-50 history-only authority bagini tasimiyor.'
+    $oldSequence = 50
+    $expectedPreviousRelease = 'Bronze 22.08.2026.50'
+  } else {
+    Assert-True (-not [string]::IsNullOrWhiteSpace($PreviousInstalledExePath)) 'Bronze 52+ exact installed N runtime girdisi zorunludur.'
+    $PreviousInstalledExePath = Resolve-RegularFile $PreviousInstalledExePath 'PreviousInstalledExePath'
+    Assert-True ([IO.Path]::GetFullPath($PreviousInstalledExePath).Equals($CanonicalPreviousInstalledExe, [StringComparison]::OrdinalIgnoreCase)) 'PreviousInstalledExePath kanonik Bronze sibling N runtime degil.'
+    Assert-True ([IO.Path]::GetFullPath($PreviousInstalledExePath).Equals([IO.Path]::GetFullPath($InstalledExePath), [StringComparison]::OrdinalIgnoreCase)) 'N ve N+1 ayni kanonik Bronze sibling runtime yolunu kullanmalidir.'
+    $installedBeforeIdentity = Get-FileIdentity $PreviousInstalledExePath
+    $oldVersionMatch = [regex]::Match($installedBeforeIdentity.fileVersion, '^(\d{1,2})\.(\d{1,2})\.(\d{4})-(\d+)$')
+    Assert-True ($oldVersionMatch.Success) 'Installed N FileVersion kanonik degil.'
+    Assert-True ($newVersionMatch.Groups[2].Value -eq $oldVersionMatch.Groups[2].Value -and $newVersionMatch.Groups[3].Value -eq $oldVersionMatch.Groups[3].Value) 'Yukseltme ayni aylik Bronze release serisinde degil.'
+    $oldSequence = [int]$oldVersionMatch.Groups[4].Value
+    Assert-True ($newSequence -eq ($oldSequence + 1)) 'Ilk faz gercek exact N->N+1 surum yukseltmesi degil.'
+    $expectedPreviousRelease = "Bronze $($oldVersionMatch.Groups[1].Value.PadLeft(2,'0')).$($oldVersionMatch.Groups[2].Value.PadLeft(2,'0')).$($oldVersionMatch.Groups[3].Value).$oldSequence"
+    Assert-True ([string]$package.parentRelease -eq $expectedPreviousRelease) 'Package parentRelease canli installed N release kimligiyle uyusmuyor.'
+    $oldDate = [DateTime]::new([int]$oldVersionMatch.Groups[3].Value, [int]$oldVersionMatch.Groups[2].Value, [int]$oldVersionMatch.Groups[1].Value)
+    $newDate = [DateTime]::new([int]$newVersionMatch.Groups[3].Value, [int]$newVersionMatch.Groups[2].Value, [int]$newVersionMatch.Groups[1].Value)
+    Assert-True ($newDate -ge $oldDate) 'N->N+1 release tarihi monotonik degil.'
+  }
   $expectedPreviousBundle = [IO.Path]::GetFullPath((Join-Path $RepoRoot "artifacts\validation\release-history\bronze-$($expectedPreviousRelease.Substring('Bronze '.Length))-windows-package-provenance-bundle\bundle.json"))
   Assert-True ([IO.Path]::GetFullPath($PreviousPackageProvenance).Equals($expectedPreviousBundle, [StringComparison]::OrdinalIgnoreCase)) 'PreviousPackageProvenance parent release icin kanonik immutable bundle.json yolu degil; eski tek JSON reddedildi.'
   $previousVerifierSource = @'
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
-const [root, bundlePath, parentRelease, currentSequence] = process.argv.slice(1);
+const [root, bundlePath, parentRelease, currentSequence, visibleRelease, releaseId, recoveryBootstrapDecision] = process.argv.slice(1);
 const provenanceModule = await import(pathToFileURL(resolve(root, 'scripts/lib/release-source-provenance.mjs')).href);
 const packageModule = await import(pathToFileURL(resolve(root, 'scripts/lib/windows-package-provenance.mjs')).href);
 const current = await provenanceModule.captureReleaseSourceProvenance({ root, expectedChannel: 'Bronze' });
 const verified = await packageModule.verifyPreviousWindowsPackageProvenance({
   root,
-  preallocatedRelease: { monthlySequence: Number(currentSequence), parentRelease },
+  preallocatedRelease: { monthlySequence: Number(currentSequence), parentRelease, visibleRelease, releaseId, recoveryBootstrapDecision },
   bundlePath,
   currentProvenance: current.provenance,
   runGit: current.runGit
 });
 process.stdout.write(JSON.stringify({ status: 'PASS', ...verified }));
 '@
-  $previousVerificationJson = & $nodePath --input-type=module -e $previousVerifierSource -- $RepoRoot $PreviousPackageProvenance $expectedPreviousRelease $newSequence
+  $recoveryBootstrapDecisionArgument = if ($isRecoveryBootstrap) { [string]$package.previousPackageProvenance.recoveryBootstrap.decision } else { 'NOT_APPLICABLE' }
+  $previousVerificationJson = & $nodePath --input-type=module -e $previousVerifierSource -- $RepoRoot $PreviousPackageProvenance $expectedPreviousRelease $newSequence ([string]$package.release) ([string]$package.releaseId) $recoveryBootstrapDecisionArgument
   Assert-True ($LASTEXITCODE -eq 0) 'Previous package canonical history bundle/PR-235/Git readback FAIL oldu.'
   $verifiedPreviousPackage = $previousVerificationJson | ConvertFrom-Json
   Assert-True ($verifiedPreviousPackage.status -eq 'PASS' -and $verifiedPreviousPackage.release -eq $expectedPreviousRelease) 'Previous package canonical verifier exact N release PASS vermedi.'
   Assert-True ($verifiedPreviousPackage.path -eq $previousPackageBinding.path -and [long]$verifiedPreviousPackage.sizeBytes -eq [long]$previousPackageBinding.sizeBytes -and $verifiedPreviousPackage.sha256 -eq $previousPackageBinding.sha256) 'Previous package bundle verifier readback bagi wrapper girdisiyle uyusmuyor.'
   Assert-True ($package.previousPackageProvenance.sha256 -eq $verifiedPreviousPackage.sha256 -and [long]$package.previousPackageProvenance.sizeBytes -eq [long]$verifiedPreviousPackage.sizeBytes -and $package.previousPackageProvenance.release -eq $expectedPreviousRelease -and $package.previousPackageProvenance.releaseId -eq $verifiedPreviousPackage.releaseId -and $package.previousPackageProvenance.sourceCommit -eq $verifiedPreviousPackage.sourceCommit -and $package.previousPackageProvenance.producer.sha256 -eq $verifiedPreviousPackage.producer.sha256) 'Current package onceki kanonik bundle verifier sonucuyla bagli degil.'
-  Assert-True ($verifiedPreviousPackage.packagedRuntime.sha256 -eq $installedBeforeIdentity.sha256 -and [long]$verifiedPreviousPackage.packagedRuntime.sizeBytes -eq $installedBeforeIdentity.sizeBytes -and $installedBeforeIdentity.fileVersion -eq "$([int]$oldVersionMatch.Groups[1].Value).$([int]$oldVersionMatch.Groups[2].Value).$($oldVersionMatch.Groups[3].Value)-$oldSequence") 'Kurulu N runtime dogrulanmis onceki bundle packaged runtime ile canli exact eslesmiyor.'
+  if ($isRecoveryBootstrap) {
+    Assert-True ($verifiedPreviousPackage.lineageRole -ceq 'REJECTED_PARENT_HISTORY_ANCHOR_ONLY' -and $verifiedPreviousPackage.trustedInstalledPredecessor -eq $false -and $verifiedPreviousPackage.recoveryBootstrap.decision -ceq 'RECOVERY_BOOTSTRAP_AFTER_REJECTED_50' -and $verifiedPreviousPackage.recoveryBootstrap.parentStatus -ceq 'REJECTED_INVALID_PACKAGE') 'Verified Bronze 50 parent recovery bootstrap icin history-anchor-only olarak siniflanmadi.'
+    Assert-True ($package.previousPackageProvenance.lineageRole -ceq $verifiedPreviousPackage.lineageRole -and $package.previousPackageProvenance.trustedInstalledPredecessor -eq $verifiedPreviousPackage.trustedInstalledPredecessor -and $package.previousPackageProvenance.recoveryBootstrap.decision -ceq $verifiedPreviousPackage.recoveryBootstrap.decision -and $package.previousPackageProvenance.recoveryBootstrap.parentStatus -ceq $verifiedPreviousPackage.recoveryBootstrap.parentStatus -and $package.previousPackageProvenance.recoveryBootstrap.releaseLedger.sha256 -ceq $verifiedPreviousPackage.recoveryBootstrap.releaseLedger.sha256 -and [long]$package.previousPackageProvenance.recoveryBootstrap.releaseLedger.sizeBytes -eq [long]$verifiedPreviousPackage.recoveryBootstrap.releaseLedger.sizeBytes) 'Current package recovery predecessor self-claim canonical verifier sonucuyla exact bagli degil.'
+  } else {
+    Assert-True ($verifiedPreviousPackage.packagedRuntime.sha256 -eq $installedBeforeIdentity.sha256 -and [long]$verifiedPreviousPackage.packagedRuntime.sizeBytes -eq $installedBeforeIdentity.sizeBytes -and $installedBeforeIdentity.fileVersion -eq "$([int]$oldVersionMatch.Groups[1].Value).$([int]$oldVersionMatch.Groups[2].Value).$($oldVersionMatch.Groups[3].Value)-$oldSequence") 'Kurulu N runtime dogrulanmis onceki bundle packaged runtime ile canli exact eslesmiyor.'
+  }
 }
 
 if (-not (Test-Path -LiteralPath $EvidenceCategoryParent)) { [IO.Directory]::CreateDirectory($EvidenceCategoryParent) | Out-Null }
@@ -426,9 +460,9 @@ $script:EvidenceRunGuard = New-EvidenceRunGuard
 
 $originalState = Get-StateSnapshot 'ORIGINAL_BEFORE_SYNTHETIC_MARKER'
 $targetExecutableAbsentBefore = -not (Test-Path -LiteralPath $InstalledExePath)
-if ($isGovernedBootstrap) {
-  Assert-True ($originalState.program.bronze.exists -eq $false) 'Bronze 50 governed bootstrap oncesinde kanonik install root tamamen yok olmalidir.'
-  Assert-True ([int]$originalState.uninstallRegistry.bronze.entryCount -eq 0) 'Bronze 50 governed bootstrap oncesinde Bronze uninstall registry kaydi bulunmamalidir.'
+if ($isFreshInstallBootstrap) {
+  Assert-True ($originalState.program.bronze.exists -eq $false) 'Bronze fresh-install bootstrap oncesinde kanonik install root tamamen yok olmalidir.'
+  Assert-True ([int]$originalState.uninstallRegistry.bronze.entryCount -eq 0) 'Bronze fresh-install bootstrap oncesinde Bronze uninstall registry kaydi bulunmamalidir.'
 }
 $bronzeDataRoot = [IO.Path]::GetFullPath((Join-Path $ExpectedUserDataRoot 'Bronze'))
 $bronzeDataRootExisted = Test-Path -LiteralPath $bronzeDataRoot
@@ -444,13 +478,13 @@ $markerIdentity = [ordered]@{ sizeBytes = $markerBytes.Length; sha256 = Get-File
 
 $phaseFailure = $null
 try {
-  $primaryClassification = if ($isGovernedBootstrap) { 'BOOTSTRAP_FRESH_INSTALL_SEQUENCE_50' } else { 'VERSION_UPGRADE_N_TO_N_PLUS_1' }
-  $primaryBeforePhase = if ($isGovernedBootstrap) { 'BEFORE_BOOTSTRAP_FRESH_INSTALL' } else { 'BEFORE_N_TO_N_PLUS_1' }
-  $primaryAfterPhase = if ($isGovernedBootstrap) { 'AFTER_BOOTSTRAP_FRESH_INSTALL' } else { 'AFTER_N_TO_N_PLUS_1' }
+  $primaryClassification = if ($isGovernedBootstrap) { 'BOOTSTRAP_FRESH_INSTALL_SEQUENCE_50' } elseif ($isRecoveryBootstrap) { 'RECOVERY_BOOTSTRAP_FRESH_INSTALL_SEQUENCE_51' } else { 'VERSION_UPGRADE_N_TO_N_PLUS_1' }
+  $primaryBeforePhase = if ($isGovernedBootstrap) { 'BEFORE_BOOTSTRAP_FRESH_INSTALL' } elseif ($isRecoveryBootstrap) { 'BEFORE_RECOVERY_BOOTSTRAP_FRESH_INSTALL' } else { 'BEFORE_N_TO_N_PLUS_1' }
+  $primaryAfterPhase = if ($isGovernedBootstrap) { 'AFTER_BOOTSTRAP_FRESH_INSTALL' } elseif ($isRecoveryBootstrap) { 'AFTER_RECOVERY_BOOTSTRAP_FRESH_INSTALL' } else { 'AFTER_N_TO_N_PLUS_1' }
   $before = Get-StateSnapshot $primaryBeforePhase
-  if ($isGovernedBootstrap) {
+  if ($isFreshInstallBootstrap) {
     $targetExecutableAbsentBefore = -not (Test-Path -LiteralPath $InstalledExePath)
-    Assert-True ($before.program.bronze.exists -eq $false -and $targetExecutableAbsentBefore -and [int]$before.uninstallRegistry.bronze.entryCount -eq 0) 'Bronze 50 fresh-install yoklugu installer baslamadan hemen once yeniden dogrulanamadi.'
+    Assert-True ($before.program.bronze.exists -eq $false -and $targetExecutableAbsentBefore -and [int]$before.uninstallRegistry.bronze.entryCount -eq 0) 'Bronze fresh-install yoklugu installer baslamadan hemen once yeniden dogrulanamadi.'
   } else {
     $installedBeforeReadback = Get-FileIdentity $PreviousInstalledExePath
     Assert-True ($installedBeforeReadback.sha256 -eq $installedBeforeIdentity.sha256 -and $installedBeforeReadback.sizeBytes -eq $installedBeforeIdentity.sizeBytes -and $installedBeforeReadback.fileVersion -eq $installedBeforeIdentity.fileVersion) 'Installed N runtime installer baslamadan onceki canli geri-okumada degisti.'
@@ -487,26 +521,27 @@ foreach ($channel in @('bronze', 'silver', 'gold', 'legacy')) { Assert-ManifestE
 Assert-True (-not (Test-Path -LiteralPath $markerPath)) 'Sentetik marker cleanup absence readback FAIL.'
 $runCompletedAt = [DateTimeOffset]::UtcNow
 
-$installationMode = if ($isGovernedBootstrap) { 'BOOTSTRAP_FRESH_INSTALL' } else { 'CONTINUATION_N_TO_N_PLUS_ONE' }
+$installationMode = if ($isGovernedBootstrap) { 'BOOTSTRAP_FRESH_INSTALL' } elseif ($isRecoveryBootstrap) { 'RECOVERY_BOOTSTRAP_FRESH_INSTALL' } else { 'CONTINUATION_N_TO_N_PLUS_ONE' }
 $primaryInstallationReceipt = [ordered]@{
   classification = $primaryProcess.classification; status = 'PASS'
-  fromFileVersion = if ($isGovernedBootstrap) { $null } else { $installedBeforeIdentity.fileVersion }
+  fromFileVersion = if ($isFreshInstallBootstrap) { $null } else { $installedBeforeIdentity.fileVersion }
   toFileVersion = $installedAfterPrimary.fileVersion
-  fromSequence = if ($isGovernedBootstrap) { $null } else { $oldSequence }
+  fromSequence = if ($isFreshInstallBootstrap) { $null } else { $oldSequence }
   toSequence = $newSequence
-  exactSuccessor = -not $isGovernedBootstrap
+  exactSuccessor = -not $isFreshInstallBootstrap
   governedBootstrap = $isGovernedBootstrap
-  targetInstallRootAbsentBefore = if ($isGovernedBootstrap) { $before.program.bronze.exists -eq $false } else { $false }
-  targetExecutableAbsentBefore = if ($isGovernedBootstrap) { $targetExecutableAbsentBefore } else { $false }
-  bronzeUninstallRegistryAbsentBefore = if ($isGovernedBootstrap) { [int]$before.uninstallRegistry.bronze.entryCount -eq 0 } else { $false }
+  recoveryBootstrap = $isRecoveryBootstrap
+  targetInstallRootAbsentBefore = if ($isFreshInstallBootstrap) { $before.program.bronze.exists -eq $false } else { $false }
+  targetExecutableAbsentBefore = if ($isFreshInstallBootstrap) { $targetExecutableAbsentBefore } else { $false }
+  bronzeUninstallRegistryAbsentBefore = if ($isFreshInstallBootstrap) { [int]$before.uninstallRegistry.bronze.entryCount -eq 0 } else { $false }
   packagePreviousProvenanceAbsent = if ($isGovernedBootstrap) { $null -eq $package.previousPackageProvenance } else { $false }
   installerProcess = $primaryProcess; before = $before; after = $afterPrimary; installedRuntime = $installedAfterPrimary
   installedEqualsPackaged = $true; markerPreserved = $true; allUserDataContentEqualityPreserved = $true
   otherChannelAndLegacyProgramMetadataPreserved = $true; otherChannelWriteCount = 0; dataSelectionDialogObserved = $false
   bronzeRegistry = $bronzeRegistryAfterPrimary
 }
-$freshInstallReceipt = if ($isGovernedBootstrap) { $primaryInstallationReceipt } else { $null }
-$upgradeReceipt = if ($isGovernedBootstrap) { $null } else { $primaryInstallationReceipt }
+$freshInstallReceipt = if ($isFreshInstallBootstrap) { $primaryInstallationReceipt } else { $null }
+$upgradeReceipt = if ($isFreshInstallBootstrap) { $null } else { $primaryInstallationReceipt }
 
 $installationReceipt = [ordered]@{
   schemaVersion = 3; id = 'PPT-WINDOWS-INSTALLED-RELEASE-UAT110-V3'; evidenceKind = 'WINDOWS_INSTALLED_RELEASE_PRESERVATION'; status = 'PASS'; exitCode = 0
@@ -515,6 +550,7 @@ $installationReceipt = [ordered]@{
   sourceCommit = [string]$verifiedPackage.sourceCommit; governedSourceFingerprintSha256 = [string]$verifiedPackage.governedSourceFingerprintSha256; canonicalRuleRegistrySha256 = [string]$verifiedPackage.canonicalRuleRegistrySha256
   producer = $producerIdentity; installer = $installerIdentity; packagedRuntime = $packagedIdentity; installedBefore = $installedBeforeIdentity
   packageProvenance = $packageBinding; governedPreflight = $preflightBinding; installerExperience = $installerExperienceBinding; previousPackageProvenance = $previousPackageBinding
+  recoveryBootstrapAuthority = if ($isRecoveryBootstrap) { $package.previousPackageProvenance.recoveryBootstrap } else { $null }
   syntheticMarker = [ordered]@{ sizeBytes = $markerIdentity.sizeBytes; sha256 = $markerIdentity.sha256; kind = $markerIdentity.kind; cleanupStatus = 'DELETED_AND_ABSENCE_READBACK_PASS' }
   privacyBoundary = [ordered]@{ existingUserFileContentsHashedForEquality = $true; existingUserFileContentsRecorded = $false; existingUserFileNamesRecorded = $false; receiptContainsUserContent = $false; contentEqualityMeasured = $true }
   primaryInstallation = $primaryInstallationReceipt; freshInstall = $freshInstallReceipt; upgrade = $upgradeReceipt

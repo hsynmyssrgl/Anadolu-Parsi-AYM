@@ -50,11 +50,11 @@ export const releaseStageForChannel=(channel:UserVisibleReleaseChannel,language:
 export const APP_META = Object.freeze({
   name: CURRENT_PRODUCT_NAME,
   edition: 'Bronze',
-  version: '22.08.2026.50',
-  packageVersion: '22.8.2026-50',
-  releaseLabel: 'Bronze 22.08.2026.50',
-  releaseId: 'bronze-2026-08-22-r50',
-  monthlySequence: 50,
+  version: '26.08.2026.51',
+  packageVersion: '26.8.2026-51',
+  releaseLabel: 'Bronze 26.08.2026.51',
+  releaseId: 'bronze-2026-08-26-r51',
+  monthlySequence: 51,
   stage: 'Aktif Geliştirme'
 });
 export type AppMeta = typeof APP_META;

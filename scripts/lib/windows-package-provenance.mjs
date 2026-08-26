@@ -28,6 +28,14 @@ export const WINDOWS_PACKAGE_HISTORY_BUNDLE_FILE = 'bundle.json';
 export const GOVERNED_PREFLIGHT_PATH = 'artifacts/validation/governed-preflight.json';
 export const WINDOWS_PACKAGE_PROVENANCE_CHAIN_ID = 'PPT-WINDOWS-PACKAGE-PROVENANCE-CHAIN-RECORD-V1';
 export const WINDOWS_PACKAGE_PROVENANCE_CHAIN_ROOT = 'D:\\AYM_LIBRARY\\ParsYuva\\ParsYuva Aile Yasam Merkezi\\governance\\PR-239\\Bronze\\package-provenance-chain';
+export const WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_DECISION = 'RECOVERY_BOOTSTRAP_AFTER_REJECTED_50';
+export const WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_RELEASE = 'Bronze 26.08.2026.51';
+export const WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_RELEASE_ID = 'bronze-2026-08-26-r51';
+export const WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_PARENT_RELEASE = 'Bronze 22.08.2026.50';
+export const WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_PARENT_RELEASE_ID = 'bronze-2026-08-22-r50';
+export const WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_PARENT_STATUS = 'REJECTED_INVALID_PACKAGE';
+export const WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_CURRENT_STATUS = 'IN_PROGRESS';
+export const WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_LINEAGE_ROLE = 'REJECTED_PARENT_HISTORY_ANCHOR_ONLY';
 
 const releaseHistoryRoot = 'artifacts/validation/release-history';
 const lockRelativePath = `${releaseHistoryRoot}/.windows-package-provenance.lock`;
@@ -98,6 +106,74 @@ const readCanonicalJson = async (root, relativePath, label) => {
 const sameBinding = (actual, expected) => actual?.path === expected.path
   && Number(actual?.sizeBytes) === expected.sizeBytes && actual?.sha256 === expected.sha256;
 const bindingWithoutBytes = (binding) => ({ path: binding.path, sizeBytes: binding.sizeBytes, sha256: binding.sha256 });
+
+const assertRecoveryBootstrapIdentity = (release, label) => {
+  check(release?.visibleRelease === WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_RELEASE
+    && release?.releaseId === WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_RELEASE_ID
+    && Number(release?.monthlySequence) === 51
+    && release?.parentRelease === WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_PARENT_RELEASE
+    && release?.recoveryBootstrapDecision === WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_DECISION,
+  `${label} is not the exact authorized Bronze sequence-51 recovery bootstrap.`);
+};
+
+const assertRecoveryBootstrapPreviousPackageProvenance = (previous, label) => {
+  check(previous?.release === WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_PARENT_RELEASE
+    && previous?.releaseId === WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_PARENT_RELEASE_ID
+    && previous?.lineageRole === WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_LINEAGE_ROLE
+    && previous?.trustedInstalledPredecessor === false,
+  `${label} does not mark rejected sequence 50 as history-anchor-only ancestry.`);
+  const recovery = previous?.recoveryBootstrap;
+  check(recovery?.decision === WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_DECISION
+    && recovery?.parentStatus === WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_PARENT_STATUS
+    && recovery?.currentRelease === WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_RELEASE
+    && recovery?.currentReleaseId === WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_RELEASE_ID
+    && recovery?.parentRelease === WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_PARENT_RELEASE
+    && recovery?.parentReleaseId === WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_PARENT_RELEASE_ID
+    && Number(recovery?.currentSequence) === 51 && Number(recovery?.parentSequence) === 50
+    && recovery?.releaseLedger?.path === 'config/release-ledger.json'
+    && Number(recovery?.releaseLedger?.sizeBytes) > 0
+    && shaPattern.test(String(recovery?.releaseLedger?.sha256 ?? '')),
+  `${label} recovery authority binding is missing, stale or forged.`);
+};
+
+export const readWindowsPackageRecoveryBootstrapAuthority = async ({ root, preallocatedRelease }) => {
+  assertRecoveryBootstrapIdentity(preallocatedRelease, 'Preallocated release');
+  const relativePath = 'config/release-ledger.json';
+  const ledgerBinding = await readRegularFile(resolve(root, relativePath), 'Release ledger', resolve(root, 'config'));
+  const ledger = parseJson(ledgerBinding.bytes, 'Release ledger');
+  check(ledger?.schemaVersion === 1 && Array.isArray(ledger.entries), 'Release ledger schema is invalid.');
+  assertRecoveryBootstrapIdentity({
+    visibleRelease: ledger.current?.visibleRelease,
+    releaseId: ledger.current?.releaseId,
+    monthlySequence: ledger.current?.monthlySequence,
+    parentRelease: ledger.current?.parentRelease,
+    recoveryBootstrapDecision: ledger.current?.recoveryBootstrapDecision
+  }, 'Release ledger current release');
+  const parentEntries = ledger.entries.filter((entry) => entry?.releaseId === WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_PARENT_RELEASE_ID
+    && Number(entry?.monthlySequence) === 50 && entry?.version === '22.08.2026.50');
+  check(parentEntries.length === 1 && parentEntries[0].status === WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_PARENT_STATUS,
+    'Release ledger does not contain exactly one rejected-invalid-package Bronze sequence-50 parent.');
+  const currentEntries = ledger.entries.filter((entry) => entry?.releaseId === WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_RELEASE_ID
+    && Number(entry?.monthlySequence) === 51 && entry?.version === '26.08.2026.51');
+  check(currentEntries.length === 1
+    && currentEntries[0].parentRelease === WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_PARENT_RELEASE
+    && currentEntries[0].recoveryBootstrapDecision === WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_DECISION
+    && ledger.current?.status === WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_CURRENT_STATUS
+    && currentEntries[0].status === WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_CURRENT_STATUS
+    && ledger.current.status === currentEntries[0].status,
+  'Release ledger does not contain exactly one authorized Bronze sequence-51 recovery release.');
+  return Object.freeze({
+    decision: WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_DECISION,
+    parentStatus: WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_PARENT_STATUS,
+    currentRelease: WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_RELEASE,
+    currentReleaseId: WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_RELEASE_ID,
+    parentRelease: WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_PARENT_RELEASE,
+    parentReleaseId: WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_PARENT_RELEASE_ID,
+    currentSequence: 51,
+    parentSequence: 50,
+    releaseLedger: Object.freeze({ path: relativePath, sizeBytes: ledgerBinding.sizeBytes, sha256: ledgerBinding.sha256 })
+  });
+};
 
 const releaseIdentity = (release) => {
   const match = /^Bronze (\d{2})\.(\d{2})\.(\d{4})\.(\d+)$/u.exec(String(release ?? ''));
@@ -383,11 +459,26 @@ export const validateWindowsPackageProvenanceEnvelope = ({ receipt, expectedRele
     'Windows package provenance parent release is not the exact monthly predecessor.');
   if (identity.sequence === 50) check(receipt.previousPackageProvenance === null,
     'Bronze sequence 50 is the governed bootstrap and cannot carry a previous package self-claim.');
-  else check(receipt.previousPackageProvenance?.release === receipt.parentRelease
-    && receipt.previousPackageProvenance?.releaseId === parent.releaseId
-    && typeof receipt.previousPackageProvenance?.path === 'string' && isAbsolute(receipt.previousPackageProvenance.path)
-    && shaPattern.test(String(receipt.previousPackageProvenance?.sha256 ?? '')),
-  'Windows package provenance exact parent bundle binding is missing or invalid.');
+  else {
+    check(receipt.previousPackageProvenance?.release === receipt.parentRelease
+      && receipt.previousPackageProvenance?.releaseId === parent.releaseId
+      && typeof receipt.previousPackageProvenance?.path === 'string' && isAbsolute(receipt.previousPackageProvenance.path)
+      && shaPattern.test(String(receipt.previousPackageProvenance?.sha256 ?? '')),
+    'Windows package provenance exact parent bundle binding is missing or invalid.');
+    if (identity.sequence === 51) {
+      check(receipt.release === WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_RELEASE
+        && receipt.releaseId === WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_RELEASE_ID
+        && receipt.parentRelease === WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_PARENT_RELEASE,
+      'Bronze sequence 51 is reserved for the exact rejected-50 recovery bootstrap.');
+      assertRecoveryBootstrapPreviousPackageProvenance(receipt.previousPackageProvenance,
+        'Windows package provenance previous package');
+    } else {
+      check(receipt.previousPackageProvenance?.recoveryBootstrap === undefined
+        && receipt.previousPackageProvenance?.lineageRole === undefined
+        && receipt.previousPackageProvenance?.trustedInstalledPredecessor === undefined,
+      'Normal Bronze continuation cannot reuse recovery-bootstrap predecessor semantics.');
+    }
+  }
   check(Number.isFinite(Date.parse(receipt.generatedAt)) && Date.parse(receipt.generatedAt) <= Date.now(),
     'Windows package provenance timestamp is invalid or future-dated.');
   check(receipt.producer?.path === 'apps/desktop/scripts/run-electron-builder.mjs'
@@ -461,7 +552,7 @@ export const verifyPreviousWindowsPackageProvenance = async ({ root, preallocate
     currentProvenance, runGit, requireEarlierCommit: true, externalChainRoot });
   const generatedAt = Date.parse(result.receipt.generatedAt);
   check(Number.isFinite(generatedAt) && generatedAt < Date.now(), 'Previous package provenance timestamp is stale or from the future.');
-  return Object.freeze({
+  const previous = {
     path: result.bundleBinding.fullPath, sizeBytes: result.bundleBinding.sizeBytes, sha256: result.bundleBinding.sha256,
     release: result.receipt.release, releaseId: result.receipt.releaseId, channel: result.receipt.channel,
     version: result.receipt.version, packageVersion: result.receipt.packageVersion,
@@ -469,7 +560,63 @@ export const verifyPreviousWindowsPackageProvenance = async ({ root, preallocate
     packagedRuntime: result.receipt.artifacts?.packagedRuntime,
     externalAnchor: { path: result.externalAnchor.binding.path, sizeBytes: result.externalAnchor.binding.sizeBytes,
       sha256: result.externalAnchor.binding.sha256 }
+  };
+  if (sequence === 51) {
+    const recoveryBootstrap = await readWindowsPackageRecoveryBootstrapAuthority({ root, preallocatedRelease });
+    Object.assign(previous, {
+      lineageRole: WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_LINEAGE_ROLE,
+      trustedInstalledPredecessor: false,
+      recoveryBootstrap
+    });
+  }
+  return Object.freeze(previous);
+};
+
+const verifyRecoveryBootstrapParentBundleLiveBeforeCommit = async ({ root, receipt }) => {
+  const identity = releaseIdentity(receipt.release);
+  check(identity.sequence === 51, 'Recovery parent precommit readback is reserved for Bronze sequence 51.');
+  const recoveryBootstrap = await readWindowsPackageRecoveryBootstrapAuthority({ root, preallocatedRelease: {
+    visibleRelease: receipt.release,
+    releaseId: receipt.releaseId,
+    monthlySequence: identity.sequence,
+    parentRelease: receipt.parentRelease,
+    recoveryBootstrapDecision: receipt.previousPackageProvenance?.recoveryBootstrap?.decision
+  } });
+  check(JSON.stringify(receipt.previousPackageProvenance?.recoveryBootstrap) === JSON.stringify(recoveryBootstrap),
+    'Sequence-51 recovery package receipt lost its live release-ledger binding before immutable commit.');
+  const canonicalRelativePath = windowsPackageHistoryBundleRelativePath(WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_PARENT_RELEASE);
+  const canonicalFullPath = resolve(root, canonicalRelativePath);
+  check(normalize(receipt.previousPackageProvenance?.path) === normalize(canonicalFullPath),
+    'Sequence-51 recovery parent bundle path is not canonical at immutable precommit.');
+  const binding = await readRegularFile(canonicalFullPath, 'Recovery parent package provenance history bundle',
+    resolve(root, releaseHistoryRoot));
+  check(binding.sizeBytes === Number(receipt.previousPackageProvenance?.sizeBytes)
+    && binding.sha256 === receipt.previousPackageProvenance?.sha256,
+  'Sequence-51 recovery parent bundle live size/SHA binding changed before immutable commit.');
+  const bundle = parseJson(binding.bytes, 'Recovery parent package provenance history bundle');
+  check(bundle?.schemaVersion === 1 && bundle.id === WINDOWS_PACKAGE_HISTORY_BUNDLE_ID && bundle.status === 'PASS'
+    && bundle.release === WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_PARENT_RELEASE
+    && bundle.releaseId === WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_PARENT_RELEASE_ID
+    && bundle.channel === 'Bronze' && bundle.version === '22.08.2026.50' && bundle.packageVersion === '22.8.2026-50'
+    && bundle.packageProvenance?.archivePath === 'windows-package-provenance.json'
+    && Number(bundle.packageProvenance?.sizeBytes) > 0 && shaPattern.test(String(bundle.packageProvenance?.sha256 ?? ''))
+    && receipt.previousPackageProvenance.release === WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_PARENT_RELEASE
+    && receipt.previousPackageProvenance.releaseId === WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_PARENT_RELEASE_ID,
+  'Sequence-51 recovery parent bundle is not the exact rejected Bronze sequence-50 provenance identity.');
+  const bundleDirectory = dirname(canonicalFullPath);
+  const archivedReceiptBinding = await readRegularFile(resolve(bundleDirectory, bundle.packageProvenance.archivePath),
+    'Recovery parent archived package provenance', bundleDirectory);
+  check(archivedReceiptBinding.sizeBytes === Number(bundle.packageProvenance.sizeBytes)
+    && archivedReceiptBinding.sha256 === bundle.packageProvenance.sha256,
+  'Sequence-51 recovery parent archived package provenance changed before immutable commit.');
+  const archivedReceipt = validateWindowsPackageProvenanceEnvelope({
+    receipt: parseJson(archivedReceiptBinding.bytes, 'Recovery parent archived package provenance'),
+    expectedReleaseId: WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_PARENT_RELEASE_ID
   });
+  check(archivedReceipt.release === WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_PARENT_RELEASE
+    && archivedReceipt.releaseId === WINDOWS_PACKAGE_RECOVERY_BOOTSTRAP_PARENT_RELEASE_ID,
+  'Sequence-51 recovery parent archived receipt is not exact Bronze sequence 50.');
+  return Object.freeze({ path: canonicalFullPath, sizeBytes: binding.sizeBytes, sha256: binding.sha256 });
 };
 
 const writeExclusiveFile = async (path, bytes) => {
@@ -597,6 +744,17 @@ export const writeWindowsPackageProvenanceTransaction = async ({ root, receipt,
   const receiptBytes = Buffer.from(`${JSON.stringify(receipt, null, 2)}\n`, 'utf8');
   const identity = releaseIdentity(receipt.release);
   validateWindowsPackageProvenanceEnvelope({ receipt, expectedReleaseId: receipt.releaseId });
+  if (identity.sequence === 51) {
+    const recoveryBootstrap = await readWindowsPackageRecoveryBootstrapAuthority({ root, preallocatedRelease: {
+      visibleRelease: receipt.release,
+      releaseId: receipt.releaseId,
+      monthlySequence: identity.sequence,
+      parentRelease: receipt.parentRelease,
+      recoveryBootstrapDecision: receipt.previousPackageProvenance?.recoveryBootstrap?.decision
+    } });
+    check(JSON.stringify(receipt.previousPackageProvenance.recoveryBootstrap) === JSON.stringify(recoveryBootstrap),
+      'Sequence-51 recovery package receipt is not bound to the live canonical release ledger.');
+  }
   const bundleRelativePath = windowsPackageHistoryBundleRelativePath(receipt.release);
   const bundlePath = resolve(root, bundleRelativePath);
   const bundleDirectory = dirname(bundlePath);
@@ -653,6 +811,7 @@ export const writeWindowsPackageProvenanceTransaction = async ({ root, receipt,
     check(bundleReadback.sizeBytes === bundleBytes.length && bundleReadback.sha256 === sha256Bytes(bundleBytes),
       'Staged package provenance bundle readback failed.');
     const stagedSnapshot = await bundleDirectorySnapshot(stagingDirectory);
+    if (identity.sequence === 51) await verifyRecoveryBootstrapParentBundleLiveBeforeCommit({ root, receipt });
     let externalAnchor;
     if (existsSync(bundleDirectory)) {
       const publishedSnapshot = await bundleDirectorySnapshot(bundleDirectory);
@@ -801,7 +960,13 @@ export const verifyWindowsPackageProvenanceLive = async ({ root, expectedRelease
       'Bronze sequence 50 must be the exact package-provenance bootstrap without a self-claimed parent bundle.');
   } else {
     const previous = await verifyPreviousWindowsPackageProvenance({ root,
-      preallocatedRelease: { monthlySequence: identity.sequence, parentRelease: receipt.parentRelease },
+      preallocatedRelease: {
+        monthlySequence: identity.sequence,
+        parentRelease: receipt.parentRelease,
+        visibleRelease: receipt.release,
+        releaseId: receipt.releaseId,
+        recoveryBootstrapDecision: receipt.previousPackageProvenance?.recoveryBootstrap?.decision
+      },
       bundlePath: receipt.previousPackageProvenance?.path, currentProvenance: liveSource.provenance,
       runGit: liveSource.runGit, externalChainRoot });
     check(JSON.stringify(receipt.previousPackageProvenance) === JSON.stringify(previous),

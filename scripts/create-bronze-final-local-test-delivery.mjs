@@ -1012,6 +1012,8 @@ export const createFinalLocalTestDeliveryReceipt = (input) => {
   check(Number.isSafeInteger(currentSequence) && currentSequence >= 50,
     'Application sequence is outside the governed predecessor boundary.');
   const isGovernedBootstrap = currentSequence === 50;
+  const isRecoveryBootstrap = currentSequence === 51;
+  const isFreshInstallBootstrap = isGovernedBootstrap || isRecoveryBootstrap;
   check(packageVersion === `${Number(day)}.${Number(month)}.${year}-${sequence}`,
     'Desktop package version is not bound to the application version.');
   check(/^[a-f0-9]{40,64}$/u.test(sourceCommit), 'Source commit is invalid.');
@@ -1175,8 +1177,10 @@ export const createFinalLocalTestDeliveryReceipt = (input) => {
     && installationPreservation.packagedRuntime?.sha256 === packagedRuntime.sha256
     && Number(installationPreservation.packagedRuntime?.sizeBytes) === packagedRuntime.sizeBytes,
   'Installed-release UAT110 executable identity is stale.');
-  const expectedInstallationMode = isGovernedBootstrap ? 'BOOTSTRAP_FRESH_INSTALL' : 'CONTINUATION_N_TO_N_PLUS_ONE';
-  const expectedPrimaryClassification = isGovernedBootstrap ? 'BOOTSTRAP_FRESH_INSTALL_SEQUENCE_50' : 'VERSION_UPGRADE_N_TO_N_PLUS_1';
+  const expectedInstallationMode = isGovernedBootstrap ? 'BOOTSTRAP_FRESH_INSTALL'
+    : isRecoveryBootstrap ? 'RECOVERY_BOOTSTRAP_FRESH_INSTALL' : 'CONTINUATION_N_TO_N_PLUS_ONE';
+  const expectedPrimaryClassification = isGovernedBootstrap ? 'BOOTSTRAP_FRESH_INSTALL_SEQUENCE_50'
+    : isRecoveryBootstrap ? 'RECOVERY_BOOTSTRAP_FRESH_INSTALL_SEQUENCE_51' : 'VERSION_UPGRADE_N_TO_N_PLUS_1';
   check(installationPreservation.installationMode === expectedInstallationMode,
     'Installed-release UAT110 mode does not match package provenance sequence semantics.');
   for (const [label, phase, classification] of [
@@ -1208,15 +1212,18 @@ export const createFinalLocalTestDeliveryReceipt = (input) => {
       && historicalPreviousSourceProvenance === null && previousPackageProducerReadback === null,
     'Bronze 50 final delivery must not receive fabricated previous package evidence.');
     check(installationPreservation.previousPackageProvenance === null
+      && installationPreservation.recoveryBootstrapAuthority === null
       && installationPreservation.installedBefore === null
       && installationPreservation.upgrade === null
       && installationPreservation.freshInstall?.classification === expectedPrimaryClassification
+      && installationPreservation.freshInstall?.recoveryBootstrap === false
       && JSON.stringify(installationPreservation.freshInstall) === JSON.stringify(installationPreservation.primaryInstallation),
     'Bronze 50 UAT110 does not carry the exclusive fresh-install union branch.');
     check(installationPreservation.primaryInstallation?.fromFileVersion === null
       && installationPreservation.primaryInstallation?.fromSequence === null
       && installationPreservation.primaryInstallation?.exactSuccessor === false
       && installationPreservation.primaryInstallation?.governedBootstrap === true
+      && installationPreservation.primaryInstallation?.recoveryBootstrap === false
       && installationPreservation.primaryInstallation?.targetInstallRootAbsentBefore === true
       && installationPreservation.primaryInstallation?.targetExecutableAbsentBefore === true
       && installationPreservation.primaryInstallation?.bronzeUninstallRegistryAbsentBefore === true
@@ -1224,11 +1231,87 @@ export const createFinalLocalTestDeliveryReceipt = (input) => {
       && installationPreservation.primaryInstallation?.before?.program?.bronze?.exists === false
       && Number(installationPreservation.primaryInstallation?.before?.uninstallRegistry?.bronze?.entryCount) === 0,
     'Bronze 50 UAT110 fresh-install absence proof is incomplete.');
+  } else if (isRecoveryBootstrap) {
+    const recovery = packageProvenance.previousPackageProvenance?.recoveryBootstrap;
+    const parentRelease = 'Bronze 22.08.2026.50';
+    check(release === 'Bronze 26.08.2026.51'
+      && packageProvenance.releaseId === 'bronze-2026-08-26-r51'
+      && packageProvenance.parentRelease === parentRelease
+      && packageProvenance.previousPackageProvenance?.release === parentRelease
+      && packageProvenance.previousPackageProvenance?.releaseId === 'bronze-2026-08-22-r50'
+      && packageProvenance.previousPackageProvenance?.lineageRole === 'REJECTED_PARENT_HISTORY_ANCHOR_ONLY'
+      && packageProvenance.previousPackageProvenance?.trustedInstalledPredecessor === false
+      && recovery?.decision === 'RECOVERY_BOOTSTRAP_AFTER_REJECTED_50'
+      && recovery?.parentStatus === 'REJECTED_INVALID_PACKAGE'
+      && recovery?.currentRelease === release && recovery?.currentReleaseId === packageProvenance.releaseId
+      && recovery?.parentRelease === parentRelease && recovery?.parentReleaseId === 'bronze-2026-08-22-r50'
+      && Number(recovery?.currentSequence) === 51 && Number(recovery?.parentSequence) === 50
+      && recovery?.releaseLedger?.path === 'config/release-ledger.json'
+      && Number(recovery?.releaseLedger?.sizeBytes) > 0
+      && SHA256_PATTERN.test(String(recovery?.releaseLedger?.sha256 ?? '')),
+    'Bronze 51 package is not the exact authorized rejected-50 recovery bootstrap.');
+    check(previousPackageHistoryBundle?.value?.schemaVersion === 1
+      && previousPackageHistoryBundle.value.id === 'PPT-WINDOWS-PACKAGE-PROVENANCE-HISTORY-BUNDLE-V1'
+      && previousPackageHistoryBundle.value.status === 'PASS'
+      && previousPackageHistoryBundle.value.release === parentRelease
+      && previousPackageHistoryBundle.value.releaseId === packageProvenance.previousPackageProvenance?.releaseId
+      && previousPackageHistoryBundle.value.sourceCommit === packageProvenance.previousPackageProvenance?.sourceCommit
+      && previousPackageHistoryBundle.value.channel === 'Bronze'
+      && previousPackageHistoryBundle.value.version === '22.08.2026.50'
+      && previousPackageHistoryBundle.value.packageVersion === '22.8.2026-50'
+      && previousPackageHistoryBundle.value.producer?.path === previousPackageArchive?.value?.producer?.path
+      && previousPackageHistoryBundle.value.producer?.sha256 === previousPackageArchive?.value?.producer?.sha256
+      && Number(previousPackageHistoryBundle.value.producer?.sizeBytes) === Number(previousPackageArchive?.value?.producer?.sizeBytes)
+      && previousPackageHistoryBundle.sha256 === packageProvenance.previousPackageProvenance?.sha256
+      && Number(previousPackageHistoryBundle.sizeBytes) === Number(packageProvenance.previousPackageProvenance?.sizeBytes)
+      && previousPackageHistoryBundle.value.packageProvenance?.archivePath === 'windows-package-provenance.json'
+      && previousPackageHistoryBundle.value.packageProvenance?.sha256 === previousPackageArchive?.sha256
+      && Number(previousPackageHistoryBundle.value.packageProvenance?.sizeBytes) === Number(previousPackageArchive?.sizeBytes),
+    'Rejected Bronze 50 history bundle is not preserved as immutable recovery ancestry.');
+    check(previousPackageArchive?.value?.schemaVersion === 2
+      && previousPackageArchive.value.id === 'PPT-WINDOWS-PACKAGE-PROVENANCE-V2'
+      && previousPackageArchive.value.evidenceKind === 'WINDOWS_PACKAGE_PROVENANCE'
+      && previousPackageArchive.value.status === 'PASS'
+      && previousPackageArchive.value.release === parentRelease
+      && previousPackageArchive.value.releaseId === packageProvenance.previousPackageProvenance?.releaseId
+      && previousPackageArchive.value.sourceProvenance?.headCommit === packageProvenance.previousPackageProvenance?.sourceCommit,
+    'Rejected Bronze 50 package archive is not the exact schema-2 receipt inside its history bundle.');
+    assertMatchingReleaseSourceProvenance(historicalPreviousSourceProvenance, previousPackageArchive.value.sourceProvenance,
+      'recovery parent package archive source');
+    check(previousPackageArchive.value.producer?.path === 'apps/desktop/scripts/run-electron-builder.mjs'
+      && previousPackageArchive.value.producer?.sha256 === previousPackageProducerReadback?.sha256
+      && Number(previousPackageArchive.value.producer?.sizeBytes) === Number(previousPackageProducerReadback?.sizeBytes),
+    'Rejected Bronze 50 package producer blob does not match its exact historical source commit.');
+    check(installationPreservation.installedBefore === null
+      && installationPreservation.upgrade === null
+      && installationPreservation.freshInstall?.classification === expectedPrimaryClassification
+      && JSON.stringify(installationPreservation.freshInstall) === JSON.stringify(installationPreservation.primaryInstallation),
+    'Bronze 51 UAT110 does not carry the exclusive recovery fresh-install union branch.');
+    check(installationPreservation.previousPackageProvenance?.path === packageProvenance.previousPackageProvenance?.path
+      && Number(installationPreservation.previousPackageProvenance?.sizeBytes) === Number(packageProvenance.previousPackageProvenance?.sizeBytes)
+      && installationPreservation.previousPackageProvenance?.sha256 === packageProvenance.previousPackageProvenance?.sha256
+      && JSON.stringify(installationPreservation.recoveryBootstrapAuthority) === JSON.stringify(recovery),
+    'Bronze 51 UAT110 is not bound to the immutable rejected-parent bundle and release-ledger authority.');
+    check(installationPreservation.primaryInstallation?.fromFileVersion === null
+      && installationPreservation.primaryInstallation?.fromSequence === null
+      && installationPreservation.primaryInstallation?.exactSuccessor === false
+      && installationPreservation.primaryInstallation?.governedBootstrap === false
+      && installationPreservation.primaryInstallation?.recoveryBootstrap === true
+      && installationPreservation.primaryInstallation?.targetInstallRootAbsentBefore === true
+      && installationPreservation.primaryInstallation?.targetExecutableAbsentBefore === true
+      && installationPreservation.primaryInstallation?.bronzeUninstallRegistryAbsentBefore === true
+      && installationPreservation.primaryInstallation?.packagePreviousProvenanceAbsent === false
+      && installationPreservation.primaryInstallation?.before?.program?.bronze?.exists === false
+      && Number(installationPreservation.primaryInstallation?.before?.uninstallRegistry?.bronze?.entryCount) === 0,
+    'Bronze 51 UAT110 recovery fresh-install absence proof is incomplete.');
   } else {
-    check(installationPreservation.freshInstall === null
+    check(installationPreservation.recoveryBootstrapAuthority === null
+      && installationPreservation.freshInstall === null
       && installationPreservation.upgrade?.classification === expectedPrimaryClassification
+      && installationPreservation.primaryInstallation?.recoveryBootstrap === false
+      && installationPreservation.upgrade?.recoveryBootstrap === false
       && JSON.stringify(installationPreservation.upgrade) === JSON.stringify(installationPreservation.primaryInstallation),
-    'Bronze 51+ UAT110 does not carry the exclusive continuation union branch.');
+    'Bronze 52+ UAT110 does not carry the exclusive continuation union branch.');
     const from = parseFileVersion(installationPreservation.upgrade?.fromFileVersion, 'Upgrade from');
     const parentRelease = `Bronze ${String(from[0]).padStart(2, '0')}.${String(from[1]).padStart(2, '0')}.${from[2]}.${from[3]}`;
     check(previousPackageHistoryBundle?.value?.schemaVersion === 1
@@ -1269,7 +1352,7 @@ export const createFinalLocalTestDeliveryReceipt = (input) => {
       && to[3] === from[3] + 1 && packageProvenance.parentRelease === parentRelease
       && packageProvenance.previousPackageProvenance?.release === parentRelease
       && installationPreservation.installedBefore?.fileVersion === installationPreservation.upgrade?.fromFileVersion
-      && installationPreservation.installedBefore?.fileVersion === previousPackageArchive.value.artifacts?.packagedRuntime?.fileVersion
+      && installationPreservation.installedBefore?.fileVersion === previousPackageHistoryBundle.value.packageVersion
       && installationPreservation.installedBefore?.sha256 === previousPackageArchive.value.artifacts?.packagedRuntime?.sha256
       && Number(installationPreservation.installedBefore?.sizeBytes) === Number(previousPackageArchive.value.artifacts?.packagedRuntime?.sizeBytes)
       && installationPreservation.previousPackageProvenance?.path === packageProvenance.previousPackageProvenance?.path
@@ -1516,8 +1599,9 @@ export const createFinalLocalTestDeliveryReceipt = (input) => {
       status: 'PASS', id: INSTALLED_RELEASE_UAT_ID,
       expectedReleaseId: installationPreservation.expectedReleaseId,
       installationMode: expectedInstallationMode,
-      freshInstall: isGovernedBootstrap ? 'PASS' : 'NOT_APPLICABLE',
-      upgrade: isGovernedBootstrap ? 'NOT_APPLICABLE' : 'PASS',
+       freshInstall: isFreshInstallBootstrap ? 'PASS' : 'NOT_APPLICABLE',
+       upgrade: isFreshInstallBootstrap ? 'NOT_APPLICABLE' : 'PASS',
+       recoveryBootstrap: isRecoveryBootstrap ? 'PASS' : 'NOT_APPLICABLE',
       sameVersionMaintenance: 'PASS', metadataOnlyUserDataInspection: true,
       markerPreserved: true, otherChannelWrites: 0,
       receiptSha256: evidenceBindings.installationPreservationUat110.sha256

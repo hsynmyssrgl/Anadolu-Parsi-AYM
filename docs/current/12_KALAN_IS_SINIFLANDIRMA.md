@@ -2,7 +2,7 @@
 
 > Kaynaklar: `config/accepted-scope-registry.json` ve `config/remaining-scope-package-roadmap.json`. Bu belge otomatik üretilir.
 
-- Aktif sürüm: **Bronze 22.08.2026.50**
+- Aktif sürüm: **Bronze 26.08.2026.51**
 - Tarihsel kapsam taban sürümü: **Bronze 04.08.2026.29**
 
 ## Sonuç
