@@ -745,7 +745,7 @@
       "tarih": "2026-08-26",
       "baslik": "Bronze 51 rejected predecessor recovery bootstrap",
       "durum": "ACTIVE",
-      "kaynak": "DEC-276, PR-241 ve 1490bb9f/4ec0820d/de8776f1/6a401791/cb7e8749/4c83cee8/aae819cc/ac2c02c1/5c07258c/b0615638/3eec5426/86602f7a reddedilmis checkpointleri",
+      "kaynak": "DEC-276, PR-241 ve 1490bb9f/4ec0820d/de8776f1/6a401791/cb7e8749/4c83cee8/aae819cc/ac2c02c1/5c07258c/b0615638/3eec5426/86602f7a/3e496f47/398de9c8/75e4072c/0f98c7cc/9a370e51 reddedilmis checkpointleri",
       "etkilenenAlanlar": [
         "config/release-ledger.json",
         "scripts/lib/windows-package-provenance.mjs",
@@ -757,7 +757,7 @@
         "BUILD_STATUS.md",
         "docs/ticari-urun-temeli"
       ],
-      "isListesiEtkisi": "IS-0211, IS-0212, IS-0213, IS-0214, IS-0215, IS-0216 ve IS-0601 DEVAM kalir. Yeni PR-241 zinciriyle master yonetisim sozlesmesi dahil 8 dosyada 85/85 test; ticari temel 1254 kontrol/87 dosya/61 is/241 kural, master makine 241 kural/185 karar/106 ADR/13 DOCX tablo/26 PDF sayfa, governance 1/1 ve DOCX 29/29 gorsel QA PASS vermistir. b0615638 tarihsel verifier marker, 3eec5426 kural kontrolsuz manifest yardimci cagri reddi olarak korunur. Vitest 4.1.10'un desteklemedigi --minWorkers secenegiyle test baslamadan duran cagri 86602f7a ile son rejected checkpointtir; urun kusuru veya PASS degildir. Full exact hedefli ve filtresiz regresyon, TypeScript, kaynak butunlugu, read-only pre/postflight, temiz paket, installer experience, UAT110/UAT111 ve final kurulu UAT tamamlanmadan ara installer yoktur.",
+      "isListesiEtkisi": "IS-0211, IS-0212, IS-0213, IS-0214, IS-0215, IS-0216 ve IS-0601 DEVAM kalir. Odakli 8 dosya/85 test, ticari temel 1254 kontrol, Windows paketleyici 3 dosya/14 test, master makine 241 kural/185 karar/106 ADR/13 DOCX tablo/26 PDF sayfa, governance 1/1 ve final DOCX 29/29 gorsel QA PASS vermistir. Kural FAIL sonrasi generator cagrisinin baslamasi 9a370e51 ile korunur ve aktif son rejected checkpoint olur; urun kusuru veya PASS degildir. Full exact hedefli/filtresiz regresyon, TypeScript, kaynak butunlugu, pre/postflight, temiz paket, installer experience, UAT110/UAT111 ve final kurulu UAT tamamlanmadan ara installer yoktur.",
       "senkronDurumu": "SYNCHRONIZED"
     }
   ]

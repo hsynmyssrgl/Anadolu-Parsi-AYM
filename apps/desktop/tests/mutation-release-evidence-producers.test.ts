@@ -271,11 +271,13 @@ describe('PR-235 canonical mutation evidence producers', () => {
         'scripts/verify-34-b-communication-messaging-lifecycle-privacy-presence-boundary.mjs',
         'scripts/verify-34-c-realtime-calling-media-accessible-ux-boundary.mjs',
         'scripts/verify-34-d-explicit-consent-recording-media-retention-boundary.mjs',
-        'scripts/verify-34-f-family-meetings-decisions-consent-minutes-contract.mjs'
+        'scripts/verify-34-f-family-meetings-decisions-consent-minutes-contract.mjs',
+        'tools/windows-packager/package-lock.json'
       ]
     });
     expect(plan.affectedVitestFiles).toEqual(expect.arrayContaining([
       'apps/desktop/tests/data-store.test.ts',
+      'apps/desktop/tests/ppk025-software-supply-chain-gates.test.ts',
       'apps/desktop/tests/windows-installer-experience-uat-contract.test.ts',
       'packages/database/family-database-authoritative-receipt-time.test.ts'
     ]));
@@ -295,6 +297,9 @@ describe('PR-235 canonical mutation evidence producers', () => {
     ]));
     expect(plan.changedPathDependencies.find((entry) => entry.path === '.gitattributes')).toMatchObject({
       ruleIds: ['governed-source-safety-net']
+    });
+    expect(plan.changedPathDependencies.find((entry) => entry.path === 'tools/windows-packager/package-lock.json')).toMatchObject({
+      ruleIds: ['governed-source-safety-net', 'isolated-windows-packager-toolchain']
     });
     expect(plan.requiredCommands).toEqual(expect.arrayContaining([
       'rootTypecheck',

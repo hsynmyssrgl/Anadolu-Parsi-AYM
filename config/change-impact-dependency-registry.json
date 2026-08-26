@@ -134,6 +134,24 @@
       "includeChangedTestFile": false
     },
     {
+      "id": "isolated-windows-packager-toolchain",
+      "match": {
+        "exactPaths": [
+          "tools/windows-packager/package.json",
+          "tools/windows-packager/package-lock.json"
+        ],
+        "pathPrefixes": ["tools/windows-packager/"],
+        "pathSuffixes": []
+      },
+      "dependentRecords": ["BUILD_STATUS.md", "docs/17_MASTER_BUILD_LEDGER.md"],
+      "affectedVitestFiles": [
+        "apps/desktop/tests/monthly-release-version.test.ts",
+        "apps/desktop/tests/ppk025-software-supply-chain-gates.test.ts",
+        "apps/desktop/tests/windows-package-provenance-history.test.ts"
+      ],
+      "includeChangedTestFile": false
+    },
+    {
       "id": "repository-scripts",
       "match": {
         "exactPaths": [],
@@ -781,7 +799,7 @@
       "id": "governed-source-safety-net",
       "match": {
         "exactPaths": [".gitattributes", "manifest.json", "package-lock.json", "package.json", "repository-metadata.json", "SHA256SUMS.txt", "tsconfig.base.json"],
-        "pathPrefixes": ["apps/", "packages/", "scripts/", "config/", "docs/", "artifacts/manifests/", "artifacts/validation/"],
+        "pathPrefixes": ["apps/", "packages/", "scripts/", "tools/", "config/", "docs/", "artifacts/manifests/", "artifacts/validation/"],
         "pathSuffixes": []
       },
       "dependentRecords": ["SHA256SUMS.txt", "manifest.json"],
