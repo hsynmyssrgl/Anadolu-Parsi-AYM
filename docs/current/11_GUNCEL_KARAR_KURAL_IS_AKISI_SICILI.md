@@ -3,7 +3,7 @@
 - Belge sürümü: **GUNCEL-2026-08-26-V5**
 - Tarih: **26.08.2026**
 - Görünür ürün sürümü: **Bronze 26.08.2026.51**
-- Kaynak HEAD: `9a370e51e847514e885f96ccd12ffb28e7964752`
+- Kaynak HEAD: `dbefb586e6775f695db6892ca00b605a65a2acdc`
 - Statü: **ACTIVE_CURRENT_MASTER_REFERENCE**
 - Kararlar: **DEC-250–DEC-276**
 
@@ -16,7 +16,7 @@
 - Office/RTF/PDF: **872**; benzersiz içerik hash'i: **7585**; tekrar kopya: **29269**.
 - Build209–228 master çiftleri ve eski Bronze aktif referans çifti tarihsel olarak korunmuştur.
 - Karar dosyası: **185**; ADR: **106**; security/threat belgesi: **72**.
-- Mevcut tam belge/config/kanıt envanteri: **2143** (yeni sürümden önceki indeks).
+- Mevcut tam belge/config/kanıt envanteri: **2144** (yeni sürümden önceki indeks).
 
 ## 2. Yetki ve öncelik
 
@@ -165,7 +165,7 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - PR-240 kapanış kayıtlarını içeren 7f866e69 kaynak commitinden final master DOCX doğru native Poppler/LibreOffice zinciriyle 29/29 sayfa görsel QA PASS vermiştir. Tüm sayfalar beş temas sayfasında; 6–7 ve yoğun kural/envanter tablolarını taşıyan 26–29 ayrıca özgün çözünürlükte kusursuzdur.
 - PR-240 d421c299 exact Bronze turunda hedefli 95 dosya/600 test, filtresiz 399 dosya/2.471 test, 172/172 ek komut ve 4.869/4.869 kaynak bütünlüğü PASS sonrasında governed preflight; önce güncel retention/görünür sürüm makbuzu eksikliğini 607a9a53, ardından tamamlanmış çalışma adımlarının 1.428 kanıt yolundan 803 Git-dışı checkpoint payload dosyasının kanal eksikliğini 8b2b5ccc ile fail-closed korumuştur. Kanal kurulumu tamamlanmış localEvidence ve persistent receipt yollarını tracked/manifest dışlamalı kanonik yol, normal dosya, SHA-256, atomik yazım ve readback ile üç kanala eşitler. Seçici 809 yol, odaklı 1 dosya/9 test ve ticari temel 1.234 kontrol PASS; yeni exact preflight PASS olmadan paket yoktur.
 - PR-240 0f0a4653 exact Bronze etki analizi 95 hedefli test dosyası hesaplamış; hedefli turda 600 test PASS iken operation-rule-check-policy current-mutation preflightStatus alanındaki tarihsel 607a9a53/8b2b5ccc FAIL metnini reddetmiş ve 50f4d9e5 ile fail-closed korunmuştur. Tarihsel retler QA alanlarında kalır; güncel mutasyon durumu NOT_RUN_CURRENT_MUTATION olur. Bronze/Silver/Gold hidrasyonu her kanalda 1.428/1.428 ve eksik 0 PASS; yeni exact testler zorunludur.
-- PR-241/DEC-276 Bronze 50 immutable REJECTED_INVALID_PACKAGE geçmişini trusted runtime saymadan korur. b0615638, 3eec5426 ve 86602f7a tarihsel retlerdir. Exact etki değerlendirmesinin eşlenmemiş Windows paketleyici lockfile reddi 3e496f47, ters ruleIds assertionı 398de9c8 ile korunmuş; assertion düzeltmesi 3 dosya/14 test PASS vermiştir. Aktif V5 render aracına desteklenmeyen yol argümanları 75e4072c, yanlış Poppler PATH retryı 0f98c7cc ile reddedilmiştir. DEC-275/DEC-276 hash bağı geçici ayrışırken operation-rule-check FAIL sonrasında generator çağrısının başlaması 9a370e51 ile korunmuş ve aktif son rejected checkpoint olmuştur; olaylar ürün kusuru veya PASS değildir. Doğrulanmış native Poppler ve sistem LibreOffice ile güncel V5 DOCX 29/29 sayfa yeniden üretilmiş ve bütün sayfalar özgün çözünürlükte tek tek taşma, örtüşme, kesilme, font ve bozuk karakter açısından temiz bulunmuştur. Yeni PR-241 hash/operation-check zinciri master yönetişim sözleşmesi dahil 8 dosya/85 test; ticari temel doğrulaması 1.254 kontrol/87 dosya/61 iş/241 kural PASS geçmişi korunur. Yalnız Bronze 51 rejected-parent provenance bundle'ını history-only lineage olarak kullanıp temiz recovery fresh-install ve ayrı same-version maintenance yolunu çalıştırabilir; bütün exact test, kaynak bütünlüğü, preflight/postflight, paket ve kurulu uygulama UAT kapıları zorunludur.
+- PR-241/DEC-276 Bronze 50 immutable REJECTED_INVALID_PACKAGE geçmişini trusted runtime saymadan korur. b0615638, 3eec5426 ve 86602f7a tarihsel retlerdir. Exact etki değerlendirmesinin eşlenmemiş Windows paketleyici lockfile reddi 3e496f47, ters ruleIds assertionı 398de9c8 ile korunmuş; assertion düzeltmesi 3 dosya/14 test PASS vermiştir. Render çağrı retleri 75e4072c/0f98c7cc ve kural FAIL sonrasında başlayan generator çağrısı 9a370e51 ile korunur. Temiz 9f16699d kapanışı sonrasında henüz 89c4332f üzerinde duran Bronze worktree için setup doğrulayıcısının pre-sync exact HEAD reddi dbefb586 ile korunmuş ve aktif son rejected checkpoint olmuştur; olaylar ürün kusuru veya PASS değildir. Doğrulanmış native Poppler ve sistem LibreOffice ile güncel V5 DOCX 29/29 sayfa yeniden üretilmiş ve bütün sayfalar özgün çözünürlükte tek tek temiz bulunmuştur. Yeni PR-241 hash/operation-check zinciri master yönetişim sözleşmesi dahil 8 dosya/85 test; ticari temel doğrulaması 1.254 kontrol/87 dosya/61 iş/241 kural PASS geçmişi korunur. Yalnız Bronze 51 rejected-parent provenance bundle'ını history-only lineage olarak kullanıp temiz recovery fresh-install ve ayrı same-version maintenance yolunu çalıştırabilir; bütün exact test, kaynak bütünlüğü, preflight/postflight, paket ve kurulu uygulama UAT kapıları zorunludur.
 
 ## 9. Görsel kimlik ve erişilebilirlik
 
