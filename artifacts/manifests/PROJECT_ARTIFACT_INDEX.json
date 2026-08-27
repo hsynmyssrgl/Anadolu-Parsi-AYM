@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "release": "Bronze 27.08.2026.52",
   "releaseId": "bronze-2026-08-27-r52",
-  "generatedAt": "2026-08-27T04:14:17.721Z",
+  "generatedAt": "2026-08-27T04:33:41.768Z",
   "selfIndexedPaths": [
     "SHA256SUMS.txt",
     "artifacts/inventory/TESLIMAT_CALISMA_AGACI_ENVANTERI.json",
@@ -4072,8 +4072,8 @@
     },
     {
       "path": "apps/desktop/tests/mutation-release-evidence-producers.test.ts",
-      "bytes": 28018,
-      "sha256": "f5856fc5753cb4920536c9a7370c64693fe522288f1362696d1a257aa04f4339",
+      "bytes": 28304,
+      "sha256": "24bea363d5c903c1bc8790d580b8c75be88db2bc05b5f191ec255a25248a0ecc",
       "extension": ".ts",
       "classification": "EVIDENCE",
       "isDocument": false
@@ -8593,7 +8593,7 @@
     {
       "path": "artifacts/validation/feature-reality-gate.json",
       "bytes": 673,
-      "sha256": "485429b7c373d967e14429bdd83fb7f347283cded46e780e401bcb84d8319dad",
+      "sha256": "6a8499aa96efe38484922beb895ec176c8bf529c0c48a9f57b4831df475ebe87",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -8616,8 +8616,8 @@
     },
     {
       "path": "artifacts/validation/governed-preflight.json",
-      "bytes": 9780,
-      "sha256": "e8dd2247a2a41eea06837a17617bc97852b89c62149685e8021695b197a48d01",
+      "bytes": 9781,
+      "sha256": "0cc9fc6073e0e76e41cc704dd4f9a9cc3e39da2f16734260c3374b349fc9efa1",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -10568,8 +10568,8 @@
     },
     {
       "path": "BUILD_STATUS.md",
-      "bytes": 21122,
-      "sha256": "ff1d609087536206a5ecaaf8e2f5825e220365770211579547114c4e146b3a02",
+      "bytes": 21082,
+      "sha256": "eddbfaf6d7e87a1a059964a45d4822758ed82f414f36fce13272210bb7ed64e5",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -13864,8 +13864,8 @@
     },
     {
       "path": "config/active-governance-ledger.json",
-      "bytes": 57828,
-      "sha256": "315eb310a23fd49b668ebccac6965818fdcb62baf8cb87b82558e5aad5f42cf8",
+      "bytes": 58096,
+      "sha256": "5395a9cae585d3c0553142714c77360d1f75c5e3f24dd83baf206313893b3f3d",
       "extension": ".json",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -14176,8 +14176,8 @@
     },
     {
       "path": "config/user-decision-ledger.json",
-      "bytes": 169906,
-      "sha256": "b172095dc49836498a3853750421ddcae0bd03599ab8798a24bc04d30adfd43b",
+      "bytes": 170978,
+      "sha256": "92f7fad3f7be806e41de8f8f014dedd311c69dae6a5d3138825757e47d314b27",
       "extension": ".json",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -14608,8 +14608,8 @@
     },
     {
       "path": "docs/10_MASTER_DECISION_REGISTER.md",
-      "bytes": 152869,
-      "sha256": "9f924faf0a008f209beac37468b454005b15fe4c276ec26d3125cfec7d5ef356",
+      "bytes": 153449,
+      "sha256": "38cf1a62496e1498013712abad9ff42626f220dfcf187936e5bc1b52c596591a",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -16560,8 +16560,8 @@
     },
     {
       "path": "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
-      "bytes": 36921,
-      "sha256": "615011ea80b8af21287880b57959d57a263eb767a206f418ab9b0e6b524b0309",
+      "bytes": 37392,
+      "sha256": "bbb666a888b23d872ad92dac84933a39b9e8d71e3577c948b81d31e0c064e6f4",
       "extension": ".md",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -16576,8 +16576,8 @@
     },
     {
       "path": "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
-      "bytes": 155647,
-      "sha256": "01ae9dd61b8d3ca3cf7342958bcdc8e57610296880ade06039cd89ab704e8ea1",
+      "bytes": 156098,
+      "sha256": "c86b41663afffc12f847e60fae842b5a982fed7492a70d7ad1e9ad9a68dc5460",
       "extension": ".md",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -16784,16 +16784,16 @@
     },
     {
       "path": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.docx",
-      "bytes": 365873,
-      "sha256": "fcf927e0db3c1e5c72246d20997753e2b449c2109cd14ff271292e7922ea34d7",
+      "bytes": 366059,
+      "sha256": "372294b721954dca292aca5587ebe47520b24b1f8e814d062283b90b309363a0",
       "extension": ".docx",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
     },
     {
       "path": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.pdf",
-      "bytes": 512257,
-      "sha256": "15b45cd1d0830db52a8157d378bff7af78115a39de9a3e894abefc98dccd3cb4",
+      "bytes": 512720,
+      "sha256": "ae37b169266e12a2d4b3b4be58288b9b3f96beb2abd41ec75bc9135432be91c0",
       "extension": ".pdf",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -18600,16 +18600,16 @@
     },
     {
       "path": "docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md",
-      "bytes": 58752,
-      "sha256": "b12bb07e44371f2177fc1667b7025bf52bd0b5d3bf269d0d51340ce3811b7288",
+      "bytes": 59670,
+      "sha256": "b79b4e1117152ef9fb16d07cc2cbb236e97d441625829a350f5df79ef470a09b",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
     },
     {
       "path": "docs/decisions/DEC-276-bronze-51-rejected-predecessor-recovery-bootstrap.md",
-      "bytes": 25049,
-      "sha256": "0593e9aff2824a752d0e570cc4f6f55191b36b0c41006665e320198f77df7eeb",
+      "bytes": 25697,
+      "sha256": "e7f1dbcc94bfd7ba90382f00c981635f0cf959642c3dc50ed730eb3952a79c69",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -19368,8 +19368,8 @@
     },
     {
       "path": "docs/ticari-urun-temeli/01_YONETIM/05_DEGISIKLIK_SICILI.json",
-      "bytes": 65154,
-      "sha256": "89bb4b71e42987d056dc7919068d58994814c38ec3a40101820b18bab3f5cc7a",
+      "bytes": 65594,
+      "sha256": "c8b940824dcbb0129f2bb18899a6781b164fb9dc568bc395bc84cea0a4c80212",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -19489,7 +19489,7 @@
     {
       "path": "docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json",
       "bytes": 17460,
-      "sha256": "581ba85fe83148f57e00d0700337d810b018f7b76ddbe155e12986b51e5f2c4f",
+      "sha256": "b2d795e2375cba7face33e45e439ba5132164e1a4fbc9bf2258ec46519749c90",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -19936,8 +19936,8 @@
     },
     {
       "path": "docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md",
-      "bytes": 24218,
-      "sha256": "2f8230e86ec9e248f14512efdbc5620f7e2e85b6a81bfa1639dc108728485793",
+      "bytes": 24770,
+      "sha256": "0309765359adf0a1037f2ad03bd70ab9a6d0c5689c5759bcedf49a2f3c7c0549",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -19952,8 +19952,8 @@
     },
     {
       "path": "docs/ticari-urun-temeli/08_IS_LISTESI/03_ANA_IS_SICILI.json",
-      "bytes": 33600,
-      "sha256": "9ed717b9a8012e4abf57c86270a098126578c1a1f5cd6ee621d9443595b70f4b",
+      "bytes": 33709,
+      "sha256": "93d3e172ecfd004f70344c529f03dee587986195b2e0f196d7cdb3f01203546f",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -20008,8 +20008,8 @@
     },
     {
       "path": "docs/ticari-urun-temeli/11_OTOMASYON/dogrula-ticari-temel-alani.mjs",
-      "bytes": 30675,
-      "sha256": "cb28eaee90ec02e4bc9b471453efd984b0f0c01efc995c550f69084bcb8e7203",
+      "bytes": 31089,
+      "sha256": "19beb12b2a1e88945677633821e901a28f189d4e79db802bd4140d088b305cd2",
       "extension": ".mjs",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -27352,8 +27352,8 @@
     },
     {
       "path": "scripts/generate-current-master-documentation.py",
-      "bytes": 71975,
-      "sha256": "bfa188b872b3ad901c38211f33ab60545a8cb59ccdc16565cf1eb85e8e891852",
+      "bytes": 72431,
+      "sha256": "5107f3729b983bf03195683df4a9f370c2ac8fac8b89ab63a866709e17e6fc67",
       "extension": ".py",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -28240,8 +28240,8 @@
     },
     {
       "path": "scripts/run-governed-preflight.mjs",
-      "bytes": 5007,
-      "sha256": "58b23d437de620340801beefaa686c5f6299fd1423279818ead3ca1697e98587",
+      "bytes": 5262,
+      "sha256": "1a0f6eb077d0e66bd3b7e9b552213ebefbb94fd5792246780f09dbe8ace33698",
       "extension": ".mjs",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -34472,8 +34472,8 @@
     },
     {
       "path": "scripts/verify-operation-rule-check.mjs",
-      "bytes": 24870,
-      "sha256": "37c005e2d3267872f7430f025db1599159bb30c56734416e3a1254f3d3091249",
+      "bytes": 25345,
+      "sha256": "b4e0200d1b978ee1212d17df4164e0057276bd386935f4a38bc67ad4d8ddaaf5",
       "extension": ".mjs",
       "classification": "TEST_OR_GATE",
       "isDocument": false

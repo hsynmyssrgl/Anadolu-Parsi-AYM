@@ -3,7 +3,7 @@
 - Belge sürümü: **GUNCEL-2026-08-27-V5**
 - Tarih: **27.08.2026**
 - Görünür ürün sürümü: **Bronze 27.08.2026.52**
-- Kaynak HEAD: `77a87a8703aa17cfce803aa1a5778131d1df8dd2`
+- Kaynak HEAD: `0854a4ecc9a1970df40d781f07c8bf1c08c95678`
 - Statü: **ACTIVE_CURRENT_MASTER_REFERENCE**
 - Kararlar: **DEC-250–DEC-276**
 
@@ -182,6 +182,7 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - Bronze 27.08.2026.52 güncel master belge QA turunda DOCX 30/30 ve PDF 28/28, toplam 58/58 sayfa özgün çözünürlükte PASS vermiştir. Taşma, örtüşme, kırpılma, token-ortası sarım, font/glyph, tablo, header/footer, marj veya sayfa numarası kusuru yoktur; exact ürün, paket ve kurulu tam UI UAT kapıları ayrıca zorunludur.
 - PPK-015 ret/retry kayıtlarıyla yeniden üretilen güncel master DOCX 31/31 ve PDF 28/28, toplam 59/59 sayfada görsel QA PASS vermiştir. Bütün sayfalar temas görünümünde; değişiklik yoğun 7-9 ve tablo yoğun 25-31 ayrıca özgün çözünürlükte taşma, örtüşme, kırpılma, token-ortası sarım, font/glyph, tablo, header/footer, marj veya sayfa numarası kusuru olmadan PASS'tir. Exact ürün, paket ve kurulu UAT kapıları ayrıca zorunludur.
 - e0f85425 exact Bronze 52 turunda hedefli 21 dosya/214 test, filtresiz 399 dosya/2.484 test ve root TypeScript PASS sonrasında 10 izlenen makbuzun yalnız generatedAt alanı değişmiş; temiz çalışma ağacı/source-integrity FAIL'i 77a87a87 ile korunmuştur. Strict --no-write pretypecheck/prebuild aktarımı, fail-closed kural/test bağı ve 10/10 byte-exact makbuz değişmezliği PASS'tir; yeni exact kapanış, paket ve kurulu UAT zorunludur.
+- Yeni exact Bronze preflightta eski .51 installer EXE/blockmap kalıntısı 4462706a, yanlış --no-write bayrağının writer moda sessiz düşmesi 0854a4ec ile reddedilmiştir. Eski installer artefaktları silinmiş; kurulu .51 predecessor ve immutable provenance korunmuştur. Governed preflight yalnız argümansız writer veya exact --read-only kabul eder; negatif CLI kapısı ve odaklı 2 dosya/12 test PASS'tir. Yeni exact zincir zorunludur.
 
 ## 9. Görsel kimlik ve erişilebilirlik
 

@@ -1597,3 +1597,5 @@ PPK-015 ret/retry kayıtlarıyla yeniden üretilen güncel master DOCX 31/31 ve 
 TICARI-052 bütün bağ retryı 1.254 kontrol/87 dosya/61 iş/241 kural PASS vermiştir; yeni exact ürün, paket ve kurulu UAT kapanışı ayrıca zorunludur.
 
 `e0f85425` exact Bronze 52 turunda hedefli 21 dosya/214 test, filtresiz 399 dosya/2.484 test ve root TypeScript PASS sonrasında 10 izlenen makbuzun yalnız `generatedAt` alanı değişmiş; temiz çalışma ağacı/source-integrity FAIL'i `77a87a87` ile korunmuştur. Strict `--no-write` pretypecheck/prebuild aktarımı ve 10/10 byte-exact değişmezlik yeni exact kapanışta yeniden ölçülmeden paket yoktur.
+
+Yeni exact Bronze preflight, eski `.51` installer EXE/blockmap kalıntısını PR-229 ihlali olarak reddetmiş ve `4462706a` ile korumuştur; release artefaktları silinirken canlı kurulu `.51` predecessor ve immutable provenance korunmuştur. Yanlış `--no-write` preflight bayrağının writer moda sessiz düşmesi `0854a4ec` ile reddedilmiş; governed preflight yalnız argümansız writer veya exact `--read-only` kabul eden strict CLI kapısına bağlanmıştır. Negatif CLI kapısı ve odaklı 2 dosya/12 test PASS'tir; yeni exact kapanış baştan çalıştırılır.

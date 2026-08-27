@@ -2,6 +2,11 @@ import { spawnSync } from 'node:child_process';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { computeGovernedSourceFingerprint, readJson } from './lib/governance-utils.mjs';
 
+const cliArguments = process.argv.slice(2);
+if (cliArguments.length > 1 || cliArguments.some((argument) => argument !== '--read-only')) {
+  console.error('GOVERNED_PREFLIGHT blocked: only the optional --read-only flag is accepted.');
+  process.exit(1);
+}
 const readOnly = process.argv.includes('--read-only');
 const registry = await readJson('config/canonical-rule-registry.json');
 const acknowledgement = await readJson('config/rule-acknowledgement.json');

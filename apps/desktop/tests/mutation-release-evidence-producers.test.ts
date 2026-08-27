@@ -102,6 +102,9 @@ describe('PR-235 canonical mutation evidence producers', () => {
     expect(testRunner).toContain('testResultFiles,');
     expect(testRunner).toContain('assertMatchingReleaseSourceProvenance(after.provenance, before.provenance');
     expect(preflight).toContain("process.argv.includes('--read-only')");
+    expect(preflight).toContain('const cliArguments = process.argv.slice(2);');
+    expect(preflight).toContain("cliArguments.length > 1 || cliArguments.some((argument) => argument !== '--read-only')");
+    expect(preflight).toContain('only the optional --read-only flag is accepted');
     expect(preflight).toContain("await readJson('artifacts/validation/governed-preflight.json')");
     expect(preflight).toContain("['scripts/verify-project-artifact-index-v2.mjs', '--no-report', '--exact-head']");
     expect(preflight).toContain("['scripts/generate-project-artifact-index-v2.mjs', '--git-index']");

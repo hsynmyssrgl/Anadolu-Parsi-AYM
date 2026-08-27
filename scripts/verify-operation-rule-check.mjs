@@ -104,6 +104,7 @@ const exactTypecheckNoWriteProducers = ['scripts/verify-product-surface-governan
   'scripts/verify-b4-controlled-import-open-banking-boundary.mjs', 'scripts/verify-33-m-accessibility-boundary.mjs',
   'scripts/verify-33-n-draft-async-state-ux-boundary.mjs'];
 const rootPackage = await readJson('package.json');
+const governedPreflightSource = await readFile('scripts/run-governed-preflight.mjs', 'utf8');
 const typecheckNoWriteProducerSources = await Promise.all(exactTypecheckNoWriteProducers.map((path) => readFile(path, 'utf8')));
 const exactDec275Documents = ['AGENTS.md', 'SHA256SUMS.txt', 'config/active-governance-ledger.json',
   'config/canonical-rule-registry.json', 'config/change-impact-dependency-registry.json',
@@ -136,6 +137,10 @@ check(typecheckNoWriteProducerSources.every((source) => source.includes("const c
   && source.includes("const noWrite = process.argv.includes('--no-write');")
   && source.includes('if (!noWrite)')),
   'TypeScript/build producer strict no-write CLI veya write guard eksik.');
+check(governedPreflightSource.includes('const cliArguments = process.argv.slice(2);')
+  && governedPreflightSource.includes("cliArguments.length > 1 || cliArguments.some((argument) => argument !== '--read-only')")
+  && governedPreflightSource.includes('only the optional --read-only flag is accepted'),
+  'Governed preflight bilinmeyen CLI bayraklarini fail-closed reddetmiyor.');
 check(referencedMasterAdrIds.every((id) => adrIds.includes(id)),
   'Ana karar sicili, karşılık gelen kaynak ADR dosyası olmayan bağlayıcı bir ADR kimliği içeriyor.');
 check(exactIds(decisionFileIds, /^DEC-\d{3}$/u)
