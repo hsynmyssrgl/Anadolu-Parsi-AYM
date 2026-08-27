@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "release": "Bronze 27.08.2026.53",
   "releaseId": "bronze-2026-08-27-r53",
-  "generatedAt": "2026-08-27T12:15:27.923Z",
+  "generatedAt": "2026-08-27T12:28:40.616Z",
   "selfIndexedPaths": [
     "SHA256SUMS.txt",
     "artifacts/inventory/TESLIMAT_CALISMA_AGACI_ENVANTERI.json",
@@ -17,7 +17,7 @@
     "manifest.json"
   ],
   "summary": {
-    "totalFiles": 4409,
+    "totalFiles": 4411,
     "totalDocuments": 2145,
     "classifications": {
       "ACTIVE_AUTHORITY": 31,
@@ -26,7 +26,7 @@
       "GENERATED": 35,
       "HISTORICAL": 1473,
       "SOURCE_CODE": 626,
-      "TEST_OR_GATE": 1078
+      "TEST_OR_GATE": 1080
     }
   },
   "files": [
@@ -4711,6 +4711,14 @@
       "isDocument": false
     },
     {
+      "path": "apps/desktop/tests/windows-technical-predecessor-preparation-contract.test.ts",
+      "bytes": 10035,
+      "sha256": "a28ad4d85696d6bff39ad9cbae19fbe5e687a3bfbe6a7de1d4e5675caff62f26",
+      "extension": ".ts",
+      "classification": "TEST_OR_GATE",
+      "isDocument": false
+    },
+    {
       "path": "apps/desktop/tsconfig.electron.json",
       "bytes": 211,
       "sha256": "ea4781abdb59766e241d1b7aeb6d10732e0f63e7dd99d53fdbdd27821302552c",
@@ -8593,7 +8601,7 @@
     {
       "path": "artifacts/validation/feature-reality-gate.json",
       "bytes": 673,
-      "sha256": "1ce437cfa9e432b0583f9bdc7564a099e0237d1e8301e07f1b1f615a32747c58",
+      "sha256": "c919f8af3c1c69d36a22de7777071ac090995ff65c7349ce7c7e7fc32c45b4a6",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -8616,8 +8624,8 @@
     },
     {
       "path": "artifacts/validation/governed-preflight.json",
-      "bytes": 3161,
-      "sha256": "3e6b689af3fc4a5165241b7cf1457b37601c70d91ac6598a4958aba75094cff1",
+      "bytes": 10034,
+      "sha256": "1bbc71ea8fca410f9104960272326b179f4a5d770da6e1a0915f5308d8bf530b",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -10568,8 +10576,8 @@
     },
     {
       "path": "BUILD_STATUS.md",
-      "bytes": 21600,
-      "sha256": "ffbceaaa08e50c5c85eccdaaad21c9532f95c7d4df3cec0ca9a26873c6531520",
+      "bytes": 21330,
+      "sha256": "f0b3d6f21b4164bb93c5aefb1cdfc019f919249dca521f2f051986c24648d757",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -13864,8 +13872,8 @@
     },
     {
       "path": "config/active-governance-ledger.json",
-      "bytes": 59809,
-      "sha256": "3868240259d6a2275b9763ad1c732f638bd5eb007c670588820510ba2b429c23",
+      "bytes": 59910,
+      "sha256": "822bdf851a4a79c0f3e756dedb9085f7cba8521cff548efa67fcbbcc5c2049da",
       "extension": ".json",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -14176,8 +14184,8 @@
     },
     {
       "path": "config/user-decision-ledger.json",
-      "bytes": 174913,
-      "sha256": "c84ae3d52cb182e620bab519bec865b1b6aa52d0eff8672f15119091dcda34c2",
+      "bytes": 174827,
+      "sha256": "b076d11ab90fa76f0df8d05d0de68ba5130a748a6d355761b6949c4d373c1025",
       "extension": ".json",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -16560,8 +16568,8 @@
     },
     {
       "path": "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
-      "bytes": 39286,
-      "sha256": "2353c37c69ef95d504241cfe32d1065e07a73ec5fb0f77451f6e6ced0cb9302a",
+      "bytes": 39677,
+      "sha256": "0d05b7ff33c7106d83d39f7ac6545a366f5e9516e37264789caf94678b2d994d",
       "extension": ".md",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -16577,7 +16585,7 @@
     {
       "path": "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
       "bytes": 157805,
-      "sha256": "ff5f3142698f9a86eb73587db19f90c5366fb4f701575e7f069491fd951c9213",
+      "sha256": "79b310fc8f014432ddc0db185dbcc7b765071d85bbd49503fd236076e8f0d758",
       "extension": ".md",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -16784,16 +16792,16 @@
     },
     {
       "path": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.docx",
-      "bytes": 366784,
-      "sha256": "88f46f2d35daa0a8004e4a6636b68e56b554d85e330856459a3a11d6a47a13be",
+      "bytes": 366782,
+      "sha256": "f30a1018d5aedaf705324a1596ab9f67ff5b2eef5283c992b8d7e232aed74265",
       "extension": ".docx",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
     },
     {
       "path": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.pdf",
-      "bytes": 513938,
-      "sha256": "5156be0f5ca2468d4a9e9b5396d83523ee49da62fb772df94fee853b0db7dc34",
+      "bytes": 513936,
+      "sha256": "8aca9d5b4411a5e5e194078b0b1b7f17ac375d0e916fd12432f3e91ba41534cb",
       "extension": ".pdf",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -18600,16 +18608,16 @@
     },
     {
       "path": "docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md",
-      "bytes": 64789,
-      "sha256": "85877846ad6419eb53ac5055d3d55a8a8e6d1dd5013b7539547ba5d4eadc2fda",
+      "bytes": 65222,
+      "sha256": "03b101e515dce5bd35bfa94097d22521cb5945404f077319dcf6157f5ec38f20",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
     },
     {
       "path": "docs/decisions/DEC-276-bronze-51-rejected-predecessor-recovery-bootstrap.md",
-      "bytes": 29277,
-      "sha256": "94274ec78169b7a624c1ac6011a223b824fa2b846fe652df2f6f381f8a890ffc",
+      "bytes": 29643,
+      "sha256": "13849db43bcf198097afaa3a4d08b143c0e410468f4d984022729f2391e192e4",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -19368,8 +19376,8 @@
     },
     {
       "path": "docs/ticari-urun-temeli/01_YONETIM/05_DEGISIKLIK_SICILI.json",
-      "bytes": 67730,
-      "sha256": "fe51cb3e517938b071af79d00f76e1e444f82ff920794f2f999bfab0505caae6",
+      "bytes": 67717,
+      "sha256": "b029f9ec3e1e20203d0fae8c4dddd414e69831da021445fc05ee2174262c5c00",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -19481,7 +19489,7 @@
     {
       "path": "docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/03_KANIT_SICILI.json",
       "bytes": 26378,
-      "sha256": "230af52cf0fa91cad11304030acb247ced7750d53ea5320189435cfdd15b5d4e",
+      "sha256": "f726c48c62f01607f14a28d9efa7e4614ad6715005eae7d6368ceaa9eacd0cdc",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -19489,7 +19497,7 @@
     {
       "path": "docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json",
       "bytes": 17283,
-      "sha256": "dd62ea4009ef59a6050e02436e838e65c5999f416ad7f7655972ac4c51124aa1",
+      "sha256": "753bbc0ab3f5e0c9e203aa98370f6a43f3fc58d7c638d05adf7dd2a6338f8bb2",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -19936,8 +19944,8 @@
     },
     {
       "path": "docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md",
-      "bytes": 24769,
-      "sha256": "ea69567f4793c98f4cdebbd587ba99ebb35a060a93a204510759ddc68d434b3e",
+      "bytes": 24793,
+      "sha256": "fbe515558b3f6ebf2f585b3ac1c0aeeadd9ca338aa4bb2316f25fcef595e7829",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -19952,8 +19960,8 @@
     },
     {
       "path": "docs/ticari-urun-temeli/08_IS_LISTESI/03_ANA_IS_SICILI.json",
-      "bytes": 34838,
-      "sha256": "4fc4136f2210a16ba9421cad15adbce352853042e777f72103ad8d244b423226",
+      "bytes": 34759,
+      "sha256": "24ce4d2b4e4d04c38a76d4d1b1a87f335a39e10a97cb1419024553df6a1009bc",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -28322,6 +28330,14 @@
       "path": "scripts/run-windows-installer-experience-uat.ps1",
       "bytes": 50498,
       "sha256": "6f5cbe466ff19c9b3d5bde94f32d3d60936f1117945ba374d54cc7f96ca0622c",
+      "extension": ".ps1",
+      "classification": "TEST_OR_GATE",
+      "isDocument": false
+    },
+    {
+      "path": "scripts/run-windows-technical-predecessor-preparation.ps1",
+      "bytes": 38465,
+      "sha256": "ae2c747bbd1d6b3277818bbbff8c6a79280977e010469222cad672f1e2b2cecb",
       "extension": ".ps1",
       "classification": "TEST_OR_GATE",
       "isDocument": false

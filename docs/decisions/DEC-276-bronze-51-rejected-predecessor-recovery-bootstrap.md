@@ -138,3 +138,5 @@ UAT110, final teslim, canlı release ledger, `.52` rejected lifecycle ve teknik 
 İlk final governed preflight, master üreticisinin `219836c6`, `d3f218c1` ve `ace2eeaf` ret markerlarını birleşik sicile taşımadığını bulmuş ve `453e8c59` ile fail-closed reddedilmiştir. Üretici düzeltmesi bu zinciri yeniden üretimde kaybetmez; yeni taze preflight, paket ve `.52→.53` kurulu kabul zinciri yine zorunludur.
 
 Preflight FAIL makbuzunun ardından yalnız `NOT_RUN` bekleyen ticari kanıt sözleşmesi gerçek FAIL vermiş ve `cb7a5d4d` ile korunmuştur. Test makbuz yaşam döngüsünü ve `KANIT-0002` exact SHA-256 bağını doğrulayacak biçimde düzeltilir; bu kayıt paket veya kurulu kabul PASS'i değildir.
+
+Bronze salt-okunur preflight, yeni teknik predecessor üreticisi ve sözleşme testi commit öncesi indekste untracked olduğu için iki dosyayı artefakt indeksinde eksik bulmuş ve `de63eb2b` ile fail-closed reddetmiştir. Tracked kaynaklardan taze indeks/preflight/manifest ve yeni exact commit kapıları tamamlanmadan `.52` teknik hazırlığı başlatılmaz.

@@ -3,7 +3,7 @@
   "id": "PARSYUVA-AILE-YASAM-MERKEZI-TICARI-DEGISIKLIK-SICILI-V2",
   "temelTarihi": "2026-08-19",
   "sonKayit": "TICARI-052",
-  "latestMutationValidation": "cb7a5d4d son kaynak retidir: preflight FAIL makbuzu dogru yazildiktan sonra yalniz NOT_RUN bekleyen ticari kanit sozlesmesi reddedildi. Test NOT_RUN/FAIL/PASS yasam dongusu ve KANIT-0002 exact SHA bagi ile duzeltilir. 453e8c59 master marker drifti ve onceki 59/59 byte-exact gorsel QA korunur; taze exact zincir pendingdir.",
+  "latestMutationValidation": "de63eb2b son kaynak retidir: yeni teknik predecessor producer ve contract dosyalari commit oncesi indekste untracked oldugu icin Bronze salt-okunur preflight iki tracked dosyayi eksik buldu. Tracked kaynaklardan taze indeks/preflight/manifest ve exact retry zorunludur; onceki 59/59 gorsel QA korunur.",
   "kayitlar": [
     {
       "id": "TICARI-001",
@@ -957,7 +957,7 @@
       "baslik": "UAT110 Windows registry strict-mode, Bronze 52 gorsel ret, teknik predecessor ve Bronze 53 continuation",
       "durum": "ACTIVE",
       "idSemantics": "TICARI kayit sirasi; urun release numarasi degildir.",
-      "kaynak": "DEC-275, DEC-276, PR-235, PR-240, PR-241, PR-229; 059e3787-a1aec744-8472face-15e3c9d0-64695e58-2ca29a6d-3976994d-fb8683dc-a6020cb4-61f09ed5-8ea2dfe1-24e6bd71-77a87a87-4462706a-0854a4ec-a5334c13-219836c6-d3f218c1-ace2eeaf-453e8c59-cb7a5d4d gercek ret zinciri, d68fd2a4 invocation-only checkpoint ve aee77952-7cb2-495a-8062-6d99d5f7b5d2 gorsel olarak reddedilen makine PASS makbuzu",
+      "kaynak": "DEC-275, DEC-276, PR-235, PR-240, PR-241, PR-229; 059e3787-a1aec744-8472face-15e3c9d0-64695e58-2ca29a6d-3976994d-fb8683dc-a6020cb4-61f09ed5-8ea2dfe1-24e6bd71-77a87a87-4462706a-0854a4ec-a5334c13-219836c6-d3f218c1-ace2eeaf-453e8c59-cb7a5d4d-de63eb2b gercek ret zinciri, d68fd2a4 invocation-only checkpoint ve aee77952-7cb2-495a-8062-6d99d5f7b5d2 gorsel olarak reddedilen makine PASS makbuzu",
       "etkilenenAlanlar": [
         "scripts/run-windows-installed-release-uat.ps1",
         "scripts/run-windows-technical-predecessor-preparation.ps1",

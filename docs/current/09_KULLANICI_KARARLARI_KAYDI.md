@@ -13,6 +13,7 @@ Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağ
 - `DEC-275/DEC-276` PR-241 enforcement retryı — İlk odaklı tur eski 19 öğeli expected gate list nedeniyle 8 dosyada 73 PASS/1 FAIL vermiş ve `d3f218c1` ile korunmuştur. Exact 21 yürütülebilir yol bağı sonrası retry 8 dosya/74 test PASS'tir; tam exact zincir ayrıca zorunludur.
 - `DEC-275/DEC-276` final preflight kayıt drifti — İlk final preflight, master üreticisinin `219836c6`, `d3f218c1` ve `ace2eeaf` ret markerlarını birleşik sicile taşımadığını bulmuş ve `453e8c59` ile fail-closed reddedilmiştir. Üretici bu ret zincirini kalıcı olarak yayımlar; exact retry PASS olmadan paket yoktur.
 - `DEC-275/DEC-276` ticari makbuz yaşam döngüsü testi — Preflight FAIL makbuzunu doğru yazdıktan sonra yalnız eski `NOT_RUN` durumunu kabul eden sözleşme testi gerçek FAIL vermiş ve `cb7a5d4d` ile korunmuştur. Test `NOT_RUN`, `FAIL` ve `PASS` durumlarını ayrı semantiklerle, `KANIT-0002` durum/SHA-256 geri-okumasına bağlı doğrular.
+- `DEC-275/DEC-276` tracked dosya indeks kapanışı — Yeni teknik predecessor üreticisi ile sözleşme testi commit öncesi artefakt indeksi üretilirken untracked olduğundan Bronze salt-okunur preflight iki dosyayı eksik bulmuş ve `de63eb2b` ile reddedilmiştir. Dosyalar tracked olduktan sonra indeks, preflight ve manifest yeniden üretilir; exact retry PASS olmadan paket yoktur.
 
 - `DEC-121` — Accepted scope, monthly release and channel gates
 - `DEC-122` — Platform Policy Kernel and Core Service foundation

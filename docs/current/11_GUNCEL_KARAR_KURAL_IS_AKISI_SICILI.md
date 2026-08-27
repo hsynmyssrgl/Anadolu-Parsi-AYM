@@ -3,7 +3,7 @@
 - Belge sürümü: **GUNCEL-2026-08-27-V5**
 - Tarih: **27.08.2026**
 - Görünür ürün sürümü: **Bronze 27.08.2026.53**
-- Kaynak HEAD: `cb7a5d4df294119ac990f046cd245d719f54c66e`
+- Kaynak HEAD: `de63eb2b580ba1937a04a7096558447f2f00af1a`
 - Statü: **ACTIVE_CURRENT_MASTER_REFERENCE**
 - Kararlar: **DEC-250–DEC-276**
 
@@ -184,7 +184,7 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - e0f85425 exact Bronze 52 turunda hedefli 21 dosya/214 test, filtresiz 399 dosya/2.484 test ve root TypeScript PASS sonrasında 10 izlenen makbuzun yalnız generatedAt alanı değişmiş; temiz çalışma ağacı/source-integrity FAIL'i 77a87a87 ile korunmuştur. Strict --no-write pretypecheck/prebuild aktarımı, fail-closed kural/test bağı ve 10/10 byte-exact makbuz değişmezliği PASS'tir; yeni exact kapanış, paket ve kurulu UAT zorunludur.
 - Yeni exact Bronze preflightta eski .51 installer EXE/blockmap kalıntısı 4462706a, yanlış --no-write bayrağının writer moda sessiz düşmesi 0854a4ec ile reddedilmiştir. Eski installer artefaktları silinmiş; kurulu .51 predecessor ve immutable provenance korunmuştur. Governed preflight yalnız argümansız writer veya exact --read-only kabul eder; negatif CLI kapısı ve odaklı 2 dosya/12 test PASS'tir. Yeni exact zincir zorunludur.
 - Bronze 52 installer-experience aee77952 makbuzu makine PASS yazsa da ucuncu anlatim ekraninin sag icerik bolgesi bos bulunmus ve gercek gorsel UAT reti a5334c13 ile korunmustur. Eski makbuz teslim kaniti degildir. Atomik WM_SETREDRAW, RedrawWindow 0x0185, UpdateWindow, uc denemeli UIA title-region kontrast piksel ve dolu satir/sutun kapisi ile UAT110/final canli readback sozlesmeleri 4 dosya/43 hedefli testte PASS'tir. Bronze 52 immutable fakat teslimden reddedilmis; Bronze 53 tek kez tahsis edilmistir. .52 yalniz uygulama acilmadan NOT_DELIVERY teknik predecessor ve veri/kanal degismezlik readback'iyle .53 normal N-to-N+1 UAT onkosulu olabilir; yeni exact tam zincir zorunludur.
-- Bronze 53 final preflight kayit zincirinde teknik predecessor producer parse reti 219836c6, PR-241 enforcement expected-list drifti d3f218c1, belge render PATH reti ace2eeaf ve master marker drifti 453e8c59 korunur. Aktif son kaynak reti cb7a5d4d kayit defterinden dinamik okunup Markdown, DOCX ve PDF'ye tasinir; taze exact preflight, paket ve kurulu UAT PASS olmadan teslim yoktur.
+- Bronze 53 final preflight kayit zincirinde teknik predecessor producer parse reti 219836c6, PR-241 enforcement expected-list drifti d3f218c1, belge render PATH reti ace2eeaf ve master marker drifti 453e8c59 korunur. Aktif son kaynak reti de63eb2b kayit defterinden dinamik okunup Markdown, DOCX ve PDF'ye tasinir; taze exact preflight, paket ve kurulu UAT PASS olmadan teslim yoktur.
 
 ## 9. Görsel kimlik ve erişilebilirlik
 
