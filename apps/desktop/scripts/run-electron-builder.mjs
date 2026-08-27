@@ -252,11 +252,15 @@ if (!isDirectoryMode) {
   const upstreamTemplateRoot = resolve(windowsPackagerRoot, 'node_modules/app-builder-lib/templates/nsis');
   const upstreamExtractorPath = resolve(upstreamTemplateRoot, 'include/extractAppPackage.nsh');
   const upstreamInstallUtilPath = resolve(upstreamTemplateRoot, 'include/installUtil.nsh');
+  const upstreamInstallSectionPath = resolve(upstreamTemplateRoot, 'installSection.nsh');
+  const upstreamInstallerIncludePath = resolve(upstreamTemplateRoot, 'include/installer.nsh');
   const governedExtractorPath = resolve(root, 'apps/desktop/build/extractAppPackage.nsh');
-  const [upstreamExtractor, governedExtractor, upstreamInstallUtil] = await Promise.all([
+  const [upstreamExtractor, governedExtractor, upstreamInstallUtil, upstreamInstallSection, upstreamInstallerInclude] = await Promise.all([
     readFile(upstreamExtractorPath, 'utf8'),
     readFile(governedExtractorPath, 'utf8'),
-    readFile(upstreamInstallUtilPath, 'utf8')
+    readFile(upstreamInstallUtilPath, 'utf8'),
+    readFile(upstreamInstallSectionPath, 'utf8'),
+    readFile(upstreamInstallerIncludePath, 'utf8')
   ]);
   if ((upstreamExtractor.match(/Nsis7z::Extract "\$\{FILE\}"/gu) ?? []).length !== 2
     || upstreamExtractor.includes('AymInstallPayloadStageBegin')
@@ -268,6 +272,14 @@ if (!isDirectoryMode) {
     || (governedExtractor.match(/Call AymInstallPayloadStageBegin/gu) ?? []).length !== 3
     || (governedExtractor.match(/Call AymInstallPayloadStageEnd/gu) ?? []).length !== 3) {
     console.error('The governed single-progress NSIS extraction template is incomplete.');
+    process.exit(1);
+  }
+  const registryAddIndex = upstreamInstallSection.indexOf('!insertmacro registryAddInstallInfo');
+  const customInstallIndex = upstreamInstallSection.indexOf('!insertmacro customInstall');
+  if (registryAddIndex < 0 || customInstallIndex < 0 || customInstallIndex <= registryAddIndex
+    || !upstreamInstallerInclude.includes('WriteRegStr SHELL_CONTEXT "${UNINSTALL_REGISTRY_KEY}" DisplayName')
+    || !upstreamInstallerInclude.includes('WriteRegStr SHELL_CONTEXT "${UNINSTALL_REGISTRY_KEY}" "DisplayIcon"')) {
+    console.error('The installed electron-builder NSIS uninstall registry hook order drifted from the reviewed 26.15.6 shape.');
     process.exit(1);
   }
   let governedInstallUtil;

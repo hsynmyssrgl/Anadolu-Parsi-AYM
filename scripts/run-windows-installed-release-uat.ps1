@@ -203,7 +203,9 @@ function Get-UninstallRegistryManifest([string]$Scope) {
       $value = Get-ItemProperty -LiteralPath $key.PSPath -ErrorAction Stop
       $displayName = Get-OptionalPropertyString $value 'DisplayName'
       if ($displayName -notmatch '^ParsYuva(?:\s|$)') { continue }
-      $channel = if ($displayName -match 'Bronze$') { 'bronze' } elseif ($displayName -match 'Silver$') { 'silver' } elseif ($displayName -match 'Gold$') { 'gold' } else { 'legacy' }
+      $channelDisplayNamePattern = '^ParsYuva Aile Ya' + [char]0x015F + 'am Merkezi (Bronze|Silver|Gold) ([0-9]{1,2}\.[0-9]{1,2}\.[0-9]{4}-[0-9]+)$'
+      $channelMatch = [regex]::Match($displayName, $channelDisplayNamePattern)
+      $channel = if ($channelMatch.Success) { $channelMatch.Groups[1].Value.ToLowerInvariant() } else { 'legacy' }
       if ($channel -ne $Scope) { continue }
       $records.Add((@(
         $displayName,
@@ -221,6 +223,8 @@ function Get-UninstallRegistryManifest([string]$Scope) {
 
 function Get-BronzeRegistryIdentity([string]$ExpectedVersion) {
   $matches = [Collections.Generic.List[object]]::new()
+  $expectedProductName = 'ParsYuva Aile Ya' + [char]0x015F + 'am Merkezi Bronze'
+  $expectedDisplayName = "$expectedProductName $ExpectedVersion"
   foreach ($registryRoot in @(
     'Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall',
     'Registry::HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall'
@@ -230,7 +234,7 @@ function Get-BronzeRegistryIdentity([string]$ExpectedVersion) {
       $value = Get-ItemProperty -LiteralPath $key.PSPath -ErrorAction Stop
       $displayName = Get-OptionalPropertyString $value 'DisplayName'
       $installLocation = Get-OptionalPropertyString $value 'InstallLocation'
-      if ($displayName -match '^ParsYuva.*Bronze$' -and
+      if ($displayName -ceq $expectedDisplayName -and
           -not [string]::IsNullOrWhiteSpace($installLocation) -and
           [IO.Path]::GetFullPath($installLocation).TrimEnd('\').Equals($CanonicalInstallRoot.TrimEnd('\'), [StringComparison]::OrdinalIgnoreCase)) {
         $matches.Add([ordered]@{
@@ -246,14 +250,24 @@ function Get-BronzeRegistryIdentity([string]$ExpectedVersion) {
   }
   Assert-True ($matches.Count -eq 1) 'Bronze uninstall registry kaydi exact tekil degil.'
   $entry = $matches[0]
-  Assert-True ([string]$entry.DisplayVersion -eq $ExpectedVersion) 'Bronze uninstall DisplayVersion packaged surumle uyusmuyor.'
-  Assert-True ([string]$entry.DisplayIcon -match [regex]::Escape('ParsYuva-Bronze.exe')) 'Bronze DisplayIcon expected EXE ile bagli degil.'
-  Assert-True ([string]$entry.UninstallString -match [regex]::Escape($CanonicalInstallRoot)) 'Bronze UninstallString sibling install root ile bagli degil.'
+  $expectedDisplayIcon = "$CanonicalInstalledExe,0"
+  $expectedUninstaller = Join-Path $CanonicalInstallRoot 'Uninstall ParsYuva-Bronze.exe'
+  $expectedUninstallString = '"' + $expectedUninstaller + '" /allusers'
+  $expectedQuietUninstallString = "$expectedUninstallString /S"
+  Assert-True ([string]$entry.DisplayName -ceq $expectedDisplayName) 'Bronze uninstall DisplayName packaged surumle exact uyusmuyor.'
+  Assert-True ([string]$entry.DisplayVersion -ceq $ExpectedVersion) 'Bronze uninstall DisplayVersion packaged surumle uyusmuyor.'
+  Assert-True ([string]$entry.DisplayIcon -ceq $expectedDisplayIcon) 'Bronze DisplayIcon expected EXE ile exact bagli degil.'
+  Assert-True ([string]$entry.UninstallString -ceq $expectedUninstallString) 'Bronze UninstallString sibling install root ile exact bagli degil.'
+  Assert-True ([string]$entry.QuietUninstallString -ceq $expectedQuietUninstallString) 'Bronze QuietUninstallString sibling install root ile exact bagli degil.'
   return [ordered]@{
     exactSingleEntry = $true
+    displayName = [string]$entry.DisplayName
     displayVersion = [string]$entry.DisplayVersion
-    installRoot = 'C:\Program Files\PPT\ParsYuva-Bronze'
-    executable = 'ParsYuva-Bronze.exe'
+    installRoot = [string]$entry.InstallLocation
+    displayIcon = [string]$entry.DisplayIcon
+    uninstallString = [string]$entry.UninstallString
+    quietUninstallString = [string]$entry.QuietUninstallString
+    executable = $CanonicalInstalledExe
   }
 }
 

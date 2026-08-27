@@ -292,8 +292,18 @@ check(commercialChange52?.durum === 'ACTIVE'
   && String(commercialChange52?.kaynak ?? '').includes('DEC-275, DEC-276, PR-235, PR-240, PR-241')
   && String(commercialChange52?.isListesiEtkisi ?? '').includes('58/58')
   && String(commercialChange52?.isListesiEtkisi ?? '').includes('2 dosya/17 test PASS')
-  && String(commercialChange52?.isListesiEtkisi ?? '').includes('15e3c9d0 pre-mutation baseline PASS'),
-'TICARI-052 ACTIVE/SYNCHRONIZED Bronze 52 UAT110 ve 58/58 gorsel QA bagi eksik');
+  && String(commercialChange52?.isListesiEtkisi ?? '').includes('15e3c9d0 pre-mutation baseline PASS')
+  && String(commercialChange52?.isListesiEtkisi ?? '').includes('d68fd2a4 test baslamadan duran invocation-only checkpointtir')
+  && String(commercialChange52?.isListesiEtkisi ?? '').includes('3976994d ile korunmustur')
+  && String(commercialChange52?.isListesiEtkisi ?? '').includes('fb8683dc ile korunmustur')
+  && String(commercialChange52?.isListesiEtkisi ?? '').includes('a6020cb4 ile korunmustur')
+  && String(commercialChange52?.isListesiEtkisi ?? '').includes('61f09ed5 ile korunmustur')
+  && String(commercialChange52?.isListesiEtkisi ?? '').includes('2 dosya/18 test PASS')
+  && String(commercialChange52?.isListesiEtkisi ?? '').includes('bos InstallLocation')
+  && String(commercialChange52?.isListesiEtkisi ?? '').includes('surum ekli DisplayName degeri legacy sayilmis')
+  && String(commercialChange52?.isListesiEtkisi ?? '').includes('gercek uygulama EXE kimligini yazar')
+  && String(commercialChange52?.isListesiEtkisi ?? '').includes('kaldirma komutlari exact dogrulanir'),
+'TICARI-052 ACTIVE/SYNCHRONIZED Bronze 52 UAT110, 3976994d ret, uninstall sicili ve 58/58 gorsel QA bagi eksik');
 
 const workRegistry = await readJson(resolve(ROOT, '08_IS_LISTESI', '03_ANA_IS_SICILI.json'));
 const workMarkdown = await readText(resolve(ROOT, '08_IS_LISTESI', '01_ANA_IS_LISTESI.md'));

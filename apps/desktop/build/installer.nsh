@@ -359,6 +359,15 @@ FunctionEnd
   Call AymApplySystemUiLanguage
   StrCpy $INSTDIR "$PROGRAMFILES64\PPT\${PPT_INSTALLER_PROGRAM_DIRECTORY}"
 !macroend
+
+!macro customInstall
+  ; electron-builder stores its maintenance location under INSTALL_REGISTRY_KEY,
+  ; while Windows Apps & Features reads UNINSTALL_REGISTRY_KEY. Keep the public
+  ; uninstall identity exact so upgrade/maintenance UAT can bind it to the same
+  ; channel root and the real application executable rather than an icon copy.
+  WriteRegStr SHELL_CONTEXT "${UNINSTALL_REGISTRY_KEY}" "InstallLocation" "$INSTDIR"
+  WriteRegStr SHELL_CONTEXT "${UNINSTALL_REGISTRY_KEY}" "DisplayIcon" "$INSTDIR\${PPT_INSTALLER_EXECUTABLE},0"
+!macroend
 !endif
 
 !ifdef BUILD_UNINSTALLER

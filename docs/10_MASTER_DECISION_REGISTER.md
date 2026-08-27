@@ -1573,3 +1573,17 @@ Deterministik ayraç satırlarıyla üretilen final-freeze4, DOCX 30/30 ve PDF 2
 ### 27.08.2026 UAT110 registry harness ve Bronze 52 continuation kaydı
 
 Bronze 51 exact package/provenance, retention, packaged runtime ve üç sayfalı installer-experience UAT kapıları `3b31753b` kaynağında PASS vermiştir. Canlı UAT110 iki provenance doğrulamasından sonra, installer başlamadan Windows kaldırma sicilindeki `DisplayName` alanı olmayan ilgisiz kayıt nedeniyle `PropertyNotFoundStrict` ile durmuştur. `059e3787`, `a1aec744`, `8472face`, `15e3c9d0` ve `64695e58` ret zinciri korunur. Kurulu EXE, uninstall girdisi ve UAT111 oluşmamış; AppData içindeki 15 kullanıcı dosyası değişmemiştir. Windows PowerShell 5.1 strict-mode null-güvenli kayıt okuması ve sıfır kayıt dizi semantiği 2 dosya/17 test PASS vermiştir. `15e3c9d0` pre-mutation baseline PASS'tir. Immutable `.51` yeniden yazılmaz; Bronze `27.08.2026.52` normal N→N+1 continuation olarak ayrılmıştır ve yalnız exact `.51` predecessor kurulum kimliği, `.52` tam kaynak/test/paket, installer-experience, UAT110/UAT111 ve final teslim geri-okuması PASS olursa kabul edilir.
+
+Bronze 51 packaged runtime daha sonra immutable bundle byte/SHA-256/FileVersion kimliğiyle canlı predecessor olarak doğrulanmıştır. Bronze 52 hedefli kanıt üreticisinin eksik açık dosya listeli ilk çağrısı `d68fd2a4` invocation-only checkpointidir ve test sonucu değildir. Doğru exact tur 19 dosyada 189 test PASS, `packageStatus` fail-closed ön eki için 1 PR-240 yaşam döngüsü testi FAIL üretmiş ve gerçek sonuç `3976994d` ile korunmuştur. Aktif son rejected checkpoint `3976994d` olur. Test gevşetilmez; Bronze 52 NOT_BUILT durumu `BLOCKED_` semantiğine alınır ve bütün exact test, bütünlük, koruma, paket ve kurulu UAT kapıları yeniden çalıştırılır.
+
+Canlı Bronze 51 uninstall girdisinin sürüm ekli `DisplayName` değeri eski `Bronze$` eşlemesinde legacy sayılmış, `InstallLocation` boş ve `DisplayIcon` kaldırıcı simgesine bağlı bulunmuştur; uygulama EXE'sinin immutable bundle kimliği yine exact PASS'tir. Bronze 52 UAT exact sürüm ekli kanal adını sınıflandırır; NSIS `customInstall` public uninstall girdisini kanonik kanal kökü ve gerçek `ParsYuva-Bronze.exe,0` ile tamamlar. DisplayName/Version/Icon ve normal/sessiz kaldırma komutları exact doğrulanır; paket kabulü primary ve maintenance sonrası Windows readback'e bağlıdır.
+
+İlk exact Unicode literal sınıflandırma Windows PowerShell 5.1 canlı testinde Bronze girdisini bulamamış; 2 dosyada 17 test PASS ve 1 test FAIL sonucu `fb8683dc` ile korunmuştur. Aktif son rejected checkpoint budur. Exact ürün adı ASCII `[char]0x015F` bileşimiyle üretilir; yeni odaklı ve bütün exact kapanış zorunludur.
+
+ASCII karakter bileşimi düzeltmesi sonrası iki sözleşme dosyasında 18/18 test PASS vermiştir; gerçek kurulu `.52` sicil readback'i ve bütün exact kapanış ayrıca zorunludur.
+
+İlk TICARI-052 uninstall sicili kayıt doğrulaması iki exact ifadenin sözcük sırası farklı olduğu için FAIL olmuş ve `a6020cb4` ile korunmuştur. Aktif son rejected checkpoint budur; kayıt fail-closed sözleşmeye exact eşlenip taze ticari test çalıştırılır.
+
+İkinci TICARI-052 retryı önceki zorunlu üç markerın kayıttan düşmesini FAIL bulmuş ve `61f09ed5` ile korunmuştur. Aktif son rejected checkpoint budur; bütün tarihsel ve güncel bağlar aynı kayıtta geri kurulur.
+
+TICARI-052 bütün bağ retryı 1.254 kontrol/87 dosya/61 iş/241 kural PASS vermiştir; yeni exact ürün, paket ve kurulu UAT kapanışı ayrıca zorunludur.

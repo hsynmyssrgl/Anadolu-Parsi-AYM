@@ -955,10 +955,13 @@
       "tarih": "2026-08-27",
       "baslik": "UAT110 Windows registry strict-mode uyumlulugu ve Bronze 52 continuation",
       "durum": "ACTIVE",
-      "kaynak": "DEC-275, DEC-276, PR-235, PR-240, PR-241 ve 059e3787-a1aec744-8472face-15e3c9d0-64695e58-2ca29a6d rejected checkpoint zinciri",
+      "kaynak": "DEC-275, DEC-276, PR-235, PR-240, PR-241; 059e3787-a1aec744-8472face-15e3c9d0-64695e58-2ca29a6d-3976994d-fb8683dc-a6020cb4-61f09ed5 gercek ret zinciri ve d68fd2a4 invocation-only checkpoint",
       "etkilenenAlanlar": [
         "scripts/run-windows-installed-release-uat.ps1",
         "scripts/generate-current-master-documentation.py",
+        "apps/desktop/build/installer.nsh",
+        "apps/desktop/scripts/run-electron-builder.mjs",
+        "apps/desktop/tests/operation-rule-check-policy.test.ts",
         "apps/desktop/tests/windows-installed-release-uat-contract.test.ts",
         "apps/desktop/tests/current-master-documentation-v5-governance.test.ts",
         "config/release-ledger.json",
@@ -969,12 +972,13 @@
         "docs/decisions/DEC-276-bronze-51-rejected-predecessor-recovery-bootstrap.md",
         "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
         "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
+        "docs/10_MASTER_DECISION_REGISTER.md",
         "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.docx",
         "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_24.08.2026_V5.pdf",
         "docs/ticari-urun-temeli/08_IS_LISTESI",
         "BUILD_STATUS.md"
       ],
-      "isListesiEtkisi": "IS-0211-IS-0216 ve IS-0601 DEVAM kalir. Bronze 51 package/provenance/installer-experience PASS sonrasinda ilk UAT110 installer baslamadan DisplayName alani olmayan ilgisiz uninstall kaydinda durmus; kurulu EXE/UAT111 olusmamis ve 15 AppData dosyasi degismemistir. Property-safe registry okuma ve sifir kayit dizisi Windows PowerShell 5.1 strict-mode davranisiyla 2 dosya/17 test PASS; 15e3c9d0 pre-mutation baseline PASS'tir. Ilk Bronze 52 governed writer sabit TICARI-051 son-kayit beklentisini 2ca29a6d ile reddetmis; TICARI-052 exact tekil son kayit duzeltmesi sonrasi ticari 1.254 kontrol ve 4.409 dosya/2.145 belge indeksli retry PASS vermistir. Bronze 52 current master DOCX 30/30 ve PDF 28/28, toplam 58/58 sayfa ozgun cozulunurlukte gorsel PASS'tir. Bronze 52 exact kaynak/test/paket, .51 predecessor readback ve N->N+1 UAT kapanmadan teslim yoktur.",
+      "isListesiEtkisi": "IS-0211-IS-0216 ve IS-0601 DEVAM kalir. Bronze 51 predecessor PASS'tir. d68fd2a4 test baslamadan duran invocation-only checkpointtir; packageStatus testi 3976994d ile korunmustur. UAT110 registry harness duzeltmesi 2 dosya/17 test PASS'tir ve 15e3c9d0 pre-mutation baseline PASS'tir. Canli .51 uninstall girdisinin surum ekli DisplayName degeri legacy sayilmis, bos InstallLocation ve DisplayIcon uninstallerIcon bulunmustur. Ilk Unicode literal retry fb8683dc ile korunmustur; ilk ticari ifade bagi a6020cb4 ile korunmustur; eksik tarihsel marker retryi 61f09ed5 ile korunmustur. Kaynak-ASCII char 0x015F duzeltmesi sonrasi 2 dosya/18 test PASS'tir; .52 customInstall kanonik kok ve gercek uygulama EXE kimligini yazar, kaldirma komutlari exact dogrulanir. Butun marker retryi ticari 1.254 kontrol/87 dosya/61 is/241 kural PASS'tir ve 58/58 master belge QA PASS'tir. Bronze 52 exact kaynak/test/paket ve N->N+1 UAT kapanmadan teslim yoktur.",
       "senkronDurumu": "SYNCHRONIZED"
     }
   ]

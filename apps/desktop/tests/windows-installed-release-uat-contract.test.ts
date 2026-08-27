@@ -4,6 +4,8 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 const producerUrl = new URL('../../../scripts/run-windows-installed-release-uat.ps1', import.meta.url);
+const installerUrl = new URL('../build/installer.nsh', import.meta.url);
+const builderUrl = new URL('../scripts/run-electron-builder.mjs', import.meta.url);
 
 describe('Windows installed release UAT contract', () => {
   it('keeps the PowerShell producer syntactically valid', () => {
@@ -166,7 +168,13 @@ describe('Windows installed release UAT contract', () => {
     expect(source).toContain('PPT_SYNTHETIC_INSTALLATION_PRESERVATION_MARKER');
     expect(source).toContain("C:\\Program Files\\PPT\\ParsYuva-Bronze");
     expect(source).toContain('Bronze uninstall registry kaydi exact tekil degil');
-    expect(source).toContain('Bronze UninstallString sibling install root ile bagli degil');
+    expect(source).toContain('Bronze UninstallString sibling install root ile exact bagli degil');
+    expect(source).toContain('Bronze QuietUninstallString sibling install root ile exact bagli degil');
+    expect(source).toContain("$expectedProductName = 'ParsYuva Aile Ya' + [char]0x015F + 'am Merkezi Bronze'");
+    expect(source).toContain('$expectedDisplayName = "$expectedProductName $ExpectedVersion"');
+    expect(source).toContain('$channelDisplayNamePattern = \'^ParsYuva Aile Ya\' + [char]0x015F');
+    expect(source).toContain('$expectedDisplayIcon = "$CanonicalInstalledExe,0"');
+    expect(source).not.toContain("$displayName -match '^ParsYuva.*Bronze$'");
     expect(source).toContain("authenticodeStatus -eq 'NotSigned'");
   });
 
@@ -180,6 +188,17 @@ describe('Windows installed release UAT contract', () => {
     expect(source).toContain('$ordered = @($records.ToArray() | Sort-Object)');
     expect(source).not.toContain('[string]$value.DisplayName');
     expect(source).not.toContain('[string]$value.InstallLocation');
+  });
+
+  it('writes the public uninstall registry identity to the canonical channel root and application executable', async () => {
+    const [installer, builder] = await Promise.all([readFile(installerUrl, 'utf8'), readFile(builderUrl, 'utf8')]);
+    expect(installer).toContain('!macro customInstall');
+    expect(installer).toContain('WriteRegStr SHELL_CONTEXT "${UNINSTALL_REGISTRY_KEY}" "InstallLocation" "$INSTDIR"');
+    expect(installer).toContain('WriteRegStr SHELL_CONTEXT "${UNINSTALL_REGISTRY_KEY}" "DisplayIcon" "$INSTDIR\\${PPT_INSTALLER_EXECUTABLE},0"');
+    expect(builder).toContain("const upstreamInstallSectionPath = resolve(upstreamTemplateRoot, 'installSection.nsh')");
+    expect(builder).toContain("const upstreamInstallerIncludePath = resolve(upstreamTemplateRoot, 'include/installer.nsh')");
+    expect(builder).toContain('customInstallIndex <= registryAddIndex');
+    expect(builder).toContain('NSIS uninstall registry hook order drifted');
   });
 
   it('executes missing-property, ordered-entry and live snapshot behavior under Windows PowerShell strict mode', () => {
@@ -203,12 +222,12 @@ describe('Windows installed release UAT contract', () => {
       'Invoke-Expression $functionText',
       '$missing=[pscustomobject]@{InstallLocation="ignored"}',
       'if((Get-OptionalPropertyString $missing "DisplayName") -cne ""){throw "Missing property was not normalized to empty."}',
-      '$complete=[pscustomobject]@{DisplayName="ParsYuva Aile Yaşam Merkezi Bronze";DisplayVersion="26.8.2026-52";InstallLocation=$CanonicalInstallRoot;DisplayIcon="ParsYuva-Bronze.exe";UninstallString="uninstall";QuietUninstallString="uninstall /S"}',
+      '$complete=[pscustomobject]@{DisplayName="ParsYuva Aile Yaşam Merkezi Bronze 26.8.2026-52";DisplayVersion="26.8.2026-52";InstallLocation=$CanonicalInstallRoot;DisplayIcon="$CanonicalInstalledExe,0";UninstallString="uninstall";QuietUninstallString="uninstall /S"}',
       'if((Get-OptionalPropertyString $complete "DisplayName") -cne $complete.DisplayName){throw "Present property readback changed."}',
       '$ordered=[ordered]@{DisplayName=$complete.DisplayName;DisplayVersion=$complete.DisplayVersion;InstallLocation=$complete.InstallLocation;DisplayIcon=$complete.DisplayIcon;UninstallString=$complete.UninstallString;QuietUninstallString=$complete.QuietUninstallString}',
-      'if($ordered.DisplayVersion -cne "26.8.2026-52" -or $ordered.DisplayIcon -cne "ParsYuva-Bronze.exe"){throw "Ordered registry identity dot access failed."}',
+      'if($ordered.DisplayVersion -cne "26.8.2026-52" -or $ordered.DisplayIcon -cne "$CanonicalInstalledExe,0"){throw "Ordered registry identity dot access failed."}',
       '$snapshot=Get-StateSnapshot "STRICT_MODE_CONTRACT"',
-      'if($null -eq $snapshot.uninstallRegistry.bronze.entryCount){throw "Live registry snapshot did not produce an entry count."}',
+      'if($snapshot.uninstallRegistry.bronze.entryCount -lt 1){throw "Versioned live Bronze uninstall entry was not classified as Bronze."}',
     ].join(';');
     const result = spawnSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', command], {
       encoding: 'utf8', windowsHide: true,
