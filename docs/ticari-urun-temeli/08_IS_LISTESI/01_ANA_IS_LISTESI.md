@@ -25,7 +25,7 @@ Durumlar: `TAMAMLANDI`, `DEVAM`, `ACIK`, `BLOCKED`, `NOT_RUN`.
 | IS-0106 | Tam English uzman panel cevirisi | Codex | DEVAM | Ilk 24 uzman panel ile pano, katalog, aile, soy agaci, zaman tuneli, onemli gunler ve birlesik arama PASS; kalan ana kabuk ekranlarinda gorunur Turkce sabit metin 0 (English locale) |
 | IS-0107 | Ilk tanitim ve yardim sesli anlatim | Codex | DEVAM | TR/EN metin-ses, fallback ve erisilebilirlik PASS |
 | IS-0108 | Gorunur surum kanalini tek kez goster | Codex | TAMAMLANDI | Bronze/Silver/Gold, TR/EN ortak bicimlendirici ve preflight kapisi PASS |
-| IS-0109 | Ozel kurulum ve olcekli ilk aile kabul yuzeyi | Codex | DEVAM | Uc bilgi karti arasinda gecisli/sahte ilerlemesiz kurulum, TR/EN ayni dil kadin ses onceligi ve erkek/kurulu ses yedegi, 900x640 tek pars/reduced-motion ile kilitli kasa ve ilk guvenlik bootstrap kapilari PASS; gercek ses insan UAT acik |
+| IS-0109 | Ozel kurulum ve olcekli ilk aile kabul yuzeyi | Codex | DEVAM | Bronze 52 ucuncu anlatim karesi bos oldugu icin `a5334c13` ile reddedildi. Atomik native repaint ve title-region piksel kapisi 4 dosya/43 test PASS; Bronze 53 yeni uc slayt, TR/EN ses, olcek ve gercek installer UAT PASS olmadan kapanmaz |
 
 ## 2. Kurulum, acilis ve yasam dongusu
 
@@ -41,12 +41,12 @@ Durumlar: `TAMAMLANDI`, `DEVAM`, `ACIK`, `BLOCKED`, `NOT_RUN`.
 | IS-0208 | Eski Windows installer artefaktlarini otomatik temizle | Codex | TAMAMLANDI | Prebuild/package temizligi, guncel-surum kapisi ve hedef test PASS |
 | IS-0209 | Temiz paket, paketli runtime ve cift yedek kabul zinciri | Codex | DEVAM | Tum workspace rebuild, installer/runtime/surum/hash/imza kaniti, GitHub + harici Git commit esitligi ve D: kaynak readback PASS |
 | IS-0210 | Bronze Silver Gold kardes program koku, veri ve kaynak yalitimi | Codex | DEVAM | `ParsYuva-<Kanal>` kardes program dizini, `ParsYuva/<Kanal>` AppData, EXE/kisayol/appId/uninstall/worktree ayrimi, legacy kanal dizininde fail-closed silme ve uc worktree geri-okuma PASS |
-| IS-0211 | Mutasyon sonrasi exact commit kanit ve taze kurulu EXE UAT kapisi | Codex | DEVAM | Bronze 51 predecessor PASS. `77a87a87` source-integrity, `4462706a` stale installer retention ve `0854a4ec` preflight unknown-flag retleridir. Strict preflight CLI 2 dosya/12 test PASS; Bronze 52 yeni exact hedefli/tam/bütünlük, paket ve kurulu EXE UAT olmadan teslim yok |
-| IS-0212 | Acik tek seferli surum tahsisi ve onceden tahsisli paket kimligi | Codex | DEVAM | Bronze 27.08.2026.52, `bronze-2026-08-27-r52` kimliğiyle tek kez tahsis edildi; allocator tekrar çalıştırılmaz. Aktif son gerçek ret `0854a4ec`, eski `.51` installer artefaktları PR-229 gereği silindi. Kurulu `.51` predecessor ve immutable provenance korunur; `.52` full exact kapılar pendingdir |
-| IS-0213 | Kanonik kurulu Windows yukseltme maintenance ve on yuz UAT zinciri | Codex | DEVAM | Bronze 51 packaged runtime bundle kimliğiyle canlı predecessor PASS. İlk Unicode sınıflandırma 2 dosya/17 PASS, 1 FAIL ve fb8683dc; ASCII char düzeltmesi sonrası 2 dosya/18 test PASS. `.52` NSIS kanonik kök/EXE kimliği, N→N+1, maintenance ve UAT111 pendingdir |
-| IS-0214 | Adversarial Windows package kurulum ve final teslim kanit zinciri | Codex | DEVAM | UAT110 registry snapshot Windows PowerShell 5.1 strict-mode uyumlu hale getirildi. Bronze 52 full exact kapılar, paket, yeni installer experience, UAT110/UAT111 ve final kurulu UAT NOT_RUN |
-| IS-0215 | En kucuk degisiklikte tum kayit ve test kapanisi | Codex | DEVAM | Aktif son ret `0854a4ec`. Strict no-write ve strict preflight CLI odaklı 2 dosya/12 test ile 10/10 byte-exact makbuz değişmezliği PASS; yeni exact zincir ve tam UAT PASS olmadan kapanmaz, ara installer yok |
-| IS-0216 | Bronze 51 rejected predecessor recovery bootstrap | Codex | DEVAM | Bronze 50 immutable REJECTED_INVALID_PACKAGE ve Bronze 51 predecessor PASS geçmişi korunur. `.51` release installer artefaktı silinmiş, kurulu predecessor ve provenance korunmuştur; Bronze 52 yeni exact kapılar, paket ve canlı UAT tamamlanmadan teslim edilmez |
+| IS-0211 | Mutasyon sonrasi exact commit kanit ve taze kurulu EXE UAT kapisi | Codex | DEVAM | Aktif son kaynak reti `cb7a5d4d`; `a5334c13` Bronze 52 release görsel retidir. Bronze 53 tek kez tahsis edildi. Yeni exact hedefli/tam/bütünlük, paket, `.52→.53` kurulu EXE UAT ve final readback olmadan teslim yok |
+| IS-0212 | Acik tek seferli surum tahsisi ve onceden tahsisli paket kimligi | Codex | DEVAM | Bronze 27.08.2026.53, `bronze-2026-08-27-r53` kimliğiyle tek kez tahsis edildi; allocator tekrar çalıştırılmaz. `.52` history parent `.51`, `.53` history parent `.52` exact kaydedilir. Aktif son kaynak reti `cb7a5d4d`; yeni exact kapılar pendingdir |
+| IS-0213 | Kanonik kurulu Windows yukseltme maintenance ve on yuz UAT zinciri | Codex | DEVAM | Bronze 51 packaged runtime bundle kimliğiyle canlı predecessor PASS. Bronze 52 immutable runtime yalnız NOT_DELIVERY teknik predecessor olarak exact makbuzla sessiz kurulabilir. Ardından `.52→.53` normal UAT110, maintenance ve UAT111 pendingdir |
+| IS-0214 | Adversarial Windows package kurulum ve final teslim kanit zinciri | Codex | DEVAM | Eski `.52` installer makbuzu gorsel kabulden reddedildi. `.52` yalniz sessiz NOT_DELIVERY teknik predecessor olabilir; Bronze 53 yeni installer experience, `.52→.53` UAT110, UAT111 ve final teslim NOT_RUN |
+| IS-0215 | En kucuk degisiklikte tum kayit ve test kapanisi | Codex | DEVAM | Aktif son ret `cb7a5d4d`; ticari makbuz durum sözleşmesi driftidir. `453e8c59` final preflight master marker driftidir. Atomik installer boyaması 4 dosya/43, teknik predecessor producer retryı 1 dosya/10, enforcement retryı 8 dosya/74 ve güncel UAT/final/kayıt çapraz sözleşme retryı 7 dosya/75 test PASS; final master 59/59 byte-exact görsel QA PASS. Bronze 53 yeni exact zincir ve tam UAT PASS olmadan kapanmaz |
+| IS-0216 | Bronze 51 rejected predecessor recovery bootstrap | Codex | DEVAM | Bronze 50/51 tarihi korunur. Bronze 52 immutable paket runtime korunmakla birlikte gorsel UAT nedeniyle teslimden reddedildi; yalnız `.53` icin silent NOT_DELIVERY predecessor olabilir. Bronze 53 exact paket ve canli UAT tamamlanmadan teslim yok |
 
 ## 3. Kimlik, lisans ve ticari guven
 
@@ -85,7 +85,7 @@ Durumlar: `TAMAMLANDI`, `DEVAM`, `ACIK`, `BLOCKED`, `NOT_RUN`.
 
 | ID | Is | Sorumlu | Durum | Kabul |
 |---|---|---|---|---|
-| IS-0601 | Tam regresyonu yeni kaynakta tekrar kos | Codex | DEVAM | e0f85425 turunda hedefli 21 dosya/214 test, filtresiz 399 dosya/2.484 test ve TypeScript PASS; 10 generatedAt drifti source-integrity FAIL olmuş ve 77a87a87 ile korunmuştur. Bronze 52 yeni exact hedefli/tam tur, TypeScript, sözdizimi ve kaynak bütünlüğü zorunlu |
+| IS-0601 | Tam regresyonu yeni kaynakta tekrar kos | Codex | DEVAM | Bronze 53 gorsel installer duzeltmesi odakli 4 dosya/43 test PASS. Exact etki testleri, filtresiz tam regresyon, TypeScript, sozdizimi ve kaynak butunlugu yeni temiz committe zorunlu |
 | IS-0602 | SBOM ve lisans kapisi | Codex | TAMAMLANDI | Belirsiz/yasak lisans 0 |
 | IS-0603 | SAST/dependency/secret tarama | Codex | TAMAMLANDI | Kritik/yuksek 0 |
 | IS-0604 | Performans ve buyuk aile testi | Codex | DEVAM | Buyuk aile ve fresh-profile dogruluk PASS; paketlenmis Electron bellek/CPU/startup SLA baseline acik |

@@ -1,6 +1,6 @@
 {
   "name": "parsyuva-aile-yasam-merkezi-family-platform",
-  "version": "27.8.2026-52",
+  "version": "27.8.2026-53",
   "private": true,
   "type": "module",
   "packageManager": "npm@10.9.2",
@@ -49,6 +49,7 @@
     "installer:verify-retention": "node scripts/verify-windows-installer-retention-policy.mjs",
     "create:bronze:final-local-test-delivery": "node scripts/create-bronze-final-local-test-delivery.mjs",
     "uat:windows:installed-release": "powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File scripts/run-windows-installed-release-uat.ps1",
+    "prepare:windows:technical-predecessor": "powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File scripts/run-windows-technical-predecessor-preparation.ps1",
     "verify:user-visible-release-display": "node scripts/verify-user-visible-release-display-policy.mjs",
     "rules:check": "node scripts/verify-operation-rule-check.mjs",
     "verify:first-family-clean-release": "node scripts/verify-first-family-clean-release-policy.mjs",

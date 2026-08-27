@@ -1,10 +1,10 @@
 # Tüm Kurallar Aşılamaz Yürütme Sözleşmesi
 
-- Sürüm: **Bronze 27.08.2026.52**
+- Sürüm: **Bronze 27.08.2026.53**
 - Karar: **DEC-129**
 - Kanonik kural sayısı: **241**
 - Aktif kural: **216**
-- Kural SHA-256: `103e269ab67eed8423a03b726d00bc36616660ca2f0f3c65eea3491103640936`
+- Kural SHA-256: `473ad949db17e76d6c3230fb1ac11e2a022ba744b69d8225c5a5a7a694c9d82b`
 
 ## Değişmez çalışma ilkesi
 
@@ -18,7 +18,7 @@ PR-237 gereği sürüm tahsisi zorunlu expected release ID ile açık tek mutasy
 
 PR-239 gereği Windows installer teslimi yalnız schema2 exact-commit package provenance, zorunlu installer-experience V2 ve UAT110 V3'ün paket sırasından yeniden türettiği birbirini dışlayan modla kabul edilir: Bronze 50 için kanonik hedefin yokluğunu kanıtlayan fresh-install + same-version maintenance; normal Bronze 52+ için immutable previous package arşiviyle eşleşen canlı sibling N'den exact N→N+1 + same-version maintenance. Tracked TypeScript kaynağına bağlı exact modül/rota otoritesi, tüm uygun kontrollerin dinamik outcome kapsamı, gerçek native CANCEL/ACCEPT, exclusive reparse-korumalı kanıt kökü, guard kaybında sıfır path temizliği, parent-run bağlı UAT111 V3 ve bütün girdileri canlı geri okuyan final V3 zorunludur. Legacy nested runtime trusted predecessor değildir; mevcut kullanıcı verisi içeriği makbuza yazılmaz. NotSigned ve koruma kapalı Kaspersky testi üretim veya zararsızlık iddiası değildir.
 
-PR-241 yalnız Bronze 51 için geçerlidir. Current top-level ve exact tek entry statusu birbirine eşit ve exact `IN_PROGRESS` olmalıdır; immutable parent bundle transaction yayımlanmadan hemen önce kanonik path/size/SHA/rejected-parent identity bağıyla canlı geri okunur. Bronze 50 package/external history immutable `REJECTED_INVALID_PACKAGE` olarak korunur; provenance bundle yalnız `REJECTED_PARENT_HISTORY_ANCHOR_ONLY` lineage girdisidir ve canlı installed predecessor otoritesi değildir. Bronze 51 temiz program kökü, EXE ve uninstall yokluğunu kanıtlayarak recovery fresh-install ve ayrı same-version maintenance çalıştırır. Exact test, kaynak bütünlüğü, preflight/postflight, installer-experience, UAT110, UAT111 ve final geri-okuma kapıları atlanamaz.
+PR-241 Bronze 51 recovery yolunu ve rejected Bronze 52 teknik predecessor sınırını fail-closed düzenler. Bronze 50 immutable `REJECTED_INVALID_PACKAGE` tarihçesi trusted runtime değildir; Bronze 51 temiz recovery fresh-install ve ayrı maintenance çalıştırır. Bronze 52 `REJECTED_INSTALLER_VISUAL_UAT_FAIL` ise Bronze 53 öncesinde yalnız kanonik `WINDOWS_TECHNICAL_PREDECESSOR_PREPARATION` receipt'iyle, uygulama açılmadan sessiz kurulabilir; bu işlem teslim, kabul veya PASS sayılmaz. Receipt canlı .51, immutable .51/.52 bundle, .52 installer/runtime, AppData Bronze/Silver/Gold/legacy, diğer kanal program/registry ve kurulu .52 kimliğini exact kanıtlar. UAT110 ve final teslim receipt UUID yolu, boyut, SHA-256, producer ve canlı .52 bağını doğrulamadan ilerlemez. Exact test, kaynak bütünlüğü, preflight/postflight, installer-experience, UAT110, UAT111 ve final geri-okuma kapıları atlanamaz.
 
 PR-235 gereği her mutasyonun exact changed-file etki analizi kural, karar, belge, manifest, ratchet, test ve UAT bağlarını günceller veya açık gerekçeyle etkilenmediğini gösterir. Kalıcı postflight ve paketleme aynı temiz committe hedefli test, tam regresyon ve kaynak bütünlüğü PASS olmadan; installer teslimi aynı pakete/commite bağlı paket sonrası gerçek kurulu ana EXE UAT PASS olmadan ilerleyemez.
 

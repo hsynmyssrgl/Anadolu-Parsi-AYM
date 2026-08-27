@@ -123,12 +123,14 @@
       "dependentRecords": ["BUILD_STATUS.md", "docs/17_MASTER_BUILD_LEDGER.md"],
       "affectedVitestFiles": [
         "apps/desktop/tests/bronze-final-local-test-delivery-contract.test.ts",
+        "apps/desktop/tests/installer-narration-experience.test.ts",
         "apps/desktop/tests/installed-frontend-user-uat-contract.test.ts",
         "apps/desktop/tests/installed-frontend-user-uat-receipt.test.ts",
         "apps/desktop/tests/installed-ui-native-file-dialog-harness.test.ts",
         "apps/desktop/tests/windows-installed-release-uat-contract.test.ts",
         "apps/desktop/tests/windows-installer-experience-uat-contract.test.ts",
         "apps/desktop/tests/windows-package-provenance-history.test.ts",
+        "apps/desktop/tests/windows-technical-predecessor-preparation-contract.test.ts",
         "apps/desktop/tests/monthly-release-version.test.ts"
       ],
       "includeChangedTestFile": false

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
-  "release": "Bronze 27.08.2026.52",
+  "release": "Bronze 27.08.2026.53",
   "decisionCount": 105,
   "decisions": [
     {
@@ -3025,7 +3025,7 @@
       "status": "ACTIVE",
       "source": "Acik kullanici karari: bundan sonra en ufak degisiklik bile her yerde tum kayitlari guncellemeli ve testi yapilmali; kullaniciya aylar surecek eksik test yuku birakilmamali",
       "document": "docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md",
-      "documentSha256": "b79b4e1117152ef9fb16d07cc2cbb236e97d441625829a350f5df79ef470a09b",
+      "documentSha256": "85877846ad6419eb53ac5055d3d55a8a8e6d1dd5013b7539547ba5d4eadc2fda",
       "documents": [
         "AGENTS.md",
         "SHA256SUMS.txt",
@@ -3050,11 +3050,16 @@
         "docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md",
         "manifest.json"
       ],
-      "workListImpact": "IS-0215 DEVAM kalir. Önceki gerçek retler korunur. 77a87a87 TypeScript makbuz driftini, 4462706a stale .51 installer retention ihlalini, 0854a4ec yanlış --no-write preflight bayrağının writer moda sessiz düşmesini korur. Eski installer artefaktları silinmiş; kurulu .51 predecessor ve immutable provenance korunmuştur. Strict no-write ve preflight CLI düzeltmesi 2 dosya/12 test ile 10/10 byte-exact değişmezlik PASS olsa da Bronze 52 exact etki, hedefli/tam regresyon, TypeScript, sözdizimi, kaynak bütünlüğü, belge QA, paket ve tüm kurulu UI UAT kapıları tamamlanmadan kapanış ve ara installer yoktur.",
-      "latestRejectedCheckpoint": "0854a4ec",
+      "workListImpact": "IS-0215 DEVAM kalir. Önceki gerçek retler korunur. aee77952 installer-experience makbuzu makine PASS yazsa da 03-narrated-guidance sag icerigi bos oldugu icin a5334c13 gercek gorsel UAT retidir. Bronze 52 teslimden reddedildi ve yeniden uretilmez; Bronze 53 tek kez tahsis edildi. Atomik WM_SETREDRAW, RedrawWindow 0x0185, UpdateWindow, uc denemeli title-region piksel kapisi ile UAT110/final canli geri-okumasi 4 dosya/43 testte PASS olsa da yeni exact etki, tam regresyon, TypeScript, sozdizimi, kaynak butunlugu, belge QA, paket ve tum kurulu UI UAT kapilari tamamlanmadan teslim yoktur.",
+      "latestRejectedCheckpoint": "cb7a5d4d",
+      "latestReleaseRejectedCheckpoint": "a5334c13",
       "ppk015CurrentRatchetImpact": "f4f84896 exact kaynak zinciri 88 değişen yol/19 hedef test hesaplamış; hedefli 19 dosya/191 test PASS ve filtresiz 399 dosya/2.483 test PASS iken yalnız eski current source inventory SHA eşliği FAIL olmuş ve 8ea2dfe1 ile korunmuştur. Canlı sınır 18 bölge/590 dosya/0 bulgu/2 adapter/3 amaç/4 yalnız-yerel taşıma dosyasıdır; yeni kaynak özeti f54e3f302649af67ed6d028e66673eea68b0d58c2ba43c912c1ccb7534babe98, yetkili adapter/purpose özeti değişmezdir. İlk contract retryında exact migration 117 tarihsel ayırıcısının kaybı 24e6bd71 ile korunur. Düzeltme sonrası contract 43/43, runtime 10/10, iki odaklı test dosyası 23/23 ve ticari temel 1.254 kontrol PASS'tir. Ağ yetkisi genişlememiştir; bütün exact zincir yeniden çalıştırılır.",
       "ppk015DocumentationQaImpact": "PPK-015 ret ve retry kayıtlarıyla yeniden üretilen güncel master DOCX 31/31 ve PDF 28/28, toplam 59/59 sayfada temas ve seçili özgün çözünürlük denetimi PASS vermiştir. Taşma, örtüşme, kırpılma, token-ortası sarım, font/glyph, tablo, header/footer, marj ve sayfa numarası kusuru yoktur; exact ürün/paket/UAT kapıları ayrıca zorunludur.",
-      "processInvocationImpact": "Tarihsel çağrı ve belge retleri korunur. 2ca29a6d governed preflight ticari son kayıt driftidir; düzeltme sonrası writer PASS'tir. d68fd2a4, test başlamadan eksik hedef dosya listesiyle duran çağrının invocation-only checkpointidir ve PASS veya gerçek test FAIL'i sayılmaz. Sonraki exact hedefli tur 19 dosyada 189 testi geçirmiş, paket durumunun BLOCKED_/FAIL_ ön eki taşımaması nedeniyle 1 PR-240 yaşam döngüsü testi FAIL olmuş ve 3976994d ile doğru biçimde reddedilmiştir. 0854a4ec yanlış --no-write preflight bayrağının writer moda sessiz düşmesini korur; preflight artık yalnız argümansız writer veya exact --read-only kabul eder ve bilinmeyen/yinelenen bayrakları yazım öncesi reddeder. Exact temiz commit, kanal eşitliği ve bütün test/UAT zinciri yeniden çalıştırılır.",
+      "processInvocationImpact": "Tarihsel çağrı ve belge retleri korunur. aee77952 makbuzundaki ucuncu screenshot insan gorsel denetiminde bos bulunmus ve a5334c13 ile reddedilmistir; eski PASS makbuzu kabul veya teslim kaniti sayilmaz. UAT capture urunu maskelemeden atomik native boyama, bounded retry ve title-region piksel kanitiyla fail-closed olur. Bronze 52 yalniz sessiz teknik predecessor olarak, uygulama acilmadan ve AppData/diger kanallar once-sonra degismezlik ile exact runtime readback kaniti uretilerek kullanilabilir; NOT_DELIVERY/NOT_PASS siniri asilemez. Bronze 53 exact temiz commit, kanal esitligi ve butun test/UAT zinciriyle yeniden calistirilir.",
+      "installerExperienceVisualImpact": "AEE77952_MACHINE_PASS_MANUAL_VISUAL_FAIL_THIRD_SLIDE_BLANK_A5334C13_REJECTED; PRODUCT_ATOMIC_REPAINT_AND_UAT_TITLE_REGION_PIXEL_FAIL_CLOSED; BRONZE_52_NOT_DELIVERABLE; BRONZE_53_FRESH_EXACT_CHAIN_REQUIRED",
+      "technicalPredecessor52Impact": "Bronze 52 immutable package runtime yalniz Bronze 53 normal N-to-N-plus-1 onkosulunu kurmak icin silent install olabilir. Uygulama acilmaz, kullaniciya teslim edilmez, PASS sayilmaz; AppData, Silver, Gold, legacy ve uninstall/runtime kimlikleri once-sonra makine kanitiyla okunur.",
+      "crossContractClosureImpact": "UAT110/final/live ledger/rejected lifecycle/technical receipt exact baglari guncellendikten sonra 7 dosya/75 test ve degisen PowerShell/JavaScript sozdizimi PASS'tir. Final master DOCX 31/31 ve PDF 28/28, toplam 59/59 tam sayfa veya byte-exact yeniden kullanimla gorsel QA PASS'tir. Ilk final governed preflight master ureticisinin 219836c6/d3f218c1/ace2eeaf markerlarini birlesik sicile tasimadigini bulmus ve 453e8c59 ile reddedilmistir. Bu FAIL makbuzundan sonra yalniz NOT_RUN bekleyen test drifti cb7a5d4d ile korunur; test NOT_RUN/FAIL/PASS yasam dongusu ve exact KANIT-0002 SHA bagi ile duzeltilir.",
+      "recordClosureRenderInvocationImpact": "Ilk kayit-kapanis DOCX renderi LibreOffice PATH cozumlenemedigi icin ace2eeaf ile reddedildi. Kanonik mutlak LibreOffice/Poppler retryinda DOCX 31/31 ve PDF 28/28, toplam 59/59 sayfa onceki tam incelenmis baseline ile byte-exact ayni ve gorsel QA PASS'tir.",
       "targetedLifecycleClosureImpact": "3976994d, d68fd2a4 kaynak kimliğindeki exact hedefli turda operation-rule-check-policy yaşam döngüsü testinin packageStatus alanında zorunlu fail-closed BLOCKED_/FAIL_ ön ekini bulamamasını kaydeder. 19 hedef dosyada 189 test PASS, 1 test FAIL'dir. Bronze 51 kanıtı korunarak Bronze 52 NOT_BUILT durumu BLOCKED_ ön ekiyle ifade edilir; yeni exact hedefli ve tam regresyon zorunludur.",
       "windowsUninstallRegistryIdentityImpact": "Canlı Bronze 51 packaged runtime immutable bundle ile exact eşleşirken Windows uninstall girdisinin sürüm ekli DisplayName değeri eski Bronze$ sınıflandırmasıyla legacy sayılmış, InstallLocation alanı boş ve DisplayIcon alanı uninstallerIcon.ico bulunmuştur. İlk Unicode literal retry 2 dosyada 17 PASS/1 FAIL vermiş ve fb8683dc ile korunmuştur. Kaynak-ASCII [char]0x015F düzeltmesi sonrası packageStatus ve UAT sözleşmesi odaklı 2 dosya/18 test PASS'tir. customInstall kanonik InstallLocation/DisplayIcon yazar; bütün sicil alanları exact karşılaştırılır ve gerçek N-to-N+1 readback zorunludur.",
       "commercialUninstallRegistryRecordImpact": "TICARI-052 ilk doğrulaması iki exact ifadenin sözcük sırası nedeniyle a6020cb4, ikinci doğrulama üç tarihsel marker eksikliği nedeniyle 61f09ed5 ile korunmuştur. Bütün tarihsel/güncel bağlar geri kurulduktan sonra ticari temel 1.254 kontrol/87 dosya/61 iş/241 kural PASS vermiştir. Bu odaklı PASS yeni exact commit zincirinin yerine geçmez.",
@@ -3069,7 +3074,7 @@
       "finalFreeze3PathImpact": "Final-freeze3 30 DOCX ve 27 PDF sayfa makine doğrulamasını PASS etmiş, ancak U+200B ReportLab token bölmesini durdurmamıştır. PDF karar/ADR yollarındaki ayraç dışı sarım a0d9df42 ile korunur. Yol yalnız /, -, _ sonrasında en çok 48 karakterlik deterministik satırlara ayrılır; yeni tam görsel QA zorunludur.",
       "finalFreeze4VisualImpact": "Deterministik ayraç satırları sonrası DOCX 30/30 ve PDF 27/27, toplam 57/57 tam tek-sayfa özgün çözünürlük QA PASS'tir. Yollar yalnız /, -, _ sonrasında sarılır; ADR-067 sıra/exact yol ve bütün sayfa mobilyası eksiksizdir. Exact ürün/paket/kurulu UAT kapıları ayrıca zorunludur.",
       "finalFreeze6VisualImpact": "P2 kayıt sertleştirmesi sonrası DOCX 30 ve PDF 27 sayfadır. Önceki onayla byte-exact aynı 25 sayfa yeniden kullanılabilir; değişen 32 sayfa üç bağımsız denetimde 32/32 PASS ve toplam sonuç 57/57 PASS'tir. Exact ürün/paket/kurulu UAT kapıları ayrıca zorunludur.",
-      "mutationAssessmentCommitIdentityImpact": "UAT110 pre-install registry harness retleri 059e3787, a1aec744, 8472face, 15e3c9d0 ve son 64695e58 ile korunur. Installer başlamamış, kurulu EXE/UAT111 oluşmamış ve 15 kullanıcı dosyası değişmemiştir. Windows PowerShell 5.1 null-güvenli registry düzeltmesi 2 dosya/17 test, 15e3c9d0 pre-mutation baseline PASS'tir. Bronze 52 exact assessment ve bütün teslim zinciri zorunludur.",
+      "mutationAssessmentCommitIdentityImpact": "UAT110 pre-install registry harness retleri ve a5334c13 installer gorsel UAT reti korunur. Bronze 52 immutable paket/provenance yeniden yazilmaz ve teslim edilemez. Bronze 53 tek kez tahsis edilmistir; exact assessment, hedefli/tam test, kaynak butunlugu, yeni paket, uc gorsel slayt, anlatim, .52 teknik predecessor readback, .52-to-.53 UAT110, UAT111 ve final teslim zorunludur.",
       "adrSourceContinuityImpact": "Ana karar sicilinin ADR-067 bağlayıcı referansı kaynak dosyasız kalmıştır. f1590772 gerçek kayıt bütünlüğü FAIL'idir. ADR-067 mevcut DEC-084/Migrasyon 38 davranışından geri kurulur; operation-rule-check ana sicil ADR referanslarını mevcut dosyalara ve ADR-001..en yüksek ADR kesintisiz numara dizisine bağlar; V5 verifier aynı sürekliliği doğrular.",
       "artifactIndexQaImpact": "47f441e1 Git-index ile uretilen kanonik indeksin varsayilan canli-agac modunda dogrulanmasini FAIL korur. Ureticiyle ayni --git-index --no-report modu 13146 kontrol/4407 dosya/2143 belge PASS; kaynak butunlugu 4868/4868 dosya ve 4869 SHA PASS verdi.",
       "runtimePrerequisiteAndNoWriteImpact": "703be65a 398 Vitest dosyasi/2469 test PASS sonrasinda 16 ek runtime icin eksik Bronze dist onkosulunu; 0a118f5f eksik resmi npm tani ortamini; 7fb288cd eksik core-service uygulama ciktisini ve ddb1abff 33-Y/33-Z/34-A alt surec no-write sizintisini FAIL korur. Resmi package/core-service/desktop onkosullariyla 16/16 ek runtime PASS; ortak no-write aktarimiyla 1 dosya/6 test, uc runtime ve uc byte-exact manifest SHA kontrolu PASS verdi. c7a3c130, exact 80cf2a39 tam regresyonunda 33-R alt surecinin migration manifesti generatedAt alanina yazmasini FAIL korur; aktarim duzeltmesinden sonra 1 dosya/6 test ve gercek 33-R 11/11, 8 dosya/30 test PASS, manifest SHA byte-exact aynidir. Yeni exact tam regresyon zorunludur.",
@@ -3130,6 +3135,11 @@
         "scripts/lib/source-manifest.mjs",
         "scripts/lib/aym-source-authority.mjs",
         "scripts/protect-authoritative-source-external.mjs",
+        "apps/desktop/build/installer.nsh",
+        "scripts/run-windows-installer-experience-uat.ps1",
+        "scripts/run-windows-technical-predecessor-preparation.ps1",
+        "scripts/run-windows-installed-release-uat.ps1",
+        "scripts/create-bronze-final-local-test-delivery.mjs",
         "docs/ticari-urun-temeli/11_OTOMASYON/dogrula-ticari-temel-alani.mjs"
       ],
       "evidence": [
@@ -3145,6 +3155,12 @@
         "apps/desktop/tests/source-manifest-worktree.test.ts",
         "apps/desktop/tests/aym-governance-channel-receipt-path.test.ts",
         "apps/desktop/tests/authoritative-source-exact-commit-backup.test.ts",
+        "apps/desktop/tests/installer-narration-experience.test.ts",
+        "apps/desktop/tests/windows-installer-experience-uat-contract.test.ts",
+        "apps/desktop/tests/windows-technical-predecessor-preparation-contract.test.ts",
+        "apps/desktop/tests/windows-installed-release-uat-contract.test.ts",
+        "apps/desktop/tests/bronze-final-local-test-delivery-contract.test.ts",
+        "artifacts/validation/installer-experience/aee77952-7cb2-495a-8062-6d99d5f7b5d2/03-narrated-guidance.png",
         "artifacts/validation/canonical-rule-registry-gate.json"
       ]
     },
@@ -3156,7 +3172,7 @@
       "status": "ACTIVE",
       "source": "Kullanıcının hatalı eski kararları düzeltme, bütün sorunları kayda alma, tam test ve temiz kurulum dosyasını ancak tüm kapılar geçince üretme yetkisi",
       "document": "docs/decisions/DEC-276-bronze-51-rejected-predecessor-recovery-bootstrap.md",
-      "documentSha256": "e7f1dbcc94bfd7ba90382f00c981635f0cf959642c3dc50ed730eb3952a79c69",
+      "documentSha256": "94274ec78169b7a624c1ac6011a223b824fa2b846fe652df2f6f381f8a890ffc",
       "documents": [
         "config/release-ledger.json",
         "config/canonical-rule-registry.json",
@@ -3169,15 +3185,19 @@
         "docs/ticari-urun-temeli/01_YONETIM/01_ASILAMAZ_KURALLAR.md",
         "docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md"
       ],
-      "workListImpact": "IS-0216 DEVAM kalir. Bronze 50 immutable REJECTED_INVALID_PACKAGE ve Bronze 51 predecessor PASS geçmişi korunur. 77a87a87 TypeScript makbuz driftini, 4462706a stale .51 installer retention ihlalini, 0854a4ec yanlış preflight bayrağının writer moda sessiz düşmesini korur. Eski .51 release installer artefaktları silinmiş; canlı kurulu predecessor ve immutable provenance korunmuştur. Bronze 52 normal continuation exact test, paket, N-to-N+1, maintenance ve UAT111 kapanışı olmadan teslim edilmez.",
-      "latestRejectedCheckpoint": "0854a4ec",
+      "workListImpact": "IS-0216 DEVAM kalir. Bronze 50 immutable rejected history ve Bronze 51 predecessor gecmisi korunur. Bronze 52 package/runtime immutable kalir ancak installer ucuncu slayt gorsel FAIL nedeniyle a5334c13 ile teslimden reddedilmistir. Bronze 53 tek kez tahsis edilmistir; .52 yalniz silent NOT_DELIVERY teknik predecessor readback, ardindan .52-to-.53 normal continuation, maintenance, UAT111 ve final kapanis icin kullanilabilir.",
+      "latestRejectedCheckpoint": "cb7a5d4d",
+      "latestReleaseRejectedCheckpoint": "a5334c13",
       "ppk015CurrentRatchetImpact": "Bronze 52 uninstall registry/UAT kaynak değişikliklerinden sonra canlı PPK-015 sınırı 18 bölge/590 dosya/0 bulgu/2 adapter/3 amaç/4 yalnız-yerel taşıma dosyası ve f54e3f302649af67ed6d028e66673eea68b0d58c2ba43c912c1ccb7534babe98 kaynak özetidir. Yetkili adapter/purpose özeti ve ağ yetkisi değişmemiştir. f4f84896 tam regresyonundaki ratchet FAIL 8ea2dfe1, ilk contract retryındaki exact migration 117 ayırıcı FAIL'i 24e6bd71 ile korunur. Düzeltme sonrası contract 43/43, runtime 10/10, iki odaklı test dosyası 23/23 ve ticari temel 1.254 kontrol PASS'tir; exact zincir yeniden tamamlanır.",
-      "ppk015DocumentationQaImpact": "PPK-015 kayıt kapanışıyla yeniden üretilen güncel master DOCX 31/31 ve PDF 28/28, toplam 59/59 sayfa görsel QA PASS'tir. Bronze 52 hâlâ NOT_BUILT'tir; belge PASS'i paket veya kurulu UAT yerine geçmez.",
-      "processInvocationImpact": "Bronze 51 exact package/provenance/installer-experience PASS'tir ve exact packaged runtime kimliğiyle canlı predecessor olarak kurulmuştur. Tarihsel gerçek retler korunur. d68fd2a4 test başlamadan duran invocation-only checkpointtir; 3976994d packageStatus test retidir. 0854a4ec yanlış --no-write preflight bayrağının writer moda sessiz düşmesini korur; strict CLI yalnız argümansız writer veya exact --read-only kabul eder. Bronze 52 tahsisi tekrar edilmez; yeni exact zincir immutable .51 predecessor readback ile sürdürülür.",
+      "ppk015DocumentationQaImpact": "PPK-015 kayıt kapanışıyla yeniden üretilen güncel master DOCX 31/31 ve PDF 28/28, toplam 59/59 sayfa görsel QA PASS'tir. Bronze 52 exact package/runtime immutable olarak üretilmiş, ancak installer görsel UAT nedeniyle REJECTED_INSTALLER_VISUAL_UAT_FAIL durumunda teslimden reddedilmiştir; yeniden üretilmez ve teslim edilmez. Bronze 53 exact zinciri tamamlanmadan belge PASS'i paket veya kurulu UAT yerine geçmez.",
+      "processInvocationImpact": "Bronze 51 exact predecessor gecmisi korunur. Bronze 52 exact package/runtime uretilmis ancak aee77952 ucuncu kare gorsel FAIL'i nedeniyle a5334c13 ile teslimden reddedilmistir ve ayni kimlikle yeniden uretilmez. Bronze 53 tek kez tahsis edilmistir. Mevcut 52+ UAT semantigi exact N gerektirdiginden .52 yalniz silent NOT_DELIVERY teknik predecessor olarak, uygulama acilmadan ve tum veri/kanal kokleri once-sonra degismezlik ile exact runtime kimligi okunarak kurulabilir; bundan sonra .53 normal UAT110 calisir.",
+      "crossContractClosureImpact": "UAT110/final/live ledger/rejected lifecycle/technical receipt exact baglari guncellendikten sonra 7 dosya/75 test ve degisen PowerShell/JavaScript sozdizimi PASS'tir. Final master DOCX 31/31 ve PDF 28/28, toplam 59/59 tam sayfa veya byte-exact yeniden kullanimla gorsel QA PASS'tir. Ilk final governed preflight master ureticisinin 219836c6/d3f218c1/ace2eeaf markerlarini birlesik sicile tasimadigini bulmus ve 453e8c59 ile reddedilmistir. Bu FAIL makbuzundan sonra yalniz NOT_RUN bekleyen test drifti cb7a5d4d ile korunur; test NOT_RUN/FAIL/PASS yasam dongusu ve exact KANIT-0002 SHA bagi ile duzeltilir.",
+      "recordClosureRenderInvocationImpact": "Ilk kayit-kapanis DOCX renderi LibreOffice PATH cozumlenemedigi icin ace2eeaf ile reddedildi. Kanonik mutlak LibreOffice/Poppler retryinda DOCX 31/31 ve PDF 28/28, toplam 59/59 sayfa onceki tam incelenmis baseline ile byte-exact ayni ve gorsel QA PASS'tir.",
+      "installerExperienceVisualImpact": "aee77952 tarihsel makine PASS makbuzu yeniden yorumlanmaz; 03-narrated-guidance bos gorseli a5334c13 ile gercek FAIL'dir. Yeni UAT her screenshot icin UIA title region, kontrast piksel, dolu satir/sutun, bounded retry ve downstream canli readback zorunlu kilar.",
       "windowsUninstallRegistryIdentityImpact": "Canlı Bronze 51 uygulama EXE'si immutable bundle kimliğiyle exact PASS olsa da uninstall girdisinin sürüm ekli DisplayName değeri eski Bronze$ eşlemesinde legacy sınıfına düşmüş, InstallLocation boş ve DisplayIcon uninstallerIcon.ico bulunmuştur. İlk Unicode literal sınıflandırma FAIL'i fb8683dc ile korunur. Kaynak-ASCII [char]0x015F düzeltmesi sonrası 2 dosya/18 test PASS'tir; installer kanonik root/EXE alanlarını yazar ve primary/maintenance bütün sicil kimliğini exact okur.",
       "commercialUninstallRegistryRecordImpact": "TICARI-052 exact uninstall sicili ifade bağı a6020cb4 ve tarihsel marker eksikliği 61f09ed5 ile korunur. Eski/yeni bağlar geri kurulduktan sonra ticari temel 1.254 kontrol/87 dosya/61 iş/241 kural PASS'tir; ürün kodu veya kurulu UAT PASS'i değildir.",
       "sourceIntegrityProducerOrderImpact": "Bronze 51 paket kapısı 2abcf853, f1590772 ve sonraki 6d94ab9e kaynak mutasyonu nedeniyle kapalıdır. Governed preflight writer ticari kanıt ve Git-index tabanlı indeksleri yeniledikten sonra manifest/SHA256SUMS son üretici olur; yeni exact committe source-integrity ve read-only pre/postflight PASS olmadan recovery installer başlatılmaz.",
-      "exactRegressionSourceIntegrityImpact": "e0f85425 exact turundaki 10 generatedAt-only tracked makbuz drifti temiz çalışma ağacı/source-integrity FAIL üretmiş ve 77a87a87 ile korunmuştur. 4462706a stale installer retention, 0854a4ec yanlış preflight flag writer drifti retleridir. Strict --no-write pretypecheck/prebuild aktarımı ile preflight strict CLI 2 dosya/12 test ve 10/10 byte-exact değişmezlikle doğrulanır; yeni exact test/bütünlük zinciri bitmeden Bronze 52 paketlenmez.",
+      "exactRegressionSourceIntegrityImpact": "e0f85425 exact turundaki 10 generatedAt-only tracked makbuz drifti 77a87a87, stale installer retention 4462706a ve yanlış preflight flag writer drifti 0854a4ec ile korunur. Bronze 52 daha sonra immutable paket/runtime üretmiş ancak a5334c13 görsel UAT ile teslimden reddedilmiştir. Teknik predecessor producer ilk PowerShell parse testi 219836c6 ile reddedilmiş, düzeltme sonrası 1 dosya/10 test PASS olmuştur. Yeni Bronze 53 exact test/bütünlük zinciri zorunludur.",
       "governedPreflightStrictCliImpact": "Eski .51 release EXE/blockmap/builder-debug PR-229 gereği silinir; kurulu predecessor ve immutable provenance korunur. Preflight yalnız argümansız writer veya exact --read-only kabul eder ve bilinmeyen bayrakları yazım öncesi reddeder.",
       "adrSourceContinuityImpact": "ADR-067 mevcut DEC-084/Migrasyon 38 gerçeğinden geri kurulur. ADR-001..en yüksek ADR kesintisizliği ve ana karar sicilindeki her ADR referansının kaynak dosyası olması operation-rule-check ile V5 verifier tarafından fail-closed zorunlu kılınır.",
       "pdfVisibleStatusReadabilityImpact": "V5 PDF ilk turunda sayfa 4/5 Yerel makine durumları token ortasında bölünmüş ve 6d94ab9e ile reddedilmiştir. Kanonik değerler değişmeden görünür DOCX/PDF durumları anlamsal boşluklarla sarılmış; son PDF 26/26 ve DOCX 30/30 görsel QA PASS vermiştir.",
@@ -3186,7 +3206,7 @@
       "finalFreeze3PathImpact": "U+200B sonrası PDF karar/ADR yolu token bölünmesinin sürmesi a0d9df42 ile korunur. Kalıcı düzeltme exact yolu yalnız /, -, _ ayraçları sonrasında en çok 48 karakterlik deterministik satırlara ayırır; yeni tam belge QA ve exact ürün zinciri zorunludur.",
       "finalFreeze4VisualImpact": "Final-freeze4 DOCX 30/30 ve PDF 27/27, toplam 57/57 tam tek-sayfa özgün çözünürlük QA PASS'tir. Güvenli yol sarımı, ADR-067 ve bütün sayfa mobilyası doğrulanmıştır; exact kaynak/test/paket/canlı UAT zinciri yine zorunludur.",
       "finalFreeze6VisualImpact": "P2 kayıt sertleştirmesi sonrası DOCX 30 ve PDF 27 sayfadır. Önceki onayla byte-exact aynı 25 sayfa yeniden kullanılabilir; değişen 32 sayfa üç bağımsız denetimde 32/32 PASS ve toplam sonuç 57/57 PASS'tir. Exact kaynak/test/paket/canlı UAT zinciri yine zorunludur.",
-      "mutationAssessmentCommitIdentityImpact": "Bronze 51 package/provenance/installer-experience PASS sonrasındaki UAT110 installer başlamadan registry snapshot harness içinde reddedilmiş; 059e3787, a1aec744, 8472face, 15e3c9d0 ve 64695e58 ile korunmuştur. Düzeltme 2 dosya/17 test PASS'tir. Immutable .51 yeniden yazılmaz; Bronze 52 normal continuation exact assessment, predecessor readback, paket ve canlı UAT kapanışı pendingdir.",
+      "mutationAssessmentCommitIdentityImpact": "Bronze 51 ve onceki ret zinciri korunur. Bronze 52 installer gorsel reti a5334c13 ile kayitlidir; immutable .52 bundle yeniden yazilmaz. Bronze 53 exact assessment, .52 teknik predecessor readback, yeni paket ve canli UAT kapanisi pendingdir.",
       "syncStatus": "SYNCHRONIZED",
       "requirements": [
         "PR-241"
@@ -3200,10 +3220,13 @@
         "scripts/create-mutation-impact-analysis.mjs",
         "scripts/run-governed-postflight.mjs",
         "scripts/lib/monthly-release-version.mjs",
+        "scripts/run-windows-technical-predecessor-preparation.ps1",
         "scripts/run-windows-installed-release-uat.ps1",
         "scripts/run-installed-frontend-user-uat.mjs",
         "scripts/create-bronze-final-local-test-delivery.mjs",
         "scripts/allocate-monthly-release-version.mjs",
+        "apps/desktop/build/installer.nsh",
+        "scripts/run-windows-installer-experience-uat.ps1",
         "apps/desktop/scripts/run-electron-builder.mjs"
       ],
       "evidence": [
@@ -3211,11 +3234,15 @@
         "apps/desktop/tests/windows-package-provenance-history.test.ts",
         "apps/desktop/tests/mutation-release-readiness-contract.test.ts",
         "apps/desktop/tests/mutation-release-evidence-producers.test.ts",
+        "apps/desktop/tests/windows-technical-predecessor-preparation-contract.test.ts",
         "apps/desktop/tests/windows-installed-release-uat-contract.test.ts",
         "apps/desktop/tests/installed-frontend-user-uat-contract.test.ts",
         "apps/desktop/tests/installed-frontend-user-uat-receipt.test.ts",
         "apps/desktop/tests/bronze-final-local-test-delivery-contract.test.ts",
-        "apps/desktop/tests/monthly-release-version.test.ts"
+        "apps/desktop/tests/monthly-release-version.test.ts",
+        "apps/desktop/tests/installer-narration-experience.test.ts",
+        "apps/desktop/tests/windows-installer-experience-uat-contract.test.ts",
+        "artifacts/validation/installer-experience/aee77952-7cb2-495a-8062-6d99d5f7b5d2/03-narrated-guidance.png"
       ]
     }
   ]

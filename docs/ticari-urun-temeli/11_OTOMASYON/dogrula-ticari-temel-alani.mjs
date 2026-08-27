@@ -103,7 +103,13 @@ const walk = async (directory) => {
 await walk(ROOT);
 check(allFiles.length >= requiredFiles.length, `dosya envanteri beklenenden kucuk: ${allFiles.length}/${requiredFiles.length}`);
 
+const evidenceRegistryPath = resolve(ROOT, '05_KALITE_TEST_KANIT', '03_KANIT_SICILI.json');
 const generatedEvidencePath = resolve(ROOT, '05_KALITE_TEST_KANIT', '04_TICARI_TEMEL_DOGRULAMA_KANITI.json');
+// KANIT-0002 stores the generated receipt hash, while the receipt inventories
+// the commercial baseline. Excluding both sides of that exact receipt binding
+// from the receipt fingerprint prevents an impossible circular hash without
+// excluding either file from schema/content validation above.
+const selfReferentialEvidencePaths = new Set([evidenceRegistryPath, generatedEvidencePath]);
 const fileInventory = [];
 for (const path of allFiles) {
   const content = await readText(path);
@@ -119,7 +125,7 @@ for (const path of allFiles) {
       check(false, `JSON gecersiz ${relative(ROOT, path)}: ${error.message}`);
     }
   }
-  if (path !== generatedEvidencePath) {
+  if (!selfReferentialEvidencePaths.has(path)) {
     fileInventory.push(Object.freeze({
       path: relative(ROOT, path).replaceAll('\\', '/'),
       bytes: Buffer.byteLength(content, 'utf8'),
@@ -182,6 +188,43 @@ for (const schemaFile of [
 }
 
 const decisionLedger = await readJson(resolve(REPO, 'config', 'user-decision-ledger.json'));
+const activeGovernanceLedger = await readJson(resolve(REPO, 'config', 'active-governance-ledger.json'));
+const releaseLedger = await readJson(resolve(REPO, 'config', 'release-ledger.json'));
+const ruleEnforcementRegistry = await readJson(resolve(REPO, 'config', 'rule-enforcement-registry.json'));
+const release51Entries = releaseLedger.entries.filter((entry) => entry.monthlySequence === 51);
+const release52Entries = releaseLedger.entries.filter((entry) => entry.monthlySequence === 52);
+const release53Entries = releaseLedger.entries.filter((entry) => entry.monthlySequence === 53);
+const release51 = release51Entries[0];
+const release52 = releaseLedger.entries.find((entry) => entry.monthlySequence === 52);
+const release53 = releaseLedger.entries.find((entry) => entry.monthlySequence === 53);
+const rule241 = canonicalRules.rules.find((rule) => rule.id === 'PR-241');
+const pr241EnforcementEntries = ruleEnforcementRegistry.entries.filter((entry) => entry.ruleId === 'PR-241');
+const pr241Enforcement = pr241EnforcementEntries[0];
+const latestRejectedCheckpoint = activeGovernanceLedger.activeDeliveryClosure?.latestRejectedCheckpoint;
+check(/^[a-f0-9]{8}$/u.test(latestRejectedCheckpoint ?? ''), 'aktif son ret checkpoint kimligi gecersiz');
+const exactPr241GateScripts = Object.freeze([
+  'scripts/lib/windows-package-provenance.mjs',
+  'scripts/lib/mutation-release-evidence.mjs',
+  'scripts/lib/release-source-provenance.mjs',
+  'scripts/create-mutation-impact-assessment.mjs',
+  'scripts/create-mutation-impact-analysis.mjs',
+  'scripts/run-governed-postflight.mjs',
+  'scripts/lib/monthly-release-version.mjs',
+  'scripts/run-windows-technical-predecessor-preparation.ps1',
+  'scripts/run-windows-installed-release-uat.ps1',
+  'scripts/run-installed-frontend-user-uat.mjs',
+  'scripts/create-bronze-final-local-test-delivery.mjs',
+  'scripts/allocate-monthly-release-version.mjs',
+  'apps/desktop/scripts/run-electron-builder.mjs',
+  'apps/desktop/tests/mutation-release-readiness-contract.test.ts',
+  'apps/desktop/tests/windows-package-provenance-history.test.ts',
+  'apps/desktop/tests/monthly-release-version.test.ts',
+  'apps/desktop/tests/windows-technical-predecessor-preparation-contract.test.ts',
+  'apps/desktop/tests/windows-installed-release-uat-contract.test.ts',
+  'apps/desktop/tests/installed-frontend-user-uat-contract.test.ts',
+  'apps/desktop/tests/installed-frontend-user-uat-receipt.test.ts',
+  'apps/desktop/tests/bronze-final-local-test-delivery-contract.test.ts',
+]);
 const decision259 = decisionLedger.decisions.find((decision) => decision.id === 'DEC-259');
 const decision260 = decisionLedger.decisions.find((decision) => decision.id === 'DEC-260');
 const decision261 = decisionLedger.decisions.find((decision) => decision.id === 'DEC-261');
@@ -239,6 +282,56 @@ check(decision276?.status === 'ACTIVE' && decision276?.syncStatus === 'SYNCHRONI
 check(decision276?.document === 'docs/decisions/DEC-276-bronze-51-rejected-predecessor-recovery-bootstrap.md'
   && JSON.stringify(decision276?.requirements) === JSON.stringify(['PR-241']),
 'DEC-276 exact dokuman ve PR-241 otorite bagi uyusmuyor');
+check(!String(decision276?.ppk015DocumentationQaImpact ?? '').includes('Bronze 52 hâlâ NOT_BUILT')
+  && String(decision276?.ppk015DocumentationQaImpact ?? '').includes('REJECTED_INSTALLER_VISUAL_UAT_FAIL')
+  && String(decision276?.ppk015DocumentationQaImpact ?? '').includes('immutable'),
+'DEC-276 aktif kaydinda stale Bronze 52 NOT_BUILT veya rejected/immutable gerceklik drifti var');
+check(canonicalRules.rulesSha256 === '473ad949db17e76d6c3230fb1ac11e2a022ba744b69d8225c5a5a7a694c9d82b'
+  && String(rule241?.text ?? '').includes('WINDOWS_TECHNICAL_PREDECESSOR_PREPARATION')
+  && String(rule241?.text ?? '').includes('UAT110 ve final teslim'),
+'PR-241 teknik predecessor kurali veya kanonik hash bagi eksik');
+check(ruleEnforcementRegistry.release === canonicalRules.effectiveRelease
+  && ruleEnforcementRegistry.canonicalRulesSha256 === canonicalRules.rulesSha256
+  && ruleEnforcementRegistry.activeRuleCount === canonicalRules.activeRuleCount
+  && pr241EnforcementEntries.length === 1
+  && pr241Enforcement?.failClosed === true
+  && pr241Enforcement?.waiverAllowed === false
+  && pr241Enforcement?.skipAllowed === false
+  && pr241Enforcement?.evidencePolicy === 'MISSING_EVIDENCE_NEVER_PASS'
+  && pr241Enforcement?.violationEffect === 'BLOCK_CURRENT_REQUIRED_STAGE'
+  && pr241Enforcement?.trackedIn === 'docs/decisions/DEC-276-bronze-51-rejected-predecessor-recovery-bootstrap.md'
+  && exactPr241GateScripts.length === 21
+  && JSON.stringify(pr241Enforcement?.gateScripts) === JSON.stringify(exactPr241GateScripts),
+'PR-241 enforcement registry hash/release veya exact 21 gate listesi drift etti');
+check(release51Entries.length === 1 && release52Entries.length === 1 && release53Entries.length === 1
+  && releaseLedger.current?.monthlySequence === 53
+  && releaseLedger.current?.visibleRelease === 'Bronze 27.08.2026.53'
+  && releaseLedger.current?.version === '27.08.2026.53'
+  && releaseLedger.current?.packageVersion === '27.8.2026-53'
+  && releaseLedger.current?.releaseId === 'bronze-2026-08-27-r53'
+  && releaseLedger.current?.status === 'IN_PROGRESS'
+  && releaseLedger.current?.parentRelease === 'Bronze 27.08.2026.52'
+  && release51?.channel === 'Bronze'
+  && release51?.version === '26.08.2026.51'
+  && release51?.parentRelease === 'Bronze 22.08.2026.50'
+  && release52?.channel === 'Bronze'
+  && release52?.version === '27.08.2026.52'
+  && release52?.packageVersion === '27.8.2026-52'
+  && release52?.releaseId === 'bronze-2026-08-27-r52'
+  && release53?.parentRelease === 'Bronze 27.08.2026.52'
+  && release53?.channel === releaseLedger.current?.channel
+  && release53?.version === releaseLedger.current?.version
+  && release53?.releaseId === releaseLedger.current?.releaseId
+  && release53?.status === releaseLedger.current?.status
+  && release52?.parentRelease === 'Bronze 26.08.2026.51'
+  && release52?.status === 'REJECTED_INSTALLER_VISUAL_UAT_FAIL'
+  && release52?.rejection?.previousStatus === 'IN_PROGRESS'
+  && release52?.rejection?.effectiveStatus === release52?.status
+  && release52?.rejection?.immutablePackageHistoryRewritten === false
+  && release52?.rejection?.countsAsDeliveryPass === false
+  && release52?.rejection?.evidence?.includes('a5334c13')
+  && release52?.rejection?.technicalPredecessorUse === 'SILENT_INSTALL_ONLY_NO_APPLICATION_LAUNCH_WITH_BEFORE_AFTER_DATA_AND_RUNTIME_READBACK',
+'Bronze 51-52-53 release parent veya rejected technical predecessor zinciri uyusmuyor');
 const currentDecisionSummary = await readText(resolve(REPO, 'docs', 'current', '09_KULLANICI_KARARLARI_KAYDI.md'));
 const currentMaster = await readText(resolve(REPO, 'docs', 'current', '11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md'));
 const currentCommercial = await readText(resolve(REPO, 'docs', 'current', '14_TICARI_URUN_TEMEL_SURUMU.md'));
@@ -278,6 +371,12 @@ check(currentDecisionSummary.includes('DEC-275'), 'DEC-275 kullanici kararlari k
 check(currentMaster.includes('DEC-275'), 'DEC-275 guncel ana sicilde yok');
 check(currentDecisionSummary.includes('DEC-276'), 'DEC-276 kullanici kararlari kaydinda yok');
 check(currentMaster.includes('DEC-276') && currentMaster.includes('PR-241'), 'DEC-276/PR-241 guncel ana sicil bagi eksik');
+check(currentDecisionSummary.includes('219836c6') && currentMaster.includes('219836c6')
+  && currentDecisionSummary.includes('d3f218c1') && currentMaster.includes('d3f218c1')
+  && currentDecisionSummary.includes('ace2eeaf') && currentMaster.includes('ace2eeaf')
+  && currentDecisionSummary.includes('453e8c59') && currentMaster.includes('453e8c59')
+  && currentDecisionSummary.includes(latestRejectedCheckpoint) && currentMaster.includes(latestRejectedCheckpoint),
+'aktif teknik predecessor ve enforcement ret checkpoint kaydi eksik');
 check(currentCommercial.includes('verify:commercial-baseline'), 'ticari aktif belge dogrulama komutunu gostermiyor');
 
 const commercialChangeLedger = await readJson(resolve(ROOT, '01_YONETIM', '05_DEGISIKLIK_SICILI.json'));
@@ -289,6 +388,7 @@ check(commercialChangeLedger.sonKayit === 'TICARI-052'
 'TICARI-052 exact tekil son ticari degisiklik kaydi degil');
 check(commercialChange52?.durum === 'ACTIVE'
   && commercialChange52?.senkronDurumu === 'SYNCHRONIZED'
+  && commercialChange52?.idSemantics === 'TICARI kayit sirasi; urun release numarasi degildir.'
   && String(commercialChange52?.kaynak ?? '').includes('DEC-275, DEC-276, PR-235, PR-240, PR-241')
   && String(commercialChange52?.kaynak ?? '').includes('8ea2dfe1')
   && String(commercialChange52?.kaynak ?? '').includes('24e6bd71')
@@ -313,6 +413,13 @@ check(commercialChange52?.durum === 'ACTIVE'
   && String(commercialChange52?.kaynak ?? '').includes('77a87a87')
   && String(commercialChange52?.kaynak ?? '').includes('4462706a')
   && String(commercialChange52?.kaynak ?? '').includes('0854a4ec')
+  && String(commercialChange52?.kaynak ?? '').includes('a5334c13')
+  && String(commercialChange52?.kaynak ?? '').includes('219836c6')
+  && String(commercialChange52?.kaynak ?? '').includes('d3f218c1')
+  && String(commercialChange52?.kaynak ?? '').includes('ace2eeaf')
+  && String(commercialChange52?.kaynak ?? '').includes('453e8c59')
+  && String(commercialChange52?.kaynak ?? '').includes(latestRejectedCheckpoint)
+  && String(commercialChange52?.kaynak ?? '').includes('aee77952-7cb2-495a-8062-6d99d5f7b5d2')
   && String(commercialChange52?.isListesiEtkisi ?? '').includes('e0f85425 exact turunda')
   && String(commercialChange52?.isListesiEtkisi ?? '').includes('TypeScript PASS')
   && String(commercialChange52?.isListesiEtkisi ?? '').includes('10 izlenen kanit dosyasinin yalniz generatedAt alani degisti')
@@ -326,15 +433,42 @@ check(commercialChange52?.durum === 'ACTIVE'
   && String(commercialChange52?.isListesiEtkisi ?? '').includes('bos InstallLocation')
   && String(commercialChange52?.isListesiEtkisi ?? '').includes('surum ekli DisplayName degeri legacy sayilmis')
   && String(commercialChange52?.isListesiEtkisi ?? '').includes('gercek uygulama EXE kimligini yazar')
-  && String(commercialChange52?.isListesiEtkisi ?? '').includes('kaldirma komutlari exact dogrulanir'),
-'TICARI-052 ACTIVE/SYNCHRONIZED Bronze 52 UAT110, 3976994d ret, uninstall sicili ve 58/58 gorsel QA bagi eksik');
+  && String(commercialChange52?.isListesiEtkisi ?? '').includes('kaldirma komutlari exact dogrulanir')
+  && String(commercialChange52?.isListesiEtkisi ?? '').includes('03-narrated-guidance sag icerigi bostur')
+  && String(commercialChange52?.isListesiEtkisi ?? '').includes('4 dosya/43 test PASS')
+  && String(commercialChange52?.isListesiEtkisi ?? '').includes('REJECTED_INSTALLER_VISUAL_UAT_FAIL')
+  && String(commercialChange52?.isListesiEtkisi ?? '').includes('Bronze 53 tek kez tahsis edilmistir')
+  && String(commercialChange52?.isListesiEtkisi ?? '').includes('1 dosya/10 test PASS')
+  && String(commercialChange52?.isListesiEtkisi ?? '').includes('8 dosya/74 test PASS')
+  && String(commercialChange52?.isListesiEtkisi ?? '').includes('makbuz teslim veya kabul PASS\'i degildir')
+  && commercialChange52.etkilenenAlanlar.includes('scripts/run-windows-technical-predecessor-preparation.ps1')
+  && commercialChange52.etkilenenAlanlar.includes('apps/desktop/tests/windows-technical-predecessor-preparation-contract.test.ts')
+  && commercialChange52.etkilenenAlanlar.includes('scripts/run-windows-installer-experience-uat.ps1')
+  && commercialChange52.etkilenenAlanlar.includes('apps/desktop/tests/windows-installer-experience-uat-contract.test.ts'),
+'TICARI-052 ACTIVE/SYNCHRONIZED Bronze 52 gorsel ret, Bronze 53 continuation, uninstall sicili ve tam kanit bagi eksik');
 
 const workRegistry = await readJson(resolve(ROOT, '08_IS_LISTESI', '03_ANA_IS_SICILI.json'));
 const workMarkdown = await readText(resolve(ROOT, '08_IS_LISTESI', '01_ANA_IS_LISTESI.md'));
 const markdownRows = [...workMarkdown.matchAll(/^\| (IS-[0-9]{4}) \| ([^|]+) \| ([^|]+) \| (TAMAMLANDI|DEVAM|ACIK|BLOCKED|NOT_RUN) \| ([^|]+) \|$/gm)];
 check(workRegistry.toplamIs === 61, `makine is sayisi 61 olmali: ${workRegistry.toplamIs}`);
+check(workRegistry.latestMutationClosure?.checkpoint === latestRejectedCheckpoint
+  && workRegistry.latestMutationClosure?.status === 'DEVAM'
+  && String(workRegistry.latestMutationClosure?.focusedValidation ?? '').includes('1 dosya/10 test PASS')
+  && String(workRegistry.latestMutationClosure?.focusedValidation ?? '').includes('8 dosya/74 test PASS'),
+'aktif mutation closure teknik predecessor ret/retry kaydi stale');
+check(await exists(resolve(REPO, 'scripts', 'run-windows-technical-predecessor-preparation.ps1'))
+  && await exists(resolve(REPO, 'apps', 'desktop', 'tests', 'windows-technical-predecessor-preparation-contract.test.ts')),
+'teknik predecessor producer veya contract dosyasi eksik');
 check(localRuleIds.has('TK-015'), 'TK-015 acik tek seferli surum tahsisi kurali eksik');
 check(workRegistry.isler.some((item) => item.id === 'IS-0212'), 'IS-0212 surum tahsisi is kaydi eksik');
+const workItem212 = workRegistry.isler.find((item) => item.id === 'IS-0212');
+const markdownWorkItem212 = markdownRows.find((row) => row[1] === 'IS-0212');
+check(workItem212?.durum === 'DEVAM'
+  && String(workItem212?.acikNedeni ?? '').includes(`Aktif son kaynak reti ${latestRejectedCheckpoint}`)
+  && !String(workItem212?.acikNedeni ?? '').includes('Aktif son kaynak reti 219836c6')
+  && String(markdownWorkItem212?.[5] ?? '').includes(`Aktif son kaynak reti \`${latestRejectedCheckpoint}\``)
+  && !String(markdownWorkItem212?.[5] ?? '').includes('Aktif son kaynak reti `219836c6`'),
+`IS-0212 JSON/Markdown aktif son kaynak checkpointi ${latestRejectedCheckpoint} degil`);
 check(localRuleIds.has('TK-016'), 'TK-016 kanonik Windows kurulu UAT kurali eksik');
 check(workRegistry.isler.some((item) => item.id === 'IS-0213'), 'IS-0213 kanonik Windows kurulu UAT is kaydi eksik');
 check(localRuleIds.has('TK-017'), 'TK-017 adversarial Windows teslim kanit kurali eksik');
@@ -365,7 +499,7 @@ for (const [, id, , , status] of markdownRows) {
 }
 check(workRegistry.requirementPass === false, 'tum ana is listesi kanitsiz PASS olamaz');
 
-const evidenceRegistry = await readJson(resolve(ROOT, '05_KALITE_TEST_KANIT', '03_KANIT_SICILI.json'));
+const evidenceRegistry = await readJson(evidenceRegistryPath);
 const evidenceIds = new Set();
 for (const evidence of evidenceRegistry.kayitlar ?? []) {
   check(/^KANIT-[0-9]{4}$/.test(evidence.id), `kanit ID gecersiz: ${evidence.id}`);
@@ -373,6 +507,13 @@ for (const evidence of evidenceRegistry.kayitlar ?? []) {
   evidenceIds.add(evidence.id);
   if (evidence.disKaynak) check(evidence.durum !== 'PASS', `${evidence.id} dis kaynak kanitsiz PASS olamaz`);
 }
+const generatedEvidenceEntries = (evidenceRegistry.kayitlar ?? []).filter((evidence) => evidence.id === 'KANIT-0002');
+const generatedEvidenceEntry = generatedEvidenceEntries[0];
+check(generatedEvidenceEntries.length === 1, `KANIT-0002 tekil degil: ${generatedEvidenceEntries.length}`);
+check(generatedEvidenceEntry?.tur === 'BELGE'
+  && generatedEvidenceEntry?.kaynak === '05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json'
+  && generatedEvidenceEntry?.disKaynak === false,
+'KANIT-0002 ticari temel makbuz bagi gecersiz');
 
 const gitEvidence = await readJson(resolve(ROOT, '05_KALITE_TEST_KANIT', '05_GIT_YEDEK_DOGRULAMA_KANITI.json'));
 const normalizedRepo = REPO.replaceAll('\\', '/').toLowerCase();
@@ -452,7 +593,23 @@ const report = {
   fileInventory,
   generatedAt: new Date().toISOString(),
 };
-await writeFile(generatedEvidencePath, `${JSON.stringify(report, null, 2)}\n`, 'utf8');
+const serializedReport = `${JSON.stringify(report, null, 2)}\n`;
+await writeFile(generatedEvidencePath, serializedReport, 'utf8');
+if (generatedEvidenceEntry) {
+  generatedEvidenceEntry.durum = report.status;
+  generatedEvidenceEntry.sha256 = sha256(serializedReport);
+  generatedEvidenceEntry.uretimZamani = report.generatedAt;
+  generatedEvidenceEntry.not = report.status === 'PASS'
+    ? 'Guncel ticari temel dogrulama makbuzu bu kaydin SHA-256 bagi ile ayni validator calismasinda PASS olarak yenilendi.'
+    : 'Guncel ticari temel dogrulama makbuzu FAIL durumundadir; bu kayit teslim veya kabul kaniti sayilamaz.';
+  await writeFile(evidenceRegistryPath, `${JSON.stringify(evidenceRegistry, null, 2)}\n`, 'utf8');
+  const persistedReportSha256 = sha256(await readFile(generatedEvidencePath));
+  const persistedEvidenceRegistry = await readJson(evidenceRegistryPath);
+  const persistedEvidenceEntry = persistedEvidenceRegistry.kayitlar?.find((evidence) => evidence.id === 'KANIT-0002');
+  if (persistedEvidenceEntry?.durum !== report.status || persistedEvidenceEntry?.sha256 !== persistedReportSha256) {
+    throw new Error('KANIT-0002 ticari temel makbuz SHA readback bagi kurulamadi');
+  }
+}
 
 if (failures.length > 0) {
   console.error(failures.join('\n'));

@@ -61,6 +61,7 @@ const FINAL_LOCAL_TEST_DELIVERY_ID = 'PPT-BRONZE-FINAL-LOCAL-TEST-DELIVERY-V3';
 const INSTALLER_EXPERIENCE_UAT_ID = 'PPT-WINDOWS-INSTALLER-EXPERIENCE-UAT-V2';
 const INSTALLED_RELEASE_UAT_ID = 'PPT-WINDOWS-INSTALLED-RELEASE-UAT110-V3';
 const INSTALLED_FRONTEND_UAT_ID = 'PPT-INSTALLED-FRONTEND-USER-UAT111-V3';
+const TECHNICAL_PREDECESSOR_PREPARATION_ID = 'PPT-WINDOWS-TECHNICAL-PREDECESSOR-PREPARATION-V1';
 const NARRATION_CLAIM_BOUNDARY = 'OFFLINE_WAVE_SYNTHESIS_ONLY_NOT_AUDIBLE_OUTPUT';
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const validationRoot = resolve(root, 'artifacts/validation');
@@ -973,23 +974,35 @@ const assertExactScreenshotSet = ({ artifacts, expectedNames, readbacks, label, 
   return Object.freeze({ names, hashes });
 };
 
-const validateFinalEvidenceRoots = ({ installerExperience, installationPreservation, installedUi, finalRunId, finalEvidenceRoot }) => {
-  check([installerExperience.runId, installationPreservation.runId, installedUi.runId, finalRunId].every((runId) => UUID_V4_PATTERN.test(String(runId ?? '')))
-    && new Set([installerExperience.runId, installationPreservation.runId, installedUi.runId, finalRunId]).size === 4,
-  'Installer/UAT110/UAT111/final runId values are not unique UUID-v4 identities.');
+const validateFinalEvidenceRoots = ({
+  technicalPredecessorPreparation, installerExperience, installationPreservation, installedUi,
+  finalRunId, finalEvidenceRoot, requireTechnicalPredecessorPreparation
+}) => {
+  const runIds = [installerExperience.runId, installationPreservation.runId, installedUi.runId, finalRunId];
+  if (requireTechnicalPredecessorPreparation) runIds.unshift(technicalPredecessorPreparation?.runId);
+  check(runIds.every((runId) => UUID_V4_PATTERN.test(String(runId ?? '')))
+    && new Set(runIds).size === (requireTechnicalPredecessorPreparation ? 5 : 4),
+  'Technical-predecessor/installer/UAT110/UAT111/final runId values are not unique UUID-v4 identities.');
   const resolveDeclaredRoot = (value) => isAbsolute(String(value ?? '')) ? resolve(String(value)) : resolve(root, String(value ?? ''));
   const installerRoot = resolveDeclaredRoot(installerExperience.evidenceRoot);
   const installationRoot = resolveDeclaredRoot(installationPreservation.evidenceRoot);
   const installedUiRoot = resolveDeclaredRoot(installedUi.evidenceRoot);
+  const technicalPredecessorRoot = requireTechnicalPredecessorPreparation
+    ? resolveDeclaredRoot(technicalPredecessorPreparation.evidenceRoot)
+    : null;
   const expectedFinalRoot = resolve(validationRoot, 'bronze-final-delivery', finalRunId);
   check(samePath(installerRoot, resolve(validationRoot, 'installer-experience', installerExperience.runId))
     && samePath(installationRoot, resolve(validationRoot, 'windows-installed-release-uat', installationPreservation.runId))
     && samePath(installedUiRoot, resolve(installationRoot, 'installed-frontend'))
+    && (!requireTechnicalPredecessorPreparation || samePath(technicalPredecessorRoot,
+      resolve(validationRoot, 'windows-technical-predecessor-preparation', technicalPredecessorPreparation.runId)))
     && samePath(finalEvidenceRoot, expectedFinalRoot),
   'Final evidence roots are outside their fixed canonical validation roots.');
-  check(new Set([installerRoot, installationRoot, installedUiRoot, resolve(finalEvidenceRoot)].map((path) => path.toLowerCase())).size === 4,
-    'Installer/UAT110/UAT111/final evidence roots are duplicated.');
-  return Object.freeze({ installerRoot, installationRoot, installedUiRoot });
+  const roots = [installerRoot, installationRoot, installedUiRoot, resolve(finalEvidenceRoot)];
+  if (requireTechnicalPredecessorPreparation) roots.unshift(technicalPredecessorRoot);
+  check(new Set(roots.map((path) => path.toLowerCase())).size === (requireTechnicalPredecessorPreparation ? 5 : 4),
+    'Technical-predecessor/installer/UAT110/UAT111/final evidence roots are duplicated.');
+  return Object.freeze({ technicalPredecessorRoot, installerRoot, installationRoot, installedUiRoot });
 };
 
 export const createFinalLocalTestDeliveryReceipt = (input) => {
@@ -998,9 +1011,10 @@ export const createFinalLocalTestDeliveryReceipt = (input) => {
     sourceProtection, sourceProtectionReadback, externalSourceProtectionVerification,
     gitRemoteEquality, packageProvenance, governedPreflight,
     installer, packagedRuntime, installedRuntime,
-    installerExperience, installationPreservation, installedUi, packagedProbe,
+    technicalPredecessorPreparation, installerExperience, installationPreservation, installedUi, packagedProbe,
     narrationTr, narrationEn, packagedFuses, installedFuses,
     evidenceBindings, screenshotReadbacks, finalRunId, finalEvidenceRoot, finalProducer,
+    technicalPredecessorReleaseLedger,
     previousPackageHistoryBundle, previousPackageArchive,
     historicalPreviousSourceProvenance, previousPackageProducerReadback
   } = input;
@@ -1014,6 +1028,12 @@ export const createFinalLocalTestDeliveryReceipt = (input) => {
   const isGovernedBootstrap = currentSequence === 50;
   const isRecoveryBootstrap = currentSequence === 51;
   const isFreshInstallBootstrap = isGovernedBootstrap || isRecoveryBootstrap;
+  const isTechnicalPredecessorConsumerRelease = release === 'Bronze 27.08.2026.53';
+  const requiresTechnicalPredecessorPreparation = isTechnicalPredecessorConsumerRelease
+    && packageVersion === '27.8.2026-53'
+    && packageProvenance?.releaseId === 'bronze-2026-08-27-r53';
+  check(!isTechnicalPredecessorConsumerRelease || requiresTechnicalPredecessorPreparation,
+    'Technical predecessor consumer must be exact Bronze 27.08.2026.53/r53.');
   check(packageVersion === `${Number(day)}.${Number(month)}.${year}-${sequence}`,
     'Desktop package version is not bound to the application version.');
   check(/^[a-f0-9]{40,64}$/u.test(sourceCommit), 'Source commit is invalid.');
@@ -1134,6 +1154,7 @@ export const createFinalLocalTestDeliveryReceipt = (input) => {
     && installerExperience.window?.className === '#32770'
     && installerExperience.window?.slideCount === 3
     && installerExperience.window?.noFakeProgress === true
+    && installerExperience.window?.visualContentVerified === true
     && installerExperience.cancellation?.processTreeExited === true
     && installerExperience.cancellation?.forcedCleanupRequired === false
     && installerExperience.installedPayloadSafety?.unchanged === true,
@@ -1152,16 +1173,172 @@ export const createFinalLocalTestDeliveryReceipt = (input) => {
     && installationPreservation.expectedReleaseId === packageProvenance.releaseId
     && installationPreservation.sourceCommit === sourceCommit,
   'Canonical Windows installed-release UAT110 identity/status mismatch.');
+  if (requiresTechnicalPredecessorPreparation) {
+    check(technicalPredecessorPreparation?.schemaVersion === 1
+      && technicalPredecessorPreparation.id === TECHNICAL_PREDECESSOR_PREPARATION_ID
+      && technicalPredecessorPreparation.evidenceKind === 'WINDOWS_TECHNICAL_PREDECESSOR_PREPARATION'
+      && technicalPredecessorPreparation.status === 'PASS'
+      && technicalPredecessorPreparation.exitCode === 0
+      && technicalPredecessorPreparation.installationMode === 'TECHNICAL_PREDECESSOR_PREPARATION_ONLY'
+      && technicalPredecessorPreparation.releaseAcceptanceClaimed === false
+      && technicalPredecessorPreparation.deliveryEligible === false
+      && technicalPredecessorPreparation.targetPackageDeliveryPassClaimed === false
+      && technicalPredecessorPreparation.interactiveInstallerUiExercised === false
+      && technicalPredecessorPreparation.applicationLaunchAttempted === false,
+    'Technical predecessor preparation schema/status/false-claim boundary is stale.');
+    check(technicalPredecessorPreparation.fromRelease === 'Bronze 26.08.2026.51'
+      && technicalPredecessorPreparation.fromReleaseId === 'bronze-2026-08-26-r51'
+      && technicalPredecessorPreparation.toRelease === 'Bronze 27.08.2026.52'
+      && technicalPredecessorPreparation.toReleaseId === 'bronze-2026-08-27-r52'
+      && technicalPredecessorPreparation.consumerRelease === release
+      && technicalPredecessorPreparation.consumerReleaseId === packageProvenance.releaseId,
+    'Technical predecessor preparation is not the exact Bronze 51/52/53 chain.');
+    assertMatchingReleaseSourceProvenance(technicalPredecessorPreparation.currentSource, sourceProvenance,
+      'technical predecessor current source');
+    const canonicalTechnicalPredecessorProducerPath = resolve(root, 'scripts/run-windows-technical-predecessor-preparation.ps1');
+    check(technicalPredecessorPreparation.currentSource?.headCommit === sourceCommit
+      && isAbsolute(String(technicalPredecessorPreparation.producer?.path ?? ''))
+      && samePath(technicalPredecessorPreparation.producer?.path, canonicalTechnicalPredecessorProducerPath)
+      && isAbsolute(String(finalProducer.technicalPredecessor?.path ?? ''))
+      && samePath(finalProducer.technicalPredecessor?.path, canonicalTechnicalPredecessorProducerPath)
+      && Number(technicalPredecessorPreparation.producer?.sizeBytes) === Number(finalProducer.technicalPredecessor?.sizeBytes)
+      && lowerSha256(technicalPredecessorPreparation.producer?.sha256, 'Technical predecessor producer')
+        === lowerSha256(finalProducer.technicalPredecessor?.sha256, 'Live technical predecessor producer'),
+    'Technical predecessor source commit or producer live readback is stale.');
+    const installedSource = technicalPredecessorPreparation.installedSourceBundle;
+    const targetPackage = technicalPredecessorPreparation.targetPackageBundle;
+    const targetPrevious = targetPackage?.previousPackageProvenance;
+    const currentPrevious = packageProvenance.previousPackageProvenance;
+    check(installedSource?.release === 'Bronze 26.08.2026.51'
+      && installedSource.releaseId === 'bronze-2026-08-26-r51'
+      && installedSource.packageVersion === '26.8.2026-51'
+      && targetPackage?.release === 'Bronze 27.08.2026.52'
+      && targetPackage.releaseId === 'bronze-2026-08-27-r52'
+      && targetPackage.packageVersion === '27.8.2026-52'
+      && targetPrevious?.releaseId === installedSource.releaseId
+      && targetPrevious?.sourceCommit === installedSource.sourceCommit
+      && samePath(targetPrevious?.path, installedSource.bundle?.path)
+      && Number(targetPrevious?.sizeBytes) === Number(installedSource.bundle?.sizeBytes)
+      && targetPrevious?.sha256 === installedSource.bundle?.sha256,
+    'Technical predecessor immutable Bronze 51/52 package lineage is stale.');
+    check(currentPrevious?.release === targetPackage.release
+      && currentPrevious?.releaseId === targetPackage.releaseId
+      && currentPrevious?.sourceCommit === targetPackage.sourceCommit
+      && samePath(currentPrevious?.path, targetPackage.bundle?.path)
+      && Number(currentPrevious?.sizeBytes) === Number(targetPackage.bundle?.sizeBytes)
+      && currentPrevious?.sha256 === targetPackage.bundle?.sha256,
+    'Bronze 53 package is not bound to the exact technical predecessor target bundle.');
+    check(technicalPredecessorPreparation.installedBefore?.fileVersion === installedSource.packageVersion
+      && technicalPredecessorPreparation.installedBefore?.sha256 === installedSource.packagedRuntime?.sha256
+      && Number(technicalPredecessorPreparation.installedBefore?.sizeBytes) === Number(installedSource.packagedRuntime?.sizeBytes)
+      && technicalPredecessorPreparation.installer?.fileVersion === targetPackage.packageVersion
+      && technicalPredecessorPreparation.installer?.sha256 === targetPackage.installer?.sha256
+      && Number(technicalPredecessorPreparation.installer?.sizeBytes) === Number(targetPackage.installer?.sizeBytes)
+      && technicalPredecessorPreparation.packagedRuntime?.fileVersion === targetPackage.packageVersion
+      && technicalPredecessorPreparation.packagedRuntime?.sha256 === targetPackage.packagedRuntime?.sha256
+      && Number(technicalPredecessorPreparation.packagedRuntime?.sizeBytes) === Number(targetPackage.packagedRuntime?.sizeBytes)
+      && technicalPredecessorPreparation.installedAfter?.fileVersion === targetPackage.packageVersion
+      && technicalPredecessorPreparation.installedAfter?.sha256 === targetPackage.packagedRuntime?.sha256
+      && Number(technicalPredecessorPreparation.installedAfter?.sizeBytes) === Number(targetPackage.packagedRuntime?.sizeBytes),
+    'Technical predecessor live Bronze 51 to Bronze 52 runtime readback is stale.');
+    check(installationPreservation.installedBefore?.fileVersion === technicalPredecessorPreparation.installedAfter.fileVersion
+      && installationPreservation.installedBefore?.sha256 === technicalPredecessorPreparation.installedAfter.sha256
+      && Number(installationPreservation.installedBefore?.sizeBytes) === Number(technicalPredecessorPreparation.installedAfter.sizeBytes)
+      && samePath(installationPreservation.installedBefore?.path, technicalPredecessorPreparation.installedAfter.path),
+    'UAT110 did not begin from the exact Bronze 52 runtime prepared by the technical predecessor receipt.');
+    check(technicalPredecessorPreparation.silentInstallation?.classification === 'TECHNICAL_PREDECESSOR_SILENT_INSTALL_ONLY'
+      && exactArray(technicalPredecessorPreparation.silentInstallation?.arguments, ['/S'])
+      && technicalPredecessorPreparation.silentInstallation?.exitCode === 0
+      && technicalPredecessorPreparation.silentInstallation?.dataSelectionDialogObserved === false
+      && technicalPredecessorPreparation.silentInstallation?.applicationProcessObserved === false
+      && technicalPredecessorPreparation.preservation?.allUserDataContentEqualityPreserved === true
+      && technicalPredecessorPreparation.preservation?.otherChannelWriteCount === 0
+      && technicalPredecessorPreparation.syntheticMarker?.preservedDuringInstall === true
+      && technicalPredecessorPreparation.syntheticMarker?.cleanupStatus === 'DELETED_AND_ABSENCE_READBACK_PASS'
+      && technicalPredecessorPreparation.lifecycleAuthority?.targetStatus === 'REJECTED_INSTALLER_VISUAL_UAT_FAIL'
+      && technicalPredecessorPreparation.lifecycleAuthority?.targetCountsAsDeliveryPass === false
+      && technicalPredecessorPreparation.lifecycleAuthority?.immutablePackageHistoryRewritten === false
+      && technicalPredecessorPreparation.lifecycleAuthority?.technicalPredecessorUse
+        === 'SILENT_INSTALL_ONLY_NO_APPLICATION_LAUNCH_WITH_BEFORE_AFTER_DATA_AND_RUNTIME_READBACK'
+      && technicalPredecessorPreparation.lifecycleAuthority?.rejectedCheckpoint === 'a5334c13'
+      && isAbsolute(String(technicalPredecessorReleaseLedger?.path ?? ''))
+      && samePath(technicalPredecessorReleaseLedger?.path, resolve(root, 'config/release-ledger.json'))
+      && isAbsolute(String(technicalPredecessorPreparation.lifecycleAuthority?.releaseLedger?.path ?? ''))
+      && samePath(technicalPredecessorPreparation.lifecycleAuthority?.releaseLedger?.path,
+        technicalPredecessorReleaseLedger?.path)
+      && Number(technicalPredecessorPreparation.lifecycleAuthority?.releaseLedger?.sizeBytes)
+        === Number(technicalPredecessorReleaseLedger?.sizeBytes)
+      && technicalPredecessorPreparation.lifecycleAuthority?.releaseLedger?.sha256
+        === technicalPredecessorReleaseLedger?.sha256
+      && technicalPredecessorPreparation.privacyBoundary?.existingUserFileContentsRecorded === false
+      && technicalPredecessorPreparation.privacyBoundary?.existingUserFileNamesRecorded === false
+      && technicalPredecessorPreparation.privacyBoundary?.receiptContainsUserContent === false
+      && technicalPredecessorPreparation.knownRejectedInstallerExperience?.targetStatus
+        === 'REJECTED_INSTALLER_VISUAL_UAT_FAIL'
+      && technicalPredecessorPreparation.knownRejectedInstallerExperience?.checkpoint === 'a5334c13'
+      && technicalPredecessorPreparation.knownRejectedInstallerExperience?.interactiveUiWasNotUsed === true
+      && technicalPredecessorPreparation.knownRejectedInstallerExperience?.acceptanceOrDeliveryClaim === false
+      && technicalPredecessorPreparation.handoff?.expectedConsumerReleaseId === packageProvenance.releaseId
+      && technicalPredecessorPreparation.handoff?.installedRuntimeReadyForExactNormalUat110Readback === true
+      && technicalPredecessorPreparation.handoff?.doesNotReplaceInstallerExperienceUat === true
+      && technicalPredecessorPreparation.handoff?.doesNotReplaceInstalledReleaseUat110 === true
+      && technicalPredecessorPreparation.handoff?.doesNotReplaceInstalledFrontendUat111 === true
+      && technicalPredecessorPreparation.handoff?.doesNotReplaceFinalDeliveryReceipt === true,
+    'Technical predecessor preservation/lifecycle/handoff proof is incomplete.');
+    check(installationPreservation.technicalPredecessorPreparation?.sha256 === evidenceBindings.technicalPredecessorPreparation?.sha256
+      && Number(installationPreservation.technicalPredecessorPreparation?.sizeBytes)
+        === Number(evidenceBindings.technicalPredecessorPreparation?.sizeBytes)
+      && samePath(installationPreservation.technicalPredecessorPreparation?.path,
+        evidenceBindings.technicalPredecessorPreparation?.path),
+    'UAT110 technical predecessor preparation binding is stale.');
+    const technicalReadback = installationPreservation.technicalPredecessorReadback;
+    const bindingMatches = (actual, expected) => samePath(actual?.path, expected?.path)
+      && Number(actual?.sizeBytes) === Number(expected?.sizeBytes)
+      && actual?.sha256 === expected?.sha256;
+    check(technicalReadback?.status === 'PASS'
+      && bindingMatches(technicalReadback.immediate?.receipt, evidenceBindings.technicalPredecessorPreparation)
+      && bindingMatches(technicalReadback.final?.receipt, evidenceBindings.technicalPredecessorPreparation)
+      && bindingMatches(technicalReadback.immediate?.producer, finalProducer.technicalPredecessor)
+      && bindingMatches(technicalReadback.final?.producer, finalProducer.technicalPredecessor)
+      && bindingMatches(technicalReadback.immediate?.releaseLedger, technicalPredecessorReleaseLedger)
+      && bindingMatches(technicalReadback.final?.releaseLedger, technicalPredecessorReleaseLedger)
+      && technicalReadback.immediate?.installedHandoff?.fileVersion === technicalPredecessorPreparation.installedAfter.fileVersion
+      && technicalReadback.immediate?.installedHandoff?.sha256 === technicalPredecessorPreparation.installedAfter.sha256
+      && Number(technicalReadback.immediate?.installedHandoff?.sizeBytes)
+        === Number(technicalPredecessorPreparation.installedAfter.sizeBytes)
+      && samePath(technicalReadback.immediate?.installedHandoff?.path, technicalPredecessorPreparation.installedAfter.path)
+      && technicalReadback.installedHandoff?.fileVersion === technicalPredecessorPreparation.installedAfter.fileVersion
+      && technicalReadback.installedHandoff?.sha256 === technicalPredecessorPreparation.installedAfter.sha256
+      && Number(technicalReadback.installedHandoff?.sizeBytes)
+        === Number(technicalPredecessorPreparation.installedAfter.sizeBytes)
+      && samePath(technicalReadback.installedHandoff?.path, technicalPredecessorPreparation.installedAfter.path)
+      && technicalReadback.consumerReleaseId === packageProvenance.releaseId
+      && technicalReadback.verifiedImmediatelyBeforeInstaller === true
+      && technicalReadback.verifiedAfterInstallationPhases === true,
+    'UAT110 technical predecessor immediate/final live readback is stale.');
+  } else {
+    check((technicalPredecessorPreparation === null || technicalPredecessorPreparation === undefined)
+      && (installationPreservation.technicalPredecessorPreparation === null
+        || installationPreservation.technicalPredecessorPreparation === undefined)
+      && (installationPreservation.technicalPredecessorReadback === null
+        || installationPreservation.technicalPredecessorReadback === undefined)
+      && evidenceBindings.technicalPredecessorPreparation === undefined,
+    'Technical predecessor preparation evidence is allowed only for the exact Bronze 53 continuation.');
+  }
   const {
+    technicalPredecessorRoot: technicalPredecessorEvidenceRoot,
     installerRoot: installerEvidenceRoot,
     installationRoot: installationEvidenceRoot,
     installedUiRoot: installedUiEvidenceRoot
   } = validateFinalEvidenceRoots({
-    installerExperience, installationPreservation, installedUi, finalRunId, finalEvidenceRoot
+    technicalPredecessorPreparation, installerExperience, installationPreservation, installedUi,
+    finalRunId, finalEvidenceRoot, requireTechnicalPredecessorPreparation: requiresTechnicalPredecessorPreparation
   });
   check(samePath(evidenceBindings.installerExperienceUat?.path, resolve(installerEvidenceRoot, 'windows-installer-experience-uat.json'))
     && samePath(evidenceBindings.installationPreservationUat110?.path, resolve(installationEvidenceRoot, 'windows-installed-release-uat110.json'))
-    && samePath(evidenceBindings.installedFrontendUat111?.path, resolve(installedUiEvidenceRoot, 'installed-frontend-user-uat111.json')),
+    && samePath(evidenceBindings.installedFrontendUat111?.path, resolve(installedUiEvidenceRoot, 'installed-frontend-user-uat111.json'))
+    && (!requiresTechnicalPredecessorPreparation || samePath(evidenceBindings.technicalPredecessorPreparation?.path,
+      resolve(technicalPredecessorEvidenceRoot, 'windows-technical-predecessor-preparation.json'))),
   'Installer/UAT110/UAT111 receipts are copied, replayed, or outside their canonical run roots.');
   check(installationPreservation.packageProvenance?.sha256 === evidenceBindings.packageProvenance.sha256
     && installationPreservation.governedPreflight?.sha256 === evidenceBindings.governedPreflight.sha256,
@@ -1467,6 +1644,25 @@ export const createFinalLocalTestDeliveryReceipt = (input) => {
     ['local-privacy', 'Bilgileriniz bu bilgisayarda kalır'],
     ['narrated-guidance', 'Rehberli ve erişilebilir bir karşılama']
   ];
+  check(installerExperience.screenshots.every((screenshot) => screenshot.visualContentStatus === 'PASS'
+    && Number.isSafeInteger(screenshot.captureAttempts) && screenshot.captureAttempts >= 1 && screenshot.captureAttempts <= 3
+    && Number.isSafeInteger(screenshot.printWindowFlags) && screenshot.printWindowFlags === 2
+    && Number.isSafeInteger(screenshot.width) && screenshot.width > 0
+    && Number.isSafeInteger(screenshot.height) && screenshot.height > 0
+    && Number.isSafeInteger(screenshot.contentRegion?.left) && screenshot.contentRegion.left >= 0
+    && Number.isSafeInteger(screenshot.contentRegion?.top) && screenshot.contentRegion.top >= 0
+    && Number.isSafeInteger(screenshot.contentRegion?.width) && screenshot.contentRegion.width >= 24
+    && Number.isSafeInteger(screenshot.contentRegion?.height) && screenshot.contentRegion.height >= 12
+    && screenshot.contentRegion.left + screenshot.contentRegion.width <= screenshot.width
+    && screenshot.contentRegion.top + screenshot.contentRegion.height <= screenshot.height
+    && Number.isSafeInteger(screenshot.backgroundSampleCount) && screenshot.backgroundSampleCount === 8
+    && Number.isSafeInteger(screenshot.contentContrastPixelCount) && screenshot.contentContrastPixelCount >= 40
+    && Number.isSafeInteger(screenshot.contentOccupiedRows) && screenshot.contentOccupiedRows >= 6
+    && Number.isSafeInteger(screenshot.contentOccupiedColumns) && screenshot.contentOccupiedColumns >= 12
+    && Number.isSafeInteger(screenshot.contentDarkPixelCount) && screenshot.contentDarkPixelCount >= 40
+    && Number.isSafeInteger(screenshot.contentDarkOccupiedRows) && screenshot.contentDarkOccupiedRows >= 6
+    && Number.isSafeInteger(screenshot.contentDarkOccupiedColumns) && screenshot.contentDarkOccupiedColumns >= 12),
+  'Installer screenshot title-region pixel proof is missing or visually blank.');
   check(Array.isArray(installerExperience.window?.slides)
     && installerExperience.window.slides.length === installerSlideSpecs.length
     && installerExperience.window.slides.every((slide, index) => slide.id === installerSlideSpecs[index][0]
@@ -1514,6 +1710,9 @@ export const createFinalLocalTestDeliveryReceipt = (input) => {
   const physicalPixelOcrPassCount = installedUi.screenshotArtifacts.filter((artifact) =>
     artifact.physicalPixelOcr.status === 'PASS_PHYSICAL_PIXEL_OCR').length;
   const physicalPixelOcrNotRunCount = installedUi.screenshotArtifacts.length - physicalPixelOcrPassCount;
+  if (requiresTechnicalPredecessorPreparation) {
+    assertNoSecretBearingEvidence(technicalPredecessorPreparation, 'Technical predecessor preparation');
+  }
   assertNoSecretBearingEvidence(installerExperience, 'Installer experience UAT');
   assertNoSecretBearingEvidence(installationPreservation, 'Installed-release UAT110');
   assertNoSecretBearingEvidence(installedUi, 'Installed UI UAT111');
@@ -1528,7 +1727,16 @@ export const createFinalLocalTestDeliveryReceipt = (input) => {
   const packageGeneratedAt = isoMillis(packageProvenance.generatedAt, 'packageProvenance.generatedAt');
   const finalGeneratedAt = new Date().toISOString();
   const finalGeneratedMillis = isoMillis(finalGeneratedAt, 'final.generatedAt');
-  check(packageGeneratedAt < installerStartedAt && installerStartedAt <= installerCompletedAt
+  const technicalPredecessorStartedAt = requiresTechnicalPredecessorPreparation
+    ? isoMillis(technicalPredecessorPreparation.startedAt, 'technicalPredecessorPreparation.startedAt')
+    : null;
+  const technicalPredecessorCompletedAt = requiresTechnicalPredecessorPreparation
+    ? isoMillis(technicalPredecessorPreparation.completedAt, 'technicalPredecessorPreparation.completedAt')
+    : null;
+  check((!requiresTechnicalPredecessorPreparation
+      || (technicalPredecessorStartedAt < technicalPredecessorCompletedAt
+        && technicalPredecessorCompletedAt <= installationStartedAt))
+    && packageGeneratedAt < installerStartedAt && installerStartedAt <= installerCompletedAt
     && installerCompletedAt < installationStartedAt && installationStartedAt <= installationAt
     && installationAt <= installedUiStartedAt && installedUiStartedAt <= installedUiCompletedAt
     && installedUiCompletedAt < finalGeneratedMillis
@@ -1590,6 +1798,23 @@ export const createFinalLocalTestDeliveryReceipt = (input) => {
     installedRuntime: { ...installedRuntime, fullPath: undefined, exactPackagedMatch: true },
     evidenceBindings,
     screenshotReadbacks,
+    ...(requiresTechnicalPredecessorPreparation ? {
+      technicalPredecessorPreparation: {
+        status: 'PASS', id: TECHNICAL_PREDECESSOR_PREPARATION_ID,
+        runId: technicalPredecessorPreparation.runId,
+        fromRelease: technicalPredecessorPreparation.fromRelease,
+        toRelease: technicalPredecessorPreparation.toRelease,
+        consumerRelease: technicalPredecessorPreparation.consumerRelease,
+        sourceCommit: technicalPredecessorPreparation.currentSource.headCommit,
+        producer: finalProducer.technicalPredecessor,
+        receipt: evidenceBindings.technicalPredecessorPreparation,
+        targetPackageBundle: technicalPredecessorPreparation.targetPackageBundle.bundle,
+        installedAfter: technicalPredecessorPreparation.installedAfter,
+        releaseAcceptanceClaimed: false,
+        deliveryEligible: false,
+        targetPackageDeliveryPassClaimed: false
+      }
+    } : {}),
     installerExperience: {
       status: 'PASS', id: INSTALLER_EXPERIENCE_UAT_ID, runId: installerExperience.runId,
       slideCount: 3, noFakeProgress: true, safeCancellation: 'PASS',
@@ -1859,7 +2084,7 @@ const main = async () => {
     sha256: canonicalSourceProtection.binding.sha256,
     value: canonicalSourceProtection.value
   });
-  const bindings = [...await Promise.all([
+  const primaryBindings = await Promise.all([
     readJsonBinding(installerExperiencePath, 'installerExperienceUat'),
     readJsonBinding(installationPreservationPath, 'installationPreservationUat110'),
     readJsonBinding(installedUiPath, 'installedFrontendUat111'),
@@ -1868,7 +2093,27 @@ const main = async () => {
     readJsonBinding(narrationEnPath, 'narrationSynthesisEn', { boundary: narrationEvidenceRoot }),
     readJsonBinding(packageProvenancePath, 'packageProvenance'),
     readJsonBinding(governedPreflightPath, 'governedPreflight')
-  ]), sourceProtectionBinding];
+  ]);
+  const installationPreservationBinding = primaryBindings.find((binding) => binding.id === 'installationPreservationUat110');
+  const requiresTechnicalPredecessorPreparation = release === 'Bronze 27.08.2026.53';
+  const technicalPredecessorClaim = installationPreservationBinding?.value?.technicalPredecessorPreparation;
+  if (requiresTechnicalPredecessorPreparation) {
+    check(typeof technicalPredecessorClaim?.path === 'string' && technicalPredecessorClaim.path.trim() !== ''
+      && Number.isSafeInteger(Number(technicalPredecessorClaim.sizeBytes)) && Number(technicalPredecessorClaim.sizeBytes) > 0
+      && SHA256_PATTERN.test(String(technicalPredecessorClaim.sha256 ?? '').toLowerCase()),
+    'UAT110 technical predecessor preparation binding/path is missing or invalid.');
+  } else {
+    check(technicalPredecessorClaim === null || technicalPredecessorClaim === undefined,
+      'UAT110 technical predecessor preparation binding is allowed only for the exact Bronze 53 continuation.');
+  }
+  const technicalPredecessorBinding = requiresTechnicalPredecessorPreparation
+    ? await readJsonBinding(resolve(root, technicalPredecessorClaim.path), 'technicalPredecessorPreparation')
+    : null;
+  const bindings = [
+    ...primaryBindings,
+    ...(technicalPredecessorBinding ? [technicalPredecessorBinding] : []),
+    sourceProtectionBinding
+  ];
   const byId = Object.fromEntries(bindings.map((binding) => [binding.id, binding]));
   const previousReference = byId.packageProvenance.value?.previousPackageProvenance;
   const packageSequenceMatch = /\.(\d+)$/u.exec(String(byId.packageProvenance.value?.release ?? ''));
@@ -1963,20 +2208,24 @@ const main = async () => {
       .flatMap((record) => [record?.cancel?.screenshot, record?.accept?.screenshot])
   };
   const [installerScreenshots, installedUiScreenshots, nativeDialogScreenshots, finalProducerBinding, installedUiProducerBinding,
-    installerExperienceProducerBinding, installedReleaseProducerBinding] = await Promise.all([
+    installerExperienceProducerBinding, installedReleaseProducerBinding, technicalPredecessorProducerBinding,
+    technicalPredecessorReleaseLedger] = await Promise.all([
     verifyScreenshotArtifactsLive(byId.installerExperienceUat.value, 'Installer experience UAT'),
     verifyScreenshotArtifactsLive(byId.installedFrontendUat111.value, 'Installed UI UAT111'),
     verifyScreenshotArtifactsLive(nativeDialogScreenshotReceipt, 'Installed UI native dialog UAT111', { requireUniqueHashes: false }),
     readFile(fileURLToPath(import.meta.url)).then((bytes) => ({ path: 'scripts/create-bronze-final-local-test-delivery.mjs', sizeBytes: bytes.length, sha256: sha256Bytes(bytes) })),
     readFile(resolve(root, 'scripts/run-installed-frontend-user-uat.mjs')).then((bytes) => ({ path: 'scripts/run-installed-frontend-user-uat.mjs', sizeBytes: bytes.length, sha256: sha256Bytes(bytes) })),
     readFile(resolve(root, 'scripts/run-windows-installer-experience-uat.ps1')).then((bytes) => ({ path: 'scripts/run-windows-installer-experience-uat.ps1', sizeBytes: bytes.length, sha256: sha256Bytes(bytes) })),
-    readFile(resolve(root, 'scripts/run-windows-installed-release-uat.ps1')).then((bytes) => ({ path: 'scripts/run-windows-installed-release-uat.ps1', sizeBytes: bytes.length, sha256: sha256Bytes(bytes) }))
+    readFile(resolve(root, 'scripts/run-windows-installed-release-uat.ps1')).then((bytes) => ({ path: 'scripts/run-windows-installed-release-uat.ps1', sizeBytes: bytes.length, sha256: sha256Bytes(bytes) })),
+    readFile(resolve(root, 'scripts/run-windows-technical-predecessor-preparation.ps1')).then((bytes) => ({ path: portablePath(resolve(root, 'scripts/run-windows-technical-predecessor-preparation.ps1')), sizeBytes: bytes.length, sha256: sha256Bytes(bytes) })),
+    readFile(resolve(root, 'config/release-ledger.json')).then((bytes) => ({ path: portablePath(resolve(root, 'config/release-ledger.json')), sizeBytes: bytes.length, sha256: sha256Bytes(bytes) }))
   ]);
   const finalProducer = Object.freeze({
     final: finalProducerBinding,
     installedUi: installedUiProducerBinding,
     installerExperience: installerExperienceProducerBinding,
-    installedRelease: installedReleaseProducerBinding
+    installedRelease: installedReleaseProducerBinding,
+    technicalPredecessor: technicalPredecessorProducerBinding
   });
   const receipt = createFinalLocalTestDeliveryReceipt({
     release, applicationVersion, packageVersion,
@@ -1989,13 +2238,14 @@ const main = async () => {
     packageProvenance: byId.packageProvenance.value,
     governedPreflight: byId.governedPreflight.value,
     installer, packagedRuntime, installedRuntime,
+    technicalPredecessorPreparation: byId.technicalPredecessorPreparation?.value,
     installerExperience: byId.installerExperienceUat.value,
     installationPreservation: byId.installationPreservationUat110.value,
     installedUi: byId.installedFrontendUat111.value,
     packagedProbe: byId.packagedLaunchProbe.value,
     narrationTr, narrationEn, packagedFuses, installedFuses, evidenceBindings,
     screenshotReadbacks: { installer: installerScreenshots, installedUi: installedUiScreenshots, nativeDialog: nativeDialogScreenshots },
-    finalRunId, finalEvidenceRoot, finalProducer,
+    finalRunId, finalEvidenceRoot, finalProducer, technicalPredecessorReleaseLedger,
     previousPackageHistoryBundle, previousPackageArchive,
     historicalPreviousSourceProvenance, previousPackageProducerReadback
   });

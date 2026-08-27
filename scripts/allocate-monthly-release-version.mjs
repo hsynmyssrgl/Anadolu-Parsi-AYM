@@ -168,6 +168,7 @@ if (previewOnly) {
       version: release.version,
       packageVersion: release.packageVersion,
       releaseId: release.releaseId,
+      parentRelease: release.parentRelease,
       status: release.status,
       summary: release.summary
     });

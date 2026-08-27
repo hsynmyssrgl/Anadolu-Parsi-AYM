@@ -63,10 +63,11 @@ const identity = (path: string, hash: string, sizeBytes: number) => ({
   signerSubject: null
 });
 
-const baseInput = (mode: 'bootstrap' | 'recovery' | 'continuation' = 'bootstrap'): any => {
+const baseInput = (mode: 'bootstrap' | 'recovery' | 'continuation' | 'technical' = 'bootstrap'): any => {
   const installerRunId = '10000000-0000-4000-8000-000000000001';
   const installationRunId = '20000000-0000-4000-8000-000000000002';
   const installedUiRunId = '30000000-0000-4000-8000-000000000003';
+  const technicalPredecessorRunId = '50000000-0000-4000-8000-000000000005';
   const installerEvidenceRoot = resolve(checkoutRoot, 'artifacts', 'validation', 'installer-experience', installerRunId);
   const installationEvidenceRoot = resolve(checkoutRoot, 'artifacts', 'validation', 'windows-installed-release-uat', installationRunId);
   const installedUiEvidenceRoot = resolve(installationEvidenceRoot, 'installed-frontend');
@@ -102,7 +103,13 @@ const baseInput = (mode: 'bootstrap' | 'recovery' | 'continuation' = 'bootstrap'
   ].map(([name, hashIndex], index) => ({
     path: `artifacts/validation/installer-experience/${installerRunId}/${name}`,
     sizeBytes: 1_000 + index, width: 900, height: 620, sha256: digest(Number(hashIndex)),
-    expectedTitle: ['Ailenizi oluşturalım', 'Bilgileriniz bu bilgisayarda kalır', 'Rehberli ve erişilebilir bir karşılama'][index]
+    expectedTitle: ['Ailenizi oluşturalım', 'Bilgileriniz bu bilgisayarda kalır', 'Rehberli ve erişilebilir bir karşılama'][index],
+    captureAttempts: 1, printWindowFlags: 2,
+    contentRegion: { left: 360, top: 140, width: 420, height: 74 },
+    backgroundSampleCount: 8,
+    contentContrastPixelCount: 800, contentOccupiedRows: 28, contentOccupiedColumns: 180,
+    contentDarkPixelCount: 760, contentDarkOccupiedRows: 27, contentDarkOccupiedColumns: 172,
+    visualContentStatus: 'PASS'
   }));
   const slides = ['family-space', 'local-privacy', 'narrated-guidance'].map((id, index) => ({
     id,
@@ -605,7 +612,7 @@ const baseInput = (mode: 'bootstrap' | 'recovery' | 'continuation' = 'bootstrap'
       governedPreflight: { sha256: sha('0') },
       producer: { path: 'scripts/run-windows-installer-experience-uat.ps1', sha256: sha('1'), sizeBytes: 1_001 },
       installer: { sha256: installer.sha256, sizeBytes: installer.sizeBytes },
-      window: { className: '#32770', slideCount: 3, noFakeProgress: true, slides },
+      window: { className: '#32770', slideCount: 3, noFakeProgress: true, visualContentVerified: true, slides },
       startedAt: '2026-08-23T16:35:00.000Z',
       completedAt: '2026-08-23T16:36:00.000Z',
       generatedAt: '2026-08-23T16:36:00.000Z',
@@ -893,8 +900,10 @@ const baseInput = (mode: 'bootstrap' | 'recovery' | 'continuation' = 'bootstrap'
       final: { path: 'scripts/create-bronze-final-local-test-delivery.mjs', sizeBytes: 1000, sha256: sha('6') },
       installedUi: { path: 'scripts/run-installed-frontend-user-uat.mjs', sizeBytes: 1000, sha256: sha('4') },
       installerExperience: { path: 'scripts/run-windows-installer-experience-uat.ps1', sizeBytes: 1_001, sha256: sha('1') },
-      installedRelease: { path: 'scripts/run-windows-installed-release-uat.ps1', sizeBytes: 1_002, sha256: sha('2') }
+      installedRelease: { path: 'scripts/run-windows-installed-release-uat.ps1', sizeBytes: 1_002, sha256: sha('2') },
+      technicalPredecessor: { path: resolve(checkoutRoot, 'scripts', 'run-windows-technical-predecessor-preparation.ps1'), sizeBytes: 1_003, sha256: sha('3') }
     },
+    technicalPredecessorReleaseLedger: { path: resolve(checkoutRoot, 'config', 'release-ledger.json'), sizeBytes: 1_000, sha256: sha('a') },
     previousPackageHistoryBundle: null,
     previousPackageArchive: null,
     historicalPreviousSourceProvenance: null,
@@ -902,16 +911,22 @@ const baseInput = (mode: 'bootstrap' | 'recovery' | 'continuation' = 'bootstrap'
   };
   if (mode !== 'bootstrap') {
     const isRecovery = mode === 'recovery';
-    const nextApplicationVersion = isRecovery ? '26.08.2026.51' : '27.08.2026.52';
-    const nextPackageVersion = isRecovery ? '26.8.2026-51' : '27.8.2026-52';
+    const isTechnical = mode === 'technical';
+    const nextApplicationVersion = isRecovery ? '26.08.2026.51' : isTechnical ? '27.08.2026.53' : '27.08.2026.52';
+    const nextPackageVersion = isRecovery ? '26.8.2026-51' : isTechnical ? '27.8.2026-53' : '27.8.2026-52';
     const nextRelease = `Bronze ${nextApplicationVersion}`;
-    const nextReleaseId = isRecovery ? 'bronze-2026-08-26-r51' : 'bronze-2026-08-27-r52';
+    const nextReleaseId = isRecovery ? 'bronze-2026-08-26-r51'
+      : isTechnical ? 'bronze-2026-08-27-r53' : 'bronze-2026-08-27-r52';
     const lineagePackageReceipt = isRecovery ? previousPackageReceipt : {
       ...previousPackageReceipt,
-      release: 'Bronze 26.08.2026.51',
-      releaseId: 'bronze-2026-08-26-r51'
+      release: isTechnical ? 'Bronze 27.08.2026.52' : 'Bronze 26.08.2026.51',
+      releaseId: isTechnical ? 'bronze-2026-08-27-r52' : 'bronze-2026-08-26-r51',
+      artifacts: isTechnical ? {
+        packagedRuntime: { path: installedPath, sizeBytes: 224_500_000, sha256: digest(806) }
+      } : previousPackageReceipt.artifacts
     };
-    const lineagePackageVersion = isRecovery ? previousPackageHistoryBundleReceipt.packageVersion : '26.8.2026-51';
+    const lineagePackageVersion = isRecovery ? previousPackageHistoryBundleReceipt.packageVersion
+      : isTechnical ? '27.8.2026-52' : '26.8.2026-51';
     const lineageHistoryBundle = {
       ...previousPackageHistoryBundleReceipt,
       release: lineagePackageReceipt.release,
@@ -958,7 +973,8 @@ const baseInput = (mode: 'bootstrap' | 'recovery' | 'continuation' = 'bootstrap'
       bronzeRegistry: { exactSingleEntry: true },
       fromFileVersion: isRecovery ? null : lineagePackageVersion,
       toFileVersion: nextPackageVersion,
-      fromSequence: isRecovery ? null : 51, toSequence: isRecovery ? 51 : 52,
+      fromSequence: isRecovery ? null : isTechnical ? 52 : 51,
+      toSequence: isRecovery ? 51 : isTechnical ? 53 : 52,
       exactSuccessor: !isRecovery, governedBootstrap: false, recoveryBootstrap: isRecovery,
       targetInstallRootAbsentBefore: isRecovery, targetExecutableAbsentBefore: isRecovery,
       bronzeUninstallRegistryAbsentBefore: isRecovery, packagePreviousProvenanceAbsent: false,
@@ -968,7 +984,7 @@ const baseInput = (mode: 'bootstrap' | 'recovery' | 'continuation' = 'bootstrap'
       release: nextRelease, expectedReleaseId: nextReleaseId,
       installationMode: isRecovery ? 'RECOVERY_BOOTSTRAP_FRESH_INSTALL' : 'CONTINUATION_N_TO_N_PLUS_ONE',
       installedBefore: isRecovery ? null : {
-        path: installedPath, sizeBytes: previousPackageReceipt.artifacts.packagedRuntime.sizeBytes,
+        path: installedPath, sizeBytes: lineagePackageReceipt.artifacts.packagedRuntime.sizeBytes,
         sha256: lineagePackageReceipt.artifacts.packagedRuntime.sha256,
         fileVersion: lineagePackageVersion
       },
@@ -993,6 +1009,120 @@ const baseInput = (mode: 'bootstrap' | 'recovery' | 'continuation' = 'bootstrap'
     input.previousPackageArchive = { value: lineagePackageReceipt, ...previousPackageArchiveBinding };
     input.historicalPreviousSourceProvenance = previousSourceProvenance;
     input.previousPackageProducerReadback = { ...lineagePackageReceipt.producer };
+    if (isTechnical) {
+      const technicalEvidenceRoot = resolve(checkoutRoot, 'artifacts', 'validation',
+        'windows-technical-predecessor-preparation', technicalPredecessorRunId);
+      const technicalReceiptBinding = {
+        path: resolve(technicalEvidenceRoot, 'windows-technical-predecessor-preparation.json'),
+        sizeBytes: 2_053,
+        sha256: digest(807)
+      };
+      const installed51Bundle = {
+        bundle: {
+          path: resolve(checkoutRoot, 'artifacts', 'validation', 'release-history',
+            'bronze-26.08.2026.51-windows-package-provenance-bundle', 'bundle.json'),
+          sizeBytes: 1_051,
+          sha256: digest(808)
+        },
+        release: 'Bronze 26.08.2026.51', releaseId: 'bronze-2026-08-26-r51',
+        packageVersion: '26.8.2026-51', sourceCommit: '7'.repeat(40),
+        packagedRuntime: { path: installedPath, sizeBytes: 224_250_000, sha256: digest(809) }
+      };
+      const target52Installer = {
+        path: resolve(checkoutRoot, 'apps', 'desktop', 'release', 'ParsYuva-Bronze-27.08.2026.52.exe'),
+        sizeBytes: 119_500_000, sha256: digest(810), fileVersion: '27.8.2026-52'
+      };
+      const target52Runtime = {
+        path: packagedPath, sizeBytes: lineagePackageReceipt.artifacts.packagedRuntime.sizeBytes,
+        sha256: lineagePackageReceipt.artifacts.packagedRuntime.sha256, fileVersion: '27.8.2026-52'
+      };
+      const target52Bundle = {
+        bundle: {
+          path: input.packageProvenance.previousPackageProvenance.path,
+          sizeBytes: input.packageProvenance.previousPackageProvenance.sizeBytes,
+          sha256: input.packageProvenance.previousPackageProvenance.sha256
+        },
+        release: 'Bronze 27.08.2026.52', releaseId: 'bronze-2026-08-27-r52',
+        packageVersion: '27.8.2026-52', sourceCommit: previousSourceProvenance.headCommit,
+        installer: { ...target52Installer }, packagedRuntime: { ...target52Runtime },
+        previousPackageProvenance: {
+          path: installed51Bundle.bundle.path, sizeBytes: installed51Bundle.bundle.sizeBytes,
+          sha256: installed51Bundle.bundle.sha256, releaseId: installed51Bundle.releaseId,
+          sourceCommit: installed51Bundle.sourceCommit
+        }
+      };
+      input.technicalPredecessorPreparation = {
+        schemaVersion: 1,
+        id: 'PPT-WINDOWS-TECHNICAL-PREDECESSOR-PREPARATION-V1',
+        evidenceKind: 'WINDOWS_TECHNICAL_PREDECESSOR_PREPARATION',
+        status: 'PASS', exitCode: 0,
+        runId: technicalPredecessorRunId, evidenceRoot: technicalEvidenceRoot,
+        startedAt: '2026-08-23T16:34:10.000Z', completedAt: '2026-08-23T16:34:50.000Z',
+        installationMode: 'TECHNICAL_PREDECESSOR_PREPARATION_ONLY',
+        releaseAcceptanceClaimed: false, deliveryEligible: false,
+        targetPackageDeliveryPassClaimed: false, interactiveInstallerUiExercised: false,
+        applicationLaunchAttempted: false,
+        fromRelease: installed51Bundle.release, fromReleaseId: installed51Bundle.releaseId,
+        toRelease: target52Bundle.release, toReleaseId: target52Bundle.releaseId,
+        consumerRelease: nextRelease, consumerReleaseId: nextReleaseId,
+        currentSource: structuredClone(sourceProvenance),
+        producer: { ...input.finalProducer.technicalPredecessor },
+        lifecycleAuthority: {
+          releaseLedger: { ...input.technicalPredecessorReleaseLedger },
+          targetStatus: 'REJECTED_INSTALLER_VISUAL_UAT_FAIL', targetCountsAsDeliveryPass: false,
+          immutablePackageHistoryRewritten: false,
+          technicalPredecessorUse: 'SILENT_INSTALL_ONLY_NO_APPLICATION_LAUNCH_WITH_BEFORE_AFTER_DATA_AND_RUNTIME_READBACK',
+          rejectedCheckpoint: 'a5334c13'
+        },
+        installedSourceBundle: installed51Bundle,
+        targetPackageBundle: target52Bundle,
+        installer: { ...target52Installer }, packagedRuntime: { ...target52Runtime },
+        installedBefore: { ...installed51Bundle.packagedRuntime, path: installedPath, fileVersion: '26.8.2026-51' },
+        installedAfter: { ...target52Runtime, path: installedPath },
+        silentInstallation: {
+          classification: 'TECHNICAL_PREDECESSOR_SILENT_INSTALL_ONLY', arguments: ['/S'], exitCode: 0,
+          dataSelectionDialogObserved: false, applicationProcessObserved: false
+        },
+        preservation: { allUserDataContentEqualityPreserved: true, otherChannelWriteCount: 0 },
+        syntheticMarker: { preservedDuringInstall: true, cleanupStatus: 'DELETED_AND_ABSENCE_READBACK_PASS' },
+        privacyBoundary: {
+          existingUserFileContentsRecorded: false, existingUserFileNamesRecorded: false,
+          receiptContainsUserContent: false
+        },
+        knownRejectedInstallerExperience: {
+          targetStatus: 'REJECTED_INSTALLER_VISUAL_UAT_FAIL', checkpoint: 'a5334c13',
+          interactiveUiWasNotUsed: true, acceptanceOrDeliveryClaim: false
+        },
+        handoff: {
+          expectedConsumerReleaseId: nextReleaseId,
+          installedRuntimeReadyForExactNormalUat110Readback: true,
+          doesNotReplaceInstallerExperienceUat: true,
+          doesNotReplaceInstalledReleaseUat110: true,
+          doesNotReplaceInstalledFrontendUat111: true,
+          doesNotReplaceFinalDeliveryReceipt: true
+        }
+      };
+      input.installationPreservation.technicalPredecessorPreparation = { ...technicalReceiptBinding };
+      input.installationPreservation.technicalPredecessorReadback = {
+        status: 'PASS',
+        immediate: {
+          receipt: { ...technicalReceiptBinding },
+          producer: { ...input.finalProducer.technicalPredecessor },
+          releaseLedger: { ...input.technicalPredecessorReleaseLedger },
+          installedHandoff: { ...input.technicalPredecessorPreparation.installedAfter }
+        },
+        final: {
+          receipt: { ...technicalReceiptBinding },
+          producer: { ...input.finalProducer.technicalPredecessor },
+          releaseLedger: { ...input.technicalPredecessorReleaseLedger }
+        },
+        installedHandoff: { ...input.technicalPredecessorPreparation.installedAfter },
+        consumerReleaseId: nextReleaseId,
+        verifiedImmediatelyBeforeInstaller: true,
+        verifiedAfterInstallationPhases: true
+      };
+      input.evidenceBindings.technicalPredecessorPreparation = { ...technicalReceiptBinding };
+    }
   }
   return input;
 };
@@ -1089,6 +1219,159 @@ describe('Bronze final local-test delivery receipt contract', () => {
         freshInstall: 'NOT_APPLICABLE', upgrade: 'PASS', recoveryBootstrap: 'NOT_APPLICABLE'
       }
     });
+  });
+
+  it('binds the exact Bronze 51 to rejected 52 technical predecessor receipt into Bronze 53 UAT110 and final delivery', () => {
+    const input = baseInput('technical');
+    const receipt = createFinalLocalTestDeliveryReceipt(input);
+    expect(receipt).toMatchObject({
+      release: 'Bronze 27.08.2026.53',
+      technicalPredecessorPreparation: {
+        status: 'PASS',
+        id: 'PPT-WINDOWS-TECHNICAL-PREDECESSOR-PREPARATION-V1',
+        fromRelease: 'Bronze 26.08.2026.51',
+        toRelease: 'Bronze 27.08.2026.52',
+        consumerRelease: 'Bronze 27.08.2026.53',
+        sourceCommit,
+        releaseAcceptanceClaimed: false,
+        deliveryEligible: false,
+        targetPackageDeliveryPassClaimed: false,
+        receipt: input.evidenceBindings.technicalPredecessorPreparation,
+        producer: input.finalProducer.technicalPredecessor
+      },
+      windowsInstalledReleaseUat: {
+        installationMode: 'CONTINUATION_N_TO_N_PLUS_ONE', upgrade: 'PASS'
+      }
+    });
+    expect(new Set([
+      input.technicalPredecessorPreparation.evidenceRoot,
+      input.installerExperience.evidenceRoot,
+      input.installationPreservation.evidenceRoot,
+      input.installedUi.evidenceRoot,
+      input.finalEvidenceRoot
+    ].map((path) => resolve(path).toLowerCase())).size).toBe(5);
+  });
+
+  it('rejects stale technical predecessor flags, lineage, producer, UAT110 binding, runtime and evidence root', () => {
+    const falseClaim = baseInput('technical');
+    falseClaim.technicalPredecessorPreparation.deliveryEligible = true;
+    expect(() => createFinalLocalTestDeliveryReceipt(falseClaim)).toThrow(/false-claim boundary/u);
+
+    const staleLineage = baseInput('technical');
+    staleLineage.technicalPredecessorPreparation.targetPackageBundle.releaseId = 'bronze-2026-08-27-r51';
+    expect(() => createFinalLocalTestDeliveryReceipt(staleLineage)).toThrow(/Bronze 51\/52 package lineage/u);
+
+    const staleSource = baseInput('technical');
+    staleSource.technicalPredecessorPreparation.currentSource.headCommit = '8'.repeat(40);
+    expect(() => createFinalLocalTestDeliveryReceipt(staleSource)).toThrow(/technical predecessor current source/u);
+
+    const staleProducer = baseInput('technical');
+    staleProducer.technicalPredecessorPreparation.producer.sha256 = sha('9');
+    expect(() => createFinalLocalTestDeliveryReceipt(staleProducer)).toThrow(/producer live readback/u);
+
+    const relativeReceiptProducer = baseInput('technical');
+    relativeReceiptProducer.technicalPredecessorPreparation.producer.path = 'scripts/run-windows-technical-predecessor-preparation.ps1';
+    expect(() => createFinalLocalTestDeliveryReceipt(relativeReceiptProducer)).toThrow(/producer live readback/u);
+
+    const relativeLiveProducer = baseInput('technical');
+    relativeLiveProducer.finalProducer.technicalPredecessor.path = 'scripts/run-windows-technical-predecessor-preparation.ps1';
+    expect(() => createFinalLocalTestDeliveryReceipt(relativeLiveProducer)).toThrow(/producer live readback/u);
+
+    const staleUat110Binding = baseInput('technical');
+    staleUat110Binding.installationPreservation.technicalPredecessorPreparation.sha256 = sha('9');
+    expect(() => createFinalLocalTestDeliveryReceipt(staleUat110Binding)).toThrow(/UAT110 technical predecessor preparation binding/u);
+
+    const staleInstalledAfter = baseInput('technical');
+    staleInstalledAfter.technicalPredecessorPreparation.installedAfter.sha256 = sha('9');
+    expect(() => createFinalLocalTestDeliveryReceipt(staleInstalledAfter)).toThrow(/runtime readback/u);
+
+    const staleLifecycleLedger = baseInput('technical');
+    staleLifecycleLedger.technicalPredecessorPreparation.lifecycleAuthority.releaseLedger.sha256 = sha('9');
+    expect(() => createFinalLocalTestDeliveryReceipt(staleLifecycleLedger)).toThrow(/preservation\/lifecycle\/handoff/u);
+
+    const relativeLifecycleLedger = baseInput('technical');
+    relativeLifecycleLedger.technicalPredecessorPreparation.lifecycleAuthority.releaseLedger.path = 'config/release-ledger.json';
+    expect(() => createFinalLocalTestDeliveryReceipt(relativeLifecycleLedger)).toThrow(/preservation\/lifecycle\/handoff/u);
+
+    const staleLiveLifecycleLedger = baseInput('technical');
+    staleLiveLifecycleLedger.technicalPredecessorReleaseLedger.sha256 = sha('9');
+    expect(() => createFinalLocalTestDeliveryReceipt(staleLiveLifecycleLedger)).toThrow(/preservation\/lifecycle\/handoff/u);
+
+    const staleRejectedCheckpoint = baseInput('technical');
+    staleRejectedCheckpoint.technicalPredecessorPreparation.lifecycleAuthority.rejectedCheckpoint = 'deadbeef';
+    expect(() => createFinalLocalTestDeliveryReceipt(staleRejectedCheckpoint)).toThrow(/preservation\/lifecycle\/handoff/u);
+
+    const staleKnownStatus = baseInput('technical');
+    staleKnownStatus.technicalPredecessorPreparation.knownRejectedInstallerExperience.targetStatus = 'PASS';
+    expect(() => createFinalLocalTestDeliveryReceipt(staleKnownStatus)).toThrow(/preservation\/lifecycle\/handoff/u);
+
+    const staleKnownCheckpoint = baseInput('technical');
+    staleKnownCheckpoint.technicalPredecessorPreparation.knownRejectedInstallerExperience.checkpoint = 'deadbeef';
+    expect(() => createFinalLocalTestDeliveryReceipt(staleKnownCheckpoint)).toThrow(/preservation\/lifecycle\/handoff/u);
+
+    const staleImmediateReceipt = baseInput('technical');
+    staleImmediateReceipt.installationPreservation.technicalPredecessorReadback.immediate.receipt.sha256 = sha('9');
+    expect(() => createFinalLocalTestDeliveryReceipt(staleImmediateReceipt)).toThrow(/immediate\/final live readback/u);
+
+    const staleFinalReceipt = baseInput('technical');
+    staleFinalReceipt.installationPreservation.technicalPredecessorReadback.final.receipt.sha256 = sha('9');
+    expect(() => createFinalLocalTestDeliveryReceipt(staleFinalReceipt)).toThrow(/immediate\/final live readback/u);
+
+    const staleImmediateProducer = baseInput('technical');
+    staleImmediateProducer.installationPreservation.technicalPredecessorReadback.immediate.producer.sha256 = sha('9');
+    expect(() => createFinalLocalTestDeliveryReceipt(staleImmediateProducer)).toThrow(/immediate\/final live readback/u);
+
+    const staleFinalProducer = baseInput('technical');
+    staleFinalProducer.installationPreservation.technicalPredecessorReadback.final.producer.sha256 = sha('9');
+    expect(() => createFinalLocalTestDeliveryReceipt(staleFinalProducer)).toThrow(/immediate\/final live readback/u);
+
+    const staleImmediateLedger = baseInput('technical');
+    staleImmediateLedger.installationPreservation.technicalPredecessorReadback.immediate.releaseLedger.sha256 = sha('9');
+    expect(() => createFinalLocalTestDeliveryReceipt(staleImmediateLedger)).toThrow(/immediate\/final live readback/u);
+
+    const staleFinalLedger = baseInput('technical');
+    staleFinalLedger.installationPreservation.technicalPredecessorReadback.final.releaseLedger.sha256 = sha('9');
+    expect(() => createFinalLocalTestDeliveryReceipt(staleFinalLedger)).toThrow(/immediate\/final live readback/u);
+
+    const staleImmediateHandoff = baseInput('technical');
+    staleImmediateHandoff.installationPreservation.technicalPredecessorReadback.immediate.installedHandoff.sha256 = sha('9');
+    expect(() => createFinalLocalTestDeliveryReceipt(staleImmediateHandoff)).toThrow(/immediate\/final live readback/u);
+
+    const staleReadbackHandoff = baseInput('technical');
+    staleReadbackHandoff.installationPreservation.technicalPredecessorReadback.installedHandoff.sha256 = sha('9');
+    expect(() => createFinalLocalTestDeliveryReceipt(staleReadbackHandoff)).toThrow(/immediate\/final live readback/u);
+
+    const staleReadbackFlag = baseInput('technical');
+    staleReadbackFlag.installationPreservation.technicalPredecessorReadback.verifiedAfterInstallationPhases = false;
+    expect(() => createFinalLocalTestDeliveryReceipt(staleReadbackFlag)).toThrow(/immediate\/final live readback/u);
+
+    const duplicateTechnicalRoot = baseInput('technical');
+    duplicateTechnicalRoot.technicalPredecessorPreparation.evidenceRoot = duplicateTechnicalRoot.installerExperience.evidenceRoot;
+    expect(() => createFinalLocalTestDeliveryReceipt(duplicateTechnicalRoot)).toThrow(/canonical validation roots|duplicated/u);
+  });
+
+  it('allows equality at the technical-predecessor to UAT110 millisecond boundary', () => {
+    const input = baseInput('technical');
+    input.technicalPredecessorPreparation.completedAt = input.installationPreservation.startedAt;
+    expect(() => createFinalLocalTestDeliveryReceipt(input)).not.toThrow();
+  });
+
+  it('rejects a non-v4 technical predecessor UUID and technical evidence on every non-exact release', () => {
+    const staleUuid = baseInput('technical');
+    staleUuid.technicalPredecessorPreparation.runId = '50000000-0000-1000-8000-000000000005';
+    expect(() => createFinalLocalTestDeliveryReceipt(staleUuid)).toThrow(/UUID-v4/u);
+
+    const staleConsumerId = baseInput('technical');
+    staleConsumerId.packageProvenance.releaseId = 'bronze-2026-08-27-r54';
+    expect(() => createFinalLocalTestDeliveryReceipt(staleConsumerId)).toThrow(/exact Bronze 27\.08\.2026\.53\/r53/u);
+
+    const nonExact = baseInput('continuation');
+    const technical = baseInput('technical');
+    nonExact.technicalPredecessorPreparation = technical.technicalPredecessorPreparation;
+    nonExact.installationPreservation.technicalPredecessorPreparation = technical.installationPreservation.technicalPredecessorPreparation;
+    nonExact.installationPreservation.technicalPredecessorReadback = technical.installationPreservation.technicalPredecessorReadback;
+    nonExact.evidenceBindings.technicalPredecessorPreparation = technical.evidenceBindings.technicalPredecessorPreparation;
+    expect(() => createFinalLocalTestDeliveryReceipt(nonExact)).toThrow(/allowed only for the exact Bronze 53 continuation/u);
   });
 
   it('rejects a stale schema-2 launch probe without executable hash binding', () => {
@@ -1297,6 +1580,32 @@ describe('Bronze final local-test delivery receipt contract', () => {
     const fakeVisualSurface = baseInput();
     fakeVisualSurface.installedUi.checks.visualAudits[0].surfaceId = 'fake-first-run';
     expect(() => createFinalLocalTestDeliveryReceipt(fakeVisualSurface)).toThrow(/visual audit raw matrix/u);
+
+    const blankInstallerSlide = baseInput();
+    blankInstallerSlide.installerExperience.screenshots[2].contentContrastPixelCount = 0;
+    blankInstallerSlide.installerExperience.screenshots[2].contentOccupiedRows = 0;
+    blankInstallerSlide.installerExperience.screenshots[2].contentOccupiedColumns = 0;
+    expect(() => createFinalLocalTestDeliveryReceipt(blankInstallerSlide)).toThrow(/title-region pixel proof|visually blank/u);
+
+    const noAbsoluteDarkProof = baseInput();
+    noAbsoluteDarkProof.installerExperience.screenshots[2].contentDarkPixelCount = 0;
+    expect(() => createFinalLocalTestDeliveryReceipt(noAbsoluteDarkProof)).toThrow(/title-region pixel proof|visually blank/u);
+
+    const negativeRegion = baseInput();
+    negativeRegion.installerExperience.screenshots[2].contentRegion.left = -1;
+    expect(() => createFinalLocalTestDeliveryReceipt(negativeRegion)).toThrow(/title-region pixel proof|visually blank/u);
+
+    const outOfBoundsRegion = baseInput();
+    outOfBoundsRegion.installerExperience.screenshots[2].contentRegion.left = 700;
+    expect(() => createFinalLocalTestDeliveryReceipt(outOfBoundsRegion)).toThrow(/title-region pixel proof|visually blank/u);
+
+    const fractionalMetric = baseInput();
+    fractionalMetric.installerExperience.screenshots[2].contentOccupiedRows = 6.5;
+    expect(() => createFinalLocalTestDeliveryReceipt(fractionalMetric)).toThrow(/title-region pixel proof|visually blank/u);
+
+    const invalidCaptureAttempts = baseInput();
+    invalidCaptureAttempts.installerExperience.screenshots[2].captureAttempts = 4;
+    expect(() => createFinalLocalTestDeliveryReceipt(invalidCaptureAttempts)).toThrow(/title-region pixel proof|visually blank/u);
 
     const forgedNativeOwner = baseInput();
     const ownerTarget = forgedNativeOwner.installedUi.checks.nativeDialogEvidence[0].accept.targetWindow;
@@ -1554,6 +1863,14 @@ describe('Bronze final local-test delivery receipt contract', () => {
     expect(producer).toContain("requireOption(options, 'installation-preservation-uat')");
     expect(producer).toContain("requireOption(options, 'installed-ui-uat')");
     expect(producer).toContain("requireOption(options, 'installer-experience-uat')");
+    expect(producer).not.toContain("requireOption(options, 'technical-predecessor-preparation')");
+    expect(producer).toContain('installationPreservationBinding?.value?.technicalPredecessorPreparation');
+    expect(producer).toContain('installationPreservation.technicalPredecessorReadback');
+    expect(producer).toContain("readJsonBinding(resolve(root, technicalPredecessorClaim.path), 'technicalPredecessorPreparation')");
+    expect(producer).toContain("readFile(resolve(root, 'scripts/run-windows-technical-predecessor-preparation.ps1'))");
+    expect(producer).toContain("portablePath(resolve(root, 'scripts/run-windows-technical-predecessor-preparation.ps1'))");
+    expect(producer).toContain("readFile(resolve(root, 'config/release-ledger.json'))");
+    expect(producer).toContain('technicalPredecessorCompletedAt <= installationStartedAt');
     expect(producer).toContain("PRODUCT_NAVIGATION_GROUPS, PRODUCT_NAVIGATION_ROUTES } from './lib/canonical-product-navigation.mjs'");
     expect(producer).not.toContain('packages/domain/dist/renderer.js');
     expect(producer).toContain('root,\n    packageProvenancePath');

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "PPT-MUTATION-RELEASE-READINESS-V2",
-  "release": "Bronze 27.08.2026.52",
+  "release": "Bronze 27.08.2026.53",
   "requirement": "PR-235",
   "decision": "DEC-270",
   "strengthenedByRequirement": "PR-240",
@@ -49,7 +49,7 @@
     "path": "config/change-impact-dependency-registry.json",
     "schemaVersion": 1,
     "id": "PPT-CHANGE-IMPACT-DEPENDENCY-REGISTRY-V1",
-    "sha256": "9bebf79f6c348e7e9131d42eb6024a436a0a3ec36c451b7d0d2c2d03c01f6e0c",
+    "sha256": "88c95ceeaa91016698c484e5c69656c0ee5a593cefe21cd2affe0b18b25522be",
     "unmatchedChangedPathEffect": "BLOCK",
     "dependentRecordsMustBeChanged": true,
     "dependentRecordNotAffected": {

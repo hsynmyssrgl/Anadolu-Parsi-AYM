@@ -1,6 +1,6 @@
 {
   "name": "@ppt/infrastructure",
-  "version": "27.8.2026-52",
+  "version": "27.8.2026-53",
   "private": true,
   "type": "module",
   "main": "dist/index.js",
@@ -9,11 +9,11 @@
     ".": "./dist/index.js"
   },
   "dependencies": {
-    "@ppt/application": "27.8.2026-52",
-    "@ppt/contracts": "27.8.2026-52",
-    "@ppt/core": "27.8.2026-52",
-    "@ppt/database": "27.8.2026-52",
-    "@ppt/domain": "27.8.2026-52"
+    "@ppt/application": "27.8.2026-53",
+    "@ppt/contracts": "27.8.2026-53",
+    "@ppt/core": "27.8.2026-53",
+    "@ppt/database": "27.8.2026-53",
+    "@ppt/domain": "27.8.2026-53"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

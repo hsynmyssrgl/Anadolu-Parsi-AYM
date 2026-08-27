@@ -1,16 +1,16 @@
 # Active Release Status
 
 - Product: ParsYuva Aile Yaşam Merkezi
-- Application Version: `27.08.2026.52`
-- Package Version: `27.8.2026-52`
+- Application Version: `27.08.2026.53`
+- Package Version: `27.8.2026-53`
 - Stage: **Bronze Active Development**
-- Monthly Sequence: **52**
+- Monthly Sequence: **53**
 - Channel flow: **Bronze development → Silver validation/fixes → Gold production**
 - Silver status: **BLOCKED**
 
 ## Current validation status
 
-- DEC-276/PR-241 Bronze 51 recovery köprüsü ve Bronze 52 continuation: **IN PROGRESS; LATEST REJECTED CHECKPOINT `0854a4ec`; PRE-MUTATION BASELINE `15e3c9d0` PASS; `e0f85425` TARGETED 21 FILES/214 TESTS PASS; FULL 399 FILES/2.484 TESTS AND ROOT TYPESCRIPT PASS; `77a87a87` SOURCE-INTEGRITY FAIL; `4462706a` STALE INSTALLER RETENTION FAIL; `0854a4ec` UNKNOWN PREFLIGHT FLAG FAIL-OPEN; MASTER DOCX 31/31 + PDF 28/28 = 59/59 VISUAL PASS; BRONZE 52 PACKAGE NOT BUILT** — `.51` exact kurulu predecessor ve immutable provenance korunur. PR-229 gereği eski `.51` release EXE/blockmap/builder-debug artefaktları silinmiştir. Governed preflight artık yalnız sıfır argüman veya exact `--read-only` kabul eder; yanlış `--no-write` writer moda düşemez. Negatif CLI kapısı ve odaklı 2 dosya/12 test PASS'tir. Yeni exact test/bütünlük, paket/installer-experience, N→N+1 UAT110, UAT111 ve final teslim PASS olmadan kullanıcı teslimi yoktur.
+- DEC-275/PR-240 Bronze 52 installer görsel UAT ve Bronze 53 düzeltme zinciri: **IN PROGRESS; LATEST SOURCE REJECTED CHECKPOINT `cb7a5d4d`; RELEASE REJECTED CHECKPOINT `a5334c13`; BRONZE 52 `REJECTED_INSTALLER_VISUAL_UAT_FAIL`; BRONZE 53 TEK KEZ TAHSİS EDİLDİ; GÖRSEL 4 DOSYA/43, TEKNİK PREDECESSOR 1 DOSYA/10, ENFORCEMENT RETRY 8 DOSYA/74 VE GÜNCEL ÇAPRAZ SÖZLEŞME RETRY 7 DOSYA/75 TEST PASS; İLK KAYIT-KAPANIŞ RENDER PATH RETRY `ace2eeaf`, KANONİK RETRY MASTER 59/59 BYTE-EXACT GÖRSEL QA PASS; FINAL PREFLIGHT MARKER DRİFTİ `453e8c59`; TİCARİ MAKBUZ DURUM TESTİ DRİFTİ `cb7a5d4d`; YENİ EXACT TAM ZİNCİR PENDING** — `aee77952-7cb2-495a-8062-6d99d5f7b5d2` makbuzu makine PASS yazsa da `03-narrated-guidance.png` sağ içerik alanı boştur ve kabul kanıtı değildir. Teknik predecessor producer parse reti `219836c6`, PR-241 expected gate list drifti `d3f218c1`, belge araç yolu reti `ace2eeaf`, master marker reti `453e8c59` ve FAIL makbuzunu eski NOT_RUN beklentisiyle reddeden sözleşme drifti `cb7a5d4d` ile korunur. Immutable `.52` paket yeniden yazılmaz veya teslim edilmez; yalnız uygulama açılmadan, NOT_DELIVERY teknik predecessor ve veri/kanal değişmezlik kanıtıyla `.53` N→N+1 testi için kurulabilir. Yeni temiz exact commit, hedefli/tam regresyon, TypeScript, kaynak bütünlüğü, final belge QA, `.53` paket, üç slayt/anlatım, `.52→.53` UAT110, UAT111 ve final teslim PASS olmadan kullanıcı teslimi yoktur.
 - PR-235 bootstrap producer pointer-sourceCommit/ancestry fix: **TARGETED PASS (d8746da8; 76 dosya / 509 test); FULL REGRESSION FAIL KÖK NEDEN DÜZELTİLİYOR**
 - PR-235 historical full-diff `.gitattributes` dependency mapping: **IMPLEMENTED; EXACT EVIDENCE PENDING**
 - PR-240 dependent-record closure: **IMPLEMENTED; EXACT EVIDENCE PENDING** — değişmez 32-K tarihsel scope yalnız tetikleyici/değişmezlik kapısıdır; güncel PPK-015 ratchet ve makbuzlar bağımlı kayıttır. 34-F'nin üç resmî makbuzu Git teslim kapsamına alınmıştır.

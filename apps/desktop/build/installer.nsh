@@ -151,6 +151,10 @@ Var AymWelcomeStepControl
 Var AymWelcomeSlide
 
 Function AymWelcomeRenderSlide
+  ; Update all four labels as one visual transaction. UI Automation can observe
+  ; WM_SETTEXT before Windows has painted the pixels, so suppress painting until
+  ; the complete slide is ready and then synchronously repaint every child.
+  SendMessage $AymWelcomeDialog ${WM_SETREDRAW} 0 0
   ${If} $AymWelcomeSlide == 1
     ${NSD_SetText} $AymWelcomeEyebrow "$(AymWelcome1)"
     ${NSD_SetText} $AymWelcomeTitleControl "$(AymWelcomeCreateTitle)"
@@ -167,6 +171,9 @@ Function AymWelcomeRenderSlide
     ${NSD_SetText} $AymWelcomeLeadControl "$(AymWelcomeVoiceLead)"
     ${NSD_SetText} $AymWelcomeStepControl "$(AymWelcomeStepThree)"
   ${EndIf}
+  SendMessage $AymWelcomeDialog ${WM_SETREDRAW} 1 0
+  System::Call 'user32::RedrawWindow(p $AymWelcomeDialog, p 0, p 0, i 0x0185)'
+  System::Call 'user32::UpdateWindow(p $AymWelcomeDialog)'
 FunctionEnd
 
 Function AymWelcomeTransition

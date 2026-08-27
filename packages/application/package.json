@@ -1,6 +1,6 @@
 {
   "name": "@ppt/application",
-  "version": "27.8.2026-52",
+  "version": "27.8.2026-53",
   "private": true,
   "type": "module",
   "main": "dist/index.js",
@@ -9,18 +9,18 @@
     ".": "./dist/index.js"
   },
   "dependencies": {
-    "@ppt/core": "27.8.2026-52",
-    "@ppt/domain": "27.8.2026-52",
-    "@ppt/events": "27.8.2026-52",
-    "@ppt/platform-policy": "27.8.2026-52",
-    "@ppt/repository-contracts": "27.8.2026-52",
-    "@ppt/security": "27.8.2026-52"
+    "@ppt/core": "27.8.2026-53",
+    "@ppt/domain": "27.8.2026-53",
+    "@ppt/events": "27.8.2026-53",
+    "@ppt/platform-policy": "27.8.2026-53",
+    "@ppt/repository-contracts": "27.8.2026-53",
+    "@ppt/security": "27.8.2026-53"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {
-    "@ppt/test-data": "27.8.2026-52"
+    "@ppt/test-data": "27.8.2026-53"
   }
 }

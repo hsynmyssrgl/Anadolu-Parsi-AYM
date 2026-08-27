@@ -1,10 +1,10 @@
 # Başlangıç
 
 - Product: ParsYuva Aile Yaşam Merkezi
-- Application Version: `27.08.2026.52`
-- Package Version: `27.8.2026-52`
+- Application Version: `27.08.2026.53`
+- Package Version: `27.8.2026-53`
 - Stage: **Bronze Active Development**
-- Monthly Sequence: **52**
+- Monthly Sequence: **53**
 
 ## İzlenecek sıra
 

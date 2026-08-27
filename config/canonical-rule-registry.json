@@ -3,7 +3,7 @@
   "id": "PPT-CANONICAL-RULE-REGISTRY-V29",
   "product": "ParsYuva Aile Yaşam Merkezi",
   "upperBrand": "ParsYuva",
-  "effectiveRelease": "Bronze 27.08.2026.52",
+  "effectiveRelease": "Bronze 27.08.2026.53",
   "exceptionless": true,
   "previousRuleSet": {
     "version": "PROJECT-RULES-2026-08-02-V6",
@@ -1720,11 +1720,11 @@
     },
     {
       "id": "PR-241",
-      "text": "Bronze 26.08.2026.51, gecersiz ve degismez Bronze 22.08.2026.50 paketinden sonraki tek recovery bootstrap surumudur. Bu yol yalniz release ledger icinde parent Bronze 50 kaydi REJECTED_INVALID_PACKAGE, current Bronze 51 top-level kaydi ile exact tek release entry statusu birbirine esit ve IN_PROGRESS, recoveryBootstrapDecision RECOVERY_BOOTSTRAP_AFTER_REJECTED_50 ve parentRelease exact Bronze 22.08.2026.50 oldugunda acilir. Bronze 50 immutable package history ve dis append-only zinciri silinmez, ezilmez veya trusted installed runtime sayilmaz; immutable transaction yayimindan hemen once parent bundle kanonik path, size, SHA-256, rejected-parent kimligi ve archived receipt bagi canli geri okunur. Bronze 51 paketi yalniz tarihsel ancestry bagini korur, previous installed runtime girdisini reddeder, kanonik Bronze program koku, EXE ve uninstall kaydinin yoklugunu kanitlayarak RECOVERY_BOOTSTRAP_FRESH_INSTALL_SEQUENCE_51 fazini ve ardindan ayri same-version maintenance veri korumasini calistirir. Sequence 50 bootstrap ve sequence 52+ exact N-to-N+1 continuation kurallari degismez. Bu tek seferlik recovery modu waiver degildir; exact commit, hedefli ve tam regresyon, kaynak butunlugu, preflight, installer experience, UAT110, UAT111 ve final teslim kanitlarinin tumunu zorunlu tutar.",
+      "text": "Bronze 26.08.2026.51, gecersiz ve degismez Bronze 22.08.2026.50 paketinden sonraki tek recovery bootstrap surumudur. Bu yol yalniz release ledger icinde parent Bronze 50 kaydi REJECTED_INVALID_PACKAGE, current Bronze 51 top-level kaydi ile exact tek release entry statusu birbirine esit ve IN_PROGRESS, recoveryBootstrapDecision RECOVERY_BOOTSTRAP_AFTER_REJECTED_50 ve parentRelease exact Bronze 22.08.2026.50 oldugunda acilir. Bronze 50 immutable package history ve dis append-only zinciri silinmez, ezilmez veya trusted installed runtime sayilmaz; immutable transaction yayimindan hemen once parent bundle kanonik path, size, SHA-256, rejected-parent kimligi ve archived receipt bagi canli geri okunur. Bronze 51 paketi yalniz tarihsel ancestry bagini korur, previous installed runtime girdisini reddeder, kanonik Bronze program koku, EXE ve uninstall kaydinin yoklugunu kanitlayarak RECOVERY_BOOTSTRAP_FRESH_INSTALL_SEQUENCE_51 fazini ve ardindan ayri same-version maintenance veri korumasini calistirir. Bronze 27.08.2026.52 installer-experience gorsel UAT nedeniyle REJECTED_INSTALLER_VISUAL_UAT_FAIL durumundaysa Bronze 27.08.2026.53 normal exact continuation oncesinde ayri WINDOWS_TECHNICAL_PREDECESSOR_PREPARATION makbuzu zorunludur. Bu hazirlik .52 uygulamasini acmadan yalniz sessiz kurar; teslim, kabul veya PASS sayilmaz; canli .51, immutable .51/.52 bundle, .52 installer/runtime, AppData Bronze/Silver/Gold/legacy, diger kanal program/registry, sentetik marker ve kurulu .52 kimligini once-sonra exact geri okur. UAT110 ve final teslim bu makbuzun kanonik UUID yolu, size, SHA-256, producer ve canli .52 runtime bagini zorunlu dogrular. Sequence 50 bootstrap ile diger sequence 52+ exact N-to-N+1 continuation kurallari degismez. Bu yollar waiver degildir; exact commit, hedefli ve tam regresyon, kaynak butunlugu, preflight, installer experience, UAT110, UAT111 ve final teslim kanitlarinin tumunu zorunlu tutar.",
       "state": "ACTIVE",
       "source": "USER_DECISION_DEC-276",
       "effectiveRelease": "Bronze 26.08.2026.51"
     }
   ],
-  "rulesSha256": "103e269ab67eed8423a03b726d00bc36616660ca2f0f3c65eea3491103640936"
+  "rulesSha256": "473ad949db17e76d6c3230fb1ac11e2a022ba744b69d8225c5a5a7a694c9d82b"
 }

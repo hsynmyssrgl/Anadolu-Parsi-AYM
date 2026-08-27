@@ -39,6 +39,10 @@ describe('installer progress, narration and Silver help experience', () => {
       '!define MUI_WELCOMEFINISHPAGE_BITMAP "${__FILEDIR__}\\${PPT_INSTALLER_CHANNEL_BITMAP}"',
       'Function AymWelcomePageCreate','Function AymWelcomePageLeave',
       'Function AymWelcomeTransition','${NSD_CreateTimer} AymWelcomeTransition 2600',
+      'SendMessage $AymWelcomeDialog ${WM_SETREDRAW} 0 0',
+      'SendMessage $AymWelcomeDialog ${WM_SETREDRAW} 1 0',
+      "System::Call 'user32::RedrawWindow(p $AymWelcomeDialog, p 0, p 0, i 0x0185)'",
+      "System::Call 'user32::UpdateWindow(p $AymWelcomeDialog)'",
       '${NSD_KillTimer} AymWelcomeTransition','Call AymStartInstallerNarration',
       'File /oname=$PLUGINSDIR\\aym-installer-narration.ps1',
       'Page custom AymWelcomePageCreate AymWelcomePageLeave',
@@ -62,6 +66,25 @@ describe('installer progress, narration and Silver help experience', () => {
       'LangString AymInstallingDetail ${AYM_LANG_TURKISH} "Yükleniyor: %s"',
       'LangString AymInstallComplete ${AYM_LANG_TURKISH} "Yükleme tamamlandı: 100%"'
     ]) expect(source).toContain(marker);
+    const renderStart = source.indexOf('Function AymWelcomeRenderSlide');
+    const renderEnd = source.indexOf('FunctionEnd', renderStart);
+    const renderBlock = source.slice(renderStart, renderEnd);
+    const redrawOff = renderBlock.indexOf('SendMessage $AymWelcomeDialog ${WM_SETREDRAW} 0 0');
+    const redrawOn = renderBlock.indexOf('SendMessage $AymWelcomeDialog ${WM_SETREDRAW} 1 0');
+    const redrawWindow = renderBlock.indexOf("System::Call 'user32::RedrawWindow");
+    const updateWindow = renderBlock.indexOf("System::Call 'user32::UpdateWindow");
+    const slideTextUpdates = [
+      '$AymWelcomeEyebrow', '$AymWelcomeTitleControl', '$AymWelcomeLeadControl', '$AymWelcomeStepControl'
+    ].flatMap((control) => [...renderBlock.matchAll(new RegExp(`\\$\\{NSD_SetText\\} \\$${control.slice(1)}`, 'gu'))]
+      .map((match) => match.index ?? -1));
+    expect(renderStart).toBeGreaterThanOrEqual(0);
+    expect(renderEnd).toBeGreaterThan(renderStart);
+    expect(renderBlock.split('${WM_SETREDRAW}').length - 1).toBe(2);
+    expect(slideTextUpdates).toHaveLength(12);
+    expect(Math.min(...slideTextUpdates)).toBeGreaterThan(redrawOff);
+    expect(redrawOn).toBeGreaterThan(Math.max(...slideTextUpdates));
+    expect(redrawWindow).toBeGreaterThan(redrawOn);
+    expect(updateWindow).toBeGreaterThan(redrawWindow);
     expect(source).not.toContain('!insertmacro MUI_PAGE_WELCOME');
     expect(source).not.toContain('${NSD_CreateProgressBar}');
     expect(source).not.toContain('Var AymWelcomePulseLabel');

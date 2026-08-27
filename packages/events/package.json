@@ -1,6 +1,6 @@
 {
   "name": "@ppt/events",
-  "version": "27.8.2026-52",
+  "version": "27.8.2026-53",
   "private": true,
   "type": "module",
   "main": "dist/index.js",
@@ -9,7 +9,7 @@
     ".": "./dist/index.js"
   },
   "dependencies": {
-    "@ppt/core": "27.8.2026-52"
+    "@ppt/core": "27.8.2026-53"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

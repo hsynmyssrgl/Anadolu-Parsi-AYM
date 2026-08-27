@@ -1,11 +1,11 @@
 # Kanonik Kural Sicili
 
-- Görünür sürüm: **Bronze 27.08.2026.52**
+- Görünür sürüm: **Bronze 27.08.2026.53**
 - Sicil kimliği: `PPT-CANONICAL-RULE-REGISTRY-V29`
 - Toplam kural: **241**
 - Aktif kural: **216**
 - Açıkça superseded tarihsel kural: **25**
-- Kural SHA-256: `103e269ab67eed8423a03b726d00bc36616660ca2f0f3c65eea3491103640936`
+- Kural SHA-256: `473ad949db17e76d6c3230fb1ac11e2a022ba744b69d8225c5a5a7a694c9d82b`
 - Makine okunur tek aktif kaynak: `config/canonical-rule-registry.json`
 
 `PR-186` her bağlayıcı kararın aynı sürümde DEC ve makine defterine kaydını, `PR-187` bilinen belge/kod/kural driftinde kapanış yasağını getirir. `DEC-251` ve `config/documentation-synchronization-policy.json` bu iki kuralı karar anında DEC + etkilenen belge + iş listesi açık/kapalı/neden güncellemesi olarak fail-closed uygular.
@@ -42,7 +42,7 @@
 
 `PR-240`; en küçük değişiklikte dahi etkilenen ana/kanal kaynakları, kural-karar sicilleri, aktif ve ticari belgeler, iş listesi, kapsam/envanter/ratchet/manifest/indeks, güncel ana DOCX/PDF ve kanıt sözleşmelerinin aynı zincirde güncellenmesini zorunlu kılar. Her değişiklik hedefli ve filtresiz tam regresyon, typecheck, sözdizimi ve kaynak bütünlüğü; UI etkisinde tüm modül/rota/menü/kontrol/durum/erişilebilirlik/görsel bütünlük UAT'ı gerektirir. Gerçek test hatası `wip(rejected)` checkpoint olarak kaydedilir; bütün kapanış tamamlanmadan ara installer üretilemez.
 
-`PR-241`; yalnız exact Bronze 51 için current/entry status exact `IN_PROGRESS` eşliğini ve immutable parent bundle'ın transaction öncesi kanonik path/size/SHA/identity canlı geri-okumasını zorunlu tutar; Bronze 50 immutable rejected provenance bundle'ı `REJECTED_PARENT_HISTORY_ANCHOR_ONLY` kalır, installed predecessor girdisi reddedilir ve temiz program kökü/EXE/uninstall yokluğuyla recovery fresh-install + ayrı same-version maintenance çalıştırılır. Bronze 50 ve sequence 52+ normal semantiği değişmez; bütün exact test ve UAT kapıları korunur.
+`PR-241`; exact Bronze 51 recovery fresh-install yolunu immutable rejected Bronze 50 tarihçesinden ayırır. Bronze 52 `REJECTED_INSTALLER_VISUAL_UAT_FAIL` olduğunda Bronze 53 normal continuation öncesi yalnız no-launch, non-delivery teknik predecessor receipt'i kullanılabilir; receipt canlı .51, immutable .51/.52 bundle, .52 installer/runtime, AppData ve diğer kanal/legacy sınırlarını exact geri okur. UAT110 ve final teslim bu receipt'in UUID yolunu, boyutunu, SHA-256/producer bağını ve canlı .52 runtime'ı doğrulamadan başlayamaz. Diğer sequence 52+ normal semantiği ve bütün exact test/UAT kapıları değişmez.
 
 ## Aşılmaz uygulama
 

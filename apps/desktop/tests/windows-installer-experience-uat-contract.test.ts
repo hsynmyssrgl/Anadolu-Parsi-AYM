@@ -79,10 +79,25 @@ describe('real Windows NSIS installer experience UAT contract', () => {
       'transitionFromPreviousMs',
       '$delta -lt 1400 -or $delta -gt 5000',
       '[ParsYuvaInstallerNativeCapture]::PrintWindow',
+      '[ParsYuvaInstallerNativeCapture]::RedrawWindow',
+      '[ParsYuvaInstallerNativeCapture]::UpdateWindow',
+      '$redrawFlags = [uint32]0x0185',
+      '$captureAttempts -lt 3',
+      'Installer visual content verification exhausted 3 capture attempts:',
       "captureMode = 'PRINT_WINDOW_TARGET_ONLY'",
       'titleBeforeCapture',
       'titleAfterCapture',
       'PrintWindow returned a blank or single-color installer capture.',
+      'PrintWindow title content region is visually blank:',
+      'backgroundSampleCount',
+      'contentContrastPixelCount',
+      'contentOccupiedRows',
+      'contentOccupiedColumns',
+      'contentDarkPixelCount',
+      'contentDarkOccupiedRows',
+      'contentDarkOccupiedColumns',
+      "visualContentStatus = 'PASS'",
+      'visualContentVerified = $visualContentVerified',
       'Welcome-only screenshot unexpectedly contains a visible input field.',
       'Get-DotNetFileSha256 -Path $path',
       'aym-installer-narration\\.ps1',
@@ -90,6 +105,28 @@ describe('real Windows NSIS installer experience UAT contract', () => {
       'GetUserDefaultUILanguage',
       '$narration.language -ne $expectedNarrationLanguage',
     ]) expect(source).toContain(marker);
+    const screenshotFunctionStart = source.indexOf('function Save-InstallerScreenshot');
+    const screenshotFunctionEnd = source.indexOf('function Find-VisibleButton', screenshotFunctionStart);
+    const screenshotFunction = source.slice(screenshotFunctionStart, screenshotFunctionEnd);
+    const saveIndex = screenshotFunction.indexOf('$bitmap.Save($path');
+    const saveGuardIndex = screenshotFunction.lastIndexOf('Assert-EvidenceRunGuard', saveIndex);
+    const saveReparseIndex = screenshotFunction.lastIndexOf('Assert-NoReparseAncestors', saveIndex);
+    const cleanupIndex = screenshotFunction.indexOf('Remove-Item -LiteralPath $path');
+    const cleanupGuardIndex = screenshotFunction.lastIndexOf('Assert-EvidenceRunGuard', cleanupIndex);
+    const cleanupReparseIndex = screenshotFunction.lastIndexOf('Assert-NoReparseAncestors', cleanupIndex);
+    expect(screenshotFunctionStart).toBeGreaterThanOrEqual(0);
+    expect(screenshotFunctionEnd).toBeGreaterThan(screenshotFunctionStart);
+    expect(saveGuardIndex).toBeGreaterThanOrEqual(0);
+    expect(saveReparseIndex).toBeGreaterThan(saveGuardIndex);
+    expect(saveIndex).toBeGreaterThan(saveReparseIndex);
+    expect(cleanupGuardIndex).toBeGreaterThan(saveIndex);
+    expect(cleanupReparseIndex).toBeGreaterThan(cleanupGuardIndex);
+    expect(cleanupIndex).toBeGreaterThan(cleanupReparseIndex);
+    expect(screenshotFunction).toContain('capture cleanup was skipped');
+    expect(screenshotFunction).toContain('$backgroundSampleCount -ne 8');
+    expect(screenshotFunction).toContain('$contentDarkPixelCount -lt 40');
+    expect(screenshotFunction).toContain('$contentDarkOccupiedRows -lt 6');
+    expect(screenshotFunction).toContain('$contentDarkOccupiedColumns -lt 12');
     expect(source).not.toContain('CopyFromScreen');
     expect(source).not.toContain("'/S'");
     expect(source).not.toMatch(/https?:|Invoke-WebRequest|Start-BitsTransfer/iu);

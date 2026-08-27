@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "id": "PPT-RULE-ENFORCEMENT-REGISTRY-V1",
-  "release": "Bronze 27.08.2026.52",
-  "canonicalRulesSha256": "103e269ab67eed8423a03b726d00bc36616660ca2f0f3c65eea3491103640936",
+  "release": "Bronze 27.08.2026.53",
+  "canonicalRulesSha256": "473ad949db17e76d6c3230fb1ac11e2a022ba744b69d8225c5a5a7a694c9d82b",
   "activeRuleCount": 216,
   "defaultPolicy": "FAIL_CLOSED_NO_WAIVER",
   "entries": [
@@ -3057,7 +3057,7 @@
     },
     {
       "ruleId": "PR-241",
-      "mode": "REJECTED_PREDECESSOR_RECOVERY_BOOTSTRAP_GATE",
+      "mode": "REJECTED_PREDECESSOR_RECOVERY_AND_TECHNICAL_STAGING_GATE",
       "failClosed": true,
       "waiverAllowed": false,
       "skipAllowed": false,
@@ -3069,6 +3069,7 @@
         "scripts/create-mutation-impact-analysis.mjs",
         "scripts/run-governed-postflight.mjs",
         "scripts/lib/monthly-release-version.mjs",
+        "scripts/run-windows-technical-predecessor-preparation.ps1",
         "scripts/run-windows-installed-release-uat.ps1",
         "scripts/run-installed-frontend-user-uat.mjs",
         "scripts/create-bronze-final-local-test-delivery.mjs",
@@ -3077,6 +3078,7 @@
         "apps/desktop/tests/mutation-release-readiness-contract.test.ts",
         "apps/desktop/tests/windows-package-provenance-history.test.ts",
         "apps/desktop/tests/monthly-release-version.test.ts",
+        "apps/desktop/tests/windows-technical-predecessor-preparation-contract.test.ts",
         "apps/desktop/tests/windows-installed-release-uat-contract.test.ts",
         "apps/desktop/tests/installed-frontend-user-uat-contract.test.ts",
         "apps/desktop/tests/installed-frontend-user-uat-receipt.test.ts",

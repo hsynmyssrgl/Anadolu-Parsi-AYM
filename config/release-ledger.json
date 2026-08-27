@@ -6,13 +6,13 @@
     "channel": "Bronze",
     "date": "2026-08-27",
     "displayDate": "27.08.2026",
-    "monthlySequence": 52,
-    "version": "27.08.2026.52",
-    "visibleRelease": "Bronze 27.08.2026.52",
-    "packageVersion": "27.8.2026-52",
-    "releaseId": "bronze-2026-08-27-r52",
+    "monthlySequence": 53,
+    "version": "27.08.2026.53",
+    "visibleRelease": "Bronze 27.08.2026.53",
+    "packageVersion": "27.8.2026-53",
+    "releaseId": "bronze-2026-08-27-r53",
     "status": "IN_PROGRESS",
-    "parentRelease": "Bronze 26.08.2026.51",
+    "parentRelease": "Bronze 27.08.2026.52",
     "summary": "Resmî derleme numarası yalnız paketleme yetkisi tarafından ayrıldı.",
     "parentSourceSha256": null
   },
@@ -298,6 +298,30 @@
       "version": "27.08.2026.52",
       "packageVersion": "27.8.2026-52",
       "releaseId": "bronze-2026-08-27-r52",
+      "parentRelease": "Bronze 26.08.2026.51",
+      "status": "REJECTED_INSTALLER_VISUAL_UAT_FAIL",
+      "summary": "Paket ve runtime kimliği korunur; installer-experience üçüncü anlatım karesi boş olduğu için kullanıcı teslimi reddedildi.",
+      "rejection": {
+        "previousStatus": "IN_PROGRESS",
+        "effectiveStatus": "REJECTED_INSTALLER_VISUAL_UAT_FAIL",
+        "reason": "aee77952-7cb2-495a-8062-6d99d5f7b5d2 makine makbuzu PASS yazsa da 03-narrated-guidance.png sağ içerik bölgesi boştur; a5334c13 gerçek görsel UAT ret checkpointidir.",
+        "evidence": [
+          "a5334c13",
+          "artifacts/validation/installer-experience/aee77952-7cb2-495a-8062-6d99d5f7b5d2/03-narrated-guidance.png"
+        ],
+        "immutablePackageHistoryRewritten": false,
+        "countsAsDeliveryPass": false,
+        "technicalPredecessorUse": "SILENT_INSTALL_ONLY_NO_APPLICATION_LAUNCH_WITH_BEFORE_AFTER_DATA_AND_RUNTIME_READBACK"
+      }
+    },
+    {
+      "channel": "Bronze",
+      "date": "2026-08-27",
+      "monthlySequence": 53,
+      "version": "27.08.2026.53",
+      "packageVersion": "27.8.2026-53",
+      "releaseId": "bronze-2026-08-27-r53",
+      "parentRelease": "Bronze 27.08.2026.52",
       "status": "IN_PROGRESS",
       "summary": "Resmî derleme numarası yalnız paketleme yetkisi tarafından ayrıldı."
     }

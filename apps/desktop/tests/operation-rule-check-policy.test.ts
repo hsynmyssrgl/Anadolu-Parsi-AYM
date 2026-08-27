@@ -129,6 +129,7 @@ describe('operation rule check policy', () => {
         'scripts/create-mutation-impact-analysis.mjs',
         'scripts/run-governed-postflight.mjs',
         'scripts/lib/monthly-release-version.mjs',
+        'scripts/run-windows-technical-predecessor-preparation.ps1',
         'scripts/run-windows-installed-release-uat.ps1',
         'scripts/run-installed-frontend-user-uat.mjs',
         'scripts/create-bronze-final-local-test-delivery.mjs',
@@ -137,6 +138,7 @@ describe('operation rule check policy', () => {
         'apps/desktop/tests/mutation-release-readiness-contract.test.ts',
         'apps/desktop/tests/windows-package-provenance-history.test.ts',
         'apps/desktop/tests/monthly-release-version.test.ts',
+        'apps/desktop/tests/windows-technical-predecessor-preparation-contract.test.ts',
         'apps/desktop/tests/windows-installed-release-uat-contract.test.ts',
         'apps/desktop/tests/installed-frontend-user-uat-contract.test.ts',
         'apps/desktop/tests/installed-frontend-user-uat-receipt.test.ts',
@@ -204,6 +206,101 @@ describe('operation rule check policy', () => {
     expect(channelGate).toContain("runGit(['worktree', 'list', '--porcelain'], checkoutRoot)");
     expect(channelGate).toContain("runGit(['rev-parse', '--git-common-dir'], expectedRoot)");
     expect(channelGate).toContain("runGit(['status', '--porcelain=v1', '--untracked-files=all'], expectedRoot)");
+  });
+
+  it('fails closed on stale Bronze 52 records and PR-241 commercial enforcement drift', async () => {
+    const [validator, canonicalRaw, enforcementRaw, releaseRaw, decisionsRaw, activeRaw, workRaw, workMarkdown, evidenceRaw, evidenceRegistryRaw] = await Promise.all([
+      readSource('docs/ticari-urun-temeli/11_OTOMASYON/dogrula-ticari-temel-alani.mjs'),
+      readSource('config/canonical-rule-registry.json'),
+      readSource('config/rule-enforcement-registry.json'),
+      readSource('config/release-ledger.json'),
+      readSource('config/user-decision-ledger.json'),
+      readSource('config/active-governance-ledger.json'),
+      readSource('docs/ticari-urun-temeli/08_IS_LISTESI/03_ANA_IS_SICILI.json'),
+      readSource('docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md'),
+      readSource('docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json'),
+      readSource('docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/03_KANIT_SICILI.json')
+    ]);
+    const canonical = JSON.parse(canonicalRaw) as any;
+    const enforcement = JSON.parse(enforcementRaw) as any;
+    const release = JSON.parse(releaseRaw) as any;
+    const decisions = JSON.parse(decisionsRaw) as any;
+    const active = JSON.parse(activeRaw) as any;
+    const work = JSON.parse(workRaw) as any;
+    const evidence = JSON.parse(evidenceRaw) as any;
+    const evidenceRegistry = JSON.parse(evidenceRegistryRaw) as any;
+    const latestRejectedCheckpoint = active.activeDeliveryClosure.latestRejectedCheckpoint as string;
+    const exactPr241GateScripts = [
+      'scripts/lib/windows-package-provenance.mjs',
+      'scripts/lib/mutation-release-evidence.mjs',
+      'scripts/lib/release-source-provenance.mjs',
+      'scripts/create-mutation-impact-assessment.mjs',
+      'scripts/create-mutation-impact-analysis.mjs',
+      'scripts/run-governed-postflight.mjs',
+      'scripts/lib/monthly-release-version.mjs',
+      'scripts/run-windows-technical-predecessor-preparation.ps1',
+      'scripts/run-windows-installed-release-uat.ps1',
+      'scripts/run-installed-frontend-user-uat.mjs',
+      'scripts/create-bronze-final-local-test-delivery.mjs',
+      'scripts/allocate-monthly-release-version.mjs',
+      'apps/desktop/scripts/run-electron-builder.mjs',
+      'apps/desktop/tests/mutation-release-readiness-contract.test.ts',
+      'apps/desktop/tests/windows-package-provenance-history.test.ts',
+      'apps/desktop/tests/monthly-release-version.test.ts',
+      'apps/desktop/tests/windows-technical-predecessor-preparation-contract.test.ts',
+      'apps/desktop/tests/windows-installed-release-uat-contract.test.ts',
+      'apps/desktop/tests/installed-frontend-user-uat-contract.test.ts',
+      'apps/desktop/tests/installed-frontend-user-uat-receipt.test.ts',
+      'apps/desktop/tests/bronze-final-local-test-delivery-contract.test.ts'
+    ];
+    const pr241Entries = enforcement.entries.filter((entry: any) => entry.ruleId === 'PR-241');
+    expect(pr241Entries).toHaveLength(1);
+    expect(pr241Entries[0].gateScripts).toEqual(exactPr241GateScripts);
+    expect(pr241Entries[0]).toMatchObject({ failClosed: true, waiverAllowed: false, skipAllowed: false });
+    expect(enforcement.canonicalRulesSha256).toBe(canonical.rulesSha256);
+    expect(validator).toContain("readJson(resolve(REPO, 'config', 'rule-enforcement-registry.json'))");
+    expect(validator).toContain('JSON.stringify(pr241Enforcement?.gateScripts) === JSON.stringify(exactPr241GateScripts)');
+    expect(validator).toContain("!String(decision276?.ppk015DocumentationQaImpact ?? '').includes('Bronze 52 hâlâ NOT_BUILT')");
+    expect(validator).toContain('workRegistry.latestMutationClosure?.checkpoint === latestRejectedCheckpoint');
+    expect(validator).toContain('currentDecisionSummary.includes(latestRejectedCheckpoint) && currentMaster.includes(latestRejectedCheckpoint)');
+    expect(validator).toContain('const selfReferentialEvidencePaths = new Set([evidenceRegistryPath, generatedEvidencePath])');
+    expect(validator).toContain('if (!selfReferentialEvidencePaths.has(path))');
+    expect(validator).toContain("generatedEvidenceEntry.sha256 = sha256(serializedReport)");
+    expect(validator).toContain("persistedEvidenceEntry?.sha256 !== persistedReportSha256");
+    const decision276 = decisions.decisions.find((decision: any) => decision.id === 'DEC-276');
+    expect(decision276.ppk015DocumentationQaImpact).not.toContain('Bronze 52 hâlâ NOT_BUILT');
+    expect(decision276.ppk015DocumentationQaImpact).toContain('REJECTED_INSTALLER_VISUAL_UAT_FAIL');
+    const work212 = work.isler.find((item: any) => item.id === 'IS-0212');
+    expect(work212.acikNedeni).toContain(`Aktif son kaynak reti ${latestRejectedCheckpoint}`);
+    expect(work212.acikNedeni).not.toContain('Aktif son kaynak reti 219836c6');
+    expect(workMarkdown).toContain(`Aktif son kaynak reti \`${latestRejectedCheckpoint}\`; yeni exact kapılar pendingdir`);
+    expect(release.current).toMatchObject({ monthlySequence: 53, status: 'IN_PROGRESS', parentRelease: 'Bronze 27.08.2026.52' });
+    expect(release.entries.find((entry: any) => entry.monthlySequence === 52)).toMatchObject({
+      status: 'REJECTED_INSTALLER_VISUAL_UAT_FAIL',
+      parentRelease: 'Bronze 26.08.2026.51',
+      rejection: {
+        immutablePackageHistoryRewritten: false,
+        countsAsDeliveryPass: false,
+        technicalPredecessorUse: 'SILENT_INSTALL_ONLY_NO_APPLICATION_LAUNCH_WITH_BEFORE_AFTER_DATA_AND_RUNTIME_READBACK'
+      }
+    });
+    expect(evidence.canonicalRuleSha256).toBe(canonical.rulesSha256);
+    expect(evidence.commercialReleaseEligible).toBe(false);
+    expect(['NOT_RUN', 'FAIL', 'PASS']).toContain(evidence.status);
+    if (evidence.status === 'NOT_RUN') {
+      expect(evidence).toMatchObject({ checks: 0, mutationWideRecordAndTestClosureVerified: false });
+    } else if (evidence.status === 'FAIL') {
+      expect(evidence.checks).toBeGreaterThan(0);
+      expect(evidence.mutationWideRecordAndTestClosureVerified).toBe(false);
+      expect(evidence.failures.length).toBeGreaterThan(0);
+    } else {
+      expect(evidence.checks).toBeGreaterThan(0);
+      expect(evidence.mutationWideRecordAndTestClosureVerified).toBe(true);
+      expect(evidence.failures).toEqual([]);
+    }
+    const commercialEvidenceEntry = evidenceRegistry.kayitlar.find((entry: any) => entry.id === 'KANIT-0002');
+    expect(commercialEvidenceEntry).toMatchObject({ durum: evidence.status, disKaynak: false });
+    expect(commercialEvidenceEntry.sha256).toBe(createHash('sha256').update(evidenceRaw).digest('hex'));
   });
 
   it('requires an explicit operation and rerun guidance before mutations', async () => {

@@ -8,6 +8,7 @@ param(
   [Parameter(Mandatory = $true)][ValidateNotNullOrEmpty()][string]$GovernedPreflight,
   [Parameter(Mandatory = $true)][ValidateNotNullOrEmpty()][string]$InstallerExperienceUat,
   [Parameter()][AllowEmptyString()][string]$PreviousPackageProvenance = '',
+  [Parameter()][AllowEmptyString()][string]$TechnicalPredecessorPreparation = '',
   [Parameter(Mandatory = $true)][ValidateNotNullOrEmpty()][string]$EvidenceRoot,
   [Parameter(Mandatory = $true)][ValidateNotNullOrEmpty()][string]$ExpectedReleaseId
 )
@@ -28,12 +29,20 @@ $ExpectedUserDataRoot = [IO.Path]::GetFullPath((Join-Path $env:APPDATA 'ParsYuva
 $RunnerPath = [IO.Path]::GetFullPath((Join-Path $RepoRoot 'scripts\run-installed-frontend-user-uat.mjs'))
 $PackageVerifierPath = [IO.Path]::GetFullPath((Join-Path $RepoRoot 'scripts\verify-windows-package-provenance.mjs'))
 $ProducerPath = [IO.Path]::GetFullPath($PSCommandPath)
+$TechnicalPredecessorValidationBase = [IO.Path]::GetFullPath((Join-Path $RepoRoot 'artifacts\validation\windows-technical-predecessor-preparation'))
+$TechnicalPredecessorProducerPath = [IO.Path]::GetFullPath((Join-Path $RepoRoot 'scripts\run-windows-technical-predecessor-preparation.ps1'))
+$ReleaseLedgerPath = [IO.Path]::GetFullPath((Join-Path $RepoRoot 'config\release-ledger.json'))
+$ExpectedTechnicalInstalledBundle = [IO.Path]::GetFullPath((Join-Path $RepoRoot 'artifacts\validation\release-history\bronze-26.08.2026.51-windows-package-provenance-bundle\bundle.json'))
 $InstallationReceiptPath = [IO.Path]::GetFullPath((Join-Path $RunRoot 'windows-installed-release-uat110.json'))
 $InstalledUiEvidenceRoot = [IO.Path]::GetFullPath((Join-Path $RunRoot 'installed-frontend'))
 $InstalledUiReceiptPath = [IO.Path]::GetFullPath((Join-Path $InstalledUiEvidenceRoot 'installed-frontend-user-uat111.json'))
 
 function Assert-True([bool]$Condition, [string]$Message) {
   if (-not $Condition) { throw $Message }
+}
+
+function Test-NonNegativeSafeInteger($Value) {
+  return (($Value -is [int]) -or ($Value -is [long])) -and [long]$Value -ge 0 -and [long]$Value -le 9007199254740991
 }
 
 function Get-Sha256Text([string]$Value) {
@@ -142,6 +151,17 @@ function Get-FileIdentity([string]$Path) {
     productVersion = [string]$item.VersionInfo.ProductVersion
     authenticodeStatus = [string]$signature.Status
   }
+}
+
+function Get-FileBinding([string]$Path, [string]$Label) {
+  $full = Resolve-RegularFile $Path $Label
+  $item = Get-Item -LiteralPath $full -Force
+  return [ordered]@{ path = $full; sizeBytes = [long]$item.Length; sha256 = Get-FileSha256 $full }
+}
+
+function Assert-BindingEqual($Expected, $Actual, [string]$Label) {
+  Assert-True ([IO.Path]::GetFullPath([string]$Expected.path).Equals([IO.Path]::GetFullPath([string]$Actual.path), [StringComparison]::OrdinalIgnoreCase) -and
+    [long]$Expected.sizeBytes -eq [long]$Actual.sizeBytes -and [string]$Expected.sha256 -ceq [string]$Actual.sha256) "$Label path/size/SHA-256 bagi degisti."
 }
 
 function Get-TreeMetadataManifest([string]$Path, [string]$Scope) {
@@ -377,6 +397,28 @@ $expectedPackagedPath = [IO.Path]::GetFullPath((Join-Path $RepoRoot 'apps\deskto
 Assert-True ([IO.Path]::GetFullPath($InstallerPath).Equals($expectedInstallerPath, [StringComparison]::OrdinalIgnoreCase)) 'InstallerPath kanonik release artifact degil.'
 Assert-True ([IO.Path]::GetFullPath($PackagedExePath).Equals($expectedPackagedPath, [StringComparison]::OrdinalIgnoreCase)) 'PackagedExePath kanonik release runtime degil.'
 Assert-True ($installerExperience.schemaVersion -eq 2 -and $installerExperience.status -eq 'PASS' -and $installerExperience.releaseId -eq $ExpectedReleaseId) 'Installer experience UAT exact package/source schema2 PASS degil.'
+Assert-True ($installerExperience.window.visualContentVerified -eq $true) 'Installer experience UAT sag icerik gorsel dogrulamasi PASS degil.'
+Assert-True (@($installerExperience.screenshots).Count -eq 3 -and @($installerExperience.screenshots | Where-Object {
+  $_.visualContentStatus -ne 'PASS' -or
+  -not (Test-NonNegativeSafeInteger $_.captureAttempts) -or [long]$_.captureAttempts -lt 1 -or [long]$_.captureAttempts -gt 3 -or
+  -not (Test-NonNegativeSafeInteger $_.printWindowFlags) -or [long]$_.printWindowFlags -ne 2 -or
+  -not (Test-NonNegativeSafeInteger $_.width) -or [long]$_.width -lt 1 -or
+  -not (Test-NonNegativeSafeInteger $_.height) -or [long]$_.height -lt 1 -or
+  $null -eq $_.contentRegion -or
+  -not (Test-NonNegativeSafeInteger $_.contentRegion.left) -or
+  -not (Test-NonNegativeSafeInteger $_.contentRegion.top) -or
+  -not (Test-NonNegativeSafeInteger $_.contentRegion.width) -or [long]$_.contentRegion.width -lt 24 -or
+  -not (Test-NonNegativeSafeInteger $_.contentRegion.height) -or [long]$_.contentRegion.height -lt 12 -or
+  ([long]$_.contentRegion.left + [long]$_.contentRegion.width) -gt [long]$_.width -or
+  ([long]$_.contentRegion.top + [long]$_.contentRegion.height) -gt [long]$_.height -or
+  -not (Test-NonNegativeSafeInteger $_.backgroundSampleCount) -or [long]$_.backgroundSampleCount -ne 8 -or
+  -not (Test-NonNegativeSafeInteger $_.contentContrastPixelCount) -or [long]$_.contentContrastPixelCount -lt 40 -or
+  -not (Test-NonNegativeSafeInteger $_.contentOccupiedRows) -or [long]$_.contentOccupiedRows -lt 6 -or
+  -not (Test-NonNegativeSafeInteger $_.contentOccupiedColumns) -or [long]$_.contentOccupiedColumns -lt 12 -or
+  -not (Test-NonNegativeSafeInteger $_.contentDarkPixelCount) -or [long]$_.contentDarkPixelCount -lt 40 -or
+  -not (Test-NonNegativeSafeInteger $_.contentDarkOccupiedRows) -or [long]$_.contentDarkOccupiedRows -lt 6 -or
+  -not (Test-NonNegativeSafeInteger $_.contentDarkOccupiedColumns) -or [long]$_.contentDarkOccupiedColumns -lt 12
+}).Count -eq 0) 'Installer experience UAT uc ekranin title-region piksel kanitini tasimiyor.'
 
 $packageBinding = [ordered]@{ path = $PackageProvenance; sizeBytes = (Get-Item -LiteralPath $PackageProvenance).Length; sha256 = Get-FileSha256 $PackageProvenance }
 $preflightBinding = [ordered]@{ path = $GovernedPreflight; sizeBytes = (Get-Item -LiteralPath $GovernedPreflight).Length; sha256 = Get-FileSha256 $GovernedPreflight }
@@ -411,7 +453,15 @@ $newSequence = [int]$newVersionMatch.Groups[4].Value
 $isGovernedBootstrap = $newSequence -eq 50
 $isRecoveryBootstrap = $newSequence -eq 51
 $isFreshInstallBootstrap = $isGovernedBootstrap -or $isRecoveryBootstrap
+$requiresTechnicalPredecessorPreparation = [string]$package.release -ceq 'Bronze 27.08.2026.53' -and
+  [string]$package.releaseId -ceq 'bronze-2026-08-27-r53' -and
+  [string]$package.packageVersion -ceq '27.8.2026-53'
 Assert-True ($newSequence -ge 50) 'Package sequence governed predecessor sinirinin altindadir.'
+if ($requiresTechnicalPredecessorPreparation) {
+  Assert-True (-not [string]::IsNullOrWhiteSpace($TechnicalPredecessorPreparation)) 'Bronze 53 exact teknik predecessor preparation makbuzu zorunludur.'
+} else {
+  Assert-True ([string]::IsNullOrWhiteSpace($TechnicalPredecessorPreparation)) 'TechnicalPredecessorPreparation yalniz exact Bronze 27.08.2026.53/r53 icin kabul edilir.'
+}
 $parentReleaseMatch = [regex]::Match([string]$package.parentRelease, '^Bronze (\d{2})\.(\d{2})\.(\d{4})\.(\d+)$')
 Assert-True ($parentReleaseMatch.Success -and [int]$parentReleaseMatch.Groups[2].Value -eq [int]$newVersionMatch.Groups[2].Value -and [int]$parentReleaseMatch.Groups[3].Value -eq [int]$newVersionMatch.Groups[3].Value -and [int]$parentReleaseMatch.Groups[4].Value -eq ($newSequence - 1)) 'Package parentRelease exact ayni-ay predecessor lineage ile uyusmuyor.'
 $expectedPreviousRelease = $null
@@ -419,6 +469,12 @@ $previousPackageBinding = $null
 $verifiedPreviousPackage = $null
 $installedBeforeIdentity = $null
 $oldSequence = $null
+$technicalPredecessorPreparationBinding = $null
+$technicalPredecessorPreparationReceipt = $null
+$technicalPredecessorProducerBinding = $null
+$technicalPredecessorReleaseLedgerBinding = $null
+$technicalPredecessorImmediateReadback = $null
+$technicalPredecessorReadback = $null
 if ($isGovernedBootstrap) {
   Assert-True ($null -eq $package.previousPackageProvenance) 'Bronze 50 governed bootstrap onceki paket self-claim tasiyamaz.'
   Assert-True ([string]::IsNullOrWhiteSpace($PreviousPackageProvenance) -and [string]::IsNullOrWhiteSpace($PreviousInstalledExePath)) 'Bronze 50 governed bootstrap onceki paket/runtime girdisi kabul etmez.'
@@ -485,6 +541,138 @@ process.stdout.write(JSON.stringify({ status: 'PASS', ...verified }));
   }
 }
 
+if ($requiresTechnicalPredecessorPreparation) {
+  Assert-True ([string]$package.release -ceq 'Bronze 27.08.2026.53' -and
+    [string]$package.releaseId -ceq 'bronze-2026-08-27-r53' -and
+    [string]$package.packageVersion -ceq '27.8.2026-53' -and
+    [string]$package.parentRelease -ceq 'Bronze 27.08.2026.52') 'Technical predecessor preparation yalniz exact Bronze 53 consumer kimligiyle kullanilabilir.'
+  $TechnicalPredecessorPreparation = Resolve-RegularFile $TechnicalPredecessorPreparation 'TechnicalPredecessorPreparation'
+  $technicalPredecessorRunRoot = [IO.Path]::GetFullPath((Split-Path -Parent $TechnicalPredecessorPreparation))
+  $technicalPredecessorCategoryParent = [IO.Path]::GetFullPath((Split-Path -Parent $technicalPredecessorRunRoot))
+  $technicalPredecessorRunId = Split-Path -Leaf $technicalPredecessorRunRoot
+  $technicalPredecessorParsedRunId = [guid]::Empty
+  Assert-True ([guid]::TryParseExact($technicalPredecessorRunId, 'D', [ref]$technicalPredecessorParsedRunId) -and
+    $technicalPredecessorRunId -cmatch '^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$' -and
+    $technicalPredecessorParsedRunId.ToString('D') -ceq $technicalPredecessorRunId) 'TechnicalPredecessorPreparation kanonik lowercase UUID-v4 run klasoru tasimiyor.'
+  Assert-True ($technicalPredecessorCategoryParent.Equals($TechnicalPredecessorValidationBase, [StringComparison]::OrdinalIgnoreCase)) 'TechnicalPredecessorPreparation exact kanonik kategori kokunun altinda degil.'
+  $expectedTechnicalPredecessorReceipt = [IO.Path]::GetFullPath((Join-Path $technicalPredecessorRunRoot 'windows-technical-predecessor-preparation.json'))
+  Assert-True ([IO.Path]::GetFullPath($TechnicalPredecessorPreparation).Equals($expectedTechnicalPredecessorReceipt, [StringComparison]::OrdinalIgnoreCase)) 'TechnicalPredecessorPreparation kanonik UUID receipt yolu degil.'
+  Assert-NoReparseChain $TechnicalPredecessorPreparation
+  $technicalPredecessorPreparationBinding = Get-FileBinding $TechnicalPredecessorPreparation 'TechnicalPredecessorPreparation'
+  $technicalPredecessorPreparationReceipt = Read-JsonFile $TechnicalPredecessorPreparation 'TechnicalPredecessorPreparation'
+  $technicalPredecessorProducerBinding = Get-FileBinding $TechnicalPredecessorProducerPath 'technical predecessor producer'
+  $technicalPredecessorReleaseLedgerBinding = Get-FileBinding $ReleaseLedgerPath 'release ledger'
+  $technicalInstalledBundleBinding = Get-FileBinding $ExpectedTechnicalInstalledBundle 'immutable Bronze 51 bundle'
+
+  Assert-True ([int]$technicalPredecessorPreparationReceipt.schemaVersion -eq 1 -and
+    [string]$technicalPredecessorPreparationReceipt.id -ceq 'PPT-WINDOWS-TECHNICAL-PREDECESSOR-PREPARATION-V1' -and
+    [string]$technicalPredecessorPreparationReceipt.evidenceKind -ceq 'WINDOWS_TECHNICAL_PREDECESSOR_PREPARATION' -and
+    [string]$technicalPredecessorPreparationReceipt.status -ceq 'PASS' -and
+    [int]$technicalPredecessorPreparationReceipt.exitCode -eq 0 -and
+    [string]$technicalPredecessorPreparationReceipt.runId -ceq $technicalPredecessorRunId -and
+    [IO.Path]::GetFullPath([string]$technicalPredecessorPreparationReceipt.evidenceRoot).Equals($technicalPredecessorRunRoot, [StringComparison]::OrdinalIgnoreCase)) 'Technical predecessor preparation envelope/UUID/runRoot exact degil.'
+  $technicalPredecessorStartedAt = [DateTimeOffset]::Parse([string]$technicalPredecessorPreparationReceipt.startedAt)
+  $technicalPredecessorCompletedAt = [DateTimeOffset]::Parse([string]$technicalPredecessorPreparationReceipt.completedAt)
+  Assert-True ($technicalPredecessorCompletedAt -ge $technicalPredecessorStartedAt -and $technicalPredecessorCompletedAt -le $runStartedAt) 'Technical predecessor preparation zaman sirasi UAT110 oncesi exact degil.'
+  Assert-True ([string]$technicalPredecessorPreparationReceipt.installationMode -ceq 'TECHNICAL_PREDECESSOR_PREPARATION_ONLY' -and
+    $technicalPredecessorPreparationReceipt.releaseAcceptanceClaimed -eq $false -and
+    $technicalPredecessorPreparationReceipt.deliveryEligible -eq $false -and
+    $technicalPredecessorPreparationReceipt.targetPackageDeliveryPassClaimed -eq $false -and
+    $technicalPredecessorPreparationReceipt.interactiveInstallerUiExercised -eq $false -and
+    $technicalPredecessorPreparationReceipt.applicationLaunchAttempted -eq $false) 'Technical predecessor preparation kabul/teslim siniri gecersiz.'
+  Assert-True ([string]$technicalPredecessorPreparationReceipt.fromRelease -ceq 'Bronze 26.08.2026.51' -and
+    [string]$technicalPredecessorPreparationReceipt.fromReleaseId -ceq 'bronze-2026-08-26-r51' -and
+    [string]$technicalPredecessorPreparationReceipt.toRelease -ceq 'Bronze 27.08.2026.52' -and
+    [string]$technicalPredecessorPreparationReceipt.toReleaseId -ceq 'bronze-2026-08-27-r52' -and
+    [string]$technicalPredecessorPreparationReceipt.consumerRelease -ceq 'Bronze 27.08.2026.53' -and
+    [string]$technicalPredecessorPreparationReceipt.consumerReleaseId -ceq 'bronze-2026-08-27-r53') 'Technical predecessor preparation .51/.52/.53 release zinciri exact degil.'
+  Assert-True (($technicalPredecessorPreparationReceipt.currentSource | ConvertTo-Json -Depth 100 -Compress) -ceq
+    ($package.sourceProvenance | ConvertTo-Json -Depth 100 -Compress)) 'Technical predecessor preparation current source exact Bronze 53 package source ile bagli degil.'
+  Assert-True ($technicalPredecessorPreparationReceipt.currentSource.worktreeClean -eq $true -and
+    $technicalPredecessorPreparationReceipt.currentSource.sharedGitObjectDatabaseVerified -eq $true -and
+    [string]$technicalPredecessorPreparationReceipt.currentSource.headCommit -ceq [string]$verifiedPackage.sourceCommit -and
+    [string]$technicalPredecessorPreparationReceipt.currentSource.governedSourceFingerprint.sha256 -ceq [string]$verifiedPackage.governedSourceFingerprintSha256) 'Technical predecessor preparation canli temiz source/Git/fingerprint bagi gecersiz.'
+  Assert-BindingEqual $technicalPredecessorPreparationReceipt.producer $technicalPredecessorProducerBinding 'Technical predecessor producer'
+  Assert-True ([IO.Path]::IsPathRooted([string]$technicalPredecessorPreparationReceipt.producer.path) -and
+    [IO.Path]::GetFullPath([string]$technicalPredecessorPreparationReceipt.producer.path).Equals($TechnicalPredecessorProducerPath, [StringComparison]::OrdinalIgnoreCase)) 'Technical predecessor producer kanonik absolute script yolu degil.'
+  Assert-True ([IO.Path]::IsPathRooted([string]$technicalPredecessorPreparationReceipt.lifecycleAuthority.releaseLedger.path)) 'Technical predecessor release ledger yolu absolute degil.'
+  Assert-BindingEqual $technicalPredecessorPreparationReceipt.lifecycleAuthority.releaseLedger $technicalPredecessorReleaseLedgerBinding 'Technical predecessor release ledger'
+
+  $technicalReleaseLedger = Read-JsonFile $ReleaseLedgerPath 'release ledger'
+  $technicalTargetLedgerEntries = @($technicalReleaseLedger.entries | Where-Object { [string]$_.releaseId -ceq 'bronze-2026-08-27-r52' })
+  $technicalConsumerLedgerEntries = @($technicalReleaseLedger.entries | Where-Object { [string]$_.releaseId -ceq 'bronze-2026-08-27-r53' })
+  Assert-True ($technicalTargetLedgerEntries.Count -eq 1 -and
+    [string]$technicalTargetLedgerEntries[0].version -ceq '27.08.2026.52' -and
+    [string]$technicalTargetLedgerEntries[0].status -ceq 'REJECTED_INSTALLER_VISUAL_UAT_FAIL' -and
+    [string]$technicalTargetLedgerEntries[0].rejection.effectiveStatus -ceq 'REJECTED_INSTALLER_VISUAL_UAT_FAIL' -and
+    $technicalTargetLedgerEntries[0].rejection.countsAsDeliveryPass -eq $false -and
+    $technicalTargetLedgerEntries[0].rejection.immutablePackageHistoryRewritten -eq $false -and
+    [string]$technicalTargetLedgerEntries[0].rejection.technicalPredecessorUse -ceq 'SILENT_INSTALL_ONLY_NO_APPLICATION_LAUNCH_WITH_BEFORE_AFTER_DATA_AND_RUNTIME_READBACK' -and
+    @($technicalTargetLedgerEntries[0].rejection.evidence) -contains 'a5334c13') 'Live release ledger rejected Bronze 52 technical predecessor authority exact degil.'
+  Assert-True ($technicalConsumerLedgerEntries.Count -eq 1 -and
+    [string]$technicalReleaseLedger.current.releaseId -ceq 'bronze-2026-08-27-r53' -and
+    [string]$technicalReleaseLedger.current.visibleRelease -ceq 'Bronze 27.08.2026.53' -and
+    [int]$technicalReleaseLedger.current.monthlySequence -eq 53 -and
+    [string]$technicalReleaseLedger.current.status -ceq 'IN_PROGRESS' -and
+    [string]$technicalReleaseLedger.current.parentRelease -ceq 'Bronze 27.08.2026.52' -and
+    [string]$technicalConsumerLedgerEntries[0].parentRelease -ceq 'Bronze 27.08.2026.52') 'Live release ledger Bronze 53 consumer authority exact degil.'
+  Assert-True ([string]$technicalPredecessorPreparationReceipt.lifecycleAuthority.targetStatus -ceq 'REJECTED_INSTALLER_VISUAL_UAT_FAIL' -and
+    $technicalPredecessorPreparationReceipt.lifecycleAuthority.targetCountsAsDeliveryPass -eq $false -and
+    $technicalPredecessorPreparationReceipt.lifecycleAuthority.immutablePackageHistoryRewritten -eq $false -and
+    [string]$technicalPredecessorPreparationReceipt.lifecycleAuthority.technicalPredecessorUse -ceq 'SILENT_INSTALL_ONLY_NO_APPLICATION_LAUNCH_WITH_BEFORE_AFTER_DATA_AND_RUNTIME_READBACK' -and
+    [string]$technicalPredecessorPreparationReceipt.lifecycleAuthority.rejectedCheckpoint -ceq 'a5334c13') 'Technical predecessor lifecycle authority exact rejected Bronze 52 kaydiyla bagli degil.'
+
+  Assert-BindingEqual $technicalPredecessorPreparationReceipt.installedSourceBundle.bundle $technicalInstalledBundleBinding 'Technical predecessor immutable Bronze 51 bundle'
+  Assert-BindingEqual $technicalPredecessorPreparationReceipt.targetPackageBundle.bundle $previousPackageBinding 'Technical predecessor immutable Bronze 52 bundle'
+  Assert-True ([string]$technicalPredecessorPreparationReceipt.installedSourceBundle.release -ceq 'Bronze 26.08.2026.51' -and
+    [string]$technicalPredecessorPreparationReceipt.installedSourceBundle.releaseId -ceq 'bronze-2026-08-26-r51' -and
+    [string]$technicalPredecessorPreparationReceipt.installedSourceBundle.packageVersion -ceq '26.8.2026-51' -and
+    [string]$technicalPredecessorPreparationReceipt.targetPackageBundle.release -ceq 'Bronze 27.08.2026.52' -and
+    [string]$technicalPredecessorPreparationReceipt.targetPackageBundle.releaseId -ceq 'bronze-2026-08-27-r52' -and
+    [string]$technicalPredecessorPreparationReceipt.targetPackageBundle.packageVersion -ceq '27.8.2026-52' -and
+    [string]$technicalPredecessorPreparationReceipt.targetPackageBundle.sourceCommit -ceq [string]$verifiedPreviousPackage.sourceCommit) 'Technical predecessor immutable .51/.52 bundle kimligi exact degil.'
+  Assert-True ([string]$technicalPredecessorPreparationReceipt.targetPackageBundle.previousPackageProvenance.release -ceq 'Bronze 26.08.2026.51' -and
+    [string]$technicalPredecessorPreparationReceipt.targetPackageBundle.previousPackageProvenance.releaseId -ceq 'bronze-2026-08-26-r51' -and
+    [string]$technicalPredecessorPreparationReceipt.targetPackageBundle.previousPackageProvenance.sha256 -ceq [string]$technicalPredecessorPreparationReceipt.installedSourceBundle.bundle.sha256 -and
+    [long]$technicalPredecessorPreparationReceipt.targetPackageBundle.previousPackageProvenance.sizeBytes -eq [long]$technicalPredecessorPreparationReceipt.installedSourceBundle.bundle.sizeBytes -and
+    [string]$technicalPredecessorPreparationReceipt.targetPackageBundle.previousPackageProvenance.sourceCommit -ceq [string]$technicalPredecessorPreparationReceipt.installedSourceBundle.sourceCommit -and
+    [string]$technicalPredecessorPreparationReceipt.targetPackageBundle.previousPackageProvenance.producer.sha256 -ceq [string]$technicalPredecessorPreparationReceipt.installedSourceBundle.producer.sha256) 'Technical predecessor Bronze 52 bundle exact immutable Bronze 51 parentine bagli degil.'
+  Assert-True ([string]$technicalPredecessorPreparationReceipt.installedBefore.fileVersion -ceq '26.8.2026-51' -and
+    [string]$technicalPredecessorPreparationReceipt.installedBefore.sha256 -ceq [string]$technicalPredecessorPreparationReceipt.installedSourceBundle.packagedRuntime.sha256 -and
+    [long]$technicalPredecessorPreparationReceipt.installedBefore.sizeBytes -eq [long]$technicalPredecessorPreparationReceipt.installedSourceBundle.packagedRuntime.sizeBytes -and
+    [string]$technicalPredecessorPreparationReceipt.installedAfter.fileVersion -ceq '27.8.2026-52' -and
+    [string]$technicalPredecessorPreparationReceipt.installedAfter.sha256 -ceq [string]$verifiedPreviousPackage.packagedRuntime.sha256 -and
+    [long]$technicalPredecessorPreparationReceipt.installedAfter.sizeBytes -eq [long]$verifiedPreviousPackage.packagedRuntime.sizeBytes -and
+    [string]$technicalPredecessorPreparationReceipt.installedAfter.sha256 -ceq [string]$installedBeforeIdentity.sha256 -and
+    [long]$technicalPredecessorPreparationReceipt.installedAfter.sizeBytes -eq [long]$installedBeforeIdentity.sizeBytes -and
+    [string]$technicalPredecessorPreparationReceipt.installedAfter.productVersion -ceq [string]$installedBeforeIdentity.productVersion -and
+    [string]$technicalPredecessorPreparationReceipt.installedAfter.authenticodeStatus -ceq [string]$installedBeforeIdentity.authenticodeStatus) 'Technical predecessor installedBefore/After handoff canli .52 runtime ile exact degil.'
+  Assert-True ([string]$technicalPredecessorPreparationReceipt.installer.sha256 -ceq [string]$technicalPredecessorPreparationReceipt.targetPackageBundle.installer.sha256 -and
+    [long]$technicalPredecessorPreparationReceipt.installer.sizeBytes -eq [long]$technicalPredecessorPreparationReceipt.targetPackageBundle.installer.sizeBytes -and
+    [string]$technicalPredecessorPreparationReceipt.packagedRuntime.sha256 -ceq [string]$technicalPredecessorPreparationReceipt.targetPackageBundle.packagedRuntime.sha256 -and
+    [long]$technicalPredecessorPreparationReceipt.packagedRuntime.sizeBytes -eq [long]$technicalPredecessorPreparationReceipt.targetPackageBundle.packagedRuntime.sizeBytes) 'Technical predecessor .52 installer/runtime bundle bagi exact degil.'
+  Assert-True ($technicalPredecessorPreparationReceipt.preservation.allUserDataContentEqualityPreserved -eq $true -and
+    $technicalPredecessorPreparationReceipt.preservation.bronzeUserDataPreserved -eq $true -and
+    $technicalPredecessorPreparationReceipt.preservation.silverUserDataPreserved -eq $true -and
+    $technicalPredecessorPreparationReceipt.preservation.goldUserDataPreserved -eq $true -and
+    $technicalPredecessorPreparationReceipt.preservation.legacyUserDataPreserved -eq $true -and
+    $technicalPredecessorPreparationReceipt.preservation.silverGoldLegacyProgramMetadataPreserved -eq $true -and
+    $technicalPredecessorPreparationReceipt.preservation.silverGoldLegacyRegistryMetadataPreserved -eq $true -and
+    [int]$technicalPredecessorPreparationReceipt.preservation.otherChannelWriteCount -eq 0 -and
+    $technicalPredecessorPreparationReceipt.syntheticMarker.preservedDuringInstall -eq $true -and
+    [string]$technicalPredecessorPreparationReceipt.syntheticMarker.cleanupStatus -ceq 'DELETED_AND_ABSENCE_READBACK_PASS') 'Technical predecessor veri/kanal koruma kaniti exact PASS degil.'
+  Assert-True ([string]$technicalPredecessorPreparationReceipt.knownRejectedInstallerExperience.targetStatus -ceq 'REJECTED_INSTALLER_VISUAL_UAT_FAIL' -and
+    [string]$technicalPredecessorPreparationReceipt.knownRejectedInstallerExperience.checkpoint -ceq 'a5334c13' -and
+    $technicalPredecessorPreparationReceipt.knownRejectedInstallerExperience.interactiveUiWasNotUsed -eq $true -and
+    $technicalPredecessorPreparationReceipt.knownRejectedInstallerExperience.acceptanceOrDeliveryClaim -eq $false) 'Technical predecessor bilinen rejected Bronze 52 siniri exact degil.'
+  Assert-True ([string]$technicalPredecessorPreparationReceipt.handoff.expectedConsumerReleaseId -ceq 'bronze-2026-08-27-r53' -and
+    $technicalPredecessorPreparationReceipt.handoff.installedRuntimeReadyForExactNormalUat110Readback -eq $true -and
+    $technicalPredecessorPreparationReceipt.handoff.doesNotReplaceInstallerExperienceUat -eq $true -and
+    $technicalPredecessorPreparationReceipt.handoff.doesNotReplaceInstalledReleaseUat110 -eq $true -and
+    $technicalPredecessorPreparationReceipt.handoff.doesNotReplaceInstalledFrontendUat111 -eq $true -and
+    $technicalPredecessorPreparationReceipt.handoff.doesNotReplaceFinalDeliveryReceipt -eq $true) 'Technical predecessor Bronze 53 handoff siniri exact degil.'
+}
+
 if (-not (Test-Path -LiteralPath $EvidenceCategoryParent)) { [IO.Directory]::CreateDirectory($EvidenceCategoryParent) | Out-Null }
 Assert-NoReparseChain $EvidenceCategoryParent
 [IO.Directory]::CreateDirectory($RunRoot) | Out-Null
@@ -524,6 +712,26 @@ try {
     Assert-True ($verifiedPreviousPackage.packagedRuntime.sha256 -eq $installedBeforeReadback.sha256 -and [long]$verifiedPreviousPackage.packagedRuntime.sizeBytes -eq $installedBeforeReadback.sizeBytes) 'Installed N runtime son geri-okumasi immutable previous package ile uyusmuyor.'
     $installedBeforeIdentity = $installedBeforeReadback
   }
+  if ($requiresTechnicalPredecessorPreparation) {
+    $technicalPredecessorImmediateBinding = Get-FileBinding $TechnicalPredecessorPreparation 'TechnicalPredecessorPreparation immediate readback'
+    $technicalPredecessorProducerImmediateBinding = Get-FileBinding $TechnicalPredecessorProducerPath 'technical predecessor producer immediate readback'
+    $technicalPredecessorReleaseLedgerImmediateBinding = Get-FileBinding $ReleaseLedgerPath 'release ledger immediate readback'
+    Assert-BindingEqual $technicalPredecessorPreparationBinding $technicalPredecessorImmediateBinding 'Technical predecessor preparation immediate readback'
+    $technicalPredecessorImmediateReceipt = Read-JsonFile $TechnicalPredecessorPreparation 'TechnicalPredecessorPreparation immediate readback'
+    Assert-True (($technicalPredecessorImmediateReceipt | ConvertTo-Json -Depth 100 -Compress) -ceq
+      ($technicalPredecessorPreparationReceipt | ConvertTo-Json -Depth 100 -Compress)) 'Technical predecessor preparation receipt installer baslamadan once degisti.'
+    Assert-BindingEqual $technicalPredecessorProducerBinding $technicalPredecessorProducerImmediateBinding 'Technical predecessor producer immediate readback'
+    Assert-BindingEqual $technicalPredecessorReleaseLedgerBinding $technicalPredecessorReleaseLedgerImmediateBinding 'Technical predecessor release ledger immediate readback'
+    Assert-True ([string]$technicalPredecessorPreparationReceipt.installedAfter.sha256 -ceq [string]$installedBeforeReadback.sha256 -and
+      [long]$technicalPredecessorPreparationReceipt.installedAfter.sizeBytes -eq [long]$installedBeforeReadback.sizeBytes -and
+      [string]$technicalPredecessorPreparationReceipt.installedAfter.fileVersion -ceq [string]$installedBeforeReadback.fileVersion) 'Technical predecessor .52 handoff installer baslamadan hemen onceki canli runtime ile exact degil.'
+    $technicalPredecessorImmediateReadback = [ordered]@{
+      receipt = $technicalPredecessorImmediateBinding
+      producer = $technicalPredecessorProducerImmediateBinding
+      releaseLedger = $technicalPredecessorReleaseLedgerImmediateBinding
+      installedHandoff = $installedBeforeReadback
+    }
+  }
   $primaryProcess = Invoke-InstallerPhase $primaryClassification
   $installedAfterPrimary = Get-FileIdentity $InstalledExePath
   Assert-True ($installedAfterPrimary.sha256 -eq $packagedIdentity.sha256 -and $installedAfterPrimary.sizeBytes -eq $packagedIdentity.sizeBytes -and $installedAfterPrimary.fileVersion -eq $packagedIdentity.fileVersion) 'Ilk kurulum/yukseltme sonrasi installed EXE packaged EXE ile exact degil.'
@@ -554,6 +762,28 @@ foreach ($channel in @('bronze', 'silver', 'gold', 'legacy')) { Assert-ManifestE
 Assert-True (-not (Test-Path -LiteralPath $markerPath)) 'Sentetik marker cleanup absence readback FAIL.'
 $runCompletedAt = [DateTimeOffset]::UtcNow
 
+if ($requiresTechnicalPredecessorPreparation) {
+  $technicalPredecessorFinalBinding = Get-FileBinding $TechnicalPredecessorPreparation 'TechnicalPredecessorPreparation final readback'
+  $technicalPredecessorProducerFinalBinding = Get-FileBinding $TechnicalPredecessorProducerPath 'technical predecessor producer final readback'
+  $technicalPredecessorReleaseLedgerFinalBinding = Get-FileBinding $ReleaseLedgerPath 'release ledger final readback'
+  Assert-BindingEqual $technicalPredecessorPreparationBinding $technicalPredecessorFinalBinding 'Technical predecessor preparation final readback'
+  Assert-BindingEqual $technicalPredecessorProducerBinding $technicalPredecessorProducerFinalBinding 'Technical predecessor producer final readback'
+  Assert-BindingEqual $technicalPredecessorReleaseLedgerBinding $technicalPredecessorReleaseLedgerFinalBinding 'Technical predecessor release ledger final readback'
+  $technicalPredecessorReadback = [ordered]@{
+    status = 'PASS'
+    immediate = $technicalPredecessorImmediateReadback
+    final = [ordered]@{
+      receipt = $technicalPredecessorFinalBinding
+      producer = $technicalPredecessorProducerFinalBinding
+      releaseLedger = $technicalPredecessorReleaseLedgerFinalBinding
+    }
+    installedHandoff = $technicalPredecessorPreparationReceipt.installedAfter
+    consumerReleaseId = [string]$technicalPredecessorPreparationReceipt.consumerReleaseId
+    verifiedImmediatelyBeforeInstaller = $true
+    verifiedAfterInstallationPhases = $true
+  }
+}
+
 $installationMode = if ($isGovernedBootstrap) { 'BOOTSTRAP_FRESH_INSTALL' } elseif ($isRecoveryBootstrap) { 'RECOVERY_BOOTSTRAP_FRESH_INSTALL' } else { 'CONTINUATION_N_TO_N_PLUS_ONE' }
 $primaryInstallationReceipt = [ordered]@{
   classification = $primaryProcess.classification; status = 'PASS'
@@ -583,6 +813,7 @@ $installationReceipt = [ordered]@{
   sourceCommit = [string]$verifiedPackage.sourceCommit; governedSourceFingerprintSha256 = [string]$verifiedPackage.governedSourceFingerprintSha256; canonicalRuleRegistrySha256 = [string]$verifiedPackage.canonicalRuleRegistrySha256
   producer = $producerIdentity; installer = $installerIdentity; packagedRuntime = $packagedIdentity; installedBefore = $installedBeforeIdentity
   packageProvenance = $packageBinding; governedPreflight = $preflightBinding; installerExperience = $installerExperienceBinding; previousPackageProvenance = $previousPackageBinding
+  technicalPredecessorPreparation = $technicalPredecessorPreparationBinding; technicalPredecessorReadback = $technicalPredecessorReadback
   recoveryBootstrapAuthority = if ($isRecoveryBootstrap) { $package.previousPackageProvenance.recoveryBootstrap } else { $null }
   syntheticMarker = [ordered]@{ sizeBytes = $markerIdentity.sizeBytes; sha256 = $markerIdentity.sha256; kind = $markerIdentity.kind; cleanupStatus = 'DELETED_AND_ABSENCE_READBACK_PASS' }
   privacyBoundary = [ordered]@{ existingUserFileContentsHashedForEquality = $true; existingUserFileContentsRecorded = $false; existingUserFileNamesRecorded = $false; receiptContainsUserContent = $false; contentEqualityMeasured = $true }

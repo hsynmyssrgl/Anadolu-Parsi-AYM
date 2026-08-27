@@ -93,7 +93,7 @@ describe('resmî aylık derleme sürümü', () => {
     const current = {
       channel: 'Bronze', date: '2026-08-26', displayDate: '26.08.2026', monthlySequence: 51,
       version: '26.08.2026.51', visibleRelease: 'Bronze 26.08.2026.51', packageVersion: '26.8.2026-51',
-      releaseId: 'bronze-2026-08-26-r51', status: 'IN_PROGRESS'
+      releaseId: 'bronze-2026-08-26-r51', parentRelease: 'Bronze 22.08.2026.50', status: 'IN_PROGRESS'
     };
     const input = {
       expectedReleaseId: current.releaseId,
@@ -117,6 +117,18 @@ describe('resmî aylık derleme sürümü', () => {
     const entryDrift = structuredClone(input);
     entryDrift.ledger.entries[0].status = 'COMPLETED';
     expect(() => assertPreallocatedReleaseIdentity(entryDrift)).toThrow(/current\/entry/u);
+
+    const parentDrift = structuredClone(input);
+    parentDrift.ledger.entries[0].parentRelease = 'Bronze 22.08.2026.49';
+    expect(() => assertPreallocatedReleaseIdentity(parentDrift)).toThrow(/parentRelease.*current\/entry/u);
+
+    const missingCurrentParent = structuredClone(input);
+    Reflect.deleteProperty(missingCurrentParent.ledger.current, 'parentRelease');
+    expect(() => assertPreallocatedReleaseIdentity(missingCurrentParent)).toThrow(/parentRelease.*current\/entry/u);
+
+    const missingHistoryParent = structuredClone(input);
+    Reflect.deleteProperty(missingHistoryParent.ledger.entries[0], 'parentRelease');
+    expect(() => assertPreallocatedReleaseIdentity(missingHistoryParent)).toThrow(/parentRelease.*current\/entry/u);
 
     const rejected = structuredClone(input);
     rejected.ledger.current.status = 'REJECTED_INVALID_PACKAGE';
@@ -145,6 +157,7 @@ describe('resmî aylık derleme sürümü', () => {
   it('allocator stale predecessor digestini tasimaz ve tum aktif surum tasiyicilarini gunceller', () => {
     const allocator = readFileSync('scripts/allocate-monthly-release-version.mjs', 'utf8');
     expect(allocator).toContain('parentSourceSha256: null');
+    expect(allocator).toContain('parentRelease: release.parentRelease');
     expect(allocator).toContain("'docs/current/12_KALAN_IS_SINIFLANDIRMA.md'");
     expect(allocator).toContain('^- Kaynak urun surumu:');
   });

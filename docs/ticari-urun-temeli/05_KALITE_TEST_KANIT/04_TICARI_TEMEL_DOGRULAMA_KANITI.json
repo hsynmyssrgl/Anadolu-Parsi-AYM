@@ -6,7 +6,7 @@
   "documentSetVersion": "1.8.0-belge.20260824.1",
   "canonicalRuleRegistry": "PPT-CANONICAL-RULE-REGISTRY-V29",
   "canonicalRuleCount": 241,
-  "canonicalRuleSha256": "103e269ab67eed8423a03b726d00bc36616660ca2f0f3c65eea3491103640936",
+  "canonicalRuleSha256": "473ad949db17e76d6c3230fb1ac11e2a022ba744b69d8225c5a5a7a694c9d82b",
   "decision": "DEC-259",
   "commercialChange": "TICARI-052",
   "decisions": [
@@ -23,12 +23,12 @@
     "PR-241"
   ],
   "mutationWideRecordAndTestClosureVerified": true,
-  "mutationDependencyRegistrySha256": "9bebf79f6c348e7e9131d42eb6024a436a0a3ec36c451b7d0d2c2d03c01f6e0c",
+  "mutationDependencyRegistrySha256": "88c95ceeaa91016698c484e5c69656c0ee5a593cefe21cd2affe0b18b25522be",
   "workItemCount": 61,
   "fileCount": 87,
-  "sourceFileCount": 86,
-  "sourceFingerprintSha256": "c9ec1b56ec7446bce68f5feaa76134e0180b7055727812db320f1a8032cafb66",
-  "checks": 1254,
+  "sourceFileCount": 85,
+  "sourceFingerprintSha256": "ad6b9b009345a828cba96afea1001199353a2abed8af1d560ff818f511fae82c",
+  "checks": 1265,
   "status": "PASS",
   "commercialReleaseEligible": false,
   "externalEvidenceDefaultsToNotRun": true,
@@ -36,13 +36,13 @@
   "fileInventory": [
     {
       "path": "00_OKU_BENI.md",
-      "bytes": 9044,
-      "sha256": "50ad81608146e2d73f3188e8b73ea6a68c0cc0ccba21ac929d303fe52a0ceaee"
+      "bytes": 9326,
+      "sha256": "98dcdacd9231f50e580407b8cacd74812e899c48af1c65de24b347c8e5480110"
     },
     {
       "path": "00_TEMEL_SURUM_MANIFESTOSU.json",
       "bytes": 1196,
-      "sha256": "4657871c6cb15d7d30188a0b352c358002001307e47fd361c2fc673a9a468313"
+      "sha256": "d0bb0c7b7b73a5fa5223e2adb78ea382345049137f9623dfe2b0277b0b5234ea"
     },
     {
       "path": "01_YONETIM/01_ASILAMAZ_KURALLAR.md",
@@ -61,13 +61,13 @@
     },
     {
       "path": "01_YONETIM/04_AKTIF_KURAL_SICILI.json",
-      "bytes": 9935,
-      "sha256": "5e3a9e9b2cb8fd8d328f3524e465238f62eaad6b0f8fab2ff90b82118a15870b"
+      "bytes": 9997,
+      "sha256": "2db59afebdc8473f770789f47bb34e1c915b0e4aa758e1ecca5cf132d3aab453"
     },
     {
       "path": "01_YONETIM/05_DEGISIKLIK_SICILI.json",
-      "bytes": 65594,
-      "sha256": "c8b940824dcbb0129f2bb18899a6781b164fb9dc568bc395bc84cea0a4c80212"
+      "bytes": 67730,
+      "sha256": "fe51cb3e517938b071af79d00f76e1e444f82ff920794f2f999bfab0505caae6"
     },
     {
       "path": "01_YONETIM/06_RISK_SICILI.md",
@@ -133,11 +133,6 @@
       "path": "05_KALITE_TEST_KANIT/02_KANIT_VE_IZLENEBILIRLIK_SISTEMI.md",
       "bytes": 1126,
       "sha256": "cf6b96461c2aabf08e9b305a0466356262418bb26a75847de9c6637d6ff3fad1"
-    },
-    {
-      "path": "05_KALITE_TEST_KANIT/03_KANIT_SICILI.json",
-      "bytes": 26232,
-      "sha256": "2b4d2def7f95ae9be49964a311e81f66f0daa7a112a2b5e0d2578a13067028af"
     },
     {
       "path": "05_KALITE_TEST_KANIT/05_GIT_YEDEK_DOGRULAMA_KANITI.json",
@@ -416,8 +411,8 @@
     },
     {
       "path": "08_IS_LISTESI/01_ANA_IS_LISTESI.md",
-      "bytes": 24770,
-      "sha256": "0309765359adf0a1037f2ad03bd70ab9a6d0c5689c5759bcedf49a2f3c7c0549"
+      "bytes": 24769,
+      "sha256": "ea69567f4793c98f4cdebbd587ba99ebb35a060a93a204510759ddc68d434b3e"
     },
     {
       "path": "08_IS_LISTESI/02_DIS_KAYNAK_GEREKTIREN_ISLER.md",
@@ -426,8 +421,8 @@
     },
     {
       "path": "08_IS_LISTESI/03_ANA_IS_SICILI.json",
-      "bytes": 33709,
-      "sha256": "93d3e172ecfd004f70344c529f03dee587986195b2e0f196d7cdb3f01203546f"
+      "bytes": 34838,
+      "sha256": "4fc4136f2210a16ba9421cad15adbce352853042e777f72103ad8d244b423226"
     },
     {
       "path": "08_IS_LISTESI/04_IS_YURUTME_SIRASI.md",
@@ -461,9 +456,9 @@
     },
     {
       "path": "11_OTOMASYON/dogrula-ticari-temel-alani.mjs",
-      "bytes": 31089,
-      "sha256": "19beb12b2a1e88945677633821e901a28f189d4e79db802bd4140d088b305cd2"
+      "bytes": 42787,
+      "sha256": "ef54e690be67af98a939336f6ea7ce3ed2768508d3c1008171a151770559faa1"
     }
   ],
-  "generatedAt": "2026-08-27T04:32:59.076Z"
+  "generatedAt": "2026-08-27T12:15:08.514Z"
 }

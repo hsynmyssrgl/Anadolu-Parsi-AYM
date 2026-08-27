@@ -232,6 +232,12 @@ public static class ParsYuvaInstallerNativeCapture {
   [DllImport("user32.dll", SetLastError = true)]
   [return: MarshalAs(UnmanagedType.Bool)]
   public static extern bool PrintWindow(System.IntPtr hwnd, System.IntPtr hdcBlt, uint flags);
+  [DllImport("user32.dll", SetLastError = true)]
+  [return: MarshalAs(UnmanagedType.Bool)]
+  public static extern bool RedrawWindow(System.IntPtr hwnd, System.IntPtr updateRect, System.IntPtr updateRegion, uint flags);
+  [DllImport("user32.dll", SetLastError = true)]
+  [return: MarshalAs(UnmanagedType.Bool)]
+  public static extern bool UpdateWindow(System.IntPtr hwnd);
 }
 '@
 
@@ -521,44 +527,189 @@ function Save-InstallerScreenshot {
   if ($width -lt 320 -or $height -lt 240 -or $width -gt 4096 -or $height -gt 4096) {
     throw "Installer window bounds are unsafe for capture: ${width}x${height}."
   }
-  $visibleNamesBefore = @(Get-VisibleElementNames -Window $Window)
-  $visibleTitlesBefore = @($AllSlideTitles | Where-Object { $visibleNamesBefore -contains $_ })
-  if ($visibleTitlesBefore.Count -ne 1 -or $visibleTitlesBefore[0] -ne $ExpectedTitle) {
-    throw "Installer slide identity changed before target-only capture: $ExpectedTitle"
-  }
   $nativeWindowHandle = [int]$Window.Current.NativeWindowHandle
   if ($nativeWindowHandle -eq 0) { throw 'Installer window has no native handle for target-only capture.' }
   $path = Join-Path $evidenceFullPath $FileName
-  $bitmap = [System.Drawing.Bitmap]::new($width, $height)
-  $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
-  $deviceContext = [System.IntPtr]::Zero
-  try {
-    $deviceContext = $graphics.GetHdc()
-    if (-not [ParsYuvaInstallerNativeCapture]::PrintWindow([System.IntPtr]::new($nativeWindowHandle), $deviceContext, 2)) {
-      throw 'PrintWindow failed; target-only installer evidence was not captured.'
-    }
-    $graphics.ReleaseHdc($deviceContext)
+  $printWindowFlags = [uint32]2
+  $redrawFlags = [uint32]0x0185 # RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN | RDW_UPDATENOW
+  $captureAttempts = 0
+  $captured = $false
+  $lastVisualFailure = 'capture was not attempted'
+  $visibleTitlesBefore = @()
+  $visibleTitlesAfter = @()
+  $contentContrastPixelCount = 0
+  $contentOccupiedRows = 0
+  $contentOccupiedColumns = 0
+  $backgroundSampleCount = 0
+  $contentDarkPixelCount = 0
+  $contentDarkOccupiedRows = 0
+  $contentDarkOccupiedColumns = 0
+  $contentRegion = $null
+  while (-not $captured -and $captureAttempts -lt 3) {
+    $captureAttempts += 1
+    $bitmap = $null
+    $graphics = $null
     $deviceContext = [System.IntPtr]::Zero
-    $sampleColors = [System.Collections.Generic.HashSet[int]]::new()
-    $sampleStepX = [System.Math]::Max(1, [int]($width / 12))
-    $sampleStepY = [System.Math]::Max(1, [int]($height / 10))
-    for ($x = 0; $x -lt $width; $x += $sampleStepX) {
-      for ($y = 0; $y -lt $height; $y += $sampleStepY) {
-        [void]$sampleColors.Add($bitmap.GetPixel($x, $y).ToArgb())
+    try {
+      Assert-EvidenceRunGuard -Guard $evidenceGuard -RunRoot $evidenceFullPath -Boundary $validationRoot
+      Assert-NoReparseAncestors -Candidate $path -Boundary $evidenceFullPath
+      if (-not [ParsYuvaInstallerNativeCapture]::RedrawWindow(
+          [System.IntPtr]::new($nativeWindowHandle), [System.IntPtr]::Zero, [System.IntPtr]::Zero, $redrawFlags)) {
+        throw 'Installer window and child controls could not be redrawn before target-only capture.'
       }
+      [void][ParsYuvaInstallerNativeCapture]::UpdateWindow([System.IntPtr]::new($nativeWindowHandle))
+      Start-Sleep -Milliseconds 120
+
+      $visibleNamesBefore = @(Get-VisibleElementNames -Window $Window)
+      $visibleTitlesBefore = @($AllSlideTitles | Where-Object { $visibleNamesBefore -contains $_ })
+      if ($visibleTitlesBefore.Count -ne 1 -or $visibleTitlesBefore[0] -ne $ExpectedTitle) {
+        throw "Installer slide identity changed during redraw stabilization: $ExpectedTitle"
+      }
+      $titleCondition = [System.Windows.Automation.PropertyCondition]::new(
+        [System.Windows.Automation.AutomationElement]::NameProperty,
+        $ExpectedTitle
+      )
+      $visibleTitleElements = @($Window.FindAll([System.Windows.Automation.TreeScope]::Descendants, $titleCondition) | Where-Object {
+        try { -not $_.Current.IsOffscreen } catch { $false }
+      })
+      if ($visibleTitleElements.Count -ne 1) {
+        throw "Installer expected title does not resolve to one visible UIA element: $ExpectedTitle"
+      }
+      $titleBounds = $visibleTitleElements[0].Current.BoundingRectangle
+      $regionLeft = [int][System.Math]::Max(0, [System.Math]::Floor($titleBounds.Left - $bounds.Left - 8))
+      $regionTop = [int][System.Math]::Max(0, [System.Math]::Floor($titleBounds.Top - $bounds.Top - 6))
+      $regionRight = [int][System.Math]::Min($width, [System.Math]::Ceiling($titleBounds.Right - $bounds.Left + 8))
+      $regionBottom = [int][System.Math]::Min($height, [System.Math]::Ceiling($titleBounds.Bottom - $bounds.Top + 6))
+      if ($regionRight - $regionLeft -lt 24 -or $regionBottom - $regionTop -lt 12) {
+        throw "Installer expected title has an unsafe visual content region: $ExpectedTitle"
+      }
+      $contentRegion = [ordered]@{
+        left = $regionLeft
+        top = $regionTop
+        width = $regionRight - $regionLeft
+        height = $regionBottom - $regionTop
+      }
+
+      $bitmap = [System.Drawing.Bitmap]::new($width, $height)
+      $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
+      $deviceContext = $graphics.GetHdc()
+      if (-not [ParsYuvaInstallerNativeCapture]::PrintWindow(
+          [System.IntPtr]::new($nativeWindowHandle), $deviceContext, $printWindowFlags)) {
+        throw 'PrintWindow failed; target-only installer evidence was not captured.'
+      }
+      $graphics.ReleaseHdc($deviceContext)
+      $deviceContext = [System.IntPtr]::Zero
+
+      $sampleColors = [System.Collections.Generic.HashSet[int]]::new()
+      $sampleStepX = [System.Math]::Max(1, [int]($width / 12))
+      $sampleStepY = [System.Math]::Max(1, [int]($height / 10))
+      for ($x = 0; $x -lt $width; $x += $sampleStepX) {
+        for ($y = 0; $y -lt $height; $y += $sampleStepY) {
+          [void]$sampleColors.Add($bitmap.GetPixel($x, $y).ToArgb())
+        }
+      }
+      if ($sampleColors.Count -lt 4) { throw 'PrintWindow returned a blank or single-color installer capture.' }
+
+      $sampleLeft = $regionLeft
+      $sampleCenterX = [int][System.Math]::Floor(($regionLeft + $regionRight - 1) / 2)
+      $sampleRight = $regionRight - 1
+      $sampleTop = $regionTop
+      $sampleCenterY = [int][System.Math]::Floor(($regionTop + $regionBottom - 1) / 2)
+      $sampleBottom = $regionBottom - 1
+      $backgroundSamplePoints = @(
+        [ordered]@{ x = $sampleLeft; y = $sampleTop },
+        [ordered]@{ x = $sampleCenterX; y = $sampleTop },
+        [ordered]@{ x = $sampleRight; y = $sampleTop },
+        [ordered]@{ x = $sampleLeft; y = $sampleCenterY },
+        [ordered]@{ x = $sampleRight; y = $sampleCenterY },
+        [ordered]@{ x = $sampleLeft; y = $sampleBottom },
+        [ordered]@{ x = $sampleCenterX; y = $sampleBottom },
+        [ordered]@{ x = $sampleRight; y = $sampleBottom }
+      )
+      $backgroundReds = [System.Collections.Generic.List[int]]::new()
+      $backgroundGreens = [System.Collections.Generic.List[int]]::new()
+      $backgroundBlues = [System.Collections.Generic.List[int]]::new()
+      foreach ($samplePoint in $backgroundSamplePoints) {
+        $sampleColor = $bitmap.GetPixel([int]$samplePoint.x, [int]$samplePoint.y)
+        $backgroundReds.Add([int]$sampleColor.R)
+        $backgroundGreens.Add([int]$sampleColor.G)
+        $backgroundBlues.Add([int]$sampleColor.B)
+      }
+      $backgroundSampleCount = $backgroundSamplePoints.Count
+      $medianIndex = [int][System.Math]::Floor($backgroundSampleCount / 2)
+      $sortedReds = @($backgroundReds | Sort-Object)
+      $sortedGreens = @($backgroundGreens | Sort-Object)
+      $sortedBlues = @($backgroundBlues | Sort-Object)
+      $backgroundColor = [System.Drawing.Color]::FromArgb(
+        [int]$sortedReds[$medianIndex],
+        [int]$sortedGreens[$medianIndex],
+        [int]$sortedBlues[$medianIndex]
+      )
+      $occupiedRows = [System.Collections.Generic.HashSet[int]]::new()
+      $occupiedColumns = [System.Collections.Generic.HashSet[int]]::new()
+      $darkOccupiedRows = [System.Collections.Generic.HashSet[int]]::new()
+      $darkOccupiedColumns = [System.Collections.Generic.HashSet[int]]::new()
+      $contentContrastPixelCount = 0
+      $contentDarkPixelCount = 0
+      for ($x = $regionLeft; $x -lt $regionRight; $x += 1) {
+        for ($y = $regionTop; $y -lt $regionBottom; $y += 1) {
+          $pixel = $bitmap.GetPixel($x, $y)
+          $distance = [System.Math]::Abs([int]$pixel.R - [int]$backgroundColor.R) +
+            [System.Math]::Abs([int]$pixel.G - [int]$backgroundColor.G) +
+            [System.Math]::Abs([int]$pixel.B - [int]$backgroundColor.B)
+          if ($distance -ge 60) {
+            $contentContrastPixelCount += 1
+            [void]$occupiedRows.Add($y)
+            [void]$occupiedColumns.Add($x)
+          }
+          $luminance = [int][System.Math]::Round(
+            (([int]$pixel.R * 299) + ([int]$pixel.G * 587) + ([int]$pixel.B * 114)) / 1000
+          )
+          if ($luminance -le 160) {
+            $contentDarkPixelCount += 1
+            [void]$darkOccupiedRows.Add($y)
+            [void]$darkOccupiedColumns.Add($x)
+          }
+        }
+      }
+      $contentOccupiedRows = $occupiedRows.Count
+      $contentOccupiedColumns = $occupiedColumns.Count
+      $contentDarkOccupiedRows = $darkOccupiedRows.Count
+      $contentDarkOccupiedColumns = $darkOccupiedColumns.Count
+      if ($backgroundSampleCount -ne 8 -or
+          $contentContrastPixelCount -lt 40 -or $contentOccupiedRows -lt 6 -or $contentOccupiedColumns -lt 12 -or
+          $contentDarkPixelCount -lt 40 -or $contentDarkOccupiedRows -lt 6 -or $contentDarkOccupiedColumns -lt 12) {
+        throw "PrintWindow title content region is visually blank: $ExpectedTitle / samples=$backgroundSampleCount contrastPixels=$contentContrastPixelCount contrastRows=$contentOccupiedRows contrastColumns=$contentOccupiedColumns darkPixels=$contentDarkPixelCount darkRows=$contentDarkOccupiedRows darkColumns=$contentDarkOccupiedColumns."
+      }
+
+      $visibleNamesAfter = @(Get-VisibleElementNames -Window $Window)
+      $visibleTitlesAfter = @($AllSlideTitles | Where-Object { $visibleNamesAfter -contains $_ })
+      if ($visibleTitlesAfter.Count -ne 1 -or $visibleTitlesAfter[0] -ne $ExpectedTitle) {
+        throw "Installer slide identity changed during target-only capture: $ExpectedTitle"
+      }
+      Assert-EvidenceRunGuard -Guard $evidenceGuard -RunRoot $evidenceFullPath -Boundary $validationRoot
+      Assert-NoReparseAncestors -Candidate $path -Boundary $evidenceFullPath
+      $bitmap.Save($path, [System.Drawing.Imaging.ImageFormat]::Png)
+      $captured = $true
+    } catch {
+      $captureFailure = $_.Exception.Message
+      $lastVisualFailure = $captureFailure
+      try {
+        Assert-EvidenceRunGuard -Guard $evidenceGuard -RunRoot $evidenceFullPath -Boundary $validationRoot
+        Assert-NoReparseAncestors -Candidate $path -Boundary $evidenceFullPath
+      } catch {
+        throw "Installer evidence guard changed; capture cleanup was skipped. Original capture failure: $captureFailure"
+      }
+      Remove-Item -LiteralPath $path -Force -ErrorAction SilentlyContinue
+    } finally {
+      if ($deviceContext -ne [System.IntPtr]::Zero -and $null -ne $graphics) { $graphics.ReleaseHdc($deviceContext) }
+      if ($null -ne $graphics) { $graphics.Dispose() }
+      if ($null -ne $bitmap) { $bitmap.Dispose() }
     }
-    if ($sampleColors.Count -lt 4) { throw 'PrintWindow returned a blank or single-color installer capture.' }
-    $bitmap.Save($path, [System.Drawing.Imaging.ImageFormat]::Png)
-  } finally {
-    if ($deviceContext -ne [System.IntPtr]::Zero) { $graphics.ReleaseHdc($deviceContext) }
-    $graphics.Dispose()
-    $bitmap.Dispose()
+    if (-not $captured) { Start-Sleep -Milliseconds 120 }
   }
-  $visibleNamesAfter = @(Get-VisibleElementNames -Window $Window)
-  $visibleTitlesAfter = @($AllSlideTitles | Where-Object { $visibleNamesAfter -contains $_ })
-  if ($visibleTitlesAfter.Count -ne 1 -or $visibleTitlesAfter[0] -ne $ExpectedTitle) {
-    Remove-Item -LiteralPath $path -Force -ErrorAction SilentlyContinue
-    throw "Installer slide identity changed during target-only capture: $ExpectedTitle"
+  if (-not $captured) {
+    throw "Installer visual content verification exhausted 3 capture attempts: $ExpectedTitle / $lastVisualFailure"
   }
   $file = Get-Item -LiteralPath $path
   $record = [ordered]@{
@@ -570,6 +721,17 @@ function Save-InstallerScreenshot {
     expectedTitle = $ExpectedTitle
     titleBeforeCapture = $visibleTitlesBefore[0]
     titleAfterCapture = $visibleTitlesAfter[0]
+    captureAttempts = $captureAttempts
+    printWindowFlags = $printWindowFlags
+    contentRegion = $contentRegion
+    backgroundSampleCount = $backgroundSampleCount
+    contentContrastPixelCount = $contentContrastPixelCount
+    contentOccupiedRows = $contentOccupiedRows
+    contentOccupiedColumns = $contentOccupiedColumns
+    contentDarkPixelCount = $contentDarkPixelCount
+    contentDarkOccupiedRows = $contentDarkOccupiedRows
+    contentDarkOccupiedColumns = $contentDarkOccupiedColumns
+    visualContentStatus = 'PASS'
     nativeWindowHandle = $nativeWindowHandle
     processIdentityKey = $windowProcessIdentity.IdentityKey
     captureMode = 'PRINT_WINDOW_TARGET_ONLY'
@@ -788,11 +950,22 @@ if ($forcedCleanup) {
 
 $allSlidesPresent = $slides.Count -eq 3
 $noFakeProgress = $allSlidesPresent -and @($slides | Where-Object { $_.visibleProgressBarCount -ne 0 }).Count -eq 0
+$visualContentVerified = $screenshots.Count -eq 3 -and @($screenshots | Where-Object {
+  $_.visualContentStatus -ne 'PASS' -or
+  [int]$_.backgroundSampleCount -ne 8 -or
+  [int]$_.contentContrastPixelCount -lt 40 -or
+  [int]$_.contentOccupiedRows -lt 6 -or
+  [int]$_.contentOccupiedColumns -lt 12 -or
+  [int]$_.contentDarkPixelCount -lt 40 -or
+  [int]$_.contentDarkOccupiedRows -lt 6 -or
+  [int]$_.contentDarkOccupiedColumns -lt 12
+}).Count -eq 0
 $status = if (
   $errors.Count -eq 0 -and
   $allSlidesPresent -and
   $noFakeProgress -and
   $screenshots.Count -eq 3 -and
+  $visualContentVerified -and
   $narration.observed -and
   $narration.language -eq $expectedNarrationLanguage -and
   $cancelRequested -and
@@ -843,6 +1016,7 @@ $report = [ordered]@{
     title = if ($null -ne $installerWindow) { try { $installerWindow.Current.Name } catch { $null } } else { $null }
     slideCount = $slides.Count
     noFakeProgress = $noFakeProgress
+    visualContentVerified = $visualContentVerified
     slides = @($slides)
   }
   narration = $narration

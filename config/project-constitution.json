@@ -1,7 +1,7 @@
 {
   "schemaVersion": 3,
   "id": "PPT-PROJECT-CONSTITUTION-V13",
-  "effectiveRelease": "Bronze 27.08.2026.52",
+  "effectiveRelease": "Bronze 27.08.2026.53",
   "projectStartDate": "2026-07-20",
   "applicationName": "ParsYuva Aile Yaşam Merkezi",
   "exceptionless": true,
@@ -92,8 +92,15 @@
   "windowsInstalledReleaseUatSequence51InstalledPredecessorForbidden": true,
   "windowsInstalledReleaseUatSequence51CleanInstallRootExeUninstallAbsenceRequired": true,
   "windowsInstalledReleaseUatSequence52PlusExactUpgradeAndMaintenanceRequired": true,
+  "windowsRejected52TechnicalPredecessorPreparationRequiredFor53": true,
+  "windowsRejected52TechnicalPredecessorPreparationSchemaVersion": 1,
+  "windowsRejected52TechnicalPredecessorPreparationIsDeliveryOrAcceptancePass": false,
+  "windowsRejected52TechnicalPredecessorPreparationApplicationLaunchForbidden": true,
+  "windowsRejected52TechnicalPredecessorPreparationDataAndChannelInvarianceRequired": true,
+  "windowsRejected52TechnicalPredecessorPreparationUat110AndFinalBindingRequired": true,
   "windowsInstalledReleaseUatMetadataOnlyUserDataInspection": true,
   "windowsInstalledReleaseUatCanonicalReceipts": [
+    "windows-technical-predecessor-preparation.json",
     "windows-installer-experience-uat.json",
     "windows-installed-release-uat110.json",
     "installed-frontend-user-uat111.json"
@@ -112,7 +119,7 @@
   "windowsNativeDialogCancelAndAcceptEvidenceRequired": true,
   "windowsEvidenceExclusiveNonReparseRunRootRequired": true,
   "windowsEvidenceGuardLossForbidsPathCleanup": true,
-  "canonicalRulesSha256": "103e269ab67eed8423a03b726d00bc36616660ca2f0f3c65eea3491103640936",
+  "canonicalRulesSha256": "473ad949db17e76d6c3230fb1ac11e2a022ba744b69d8225c5a5a7a694c9d82b",
   "activeGovernanceLedger": "config/active-governance-ledger.json",
   "deliveryReportContract": "config/delivery-report-contract.json",
   "documentInventoryPolicy": "config/document-inventory-policy.json",

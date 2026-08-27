@@ -8,7 +8,7 @@
   "anaKuralSayisi": 241,
   "aktifKuralSayisi": 216,
   "degistirilmisKuralSayisi": 25,
-  "anaKuralSha256": "103e269ab67eed8423a03b726d00bc36616660ca2f0f3c65eea3491103640936",
+  "anaKuralSha256": "473ad949db17e76d6c3230fb1ac11e2a022ba744b69d8225c5a5a7a694c9d82b",
   "yurutmeKapisi": "../06_KOD/app/scripts/run-governed-preflight.mjs",
   "temelAlanDogrulamaKapisi": "11_OTOMASYON/dogrula-ticari-temel-alani.mjs",
   "kurallar": [
@@ -176,8 +176,8 @@
     },
     {
       "id": "TK-019",
-      "baslik": "Bronze 51 rejected predecessor recovery bootstrap",
-      "metin": "Bronze 50 immutable REJECTED_INVALID_PACKAGE paket ve external history olarak korunur, trusted installed runtime sayilmaz. Yalniz Bronze 51 current ve exact tek entry statusu birbirine esit IN_PROGRESS oldugunda acilir; immutable parent bundle transaction oncesi kanonik path size SHA-256 rejected-parent identity ve archived receipt bagi canli okunur. Rejected parent package provenance bundle REJECTED_PARENT_HISTORY_ANCHOR_ONLY olarak kullanilir; installed predecessor girdisi reddedilir, temiz program koku EXE ve uninstall yoklugu kanitlanir, recovery fresh-install ve ayri same-version maintenance calistirilir. Sequence 52 ve sonrasi normal exact continuation uygular; tum test ve UAT kapilari zorunludur.",
+      "baslik": "Bronze 51 recovery ve rejected Bronze 52 teknik predecessor kapisi",
+      "metin": "Bronze 50 immutable REJECTED_INVALID_PACKAGE paket ve external history olarak korunur, trusted installed runtime sayilmaz. Yalniz Bronze 51 current ve exact tek entry statusu birbirine esit IN_PROGRESS oldugunda recovery fresh-install ve ayri same-version maintenance acilir. Bronze 52 REJECTED_INSTALLER_VISUAL_UAT_FAIL ise Bronze 53 oncesinde yalniz no-launch silent teknik predecessor hazirligi yapilabilir; bu teslim veya PASS degildir. Kanonik receipt canli .51, immutable .51/.52 bundle, .52 installer/runtime, AppData ve diger kanal/legacy sinirlarini once-sonra exact kanitlar; UAT110 ve final teslim receipt path size SHA-256 producer ve canli .52 bagini zorunlu okur. Diger sequence 52+ normal exact continuation ve tum test/UAT kapilari degismez.",
       "durum": "ACTIVE",
       "kaynak": "PR-241 ve DEC-276",
       "yurutme": "FAIL_CLOSED",

@@ -90,6 +90,10 @@ export const assertPreallocatedReleaseIdentity = ({
   if (typeof current.status !== 'string' || current.status.trim() === '' || matchingEntries[0].status !== current.status) {
     throw new Error('Güncel sürüm lifecycle durumu kanonik current/entry arasında exact eşleşmiyor.');
   }
+  if (typeof current.parentRelease !== 'string' || current.parentRelease.trim() === ''
+    || matchingEntries[0].parentRelease !== current.parentRelease) {
+    throw new Error('Güncel sürüm parentRelease değeri kanonik current/entry arasında exact eşleşmiyor.');
+  }
   if (current.releaseId === 'bronze-2026-08-26-r51'
     && (current.status !== 'IN_PROGRESS' || current.status.startsWith('REJECTED'))) {
     throw new Error('Bronze sequence-51 recovery lifecycle durumu paketleme için izinli değildir.');

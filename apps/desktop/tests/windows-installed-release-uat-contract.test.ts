@@ -36,7 +36,7 @@ describe('Windows installed release UAT contract', () => {
       'EvidenceRoot',
       'ExpectedReleaseId'
     ]) expect(source).toContain(`[Parameter(Mandatory = $true)][ValidateNotNullOrEmpty()][string]$${parameter}`);
-    for (const parameter of ['PreviousInstalledExePath', 'PreviousPackageProvenance']) {
+    for (const parameter of ['PreviousInstalledExePath', 'PreviousPackageProvenance', 'TechnicalPredecessorPreparation']) {
       expect(source).toContain(`[Parameter()][AllowEmptyString()][string]$${parameter} = ''`);
     }
     expect(source).toContain("$package.releaseId -ceq $ExpectedReleaseId");
@@ -66,6 +66,14 @@ describe('Windows installed release UAT contract', () => {
     }
     expect(source).not.toContain('[string]$packagedIdentity.fileVersion -eq [string]$package.packageVersion');
     expect(source).not.toContain('[string]$installerIdentity.fileVersion -eq [string]$package.packageVersion');
+    expect(source).toContain('$installerExperience.window.visualContentVerified -eq $true');
+    expect(source).toContain("$_.visualContentStatus -ne 'PASS'");
+    expect(source).toContain('Test-NonNegativeSafeInteger $_.contentRegion.left');
+    expect(source).toContain('([long]$_.contentRegion.left + [long]$_.contentRegion.width) -gt [long]$_.width');
+    expect(source).toContain('Test-NonNegativeSafeInteger $_.backgroundSampleCount');
+    expect(source).toContain('[long]$_.backgroundSampleCount -ne 8');
+    expect(source).toContain('Test-NonNegativeSafeInteger $_.contentContrastPixelCount');
+    expect(source).toContain('Test-NonNegativeSafeInteger $_.contentDarkPixelCount');
   });
 
   it('uses the exact category parent plus a generated UUID run root, holds its guard and atomically reads receipts back', async () => {
@@ -128,6 +136,58 @@ describe('Windows installed release UAT contract', () => {
     expect(source.indexOf('Bronze fresh-install bootstrap oncesinde kanonik install root tamamen yok olmalidir.')).toBeLessThan(
       source.indexOf('$primaryProcess = Invoke-InstallerPhase $primaryClassification'),
     );
+  });
+
+  it('requires the canonical UUID-v4 technical predecessor preparation only for exact Bronze 27.08.2026.53 and verifies it before installer start', async () => {
+    const source = await readFile(producerUrl, 'utf8');
+    const firstInstallerStart = source.indexOf('$primaryProcess = Invoke-InstallerPhase $primaryClassification');
+    const failClosedMarkers = [
+      "$requiresTechnicalPredecessorPreparation = [string]$package.release -ceq 'Bronze 27.08.2026.53'",
+      "[string]$package.releaseId -ceq 'bronze-2026-08-27-r53'",
+      "[string]$package.packageVersion -ceq '27.8.2026-53'",
+      'Bronze 53 exact teknik predecessor preparation makbuzu zorunludur.',
+      'TechnicalPredecessorPreparation yalniz exact Bronze 27.08.2026.53/r53 icin kabul edilir.',
+      'artifacts\\validation\\windows-technical-predecessor-preparation',
+      "[guid]::TryParseExact($technicalPredecessorRunId, 'D', [ref]$technicalPredecessorParsedRunId)",
+      "$technicalPredecessorRunId -cmatch '^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'",
+      "Join-Path $technicalPredecessorRunRoot 'windows-technical-predecessor-preparation.json'",
+      'PPT-WINDOWS-TECHNICAL-PREDECESSOR-PREPARATION-V1',
+      'WINDOWS_TECHNICAL_PREDECESSOR_PREPARATION',
+      "'Bronze 26.08.2026.51'",
+      "'bronze-2026-08-26-r51'",
+      "'Bronze 27.08.2026.52'",
+      "'bronze-2026-08-27-r52'",
+      "'Bronze 27.08.2026.53'",
+      "'bronze-2026-08-27-r53'",
+      'current source exact Bronze 53 package source ile bagli degil.',
+      'Technical predecessor immutable .51/.52 bundle kimligi exact degil.',
+      'Technical predecessor installedBefore/After handoff canli .52 runtime ile exact degil.',
+      '[IO.Path]::IsPathRooted([string]$technicalPredecessorPreparationReceipt.producer.path)',
+      '[IO.Path]::IsPathRooted([string]$technicalPredecessorPreparationReceipt.lifecycleAuthority.releaseLedger.path)',
+      'REJECTED_INSTALLER_VISUAL_UAT_FAIL',
+      'SILENT_INSTALL_ONLY_NO_APPLICATION_LAUNCH_WITH_BEFORE_AFTER_DATA_AND_RUNTIME_READBACK',
+      'a5334c13',
+      'Technical predecessor veri/kanal koruma kaniti exact PASS degil.',
+      'Technical predecessor Bronze 53 handoff siniri exact degil.',
+      'Technical predecessor .52 handoff installer baslamadan hemen onceki canli runtime ile exact degil.',
+    ];
+    expect(firstInstallerStart).toBeGreaterThan(-1);
+    for (const marker of failClosedMarkers) {
+      expect(source).toContain(marker);
+      expect(source.indexOf(marker)).toBeLessThan(firstInstallerStart);
+    }
+    expect(source).toContain("technicalPredecessorPreparation = $technicalPredecessorPreparationBinding");
+    expect(source).toContain('technicalPredecessorReadback = $technicalPredecessorReadback');
+    expect(source).toContain('immediate = $technicalPredecessorImmediateReadback');
+    expect(source).toContain('final = [ordered]@{');
+    expect(source).toContain('receipt = $technicalPredecessorImmediateBinding');
+    expect(source).toContain('installedHandoff = $installedBeforeReadback');
+    expect(source).toContain("receipt = $technicalPredecessorFinalBinding");
+    expect(source).toContain("producer = $technicalPredecessorProducerFinalBinding");
+    expect(source).toContain("releaseLedger = $technicalPredecessorReleaseLedgerFinalBinding");
+    expect(source).toContain('verifiedImmediatelyBeforeInstaller = $true');
+    expect(source).toContain('verifiedAfterInstallationPhases = $true');
+    expect(source).not.toContain('$requiresTechnicalPredecessorPreparation = $newSequence -eq 53');
   });
 
   it('accepts only the canonical parent history bundle and delegates all trust checks to the JS verifier before install', async () => {
