@@ -17,7 +17,7 @@
   "currentBoundary": {
     "productionSourceZones": 18,
     "scannedFiles": 590,
-    "sourceInventorySha256": "f54e3f302649af67ed6d028e66673eea68b0d58c2ba43c912c1ccb7534babe98",
+    "sourceInventorySha256": "e1aa60de704e1791e8edd83bfeeebb94e41747801931f429ea19b15be247f2a3",
     "maliciousSelfTests": 7,
     "findings": 0,
     "authorizedAdapterCount": 2,
@@ -38,8 +38,8 @@
     "changeImpactValidation": {
       "date": "2026-08-27",
       "requirement": "PR-235",
-      "status": "UPDATED_AFTER_8EA2DFE1_FULL_REGRESSION_RATCHET_REJECTION",
-      "fullBoundaryContractRuntimeChain": "f4f84896 TARGETED 19 FILES/191 TESTS PASS; FULL 399 FILES/2483 TESTS PASS PLUS 1 PPK-015 RATCHET FAIL",
+      "status": "UPDATED_AFTER_2EEAAC0B_TARGETED_RATCHET_REJECTION_AND_FOCUSED_PASS",
+      "fullBoundaryContractRuntimeChain": "5FA1E559 TARGETED 23 FILES/233 TESTS PASS PLUS 1 PPK-015 RATCHET FAIL; FIXED RATCHET FOCUSED 2 FILES/23 TESTS CONTRACT 43/43 RUNTIME 10/10 PASS; PREVIOUS F4F84896 FULL 399 FILES/2483 TESTS PASS PLUS 8EA2DFE1 RATCHET FAIL PRESERVED",
       "networkAuthorityChanged": false,
       "externalEvidenceClosed": false
     }

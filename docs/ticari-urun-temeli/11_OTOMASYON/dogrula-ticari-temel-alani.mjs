@@ -409,6 +409,8 @@ check(commercialChange52?.durum === 'ACTIVE'
   && String(commercialChange52?.isListesiEtkisi ?? '').includes('24e6bd71 ile korunmustur')
   && String(commercialChange52?.isListesiEtkisi ?? '').includes('18 bolge/590 dosya/0 bulgu/2 adapter/3 amac')
   && String(commercialChange52?.isListesiEtkisi ?? '').includes('f54e3f302649af67ed6d028e66673eea68b0d58c2ba43c912c1ccb7534babe98')
+  && String(commercialChange52?.ppk015SecondRatchetImpact ?? '').includes('2eeaac0b ile korunur')
+  && String(commercialChange52?.ppk015SecondRatchetImpact ?? '').includes('e1aa60de704e1791e8edd83bfeeebb94e41747801931f429ea19b15be247f2a3')
   && String(commercialChange52?.isListesiEtkisi ?? '').includes('ag yetkisi degismemistir')
   && String(commercialChange52?.kaynak ?? '').includes('77a87a87')
   && String(commercialChange52?.kaynak ?? '').includes('4462706a')

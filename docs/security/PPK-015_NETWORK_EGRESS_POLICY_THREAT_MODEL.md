@@ -48,7 +48,7 @@ PR-235 kapsamında güncel kullanıcı dili ve renderer sözleşmesi bu tehdit m
 
 ## 27.08.2026 Bronze 52 kaynak ratchet doğrulaması
 
-Uninstall registry kimliği ve kurulu uygulama UAT kaynakları güncellendikten sonra canlı PPK-015 taraması 18 bölge, 590 dosya, sıfır bulgu, 2 yetkili adapter, 3 amaç ve 4 yalnız-yerel taşıma dosyası bulmuştur. Yalnız kaynak envanter özeti `f54e3f302649af67ed6d028e66673eea68b0d58c2ba43c912c1ccb7534babe98` değerine değişmiş; yetkili adapter/purpose özeti değişmemiştir. `f4f84896` tam regresyonundaki eski özet eşliği gerçek FAIL olmuş ve `8ea2dfe1` ile korunmuştur. Bu kayıt yeni endpoint, adapter, amaç, ağ istisnası, gerçek istek, veri aktarımı veya cutover yetkisi açmaz.
+Uninstall registry kimliği, kurulu uygulama UAT ve hedefli kanıt üreticisi kaynakları güncellendikten sonra canlı PPK-015 taraması 18 bölge, 590 dosya, sıfır bulgu, 2 yetkili adapter, 3 amaç ve 4 yalnız-yerel taşıma dosyası bulmuştur. Yalnız kaynak envanter özeti `e1aa60de704e1791e8edd83bfeeebb94e41747801931f429ea19b15be247f2a3` değerine değişmiş; yetkili adapter/purpose özeti değişmemiştir. `f4f84896` tam regresyonundaki `f54e3f302649af67ed6d028e66673eea68b0d58c2ba43c912c1ccb7534babe98` eski özet eşliği `8ea2dfe1`, `5fa1e559` hedefli turundaki yeni özet eşliği ise `2eeaac0b` ile korunmuştur. Bu kayıt yeni endpoint, adapter, amaç, ağ istisnası, gerçek istek, veri aktarımı veya cutover yetkisi açmaz.
 
 İlk contract retryındaki tarihsel `migration 117` exact ayırıcı kaybı 43 kontrolde 1 FAIL vermiş ve `24e6bd71` ile korunmuştur. Ayırıcı geri yazılır; bu metin düzeltmesi canlı ağ sınırını veya yetkiyi değiştirmez.
 

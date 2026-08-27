@@ -1588,6 +1588,8 @@ ASCII karakter bileşimi düzeltmesi sonrası iki sözleşme dosyasında 18/18 t
 
 Ana kaynak ve Bronze/Silver/Gold `f4f84896` commitinde exact temiz eşitlik, read-only governed preflight ve 88 yol/19 hedef test etki zinciri PASS vermiştir. Hedefli tur 19 dosya/191 test PASS'tir. Filtresiz turda 399 dosya/2.483 test PASS olurken yalnız PPK-015 kaynak envanter SHA ratchet'i eski kalmış ve gerçek FAIL `8ea2dfe1` ile korunmuştur. Canlı tarama 18 bölge/590 dosya/0 bulgu/2 adapter/3 amaç/4 yalnız-yerel taşıma dosyası bulur; yetkili adapter/purpose özeti değişmez, yalnız üretim kaynak özeti `f54e3f302649af67ed6d028e66673eea68b0d58c2ba43c912c1ccb7534babe98` olur. Ağ yetkisi genişlemez; ratchet ve bağımlı kayıtlar güncellenip bütün exact kapılar yeniden çalıştırılır.
 
+`5fa1e559` exact etki zinciri 121 yol/23 hedef test hesaplamış; hedefli turda 23 dosya/233 test PASS iken yalnız PPK-015 güncel üretim kaynak özeti eski kalmış ve gerçek FAIL `2eeaac0b` ile korunmuştur. Canlı tarama yine 18 bölge/590 dosya/0 bulgu/2 adapter/3 amaç/4 yalnız-yerel taşıma dosyasıdır; yetkili envanter özeti değişmez, yeni üretim kaynak özeti `e1aa60de704e1791e8edd83bfeeebb94e41747801931f429ea19b15be247f2a3` olur. Ağ yetkisi genişlemez; yeni exact zincir zorunludur.
+
 İlk PPK-015 contract retryı güncel latest migration 121 ifadesi korunurken zorunlu exact küçük harfli `migration 117` tarihsel ayırıcısının kaybolduğunu 43 kontrolde 1 gerçek FAIL olarak bulmuş ve `24e6bd71` ile korumuştur. Ayırıcı geri kurulur; canlı sınır ve ağ yetkisi değişmez, taze exact zincir gerekir.
 
 Ayırıcı düzeltmesi sonrası contract 43/43, runtime 10/10, iki odaklı test dosyası 23/23 ve ticari temel 1.254 kontrol PASS'tir. Bu odaklı PASS yeni exact commit ve teslim zinciri yerine geçmez.
