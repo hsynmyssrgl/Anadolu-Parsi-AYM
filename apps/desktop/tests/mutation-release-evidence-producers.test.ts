@@ -89,7 +89,8 @@ describe('PR-235 canonical mutation evidence producers', () => {
     expect(packageProvenance.match(/expectedSourceCommit:/gu)).toHaveLength(2);
     expect(packageProvenance.match(/expectedBaselineCommit:/gu)).toHaveLength(2);
     expect(testRunner).toContain('spawnSync(process.execPath');
-    expect(testRunner).toContain('validateTargetedTestFiles(requested)');
+    expect(testRunner).toContain('const requestedTargetFiles = requested.length > 0 ? requested : dependencyPlan.affectedVitestFiles;');
+    expect(testRunner).toContain('validateTargetedTestFiles(requestedTargetFiles)');
     expect(testRunner).toContain('Targeted Vitest files must exactly equal the affected files derived from changed paths.');
     expect(testRunner).toContain("id: 'rootTypecheck'");
     expect(testRunner).toContain('changedMjsSyntax:');

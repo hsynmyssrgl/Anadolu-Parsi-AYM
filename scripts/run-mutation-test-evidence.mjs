@@ -28,7 +28,8 @@ const dependencyAssessment = createDependencyAssessmentContract({ plan: dependen
 if (JSON.stringify(impactAnalysisBinding.value.dependencyPlan) !== JSON.stringify(dependencyAssessment)) {
   throw new Error('Impact analysis dependency plan does not match the live change-impact registry.');
 }
-const targetFiles = kind === 'targeted' ? validateTargetedTestFiles(requested) : [];
+const requestedTargetFiles = requested.length > 0 ? requested : dependencyPlan.affectedVitestFiles;
+const targetFiles = kind === 'targeted' ? validateTargetedTestFiles(requestedTargetFiles) : [];
 if (kind === 'targeted'
   && JSON.stringify(targetFiles) !== JSON.stringify(dependencyPlan.affectedVitestFiles)) {
   throw new Error('Targeted Vitest files must exactly equal the affected files derived from changed paths.');

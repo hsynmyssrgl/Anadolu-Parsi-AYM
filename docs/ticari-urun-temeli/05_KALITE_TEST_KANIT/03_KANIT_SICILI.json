@@ -19,8 +19,8 @@
       "kapsam": "Ticari temel belge alani",
       "durum": "PASS",
       "kaynak": "05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json",
-      "sha256": "753bbc0ab3f5e0c9e203aa98370f6a43f3fc58d7c638d05adf7dd2a6338f8bb2",
-      "uretimZamani": "2026-08-27T12:28:25.139Z",
+      "sha256": "c68f6c3acf424c18598d2aaadd193d92a76c781c8876a7686561260e0942ba06",
+      "uretimZamani": "2026-08-27T13:04:45.877Z",
       "disKaynak": false,
       "not": "Guncel ticari temel dogrulama makbuzu bu kaydin SHA-256 bagi ile ayni validator calismasinda PASS olarak yenilendi."
     },
