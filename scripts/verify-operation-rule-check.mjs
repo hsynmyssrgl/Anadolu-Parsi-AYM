@@ -97,6 +97,14 @@ const exactUniversalDependentRecords = ['SHA256SUMS.txt', 'artifacts/manifests/P
   'docs/ticari-urun-temeli/08_IS_LISTESI/03_ANA_IS_SICILI.json', 'manifest.json'];
 const exactUniversalAffectedVitestFiles = ['apps/desktop/tests/mutation-release-evidence-producers.test.ts',
   'apps/desktop/tests/mutation-release-readiness-contract.test.ts', 'apps/desktop/tests/operation-rule-check-policy.test.ts'];
+const exactTypecheckNoWriteProducers = ['scripts/verify-product-surface-governance.mjs',
+  'scripts/verify-desktop-security-boundary.mjs', 'scripts/verify-sensitive-data-consent-boundary.mjs',
+  'scripts/verify-b4-banking-foundation-boundary.mjs', 'scripts/verify-b4-payment-card-management-boundary.mjs',
+  'scripts/verify-b4-loan-management-boundary.mjs', 'scripts/verify-b4-finance-planning-portfolio-analytics-boundary.mjs',
+  'scripts/verify-b4-controlled-import-open-banking-boundary.mjs', 'scripts/verify-33-m-accessibility-boundary.mjs',
+  'scripts/verify-33-n-draft-async-state-ux-boundary.mjs'];
+const rootPackage = await readJson('package.json');
+const typecheckNoWriteProducerSources = await Promise.all(exactTypecheckNoWriteProducers.map((path) => readFile(path, 'utf8')));
 const exactDec275Documents = ['AGENTS.md', 'SHA256SUMS.txt', 'config/active-governance-ledger.json',
   'config/canonical-rule-registry.json', 'config/change-impact-dependency-registry.json',
   'config/mutation-release-readiness-policy.json', 'config/rule-acknowledgement.json',
@@ -120,6 +128,14 @@ check(exactIds(adrIds, /^ADR-\d{3}$/u)
   'ADR dosya kimlikleri tekil değil veya dosya adı ile başlık uyuşmuyor.');
 check(JSON.stringify(adrNumbers) === JSON.stringify(expectedAdrNumbers),
   'ADR dosya numaraları ADR-001 ile en yüksek ADR arasında kesintisiz değil.');
+check(['pretypecheck', 'prebuild'].every((lifecycle) => exactTypecheckNoWriteProducers.every((path) =>
+  String(rootPackage.scripts?.[lifecycle] ?? '').includes(`node ${path} --no-write`))),
+  'TypeScript/build lifecycle no-write aktarimi on exact producer icin eksik.');
+check(typecheckNoWriteProducerSources.every((source) => source.includes("const cliArguments = process.argv.slice(2);")
+  && source.includes("cliArguments.length > 1 || cliArguments.some((argument) => argument !== '--no-write')")
+  && source.includes("const noWrite = process.argv.includes('--no-write');")
+  && source.includes('if (!noWrite)')),
+  'TypeScript/build producer strict no-write CLI veya write guard eksik.');
 check(referencedMasterAdrIds.every((id) => adrIds.includes(id)),
   'Ana karar sicili, karşılık gelen kaynak ADR dosyası olmayan bağlayıcı bir ADR kimliği içeriyor.');
 check(exactIds(decisionFileIds, /^DEC-\d{3}$/u)

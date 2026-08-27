@@ -181,6 +181,26 @@ describe('PR-235 canonical mutation evidence producers', () => {
       expect(source).not.toMatch(/npmArgs\(\['run','verify:(?:migrations|data-store-smoke|ppk021:runtime|ppk022:runtime|ppk015:egress:runtime)'\]\)/u);
     }
     for (const path of [
+      'scripts/verify-product-surface-governance.mjs',
+      'scripts/verify-desktop-security-boundary.mjs',
+      'scripts/verify-sensitive-data-consent-boundary.mjs',
+      'scripts/verify-b4-banking-foundation-boundary.mjs',
+      'scripts/verify-b4-payment-card-management-boundary.mjs',
+      'scripts/verify-b4-loan-management-boundary.mjs',
+      'scripts/verify-b4-finance-planning-portfolio-analytics-boundary.mjs',
+      'scripts/verify-b4-controlled-import-open-banking-boundary.mjs',
+      'scripts/verify-33-m-accessibility-boundary.mjs',
+      'scripts/verify-33-n-draft-async-state-ux-boundary.mjs'
+    ]) {
+      const source = await readFile(path, 'utf8');
+      expect(pkg.scripts.pretypecheck).toContain(`node ${path} --no-write`);
+      expect(pkg.scripts.prebuild).toContain(`node ${path} --no-write`);
+      expect(source).toContain('const cliArguments = process.argv.slice(2);');
+      expect(source).toContain("cliArguments.length > 1 || cliArguments.some((argument) => argument !== '--no-write')");
+      expect(source).toContain("process.argv.includes('--no-write')");
+      expect(source).toContain('if (!noWrite)');
+    }
+    for (const path of [
       'scripts/verify-33-y-local-first-smart-home-energy-runtime.mjs',
       'scripts/verify-33-z-signed-plugin-external-provider-platform-runtime.mjs',
       'scripts/verify-34-a-communication-policy-mls-foundation-runtime.mjs',

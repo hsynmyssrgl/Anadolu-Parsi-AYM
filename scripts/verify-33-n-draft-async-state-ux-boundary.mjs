@@ -1,6 +1,11 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 
+const cliArguments = process.argv.slice(2);
+if (cliArguments.length > 1 || cliArguments.some((argument) => argument !== '--no-write')) {
+  throw new Error('Unsupported 33-N draft async-state UX boundary argument.');
+}
+const noWrite = process.argv.includes('--no-write');
 const root = resolve(process.cwd());
 const output = 'artifacts/validation/33-N-draft-async-state-ux-boundary.json';
 const requirements = ['B3-02', 'B7-14', 'B7-15'];
@@ -67,7 +72,9 @@ check('B7-15 inventory binds 22 routes to five states and 110 behavior mappings'
 
 const failures = checks.filter((item) => item.status === 'FAIL');
 const report = { schemaVersion: 1, step: '33-N', decision: 'DEC-225', requirements, status: failures.length ? 'FAIL' : 'PASS', checksPassed: checks.length - failures.length, checksFailed: failures.length, checks, generatedAt: new Date().toISOString() };
-await mkdir(dirname(resolve(root, output)), { recursive: true });
-await writeFile(resolve(root, output), `${JSON.stringify(report, null, 2)}\n`, 'utf8');
+if (!noWrite) {
+  await mkdir(dirname(resolve(root, output)), { recursive: true });
+  await writeFile(resolve(root, output), `${JSON.stringify(report, null, 2)}\n`, 'utf8');
+}
 console.log(`33-N draft async-state UX boundary: ${report.status} (${report.checksPassed}/${checks.length}).`);
 if (failures.length) process.exitCode = 1;

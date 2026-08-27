@@ -120,3 +120,5 @@ Ayırıcı düzeltmesi sonrası retry contract 43/43, runtime 10/10, iki odaklı
 PPK-015 ret/retry kayıtlarıyla yeniden üretilen güncel master DOCX 31/31 ve PDF 28/28, toplam 59/59 sayfada görsel QA PASS vermiştir. `.51` predecessor değişmez; Bronze 52 hâlâ paketlenmemiş ve kurulmamıştır.
 
 Bütün bağlar geri kurulduktan sonra ticari temel 1.254 kontrol/87 dosya/61 iş/241 kural PASS vermiştir; exact paket ve canlı UAT hâlâ zorunludur.
+
+`e0f85425` exact Bronze 52 continuation turunda hedefli 21 dosya/214 test, filtresiz 399 dosya/2.484 test ve root TypeScript PASS sonrasında 10 izlenen makbuzun yalnız `generatedAt` alanı değişmiş; source-integrity temiz ağaç kapısı FAIL vermiş ve gerçek ret `77a87a87` ile korunmuştur. Immutable `.51` predecessor PASS kalır; Bronze 52 hâlâ paketlenmemiş ve kurulmamıştır. Strict `--no-write` pretypecheck/prebuild aktarımı 10/10 byte-exact makbuz değişmezliğiyle doğrulanıp bütün exact test, kaynak bütünlüğü, paket ve kurulu UAT zinciri yeniden tamamlanır.

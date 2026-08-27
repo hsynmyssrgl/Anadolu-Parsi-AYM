@@ -151,3 +151,5 @@ Son preflight/paket kapsam kaydı: `af2d15fa` sessiz canlı paket doğrulamasın
 Bu düzeltmenin ana belge QA turunda ilk temas yardımcısı `System.Drawing.Font` overload hatası `3bc57c12` ile korunmuştur. Açık tipli retry 29/29 sayfa temas ve 7–8/27–29 özgün çözünürlük kontrollerinde PASS vermiştir.
 
 Son kanal doğrulayıcı çağrı kaydı: zorunlu `--kind` olmadan yapılan ilk ek çağrı `2ab9cddf` ile korunmuştur. Doğru `--kind build` retry ana kaynak ile Bronze/Silver/Gold'un exact commit, dal, ortak Git deposu ve temiz ağaç eşitliğini PASS vermiştir.
+
+- `DEC-275/DEC-276` exact TypeScript/source-integrity kaydı — `e0f85425` hedefli 21 dosya/214 test, filtresiz 399 dosya/2.484 test ve root TypeScript PASS sonrasında 10 izlenen makbuzda yalnız `generatedAt` drift etmiş; temiz ağaç/source-integrity FAIL'i `77a87a87` ile korunmuştur. Üreticiler strict `--no-write`, pretypecheck/prebuild aktarımı ve fail-closed kural/test bağına alınmıştır. 10/10 byte-exact değişmezlik PASS olsa da yeni exact commit, paket ve kurulu UAT zorunludur.

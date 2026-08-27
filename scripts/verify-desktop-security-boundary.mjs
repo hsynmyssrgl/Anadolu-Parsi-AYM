@@ -1,6 +1,11 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { ELECTRON_FUSE_POLICY } from '../apps/desktop/scripts/electron-fuse-policy.mjs';
 
+const cliArguments = process.argv.slice(2);
+if (cliArguments.length > 1 || cliArguments.some((argument) => argument !== '--no-write')) {
+  throw new Error('Unsupported desktop security boundary argument.');
+}
+const noWrite = process.argv.includes('--no-write');
 const readText = async (path) => readFile(path, 'utf8');
 const readJson = async (path) => JSON.parse(await readText(path));
 const includesAll = (source, markers) => markers.every((marker) => source.includes(marker));
@@ -152,8 +157,10 @@ export const verifyDesktopSecurityBoundary = async () => {
 };
 
 const report = await verifyDesktopSecurityBoundary();
-await mkdir('artifacts/validation', { recursive: true });
-await writeFile('artifacts/validation/32-X-b2-03-b2-04-desktop-security-boundary.json', `${JSON.stringify(report, null, 2)}\n`);
+if (!noWrite) {
+  await mkdir('artifacts/validation', { recursive: true });
+  await writeFile('artifacts/validation/32-X-b2-03-b2-04-desktop-security-boundary.json', `${JSON.stringify(report, null, 2)}\n`);
+}
 console.log(`B2-03/B2-04 desktop security boundary: ${report.status} (${report.checksPassed}/${report.checks.length} checks).`);
 if (report.status !== 'PASS') {
   console.error(report.failures.join('\n'));

@@ -27,6 +27,9 @@ describe('operation rule check policy', () => {
     expect(source).toContain("readFile('docs/10_MASTER_DECISION_REGISTER.md', 'utf8')");
     expect(source).toContain("readJson('docs/ticari-urun-temeli/08_IS_LISTESI/03_ANA_IS_SICILI.json')");
     expect(source).toContain("readJson('docs/ticari-urun-temeli/01_YONETIM/05_DEGISIKLIK_SICILI.json')");
+    expect(source).toContain("const exactTypecheckNoWriteProducers = ['scripts/verify-product-surface-governance.mjs'");
+    expect(source).toContain("['pretypecheck', 'prebuild'].every((lifecycle)");
+    expect(source).toContain("TypeScript/build producer strict no-write CLI veya write guard eksik.");
     expect(source).toContain("exactIds(ruleIds, /^PR-\\d{3}$/u)");
     expect(source).toContain("exactIds(decisionIds, /^DEC-\\d{3}$/u)");
     expect(source).toContain("text.startsWith(`# ${id}`)");

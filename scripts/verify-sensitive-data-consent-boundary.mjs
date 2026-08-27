@@ -2,6 +2,11 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { runPlatformPolicyAstGate } from './verify-platform-policy-ast-gate.mjs';
 import { runPlatformCapabilityManifestGate } from './verify-platform-capability-manifest-gate.mjs';
 
+const cliArguments = process.argv.slice(2);
+if (cliArguments.length > 1 || cliArguments.some((argument) => argument !== '--no-write')) {
+  throw new Error('Unsupported sensitive data consent boundary argument.');
+}
+const noWrite = process.argv.includes('--no-write');
 const readText = async (path) => readFile(path, 'utf8');
 const readJson = async (path) => JSON.parse(await readText(path));
 const includesAll = (source, markers) => markers.every((marker) => source.includes(marker));
@@ -145,8 +150,10 @@ export const verifySensitiveDataConsentBoundary = async () => {
 };
 
 const report = await verifySensitiveDataConsentBoundary();
-await mkdir('artifacts/validation', { recursive: true });
-await writeFile('artifacts/validation/32-Y-b2-05-b6-03-sensitive-data-consent-boundary.json', `${JSON.stringify(report, null, 2)}\n`);
+if (!noWrite) {
+  await mkdir('artifacts/validation', { recursive: true });
+  await writeFile('artifacts/validation/32-Y-b2-05-b6-03-sensitive-data-consent-boundary.json', `${JSON.stringify(report, null, 2)}\n`);
+}
 console.log(`B2-05/B6-03 sensitive data consent boundary: ${report.status} (${report.checksPassed}/${report.checks.length} checks).`);
 if (report.status !== 'PASS') {
   console.error(report.failures.join('\n'));

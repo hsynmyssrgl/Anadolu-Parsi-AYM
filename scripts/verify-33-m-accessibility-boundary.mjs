@@ -1,6 +1,11 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 
+const cliArguments = process.argv.slice(2);
+if (cliArguments.length > 1 || cliArguments.some((argument) => argument !== '--no-write')) {
+  throw new Error('Unsupported 33-M accessibility boundary argument.');
+}
+const noWrite = process.argv.includes('--no-write');
 const root = resolve(process.cwd());
 const output = 'artifacts/validation/33-M-accessibility-boundary.json';
 const sources = {
@@ -57,7 +62,9 @@ check('targeted negative test suite exists', has('test', 'fails closed to bounde
 
 const failures = checks.filter((item) => item.status === 'FAIL');
 const report = { schemaVersion: 1, step: '33-M', decision: 'DEC-224', requirements: Array.from({ length: 13 }, (_, index) => `B7-${String(index + 1).padStart(2, '0')}`), status: failures.length ? 'FAIL' : 'PASS', checksPassed: checks.length - failures.length, checksFailed: failures.length, checks, manualCertification: { windowsNarrator: 'NOT_RUN', windowsMagnifier: 'NOT_RUN', realDevice: 'NOT_RUN', humanUat: 'NOT_RUN', certificationClaimed: false }, generatedAt: new Date().toISOString() };
-await mkdir(dirname(resolve(root, output)), { recursive: true });
-await writeFile(resolve(root, output), `${JSON.stringify(report, null, 2)}\n`, 'utf8');
+if (!noWrite) {
+  await mkdir(dirname(resolve(root, output)), { recursive: true });
+  await writeFile(resolve(root, output), `${JSON.stringify(report, null, 2)}\n`, 'utf8');
+}
 console.log(`33-M accessibility boundary: ${report.status} (${report.checksPassed}/${checks.length}).`);
 if (failures.length) process.exitCode = 1;

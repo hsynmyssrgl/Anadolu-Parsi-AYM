@@ -2,6 +2,11 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { runPlatformPolicyAstGate } from './verify-platform-policy-ast-gate.mjs';
 import { runPlatformCapabilityManifestGate } from './verify-platform-capability-manifest-gate.mjs';
 
+const cliArguments = process.argv.slice(2);
+if (cliArguments.length > 1 || cliArguments.some((argument) => argument !== '--no-write')) {
+  throw new Error('Unsupported B4 banking foundation boundary argument.');
+}
+const noWrite = process.argv.includes('--no-write');
 const text = (path) => readFile(path, 'utf8');
 const json = async (path) => JSON.parse(await text(path));
 const includesAll = (source, markers) => markers.every((marker) => source.includes(marker));
@@ -192,8 +197,10 @@ export const verifyB4BankingFoundationBoundary = async () => {
 };
 
 const report = await verifyB4BankingFoundationBoundary();
-await mkdir('artifacts/validation', { recursive: true });
-await writeFile('artifacts/validation/32-Z-b4-banking-foundation-boundary.json', `${JSON.stringify(report, null, 2)}\n`);
+if (!noWrite) {
+  await mkdir('artifacts/validation', { recursive: true });
+  await writeFile('artifacts/validation/32-Z-b4-banking-foundation-boundary.json', `${JSON.stringify(report, null, 2)}\n`);
+}
 console.log(`B4 banking foundation boundary: ${report.status} (${report.checksPassed}/${report.checks.length} checks).`);
 if (report.status !== 'PASS') {
   console.error(report.failures.join('\n'));
