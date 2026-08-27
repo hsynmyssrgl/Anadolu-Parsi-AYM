@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "requirement": "PPK-015",
   "status": "CURRENT_RATCHET",
-  "recordedAt": "2026-08-26",
+  "recordedAt": "2026-08-27",
   "historicalClosure": {
     "step": "32-K",
     "decisionId": "DEC-196",
@@ -17,7 +17,7 @@
   "currentBoundary": {
     "productionSourceZones": 18,
     "scannedFiles": 590,
-    "sourceInventorySha256": "debfeecf460834f50cf328bff58b2c19ad94ef229610c4c829a35c4331ef235a",
+    "sourceInventorySha256": "f54e3f302649af67ed6d028e66673eea68b0d58c2ba43c912c1ccb7534babe98",
     "maliciousSelfTests": 7,
     "findings": 0,
     "authorizedAdapterCount": 2,
@@ -36,10 +36,11 @@
     "directPrimitiveExceptionCount": 0,
     "latestDatabaseMigration": 121,
     "changeImpactValidation": {
-      "date": "2026-08-26",
+      "date": "2026-08-27",
       "requirement": "PR-235",
-      "status": "UPDATED",
-      "fullBoundaryContractRuntimeChain": "52/52 PASS",
+      "status": "UPDATED_AFTER_8EA2DFE1_FULL_REGRESSION_RATCHET_REJECTION",
+      "fullBoundaryContractRuntimeChain": "f4f84896 TARGETED 19 FILES/191 TESTS PASS; FULL 399 FILES/2483 TESTS PASS PLUS 1 PPK-015 RATCHET FAIL",
+      "networkAuthorityChanged": false,
       "externalEvidenceClosed": false
     }
   },

@@ -1586,4 +1586,12 @@ ASCII karakter bileşimi düzeltmesi sonrası iki sözleşme dosyasında 18/18 t
 
 İkinci TICARI-052 retryı önceki zorunlu üç markerın kayıttan düşmesini FAIL bulmuş ve `61f09ed5` ile korunmuştur. Aktif son rejected checkpoint budur; bütün tarihsel ve güncel bağlar aynı kayıtta geri kurulur.
 
+Ana kaynak ve Bronze/Silver/Gold `f4f84896` commitinde exact temiz eşitlik, read-only governed preflight ve 88 yol/19 hedef test etki zinciri PASS vermiştir. Hedefli tur 19 dosya/191 test PASS'tir. Filtresiz turda 399 dosya/2.483 test PASS olurken yalnız PPK-015 kaynak envanter SHA ratchet'i eski kalmış ve gerçek FAIL `8ea2dfe1` ile korunmuştur. Canlı tarama 18 bölge/590 dosya/0 bulgu/2 adapter/3 amaç/4 yalnız-yerel taşıma dosyası bulur; yetkili adapter/purpose özeti değişmez, yalnız üretim kaynak özeti `f54e3f302649af67ed6d028e66673eea68b0d58c2ba43c912c1ccb7534babe98` olur. Ağ yetkisi genişlemez; ratchet ve bağımlı kayıtlar güncellenip bütün exact kapılar yeniden çalıştırılır.
+
+İlk PPK-015 contract retryı güncel latest migration 121 ifadesi korunurken zorunlu exact küçük harfli `migration 117` tarihsel ayırıcısının kaybolduğunu 43 kontrolde 1 gerçek FAIL olarak bulmuş ve `24e6bd71` ile korumuştur. Ayırıcı geri kurulur; canlı sınır ve ağ yetkisi değişmez, taze exact zincir gerekir.
+
+Ayırıcı düzeltmesi sonrası contract 43/43, runtime 10/10, iki odaklı test dosyası 23/23 ve ticari temel 1.254 kontrol PASS'tir. Bu odaklı PASS yeni exact commit ve teslim zinciri yerine geçmez.
+
+PPK-015 ret/retry kayıtlarıyla yeniden üretilen güncel master DOCX 31/31 ve PDF 28/28, toplam 59/59 sayfada görsel QA PASS'tir. Taşma, örtüşme, kırpılma, token-ortası sarım, font/glyph, tablo, header/footer, marj veya sayfa numarası kusuru yoktur; exact ürün ve kurulu UAT kapıları ayrıca zorunludur.
+
 TICARI-052 bütün bağ retryı 1.254 kontrol/87 dosya/61 iş/241 kural PASS vermiştir; yeni exact ürün, paket ve kurulu UAT kapanışı ayrıca zorunludur.

@@ -21,7 +21,7 @@
 
 | Tehdit | Fail-closed kontrol |
 | --- | --- |
-| Yeni bir üretim modülünden `http`, `https`, `net`, `tls`, `dns`, `fetch`, WebSocket veya üçüncü taraf ağ istemcisiyle çıkış | 18 üretim kaynak alanını typecheck/build öncesi tarayan, 6 kötü niyetli öz-sınamalı statik kapı; sıfır doğrudan primitive istisnası |
+| Yeni bir üretim modülünden `http`, `https`, `net`, `tls`, `dns`, `fetch`, WebSocket veya üçüncü taraf ağ istemcisiyle çıkış | 18 üretim kaynak alanını typecheck/build öncesi tarayan, 7 kötü niyetli öz-sınamalı statik kapı; sıfır doğrudan primitive istisnası |
 | Tek adaptörü use-case/policy katmanını atlayarak çağırma | Adaptör import'u yalnız merkezi use-case dosyasında; use-case import'u yalnız senkronizasyon servisinde kabul edilir |
 | Caller tarafından farklı URL, endpoint, uygulama, amaç veya yöntem seçimi | İstek ile repository kökenli authority bağlamının exact eşleşmesi; yalnız `windows-desktop`, `GET` ve kanonik iptal-listesi amacı |
 | SSRF ile loopback, özel, link-local, ayrılmış veya DNS-rebinding adresine erişim | DNS sonuçlarının ve TLS bağlantısındaki gerçek `remoteAddress` değerinin ayrı ayrı public-only denetimi |
@@ -45,3 +45,11 @@ Bu paket gerçek internete doğrulama verisi göndermemiş, gerçek kullanıcı 
 ## 24.08.2026 değişiklik-etki doğrulaması
 
 PR-235 kapsamında güncel kullanıcı dili ve renderer sözleşmesi bu tehdit modeline yeniden bağlandı; 52/52 sınır-sözleşme-çalışma zamanı zinciri PASS oldu. Sonuç gerçek ağ, dış sağlayıcı veya production kabul kanıtı değildir.
+
+## 27.08.2026 Bronze 52 kaynak ratchet doğrulaması
+
+Uninstall registry kimliği ve kurulu uygulama UAT kaynakları güncellendikten sonra canlı PPK-015 taraması 18 bölge, 590 dosya, sıfır bulgu, 2 yetkili adapter, 3 amaç ve 4 yalnız-yerel taşıma dosyası bulmuştur. Yalnız kaynak envanter özeti `f54e3f302649af67ed6d028e66673eea68b0d58c2ba43c912c1ccb7534babe98` değerine değişmiş; yetkili adapter/purpose özeti değişmemiştir. `f4f84896` tam regresyonundaki eski özet eşliği gerçek FAIL olmuş ve `8ea2dfe1` ile korunmuştur. Bu kayıt yeni endpoint, adapter, amaç, ağ istisnası, gerçek istek, veri aktarımı veya cutover yetkisi açmaz.
+
+İlk contract retryındaki tarihsel `migration 117` exact ayırıcı kaybı 43 kontrolde 1 FAIL vermiş ve `24e6bd71` ile korunmuştur. Ayırıcı geri yazılır; bu metin düzeltmesi canlı ağ sınırını veya yetkiyi değiştirmez.
+
+Retry contract 43/43, runtime 10/10 ve iki odaklı Vitest dosyası 23/23 PASS vermiştir. Gerçek ağ isteği veya veri aktarımı yapılmamıştır.

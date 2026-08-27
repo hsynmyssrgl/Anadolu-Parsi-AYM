@@ -111,4 +111,12 @@ TICARI-052 uninstall sicili exact ifade bağının ilk retryı iki sözcük sır
 
 İkinci TICARI-052 retryı önceki üç zorunlu tarihsel markerın kayıttan düşmesini FAIL bulmuş ve `61f09ed5` ile korunmuştur. Aktif son rejected checkpoint budur; bütün bağlar geri kurulur.
 
+Bronze 52 continuation kaynak kapanışı `f4f84896` exact commitinde ana kaynak ve üç kanal eşitliği, salt-okunur preflight, 88 yol/19 hedef test assessment/analysis ve hedefli 19 dosya/191 test PASS üretmiştir. Filtresiz turda 399 dosya/2.483 test PASS olurken yalnız PPK-015 üretim kaynak özeti ratchet'i eski kalmış; gerçek FAIL `8ea2dfe1` ile korunmuştur. Canlı PPK-015 sınırı 18 bölge/590 dosya/0 bulgu/2 adapter/3 amaç/4 yalnız-yerel taşıma dosyası ve `f54e3f302649af67ed6d028e66673eea68b0d58c2ba43c912c1ccb7534babe98` kaynak özetidir. Ağ yetkisi değişmemiştir. `.51` predecessor kurulumu ve immutable bundle korunur; ratchet ile bütün bağımlı kayıtlar eşlendikten sonra `.52` exact zinciri baştan tamamlanmadan paket veya teslim yoktur.
+
+İlk PPK-015 contract retryı 43 kontrolde 1 FAIL vermiştir; ratchet notundaki son migration 121 gerçeği doğru olmasına rağmen tarihsel exact `migration 117` ayırıcısı kaybolmuştur. Gerçek FAIL `24e6bd71` ile korunur ve aktif son rejected checkpoint budur. Ayırıcı geri kurulur; `.51` predecessor, canlı PPK-015 sınırı ve ağ yetkisi değişmez. Bronze 52 henüz paketlenmemiş veya kurulmamıştır; taze exact test, bütünlük, paket ve kurulu UAT kapanışı zorunludur.
+
+Ayırıcı düzeltmesi sonrası retry contract 43/43, runtime 10/10, iki odaklı test dosyası 23/23 ve ticari temel 1.254 kontrol PASS vermiştir. Bronze 52 hâlâ NOT_BUILT'tir; yeni exact committe kanonik hedefli/tam/bütünlük ve bütün kurulu UAT kapanışı zorunludur.
+
+PPK-015 ret/retry kayıtlarıyla yeniden üretilen güncel master DOCX 31/31 ve PDF 28/28, toplam 59/59 sayfada görsel QA PASS vermiştir. `.51` predecessor değişmez; Bronze 52 hâlâ paketlenmemiş ve kurulmamıştır.
+
 Bütün bağlar geri kurulduktan sonra ticari temel 1.254 kontrol/87 dosya/61 iş/241 kural PASS vermiştir; exact paket ve canlı UAT hâlâ zorunludur.

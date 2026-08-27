@@ -3025,7 +3025,7 @@
       "status": "ACTIVE",
       "source": "Acik kullanici karari: bundan sonra en ufak degisiklik bile her yerde tum kayitlari guncellemeli ve testi yapilmali; kullaniciya aylar surecek eksik test yuku birakilmamali",
       "document": "docs/decisions/DEC-275-mutation-wide-record-and-test-closure.md",
-      "documentSha256": "3a2ed2b96c04d949eed47ec951bca7c6fe15fcd1b9a7c8a05acc4ad53680fe29",
+      "documentSha256": "aca43abf362cdf50b1fc42f29e04f8f1545bd4c38d2edf2c32812671e61d4d27",
       "documents": [
         "AGENTS.md",
         "SHA256SUMS.txt",
@@ -3050,8 +3050,10 @@
         "docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md",
         "manifest.json"
       ],
-      "workListImpact": "IS-0215 DEVAM kalir. d68fd2a4 test başlamadan duran invocation-only checkpointtir. Exact hedefli tur 19 dosyada 189 test PASS ve 1 packageStatus FAIL üretmiş, 3976994d ile korunmuştur. Sonraki uninstall sınıflandırma odaklı turu 2 dosyada 17 test PASS ve 1 Windows PowerShell 5.1 Unicode literal FAIL üretmiş, aktif son ret fb8683dc ile korunmuştur. Bronze 52 exact etki, hedefli/tam regresyon, TypeScript, sozdizimi, kaynak butunlugu, belge QA, paket ve tum kurulu UI UAT kapilari tamamlanmadan kapanis ve ara installer yoktur.",
-      "latestRejectedCheckpoint": "61f09ed5",
+      "workListImpact": "IS-0215 DEVAM kalir. d68fd2a4 test başlamadan duran invocation-only checkpointtir. 3976994d, fb8683dc, a6020cb4, 61f09ed5, 8ea2dfe1 ve 24e6bd71 gerçek retlerdir. f4f84896 exact turunda hedefli 19 dosya/191 test PASS; filtresiz 399 dosya/2.483 test PASS ve yalnız PPK-015 kaynak ratchet eşliği FAIL vermiştir. İlk ratchet contract retryı tarihsel migration 117 exact ayırıcısı nedeniyle 42/43 PASS ve 1 FAIL vermiştir. Bronze 52 exact etki, hedefli/tam regresyon, TypeScript, sözdizimi, kaynak bütünlüğü, belge QA, paket ve tüm kurulu UI UAT kapıları tamamlanmadan kapanış ve ara installer yoktur.",
+      "latestRejectedCheckpoint": "24e6bd71",
+      "ppk015CurrentRatchetImpact": "f4f84896 exact kaynak zinciri 88 değişen yol/19 hedef test hesaplamış; hedefli 19 dosya/191 test PASS ve filtresiz 399 dosya/2.483 test PASS iken yalnız eski current source inventory SHA eşliği FAIL olmuş ve 8ea2dfe1 ile korunmuştur. Canlı sınır 18 bölge/590 dosya/0 bulgu/2 adapter/3 amaç/4 yalnız-yerel taşıma dosyasıdır; yeni kaynak özeti f54e3f302649af67ed6d028e66673eea68b0d58c2ba43c912c1ccb7534babe98, yetkili adapter/purpose özeti değişmezdir. İlk contract retryında exact migration 117 tarihsel ayırıcısının kaybı 24e6bd71 ile korunur. Düzeltme sonrası contract 43/43, runtime 10/10, iki odaklı test dosyası 23/23 ve ticari temel 1.254 kontrol PASS'tir. Ağ yetkisi genişlememiştir; bütün exact zincir yeniden çalıştırılır.",
+      "ppk015DocumentationQaImpact": "PPK-015 ret ve retry kayıtlarıyla yeniden üretilen güncel master DOCX 31/31 ve PDF 28/28, toplam 59/59 sayfada temas ve seçili özgün çözünürlük denetimi PASS vermiştir. Taşma, örtüşme, kırpılma, token-ortası sarım, font/glyph, tablo, header/footer, marj ve sayfa numarası kusuru yoktur; exact ürün/paket/UAT kapıları ayrıca zorunludur.",
       "processInvocationImpact": "Tarihsel çağrı ve belge retleri korunur. 2ca29a6d governed preflight ticari son kayıt driftidir; düzeltme sonrası writer PASS'tir. d68fd2a4, test başlamadan eksik hedef dosya listesiyle duran çağrının invocation-only checkpointidir ve PASS veya gerçek test FAIL'i sayılmaz. Sonraki exact hedefli tur 19 dosyada 189 testi geçirmiş, paket durumunun BLOCKED_/FAIL_ ön eki taşımaması nedeniyle 1 PR-240 yaşam döngüsü testi FAIL olmuş ve 3976994d ile doğru biçimde reddedilmiştir. Paket durumu BLOCKED_ semantiğine alınır; exact temiz commit, kanal eşitliği ve bütün test/UAT zinciri yeniden çalıştırılır.",
       "targetedLifecycleClosureImpact": "3976994d, d68fd2a4 kaynak kimliğindeki exact hedefli turda operation-rule-check-policy yaşam döngüsü testinin packageStatus alanında zorunlu fail-closed BLOCKED_/FAIL_ ön ekini bulamamasını kaydeder. 19 hedef dosyada 189 test PASS, 1 test FAIL'dir. Bronze 51 kanıtı korunarak Bronze 52 NOT_BUILT durumu BLOCKED_ ön ekiyle ifade edilir; yeni exact hedefli ve tam regresyon zorunludur.",
       "windowsUninstallRegistryIdentityImpact": "Canlı Bronze 51 packaged runtime immutable bundle ile exact eşleşirken Windows uninstall girdisinin sürüm ekli DisplayName değeri eski Bronze$ sınıflandırmasıyla legacy sayılmış, InstallLocation alanı boş ve DisplayIcon alanı uninstallerIcon.ico bulunmuştur. İlk Unicode literal retry 2 dosyada 17 PASS/1 FAIL vermiş ve fb8683dc ile korunmuştur. Kaynak-ASCII [char]0x015F düzeltmesi sonrası packageStatus ve UAT sözleşmesi odaklı 2 dosya/18 test PASS'tir. customInstall kanonik InstallLocation/DisplayIcon yazar; bütün sicil alanları exact karşılaştırılır ve gerçek N-to-N+1 readback zorunludur.",
@@ -3152,7 +3154,7 @@
       "status": "ACTIVE",
       "source": "Kullanıcının hatalı eski kararları düzeltme, bütün sorunları kayda alma, tam test ve temiz kurulum dosyasını ancak tüm kapılar geçince üretme yetkisi",
       "document": "docs/decisions/DEC-276-bronze-51-rejected-predecessor-recovery-bootstrap.md",
-      "documentSha256": "061b283474eaf4f9ad7e393219775ebf0955c89ab70e8ac0699724263df1b857",
+      "documentSha256": "5b792fc9e26e586b34b750854eb15b5dbd347f02e3cf4c5d3a1c8824ce07526e",
       "documents": [
         "config/release-ledger.json",
         "config/canonical-rule-registry.json",
@@ -3165,8 +3167,10 @@
         "docs/ticari-urun-temeli/01_YONETIM/01_ASILAMAZ_KURALLAR.md",
         "docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md"
       ],
-      "workListImpact": "IS-0216 DEVAM kalir. Bronze 50 immutable REJECTED_INVALID_PACKAGE ve Bronze 51 immutable package/provenance/installer-experience gecmisi korunur. UAT110 installer baslamadan registry snapshot harness icinde reddedilmis; duzeltme 2 dosya/17 test PASS vermistir. Exact .51 installer once bundle kimligiyle canli predecessor olarak dogrulanir; Bronze 52 normal continuation exact test, paket, N-to-N+1, maintenance ve UAT111 kapanisi olmadan teslim edilmez.",
-      "latestRejectedCheckpoint": "61f09ed5",
+      "workListImpact": "IS-0216 DEVAM kalir. Bronze 50 immutable REJECTED_INVALID_PACKAGE ve Bronze 51 immutable package/provenance/installer-experience geçmişi korunur. f4f84896 exact Bronze 52 turunda hedefli 19 dosya/191 test PASS; filtresiz 399 dosya/2.483 test PASS ve yalnız PPK-015 kaynak ratchet eşliği FAIL vermiş, 8ea2dfe1 ile korunmuştur. İlk ratchet contract retryındaki tarihsel migration 117 exact ayırıcı FAIL'i 24e6bd71 ile korunur. Exact .51 installer bundle kimliğiyle canlı predecessor kalır; Bronze 52 normal continuation exact test, paket, N-to-N+1, maintenance ve UAT111 kapanışı olmadan teslim edilmez.",
+      "latestRejectedCheckpoint": "24e6bd71",
+      "ppk015CurrentRatchetImpact": "Bronze 52 uninstall registry/UAT kaynak değişikliklerinden sonra canlı PPK-015 sınırı 18 bölge/590 dosya/0 bulgu/2 adapter/3 amaç/4 yalnız-yerel taşıma dosyası ve f54e3f302649af67ed6d028e66673eea68b0d58c2ba43c912c1ccb7534babe98 kaynak özetidir. Yetkili adapter/purpose özeti ve ağ yetkisi değişmemiştir. f4f84896 tam regresyonundaki ratchet FAIL 8ea2dfe1, ilk contract retryındaki exact migration 117 ayırıcı FAIL'i 24e6bd71 ile korunur. Düzeltme sonrası contract 43/43, runtime 10/10, iki odaklı test dosyası 23/23 ve ticari temel 1.254 kontrol PASS'tir; exact zincir yeniden tamamlanır.",
+      "ppk015DocumentationQaImpact": "PPK-015 kayıt kapanışıyla yeniden üretilen güncel master DOCX 31/31 ve PDF 28/28, toplam 59/59 sayfa görsel QA PASS'tir. Bronze 52 hâlâ NOT_BUILT'tir; belge PASS'i paket veya kurulu UAT yerine geçmez.",
       "processInvocationImpact": "Bronze 51 exact package/provenance/installer-experience PASS'tir ve exact packaged runtime kimliğiyle canlı predecessor olarak kurulmuştur. Tarihsel gerçek retler korunur. d68fd2a4 test başlamadan duran invocation-only checkpointtir; 3976994d packageStatus test retidir. Sonraki Windows PowerShell 5.1 Unicode literal sınıflandırma testi fb8683dc ile korunur ve kaynak-ASCII char bileşimiyle düzeltilir. Bronze 52 tahsisi tekrar edilmez; yeni exact zincir immutable .51 predecessor readback ile surdurulur.",
       "windowsUninstallRegistryIdentityImpact": "Canlı Bronze 51 uygulama EXE'si immutable bundle kimliğiyle exact PASS olsa da uninstall girdisinin sürüm ekli DisplayName değeri eski Bronze$ eşlemesinde legacy sınıfına düşmüş, InstallLocation boş ve DisplayIcon uninstallerIcon.ico bulunmuştur. İlk Unicode literal sınıflandırma FAIL'i fb8683dc ile korunur. Kaynak-ASCII [char]0x015F düzeltmesi sonrası 2 dosya/18 test PASS'tir; installer kanonik root/EXE alanlarını yazar ve primary/maintenance bütün sicil kimliğini exact okur.",
       "commercialUninstallRegistryRecordImpact": "TICARI-052 exact uninstall sicili ifade bağı a6020cb4 ve tarihsel marker eksikliği 61f09ed5 ile korunur. Eski/yeni bağlar geri kurulduktan sonra ticari temel 1.254 kontrol/87 dosya/61 iş/241 kural PASS'tir; ürün kodu veya kurulu UAT PASS'i değildir.",
@@ -3184,6 +3188,7 @@
         "PR-241"
       ],
       "codeAreas": [
+        "scripts/verify-network-egress-boundary.mjs",
         "scripts/lib/windows-package-provenance.mjs",
         "scripts/lib/mutation-release-evidence.mjs",
         "scripts/lib/release-source-provenance.mjs",
@@ -3198,6 +3203,7 @@
         "apps/desktop/scripts/run-electron-builder.mjs"
       ],
       "evidence": [
+        "apps/desktop/tests/ppk015-network-egress-governance-ratchet.test.ts",
         "apps/desktop/tests/windows-package-provenance-history.test.ts",
         "apps/desktop/tests/mutation-release-readiness-contract.test.ts",
         "apps/desktop/tests/mutation-release-evidence-producers.test.ts",
